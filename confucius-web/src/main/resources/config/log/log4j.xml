@@ -6,19 +6,19 @@
 	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
 		<param name="Target" value="System.out" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[framework-web]%d %-5p [%c] %m%n" />
+			<param name="ConversionPattern" value="[confucius-web]%d %-5p [%c] %m%n" />
 		</layout>
 	</appender>
 	<appender name="appAppender" class="org.apache.log4j.DailyRollingFileAppender"> <!-- <param name="Threshold" value="INFO" /> -->
-		<param name="File" value="/data/applogs/framework-web/logs/app.config.log" />
+		<param name="File" value="/data/applogs/confucius-web/logs/app.log" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[framework-web]%d %-5p [%c] %m%n" />
+			<param name="ConversionPattern" value="[confucius-web]%d %-5p [%c] %m%n" />
 		</layout>
 	</appender>
 	<appender name="ibatisAppender" class="org.apache.log4j.DailyRollingFileAppender"> <!-- <param name="Threshold" value="INFO" /> -->
-		<param name="File" value="/data/applogs/framework-web/logs/ibatis.config.log" />
+		<param name="File" value="/data/applogs/confucius-web/logs/ibatis.log" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[framework-web]%d %-5p [%c] %m%n" />
+			<param name="ConversionPattern" value="[confucius-web]%d %-5p [%c] %m%n" />
 		</layout>
 	</appender>
 
