@@ -8,6 +8,5 @@ bin
 .gradle
 *.DS_Store
 docker*
-weixin/
 *.sql
 classes/
