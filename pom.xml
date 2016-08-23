@@ -7,8 +7,6 @@
     <name>confucius</name>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
-        <module>adam/qyweixin-adapter-biz</module>
-        <module>adam/qyweixin-adapter-web</module>
         <module>confucius-biz</module>
         <module>confucius-web</module>
     </modules>
@@ -133,6 +131,12 @@
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-core-asl</artifactId>
                 <version>1.9.4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.typesafe</groupId>
+                <artifactId>config</artifactId>
+                <version>1.2.1</version>
             </dependency>
 
         </dependencies>

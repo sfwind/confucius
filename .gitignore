@@ -8,6 +8,6 @@ bin
 .gradle
 *.DS_Store
 docker*
-adam/
+weixin/
 *.sql
 classes/
