@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.iquanwai.confucius.biz.dao.FollowUserDao">
+    <sql id="Base_Column_List">
+        OpenId,Nickname,Sex,City,Country, Province,Headimgurl,Subscribe_time,Remark,Groupid,AddTime,UpdateTime
+    </sql>
+
+    <insert id="insert" parameterType="Account">
+        INSERT INTO `Follow_Users`(
+        <include refid="Base_Column_List"/>
+        )
+        VALUES
+        (
+        #{account.openid},
+        #{account.nickname},
+        #{account.sex},
+        #{account.city},
+        #{account.country},
+        #{account.province},
+        #{account.headimgurl},
+        #{account.subscribe_time},
+        #{account.remark},
+        #{account.groupid},
+        now(),
+        now()
+        )
+
+    </insert>
+
+</mapper>
+

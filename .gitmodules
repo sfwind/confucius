@@ -1,3 +1,0 @@
-[submodule "adam"]
-	path = weixin
-	url = git@github.com:sfwind:master/adam.git
