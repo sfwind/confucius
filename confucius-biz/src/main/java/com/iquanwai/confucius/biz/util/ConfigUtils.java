@@ -36,7 +36,7 @@ public class ConfigUtils {
 		return config.getInt("js.internal");
 	}
 
-	public static String getJsTicketUrl() {
-		return "";
+	public static boolean isDebug(){
+		return config.getBoolean("debug");
 	}
 }

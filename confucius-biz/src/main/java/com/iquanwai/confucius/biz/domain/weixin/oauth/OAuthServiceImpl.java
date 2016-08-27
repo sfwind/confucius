@@ -78,7 +78,7 @@ public class OAuthServiceImpl implements OAuthService {
         return newAccessToken;
     }
 
-    public String accessToken(String code, String state) {
+    public Callback accessToken(String code, String state) {
         Callback callback = callbackDao.queryByState(state);
         if(callback==null){
             logger.error("state {} is not found", state);
@@ -101,8 +101,8 @@ public class OAuthServiceImpl implements OAuthService {
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
 
         // callbackUrl增加参数access_token
-        String callbackUrl = callback.getCallbackUrl();
-        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
-        return callbackUrl;
+//        String callbackUrl = callback.getCallbackUrl();
+//        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
+        return callback;
     }
 }

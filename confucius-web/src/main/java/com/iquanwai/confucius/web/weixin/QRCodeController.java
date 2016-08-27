@@ -15,6 +15,7 @@ import java.util.Map;
 /**
  * Created by justin on 16/8/13.
  */
+@RequestMapping("/wx/qrcode")
 @Controller
 public class QRCodeController {
     @Autowired
@@ -22,7 +23,7 @@ public class QRCodeController {
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    @RequestMapping("/qrcode/{scene}")
+    @RequestMapping("/{scene}")
     public ResponseEntity<Map<String, Object>> generate(@PathVariable String scene) {
         try {
             String url = qrCodeService.generateQRCode(scene);

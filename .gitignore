@@ -10,3 +10,4 @@ bin
 docker*
 *.sql
 classes/
+localconfig.conf

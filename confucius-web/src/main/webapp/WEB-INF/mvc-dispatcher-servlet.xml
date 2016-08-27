@@ -27,5 +27,16 @@
                 </property>
             </bean>
         </mvc:message-converters>
+        <mvc:argument-resolvers>
+            <bean class="com.iquanwai.confucius.resolver.LoginUserResolver"/>
+        </mvc:argument-resolvers>
     </mvc:annotation-driven>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**" />
+            <mvc:exclude-mapping path="/wx/**" />
+            <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
 </beans>

@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 @Controller
+@RequestMapping("/wx")
 public class CbController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CbController.class);
