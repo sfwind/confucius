@@ -18,5 +18,6 @@ public class Chapter {
     private Integer startDay; //开始于第几天
     private Integer endDay; //结束于第几天
     private boolean unlock; //是否解锁
+    private boolean complete; //是否完成
     private String icon; //icon链接
 }
