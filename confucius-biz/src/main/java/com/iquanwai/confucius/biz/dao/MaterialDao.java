@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.dao;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.po.Chapter;
+import com.iquanwai.confucius.biz.dao.po.Material;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -13,19 +13,20 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Created by justin on 16/8/29.
+ * Created by justin on 16/9/3.
  */
 @Repository
-public class ChapterDao extends DBUtil{
+public class MaterialDao extends DBUtil{
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<Chapter> loadChapters(int courseId, int week){
+    public List<Material> loadPageMaterials(int pageId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Chapter>> h = new BeanListHandler(Chapter.class);
+        ResultSetHandler<List<Material>> h = new BeanListHandler(Material.class);
 
         try {
-            List<Chapter> chapterList = run.query("SELECT * FROM Chapter where CourseId=? and Week=?", h, courseId, week);
-            return chapterList;
+            List<Material> materialList = run.query("SELECT * FROM Material where PageId=? order by Sequence",
+                    h, pageId);
+            return materialList;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

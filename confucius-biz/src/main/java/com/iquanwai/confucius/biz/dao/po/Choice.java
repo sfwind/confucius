@@ -1,13 +1,11 @@
 package com.iquanwai.confucius.biz.dao.po;
 
 import lombok.Data;
-import org.apache.ibatis.type.Alias;
 
 /**
  * Created by justin on 16/8/25.
  */
 @Data
-@Alias("choice")
 public class Choice {
     private int id;
     private Integer questionId; //问题id

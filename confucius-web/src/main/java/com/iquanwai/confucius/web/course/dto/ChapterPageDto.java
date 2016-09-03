@@ -10,9 +10,9 @@ import lombok.Data;
 public class ChapterPageDto {
     private String openid;
     private String username;
-    private boolean done;
     private Integer chapterId;
     private String chapterName;
     private String chapterPic;
+    private Integer chapterType;
     private Page page;
 }

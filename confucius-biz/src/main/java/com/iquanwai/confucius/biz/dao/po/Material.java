@@ -1,13 +1,11 @@
 package com.iquanwai.confucius.biz.dao.po;
 
 import lombok.Data;
-import org.apache.ibatis.type.Alias;
 
 /**
  * Created by justin on 16/8/25.
  */
 @Data
-@Alias("material")
 public class Material {
     private int id;
     private Integer type; //素材类型（1-文字，2-图片，3-语音，4-作业，5-题目，99-特殊）

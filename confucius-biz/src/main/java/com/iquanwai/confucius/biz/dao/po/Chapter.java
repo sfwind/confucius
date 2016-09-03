@@ -1,13 +1,11 @@
 package com.iquanwai.confucius.biz.dao.po;
 
 import lombok.Data;
-import org.apache.ibatis.type.Alias;
 
 /**
  * Created by justin on 16/8/25.
  */
 @Data
-@Alias("chapter")
 public class Chapter {
     private int id;
     private Integer courseId; //课程id

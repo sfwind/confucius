@@ -42,4 +42,20 @@ public class DBUtil {
         return null;
     }
 
+
+    public int count(Class type){
+
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<Integer> h = new BeanHandler<Integer>(type);
+
+        try {
+            Integer number = run.query("SELECT count(*) FROM "+type.getSimpleName(), h);
+            return number;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return -1;
+    }
+
 }

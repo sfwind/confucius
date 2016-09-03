@@ -49,20 +49,20 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return classMember;
     }
 
-    public Course loadCourse(int courseId, int week, int personalProgress, int classProgress) {
+    public Course loadCourse(int courseId, int week, List<Integer> personalProgress, int classProgress) {
         Course course = courseDao.load(Course.class, courseId);
         List<Chapter> chapters = chapterDao.loadChapters(courseId, week);
 
-        course.setChapterList(buildChapter(chapters, classProgress));
+        course.setChapterList(buildChapter(chapters, personalProgress, classProgress));
 
         return course;
     }
 
-    private List<Chapter> buildChapter(List<Chapter> chapters, final int classProgress) {
+    private List<Chapter> buildChapter(List<Chapter> chapters, final List<Integer> personalProgress, final int classProgress) {
         return Lists.transform(chapters, new Function<Chapter, Chapter>() {
             public Chapter apply(Chapter chapter) {
                 boolean unlock = checkUnlock(chapter, classProgress);
-                boolean complete = checkComplete(chapter, classProgress);
+                boolean complete = checkComplete(chapter, personalProgress);
                 chapter.setIcon(CourseType.getUrl(chapter.getType(), unlock, complete));
                 chapter.setUnlock(unlock);
                 chapter.setComplete(complete);
@@ -71,10 +71,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         });
     }
 
-    private boolean checkComplete(Chapter chapter, int personalProgress) {
+    private boolean checkComplete(Chapter chapter, List<Integer> personalProgress) {
         Assert.notNull(chapter, "chapter不能为空");
-        //章节进度小于个人当前进度，则当前章节完成
-        if(chapter.getStartDay()<=personalProgress){
+        Assert.notNull(personalProgress, "个人进度不能为空");
+        if(personalProgress.contains(chapter.getId())){
             return true;
         }
 

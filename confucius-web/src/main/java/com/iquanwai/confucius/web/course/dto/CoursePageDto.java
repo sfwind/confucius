@@ -12,7 +12,6 @@ public class CoursePageDto{
     private String openid;
     private String username;
     private int week;
-    private int userProgress; //用户课程进度序号
     private Course course;
 
 }
