@@ -14,5 +14,6 @@ public class Question {
     private String subject; //题干
     private String analysis; //题目分析
     private Integer point; //分值
+    private boolean answered; //是否回答过
     private List<Choice> choiceList;
 }

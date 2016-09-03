@@ -2,10 +2,10 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.ChapterDao;
-import com.iquanwai.confucius.biz.dao.ClassDao;
-import com.iquanwai.confucius.biz.dao.ClassMemberDao;
-import com.iquanwai.confucius.biz.dao.CourseDao;
+import com.iquanwai.confucius.biz.dao.course.ChapterDao;
+import com.iquanwai.confucius.biz.dao.course.ClassDao;
+import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
+import com.iquanwai.confucius.biz.dao.course.CourseDao;
 import com.iquanwai.confucius.biz.dao.po.Chapter;
 import com.iquanwai.confucius.biz.dao.po.ClassMember;
 import com.iquanwai.confucius.biz.dao.po.Course;

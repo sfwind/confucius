@@ -1,6 +1,7 @@
-package com.iquanwai.confucius.biz.dao;
+package com.iquanwai.confucius.biz.dao.course;
 
-import com.iquanwai.confucius.biz.dao.po.ClassMember;
+import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.dao.po.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -11,19 +12,20 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 
 /**
- * Created by justin on 16/8/29.
+ * Created by justin on 16/9/3.
  */
 @Repository
-public class ClassMemberDao extends DBUtil{
+public class PageDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ClassMember activeCourse(String openid){
+    public Page loadPage(int chapterId, int pageSequence){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+        ResultSetHandler<Page> h = new BeanHandler(Page.class);
 
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and Graduate = 0", h, openid);
-            return classMember;
+            Page page = run.query("SELECT * FROM Page where ChapterId=? and Sequence=?", h,
+                    chapterId, pageSequence);
+            return page;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

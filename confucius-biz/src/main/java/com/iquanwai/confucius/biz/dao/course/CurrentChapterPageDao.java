@@ -1,5 +1,6 @@
-package com.iquanwai.confucius.biz.dao;
+package com.iquanwai.confucius.biz.dao.course;
 
+import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.dao.po.CurrentChapterPage;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
@@ -18,7 +19,7 @@ import java.util.concurrent.Future;
  * Created by justin on 16/9/3.
  */
 @Repository
-public class CurrentChapterPageDao extends DBUtil{
+public class CurrentChapterPageDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public Integer currentPage(String openid, int chapterId){

@@ -10,6 +10,14 @@ import java.util.Map;
  * Created by justin on 7/23/15.
  */
 public class WebUtils {
+    public static ResponseEntity<Map<String, Object>> success() {
+        Map<String, Object> json = new HashMap<String, Object>();
+        json.put("code", 200);
+        json.put("msg", "ok");
+
+        return new ResponseEntity<Map<String, Object>>(json, HttpStatus.OK);
+    }
+
     public static ResponseEntity<Map<String, Object>> result(Object result) {
         Map<String, Object> json = new HashMap<String, Object>();
         json.put("code", 200);

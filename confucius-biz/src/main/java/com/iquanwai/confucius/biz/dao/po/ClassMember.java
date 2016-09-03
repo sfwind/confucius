@@ -13,7 +13,7 @@ public class ClassMember {
     private Boolean graduate; //是否毕业（0-否，1-是）
     private Integer score;    //课程积分
     private Integer level;  //课程等级，和勋章挂钩
-    private Boolean superb; //是否优秀学员（1-是，0-否
+    private Boolean superb; //是否优秀学员（1-是，0-否)
     private String progress; //学员进度，章节的id集合，用逗号隔开
     private Integer progressWeek; //学员进度周
     private Boolean pass;  //是否通过课程（0-否，1-是）

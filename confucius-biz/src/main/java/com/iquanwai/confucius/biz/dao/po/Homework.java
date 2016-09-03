@@ -13,4 +13,5 @@ public class Homework {
     private String voice; //语音链接
     private Integer point; //分值
     private String pcurl; //pc端打开url
+    private boolean submitted; //是否提交过
 }

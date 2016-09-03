@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class CurrentChapterPage {
     private int id;
-    private String openid;
-    private int chapterId;
-    private int pageSequence;
+    private String openid; //openid
+    private int chapterId; //课程id
+    private int pageSequence; //页码
 }

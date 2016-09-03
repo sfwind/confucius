@@ -1,10 +1,12 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.po.*;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.course.dto.AnswerDto;
 import com.iquanwai.confucius.web.course.dto.ChapterPageDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,7 +59,7 @@ public class ChapterController {
         ChapterPageDto chapterPageDto = new ChapterPageDto();
         Page page = courseStudyService.loadPage(loginUser.getOpenId(), chapterId, pageSequence);
         chapterPageDto.setPage(page);
-        Chapter chapter = courseStudyService.loadChapter(chapterId);
+        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
         chapterPageDto.setChapterPic(chapter.getIcon());
         chapterPageDto.setChapterType(chapter.getType());
         chapterPageDto.setChapterName(chapter.getName());
@@ -92,47 +94,110 @@ public class ChapterController {
     }
 
     @RequestMapping("/question/load/{questionId}")
-    public ResponseEntity<Map<String, Object>> loadQuestion(LoginUser loginUser){
-        Question question = new Question();
-        question.setId(1);
-        question.setMaterialId(5);
-        question.setSubject("问题1-blabla");
-        question.setPoint(100);
-        question.setAnalysis("问题解析问题解析问题解析问题解析");
-        List<Choice> choiceList = new ArrayList<Choice>();
-        question.setChoiceList(choiceList);
-        Choice choice1 = new Choice();
-        choice1.setSubject("选项1");
-        choice1.setId(1);
-        choice1.setSequence(1);
-        choice1.setRight(false);
-        choice1.setQuestionId(1);
-        choiceList.add(choice1);
-        Choice choice2 = new Choice();
-        choice2.setSubject("选项2");
-        choice2.setId(2);
-        choice2.setSequence(2);
-        choice2.setRight(true);
-        choice2.setQuestionId(1);
-        choiceList.add(choice2);
-        Choice choice3 = new Choice();
-        choice3.setSubject("选项3");
-        choice3.setId(3);
-        choice3.setSequence(3);
-        choice3.setRight(true);
-        choice3.setQuestionId(1);
-        choiceList.add(choice3);
-        return WebUtils.result(question);
+    public ResponseEntity<Map<String, Object>> loadQuestion(LoginUser loginUser,
+                                                            @PathVariable("questionId") Integer questionId){
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            Question question = courseStudyService.loadQuestion(loginUser.getOpenId(), questionId);
+            if(question==null){
+                return WebUtils.error(200, "获取选择题失败");
+            }
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("章节")
+                    .function("学习章节")
+                    .action("加载选择题")
+                    .memo(question.getId()+"");
+            operationLogService.log(operationLog);
+            return WebUtils.result(question);
+        }catch (Exception e){
+            LOGGER.error("获取选择题失败", e);
+            return WebUtils.error(200, "获取选择题失败");
+        }
+    }
+
+    @RequestMapping(value="/homework/submit/{questionId}", method= RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> submitQuestion(LoginUser loginUser,
+                                                              @PathVariable("questionId") Integer questionId,
+                                                              @RequestBody String body){
+        try{
+            Gson gson = new Gson();
+            AnswerDto answerDto = gson.fromJson(body, AnswerDto.class);
+
+            courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
+
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("章节")
+                    .function("回答问题")
+                    .action("提交问题")
+                    .memo(questionId+"");
+            operationLogService.log(operationLog);
+            return WebUtils.success();
+        }catch (Exception e){
+            LOGGER.error("回答问题失败", e);
+            return WebUtils.error(200, "回答问题失败");
+        }
     }
 
     @RequestMapping("/homework/load/{homeworkId}")
-    public ResponseEntity<Map<String, Object>> loadHomework(LoginUser loginUser){
-        Homework homework = new Homework();
-        homework.setId(1);
-        homework.setMaterialId(5);
-        homework.setSubject("问题1-blabla");
-        homework.setPoint(100);
+    public ResponseEntity<Map<String, Object>> loadHomework(LoginUser loginUser,
+                                                            @PathVariable("homeworkId") Integer homeworkId){
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            Homework homework = courseStudyService.loadHomework(loginUser.getOpenId(), homeworkId);
+            if(homework==null){
+                return WebUtils.error(200, "获取作业失败");
+            }
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("作业")
+                    .function("做作业")
+                    .action("加载作业")
+                    .memo(homework.getId()+"");
+            operationLogService.log(operationLog);
+            return WebUtils.result(homework);
+        }catch (Exception e){
+            LOGGER.error("获取作业失败", e);
+            return WebUtils.error(200, "获取作业失败");
+        }
+    }
 
-        return WebUtils.result(homework);
+    @RequestMapping(value="/homework/submit/{homeworkId}", method= RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> submitHomework(LoginUser loginUser,
+                                                      @PathVariable("homeworkId") Integer homeworkId,
+                                                      @RequestBody String body){
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            courseStudyService.submitHomework(body, loginUser.getOpenId(), homeworkId);
+
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("作业")
+                    .function("做作业")
+                    .action("提交作业")
+                    .memo(homeworkId+"");
+            operationLogService.log(operationLog);
+            return WebUtils.success();
+        }catch (Exception e){
+            LOGGER.error("提交作业失败", e);
+            return WebUtils.error(200, "提交作业失败");
+        }
+    }
+
+    @RequestMapping(value="/complete/{chapterId}", method= RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> completeChapter(LoginUser loginUser,
+                                                              @PathVariable("chapterId") Integer chapterId){
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            courseStudyService.completeChapter(loginUser.getOpenId(), chapterId);
+
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("章节")
+                    .function("章节完成")
+                    .action("章节完成")
+                    .memo(chapterId+"");
+            operationLogService.log(operationLog);
+            return WebUtils.success();
+        }catch (Exception e){
+            LOGGER.error("回答问题失败", e);
+            return WebUtils.error(200, "回答问题失败");
+        }
     }
 }

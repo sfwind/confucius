@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.dao;
 
+import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.dao.po.OperationLog;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
