@@ -1,8 +1,8 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.iquanwai.confucius.biz.dao.po.Homework;
-import com.iquanwai.confucius.biz.dao.po.HomeworkSubmit;
-import com.iquanwai.confucius.biz.dao.po.OperationLog;
+import com.iquanwai.confucius.biz.po.Homework;
+import com.iquanwai.confucius.biz.po.HomeworkSubmit;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.util.WebUtils;

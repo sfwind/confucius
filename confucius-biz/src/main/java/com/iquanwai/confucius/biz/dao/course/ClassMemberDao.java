@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.dao.course;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.dao.po.ClassMember;
+import com.iquanwai.confucius.biz.po.ClassMember;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;

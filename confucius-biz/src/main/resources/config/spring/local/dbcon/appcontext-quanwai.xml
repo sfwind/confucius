@@ -18,10 +18,10 @@
     </bean>
 
     <!-- define the SqlSessionFactory -->
-    <bean id="dao.sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dao.dataSource" />
-        <property name="typeAliasesPackage"
-                  value="com.iquanwai.confucius.biz.dao.po" />
+    <!--<bean id="dao.sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+        <!--<property name="dataSource" ref="dao.dataSource" />-->
+        <!--<property name="typeAliasesPackage"-->
+                  <!--value="com.iquanwai.confucius.biz.po" />-->
         <!--<property name="plugins">-->
         <!--<array>-->
         <!--<bean class="com.github.pagehelper.PageHelper">-->
@@ -34,13 +34,13 @@
         <!--</bean>-->
         <!--</array>-->
         <!--</property>-->
-    </bean>
+    <!--</bean>-->
 
     <!-- scan for mappers and let them be autowired -->
-    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage"
-                  value="com.iquanwai.confucius.biz.dao" />
-        <property name="sqlSessionFactoryBeanName" value="dao.sqlSessionFactory" />
-    </bean>
+    <!--<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+        <!--<property name="basePackage"-->
+                  <!--value="com.iquanwai.confucius.biz.dao" />-->
+        <!--<property name="sqlSessionFactoryBeanName" value="dao.sqlSessionFactory" />-->
+    <!--</bean>-->
 
 </beans>

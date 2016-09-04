@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.iquanwai.confucius.biz.dao.po.*;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.resolver.LoginUser;

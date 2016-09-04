@@ -1,8 +1,8 @@
 package com.iquanwai.confucius.biz.domain.weixin.oauth;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.CallbackDao;
-import com.iquanwai.confucius.biz.dao.po.Callback;
+import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
+import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;

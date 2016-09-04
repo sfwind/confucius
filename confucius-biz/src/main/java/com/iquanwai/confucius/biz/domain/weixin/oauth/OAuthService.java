@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.weixin.oauth;
 
-import com.iquanwai.confucius.biz.dao.po.Callback;
+import com.iquanwai.confucius.biz.po.Callback;
 
 /**
  * Created by justin on 14-7-28.

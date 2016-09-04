@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.progress;
 
-import com.iquanwai.confucius.biz.dao.po.*;
+import com.iquanwai.confucius.biz.po.*;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.po.Account;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;

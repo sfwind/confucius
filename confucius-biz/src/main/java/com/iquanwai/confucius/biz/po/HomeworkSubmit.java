@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.dao.po;
+package com.iquanwai.confucius.biz.po;
 
 import lombok.Data;
 
@@ -8,13 +8,14 @@ import java.util.Date;
  * Created by justin on 16/9/3.
  */
 @Data
-public class QuestionSubmit {
+public class HomeworkSubmit {
     private int id;
-    private Integer questionId; //问题id
+    private Integer homeworkId; //作业id
     private String submitOpenid; //提交人openid
     private Integer classId;  //班级id
     private Date submitTime;  //提交时间
-    private String submitAnswer; //提交答案的序号，多选用逗号隔开
+    private String submitContent; //提交内容
     private Integer score; //作业分数
-
+    private String remark; //作业评语
+    private String submitUrl; //提交url
 }

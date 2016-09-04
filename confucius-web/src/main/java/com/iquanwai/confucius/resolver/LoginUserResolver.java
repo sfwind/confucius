@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.resolver;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.po.Account;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;

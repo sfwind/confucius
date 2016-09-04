@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.introduction;
 
-import com.iquanwai.confucius.biz.dao.po.Course;
+import com.iquanwai.confucius.biz.po.Course;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.course.dto;
 
-import com.iquanwai.confucius.biz.dao.po.Homework;
+import com.iquanwai.confucius.biz.po.Homework;
 import lombok.Data;
 
 /**

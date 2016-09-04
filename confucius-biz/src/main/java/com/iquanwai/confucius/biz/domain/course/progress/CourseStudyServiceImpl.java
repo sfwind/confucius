@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.course.progress;
 
 import com.iquanwai.confucius.biz.dao.course.*;
-import com.iquanwai.confucius.biz.dao.po.*;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

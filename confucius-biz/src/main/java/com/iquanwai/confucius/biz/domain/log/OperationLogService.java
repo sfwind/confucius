@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.log;
 
-import com.iquanwai.confucius.biz.dao.po.OperationLog;
+import com.iquanwai.confucius.biz.po.OperationLog;
 
 /**
  * Created by justin on 16/9/3.

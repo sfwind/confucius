@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz;
 
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
-import com.iquanwai.confucius.biz.dao.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

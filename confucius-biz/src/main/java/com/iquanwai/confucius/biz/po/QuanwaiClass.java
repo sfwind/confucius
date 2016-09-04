@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.dao.po;
+package com.iquanwai.confucius.biz.po;
 
 import lombok.Data;
 

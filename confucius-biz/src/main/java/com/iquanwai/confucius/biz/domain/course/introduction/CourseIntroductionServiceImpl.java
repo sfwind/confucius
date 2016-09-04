@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.course.introduction;
 
 import com.iquanwai.confucius.biz.dao.course.CourseDao;
-import com.iquanwai.confucius.biz.dao.po.Course;
+import com.iquanwai.confucius.biz.po.Course;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

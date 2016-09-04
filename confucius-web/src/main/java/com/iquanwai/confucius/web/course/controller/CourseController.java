@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.po.ClassMember;
-import com.iquanwai.confucius.biz.dao.po.Course;
-import com.iquanwai.confucius.biz.dao.po.OperationLog;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.resolver.LoginUser;

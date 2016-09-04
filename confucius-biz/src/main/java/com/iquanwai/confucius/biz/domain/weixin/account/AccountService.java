@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
 
-import com.iquanwai.confucius.biz.dao.po.Account;
+import com.iquanwai.confucius.biz.po.Account;
 
 /**
  * Created by justin on 16/8/10.
