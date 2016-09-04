@@ -36,7 +36,7 @@ public class HomeworkSubmitDao extends DBUtil{
         return null;
     }
 
-    public boolean submitted(String openid, int classId, int homeworkId){
+    private boolean submitted(String openid, int classId, int homeworkId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<HomeworkSubmit> h = new BeanHandler(HomeworkSubmit.class);
 
@@ -45,6 +45,10 @@ public class HomeworkSubmitDao extends DBUtil{
                             "and ClassId=? and HomeworkId=?", h, openid, classId, homeworkId);
             if(submit==null){
                 return false;
+            }else{
+                if(submit.getSubmitContent()==null){
+                    return false;
+                }
             }
             return true;
         } catch (SQLException e) {
@@ -52,6 +56,21 @@ public class HomeworkSubmitDao extends DBUtil{
         }
 
         return false;
+    }
+
+    public HomeworkSubmit loadHomeworkSubmit(String openid, int classId, int homeworkId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<HomeworkSubmit> h = new BeanHandler(HomeworkSubmit.class);
+
+        try {
+            HomeworkSubmit submit = run.query("SELECT * FROM HomeworkSubmit where SubmitOpenid=? " +
+                    "and ClassId=? and HomeworkId=?", h, openid, classId, homeworkId);
+            return submit;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
     }
 
     public int insert(String openid, int classId, int homeworkId, String submitUrl) {
@@ -74,26 +93,29 @@ public class HomeworkSubmitDao extends DBUtil{
         return -1;
     }
 
-    public void submit(int homeworkId, String openid, String submitContent){
+    public void submit(int homeworkId, int classId, String openid, String submitContent){
+        if(submitted(openid, classId, homeworkId)){
+            return;
+        }
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
             asyncRun.update("UPDATE HomeworkSubmit SET SubmitContent =?, SubmitTime=now() " +
-                    "where SubmitOpenid=? and HomeworkId=?", submitContent, openid, homeworkId);
+                    "where SubmitOpenid=? and ClassId=? and HomeworkId=?", submitContent, openid, classId, homeworkId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public void remark(int homeworkId, String openid, String remark, Integer score){
+    public void remark(int homeworkId, int classId, String openid, String remark, Integer score){
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
             asyncRun.update("UPDATE HomeworkSubmit SET Remark =?, Score=? " +
-                    "where SubmitOpenid=? and HomeworkId=?", remark, score, openid, homeworkId);
+                    "where SubmitOpenid=? and ClassId=? and HomeworkId=?", remark, score, openid, classId, homeworkId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

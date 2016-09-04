@@ -10,7 +10,6 @@ import java.util.List;
 @Data
 public class Question {
     private int id;
-    private Integer materialId; //素材id
     private String subject; //题干
     private String analysis; //题目分析
     private Integer point; //分值

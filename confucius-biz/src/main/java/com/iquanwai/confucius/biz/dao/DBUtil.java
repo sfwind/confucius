@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.biz.dao;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by justin on 16/8/29.
@@ -42,6 +45,20 @@ public class DBUtil {
         return null;
     }
 
+    public <T> List<T> loadAll(Class<T> type){
+
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<T>> h = new BeanListHandler<T>(type);
+
+        try {
+            List<T> t = run.query("SELECT * FROM "+type.getSimpleName()+" limit 10000", h);
+            return t;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
 
     public int count(Class type){
 

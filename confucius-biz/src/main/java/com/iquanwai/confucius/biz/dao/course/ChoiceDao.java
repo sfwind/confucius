@@ -39,7 +39,7 @@ public class ChoiceDao extends DBUtil {
         ResultSetHandler<List<Choice>> h = new BeanListHandler(Choice.class);
 
         try {
-            List<Choice> choices = run.query("SELECT * FROM Choice where QuestionId=? AND Right=1", h,
+            List<Choice> choices = run.query("SELECT * FROM Choice where QuestionId=? AND `Right`=1", h,
                     questionId);
             return choices;
         } catch (SQLException e) {

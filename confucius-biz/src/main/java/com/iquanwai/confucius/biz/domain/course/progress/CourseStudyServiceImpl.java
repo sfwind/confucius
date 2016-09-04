@@ -62,12 +62,32 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         Assert.notNull(openid, "openid不能为空");
         ClassMember classMember = classMemberDao.activeCourse(openid);
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
-        // TODO:报过班才能看
-        if(chapter.getCourseId().equals(classMember.getCourseId())){
-            return chapter;
+        String progress = "";
+        boolean mark = false;
+        if(StringUtils.isEmpty(classMember.getProgress())){
+            progress = chapterId +"";
         }else{
-            return null;
+            String[] progressArr = classMember.getProgress().split(",");
+            for(String prog:progressArr){
+                if(prog.equals(String.valueOf(chapterId))){
+                    mark = true;
+                }
+            }
+            if(!mark) {
+                progress = progress+","+chapterId;
+            }
         }
+        if(!mark) {
+            classMemberDao.progress(openid, chapterId, progress);
+        }
+        // TODO:报过班才能看
+//        if(chapter.getCourseId().equals(classMember.getCourseId())){
+//            return chapter;
+//        }else{
+//            return null;
+//        }
+
+        return chapter;
     }
 
     public Question loadQuestion(String openid, int questionId) {
@@ -88,11 +108,16 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         ClassMember classMember = classMemberDao.activeCourse(openid);
         Homework homework = homeworkDao.load(Homework.class, homeworkId);
         if(homework!=null){
-            boolean submitted = homeworkSubmitDao.submitted(openid, classMember.getClassId(), homeworkId);
-            homework.setSubmitted(submitted);
-        }else{
-            String url = "/homework/load/"+ CommonUtils.randomString(6);
-            homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url);
+            HomeworkSubmit submit = homeworkSubmitDao.loadHomeworkSubmit(openid, classMember.getClassId(), homeworkId);
+            if(submit==null || submit.getSubmitContent()==null) {
+                homework.setSubmitted(false);
+            }else{
+                homework.setSubmitted(true);
+            }
+            if(submit==null){
+                String url = "/homework/load/"+ CommonUtils.randomString(6);
+                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url);
+            }
         }
         return homework;
     }
@@ -102,16 +127,20 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     public void submitHomework(String content, String openid, Integer homeworkId) {
-        homeworkSubmitDao.submit(homeworkId, openid, content);
+        Assert.notNull(openid, "openid不能为空");
+        ClassMember classMember = classMemberDao.activeCourse(openid);
+        homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
     }
 
     public void submitQuestion(String openid, Integer questionId, List<Integer> choiceList) {
+        Assert.notNull(openid, "openid不能为空");
         String answer = "";
         ClassMember classMember = classMemberDao.activeCourse(openid);
         Integer score = score(questionId, choiceList);
         for(Integer choice:choiceList){
-            answer = answer+choice;
+            answer = answer+","+choice;
         }
+        answer = answer.substring(1);
         QuestionSubmit questionSubmit = new QuestionSubmit();
         questionSubmit.setClassId(classMember.getClassId());
         questionSubmit.setScore(score);
@@ -122,14 +151,14 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     public void completeChapter(String openid, Integer chapterId) {
-        ClassMember classMember = classMemberDao.activeCourse(openid);
-        String progress = "";
-        if(StringUtils.isEmpty(classMember.getProgress())){
-            progress = chapterId +"";
-        }else{
-            progress = progress + ","+ chapterId;
-        }
-        classMemberDao.progress(openid, classMember.getClassId(), progress);
+//        ClassMember classMember = classMemberDao.activeCourse(openid);
+//        String progress = "";
+//        if(StringUtils.isEmpty(classMember.getProgress())){
+//            progress = chapterId +"";
+//        }else{
+//            progress = progress + ","+ chapterId;
+//        }
+//        classMemberDao.progress(openid, classMember.getClassId(), progress);
     }
 
     private Integer score(Integer questionId, List<Integer> choiceList) {

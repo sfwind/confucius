@@ -42,6 +42,9 @@ public class QuestionSubmitDao extends DBUtil{
     }
 
     public int insert(QuestionSubmit questionSubmit) {
+        if(submitted(questionSubmit.getSubmitOpenid(), questionSubmit.getClassId(), questionSubmit.getQuestionId())){
+           return 0;
+        }
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "INSERT INTO QuestionSubmit(SubmitOpenid, ClassId, QuestionId, SubmitAnswer, SubmitTime, Score) " +

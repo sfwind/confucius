@@ -8,7 +8,6 @@ import lombok.Data;
 @Data
 public class Homework {
     private int id;
-    private Integer materialId; //素材id
     private String subject; //题干
     private String voice; //语音链接
     private Integer point; //分值

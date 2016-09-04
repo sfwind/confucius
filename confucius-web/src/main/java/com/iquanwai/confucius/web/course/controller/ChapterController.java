@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.po.*;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -8,6 +7,7 @@ import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.AnswerDto;
 import com.iquanwai.confucius.web.course.dto.ChapterPageDto;
+import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,14 +115,11 @@ public class ChapterController {
         }
     }
 
-    @RequestMapping(value="/homework/submit/{questionId}", method= RequestMethod.POST)
+    @RequestMapping(value="/answer/{questionId}", method= RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submitQuestion(LoginUser loginUser,
                                                               @PathVariable("questionId") Integer questionId,
-                                                              @RequestBody String body){
+                                                              @RequestBody AnswerDto answerDto){
         try{
-            Gson gson = new Gson();
-            AnswerDto answerDto = gson.fromJson(body, AnswerDto.class);
-
             courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
 
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -163,10 +160,10 @@ public class ChapterController {
     @RequestMapping(value="/homework/submit/{homeworkId}", method= RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submitHomework(LoginUser loginUser,
                                                       @PathVariable("homeworkId") Integer homeworkId,
-                                                      @RequestBody String body){
+                                                      @RequestBody HomeworkSubmitDto homeworkSubmitDto){
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            courseStudyService.submitHomework(body, loginUser.getOpenId(), homeworkId);
+            courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), loginUser.getOpenId(), homeworkId);
 
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("作业")
