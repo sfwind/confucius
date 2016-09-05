@@ -39,4 +39,8 @@ public class ConfigUtils {
 	public static boolean isDebug(){
 		return config.getBoolean("debug");
 	}
+
+	public static String staticResourceUrl(){
+		return config.getString("static.resource.url");
+	}
 }

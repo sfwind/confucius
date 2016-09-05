@@ -10,4 +10,5 @@ bin
 docker*
 *.sql
 classes/
+js/
 localconfig.conf
