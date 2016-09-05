@@ -1,4 +1,5 @@
 <!doctype html>
+<%@ page import="com.iquanwai.confucius.biz.util.ConfigUtils" contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -14,9 +15,11 @@
 </script>
 
 <div id="react-app"></div>
-
+<h2>Hello World!</h2>
+</br>
+<h3>Hello Java! I am confucius Web...</h3>
 <!-- 业务代码-->
-<script src="http://127.0.0.1/bundle.js"></script>
+<script src="<%=ConfigUtils.staticResourceUrl()%>/bundle.js"></script>
 
 </body>
 </html>
