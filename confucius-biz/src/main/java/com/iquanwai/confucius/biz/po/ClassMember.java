@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class ClassMember {
     private int id;
+    private String memberId; // 学号
     private String openId;  //openid
     private Integer classId; //班级id
     private Boolean graduate; //是否毕业（0-否，1-是）

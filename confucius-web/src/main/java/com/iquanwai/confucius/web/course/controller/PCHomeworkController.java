@@ -1,10 +1,10 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.Homework;
 import com.iquanwai.confucius.biz.po.HomeworkSubmit;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
-import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
 import com.iquanwai.confucius.web.course.dto.PCHomeworkDto;
@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +20,7 @@ import java.util.Map;
 /**
  * Created by justin on 16/9/3.
  */
-@Controller
+@RestController
 @RequestMapping("/homework")
 public class PCHomeworkController {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());

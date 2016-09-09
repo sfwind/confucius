@@ -19,6 +19,7 @@ public class RestfulHelper {
     private static OkHttpClient client = new OkHttpClient();
 
     private MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private MediaType XML = MediaType.parse("text/xml; charset=utf-8");
 
     private Logger logger = LoggerFactory.getLogger(RestfulHelper.class);
 
@@ -44,6 +45,28 @@ public class RestfulHelper {
         }
         return "";
     }
+
+    public String postXML(String requestUrl, String xml) {
+        if(StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
+            Request request = new Request.Builder()
+                    .url(requestUrl)
+                    .post(RequestBody.create(XML, xml))
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                String body = response.body().string();
+//                if(CommonUtils.isError(body)){
+//                    logger.error("execute {} return error, error message is {}", requestUrl, body);
+//                }
+                return body;
+            } catch (Exception e) {
+                logger.error("execute " + requestUrl + " error", e);
+            }
+        }
+        return "";
+    }
+
 
 
     public String get(String requestUrl) {
