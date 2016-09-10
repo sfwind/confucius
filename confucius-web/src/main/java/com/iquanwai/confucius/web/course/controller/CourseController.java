@@ -42,12 +42,12 @@ public class CourseController {
             Assert.notNull(loginUser,"用户不能为空");
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), null);
             if(classMember==null){
-                WebUtils.error(200, "用户"+loginUser.getWeixinName()+"还没有报名");
+                WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
             }
 
             CoursePageDto course = getCourse(loginUser, classMember, classMember.getProgressWeek());
             if(course==null){
-                return WebUtils.error(200, "获取用户当前课程失败");
+                return WebUtils.error("获取用户当前课程失败");
             }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("课程")
@@ -58,7 +58,7 @@ public class CourseController {
             return WebUtils.result(course);
         }catch (Exception e){
             LOGGER.error("获取用户当前课程失败", e);
-            return WebUtils.error(200, "获取用户当前课程失败");
+            return WebUtils.error("获取用户当前课程失败");
         }
     }
 
@@ -94,12 +94,12 @@ public class CourseController {
             Assert.notNull(loginUser,"用户不能为空");
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
             if(classMember==null){
-                WebUtils.error(200, "用户"+loginUser.getWeixinName()+"还没有报名");
+                WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
             }
 
             CoursePageDto course = getCourse(loginUser, classMember, week);
             if(course==null){
-                return WebUtils.error(200, "获取用户当前课程失败");
+                return WebUtils.error("获取用户当前课程失败");
             }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("课程")
@@ -110,7 +110,7 @@ public class CourseController {
             return WebUtils.result(course);
         }catch (Exception e){
             LOGGER.error("获取用户当前课程失败", e);
-            return WebUtils.error(200, "获取用户当前课程失败");
+            return WebUtils.error("获取用户当前课程失败");
         }
     }
 }

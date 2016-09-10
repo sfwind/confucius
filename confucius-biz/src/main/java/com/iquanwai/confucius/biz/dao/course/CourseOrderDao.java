@@ -6,8 +6,10 @@ import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
@@ -17,6 +19,7 @@ import java.util.concurrent.Future;
 /**
  * Created by justin on 16/9/10.
  */
+@Repository
 public class CourseOrderDao extends DBUtil{
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -56,5 +59,20 @@ public class CourseOrderDao extends DBUtil{
         }
 
         return null;
+    }
+
+    public int paidCount(Integer classId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+
+        try {
+            Long count = run.query("SELECT count(*) FROM CourseOrder where ClassId=? and Status=1",
+                    h, classId);
+            return count.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return 0;
     }
 }

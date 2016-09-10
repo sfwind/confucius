@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -50,6 +51,22 @@ public class ClassMemberDao extends DBUtil {
         }
     }
 
+    public boolean isEntry(String openid){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+
+        try {
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=?", h, openid);
+            if(classMember==null){
+                return false;
+            }
+            return true;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return false;
+    }
     public int entry(ClassMember classMember) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
@@ -65,6 +82,20 @@ public class ClassMemberDao extends DBUtil {
             // ignore
         } catch (ExecutionException e) {
             logger.error(e.getMessage(), e);
+        }
+
+        return -1;
+    }
+
+    public Integer classMemberNumber(Integer classId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+
+        try {
+            Long number = run.query("SELECT count(*) FROM ClassMember where ClassId=?", h, classId);
+            return number.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
         }
 
         return -1;

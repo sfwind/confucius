@@ -36,7 +36,7 @@ public class ChapterController {
             Assert.notNull(loginUser, "用户不能为空");
             ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, null);
             if(chapterPageDto==null){
-                return WebUtils.error(200, "获取用户当前章节页失败");
+                return WebUtils.error("获取用户当前章节页失败");
             }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("章节")
@@ -47,7 +47,7 @@ public class ChapterController {
             return WebUtils.result(chapterPageDto);
         }catch (Exception e){
             LOGGER.error("获取用户当前章节页失败", e);
-            return WebUtils.error(200, "获取用户当前章节页失败");
+            return WebUtils.error("获取用户当前章节页失败");
         }
     }
 
@@ -78,12 +78,12 @@ public class ChapterController {
             operationLogService.log(operationLog);
             ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence);
             if(chapterPageDto==null){
-                return WebUtils.error(200, "获取用户当前章节页失败");
+                return WebUtils.error("获取用户当前章节页失败");
             }
             return WebUtils.result(chapterPageDto);
         }catch (Exception e){
             LOGGER.error("获取用户当前章节页失败", e);
-            return WebUtils.error(200, "获取用户当前章节页失败");
+            return WebUtils.error("获取用户当前章节页失败");
         }
     }
 
@@ -100,12 +100,12 @@ public class ChapterController {
             operationLogService.log(operationLog);
             Question question = courseStudyService.loadQuestion(loginUser.getOpenId(), questionId);
             if(question==null){
-                return WebUtils.error(200, "获取选择题失败");
+                return WebUtils.error("获取选择题失败");
             }
             return WebUtils.result(question);
         }catch (Exception e){
             LOGGER.error("获取选择题失败", e);
-            return WebUtils.error(200, "获取选择题失败");
+            return WebUtils.error("获取选择题失败");
         }
     }
 
@@ -125,7 +125,7 @@ public class ChapterController {
             return WebUtils.success();
         }catch (Exception e){
             LOGGER.error("回答问题失败", e);
-            return WebUtils.error(200, "回答问题失败");
+            return WebUtils.error("回答问题失败");
         }
     }
 
@@ -142,12 +142,12 @@ public class ChapterController {
             operationLogService.log(operationLog);
             Homework homework = courseStudyService.loadHomework(loginUser.getOpenId(), homeworkId);
             if(homework==null){
-                return WebUtils.error(200, "获取作业失败");
+                return WebUtils.error("获取作业失败");
             }
             return WebUtils.result(homework);
         }catch (Exception e){
             LOGGER.error("获取作业失败", e);
-            return WebUtils.error(200, "获取作业失败");
+            return WebUtils.error("获取作业失败");
         }
     }
 
@@ -168,7 +168,7 @@ public class ChapterController {
             return WebUtils.success();
         }catch (Exception e){
             LOGGER.error("提交作业失败", e);
-            return WebUtils.error(200, "提交作业失败");
+            return WebUtils.error("提交作业失败");
         }
     }
 
@@ -188,7 +188,7 @@ public class ChapterController {
             return WebUtils.success();
         }catch (Exception e){
             LOGGER.error("回答问题失败", e);
-            return WebUtils.error(200, "回答问题失败");
+            return WebUtils.error("回答问题失败");
         }
     }
 }

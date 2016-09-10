@@ -2,10 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.google.common.collect.Maps;
 import com.google.zxing.WriterException;
-import com.iquanwai.confucius.biz.dao.course.ClassDao;
-import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
-import com.iquanwai.confucius.biz.dao.course.CourseDao;
-import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
+import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.CourseOrder;
@@ -42,6 +39,8 @@ public class SignupServiceImpl implements SignupService {
     private CourseOrderDao courseOrderDao;
     @Autowired
     private ClassMemberDao classMemberDao;
+    @Autowired
+    private CourseFreeListDao courseFreeListDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -75,7 +74,7 @@ public class SignupServiceImpl implements SignupService {
         if(remainingCount.get(courseId)==null){
             synchronized (lock){
                 if(remainingCount.get(courseId)==null){
-                    List<QuanwaiClass> quanwaiClass = classDao.openClass(openid, courseId);
+                    List<QuanwaiClass> quanwaiClass = classDao.openClass(courseId);
                     //TODO:没有班级需要报警
                     if(CollectionUtils.isEmpty(quanwaiClass)){
                         logger.error("course {} has no open class", courseId);
@@ -88,7 +87,11 @@ public class SignupServiceImpl implements SignupService {
                                 logger.error("class {} 's limit is wrong", clazz.getId());
                                 return new ImmutablePair(-3, clazz.getId());
                             }
-                            clazzNumber.put(clazz.getId(), clazz.getLimit());
+                            Integer count = courseOrderDao.paidCount(clazz.getId());
+                            if(count>=0){
+                                int remaining = clazz.getLimit()-count>0?clazz.getLimit()-count:0;
+                                clazzNumber.put(clazz.getId(), remaining);
+                            }
                             classMap.put(clazz.getId(), new SoftReference<QuanwaiClass>(clazz));
                         }
                         remainingCount.put(courseId, clazzNumber);
@@ -99,16 +102,27 @@ public class SignupServiceImpl implements SignupService {
         //计算剩余人数
         synchronized (lock2) {
             Map<Integer, Integer> remaining = remainingCount.get(courseId);
+            int remain = 0;
+            boolean isEntry = false; //是否已经进入某班
+            Integer classId = 0;
             for(Iterator<Map.Entry<Integer,Integer>> it =remaining.entrySet().iterator(); it.hasNext();){
                 Map.Entry<Integer,Integer> entry = it.next();
                 int remainingNumber = entry.getValue();
                 if(remainingNumber==0){
                     continue;
                 }else{
-                    //人数-1
-                    entry.setValue(remainingNumber-1);
-                    return new ImmutablePair<Integer, Integer>(remainingNumber-1, entry.getKey());
+                    if(!isEntry) {
+                        //人数-1，记录班级id，标记分配进入某班
+                        remainingNumber--;
+                        classId = entry.getKey();
+                        entry.setValue(remainingNumber);
+                        isEntry = true;
+                    }
                 }
+                remain = remain+remainingNumber;
+            }
+            if(isEntry) {
+                return new ImmutablePair<Integer, Integer>(remain, classId);
             }
         }
         return new ImmutablePair(-1, 0);
@@ -136,7 +150,11 @@ public class SignupServiceImpl implements SignupService {
 
         courseOrderDao.insert(courseOrder);
 
-        String payUrl = payUrl(orderId);
+        return orderId;
+    }
+
+    public String qrcode(String productId) {
+        String payUrl = payUrl(productId);
 
         try {
             //生成二维码base64编码
@@ -154,7 +172,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public QuanwaiClass getCachedClass(Integer classId) {
-        if(classMap.get(classId)==null && classMap.get(classId).get()!=null){
+        if(classMap.get(classId)==null || classMap.get(classId).get()==null){
             QuanwaiClass quanwaiClass = courseDao.load(QuanwaiClass.class, classId);
             if(quanwaiClass!=null){
                 classMap.put(classId, new SoftReference<QuanwaiClass>(quanwaiClass));
@@ -164,7 +182,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public Course getCachedCourse(Integer courseId) {
-        if(courseMap.get(courseId)==null && courseMap.get(courseId).get()!=null){
+        if(courseMap.get(courseId)==null || courseMap.get(courseId).get()==null){
             Course course = courseDao.load(Course.class, courseId);
             if(course!=null){
                 courseMap.put(courseId, new SoftReference<Course>(course));
@@ -178,6 +196,9 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public String entry(Integer classId, String openid) {
+        if(classMemberDao.isEntry(openid)){
+            return null;
+        }
         ClassMember classMember = new ClassMember();
         classMember.setClassId(classId);
         classMember.setOpenId(openid);
@@ -185,6 +206,10 @@ public class SignupServiceImpl implements SignupService {
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
         return memberId;
+    }
+
+    public boolean isWhite(Integer courseId, String openid) {
+        return courseFreeListDao.isFree(openid, courseId);
     }
 
     //生成学号
@@ -214,8 +239,9 @@ public class SignupServiceImpl implements SignupService {
 
     public synchronized Integer getClassNumber(Integer classId){
         if(memberCount.get(classId)==null){
-            memberCount.put(classId, 1);
-            return 1;
+            int number = classMemberDao.classMemberNumber(classId);
+            memberCount.put(classId, number+1);
+            return number+1;
         }
 
         int count = memberCount.get(classId)+1;

@@ -51,7 +51,7 @@ public class IntroductionController {
             }
             Course course = courseIntroductionService.loadCourse(classMember.getCourseId());
             if(course==null){
-                return WebUtils.error(200, "获取介绍失败");
+                return WebUtils.error("获取介绍失败");
             }
             courseDto.setCourse(course);
             courseDto.setCourseProgress(courseProgress(course, classMember));
@@ -64,7 +64,7 @@ public class IntroductionController {
             return WebUtils.result(courseDto);
         }catch (Exception e){
             LOGGER.error("获取介绍失败", e);
-            return WebUtils.error(200, "获取介绍失败");
+            return WebUtils.error("获取介绍失败");
         }
     }
 
@@ -108,7 +108,7 @@ public class IntroductionController {
             return WebUtils.result(courseList);
         }catch (Exception e){
             LOGGER.error("获取更多训练失败", e);
-            return WebUtils.error(200, "获取更多训练失败");
+            return WebUtils.error("获取更多训练失败");
         }
     }
 }

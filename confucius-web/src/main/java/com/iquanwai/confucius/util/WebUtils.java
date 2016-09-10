@@ -28,7 +28,7 @@ public class WebUtils {
 
     public static ResponseEntity<Map<String, Object>> error(Object msg) {
         Map<String, Object> json = new HashMap<String, Object>();
-        json.put("code", 500);
+        json.put("code", 221);
         json.put("msg", msg);
 
         return new ResponseEntity<Map<String, Object>>(json, HttpStatus.OK);

@@ -12,5 +12,7 @@ public class SignupDto {
     private Integer remaining;
     private String qrcode;
     private Course course;
+    private String productId;
+    private boolean isFree = false;
     private QuanwaiClass quanwaiClass;
 }

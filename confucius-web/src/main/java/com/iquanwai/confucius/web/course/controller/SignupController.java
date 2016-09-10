@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -37,7 +38,7 @@ public class SignupController {
     @Autowired
     private AccountService accountService;
 
-    @RequestMapping("/course/{courseId}")
+    @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable int courseId){
         SignupDto signupDto = new SignupDto();
         try{
@@ -48,27 +49,34 @@ public class SignupController {
                     .action("进入报名页")
                     .memo(courseId+"");
             operationLogService.log(operationLog);
+            //课程免单用户
+            if (signupService.isWhite(courseId, loginUser.getOpenId())) {
+                signupDto.setFree(true);
+                return WebUtils.result(signupDto);
+            }
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
 
             if(result.getLeft()<0){
-                return WebUtils.error(200, "报名人数已满");
+                return WebUtils.error("报名人数已满");
             }
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
             //去掉群二维码
             quanwaiClass.setWeixinGroup(null);
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
-            String qrcode = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
+            String productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            signupDto.setProductId(productId);
+            String qrcode = signupService.qrcode(productId);
             signupDto.setQrcode(qrcode);
         }catch (Exception e){
             LOGGER.error("报名失败", e);
-            return WebUtils.error(200, "报名人数已满");
+            return WebUtils.error("报名人数已满");
         }
         return WebUtils.result(signupDto);
     }
 
-    @RequestMapping("/paid/{orderId}")
+    @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
         EntryDto entryDto = new EntryDto();
         try{
@@ -82,14 +90,17 @@ public class SignupController {
             CourseOrder courseOrder = signupService.getCourseOrder(orderId);
             if(courseOrder==null){
                 LOGGER.error("{} 订单不存在", orderId);
-                return WebUtils.error(200, "报名失败请联系管理员");
+                return WebUtils.error("报名失败请联系管理员");
             }
             if(courseOrder.getStatus()!=1){
                 LOGGER.error("订单状态：{}", courseOrder.getStatus());
-                return WebUtils.error(200, "付费尚未成功");
+                return WebUtils.error("付费尚未成功");
             }
 
             String memberId = signupService.entry(courseOrder.getClassId(), courseOrder.getOpenid());
+            if(memberId==null){
+                return WebUtils.error("请不要重复点击");
+            }
             entryDto.setMemberId(memberId);
             entryDto.setQuanwaiClass(signupService.getCachedClass(courseOrder.getClassId()));
             entryDto.setCourse(signupService.getCachedCourse(courseOrder.getCourseId()));
@@ -101,7 +112,7 @@ public class SignupController {
             }
         }catch (Exception e){
             LOGGER.error("报名失败", e);
-            return WebUtils.error(200, "报名人数已满");
+            return WebUtils.error("报名人数已满");
         }
         return WebUtils.result(entryDto);
     }

@@ -23,13 +23,13 @@ import java.util.List;
 public class ClassDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<QuanwaiClass> openClass(String openid, int courseId){
+    public List<QuanwaiClass> openClass(int courseId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
 
         try {
-            List<QuanwaiClass> quanwaiClass = run.query("SELECT * FROM QuaiwaiClass where Openid=? and CourseId=? and Open = 1",
-                    h, openid, courseId);
+            List<QuanwaiClass> quanwaiClass = run.query("SELECT * FROM QuanwaiClass where CourseId=? and Open = 1",
+                    h, courseId);
 
             if(CollectionUtils.isEmpty(quanwaiClass)){
                 return null;

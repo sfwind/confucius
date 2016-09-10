@@ -36,7 +36,7 @@ public class PCHomeworkController {
             HomeworkSubmit submit = courseStudyService.loadHomework(completeUrl);
 
             if(submit==null){
-                return WebUtils.error(200, "获取作业失败");
+                return WebUtils.error("获取作业失败");
             }
             String openid = submit.getSubmitOpenid();
             OperationLog operationLog = OperationLog.create().openid(openid)
@@ -47,7 +47,7 @@ public class PCHomeworkController {
             operationLogService.log(operationLog);
             Homework homework = courseStudyService.loadHomework(openid, submit.getHomeworkId());
             if(homework==null){
-                return WebUtils.error(200, "获取作业失败");
+                return WebUtils.error("获取作业失败");
             }
             PCHomeworkDto pcHomeworkDto = new PCHomeworkDto();
             pcHomeworkDto.setOpenid(openid);
@@ -55,7 +55,7 @@ public class PCHomeworkController {
             return WebUtils.result(pcHomeworkDto);
         }catch (Exception e){
             LOGGER.error("获取作业失败", e);
-            return WebUtils.error(200, "获取作业失败");
+            return WebUtils.error("获取作业失败");
         }
     }
 
@@ -76,7 +76,7 @@ public class PCHomeworkController {
             return WebUtils.success();
         }catch (Exception e){
             LOGGER.error("提交作业失败", e);
-            return WebUtils.error(200, "提交作业失败");
+            return WebUtils.error("提交作业失败");
         }
     }
 }

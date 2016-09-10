@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.resolver;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -29,7 +28,7 @@ public class ExceptionResolver implements HandlerExceptionResolver, Ordered {
 //            return null;
 //        }
 
-        logger.error(ExceptionUtils.getFullStackTrace(e));
+        logger.error(e.getMessage(), e);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("code", 500);
         map.put("msg", "服务器内部错误");

@@ -22,9 +22,15 @@ public interface SignupService {
 
     /**
      * 课程报名
-     * @return 报名二维码
+     * @return 报名订单号
      * */
     String signup(String openid, Integer courseId, Integer classId);
+
+    /**
+     * 生成付款二维码
+     * @return 报名二维码
+     * */
+    String qrcode(String productId);
 
     /**
      * 根据班级id获取班级信息
@@ -45,6 +51,11 @@ public interface SignupService {
      * @return 返回学号
      * */
     String entry(Integer classId, String openid);
+
+    /**
+     * 是否是白名单
+     * */
+    boolean isWhite(Integer courseId, String openid);
 
     String PAY_URL = "weixin：//wxpay/bizpayurl?sign=XXXXX&appid={app_id}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
 }
