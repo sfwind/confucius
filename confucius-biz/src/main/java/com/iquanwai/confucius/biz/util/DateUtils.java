@@ -29,4 +29,8 @@ public class DateUtils {
         return dateTime.plusMinutes(minute).toDate();
     }
 
+    public static long currentTimestamp(){
+        return System.currentTimeMillis()/1000;
+    }
+
 }

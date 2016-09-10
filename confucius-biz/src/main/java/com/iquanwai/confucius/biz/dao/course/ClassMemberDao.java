@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao.course;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.CourseOrder;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -11,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created by justin on 16/8/29.
@@ -45,5 +48,25 @@ public class ClassMemberDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public int entry(ClassMember classMember) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        String insertSql = "INSERT INTO ClassMember(ClassId, Openid, MemberId)" +
+                "VALUES(?, ?, ?)";
+        try {
+            Future<Integer> result = asyncRun.update(insertSql,
+                    classMember.getClassId(), classMember.getOpenId(), classMember.getMemberId());
+            return result.get();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        } catch (InterruptedException e) {
+            // ignore
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return -1;
     }
 }

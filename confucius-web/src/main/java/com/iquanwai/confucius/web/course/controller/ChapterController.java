@@ -60,8 +60,6 @@ public class ChapterController {
         chapterPageDto.setChapterType(chapter.getType());
         chapterPageDto.setChapterName(chapter.getName());
         chapterPageDto.setChapterId(chapterId);
-        chapterPageDto.setOpenid(loginUser.getOpenId());
-        chapterPageDto.setUsername(loginUser.getWeixinName());
 
         return chapterPageDto;
     }
@@ -72,16 +70,16 @@ public class ChapterController {
                                                     @PathVariable("sequence") Integer pageSequence){
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence);
-            if(chapterPageDto==null){
-                return WebUtils.error(200, "获取用户当前章节页失败");
-            }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("章节")
                     .function("学习章节")
                     .action("打开章节某页")
                     .memo(chapterId+","+pageSequence);
             operationLogService.log(operationLog);
+            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence);
+            if(chapterPageDto==null){
+                return WebUtils.error(200, "获取用户当前章节页失败");
+            }
             return WebUtils.result(chapterPageDto);
         }catch (Exception e){
             LOGGER.error("获取用户当前章节页失败", e);
@@ -94,16 +92,16 @@ public class ChapterController {
                                                             @PathVariable("questionId") Integer questionId){
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            Question question = courseStudyService.loadQuestion(loginUser.getOpenId(), questionId);
-            if(question==null){
-                return WebUtils.error(200, "获取选择题失败");
-            }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("章节")
                     .function("学习章节")
                     .action("加载选择题")
-                    .memo(question.getId()+"");
+                    .memo(questionId+"");
             operationLogService.log(operationLog);
+            Question question = courseStudyService.loadQuestion(loginUser.getOpenId(), questionId);
+            if(question==null){
+                return WebUtils.error(200, "获取选择题失败");
+            }
             return WebUtils.result(question);
         }catch (Exception e){
             LOGGER.error("获取选择题失败", e);
@@ -136,16 +134,16 @@ public class ChapterController {
                                                             @PathVariable("homeworkId") Integer homeworkId){
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            Homework homework = courseStudyService.loadHomework(loginUser.getOpenId(), homeworkId);
-            if(homework==null){
-                return WebUtils.error(200, "获取作业失败");
-            }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("作业")
                     .function("做作业")
                     .action("加载作业")
-                    .memo(homework.getId()+"");
+                    .memo(homeworkId+"");
             operationLogService.log(operationLog);
+            Homework homework = courseStudyService.loadHomework(loginUser.getOpenId(), homeworkId);
+            if(homework==null){
+                return WebUtils.error(200, "获取作业失败");
+            }
             return WebUtils.result(homework);
         }catch (Exception e){
             LOGGER.error("获取作业失败", e);

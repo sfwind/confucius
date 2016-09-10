@@ -1,14 +1,15 @@
 package com.iquanwai.confucius.biz.util;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by justin on 16/8/7.
@@ -90,6 +91,23 @@ public class CommonUtils {
             sb.append(base.charAt(number));
         }
         return sb.toString();
+    }
+
+    public static String sign(final Map<String, String> params){
+        List<String> list = new ArrayList(params.keySet());
+        Collections.sort(list);
+
+        List<String> kvList = Lists.transform(list, new Function<String, String>() {
+            public String apply(String input) {
+                return input+"="+params.get(input);
+            }
+        });
+
+        String digest = StringUtils.join(kvList.iterator(), "&")
+                .concat("&key=")
+                .concat(ConfigUtils.getAPIKey());
+
+        return MessageDigestHelper.getMD5String(digest);
     }
 
 }

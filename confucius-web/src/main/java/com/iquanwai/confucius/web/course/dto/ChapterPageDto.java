@@ -8,8 +8,6 @@ import lombok.Data;
  */
 @Data
 public class ChapterPageDto {
-    private String openid;
-    private String username;
     private Integer chapterId;
     private String chapterName;
     private String chapterPic;

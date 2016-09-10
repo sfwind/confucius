@@ -9,7 +9,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.MyCourseDto;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +53,6 @@ public class IntroductionController {
             if(course==null){
                 return WebUtils.error(200, "获取介绍失败");
             }
-            courseDto.setOpenid(loginUser.getOpenId());
-            courseDto.setUsername(loginUser.getWeixinName());
             courseDto.setCourse(course);
             courseDto.setCourseProgress(courseProgress(course, classMember));
             courseDto.setMyProgress(myProgress(course, classMember));
@@ -101,12 +99,12 @@ public class IntroductionController {
 
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            List<Course> courseList = courseIntroductionService.loadAll();
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("服务号")
                     .function("介绍")
                     .action("更多训练");
             operationLogService.log(operationLog);
+            List<Course> courseList = courseIntroductionService.loadAll();
             return WebUtils.result(courseList);
         }catch (Exception e){
             LOGGER.error("获取更多训练失败", e);

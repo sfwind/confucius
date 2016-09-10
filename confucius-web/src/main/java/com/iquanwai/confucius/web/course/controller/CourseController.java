@@ -82,8 +82,6 @@ public class CourseController {
 
         CoursePageDto coursePageDto = new CoursePageDto();
         coursePageDto.setCourse(course);
-        coursePageDto.setUsername(loginUser.getWeixinName());
-        coursePageDto.setOpenid(loginUser.getOpenId());
         coursePageDto.setWeek(classMember.getProgressWeek());
         return coursePageDto;
     }

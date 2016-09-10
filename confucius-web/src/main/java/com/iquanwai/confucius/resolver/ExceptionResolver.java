@@ -25,7 +25,7 @@ public class ExceptionResolver implements HandlerExceptionResolver, Ordered {
 
 //        List<String> excludedException = Lists.newArrayList(StringUtils.split(ConfigUtils.getUnhandledException(), ","));
 //
-//        if (excludedException.contains(e.getClass().getSimpleName())) {
+//        if (excludedException.contains(e.getCachedClass().getSimpleName())) {
 //            return null;
 //        }
 

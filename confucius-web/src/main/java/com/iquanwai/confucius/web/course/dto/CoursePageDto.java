@@ -9,8 +9,6 @@ import lombok.Data;
  */
 @Data
 public class CoursePageDto{
-    private String openid;
-    private String username;
     private int week;
     private Course course;
 

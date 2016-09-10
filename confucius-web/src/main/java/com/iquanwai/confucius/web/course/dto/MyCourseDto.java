@@ -8,8 +8,6 @@ import lombok.Data;
  */
 @Data
 public class MyCourseDto {
-    private String openid;
-    private String username;
     private Double myProgress;
     private Double courseProgress;
     private Course course;

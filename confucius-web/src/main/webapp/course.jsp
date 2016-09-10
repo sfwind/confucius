@@ -1,6 +1,5 @@
 <!doctype html>
 <%@ page import="com.iquanwai.confucius.biz.util.ConfigUtils" contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
-<%@ page import="java.util.Random" %>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -17,7 +16,7 @@
 
 <div id="react-app"></div>
 <!-- 业务代码-->
-<script src="<%=ConfigUtils.staticResourceUrl()%>/bundle.js?t=_<%=new Random().nextLong()%>"></script>
+<script src="<%=ConfigUtils.staticResourceUrl()%>"></script>
 
 </body>
 </html>

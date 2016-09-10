@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Created by yangyuchen on 15-1-30.
  */
-public class SHA1Helper {
+public class MessageDigestHelper {
     public static String getSHA1String(String s) {
         //SHA-1加密实例
         MessageDigest sha1 = null;
@@ -22,6 +22,22 @@ public class SHA1Helper {
         String codedString = new BigInteger(1, codedBytes).toString(16);
 
         return codedString;
+    }
+
+    public static String getMD5String(String s) {
+        //SHA-1加密实例
+        MessageDigest sha1 = null;
+        try {
+            sha1 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        sha1.update(s.getBytes());
+        byte[] codedBytes = sha1.digest();
+        //将加密后的字节数组转换成字符串
+        String codedString = new BigInteger(1, codedBytes).toString(16);
+
+        return codedString.toUpperCase();
     }
 
 }
