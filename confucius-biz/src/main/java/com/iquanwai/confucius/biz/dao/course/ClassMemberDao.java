@@ -51,12 +51,13 @@ public class ClassMemberDao extends DBUtil {
         }
     }
 
-    public boolean isEntry(String openid){
+    public boolean isEntry(Integer classId, String openid){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
 
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=?", h, openid);
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where ClassId=? AND Openid=?",
+                    h, classId, openid);
             if(classMember==null){
                 return false;
             }

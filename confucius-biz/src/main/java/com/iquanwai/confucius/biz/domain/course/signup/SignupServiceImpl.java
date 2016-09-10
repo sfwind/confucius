@@ -196,7 +196,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public String entry(Integer classId, String openid) {
-        if(classMemberDao.isEntry(openid)){
+        if(classMemberDao.isEntry(classId, openid)){
             return null;
         }
         ClassMember classMember = new ClassMember();
