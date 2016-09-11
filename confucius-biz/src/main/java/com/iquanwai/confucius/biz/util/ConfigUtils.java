@@ -63,4 +63,8 @@ public class ConfigUtils {
 
 		return url;
 	}
+
+	public static String getValue(String key){
+		return config.getString(key);
+	}
 }

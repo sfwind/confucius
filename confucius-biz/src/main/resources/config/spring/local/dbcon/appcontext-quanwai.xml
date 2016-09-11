@@ -5,9 +5,9 @@
                            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <bean id="dao.dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-        <property name="jdbcUrl" value="jdbc:mysql://121.43.177.170:3306/quanwai" />
-        <property name="user" value="weixin" />
-        <property name="password" value="weixin4test" />
+        <property name="jdbcUrl" value="${db.url}" />
+        <property name="user" value="${db.name}" />
+        <property name="password" value="${db.password}" />
         <property name="driverClass" value="com.mysql.jdbc.Driver" />
     </bean>
 
