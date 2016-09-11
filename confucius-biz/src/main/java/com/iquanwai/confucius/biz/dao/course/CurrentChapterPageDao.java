@@ -27,8 +27,8 @@ public class CurrentChapterPageDao extends DBUtil {
         ResultSetHandler<CurrentChapterPage> h = new BeanHandler(CurrentChapterPage.class);
 
         try {
-            CurrentChapterPage page = run.query("SELECT PageSequence FROM CurrentChapterPage where ChapterId=? and Openid=?",
-                    h, chapterId, openid);
+            CurrentChapterPage page = run.query("SELECT PageSequence FROM CurrentChapterPage where Openid=? and ChapterId=?",
+                    h, openid, chapterId);
             if(page==null){
                 return null;
             }

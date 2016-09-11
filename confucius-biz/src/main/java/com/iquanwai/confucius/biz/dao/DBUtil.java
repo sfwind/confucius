@@ -5,6 +5,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,19 +61,19 @@ public class DBUtil {
         return Lists.newArrayList();
     }
 
-    public int count(Class type){
+    public long count(Class type){
 
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Integer> h = new BeanHandler<Integer>(type);
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
 
         try {
-            Integer number = run.query("SELECT count(*) FROM "+type.getSimpleName(), h);
+            Long number = run.query("SELECT count(*) FROM "+type.getSimpleName(), h);
             return number;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
-        return -1;
+        return -1L;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.dao.course;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Choice;
 import org.apache.commons.dbutils.QueryRunner;
@@ -31,7 +32,7 @@ public class ChoiceDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
 
-        return null;
+        return Lists.newArrayList();
     }
 
     public List<Choice> loadRightChoices(int questionId){
@@ -46,6 +47,6 @@ public class ChoiceDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
 
-        return null;
+        return Lists.newArrayList();
     }
 }

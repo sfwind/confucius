@@ -24,4 +24,9 @@ public interface CourseProgressService {
      * @param classProgress 课程进度
      * */
     Course loadCourse(int courseId, int week, List<Integer> personalProgress,int classProgress);
+
+    /**
+     * 每天定时更新每个班级的进度
+     * */
+    void classProgress();
 }

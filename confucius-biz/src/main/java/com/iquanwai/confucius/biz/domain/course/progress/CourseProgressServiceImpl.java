@@ -10,6 +10,7 @@ import com.iquanwai.confucius.biz.po.Chapter;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -56,6 +57,22 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         course.setChapterList(buildChapter(chapters, personalProgress, classProgress));
 
         return course;
+    }
+
+    public void classProgress() {
+        List<QuanwaiClass> openClass = classDao.loadAllOpenClass();
+        for(QuanwaiClass clazz:openClass){
+            Integer courseId = clazz.getCourseId();
+            //开课天数=今天-开课日期+1
+            int startDay = DateUtils.interval(clazz.getOpenTime())+1;
+            Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
+            if(chapter!=null){
+                Integer sequence = chapter.getSequence();
+                if(!sequence.equals(clazz.getProgress())){
+                    classDao.progress(clazz.getId(), sequence);
+                }
+            }
+        }
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, final List<Integer> personalProgress, final int classProgress) {

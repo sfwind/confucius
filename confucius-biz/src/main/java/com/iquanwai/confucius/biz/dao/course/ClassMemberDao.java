@@ -55,8 +55,8 @@ public class ClassMemberDao extends DBUtil {
         ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
 
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where ClassId=? AND Openid=?",
-                    h, classId, openid);
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and ClassId=? ",
+                    h, openid, classId);
             if(classMember==null){
                 return false;
             }
@@ -70,7 +70,7 @@ public class ClassMemberDao extends DBUtil {
     public int entry(ClassMember classMember) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "INSERT INTO ClassMember(ClassId, Openid, MemberId)" +
+        String insertSql = "INSERT INTO ClassMember(ClassId, Openid, MemberId) " +
                 "VALUES(?, ?, ?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,

@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Chapter;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,5 +33,20 @@ public class ChapterDao extends DBUtil {
         }
 
         return Lists.newArrayList();
+    }
+
+    public Chapter getChapterByStartDay(Integer courseId, int startDay){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<Chapter> h = new BeanHandler(Chapter.class);
+
+        try {
+            Chapter chapter = run.query("SELECT * FROM Chapter where CourseId=? and StartDay<=? and EndDay>=?",
+                    h, courseId, startDay, startDay);
+            return chapter;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
     }
 }

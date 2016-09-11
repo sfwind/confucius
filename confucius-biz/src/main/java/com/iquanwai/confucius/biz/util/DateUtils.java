@@ -7,26 +7,29 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateUtils {
-    private static DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private static DateTimeFormatter format1 = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private static DateTimeFormatter format2 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     public static String parseDateToString(Date date) {
-        return format.print(new DateTime(date));
+        return format1.print(new DateTime(date));
     }
 
     public static Date parseStringToDate(String strDate) {
-        return format.parseDateTime(strDate).toDate();
+        return format1.parseDateTime(strDate).toDate();
     }
 
-    public static int getMinuteByDate(Date date) {
-        if (date == null) {
-            return 0;
-        }
-        DateTime dateTime = new DateTime(date);
-        return dateTime.getMinuteOfHour();
+    public static String parseDateTimeToString(Date date) {
+        return format2.print(new DateTime(date));
     }
 
-    public static Date minuteAfter(Date date, int minute){
-        DateTime dateTime = new DateTime(date);
-        return dateTime.plusMinutes(minute).toDate();
+    public static Date parseStringToDateTime(String strDate) {
+        return format2.parseDateTime(strDate).toDate();
+    }
+
+    public static int interval(Date date) {
+        long now = new Date().getTime();
+        long thatTime = date.getTime();
+
+        return Math.abs((int)(now - thatTime)/1000)/60/60/24;
     }
 
     public static long currentTimestamp(){
