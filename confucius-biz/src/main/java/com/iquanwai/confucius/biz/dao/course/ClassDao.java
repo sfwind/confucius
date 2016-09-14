@@ -9,6 +9,7 @@ import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -67,5 +68,19 @@ public class ClassDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public Integer classNumber(Integer courseId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+
+        try {
+            Long number = run.query("SELECT count(*) FROM QuanwaiClass where CourseId=?", h, courseId);
+            return number.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return -1;
     }
 }

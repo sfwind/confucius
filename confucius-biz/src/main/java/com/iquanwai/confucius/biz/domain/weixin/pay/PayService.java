@@ -18,7 +18,14 @@ public interface PayService {
      * */
     void handlePayResult(PayCallback payCallback);
 
+    /**
+     * 定期关闭过期订单
+     * */
+    void closeOrder();
+
     String UNIFIED_ORDER_URL ="https://api.mch.weixin.qq.com/pay/unifiedorder";
+
+    String CLOSE_ORDER_URL ="https://api.mch.weixin.qq.com/pay/closeorder";
 
     String GOODS_BODY = "圈外-线上课程";
 

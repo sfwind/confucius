@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.job;
+package com.iquanwai.confucius.job;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import org.slf4j.Logger;

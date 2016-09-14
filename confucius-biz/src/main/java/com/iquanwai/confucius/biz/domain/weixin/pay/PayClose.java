@@ -9,13 +9,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name="xml")
 @Data
-public class OrderCallbackReply {
-    private String return_code; //返回状态码
+public class PayClose {
     private String appid; //公众账号ID
     private String mch_id; //商户号
+    private String out_trade_no; //商户订单号
     private String nonce_str; //随机字符串
-    private String prepay_id; //预支付ID
-    private String result_code; //业务结果
-    private String err_code_des; //错误描述
     private String sign; //签名
 }

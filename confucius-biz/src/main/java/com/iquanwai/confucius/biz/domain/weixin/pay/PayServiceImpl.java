@@ -104,6 +104,51 @@ public class PayServiceImpl implements PayService{
         courseOrderDao.paySuccess(paidTime, transactionId, orderId);
     }
 
+    public void closeOrder() {
+        Date date = DateUtils.afterMinutes(new Date(), 0-ConfigUtils.getBillOpenMinute());
+        List<CourseOrder> underCloseOrders = courseOrderDao.queryUnderCloseOrders(date);
+        for(CourseOrder courseOrder:underCloseOrders){
+            String orderId = courseOrder.getOrderId();
+            PayClose payClose = buildPayClose(orderId);
+            try {
+                String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
+                PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
+                if(payCloseReply!=null){
+                    if(payCloseReply.getReturn_code().equals(SUCCESS_CODE)){
+                        if(payCloseReply.getErr_code().equals(ERROR_CODE) && payCloseReply.getErr_code_des()!=null){
+                            logger.error(payCloseReply.getErr_code_des()+", orderId="+orderId);
+                        }
+                        logger.info("orderId: {} closed automatically", orderId);
+                        courseOrderDao.closeOrder(orderId);
+                    }
+                }
+            }catch (Exception e){
+                logger.error("orderId: {} close failed", orderId);
+            }
+        }
+    }
+
+    private PayClose buildPayClose(String orderId) {
+        PayClose payClose = new PayClose();
+        Map<String, String> map = Maps.newHashMap();
+        map.put("out_trade_no", orderId);
+        String appid = ConfigUtils.getAppid();
+        map.put("appid", appid);
+        String mch_id = ConfigUtils.getMch_id();
+        map.put("mch_id", mch_id);
+        String nonce_str = CommonUtils.randomString(16);
+        map.put("nonce_str", nonce_str);
+        String sign = CommonUtils.sign(map);
+
+        payClose.setNonce_str(nonce_str);
+        payClose.setMch_id(mch_id);
+        payClose.setAppid(appid);
+        payClose.setOut_trade_no(orderId);
+        payClose.setSign(sign);
+
+        return payClose;
+    }
+
 
     private UnifiedOrder buildOrder(CourseOrder courseOrder){
         UnifiedOrder unifiedOrder = new UnifiedOrder();

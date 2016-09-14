@@ -2,9 +2,12 @@ package com.iquanwai.confucius.biz.domain.weixin.pay;
 
 import lombok.Data;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Created by justin on 16/9/14.
  */
+@XmlRootElement(name="xml")
 @Data
 public class OrderCallback {
     private String appid; //公众账号ID

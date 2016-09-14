@@ -1,11 +1,13 @@
 package com.iquanwai.confucius.biz.dao.course;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -111,6 +114,34 @@ public class CourseOrderDao extends DBUtil{
         try {
             asyncRun.update("UPDATE CourseOrder SET PaidTime =?, TransactionId=? " +
                     "where OrderId=?", paidTime, transactionId, orderId);
+
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public List<CourseOrder> queryUnderCloseOrders(Date openTime) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<CourseOrder>> h = new BeanListHandler(CourseOrder.class);
+
+        try {
+            List<CourseOrder> orderList = run.query("SELECT * FROM CourseOrder where Status=0 and createTime<=? ",
+                    h, openTime);
+            return orderList;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public void closeOrder(String orderId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+
+        try {
+            asyncRun.update("UPDATE CourseOrder SET Status=2 " +
+                    "where OrderId=?", orderId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

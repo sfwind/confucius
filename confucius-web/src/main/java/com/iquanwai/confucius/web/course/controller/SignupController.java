@@ -97,7 +97,7 @@ public class SignupController {
                 return WebUtils.error("付费尚未成功");
             }
 
-            String memberId = signupService.entry(courseOrder.getClassId(), courseOrder.getOpenid());
+            String memberId = signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
             if(memberId==null){
                 return WebUtils.error("请不要重复点击");
             }

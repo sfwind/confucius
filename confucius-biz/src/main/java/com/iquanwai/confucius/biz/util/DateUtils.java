@@ -48,4 +48,8 @@ public class DateUtils {
     public static Date afterMinutes(Date date, int increment){
         return new DateTime(date).plusMinutes(increment).toDate();
     }
+
+    public static Date afterYears(Date date, int increment){
+        return new DateTime(date).plusYears(increment).toDate();
+    }
 }

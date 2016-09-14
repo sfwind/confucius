@@ -1,12 +1,10 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.zxing.WriterException;
 import com.iquanwai.confucius.biz.dao.course.*;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -41,6 +39,8 @@ public class SignupServiceImpl implements SignupService {
     private ClassMemberDao classMemberDao;
     @Autowired
     private CourseFreeListDao courseFreeListDao;
+    @Autowired
+    private CouponDao couponDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -136,13 +136,12 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setCreateTime(new Date());
         courseOrder.setOpenid(openid);
 
-        int discount = discount(openid);
-        courseOrder.setDiscount(discount);
-
         Course course = getCachedCourse(courseId);
         if(course == null){
             return null;
         }
+        int discount = discount(openid, course.getFee().intValue());
+        courseOrder.setDiscount(discount);
         courseOrder.setPrice(course.getFee().intValue()-discount);
         courseOrder.setStatus(0); //待支付
         String orderId = CommonUtils.randomString(16);
@@ -167,9 +166,36 @@ public class SignupServiceImpl implements SignupService {
         return null;
     }
 
-    //暂时没有折扣
-    private int discount(String openid) {
-        return 0;
+    //折扣计算
+    private int discount(String openid, Integer price) {
+        List<Coupon> coupons = couponDao.getCoupon(openid);
+        List<Integer> usedCoupon = Lists.newArrayList();
+        int remain = price;
+        for(Coupon coupon:coupons){
+            int amount = coupon.getAmount();
+            if(remain>=amount){
+                remain = remain-amount;
+                if(remain==0){
+                    break;
+                }
+            }else{
+                int newAmount = amount-remain;
+                Coupon newCoupon = new Coupon();
+                newCoupon.setAmount(newAmount);
+                newCoupon.setExpiredDate(defaultExpiredDate());
+                newCoupon.setOpenid(openid);
+                newCoupon.setUsed(0);
+                couponDao.insert(coupon);
+                break;
+            }
+            usedCoupon.add(coupon.getId());
+        }
+        couponDao.updateCoupon(usedCoupon, 2);
+        return price-remain;
+    }
+
+    private Date defaultExpiredDate() {
+        return DateUtils.afterYears(new Date(), 100);
     }
 
     public QuanwaiClass getCachedClass(Integer classId) {
@@ -196,14 +222,14 @@ public class SignupServiceImpl implements SignupService {
         return courseOrderDao.loadOrder(orderId);
     }
 
-    public String entry(Integer classId, String openid) {
+    public String entry(Integer courseId, Integer classId, String openid) {
         if(classMemberDao.isEntry(classId, openid)){
             return null;
         }
         ClassMember classMember = new ClassMember();
         classMember.setClassId(classId);
         classMember.setOpenId(openid);
-        String memberId = memberId(classId);
+        String memberId = memberId(courseId, classId);
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
         return memberId;
@@ -213,9 +239,11 @@ public class SignupServiceImpl implements SignupService {
         return courseFreeListDao.isFree(openid, courseId);
     }
 
-    //生成学号
-    private String memberId(Integer classId) {
-        return getClassNumber(classId)+"";
+    //生成学号 2位课程号2位班级号3位学号
+    private String memberId(Integer courseId, Integer classId) {
+        Integer classNumber = classDao.classNumber(courseId);
+        Integer memberNumber = getMemberNumber(classId);
+        return String.format("%02d%02d%03d", courseId, classNumber, memberNumber);
     }
 
     private String payUrl(String productId){
@@ -238,7 +266,7 @@ public class SignupServiceImpl implements SignupService {
         return CommonUtils.urlReplace(PAY_URL, map);
     }
 
-    public synchronized Integer getClassNumber(Integer classId){
+    public synchronized Integer getMemberNumber(Integer classId){
         if(memberCount.get(classId)==null){
             int number = classMemberDao.classMemberNumber(classId);
             memberCount.put(classId, number+1);
