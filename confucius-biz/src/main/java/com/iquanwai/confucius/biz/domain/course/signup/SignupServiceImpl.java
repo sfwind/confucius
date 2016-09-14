@@ -153,17 +153,16 @@ public class SignupServiceImpl implements SignupService {
         return orderId;
     }
 
-    public String qrcode(String productId) {
+    public void qrcode(String productId) {
         String payUrl = payUrl(productId);
 
         try {
             //生成二维码base64编码
             Image image = QRCodeUtils.genQRCode(payUrl, QRCODE_WIDTH, QRCODE_HEIGHT);
-            return QRCodeUtils.image2base64(image);
+            QRCodeUtils.image2FS(image);
         } catch (WriterException e) {
             logger.error("二维码生成失败", e);
         }
-        return null;
     }
 
     //折扣计算

@@ -30,7 +30,7 @@ public interface SignupService {
      * 生成付款二维码
      * @return 报名二维码
      * */
-    String qrcode(String productId);
+    void qrcode(String productId);
 
     /**
      * 根据班级id获取班级信息
@@ -57,5 +57,5 @@ public interface SignupService {
      * */
     boolean isWhite(Integer courseId, String openid);
 
-    String PAY_URL = "weixin：//wxpay/bizpayurl?sign=XXXXX&appid={app_id}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
+    String PAY_URL = "weixin://wxpay/bizpayurl?sign={sign}&appid={appid}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
 }

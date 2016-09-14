@@ -17,9 +17,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.awt.image.RenderedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -374,22 +372,13 @@ public class QRCodeUtils {
         }
     }
 
-    public static String image2base64(Image image){
+    public static void image2FS(Image image){
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write((RenderedImage) image, "jpg", baos);
-            byte[] data = baos.toByteArray();
-            BASE64Encoder encoder = new BASE64Encoder();
-            return encoder.encode(data);// 返回Base64编码过的字节数组字符串
+            ImageIO.write((RenderedImage) image, "jpg",
+                    new File("/data/static/qrcode/1.jpg"));
         } catch (IOException e) {
 //            e.printStackTrace();
             logger.error(e.getMessage(), e);
         }
-        return "";
-
-    }
-
-    public static void main(String[] args) throws Exception{
-        System.out.println(image2base64(genQRCode("weixin://wxpay/bizpayurl?sign=XXXXX&appid=XXXXX&mch_id=XXXXX&product_id=XXXXXX&time_stamp=XXXXXX&nonce_str=XXXXX", 300, 300)));
     }
 }
