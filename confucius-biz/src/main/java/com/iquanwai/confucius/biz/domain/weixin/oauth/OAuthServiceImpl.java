@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by justin on 16/8/13.
@@ -32,7 +31,7 @@ public class OAuthServiceImpl implements OAuthService {
         String requestUrl = OAUTH_URL;
         Callback callback = new Callback();
         callback.setCallbackUrl(callbackUrl);
-        String state = UUID.randomUUID().toString().replaceAll("-", "");
+        String state = CommonUtils.randomString(32);
         callback.setState(state);
         callbackDao.insert(callback);
 

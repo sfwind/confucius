@@ -13,6 +13,7 @@ public class CourseOrder {
     private String orderId; //订单id
     private String openid; //openid
     private Integer courseId; //课程id
+    private String courseName; //课程名称
     private Integer classId; //班级id
     private Integer price;   //实际金额 总金额-折扣金额
     private Integer discount; //折扣金额
@@ -21,5 +22,6 @@ public class CourseOrder {
     private Date paidTime;   //订单付款时间
     private Date createTime; //订单生成时间
     private String returnMsg; //微信返回信息
+    private String transactionId; // 微信支付订单号
 
 }

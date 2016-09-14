@@ -47,6 +47,7 @@ public class RestfulHelper {
     }
 
     public String postXML(String requestUrl, String xml) {
+        logger.info("requestUrl: {}\nxml: {}",requestUrl, xml);
         if(StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
             Request request = new Request.Builder()
                     .url(requestUrl)

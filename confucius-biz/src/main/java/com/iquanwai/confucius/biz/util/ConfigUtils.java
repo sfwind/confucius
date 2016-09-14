@@ -18,14 +18,6 @@ public class ConfigUtils {
 		config = fileconfig.withFallback(config);
 	}
 
-	public static String getToken() {
-		return config.getString("token");
-	}
-
-	public static String getEncodingAesKey() {
-		return "NdljBZaXGGkx8c9R70fpZ54M6s1OHlxxpKMG7bIoadd";
-	}
-
 	public static String getAppid() {
 		return config.getString("appid");
 	}
@@ -54,6 +46,17 @@ public class ConfigUtils {
 		return config.getString("mch_id");
 	}
 
+	public static String getExternalIP(){
+		return config.getString("external.ip");
+	}
+
+	public static Integer getBillOpenMinute(){
+		return config.getInt("bill.open.minute");
+	}
+
+	public static String getPayResultCallbackUrl(){
+		return config.getString("pay.result.callback.url");
+	}
 	public static String staticResourceUrl(){
 		String url = config.getString("static.resource.url");
 		//测试环境防浏览器缓存，添加随机参数

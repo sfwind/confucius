@@ -2,8 +2,8 @@ package com.iquanwai.confucius.biz.domain.weixin.signature;
 
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.MessageDigestHelper;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by yangyuchen on 15-1-30.
@@ -45,7 +44,7 @@ public class JsSignatureServiceImpl implements JsSignatureService {
             }
         }
 
-        String noncestr = UUID.randomUUID().toString().replace("-","").substring(0, 11);
+        String noncestr = CommonUtils.randomString(11);
         String timestamp =  Long.toString(System.currentTimeMillis());
         Map<String, String> vars = new LinkedHashMap<String, String>();
         vars.put("jsapi_ticket", jsapi_ticket);

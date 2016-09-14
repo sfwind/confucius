@@ -147,6 +147,7 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setStatus(0); //待支付
         String orderId = CommonUtils.randomString(16);
         courseOrder.setOrderId(orderId);
+        courseOrder.setCourseName(course.getName());
 
         courseOrderDao.insert(courseOrder);
 

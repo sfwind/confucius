@@ -13,5 +13,5 @@ public class GoodsDetail {
     private Integer goods_num; // 必填 商品数量
     private Integer price; // 必填 商品单价，单位为分
 //    private String goods_category; // 可选 32 商品类目ID
-    private String body; // 可选 1000 商品描述信息
+//    private String body; // 可选 1000 商品描述信息
 }

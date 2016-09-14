@@ -9,6 +9,7 @@ import java.util.Date;
 public class DateUtils {
     private static DateTimeFormatter format1 = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static DateTimeFormatter format2 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private static DateTimeFormatter format3 = DateTimeFormat.forPattern("yyyyMMddHHmmss");
     public static String parseDateToString(Date date) {
         return format1.print(new DateTime(date));
     }
@@ -36,4 +37,15 @@ public class DateUtils {
         return System.currentTimeMillis()/1000;
     }
 
+    public static String parseDateToString3(Date date) {
+        return format3.print(new DateTime(date));
+    }
+
+    public static Date parseStringToDate3(String strDate) {
+        return format3.parseDateTime(strDate).toDate();
+    }
+
+    public static Date afterMinutes(Date date, int increment){
+        return new DateTime(date).plusMinutes(increment).toDate();
+    }
 }
