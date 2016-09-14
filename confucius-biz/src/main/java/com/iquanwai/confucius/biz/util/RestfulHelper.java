@@ -60,6 +60,7 @@ public class RestfulHelper {
 //                if(CommonUtils.isError(body)){
 //                    logger.error("execute {} return error, error message is {}", requestUrl, body);
 //                }
+                logger.info("body:{}", body);
                 return body;
             } catch (Exception e) {
                 logger.error("execute " + requestUrl + " error", e);
