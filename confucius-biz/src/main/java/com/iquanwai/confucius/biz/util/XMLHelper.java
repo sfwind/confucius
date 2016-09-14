@@ -1,8 +1,6 @@
 package com.iquanwai.confucius.biz.util;
 
 
-import com.iquanwai.confucius.biz.domain.weixin.pay.UnifiedOrderReply;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -25,7 +23,9 @@ public class XMLHelper {
         } catch (JAXBException e) {
             e.printStackTrace();
         }
-        return sw.toString();
+        String escaped_xml = sw.toString();
+
+        return escaped_xml.replace("&lt;![CDATA", "<![CDATA").replace("]]&gt;", "]]>");
     }
 
     public static <T> T parseXml(Class<T> clazz, String xml) {
@@ -46,16 +46,22 @@ public class XMLHelper {
 
     public static void main(String[] args) {
         String reply = "<xml>\n" +
-                "<return_code><![CDATA[SUCCESS]]></return_code>\n" +
-                "<return_msg><![CDATA[OK]]></return_msg>\n" +
-                "<appid><![CDATA[wx2421b1c4370ec43b]]></appid>\n" +
-                "<mch_id><![CDATA[10000100]]></mch_id>\n" +
-                "<nonce_str><![CDATA[IITRi8Iabbblz1Jc]]></nonce_str>\n" +
-                "<sign><![CDATA[7921E432F65EB8ED0CE9755F0E86D72F]]></sign>\n" +
-                "<result_code><![CDATA[SUCCESS]]></result_code>\n" +
-                "<prepay_id><![CDATA[wx201411101639507cbf6ffd8b0779950874]]></prepay_id>\n" +
-                "<trade_type><![CDATA[JSAPI]]></trade_type>\n" +
+                "    <appid>wx6d7641af1b854a21</appid>\n" +
+                "    <body>圈外-线上课程</body>\n" +
+                "    <detail>&lt;![CDATA[{\"goodsDetail\":[{\"goods_id\":\"1\",\"goods_name\":\"结构化思维\n" +
+                "\",\"goods_num\":1,\"price\":1000}]}]]&gt;</detail>\n" +
+                "    <mch_id>1388290502</mch_id>\n" +
+                "    <nonce_str>okn4i6h57vxux6hz</nonce_str>\n" +
+                "    <notify_url>http://www.confucius.mobi/wx/pay/result/callback</notify_url>\n" +
+                "    <openid>oK881wQekezGpw6rq790y_vAY_YY</openid>\n" +
+                "    <out_trade_no>1cp11l48476ymz83</out_trade_no>\n" +
+                "    <sign>2623685A16ADB47279096BC72F220CCA</sign>\n" +
+                "    <spbill_create_ip>121.43.177.170</spbill_create_ip>\n" +
+                "    <time_expire>20160914235903</time_expire>\n" +
+                "    <time_start>20160914232903</time_start>\n" +
+                "    <total_fee>1000</total_fee>\n" +
+                "    <trade_type>JSAPI</trade_type>\n" +
                 "</xml>";
-        UnifiedOrderReply reply1= parseXml(UnifiedOrderReply.class, reply);
+        System.out.println(reply.replace("&lt;![CDATA", "<![CDATA").replace("]]&gt;", "]]>"));
     }
 }
