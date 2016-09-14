@@ -40,7 +40,7 @@ public class RestfulHelper {
                 }
                 return body;
             } catch (Exception e) {
-                logger.error("execute " + requestUrl + " error", e);
+                logger.error("execute " + requestUrl + " error", e.getCause().getMessage());
             }
         }
         return "";
