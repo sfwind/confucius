@@ -97,6 +97,9 @@ public class OAuthServiceImpl implements OAuthService {
         String openid = (String)result.get("openid");
         String refreshToken = (String)result.get("refresh_token");
         //更新accessToken，refreshToken，openid
+        callback.setOpenid(openid);
+        callback.setRefreshToken(refreshToken);
+        callback.setAccessToken(accessToken);
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
 
         // callbackUrl增加参数access_token
