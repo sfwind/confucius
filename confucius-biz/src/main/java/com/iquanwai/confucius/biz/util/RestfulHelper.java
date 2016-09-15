@@ -81,7 +81,7 @@ public class RestfulHelper {
                 result += line;
             }
         } catch (Exception e) {
-            logger.error("execute " + requestUrl + " error", e);
+            logger.error(e.getCause().getMessage(), e);
         }
         //使用finally块来关闭输出流、输入流
         finally{
