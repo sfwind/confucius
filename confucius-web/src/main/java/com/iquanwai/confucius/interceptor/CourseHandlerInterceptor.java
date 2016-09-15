@@ -19,7 +19,11 @@ public class CourseHandlerInterceptor extends HandlerInterceptorAdapter {
             String value = CookieUtils.getCookie(request, "_act");
             //没有access_token,跳转去授权
             if (StringUtils.isEmpty(value)) {
-                response.sendRedirect("/wx/oauth/auth");
+                String url = request.getRequestURL().toString();
+                if(!StringUtils.isEmpty(request.getQueryString())){
+                    url = url +"?"+request.getQueryString();
+                }
+                response.sendRedirect("/wx/oauth/auth?callbackUrl="+url);
                 return false;
             }
         }

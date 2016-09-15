@@ -29,7 +29,7 @@ public class OAuthController {
     private OAuthService oAuthService;
 
     @RequestMapping("/auth")
-    public void oauthCode(@RequestParam String callbackUrl,
+    public void oauthCode(@RequestParam("callbackUrl") String callbackUrl,
                           HttpServletResponse response) {
         try {
             if (LOGGER.isDebugEnabled()) {
