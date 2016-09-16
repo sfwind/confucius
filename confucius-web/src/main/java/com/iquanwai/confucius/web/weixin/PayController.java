@@ -46,15 +46,15 @@ public class PayController {
         }
         String prepayId = payService.unifiedOrder(orderCallback.getProduct_id());
         if(StringUtils.isEmpty(prepayId)){
-            orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "支付失败，请重新扫描二维码", "");
+            orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "下单失败，请重新扫描二维码", "");
         }else{
-            orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "支付成功", prepayId);
+            orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "下单成功", prepayId);
         }
         LOGGER.info(orderCallbackReply.toString());
         return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);
     }
 
-    @RequestMapping(value="/pay/callback")
+    @RequestMapping(value="/result/callback")
     public void payCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
         LOGGER.info(payCallback.toString());
         try {
