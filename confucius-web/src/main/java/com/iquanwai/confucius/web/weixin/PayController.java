@@ -50,6 +50,7 @@ public class PayController {
         }else{
             orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "支付成功", prepayId);
         }
+        LOGGER.info(orderCallbackReply.toString());
         return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);
     }
 

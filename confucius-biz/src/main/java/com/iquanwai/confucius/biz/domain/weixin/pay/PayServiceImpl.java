@@ -28,7 +28,7 @@ public class PayServiceImpl implements PayService{
     @Autowired
     private RestfulHelper restfulHelper;
 
-    private String WEIXIN = "JSAPI";
+    private String WEIXIN = "NATIVE";
 
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
