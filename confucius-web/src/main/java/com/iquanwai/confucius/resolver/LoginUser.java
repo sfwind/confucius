@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.resolver;
 
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,6 @@ public class LoginUser {
     private String weixinName;
 
     public static LoginUser defaultUser(){
-        return new LoginUser("oK881wQekezGpw6rq790y_vAY_YY","风之伤");
+        return new LoginUser(ConfigUtils.getDefaultOpenid(),"风之伤");
     }
 }

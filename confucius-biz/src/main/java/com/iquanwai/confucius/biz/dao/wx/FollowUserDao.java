@@ -4,6 +4,8 @@ import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Account;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -42,5 +44,19 @@ public class FollowUserDao extends DBUtil {
         }
 
         return -1;
+    }
+
+    public Account queryByOpenid(String openid) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<Account> h = new BeanHandler(Account.class);
+
+        try {
+            Account account = run.query("SELECT * FROM FollowUsers where Openid=?", h, openid);
+            return account;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
     }
 }

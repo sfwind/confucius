@@ -70,8 +70,8 @@ public class ClassMemberDao extends DBUtil {
     public int entry(ClassMember classMember) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "INSERT INTO ClassMember(ClassId, Openid, MemberId) " +
-                "VALUES(?, ?, ?)";
+        String insertSql = "INSERT INTO ClassMember(ClassId, Openid, MemberId, Graduate) " +
+                "VALUES(?, ?, ?, 0)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
                     classMember.getClassId(), classMember.getOpenId(), classMember.getMemberId());

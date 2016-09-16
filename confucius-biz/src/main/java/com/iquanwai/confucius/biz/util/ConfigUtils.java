@@ -57,6 +57,7 @@ public class ConfigUtils {
 	public static String getPayResultCallbackUrl(){
 		return config.getString("pay.result.callback.url");
 	}
+
 	public static String staticResourceUrl(){
 		String url = config.getString("static.resource.url");
 		//测试环境防浏览器缓存，添加随机参数
@@ -65,6 +66,10 @@ public class ConfigUtils {
 		}
 
 		return url;
+	}
+
+	public static String getDefaultOpenid(){
+		return config.getString("default.openid");
 	}
 
 	public static String getValue(String key){
