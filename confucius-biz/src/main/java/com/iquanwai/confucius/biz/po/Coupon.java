@@ -11,7 +11,7 @@ import java.util.Date;
 public class Coupon {
     private int id;
     private String openid;
-    private Integer amount;
+    private Double amount;
     private Integer used; //是否使用（0-否，1-是，2-正在使用）
     private Date expiredDate; //过期日期
 }

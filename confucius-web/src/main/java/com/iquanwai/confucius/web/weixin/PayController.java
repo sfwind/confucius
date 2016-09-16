@@ -39,7 +39,7 @@ public class PayController {
         LOGGER.info(orderCallback.toString());
         OrderCallbackReply orderCallbackReply;
         //未关注用户先提示关注
-        if(orderCallback.equals("N")){
+        if("N".equals(orderCallback.getIs_subscribe())){
             LOGGER.info("{}还没关注服务号", orderCallback.getOpenid());
             orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "请先关注圈外服务号", "");
             return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);

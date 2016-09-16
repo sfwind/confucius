@@ -92,7 +92,7 @@ public class PayServiceImpl implements PayService{
     public void handlePayResult(PayCallback payCallback) {
         Assert.notNull(payCallback, "支付结果不能为空");
         String orderId = payCallback.getOut_trade_no();
-        if(payCallback.getErr_code().equals(ERROR_CODE) && payCallback.getErr_code_des()!=null){
+        if(ERROR_CODE.equals(payCallback.getErr_code()) && payCallback.getErr_code_des()!=null){
             logger.error(payCallback.getErr_code_des()+", orderId="+orderId);
             courseOrderDao.payError(payCallback.getErr_code_des(), orderId);
             return;
@@ -114,8 +114,8 @@ public class PayServiceImpl implements PayService{
                 String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
                 PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
                 if(payCloseReply!=null){
-                    if(payCloseReply.getReturn_code().equals(SUCCESS_CODE)){
-                        if(payCloseReply.getErr_code().equals(ERROR_CODE) && payCloseReply.getErr_code_des()!=null){
+                    if(SUCCESS_CODE.equals(payCloseReply.getReturn_code())) {
+                        if (ERROR_CODE.equals(payCloseReply.getErr_code()) && payCloseReply.getErr_code_des()!=null){
                             logger.error(payCloseReply.getErr_code_des()+", orderId="+orderId);
                         }
                         logger.info("orderId: {} closed automatically", orderId);
@@ -176,7 +176,7 @@ public class PayServiceImpl implements PayService{
         String time_expire = DateUtils.parseDateToString3(
                 DateUtils.afterMinutes(new Date(), ConfigUtils.getBillOpenMinute()));
         map.put("time_expire", time_expire);
-        Integer total_fee = courseOrder.getPrice()*100;
+        Integer total_fee = (int)(courseOrder.getPrice()*100);
         map.put("total_fee", total_fee.toString());
 
         String detail = buildOrderDetail(courseOrder, total_fee);

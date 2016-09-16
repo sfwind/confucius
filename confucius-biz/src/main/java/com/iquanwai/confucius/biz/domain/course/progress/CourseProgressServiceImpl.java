@@ -11,6 +11,8 @@ import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -30,6 +32,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private ClassDao classDao;
     @Autowired
     private ClassMemberDao classMemberDao;
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
 
     public ClassMember loadActiveCourse(String openid, Integer courseId) {
@@ -68,8 +72,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
             if(chapter!=null){
                 Integer sequence = chapter.getSequence();
-                if(!sequence.equals(clazz.getProgress())){
-                    classDao.progress(clazz.getId(), sequence);
+                if(sequence==null){
+                    logger.error("{} has no sequence", chapter.getId());
+                }else {
+                    if (!sequence.equals(clazz.getProgress())) {
+                        classDao.progress(clazz.getId(), sequence);
+                    }
                 }
             }
         }

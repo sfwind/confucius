@@ -140,9 +140,9 @@ public class SignupServiceImpl implements SignupService {
         if(course == null){
             return null;
         }
-        int discount = discount(openid, course.getFee().intValue());
+        double discount = discount(openid, course.getFee());
         courseOrder.setDiscount(discount);
-        courseOrder.setPrice(course.getFee().intValue()-discount);
+        courseOrder.setPrice(course.getFee()-discount);
         courseOrder.setStatus(0); //待支付
         String orderId = CommonUtils.randomString(16);
         courseOrder.setOrderId(orderId);
@@ -166,19 +166,19 @@ public class SignupServiceImpl implements SignupService {
     }
 
     //折扣计算
-    private int discount(String openid, Integer price) {
+    private double discount(String openid, Double price) {
         List<Coupon> coupons = couponDao.getCoupon(openid);
         List<Integer> usedCoupon = Lists.newArrayList();
-        int remain = price;
+        double remain = price;
         for(Coupon coupon:coupons){
-            int amount = coupon.getAmount();
+            double amount = coupon.getAmount();
             if(remain>=amount){
                 remain = remain-amount;
-                if(remain==0){
+                if(remain==0.0){
                     break;
                 }
             }else{
-                int newAmount = amount-remain;
+                double newAmount = amount-remain;
                 Coupon newCoupon = new Coupon();
                 newCoupon.setAmount(newAmount);
                 newCoupon.setExpiredDate(defaultExpiredDate());

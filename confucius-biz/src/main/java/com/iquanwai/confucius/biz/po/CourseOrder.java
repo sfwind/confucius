@@ -15,8 +15,8 @@ public class CourseOrder {
     private Integer courseId; //课程id
     private String courseName; //课程名称
     private Integer classId; //班级id
-    private Integer price;   //实际金额 总金额-折扣金额
-    private Integer discount; //折扣金额
+    private Double price;   //实际金额 总金额-折扣金额
+    private Double discount; //折扣金额
     private String prepayId; //预支付交易会话标识
     private Integer status;  //付费状态（0-待付费，1-已付费，2-付费取消，3-付费退款，4-付费失败）
     private Date paidTime;   //订单付款时间
