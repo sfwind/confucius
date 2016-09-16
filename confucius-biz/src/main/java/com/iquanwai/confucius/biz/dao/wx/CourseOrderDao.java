@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.dao.course;
+package com.iquanwai.confucius.biz.dao.wx;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
@@ -112,7 +112,7 @@ public class CourseOrderDao extends DBUtil{
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE CourseOrder SET PaidTime =?, TransactionId=? " +
+            asyncRun.update("UPDATE CourseOrder SET Status=1, PaidTime =?, TransactionId=? " +
                     "where OrderId=?", paidTime, transactionId, orderId);
 
         } catch (SQLException e) {

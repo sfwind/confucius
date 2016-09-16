@@ -67,8 +67,8 @@ public class SignupController {
             signupDto.setCourse(signupService.getCachedCourse(courseId));
             String productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
             signupDto.setProductId(productId);
-            signupService.qrcode(productId);
-//            signupDto.setQrcode(qrcode);
+            String qrcode = signupService.payQRCode(productId);
+            signupDto.setQrcode(qrcode);
         }catch (Exception e){
             LOGGER.error("报名失败", e);
             return WebUtils.error("报名人数已满");

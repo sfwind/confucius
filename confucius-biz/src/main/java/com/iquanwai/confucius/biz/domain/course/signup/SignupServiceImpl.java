@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.zxing.WriterException;
 import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -153,16 +154,18 @@ public class SignupServiceImpl implements SignupService {
         return orderId;
     }
 
-    public void qrcode(String productId) {
+    public String payQRCode(String productId) {
         String payUrl = payUrl(productId);
-
+        String path = "/data/static/images/qrcode/"+productId+".jpg";
         try {
             //生成二维码base64编码
             Image image = QRCodeUtils.genQRCode(payUrl, QRCODE_WIDTH, QRCODE_HEIGHT);
-            QRCodeUtils.image2FS(image);
+
+            QRCodeUtils.image2FS(image, path);
         } catch (WriterException e) {
             logger.error("二维码生成失败", e);
         }
+        return path;
     }
 
     //折扣计算

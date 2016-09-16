@@ -372,10 +372,10 @@ public class QRCodeUtils {
         }
     }
 
-    public static void image2FS(Image image){
+    public static void image2FS(Image image, String path){
         try {
-            ImageIO.write((RenderedImage) image, "jpg",
-                    new File("/data/static/qrcode/1.jpg"));
+            // TODO:改成ftp
+            ImageIO.write((RenderedImage) image, "jpg", new File(path));
         } catch (IOException e) {
 //            e.printStackTrace();
             logger.error(e.getMessage(), e);

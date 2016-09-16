@@ -30,7 +30,7 @@ public interface SignupService {
      * 生成付款二维码
      * @return 报名二维码
      * */
-    void qrcode(String productId);
+    String payQRCode(String productId);
 
     /**
      * 根据班级id获取班级信息
