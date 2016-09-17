@@ -86,6 +86,7 @@ public class OAuthController {
     public ResponseEntity<Map<String, Object>> openid(@PathVariable("access_token") String accessToken) {
         try {
             String openid = oAuthService.openId(accessToken);
+            LOGGER.info("openId {}, accessToken {}", openid, accessToken);
             return WebUtils.result(openid);
         }catch (Exception e){
             LOGGER.error("openid failed", e);
