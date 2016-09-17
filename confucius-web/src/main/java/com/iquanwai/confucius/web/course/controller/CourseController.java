@@ -39,7 +39,8 @@ public class CourseController {
             Assert.notNull(loginUser,"用户不能为空");
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), null);
             if(classMember==null){
-                WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
+                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
+                return WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
             }
 
             CoursePageDto course = getCourse(loginUser, classMember, classMember.getProgressWeek());
