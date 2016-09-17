@@ -14,7 +14,7 @@ public interface CourseStudyService {
      * @param chapterId 课程章节id
      * @param page 课程页码
      * */
-    Page loadPage(String openid, int chapterId, Integer page);
+    Page loadPage(String openid, int chapterId, Integer page, Boolean lazyLoad);
 
     /**
      * 获取章节信息

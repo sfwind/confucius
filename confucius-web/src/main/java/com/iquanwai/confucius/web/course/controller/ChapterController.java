@@ -34,7 +34,7 @@ public class ChapterController {
                                                     @PathVariable("chapterId") Integer chapterId){
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, null);
+            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, null, false);
             if(chapterPageDto==null){
                 return WebUtils.error("获取用户当前章节页失败");
             }
@@ -51,9 +51,9 @@ public class ChapterController {
         }
     }
 
-    private ChapterPageDto loadPage(LoginUser loginUser, int chapterId, Integer pageSequence) {
+    private ChapterPageDto loadPage(LoginUser loginUser, int chapterId, Integer pageSequence, Boolean lazyLoad) {
         ChapterPageDto chapterPageDto = new ChapterPageDto();
-        Page page = courseStudyService.loadPage(loginUser.getOpenId(), chapterId, pageSequence);
+        Page page = courseStudyService.loadPage(loginUser.getOpenId(), chapterId, pageSequence, lazyLoad);
         chapterPageDto.setPage(page);
         Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
         chapterPageDto.setChapterPic(chapter.getIcon());
@@ -76,7 +76,7 @@ public class ChapterController {
                     .action("打开章节某页")
                     .memo(chapterId+","+pageSequence);
             operationLogService.log(operationLog);
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence);
+            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence, false);
             if(chapterPageDto==null){
                 return WebUtils.error("获取用户当前章节页失败");
             }
@@ -84,6 +84,29 @@ public class ChapterController {
         }catch (Exception e){
             LOGGER.error("获取用户当前章节页失败", e);
             return WebUtils.error("获取用户当前章节页失败");
+        }
+    }
+
+    @RequestMapping("/page/lazyLoad/{chapterId}/{sequence}")
+    public ResponseEntity<Map<String, Object>> lazyLoad(LoginUser loginUser,
+                                                    @PathVariable("chapterId") Integer chapterId,
+                                                    @PathVariable("sequence") Integer pageSequence){
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+//            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+//                    .module("章节")
+//                    .function("学习章节")
+//                    .action("打开章节某页")
+//                    .memo(chapterId+","+pageSequence);
+//            operationLogService.log(operationLog);
+            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence, true);
+            if(chapterPageDto==null){
+                return WebUtils.error("懒加载章节页失败");
+            }
+            return WebUtils.result(chapterPageDto);
+        }catch (Exception e){
+            LOGGER.error("懒加载章节页失败", e);
+            return WebUtils.error("懒加载章节页失败");
         }
     }
 

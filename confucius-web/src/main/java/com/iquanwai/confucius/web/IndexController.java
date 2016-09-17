@@ -10,7 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller
 public class IndexController {
-    @RequestMapping(value = "/course/main",method = RequestMethod.GET)
+    @RequestMapping(value = "/static/**",method = RequestMethod.GET)
     public ModelAndView getIndex() {
         return new ModelAndView("course");
     }

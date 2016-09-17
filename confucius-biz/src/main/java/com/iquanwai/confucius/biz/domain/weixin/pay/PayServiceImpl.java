@@ -51,11 +51,17 @@ public class PayServiceImpl implements PayService{
             if(reply.getErr_code_des()!=null){
                 logger.error("response is------\n"+response);
                 logger.error(reply.getErr_code_des()+", orderId="+orderId);
-                courseOrderDao.payError(reply.getErr_code_des(), orderId);
+                if(!ignoreCode(reply.getErr_code())) {
+                    courseOrderDao.payError(reply.getErr_code_des(), orderId);
+                }
             }
 
         }
         return "";
+    }
+
+    private boolean ignoreCode(String err_code) {
+        return SYSTEM_ERROR.equals(err_code)||DUP_PAID.equals(err_code)||ORDER_CLOSE.equals(err_code);
     }
 
     public OrderCallbackReply callbackReply(String result, String errMsg, String prepayId) {
@@ -92,9 +98,11 @@ public class PayServiceImpl implements PayService{
     public void handlePayResult(PayCallback payCallback) {
         Assert.notNull(payCallback, "支付结果不能为空");
         String orderId = payCallback.getOut_trade_no();
-        if(ERROR_CODE.equals(payCallback.getErr_code()) && payCallback.getErr_code_des()!=null){
+        if(payCallback.getErr_code_des()!=null){
             logger.error(payCallback.getErr_code_des()+", orderId="+orderId);
-            courseOrderDao.payError(payCallback.getErr_code_des(), orderId);
+            if(!ignoreCode(payCallback.getErr_code())) {
+                courseOrderDao.payError(payCallback.getErr_code_des(), orderId);
+            }
             return;
         }
 

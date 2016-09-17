@@ -37,9 +37,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private ClassMemberDao classMemberDao;
 
 
-    public Page loadPage(String openid, int chapterId, Integer pageSequence) {
+    public Page loadPage(String openid, int chapterId, Integer pageSequence, Boolean lazyLoad) {
         Assert.notNull(openid, "openid不能为空");
-        if(pageSequence==null){
+        if(pageSequence==null || lazyLoad){
             pageSequence = currentChapterPageDao.currentPage(openid, chapterId);
         }
 

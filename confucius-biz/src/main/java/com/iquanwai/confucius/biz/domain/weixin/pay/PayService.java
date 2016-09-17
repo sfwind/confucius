@@ -31,4 +31,8 @@ public interface PayService {
 
     String ERROR_CODE = "FAIL";
     String SUCCESS_CODE = "SUCCESS";
+
+    String DUP_PAID = "ORDERPAID";
+    String ORDER_CLOSE = "ORDERCLOSED";
+    String SYSTEM_ERROR = "SYSTEMERROR";
 }
