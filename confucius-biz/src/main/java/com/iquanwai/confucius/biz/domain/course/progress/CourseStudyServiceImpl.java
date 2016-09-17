@@ -39,9 +39,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public Page loadPage(String openid, int chapterId, Integer pageSequence, Boolean lazyLoad) {
         Assert.notNull(openid, "openid不能为空");
-        if(pageSequence==null || !lazyLoad){
-            pageSequence = currentChapterPageDao.currentPage(openid, chapterId);
-        }
 
         //首次学习
         if(pageSequence==null){
@@ -53,7 +50,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             List<Material> materialList = materialDao.loadPageMaterials(page.getId());
             page.setMaterialList(materialList);
             //记录到阅读到第几页
-            currentChapterPageDao.updatePage(openid, chapterId, pageSequence);
+            if(!lazyLoad) {
+                currentChapterPageDao.updatePage(openid, chapterId, pageSequence);
+            }
         }
         return page;
     }
