@@ -45,7 +45,7 @@ public class JsSignatureServiceImpl implements JsSignatureService {
         }
 
         String noncestr = CommonUtils.randomString(11);
-        String timestamp =  Long.toString(System.currentTimeMillis());
+        String timestamp =  Long.toString(System.currentTimeMillis()/1000);
         Map<String, String> vars = new LinkedHashMap<String, String>();
         vars.put("jsapi_ticket", jsapi_ticket);
         logger.info("jsapi_ticket {}", jsapi_ticket);

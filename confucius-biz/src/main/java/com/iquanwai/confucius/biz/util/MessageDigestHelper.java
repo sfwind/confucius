@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class MessageDigestHelper {
     public static String getSHA1String(String s) {
-        return getHash(s, "SHA-1");
+        return getHash(s, "SHA-1").toLowerCase();
     }
 
     public static String getMD5String(String s) {
