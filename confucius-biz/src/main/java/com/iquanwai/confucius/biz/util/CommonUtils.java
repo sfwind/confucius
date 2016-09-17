@@ -66,20 +66,20 @@ public class CommonUtils {
         }
     }
 
-    public static String getUrlParamsByMap(Map<String, String> map) {
+    public static String getUrlParamsByMap(final Map<String, String> map) {
         if (map == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            sb.append(entry.getKey() + "=" + entry.getValue());
-            sb.append("&");
-        }
-        String s = sb.toString();
-        if (s.endsWith("&")) {
-            s = StringUtils.substringBeforeLast(s, "&");
-        }
-        return s;
+        List<String> list = new ArrayList(map.keySet());
+        Collections.sort(list);
+
+        List<String> kvList = Lists.transform(list, new Function<String, String>() {
+            public String apply(String input) {
+                return input+"="+map.get(input);
+            }
+        });
+
+        return StringUtils.join(kvList.iterator(), "&");
     }
 
     public static String randomString(int length) {
