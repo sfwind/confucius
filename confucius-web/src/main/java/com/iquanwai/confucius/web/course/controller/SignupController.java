@@ -104,11 +104,13 @@ public class SignupController {
             entryDto.setMemberId(memberId);
             entryDto.setQuanwaiClass(signupService.getCachedClass(courseOrder.getClassId()));
             entryDto.setCourse(signupService.getCachedCourse(courseOrder.getCourseId()));
-
-            Account account = accountService.getAccount(loginUser.getOpenId());
-            entryDto.setUsername(loginUser.getWeixinName());
-            if(account!=null){
+            Account account = accountService.getAccount(loginUser.getOpenId(), true);
+            if(account!=null) {
+                entryDto.setUsername(account.getNickname());
                 entryDto.setHeadUrl(account.getHeadimgurl());
+            }else{
+                entryDto.setUsername(loginUser.getWeixinName());
+                entryDto.setHeadUrl(loginUser.getHeadimgUrl());
             }
         }catch (Exception e){
             LOGGER.error("报名失败", e);

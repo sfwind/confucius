@@ -1,16 +1,20 @@
 package com.iquanwai.confucius.biz.dao.course;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.CurrentChapterPage;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -74,5 +78,23 @@ public class CurrentChapterPageDao extends DBUtil {
         }
 
         return -1;
+    }
+
+
+    public List<CurrentChapterPage> currentPages(String openid, List<Integer> chapterIds){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<CurrentChapterPage>> h = new BeanListHandler(CurrentChapterPage.class);
+
+        String chapterId = StringUtils.join(chapterIds, ",");
+        try {
+            List<CurrentChapterPage> pages = run.query("SELECT PageSequence FROM CurrentChapterPage where Openid=? and ChapterId in (?)",
+                    h, openid, chapterId);
+
+            return pages;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
     }
 }

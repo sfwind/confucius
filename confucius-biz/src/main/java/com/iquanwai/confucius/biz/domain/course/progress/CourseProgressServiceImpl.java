@@ -2,14 +2,8 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.course.ChapterDao;
-import com.iquanwai.confucius.biz.dao.course.ClassDao;
-import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
-import com.iquanwai.confucius.biz.dao.course.CourseDao;
-import com.iquanwai.confucius.biz.po.Chapter;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +26,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private ClassDao classDao;
     @Autowired
     private ClassMemberDao classMemberDao;
+    @Autowired
+    private CurrentChapterPageDao currentChapterPageDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -81,6 +77,25 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 }
             }
         }
+    }
+
+    public void personalChapterPage(String openid, List<Chapter> chapters) {
+        List<Integer> chapterIds = Lists.transform(chapters, new Function<Chapter, Integer>() {
+            public Integer apply(Chapter input) {
+                return input.getId();
+            }
+        });
+
+        //设置学员的章节上次看到的页码
+        List<CurrentChapterPage> currentChapterPages = currentChapterPageDao.currentPages(openid, chapterIds);
+        for(Chapter chapter:chapters){
+            for(CurrentChapterPage currentChapterPage:currentChapterPages){
+                if(chapter.getId()==currentChapterPage.getChapterId()){
+                    chapter.setPageSequence(currentChapterPage.getPageSequence());
+                }
+            }
+        }
+
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, final List<Integer> personalProgress, final int classProgress) {

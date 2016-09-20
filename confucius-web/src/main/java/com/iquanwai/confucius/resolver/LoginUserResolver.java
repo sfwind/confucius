@@ -56,7 +56,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
             return loginUserMap.get(openId);
         }
 
-        Account account = accountService.getAccount(openId);
+        Account account = accountService.getAccount(openId, false);
 
         if(account==null){
             logger.error("openId {} is not found in db", openId);
@@ -66,6 +66,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         LoginUser loginUser = new LoginUser();
         loginUser.setOpenId(account.getOpenid());
         loginUser.setWeixinName(account.getNickname());
+        loginUser.setHeadimgUrl(account.getHeadimgurl());
         loginUserMap.put(openId, loginUser);
 
         return loginUser;

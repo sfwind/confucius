@@ -14,8 +14,9 @@ import lombok.NoArgsConstructor;
 public class LoginUser {
     private String openId;
     private String weixinName;
+    private String headimgUrl;
 
     public static LoginUser defaultUser(){
-        return new LoginUser(ConfigUtils.getDefaultOpenid(),"风之伤");
+        return new LoginUser(ConfigUtils.getDefaultOpenid(),"风之伤", null);
     }
 }

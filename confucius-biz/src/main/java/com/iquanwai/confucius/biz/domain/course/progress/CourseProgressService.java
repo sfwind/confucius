@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.progress;
 
+import com.iquanwai.confucius.biz.po.Chapter;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
 
@@ -29,4 +30,9 @@ public interface CourseProgressService {
      * 每天定时更新每个班级的进度
      * */
     void classProgress();
+
+    /**
+     * 设置学员的每一章节看到的页数
+     * */
+    void personalChapterPage(String openid, List<Chapter> chapters);
 }

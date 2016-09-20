@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.domain.weixin.signature;
 
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.MessageDigestHelper;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +51,7 @@ public class JsSignatureServiceImpl implements JsSignatureService {
         vars.put("noncestr", noncestr);
         vars.put("timestamp", timestamp);
         vars.put("url", url);
-        String varStr = CommonUtils.getUrlParamsByMap(vars);
-        String signature = MessageDigestHelper.getSHA1String(varStr);
+        String signature = CommonUtils.jsSign(vars);
         JsSignature jsSignature = new JsSignature(ConfigUtils.getAppid(), timestamp, noncestr, signature);
         return jsSignature;
     }

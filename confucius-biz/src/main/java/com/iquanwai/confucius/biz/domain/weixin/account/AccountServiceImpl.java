@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -24,20 +25,31 @@ import java.util.Map;
 public class AccountServiceImpl implements AccountService {
     @Autowired
     public RestfulHelper restfulHelper;
+    @Autowired
+    private FollowUserDao followUserDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public Account getAccount(String openId) {
+    public Account getAccount(String openid, boolean realTime) {
+        //从数据库查询account对象
+        Account account = null;
+        if(!realTime) {
+            account = followUserDao.queryByOpenid(openid);
+            if (account != null) {
+                return account;
+            }
+        }
+        //调用api查询account对象
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
-        map.put("openid", openId);
+        map.put("openid", openid);
         url = CommonUtils.urlReplace(url, map);
-        Account account = new Account();
 
         String body = restfulHelper.get(url);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
 
         try {
+            Account accountNew = new Account();
             ConvertUtils.register(new Converter() {
                 public Object convert(Class aClass, Object value) {
                     if (value == null)
@@ -53,8 +65,13 @@ public class AccountServiceImpl implements AccountService {
                 }
             }, Date.class);
 
-            BeanUtils.populate(account, result);
-            return account;
+            BeanUtils.populate(accountNew, result);
+            if(account==null) {
+                followUserDao.insert(accountNew);
+            }else{
+                followUserDao.update(accountNew);
+            }
+            return accountNew;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

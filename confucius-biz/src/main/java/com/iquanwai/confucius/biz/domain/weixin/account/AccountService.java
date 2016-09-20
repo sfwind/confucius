@@ -10,7 +10,7 @@ public interface AccountService {
     /**
      * 根据openid获取用户的详细信息
      * */
-    Account getAccount(String openId);
+    Account getAccount(String openid, boolean realTime);
 
     String USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN";
 }

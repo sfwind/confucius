@@ -9,6 +9,6 @@ import lombok.Data;
 public class CurrentChapterPage {
     private int id;
     private String openid; //openid
-    private int chapterId; //课程id
-    private int pageSequence; //页码
+    private Integer chapterId; //课程id
+    private Integer pageSequence; //页码
 }
