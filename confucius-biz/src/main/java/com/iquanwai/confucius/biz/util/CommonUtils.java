@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -66,7 +65,7 @@ public class CommonUtils {
         }
     }
 
-    public static String getUrlParamsByMap(final Map<String, String> map) {
+    public static String jsSign(final Map<String, String> map) {
         if (map == null) {
             return "";
         }
@@ -79,7 +78,8 @@ public class CommonUtils {
             }
         });
 
-        return StringUtils.join(kvList.iterator(), "&");
+        String digest = StringUtils.join(kvList.iterator(), "&");
+        return MessageDigestHelper.getSHA1String(digest);
     }
 
     public static String randomString(int length) {
