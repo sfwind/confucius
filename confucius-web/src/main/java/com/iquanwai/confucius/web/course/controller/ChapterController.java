@@ -137,15 +137,15 @@ public class ChapterController {
                                                               @PathVariable("questionId") Integer questionId,
                                                               @RequestBody AnswerDto answerDto){
         try{
-            courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
+            boolean right = courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
 
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("章节")
                     .function("回答问题")
                     .action("提交问题")
-                    .memo(questionId+"");
+                    .memo(questionId+":"+right);
             operationLogService.log(operationLog);
-            return WebUtils.success();
+            return WebUtils.result(right);
         }catch (Exception e){
             LOGGER.error("回答问题失败", e);
             return WebUtils.error("回答问题失败");

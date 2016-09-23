@@ -135,11 +135,16 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
     }
 
-    public void submitQuestion(String openid, Integer questionId, List<Integer> choiceList) {
+    public boolean submitQuestion(String openid, Integer questionId, List<Integer> choiceList) {
         Assert.notNull(openid, "openid不能为空");
         String answer = "";
         ClassMember classMember = classMemberDao.activeCourse(openid);
-        Integer score = score(questionId, choiceList);
+        Question q = questionDao.load(Question.class, questionId);
+        Integer score = score(q, choiceList);
+        boolean right = false;
+        if(score.equals(q.getPoint())){
+            right = true;
+        }
         for(Integer choice:choiceList){
             answer = answer+","+choice;
         }
@@ -151,6 +156,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         questionSubmit.setSubmitAnswer(answer);
         questionSubmit.setSubmitOpenid(openid);
         questionSubmitDao.insert(questionSubmit);
+
+        return right;
     }
 
     public void completeChapter(String openid, Integer chapterId) {
@@ -180,9 +187,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return score;
     }
 
-    private Integer score(Integer questionId, List<Integer> choiceList) {
+    private Integer score(Question question, List<Integer> choiceList) {
         Assert.notNull(choiceList, "选项不能为空");
-        List<Choice> right = choiceDao.loadRightChoices(questionId);
+        List<Choice> right = choiceDao.loadRightChoices(question.getId());
 
         for(Choice choice:right){
             if(!choiceList.contains(choice.getId())) {
@@ -190,7 +197,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             }
         }
 
-        Question question = questionDao.load(Question.class, questionId);
         if(right.size()==choiceList.size()){
             return question.getPoint();
         }

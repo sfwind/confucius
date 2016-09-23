@@ -31,7 +31,7 @@ public class CurrentChapterPageDao extends DBUtil {
         ResultSetHandler<CurrentChapterPage> h = new BeanHandler(CurrentChapterPage.class);
 
         try {
-            CurrentChapterPage page = run.query("SELECT PageSequence FROM CurrentChapterPage where Openid=? and ChapterId=?",
+            CurrentChapterPage page = run.query("SELECT * FROM CurrentChapterPage where Openid=? and ChapterId=?",
                     h, openid, chapterId);
             if(page==null){
                 return null;
@@ -87,7 +87,7 @@ public class CurrentChapterPageDao extends DBUtil {
 
         String chapterId = StringUtils.join(chapterIds, ",");
         try {
-            List<CurrentChapterPage> pages = run.query("SELECT PageSequence FROM CurrentChapterPage where Openid=? and ChapterId in (?)",
+            List<CurrentChapterPage> pages = run.query("SELECT * FROM CurrentChapterPage where Openid=? and ChapterId in (?)",
                     h, openid, chapterId);
 
             return pages;

@@ -64,7 +64,7 @@ public interface CourseStudyService {
      * @param openid
      * @param questionId 选择题id
      * */
-    void submitQuestion(String openid, Integer questionId, List<Integer> choiceList);
+    boolean submitQuestion(String openid, Integer questionId, List<Integer> choiceList);
 
     /**
      * 章节结束

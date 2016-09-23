@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 public class CoursePageDto{
     private Course course;
-    private CourseWeek courseWeek;
+    private int week;
+    private String topic;
 
 }

@@ -75,14 +75,15 @@ public class CourseController {
                 }
             }
         }
-
         Course course = courseProgressService.loadCourse(classMember.getCourseId(), week,
                 personalProgressList, classMember.getClassProgress());
-
+        //设置看到某一页
+        courseProgressService.personalChapterPage(loginUser.getOpenId(), course.getChapterList());
         CoursePageDto coursePageDto = new CoursePageDto();
         coursePageDto.setCourse(course);
-        CourseWeek courseWeek = new CourseWeek();
-        coursePageDto.setCourseWeek(courseWeek);
+        CourseWeek courseWeek = courseProgressService.loadCourseWeek(classMember.getCourseId(), week);
+        coursePageDto.setWeek(week);
+        coursePageDto.setTopic(courseWeek.getTopic());
         return coursePageDto;
     }
 
