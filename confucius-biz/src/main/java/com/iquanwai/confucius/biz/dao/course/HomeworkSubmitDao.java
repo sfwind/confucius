@@ -1,16 +1,19 @@
 package com.iquanwai.confucius.biz.dao.course;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.HomeworkSubmit;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,6 +37,20 @@ public class HomeworkSubmitDao extends DBUtil{
         }
 
         return null;
+    }
+
+    public List<HomeworkSubmit> submittedHomework(Integer homeworkId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<HomeworkSubmit>> h = new BeanListHandler(HomeworkSubmit.class);
+
+        try {
+            List<HomeworkSubmit> submit = run.query("SELECT * FROM HomeworkSubmit where HomeworkId=? ", h, homeworkId);
+            return submit;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
     }
 
     private boolean submitted(String openid, int classId, int homeworkId){

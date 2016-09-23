@@ -28,6 +28,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private ClassMemberDao classMemberDao;
     @Autowired
     private CurrentChapterPageDao currentChapterPageDao;
+    @Autowired
+    private CourseWeekDao courseWeekDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -96,6 +98,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             }
         }
 
+    }
+
+    public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
+        return courseWeekDao.getCourseWeek(courseId, week);
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, final List<Integer> personalProgress, final int classProgress) {

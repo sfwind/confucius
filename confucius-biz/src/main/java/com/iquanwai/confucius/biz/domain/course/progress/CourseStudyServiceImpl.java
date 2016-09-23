@@ -125,6 +125,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return homeworkSubmitDao.loadByUrl(url);
     }
 
+    public List<HomeworkSubmit> loadSubmittedHomework(Integer homeworkId) {
+        return homeworkSubmitDao.submittedHomework(homeworkId);
+    }
+
     public void submitHomework(String content, String openid, Integer homeworkId) {
         Assert.notNull(openid, "openid不能为空");
         ClassMember classMember = classMemberDao.activeCourse(openid);
@@ -158,6 +162,22 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 //            progress = progress + ","+ chapterId;
 //        }
 //        classMemberDao.progress(openid, classMember.getClassId(), progress);
+    }
+
+    public void remark(String openid, Integer classId, Integer homeworkId, boolean excellent, boolean fail) {
+        int score = getScore(excellent, fail);
+        homeworkSubmitDao.remark(homeworkId, classId, openid, null, score);
+    }
+
+    private int getScore(boolean excellent, boolean fail) {
+        int score = 75;
+        if(excellent){
+            score = 90;
+        }
+        if(fail){
+            score = 59;
+        }
+        return score;
     }
 
     private Integer score(Integer questionId, List<Integer> choiceList) {

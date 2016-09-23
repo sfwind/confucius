@@ -45,6 +45,12 @@ public interface CourseStudyService {
     HomeworkSubmit loadHomework(String url);
 
     /**
+     * 获取提交的作业
+     * @param homeworkId 作业id
+     * */
+    List<HomeworkSubmit> loadSubmittedHomework(Integer homeworkId);
+
+    /**
      * 作业提交
      * @param content 提交答案
      * @param openid
@@ -66,4 +72,14 @@ public interface CourseStudyService {
      * @param chapterId 章节id
      * */
     void completeChapter(String openid, Integer chapterId);
+
+    /**
+     * 作业批改
+     * @param openid 学员id
+     * @param classId 班级id
+     * @param homeworkId 作业id
+     * @param excellent 优秀
+     * @param fail 不及格
+     * */
+    void remark(String openid, Integer classId, Integer homeworkId, boolean excellent, boolean fail);
 }

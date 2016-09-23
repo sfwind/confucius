@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.po.Homework;
 import com.iquanwai.confucius.biz.po.HomeworkSubmit;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.course.dto.HomeworkReviewDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
 import com.iquanwai.confucius.web.course.dto.PCHomeworkDto;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,6 +79,34 @@ public class PCHomeworkController {
         }catch (Exception e){
             LOGGER.error("提交作业失败", e);
             return WebUtils.error("提交作业失败");
+        }
+    }
+
+    @RequestMapping("/load/{homeworkId}/all")
+    public ResponseEntity<Map<String, Object>> loadHomeworkAll(@PathVariable("homeworkId") Integer homeworkId){
+        try{
+            List<HomeworkSubmit> submit = courseStudyService.loadSubmittedHomework(homeworkId);
+
+            return WebUtils.result(submit);
+        }catch (Exception e){
+            LOGGER.error("获取作业失败", e);
+            return WebUtils.error("获取作业失败");
+        }
+    }
+
+    @RequestMapping(value = "/remark", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> remark(@RequestBody HomeworkReviewDto homeworkReviewDto){
+        try{
+            courseStudyService.remark(homeworkReviewDto.getOpenid(),
+                    homeworkReviewDto.getClassId(),
+                    homeworkReviewDto.getHomeworkId(),
+                    homeworkReviewDto.isExcellent(),
+                    homeworkReviewDto.isFail());
+
+            return WebUtils.success();
+        }catch (Exception e){
+            LOGGER.error("批改作业失败", e);
+            return WebUtils.error("批改作业失败");
         }
     }
 }

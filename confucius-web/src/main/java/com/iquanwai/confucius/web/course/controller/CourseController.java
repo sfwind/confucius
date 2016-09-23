@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseWeek;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
@@ -61,7 +62,7 @@ public class CourseController {
     }
 
     private CoursePageDto getCourse(LoginUser loginUser, ClassMember classMember,
-                                           int courseWeek) {
+                                           int week) {
         List<Integer> personalProgressList = Lists.newArrayList();
         String personalProgress = classMember.getProgress();
         if(personalProgress!=null) {
@@ -75,12 +76,13 @@ public class CourseController {
             }
         }
 
-        Course course = courseProgressService.loadCourse(classMember.getCourseId(),courseWeek,
+        Course course = courseProgressService.loadCourse(classMember.getCourseId(), week,
                 personalProgressList, classMember.getClassProgress());
 
         CoursePageDto coursePageDto = new CoursePageDto();
         coursePageDto.setCourse(course);
-        coursePageDto.setWeek(classMember.getProgressWeek());
+        CourseWeek courseWeek = new CourseWeek();
+        coursePageDto.setCourseWeek(courseWeek);
         return coursePageDto;
     }
 

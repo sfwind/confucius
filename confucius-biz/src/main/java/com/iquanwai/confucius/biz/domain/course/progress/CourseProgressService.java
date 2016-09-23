@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 import com.iquanwai.confucius.biz.po.Chapter;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseWeek;
 
 import java.util.List;
 
@@ -35,4 +36,9 @@ public interface CourseProgressService {
      * 设置学员的每一章节看到的页数
      * */
     void personalChapterPage(String openid, List<Chapter> chapters);
+
+    /**
+     * 获取周主题
+     * */
+    CourseWeek loadCourseWeek(Integer courseId, Integer week);
 }

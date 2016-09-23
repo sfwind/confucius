@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.course.dto;
 
 
 import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseWeek;
 import lombok.Data;
 
 /**
@@ -9,7 +10,7 @@ import lombok.Data;
  */
 @Data
 public class CoursePageDto{
-    private int week;
     private Course course;
+    private CourseWeek courseWeek;
 
 }
