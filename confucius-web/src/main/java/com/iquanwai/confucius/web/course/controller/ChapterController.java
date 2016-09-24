@@ -214,4 +214,26 @@ public class ChapterController {
             return WebUtils.error("回答问题失败");
         }
     }
+
+
+    @RequestMapping(value="/mark/page/{chapterId}/{sequence}", method= RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> markPage(LoginUser loginUser,
+                                                                @PathVariable("chapterId") Integer chapterId,
+                                                                @PathVariable("sequence") Integer sequence){
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            courseStudyService.markPage(loginUser.getOpenId(), chapterId, sequence);
+
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("章节")
+                    .function("记录看到的页数")
+                    .action("记录看到的页数")
+                    .memo(chapterId+""+sequence);
+            operationLogService.log(operationLog);
+            return WebUtils.success();
+        }catch (Exception e){
+            LOGGER.error("记录页数失败", e);
+            return WebUtils.error("记录页数失败");
+        }
+    }
 }

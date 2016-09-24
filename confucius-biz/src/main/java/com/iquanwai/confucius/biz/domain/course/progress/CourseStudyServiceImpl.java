@@ -52,7 +52,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             page.setMaterialList(materialList);
             //记录到阅读到第几页
             if(!lazyLoad) {
-                currentChapterPageDao.updatePage(openid, chapterId, pageSequence);
+                markPage(openid, chapterId, pageSequence);
             }
         }
         return page;
@@ -180,6 +180,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     public void remark(String openid, Integer classId, Integer homeworkId, boolean excellent, boolean fail) {
         int score = getScore(excellent, fail);
         homeworkSubmitDao.remark(homeworkId, classId, openid, null, score);
+    }
+
+    public void markPage(String openid, Integer chapterId, Integer pageSequence) {
+        currentChapterPageDao.updatePage(openid, chapterId, pageSequence);
     }
 
     private int getScore(boolean excellent, boolean fail) {

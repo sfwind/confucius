@@ -82,4 +82,9 @@ public interface CourseStudyService {
      * @param fail 不及格
      * */
     void remark(String openid, Integer classId, Integer homeworkId, boolean excellent, boolean fail);
+
+    /**
+     * 记录看到第几页
+     * */
+    void markPage(String openid, Integer chapterId, Integer pageSequence);
 }
