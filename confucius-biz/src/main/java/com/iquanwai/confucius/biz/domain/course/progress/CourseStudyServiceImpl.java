@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -115,7 +116,12 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             }
             if(submit==null){
                 String url = "/homework/load/"+ CommonUtils.randomString(6);
+                homework.setPcurl(ConfigUtils.domainName()+url);
                 homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url);
+            }else{
+                if(submit.getSubmitUrl()!=null){
+                    homework.setPcurl(ConfigUtils.domainName()+submit.getSubmitUrl());
+                }
             }
         }
         return homework;

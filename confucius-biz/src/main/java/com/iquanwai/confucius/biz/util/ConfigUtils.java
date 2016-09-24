@@ -58,6 +58,10 @@ public class ConfigUtils {
 		return config.getString("pay.result.callback.url");
 	}
 
+	public static String domainName(){
+		return config.getString("app.domain");
+	}
+
 	public static String staticResourceUrl(){
 		String url = config.getString("static.resource.url");
 		//测试环境防浏览器缓存，添加随机参数
