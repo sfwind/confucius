@@ -12,5 +12,6 @@ public class Page {
     private int id;
     private Integer chapterId; //章节id
     private Integer sequence;  //章节内顺序
+    private String topic; //页标题
     private List<Material> materialList;
 }
