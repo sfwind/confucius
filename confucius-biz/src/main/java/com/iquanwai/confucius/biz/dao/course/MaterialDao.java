@@ -25,7 +25,7 @@ public class MaterialDao extends DBUtil {
         ResultSetHandler<List<Material>> h = new BeanListHandler(Material.class);
 
         try {
-            List<Material> materialList = run.query("SELECT * FROM Material where PageId=? order by Sequence",
+            List<Material> materialList = run.query("SELECT * FROM Material where PageId=? AND DEL = 0 order by Sequence",
                     h, pageId);
             return materialList;
         } catch (SQLException e) {
