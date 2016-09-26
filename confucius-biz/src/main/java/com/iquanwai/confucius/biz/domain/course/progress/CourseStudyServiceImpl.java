@@ -154,15 +154,17 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         for(Integer choice:choiceList){
             answer = answer+","+choice;
         }
-        answer = answer.substring(1);
-        QuestionSubmit questionSubmit = new QuestionSubmit();
-        questionSubmit.setClassId(classMember.getClassId());
-        questionSubmit.setScore(score);
-        questionSubmit.setQuestionId(questionId);
-        questionSubmit.setSubmitAnswer(answer);
-        questionSubmit.setSubmitOpenid(openid);
-        questionSubmitDao.insert(questionSubmit);
 
+        if(StringUtils.isNotEmpty(answer)) {
+            answer = answer.substring(1);
+            QuestionSubmit questionSubmit = new QuestionSubmit();
+            questionSubmit.setClassId(classMember.getClassId());
+            questionSubmit.setScore(score);
+            questionSubmit.setQuestionId(questionId);
+            questionSubmit.setSubmitAnswer(answer);
+            questionSubmit.setSubmitOpenid(openid);
+            questionSubmitDao.insert(questionSubmit);
+        }
         return right;
     }
 
