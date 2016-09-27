@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -59,7 +60,7 @@ public class AccountServiceImpl implements AccountService {
                         logger.error("不是日期类型");
                         throw new ConversionException("不是日期类型");
                     }
-                    Double time = (Double)value;
+                    Double time = (Double)value*1000;
 
                     return new DateTime(time.longValue()).toDate();
                 }
@@ -77,5 +78,19 @@ public class AccountServiceImpl implements AccountService {
         }
         return null;
     }
+
+    public void collectUsers() {
+        //调用api查询account对象
+        String url = GET_USERS_URL;
+
+        String body = restfulHelper.get(url);
+
+        UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
+
+        for(String openid:usersDto.getData().getOpenid()) {
+            getAccount(openid, true);
+        }
+    }
+
 
 }

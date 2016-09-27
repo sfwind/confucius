@@ -25,15 +25,15 @@ public class FollowUserDao extends DBUtil {
     public int insert(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "INSERT INTO FollowUsers(Openid, City, Country, Groupid, Headimgurl, Language, " +
-                "Nickname, Province, Remark, Sex, Subscribe, Subscribe_time) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO FollowUsers(Openid, City, Country, Groupid, Headimgurl, " +
+                "Nickname, Province, Remark, Sex, Subscribe_time) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
                     account.getOpenid(), account.getCity(), account.getCountry(),
-                    account.getGroupid(), account.getHeadimgurl(), account.getLanguage(),
+                    account.getGroupid(), account.getHeadimgurl(),
                     account.getNickname(), account.getProvince(), account.getRemark(),
-                    account.getSex(), account.getSubscribe(), account.getSubscribe_time());
+                    account.getSex(), account.getSubscribe_time());
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
