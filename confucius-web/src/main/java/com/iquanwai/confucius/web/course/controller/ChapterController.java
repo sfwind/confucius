@@ -60,6 +60,7 @@ public class ChapterController {
         chapterPageDto.setChapterType(chapter.getType());
         chapterPageDto.setChapterName(chapter.getName());
         chapterPageDto.setChapterId(chapterId);
+        chapterPageDto.setTotalPage(chapter.getTotalPage());
 
         return chapterPageDto;
     }

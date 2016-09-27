@@ -3,6 +3,8 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import org.slf4j.Logger;
@@ -29,7 +31,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     @Autowired
     private CurrentChapterPageDao currentChapterPageDao;
     @Autowired
-    private CourseWeekDao courseWeekDao;
+    private TemplateMessageService templateMessageService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -100,8 +102,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     }
 
-    public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
-        return courseWeekDao.getCourseWeek(courseId, week);
+    public void graduate(Integer classId) {
+        List<ClassMember> classMembers = classMemberDao.getPassMember(classId);
+        for(ClassMember classMember:classMembers){
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTouser(classMember.getOpenId());
+//            templateMessageService.sendMessage(templateMessage);
+        }
+        classMemberDao.graduate(classId);
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, final List<Integer> personalProgress, final int classProgress) {

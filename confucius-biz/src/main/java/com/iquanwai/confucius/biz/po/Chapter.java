@@ -18,5 +18,6 @@ public class Chapter {
     private boolean unlock; //是否解锁
     private boolean complete; //是否完成
     private String icon; //icon链接
-    private Integer pageSequence = 1 ; //当前第几页
+    private Integer pageSequence; //当前第几页
+    private Integer totalPage; //一共几页
 }

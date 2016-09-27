@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
@@ -31,6 +32,8 @@ public class CourseController {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Autowired
     private CourseProgressService courseProgressService;
+    @Autowired
+    private CourseStudyService courseStudyService;
     @Autowired
     private OperationLogService operationLogService;
 
@@ -81,7 +84,8 @@ public class CourseController {
         courseProgressService.personalChapterPage(loginUser.getOpenId(), course.getChapterList());
         CoursePageDto coursePageDto = new CoursePageDto();
         coursePageDto.setCourse(course);
-        CourseWeek courseWeek = courseProgressService.loadCourseWeek(classMember.getCourseId(), week);
+        //加载周主题
+        CourseWeek courseWeek = courseStudyService.loadCourseWeek(classMember.getCourseId(), week);
         coursePageDto.setWeek(week);
         coursePageDto.setTopic(courseWeek.getTopic());
         return coursePageDto;
@@ -112,6 +116,17 @@ public class CourseController {
         }catch (Exception e){
             LOGGER.error("获取用户当前课程失败", e);
             return WebUtils.error("获取用户当前课程失败");
+        }
+    }
+
+    @RequestMapping("/graduate/{classId}")
+    public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId){
+        try{
+            courseProgressService.graduate(classId);
+            return WebUtils.success();
+        }catch (Exception e){
+            LOGGER.error("触发毕业失败", e);
+            return WebUtils.error("触发毕业失败");
         }
     }
 }

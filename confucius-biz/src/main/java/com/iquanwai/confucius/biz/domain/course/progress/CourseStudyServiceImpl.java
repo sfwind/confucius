@@ -36,6 +36,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private HomeworkSubmitDao homeworkSubmitDao;
     @Autowired
     private ClassMemberDao classMemberDao;
+    @Autowired
+    private CourseWeekDao courseWeekDao;
 
 
     public Page loadPage(String openid, int chapterId, Integer pageSequence, Boolean lazyLoad) {
@@ -80,6 +82,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         if(!mark) {
             classMemberDao.progress(openid, chapterId, progress);
         }
+
+        Integer totalPage = pageDao.chapterPageNumber(chapterId);
+        chapter.setTotalPage(totalPage);
         // TODO:报过班才能看
 //        if(chapter.getCourseId().equals(classMember.getCourseId())){
 //            return chapter;
@@ -213,5 +218,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             return question.getPoint();
         }
         return 0;
+    }
+
+    public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
+        return courseWeekDao.getCourseWeek(courseId, week);
     }
 }

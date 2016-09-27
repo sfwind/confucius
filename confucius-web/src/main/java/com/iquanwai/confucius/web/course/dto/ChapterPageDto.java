@@ -12,5 +12,6 @@ public class ChapterPageDto {
     private String chapterName;
     private String chapterPic;
     private Integer chapterType;
+    private Integer totalPage;
     private Page page;
 }

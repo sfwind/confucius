@@ -87,4 +87,9 @@ public interface CourseStudyService {
      * 记录看到第几页
      * */
     void markPage(String openid, Integer chapterId, Integer pageSequence);
+
+    /**
+     * 获取周主题
+     * */
+    CourseWeek loadCourseWeek(Integer courseId, Integer week);
 }

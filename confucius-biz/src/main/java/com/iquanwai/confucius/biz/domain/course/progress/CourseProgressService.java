@@ -38,7 +38,8 @@ public interface CourseProgressService {
     void personalChapterPage(String openid, List<Chapter> chapters);
 
     /**
-     * 获取周主题
+     * 毕业流程
+     * @param classId 班级id
      * */
-    CourseWeek loadCourseWeek(Integer courseId, Integer week);
+    void graduate(Integer classId);
 }

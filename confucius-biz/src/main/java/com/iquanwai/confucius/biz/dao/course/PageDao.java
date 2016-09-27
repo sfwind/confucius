@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.po.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -31,5 +32,20 @@ public class PageDao extends DBUtil {
         }
 
         return null;
+    }
+
+    public Integer chapterPageNumber(int chapterId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+
+        try {
+            Long number = run.query("SELECT count(*) FROM Page where ChapterId=?", h,
+                    chapterId);
+            return number.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return -1;
     }
 }
