@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.course.dto;
 
-import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import lombok.Data;
 
 /**
@@ -10,6 +10,6 @@ import lombok.Data;
 public class MyCourseDto {
     private Double myProgress;
     private Double courseProgress;
-    private Course course;
+    private CourseIntroduction course;
 
 }

@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.course.introduction;
 
-import com.iquanwai.confucius.biz.dao.course.CourseDao;
-import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +13,13 @@ import java.util.List;
 @Service
 public class CourseIntroductionServiceImpl implements CourseIntroductionService {
     @Autowired
-    private CourseDao courseDao;
+    private CourseIntroductionDao courseIntroductionDao;
 
-    public List<Course> loadAll() {
-        return courseDao.loadAll(Course.class);
+    public List<CourseIntroduction> loadAll() {
+        return courseIntroductionDao.loadAll(CourseIntroduction.class);
     }
 
-    public Course loadCourse(int courseId) {
-        return courseDao.load(Course.class, courseId);
+    public CourseIntroduction loadCourse(int courseId) {
+        return courseIntroductionDao.getByCourseId(courseId);
     }
 }

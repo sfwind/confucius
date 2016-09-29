@@ -4,7 +4,7 @@ import com.iquanwai.confucius.biz.domain.course.introduction.CourseIntroductionS
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
@@ -49,7 +49,7 @@ public class IntroductionController {
                 operationLogService.log(operationLog);
                 return WebUtils.result(courseDto);
             }
-            Course course = courseIntroductionService.loadCourse(classMember.getCourseId());
+            CourseIntroduction course = courseIntroductionService.loadCourse(classMember.getCourseId());
             if(course==null){
                 return WebUtils.error("获取介绍失败");
             }
@@ -68,13 +68,13 @@ public class IntroductionController {
         }
     }
 
-    private Double courseProgress(Course course, ClassMember classMember) {
+    private Double courseProgress(CourseIntroduction course, ClassMember classMember) {
         Assert.notNull(course, "课程不能为空");
         Assert.notNull(classMember, "班级不能为空");
         return classMember.getClassProgress()*1.0/course.getLength();
     }
 
-    private Double myProgress(Course course, ClassMember classMember) {
+    private Double myProgress(CourseIntroduction course, ClassMember classMember) {
         Assert.notNull(course, "课程不能为空");
         Assert.notNull(classMember, "班级不能为空");
         String progress = classMember.getProgress();
@@ -104,7 +104,7 @@ public class IntroductionController {
                     .function("介绍")
                     .action("更多训练");
             operationLogService.log(operationLog);
-            List<Course> courseList = courseIntroductionService.loadAll();
+            List<CourseIntroduction> courseList = courseIntroductionService.loadAll();
             return WebUtils.result(courseList);
         }catch (Exception e){
             LOGGER.error("获取更多训练失败", e);

@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.course.dto;
 
-import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import lombok.Data;
 
@@ -13,5 +13,5 @@ public class EntryDto {
     private String headUrl;
     private String memberId;
     private QuanwaiClass quanwaiClass;
-    private Course course;
+    private CourseIntroduction course;
 }

@@ -33,7 +33,7 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ClassDao classDao;
     @Autowired
-    private CourseDao courseDao;
+    private CourseIntroductionDao courseIntroductionDao;
     @Autowired
     private CourseOrderDao courseOrderDao;
     @Autowired
@@ -67,7 +67,7 @@ public class SignupServiceImpl implements SignupService {
     private Map<Integer, Integer> memberCount = Maps.newConcurrentMap();
 
     private Map<Integer, SoftReference<QuanwaiClass>> classMap = Maps.newHashMap();
-    private Map<Integer, SoftReference<Course>> courseMap = Maps.newHashMap();
+    private Map<Integer, SoftReference<CourseIntroduction>> courseMap = Maps.newHashMap();
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
 
@@ -137,7 +137,7 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setCreateTime(new Date());
         courseOrder.setOpenid(openid);
 
-        Course course = getCachedCourse(courseId);
+        CourseIntroduction course = getCachedCourse(courseId);
         if(course == null){
             return null;
         }
@@ -147,7 +147,7 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setStatus(0); //待支付
         String orderId = CommonUtils.randomString(16);
         courseOrder.setOrderId(orderId);
-        courseOrder.setCourseName(course.getName());
+        courseOrder.setCourseName(course.getCourseName());
 
         courseOrderDao.insert(courseOrder);
 
@@ -202,7 +202,7 @@ public class SignupServiceImpl implements SignupService {
 
     public QuanwaiClass getCachedClass(Integer classId) {
         if(classMap.get(classId)==null || classMap.get(classId).get()==null){
-            QuanwaiClass quanwaiClass = courseDao.load(QuanwaiClass.class, classId);
+            QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
             if(quanwaiClass!=null){
                 classMap.put(classId, new SoftReference<QuanwaiClass>(quanwaiClass));
             }
@@ -210,11 +210,11 @@ public class SignupServiceImpl implements SignupService {
         return classMap.get(classId).get();
     }
 
-    public Course getCachedCourse(Integer courseId) {
+    public CourseIntroduction getCachedCourse(Integer courseId) {
         if(courseMap.get(courseId)==null || courseMap.get(courseId).get()==null){
-            Course course = courseDao.load(Course.class, courseId);
+            CourseIntroduction course = courseIntroductionDao.getByCourseId(courseId);
             if(course!=null){
-                courseMap.put(courseId, new SoftReference<Course>(course));
+                courseMap.put(courseId, new SoftReference<CourseIntroduction>(course));
             }
         }
         return courseMap.get(courseId).get();

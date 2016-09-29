@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
-import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,7 +40,7 @@ public interface SignupService {
     /**
      * 根据课程id获取课程信息
      * */
-    Course getCachedCourse(Integer courseId);
+    CourseIntroduction getCachedCourse(Integer courseId);
     /**
      * 根据订单号获取订单
      * */

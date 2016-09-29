@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.course.dto;
 
-import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import lombok.Data;
 public class SignupDto {
     private Integer remaining;
     private String qrcode;
-    private Course course;
+    private CourseIntroduction course;
     private String productId;
     private boolean isFree = false;
     private QuanwaiClass quanwaiClass;
