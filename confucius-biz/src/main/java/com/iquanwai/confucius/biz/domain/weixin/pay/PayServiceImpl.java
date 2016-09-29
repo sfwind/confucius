@@ -28,7 +28,9 @@ public class PayServiceImpl implements PayService{
     @Autowired
     private RestfulHelper restfulHelper;
 
-    private String WEIXIN = "NATIVE";
+    private static final String WEIXIN = "NATIVE";
+
+    private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
 
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
@@ -171,7 +173,7 @@ public class PayServiceImpl implements PayService{
         map.put("body", body);
         String openid = courseOrder.getOpenid();
         map.put("openid", openid);
-        String notify_url = ConfigUtils.getPayResultCallbackUrl();
+        String notify_url = ConfigUtils.domainName()+PAY_CALLBACK_PATH;
         map.put("notify_url", notify_url);
         String out_trade_no = courseOrder.getOrderId();
         map.put("out_trade_no", out_trade_no);

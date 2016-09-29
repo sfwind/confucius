@@ -25,6 +25,8 @@ public class OAuthServiceImpl implements OAuthService {
     @Autowired
     private CallbackDao callbackDao;
 
+    private static final String REDIRECT_PATH = "/wx/oauth/code";
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public String redirectUrl(String callbackUrl) {
@@ -38,7 +40,7 @@ public class OAuthServiceImpl implements OAuthService {
         Map<String,String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         try {
-            params.put("redirect_url", URLEncoder.encode(ConfigUtils.getRedirectUrl(), "utf-8"));
+            params.put("redirect_url", URLEncoder.encode(ConfigUtils.domainName()+REDIRECT_PATH, "utf-8"));
         } catch (UnsupportedEncodingException e) {
             // ignore
         }

@@ -130,6 +130,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             }else{
                 homework.setSubmitted(true);
             }
+            if(homework.getVoice()!=null) {
+                homework.setVoice(ConfigUtils.domainName() + homework.getVoice());
+            }
             if(submit==null){
                 String url = "/homework/load/"+ CommonUtils.randomString(6);
                 homework.setPcurl(ConfigUtils.domainName()+url);

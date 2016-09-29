@@ -30,10 +30,6 @@ public class ConfigUtils {
 		return config.getString("secret");
 	}
 
-	public static String getRedirectUrl(){
-		return config.getString("redirectUrl");
-	}
-
 	public static int getJsSignatureInterval() {
 		return config.getInt("js.internal");
 	}
@@ -52,10 +48,6 @@ public class ConfigUtils {
 
 	public static Integer getBillOpenMinute(){
 		return config.getInt("bill.open.minute");
-	}
-
-	public static String getPayResultCallbackUrl(){
-		return config.getString("pay.result.callback.url");
 	}
 
 	public static String domainName(){
