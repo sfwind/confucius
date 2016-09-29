@@ -39,6 +39,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     @Autowired
     private CourseWeekDao courseWeekDao;
 
+    private String picUrlPrefix = ConfigUtils.domainName()+"/images/";
+    private String audioUrlPrefix = ConfigUtils.domainName()+"/audio/";
+
 
     public Page loadPage(String openid, int chapterId, Integer pageSequence, Boolean lazyLoad) {
         Assert.notNull(openid, "openid不能为空");
@@ -51,6 +54,14 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         Page page = pageDao.loadPage(chapterId, pageSequence);
         if(page!=null) {
             List<Material> materialList = materialDao.loadPageMaterials(page.getId());
+            //拼接url前缀
+            for(Material m:materialList){
+                if(m.getType()==2){
+                    m.setContent(picUrlPrefix+m.getContent());
+                }else if(m.getType()==3){
+                    m.setContent(audioUrlPrefix+m.getContent());
+                }
+            }
             page.setMaterialList(materialList);
             //记录到阅读到第几页
             if(!lazyLoad) {
