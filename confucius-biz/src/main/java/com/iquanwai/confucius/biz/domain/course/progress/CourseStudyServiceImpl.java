@@ -5,6 +5,8 @@ import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -38,6 +40,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private ClassMemberDao classMemberDao;
     @Autowired
     private CourseWeekDao courseWeekDao;
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private String picUrlPrefix = ConfigUtils.domainName()+"/images/";
     private String audioUrlPrefix = ConfigUtils.domainName()+"/audio/";
@@ -74,7 +78,16 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     public Chapter loadChapter(String openid, int chapterId) {
         Assert.notNull(openid, "openid不能为空");
         ClassMember classMember = classMemberDao.activeCourse(openid);
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return null;
+        }
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
+        if(chapter==null){
+            logger.error("{} is invalid", chapterId);
+            return null;
+        }
         String progress = "";
         boolean mark = false;
         if(StringUtils.isEmpty(classMember.getProgress())){
@@ -113,6 +126,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         if(question!=null){
             boolean submitted = questionSubmitDao.submitted(openid, classMember.getClassId(), questionId);
             question.setAnswered(submitted);
+            //语音分析，拼接完整url
+            if(question.getAnalysisType()==2 && question.getAnalysis()!=null){
+                question.setAnalysis(audioUrlPrefix+question.getAnalysis());
+            }
             List<Choice> choiceList = choiceDao.loadChoices(questionId);
             question.setChoiceList(choiceList);
         }
@@ -157,13 +174,20 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     public void submitHomework(String content, String openid, Integer homeworkId) {
         Assert.notNull(openid, "openid不能为空");
         ClassMember classMember = classMemberDao.activeCourse(openid);
-        homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
+        if(classMember!=null) {
+            homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
+        }
     }
 
     public boolean submitQuestion(String openid, Integer questionId, List<Integer> choiceList) {
         Assert.notNull(openid, "openid不能为空");
         String answer = "";
         ClassMember classMember = classMemberDao.activeCourse(openid);
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return false;
+        }
         Question q = questionDao.load(Question.class, questionId);
         Integer score = score(q, choiceList);
         boolean right = false;

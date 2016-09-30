@@ -65,12 +65,18 @@ public class SignupServiceImpl implements SignupService {
      * 每个班级的当前学号
      * */
     private Map<Integer, Integer> memberCount = Maps.newConcurrentMap();
+    /**
+     * 每个人的报名班级id
+     * */
+    private Map<String, Integer> signupMap = Maps.newConcurrentMap();
 
     private Map<Integer, SoftReference<QuanwaiClass>> classMap = Maps.newHashMap();
     private Map<Integer, SoftReference<CourseIntroduction>> courseMap = Maps.newHashMap();
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
-
+        if(classMemberDao.isEntry(courseId, openid)){
+            return new ImmutablePair(-4, 0);
+        }
         //初始化课程报名人数
         if(remainingCount.get(courseId)==null){
             synchronized (lock){
@@ -117,6 +123,7 @@ public class SignupServiceImpl implements SignupService {
                         remainingNumber--;
                         classId = entry.getKey();
                         entry.setValue(remainingNumber);
+                        signupMap.put(openid, classId);
                         isEntry = true;
                     }
                 }
@@ -139,6 +146,7 @@ public class SignupServiceImpl implements SignupService {
 
         CourseIntroduction course = getCachedCourse(courseId);
         if(course == null){
+            logger.error("courseId {} is not existed", courseId);
             return null;
         }
         double discount = discount(openid, course.getFee());
@@ -225,10 +233,11 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public String entry(Integer courseId, Integer classId, String openid) {
-        if(classMemberDao.isEntry(classId, openid)){
-            return null;
+        ClassMember classMember = classMemberDao.getClassMember(classId, openid);
+        if(classMember!=null){
+            return classMember.getMemberId();
         }
-        ClassMember classMember = new ClassMember();
+        classMember = new ClassMember();
         classMember.setClassId(classId);
         classMember.setOpenId(openid);
         String memberId = memberId(courseId, classId);
@@ -239,6 +248,20 @@ public class SignupServiceImpl implements SignupService {
 
     public boolean isWhite(Integer courseId, String openid) {
         return courseFreeListDao.isFree(openid, courseId);
+    }
+
+    public void quitClass(String openid) {
+        Integer classId = signupMap.get(openid);
+        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
+        if(quanwaiClass==null){
+            return;
+        }
+        Integer courseId = quanwaiClass.getCourseId();
+        synchronized (lock2) {
+            Map<Integer, Integer> classCountMap = remainingCount.get(courseId);
+            Integer remaining = classCountMap.get(classId);
+            classCountMap.put(classId, remaining+1);
+        }
     }
 
     //生成学号 2位课程号2位班级号3位学号

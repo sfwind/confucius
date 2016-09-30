@@ -16,6 +16,7 @@ public interface SignupService {
      * @return {-1,0} 已报满，
      *         {-2,0} 没有设置课程，
      *         {-3,*} 有课程的最大人数设置不正确，
+     *         {-4,0} 已报名成功，
      *          其余情况返回剩余多少名额和班级id
      * */
     Pair<Integer, Integer> signupCheck(String openid, Integer courseId);
@@ -56,6 +57,11 @@ public interface SignupService {
      * 是否是白名单
      * */
     boolean isWhite(Integer courseId, String openid);
+
+    /**
+     * 放弃报班
+     * */
+    void quitClass(String openid);
 
     String PAY_URL = "weixin://wxpay/bizpayurl?sign={sign}&appid={appid}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
 }

@@ -43,6 +43,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             return null;
         }
         if(classMember==null){
+            logger.error("{} has no active course", openid);
             return null;
         }
         //设置课程id和课程进度

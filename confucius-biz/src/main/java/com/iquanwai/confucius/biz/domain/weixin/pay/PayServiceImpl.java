@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.util.*;
 import org.slf4j.Logger;
@@ -25,6 +26,8 @@ public class PayServiceImpl implements PayService{
     private CourseOrderDao courseOrderDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+    @Autowired
+    private SignupService signupService;
     @Autowired
     private RestfulHelper restfulHelper;
 
@@ -130,6 +133,7 @@ public class PayServiceImpl implements PayService{
                         }
                         logger.info("orderId: {} closed automatically", orderId);
                         courseOrderDao.closeOrder(orderId);
+                        signupService.quitClass(courseOrder.getOpenid());
                     }
                 }
             }catch (Exception e){

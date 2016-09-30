@@ -56,8 +56,14 @@ public class SignupController {
             }
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
 
-            if(result.getLeft()<0){
-                return WebUtils.error("报名人数已满");
+            if(result.getLeft()==-1||result.getLeft()==-3){
+                return WebUtils.error("报名人数已满，后续开班会及时通知您！");
+            }
+            if(result.getLeft()==-4){
+                return WebUtils.error("您已报名成功，请关注服务号的推送消息！");
+            }
+            if(result.getLeft()==-2){
+                return WebUtils.error("暂时没有开放报名，后续开班会及时通知您！");
             }
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
             //去掉群二维码
@@ -98,9 +104,6 @@ public class SignupController {
             }
 
             String memberId = signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
-            if(memberId==null){
-                return WebUtils.error("请不要重复点击");
-            }
             entryDto.setMemberId(memberId);
             entryDto.setQuanwaiClass(signupService.getCachedClass(courseOrder.getClassId()));
             entryDto.setCourse(signupService.getCachedCourse(courseOrder.getCourseId()));
