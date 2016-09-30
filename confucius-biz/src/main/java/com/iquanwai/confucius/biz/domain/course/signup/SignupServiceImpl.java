@@ -10,7 +10,6 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -18,10 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.awt.*;
 import java.lang.ref.SoftReference;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,16 +36,17 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private CourseOrderDao courseOrderDao;
     @Autowired
+    private ClassMemberCountRepo classMemberCountRepo;
+    @Autowired
     private ClassMemberDao classMemberDao;
     @Autowired
     private CourseFreeListDao courseFreeListDao;
     @Autowired
     private CouponDao couponDao;
+    //课程白名单
+    private Map<Integer, List<String>> whiteList = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    private Object lock = new Object();
-    private Object lock2 = new Object();
 
     /**
      * 支付二维码的高度
@@ -58,82 +58,21 @@ public class SignupServiceImpl implements SignupService {
     private static int QRCODE_WIDTH = 200;
 
     /**
-     * 每个班级的剩余人数
-     * */
-    private Map<Integer, Map<Integer,Integer>> remainingCount = Maps.newConcurrentMap();
-    /**
      * 每个班级的当前学号
      * */
     private Map<Integer, Integer> memberCount = Maps.newConcurrentMap();
-    /**
-     * 每个人的报名班级id
-     * */
-    private Map<String, Integer> signupMap = Maps.newConcurrentMap();
 
     private Map<Integer, SoftReference<QuanwaiClass>> classMap = Maps.newHashMap();
     private Map<Integer, SoftReference<CourseIntroduction>> courseMap = Maps.newHashMap();
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
-        if(classMemberDao.isEntry(courseId, openid)){
-            return new ImmutablePair(-4, 0);
-        }
-        //初始化课程报名人数
-        if(remainingCount.get(courseId)==null){
-            synchronized (lock){
-                if(remainingCount.get(courseId)==null){
-                    List<QuanwaiClass> quanwaiClass = classDao.openClass(courseId);
-                    //TODO:没有班级需要报警
-                    if(CollectionUtils.isEmpty(quanwaiClass)){
-                        logger.error("course {} has no open class", courseId);
-                        return new ImmutablePair(-2, 0);
-                    }else{
-                        Map<Integer,Integer> clazzNumber = Maps.newConcurrentMap();
-                        for(QuanwaiClass clazz:quanwaiClass){
-                            //TODO:班级人数设置问题,需要报警
-                            if(clazz.getLimit()==null || clazz.getLimit()<=0){
-                                logger.error("class {} 's limit is wrong", clazz.getId());
-                                return new ImmutablePair(-3, clazz.getId());
-                            }
-                            Integer count = courseOrderDao.paidCount(clazz.getId());
-                            if(count>=0){
-                                int remaining = clazz.getLimit()-count>0?clazz.getLimit()-count:0;
-                                clazzNumber.put(clazz.getId(), remaining);
-                            }
-                            classMap.put(clazz.getId(), new SoftReference<QuanwaiClass>(clazz));
-                        }
-                        remainingCount.put(courseId, clazzNumber);
-                    }
-                }
+        if(!ConfigUtils.pressTestSwitch()) {
+            if (classMemberCountRepo.isEntry(openid)) {
+                return new ImmutablePair(-3, 0);
             }
         }
-        //计算剩余人数
-        synchronized (lock2) {
-            Map<Integer, Integer> remaining = remainingCount.get(courseId);
-            int remain = 0;
-            boolean isEntry = false; //是否已经进入某班
-            Integer classId = 0;
-            for(Iterator<Map.Entry<Integer,Integer>> it =remaining.entrySet().iterator(); it.hasNext();){
-                Map.Entry<Integer,Integer> entry = it.next();
-                int remainingNumber = entry.getValue();
-                if(remainingNumber==0){
-                    continue;
-                }else{
-                    if(!isEntry) {
-                        //人数-1，记录班级id，标记分配进入某班
-                        remainingNumber--;
-                        classId = entry.getKey();
-                        entry.setValue(remainingNumber);
-                        signupMap.put(openid, classId);
-                        isEntry = true;
-                    }
-                }
-                remain = remain+remainingNumber;
-            }
-            if(isEntry) {
-                return new ImmutablePair<Integer, Integer>(remain, classId);
-            }
-        }
-        return new ImmutablePair(-1, 0);
+
+        return classMemberCountRepo.prepareSignup(openid, courseId);
     }
 
     public String signup(String openid, Integer courseId, Integer classId) {
@@ -247,21 +186,15 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public boolean isWhite(Integer courseId, String openid) {
-        return courseFreeListDao.isFree(openid, courseId);
+        List<String> classWhiteList = whiteList.get(courseId);
+        if(classWhiteList==null||!classWhiteList.contains(openid)){
+            return false;
+        }
+        return true;
     }
 
-    public void quitClass(String openid) {
-        Integer classId = signupMap.get(openid);
-        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
-        if(quanwaiClass==null){
-            return;
-        }
-        Integer courseId = quanwaiClass.getCourseId();
-        synchronized (lock2) {
-            Map<Integer, Integer> classCountMap = remainingCount.get(courseId);
-            Integer remaining = classCountMap.get(classId);
-            classCountMap.put(classId, remaining+1);
-        }
+    public void giveupSignup(String openid) {
+        classMemberCountRepo.quitClass(openid);
     }
 
     //生成学号 2位课程号2位班级号3位学号
@@ -301,6 +234,20 @@ public class SignupServiceImpl implements SignupService {
         int count = memberCount.get(classId)+1;
         memberCount.put(classId, count);
         return count;
+    }
+
+    @PostConstruct
+    public void initWhiteList(){
+        List<CourseFreeList> courseFreeLists = courseFreeListDao.loadAll(CourseFreeList.class);
+        for(CourseFreeList freeList:courseFreeLists){
+            List<String> openids = whiteList.get(freeList.getCourseId());
+            if(openids==null){
+                openids = Lists.newArrayList();
+                whiteList.put(freeList.getCourseId(), openids);
+            }
+            openids.add(freeList.getOpenid());
+        }
+        logger.info("init white list complete");
     }
 
 }

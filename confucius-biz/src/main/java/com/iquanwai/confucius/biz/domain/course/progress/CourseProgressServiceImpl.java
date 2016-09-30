@@ -65,7 +65,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     public void classProgress() {
-        List<QuanwaiClass> openClass = classDao.loadAllOpenClass();
+        List<QuanwaiClass> openClass = classDao.loadRunningClass();
         for(QuanwaiClass clazz:openClass){
             Integer courseId = clazz.getCourseId();
             //开课天数=今天-开课日期+1

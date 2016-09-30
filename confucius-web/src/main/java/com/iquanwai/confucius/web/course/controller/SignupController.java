@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
@@ -56,14 +57,14 @@ public class SignupController {
             }
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
 
-            if(result.getLeft()==-1||result.getLeft()==-3){
-                return WebUtils.error("报名人数已满，后续开班会及时通知您！");
-            }
-            if(result.getLeft()==-4){
-                return WebUtils.error("您已报名成功，请关注服务号的推送消息！");
+            if(result.getLeft()==-1){
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
             }
             if(result.getLeft()==-2){
-                return WebUtils.error("暂时没有开放报名，后续开班会及时通知您！");
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.noclass"));
+            }
+            if(result.getLeft()==-3){
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
             }
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
             //去掉群二维码
@@ -96,11 +97,11 @@ public class SignupController {
             CourseOrder courseOrder = signupService.getCourseOrder(orderId);
             if(courseOrder==null){
                 LOGGER.error("{} 订单不存在", orderId);
-                return WebUtils.error("报名失败请联系管理员");
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
             }
             if(courseOrder.getStatus()!=1){
                 LOGGER.error("订单状态：{}", courseOrder.getStatus());
-                return WebUtils.error("付费尚未成功");
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
 
             String memberId = signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());

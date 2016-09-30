@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.CourseWeek;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.CoursePageDto;
@@ -44,12 +45,12 @@ public class CourseController {
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), null);
             if(classMember==null){
                 LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
-                return WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
             }
 
             CoursePageDto course = getCourse(loginUser, classMember, classMember.getProgressWeek());
             if(course==null){
-                return WebUtils.error("获取用户当前课程失败");
+                return WebUtils.error("获取当前课程失败");
             }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("课程")
@@ -59,8 +60,8 @@ public class CourseController {
             operationLogService.log(operationLog);
             return WebUtils.result(course);
         }catch (Exception e){
-            LOGGER.error("获取用户当前课程失败", e);
-            return WebUtils.error("获取用户当前课程失败");
+            LOGGER.error("获取当前课程失败", e);
+            return WebUtils.error("获取当前课程失败");
         }
     }
 

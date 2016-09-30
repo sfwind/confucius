@@ -41,7 +41,22 @@ public class ClassDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public List<QuanwaiClass> loadAllOpenClass(){
+    public List<QuanwaiClass> openClass(){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
+
+        try {
+            List<QuanwaiClass> quanwaiClass = run.query("SELECT * FROM QuanwaiClass where Open = 1",
+                    h);
+            return quanwaiClass;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public List<QuanwaiClass> loadRunningClass(){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
 

@@ -28,7 +28,6 @@ public class OperationLogDao extends DBUtil {
             Future<Integer> result =  asyncRun.update(insertSql,
                     log.getOpenid(), log.getModule(), log.getFunction(),
                     log.getAction(), log.getMemo());
-
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

@@ -133,7 +133,7 @@ public class PayServiceImpl implements PayService{
                         }
                         logger.info("orderId: {} closed automatically", orderId);
                         courseOrderDao.closeOrder(orderId);
-                        signupService.quitClass(courseOrder.getOpenid());
+                        signupService.giveupSignup(courseOrder.getOpenid());
                     }
                 }
             }catch (Exception e){

@@ -5,12 +5,27 @@ import com.typesafe.config.ConfigFactory;
 
 import java.io.File;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ConfigUtils {
 	private static Config config;
 	private static Config localconfig;
 	private static Config fileconfig;
+
+	private static Timer timer;
 	static{
+		loadConfig();
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				loadConfig();
+			}
+		}, 0, 1000*60);
+	}
+
+	private static void loadConfig() {
 		localconfig = ConfigFactory.load("localconfig");
 		config = ConfigFactory.load("confucius");
 		fileconfig = ConfigFactory.parseFile(new File("/data/config/localconfig"));
@@ -20,6 +35,14 @@ public class ConfigUtils {
 
 	public static String getAppid() {
 		return config.getString("appid");
+	}
+
+	public static boolean logSwitch() {
+		return config.getBoolean("open.log");
+	}
+
+	public static boolean pressTestSwitch(){
+		return config.getBoolean("press.test");
 	}
 
 	public static String getAPIKey() {
@@ -35,7 +58,7 @@ public class ConfigUtils {
 	}
 
 	public static boolean isDebug(){
-		return config.getBoolean("debug");
+		return config.getBoolean("debug")||config.getBoolean("press.test");
 	}
 
 	public static String getMch_id(){
