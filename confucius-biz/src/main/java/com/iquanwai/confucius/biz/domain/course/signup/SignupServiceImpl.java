@@ -5,6 +5,8 @@ import com.google.common.collect.Maps;
 import com.google.zxing.WriterException;
 import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -32,6 +34,8 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ClassDao classDao;
     @Autowired
+    private CourseDao courseDao;
+    @Autowired
     private CourseIntroductionDao courseIntroductionDao;
     @Autowired
     private CourseOrderDao courseOrderDao;
@@ -43,6 +47,8 @@ public class SignupServiceImpl implements SignupService {
     private CourseFreeListDao courseFreeListDao;
     @Autowired
     private CouponDao couponDao;
+    @Autowired
+    private TemplateMessageService templateMessageService;
     //课程白名单
     private Map<Integer, List<String>> whiteList = Maps.newHashMap();
 
@@ -182,6 +188,8 @@ public class SignupServiceImpl implements SignupService {
         String memberId = memberId(courseId, classId);
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
+        //发送录取消息
+        sendWelcomeMsg(courseId, openid, classId);
         return memberId;
     }
 
@@ -195,6 +203,29 @@ public class SignupServiceImpl implements SignupService {
 
     public void giveupSignup(String openid) {
         classMemberCountRepo.quitClass(openid);
+    }
+
+    public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {
+        String key = ConfigUtils.signupSuccessMsgKey();
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(openid);
+        templateMessage.setTemplate_id(key);
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setData(data);
+
+        ClassMember classMember = classMemberDao.getClassMember(classId, openid);
+        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
+        Course course = courseDao.load(Course.class, courseId);
+
+
+        data.put("first",new TemplateMessage.Keyword("你已成功报名圈外训练营"));
+        data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
+        data.put("keyword2",new TemplateMessage.Keyword(quanwaiClass.getOpenTime()+"-"+quanwaiClass.getCloseTime()));
+
+        String remark = "你的学号是"+classMember.getMemberId()+"课程开始前先加入训练微信群，去认识一下你的同伴、助教和圈圈吧，点击查看群二维码。";
+        data.put("remark",new TemplateMessage.Keyword(remark));
+        templateMessage.setUrl(quanwaiClass.getWeixinGroup());
+        templateMessageService.sendMessage(templateMessage);
     }
 
     //生成学号 2位课程号2位班级号3位学号

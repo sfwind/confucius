@@ -85,9 +85,14 @@ public class IntroductionController {
         String[] chapterArr = progress.split(",");
         Integer largest = 1;
         for(String chapter:chapterArr){
-            if(Integer.valueOf(chapter)>largest){
-                largest = Integer.valueOf(chapter);
+            try {
+                if(Integer.valueOf(chapter)>largest){
+                    largest = Integer.valueOf(chapter);
+                }
+            }catch (NumberFormatException e){
+                LOGGER.error("chapter {} is not a number", chapter);
             }
+
         }
 
         return largest*1.0/course.getLength();

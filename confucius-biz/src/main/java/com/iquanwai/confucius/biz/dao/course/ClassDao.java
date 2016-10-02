@@ -85,6 +85,7 @@ public class ClassDao extends DBUtil {
         }
     }
 
+    // TODO: BUG
     public Integer classNumber(Integer courseId){
         QueryRunner run = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();

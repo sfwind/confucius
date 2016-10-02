@@ -73,6 +73,14 @@ public class ConfigUtils {
 		return config.getInt("bill.open.minute");
 	}
 
+	public static String signupSuccessMsgKey(){
+		return config.getString("signup.success.msg");
+	}
+
+	public static String coursePassMsgKey(){
+		return config.getString("course.pass.msg");
+	}
+
 	public static String domainName(){
 		return config.getString("app.domain");
 	}

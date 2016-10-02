@@ -18,7 +18,11 @@ public class TemplateMessage {
 
     @Data
     public static class Keyword{
+        public Keyword(String value) {
+            this.value = value;
+        }
+
         private String value;
-        private String color;
+        private String color = "#44B549";
     }
 }

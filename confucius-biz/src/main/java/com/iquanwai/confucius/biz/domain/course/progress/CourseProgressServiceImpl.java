@@ -2,10 +2,12 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 16/8/29.
@@ -105,12 +109,56 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     public void graduate(Integer classId) {
         List<ClassMember> classMembers = classMemberDao.getPassMember(classId);
+        String key = ConfigUtils.coursePassMsgKey();
         for(ClassMember classMember:classMembers){
+            boolean pass = classMember.getPass();
+            boolean superb = classMember.getSuperb();
+
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(classMember.getOpenId());
-//            templateMessageService.sendMessage(templateMessage);
+
+            templateMessage.setTemplate_id(key);
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+
+            Course course = courseDao.load(Course.class, classMember.getCourseId());
+
+            String first = coursePassStartMsg(pass, superb, course.getName());
+            String remark = courseRemarkStartMsg(pass, superb);
+            data.put("first",new TemplateMessage.Keyword(first));
+            data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
+            data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+            data.put("remark",new TemplateMessage.Keyword(remark));
+            //TODO:url待定
+//            templateMessage.setUrl(quanwaiClass.getWeixinGroup());
+            templateMessageService.sendMessage(templateMessage);
         }
         classMemberDao.graduate(classId);
+    }
+
+    private String courseRemarkStartMsg(boolean pass, boolean superb) {
+        if(pass){
+            if(superb){
+                return "作为优秀学员，你的奖励是待定\n" +
+                        "现在获取你的专属毕业证书吧！";
+            }else{
+                return "现在获取你的专属毕业证书吧！";
+            }
+        }else{
+            return "在下周之内补完作业，还可以顺利毕业、拿到专属毕业证书哦！";
+        }
+    }
+
+    private String coursePassStartMsg(boolean pass, boolean superb, String courseName) {
+        if(pass){
+            if(superb){
+                return "你已完成"+courseName+"训练营的所有挑战，并且以出色的成绩，作为“优秀学员”毕业，给自己一个拥抱吧。";
+            }else{
+                return "你已完成"+courseName+"训练营的所有挑战，不知不觉就走完了这段学习历程。";
+            }
+        }else{
+            return "很遗憾你未能完成"+courseName+"训练营的所有挑战";
+        }
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, final List<Integer> personalProgress, final int classProgress) {
