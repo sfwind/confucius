@@ -38,6 +38,7 @@ public class SignupController {
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable int courseId){
         SignupDto signupDto = new SignupDto();
+        String productId = "";
         try{
             Assert.notNull(loginUser, "用户不能为空");
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -68,11 +69,13 @@ public class SignupController {
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
-            String productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
             signupDto.setProductId(productId);
             String qrcode = signupService.payQRCode(productId);
             signupDto.setQrcode(qrcode);
         }catch (Exception e){
+            //异常关闭订单
+            signupService.giveupSignup(loginUser.getOpenId(), productId);
             LOGGER.error("报名失败", e);
             return WebUtils.error("报名人数已满");
         }
@@ -100,8 +103,8 @@ public class SignupController {
             }
             signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
         }catch (Exception e){
-            LOGGER.error("报名失败", e);
-            return WebUtils.error("报名人数已满");
+            LOGGER.error("支付校验失败", e);
+            return WebUtils.error("报名失败");
         }
         return WebUtils.success();
     }
@@ -185,8 +188,8 @@ public class SignupController {
                 entryDto.setHeadUrl(loginUser.getHeadimgUrl());
             }
         }catch (Exception e){
-            LOGGER.error("报名失败", e);
-            return WebUtils.error("报名人数已满");
+            LOGGER.error("报名成功页面加载失败", e);
+            return WebUtils.error("报名失败");
         }
         return WebUtils.result(entryDto);
     }

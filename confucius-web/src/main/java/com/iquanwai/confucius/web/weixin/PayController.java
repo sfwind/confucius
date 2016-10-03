@@ -37,20 +37,27 @@ public class PayController {
     @RequestMapping(value="/order/callback", produces = "application/xml")
     public ResponseEntity<OrderCallbackReply> orderCallback(@RequestBody OrderCallback orderCallback) {
         LOGGER.info(orderCallback.toString());
-        OrderCallbackReply orderCallbackReply;
-        //未关注用户先提示关注
-        if("N".equals(orderCallback.getIs_subscribe())){
-            LOGGER.info("{}还没关注服务号", orderCallback.getOpenid());
-            orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "请先关注圈外服务号", "");
-            return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);
+        OrderCallbackReply orderCallbackReply = null;
+        try {
+            //未关注用户先提示关注
+            if ("N".equals(orderCallback.getIs_subscribe())) {
+                LOGGER.info("{}还没关注服务号", orderCallback.getOpenid());
+                orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "请先关注圈外服务号", "");
+                return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);
+            }
+            String prepayId = payService.unifiedOrder(orderCallback.getProduct_id());
+            if (StringUtils.isEmpty(prepayId)) {
+                orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "下单失败，请重新扫描二维码", "");
+            } else {
+                orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "下单成功", prepayId);
+            }
+            LOGGER.info(orderCallbackReply.toString());
+        }catch (Exception e){
+            //异常关闭订单
+            payService.closeOrder(orderCallback.getOpenid(), orderCallback.getProduct_id());
+            LOGGER.error("扫码支付回调处理失败", e);
         }
-        String prepayId = payService.unifiedOrder(orderCallback.getProduct_id());
-        if(StringUtils.isEmpty(prepayId)){
-            orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "下单失败，请重新扫描二维码", "");
-        }else{
-            orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "下单成功", prepayId);
-        }
-        LOGGER.info(orderCallbackReply.toString());
+
         return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);
     }
 

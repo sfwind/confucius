@@ -206,7 +206,8 @@ public class SignupServiceImpl implements SignupService {
         return true;
     }
 
-    public void giveupSignup(String openid) {
+    public void giveupSignup(String openid, String orderId) {
+        courseOrderDao.closeOrder(orderId);
         classMemberCountRepo.quitClass(openid);
     }
 
