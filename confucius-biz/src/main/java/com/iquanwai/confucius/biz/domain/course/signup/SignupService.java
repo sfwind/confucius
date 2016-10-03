@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
@@ -25,6 +26,11 @@ public interface SignupService {
      * @return 报名订单号
      * */
     String signup(String openid, Integer courseId, Integer classId);
+
+    /**
+     * 获取学员详情
+     * */
+    ClassMember classMember(String openid, Integer classId);
 
     /**
      * 生成付款二维码

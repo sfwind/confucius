@@ -3,25 +3,21 @@ package com.iquanwai.confucius.web.course.controller;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
+import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.SignupDto;
 import org.apache.commons.lang3.tuple.Pair;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -85,7 +81,6 @@ public class SignupController {
 
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
-        EntryDto entryDto = new EntryDto();
         try{
             Assert.notNull(loginUser, "用户不能为空");
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -103,9 +98,82 @@ public class SignupController {
                 LOGGER.error("订单状态：{}", courseOrder.getStatus());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
+            signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
+        }catch (Exception e){
+            LOGGER.error("报名失败", e);
+            return WebUtils.error("报名人数已满");
+        }
+        return WebUtils.success();
+    }
 
-            String memberId = signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
-            entryDto.setMemberId(memberId);
+    @RequestMapping(value = "/info/load", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser){
+        InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("提交个人信息")
+                    .action("加载个人信息");
+            operationLogService.log(operationLog);
+            Account account = accountService.getAccount(loginUser.getOpenId(), false);
+            ModelMapper mapper = new ModelMapper();
+            mapper.map(account, infoSubmitDto);
+        }catch (Exception e){
+            LOGGER.error("加载个人信息失败", e);
+            return WebUtils.error("加载个人信息失败");
+        }
+        return WebUtils.result(infoSubmitDto);
+    }
+
+    @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> infoSubmit(@RequestBody InfoSubmitDto infoSubmitDto,
+                                                          LoginUser loginUser){
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("提交个人信息")
+                    .action("提交个人信息");
+            operationLogService.log(operationLog);
+            Account account = new Account();
+            ModelMapper mapper = new ModelMapper();
+            mapper.map(infoSubmitDto, account);
+            account.setOpenid(loginUser.getOpenId());
+            accountService.submitPersonalInfo(account);
+        }catch (Exception e){
+            LOGGER.error("提交个人信息失败", e);
+            return WebUtils.error("提交个人信息失败");
+        }
+        return WebUtils.success();
+    }
+
+    @RequestMapping("/welcome/{orderId}")
+    public ResponseEntity<Map<String, Object>> welcome(LoginUser loginUser, @PathVariable String orderId){
+        EntryDto entryDto = new EntryDto();
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("报名成功页面")
+                    .action("打开报名成功页面")
+                    .memo(orderId);
+            operationLogService.log(operationLog);
+            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
+            if(courseOrder==null){
+                LOGGER.error("{} 订单不存在", orderId);
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+            }
+            if(courseOrder.getStatus()!=1){
+                LOGGER.error("订单状态：{}", courseOrder.getStatus());
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+            }
+            ClassMember classMember = signupService.classMember(courseOrder.getOpenid(), courseOrder.getClassId());
+            if(classMember==null || classMember.getMemberId()==null){
+                LOGGER.error("{} 尚未报班 {}", courseOrder.getOpenid(), courseOrder.getClassId());
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+            }
+            entryDto.setMemberId(classMember.getMemberId());
             entryDto.setQuanwaiClass(signupService.getCachedClass(courseOrder.getClassId()));
             entryDto.setCourse(signupService.getCachedCourse(courseOrder.getCourseId()));
             Account account = accountService.getAccount(loginUser.getOpenId(), true);

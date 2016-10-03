@@ -84,19 +84,4 @@ public class ClassDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-
-    // TODO: BUG
-    public Integer classNumber(Integer courseId){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ScalarHandler<Long> h = new ScalarHandler<Long>();
-
-        try {
-            Long number = run.query("SELECT count(*) FROM QuanwaiClass where CourseId=?", h, courseId);
-            return number.intValue();
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return -1;
-    }
 }

@@ -20,5 +20,6 @@ public class ClassMember {
     private Boolean pass;  //是否通过课程（0-否，1-是）
     private Integer classProgress; //课程进度，章节的id
     private Integer courseId; //课程id
+    private String certificateNo; // 毕业证书编号
 
 }

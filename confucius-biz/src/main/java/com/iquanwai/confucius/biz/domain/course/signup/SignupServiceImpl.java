@@ -107,6 +107,10 @@ public class SignupServiceImpl implements SignupService {
         return orderId;
     }
 
+    public ClassMember classMember(String openid, Integer classId) {
+        return classMemberDao.getClassMember(classId, openid);
+    }
+
     public String payQRCode(String productId) {
         String payUrl = payUrl(productId);
         String path = "/data/static/images/qrcode/"+productId+".jpg";
@@ -230,7 +234,7 @@ public class SignupServiceImpl implements SignupService {
 
     //生成学号 2位课程号2位班级号3位学号
     private String memberId(Integer courseId, Integer classId) {
-        Integer classNumber = classDao.classNumber(courseId);
+        Integer classNumber = classDao.load(QuanwaiClass.class, classId).getClassNumber();
         Integer memberNumber = getMemberNumber(classId);
         return String.format("%02d%02d%03d", courseId, classNumber, memberNumber);
     }

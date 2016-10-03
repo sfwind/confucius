@@ -10,6 +10,7 @@ import java.util.Date;
 @Data
 public class QuanwaiClass {
     private int id;
+    private Integer classNumber; //按同一门课的班级排序的序号
     private Date openTime; //开课时间
     private Date closeTime; //结业时间
     private Integer courseId; //课程id

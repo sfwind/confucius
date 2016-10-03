@@ -33,12 +33,9 @@ public class AccountServiceImpl implements AccountService {
 
     public Account getAccount(String openid, boolean realTime) {
         //从数据库查询account对象
-        Account account = null;
-        if(!realTime) {
-            account = followUserDao.queryByOpenid(openid);
-            if (account != null) {
-                return account;
-            }
+        Account account = followUserDao.queryByOpenid(openid);
+        if(!realTime && account != null) {
+            return account;
         }
         //调用api查询account对象
         String url = USER_INFO_URL;
@@ -70,13 +67,17 @@ public class AccountServiceImpl implements AccountService {
             if(account==null) {
                 followUserDao.insert(accountNew);
             }else{
-                followUserDao.update(accountNew);
+                followUserDao.updateMeta(accountNew);
             }
             return accountNew;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public void submitPersonalInfo(Account account) {
+        followUserDao.updateInfo(account);
     }
 
     public void collectUsers() {

@@ -60,13 +60,35 @@ public class FollowUserDao extends DBUtil {
         return null;
     }
 
-    public int update(Account account) {
+    public int updateMeta(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String updateSql = "Update FollowUsers Set Nickname=?, Headimgurl=? where Openid=?";
         try {
             Future<Integer> result = asyncRun.update(updateSql,
                     account.getNickname(), account.getHeadimgurl(), account.getOpenid());
+            return result.get();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        } catch (InterruptedException e) {
+            // ignore
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return -1;
+    }
+
+    public int updateInfo(Account account) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        String updateSql = "Update FollowUsers Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=? " +
+                "where Openid=?";
+        try {
+            Future<Integer> result = asyncRun.update(updateSql,
+                    account.getMobileNo(), account.getEmail(),
+                    account.getIndustry(), account.getFunction(),
+                    account.getWorkingLife(), account.getOpenid());
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

@@ -18,6 +18,7 @@ import org.springframework.util.Assert;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by justin on 16/8/29.
@@ -38,6 +39,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private TemplateMessageService templateMessageService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    private final static String CERTIFICATE_PREFIX = "IQW";
+
+    private final static int CERTIFICATE_OFFSET = 51000;
 
 
     public ClassMember loadActiveCourse(String openid, Integer courseId) {
@@ -120,6 +125,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             templateMessage.setTemplate_id(key);
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
+            //生成毕业证书
+            String certificateNo = generateCertificate(classMember);
+            classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
 
             Course course = courseDao.load(Course.class, classMember.getCourseId());
 
@@ -133,7 +141,17 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 //            templateMessage.setUrl(quanwaiClass.getWeixinGroup());
             templateMessageService.sendMessage(templateMessage);
         }
+
         classMemberDao.graduate(classId);
+    }
+
+    private String generateCertificate(ClassMember classMember) {
+
+        return String.format("%s%02d%02d%08d%s", CERTIFICATE_PREFIX,
+                classMember.getCourseId(),
+                new Random().nextInt(100),
+                classMember.getId()+CERTIFICATE_OFFSET,
+                classMember.getMemberId());
     }
 
     private String courseRemarkStartMsg(boolean pass, boolean superb) {

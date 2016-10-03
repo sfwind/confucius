@@ -146,4 +146,17 @@ public class ClassMemberDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public void updateCertificateNo(Integer classId, String openid, String certificateNo){
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+
+        try {
+            asyncRun.update("UPDATE ClassMember SET CertificateNo=? " +
+                    "where ClassId=? and openid=?", certificateNo, classId, openid);
+
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
 }

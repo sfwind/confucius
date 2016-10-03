@@ -13,6 +13,11 @@ public interface AccountService {
     Account getAccount(String openid, boolean realTime);
 
     /**
+     * 更新个人信息
+     * */
+    void submitPersonalInfo(Account account);
+
+    /**
      * 收集所有关注用户的信息
      * */
     void collectUsers();
