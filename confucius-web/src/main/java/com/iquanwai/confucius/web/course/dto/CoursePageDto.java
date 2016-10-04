@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.course.dto;
 
 
 import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseWeek;
 import lombok.Data;
 
 /**

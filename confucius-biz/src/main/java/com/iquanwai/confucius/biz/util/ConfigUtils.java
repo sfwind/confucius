@@ -61,6 +61,10 @@ public class ConfigUtils {
 		return config.getBoolean("debug")||config.getBoolean("press.test");
 	}
 
+	public static boolean logDetail(){
+		return config.getBoolean("log.debug");
+	}
+
 	public static String getMch_id(){
 		return config.getString("mch_id");
 	}

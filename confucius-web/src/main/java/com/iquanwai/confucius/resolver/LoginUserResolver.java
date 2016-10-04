@@ -28,7 +28,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     @Autowired
     private AccountService accountService;
 
-    public Map<String, LoginUser> loginUserMap = Maps.newHashMap();
+    private static Map<String, LoginUser> loginUserMap = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -46,14 +46,14 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         }
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
         String accessToken = CookieUtils.getCookie(request, "_act");
+        if(loginUserMap.containsKey(accessToken)){
+            return loginUserMap.get(accessToken);
+        }
 
         String openId = oAuthService.openId(accessToken);
         if(StringUtils.isEmpty(openId)){
             logger.error("accessToken {} is not found in db", accessToken);
             return null;
-        }
-        if(loginUserMap.containsKey(openId)){
-            return loginUserMap.get(openId);
         }
 
         Account account = accountService.getAccount(openId, false);
@@ -67,8 +67,16 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         loginUser.setOpenId(account.getOpenid());
         loginUser.setWeixinName(account.getNickname());
         loginUser.setHeadimgUrl(account.getHeadimgurl());
-        loginUserMap.put(openId, loginUser);
+        loginUserMap.put(accessToken, loginUser);
 
         return loginUser;
+    }
+
+    public static LoginUser getLoginUser(HttpServletRequest request){
+        String accessToken = CookieUtils.getCookie(request, "_act");
+        if(loginUserMap.containsKey(accessToken)){
+            return loginUserMap.get(accessToken);
+        }
+        return null;
     }
 }
