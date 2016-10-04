@@ -77,7 +77,7 @@ public class ClassDao extends DBUtil {
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE QuanwaiClass SET Progress =? " +
+            asyncRun.update("UPDATE QuanwaiClass SET Progress =?, Open=0 " +
                     "where Id=?", progress, classId);
 
         } catch (SQLException e) {

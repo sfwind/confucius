@@ -18,6 +18,8 @@ public class CloseOrderJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Scheduled(cron="${closeOrderJob.cron}")
     public void work(){
-//        payService.closeOrder();
+//        logger.info("CloseOrderJob start");
+        payService.closeOrder();
+//        logger.info("CloseOrderJob end");
     }
 }
