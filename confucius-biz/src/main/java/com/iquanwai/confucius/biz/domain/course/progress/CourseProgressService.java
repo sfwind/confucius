@@ -20,12 +20,10 @@ public interface CourseProgressService {
 
     /**
      * 获取课程信息
-     * @param courseId 课程id
+     * @param classMember 学员详情
      * @param week 加载当前周的章节
-     * @param personalProgress 个人当前进度
-     * @param classProgress 课程进度
      * */
-    Course loadCourse(int courseId, int week, List<Integer> personalProgress,int classProgress);
+    Course loadCourse(ClassMember classMember, int week);
 
     /**
      * 每天定时更新每个班级的进度

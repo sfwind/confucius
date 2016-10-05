@@ -88,24 +88,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("{} is invalid", chapterId);
             return null;
         }
-        String progress = "";
-        boolean mark = false;
-        if(StringUtils.isEmpty(classMember.getProgress())){
-            progress = chapterId +"";
-        }else{
-            String[] progressArr = classMember.getProgress().split(",");
-            for(String prog:progressArr){
-                if(prog.equals(String.valueOf(chapter.getSequence()))){
-                    mark = true;
-                }
-            }
-            if(!mark) {
-                progress = progress+","+chapterId;
-            }
-        }
-        if(!mark) {
-            classMemberDao.progress(openid, chapterId, progress);
-        }
 
         Integer totalPage = pageDao.chapterPageNumber(chapterId);
         chapter.setTotalPage(totalPage);
@@ -212,7 +194,12 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     public void completeChapter(String openid, Integer chapterId) {
-
+        Chapter chapter = chapterDao.load(Chapter.class, chapterId);
+        ClassMember classMember = classMemberDao.activeCourse(openid);
+        String progress = progressMark(classMember.getComplete(), chapter.getSequence());
+        if(progress!=null) {
+            classMemberDao.complete(openid, classMember.getClassId(), progress);
+        }
     }
 
     public void remark(String openid, Integer classId, Integer homeworkId, boolean excellent, boolean fail) {
@@ -222,6 +209,48 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public void markPage(String openid, Integer chapterId, Integer pageSequence) {
         currentChapterPageDao.updatePage(openid, chapterId, pageSequence);
+        //判断第一页
+        if(pageSequence==1){
+            progressChapter(openid, chapterId);
+        }
+
+        //判断是否最后一页
+        int count = pageDao.chapterPageNumber(chapterId);
+        if(count==pageSequence){
+            completeChapter(openid, chapterId);
+        }
+    }
+
+    private void progressChapter(String openid, Integer chapterId) {
+        Chapter chapter = chapterDao.load(Chapter.class, chapterId);
+        ClassMember classMember = classMemberDao.activeCourse(openid);
+
+        String progress = progressMark(classMember.getProgress(), chapter.getSequence());
+        if(progress!=null) {
+            classMemberDao.progress(openid, classMember.getClassId(), progress);
+        }
+    }
+
+    private String progressMark(String progress, Integer sequence){
+        boolean mark = false;
+        if(StringUtils.isEmpty(progress)){
+            progress = sequence +"";
+        }else{
+            String[] progressArr = progress.split(",");
+            for(String prog:progressArr){
+                if(prog.equals(String.valueOf(sequence))){
+                    mark = true;
+                }
+            }
+            if(!mark) {
+                progress = progress+","+sequence;
+            }
+        }
+        if(!mark){
+            return progress;
+        }else{
+            return null;
+        }
     }
 
     private int getScore(boolean excellent, boolean fail) {

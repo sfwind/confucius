@@ -196,27 +196,6 @@ public class ChapterController {
         }
     }
 
-    @RequestMapping(value="/complete/{chapterId}", method= RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> completeChapter(LoginUser loginUser,
-                                                              @PathVariable("chapterId") Integer chapterId){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            courseStudyService.completeChapter(loginUser.getOpenId(), chapterId);
-
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("章节")
-                    .function("章节完成")
-                    .action("章节完成")
-                    .memo(chapterId+"");
-            operationLogService.log(operationLog);
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("回答问题失败", e);
-            return WebUtils.error("回答问题失败");
-        }
-    }
-
-
     @RequestMapping(value="/mark/page/{chapterId}/{sequence}", method= RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> markPage(LoginUser loginUser,
                                                                 @PathVariable("chapterId") Integer chapterId,

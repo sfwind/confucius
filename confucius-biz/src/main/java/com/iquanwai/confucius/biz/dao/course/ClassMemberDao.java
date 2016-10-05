@@ -52,6 +52,19 @@ public class ClassMemberDao extends DBUtil {
         }
     }
 
+    public void complete(String openid, Integer classId, String complete){
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+
+        try {
+            asyncRun.update("UPDATE ClassMember SET Complete =? " +
+                    "where Openid=? and ClassId=?", complete, openid, classId);
+
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public ClassMember getClassMember(Integer classId, String openid){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);

@@ -88,20 +88,8 @@ public class CourseController {
 
     private CoursePageDto getCourse(LoginUser loginUser, ClassMember classMember,
                                            int week) {
-        List<Integer> personalProgressList = Lists.newArrayList();
-        String personalProgress = classMember.getProgress();
-        if(personalProgress!=null) {
-            String[] progressArr = personalProgress.split(",");
-            for(int i=0;i<progressArr.length;i++){
-                try {
-                    personalProgressList.add(Integer.valueOf(progressArr[i]));
-                }catch (NumberFormatException e){
-                    LOGGER.error(loginUser.getOpenId()+" progress is abnormal,"+progressArr[i]+" is not a number");
-                }
-            }
-        }
-        Course course = courseProgressService.loadCourse(classMember.getCourseId(), week,
-                personalProgressList, classMember.getClassProgress());
+
+        Course course = courseProgressService.loadCourse(classMember, week);
         //设置看到某一页
         courseProgressService.personalChapterPage(loginUser.getOpenId(), course.getChapterList());
         CoursePageDto coursePageDto = new CoursePageDto();

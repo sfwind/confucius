@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by justin on 16/8/29.
@@ -64,11 +61,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return classMember;
     }
 
-    public Course loadCourse(int courseId, int week, List<Integer> personalProgress, int classProgress) {
-        Course course = courseDao.load(Course.class, courseId);
-        List<Chapter> chapters = chapterDao.loadChapters(courseId, week);
+    public Course loadCourse(ClassMember classMember, int week) {
+        Course course = courseDao.load(Course.class, classMember.getCourseId());
+        List<Chapter> chapters = chapterDao.loadChapters(classMember.getCourseId(), week);
 
-        course.setChapterList(buildChapter(chapters, personalProgress, classProgress));
+        course.setChapterList(buildChapter(chapters, classMember.getComplete(), classMember.getClassProgress()));
 
         return course;
     }
@@ -179,11 +176,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
     }
 
-    private List<Chapter> buildChapter(List<Chapter> chapters, final List<Integer> personalProgress, final int classProgress) {
+    private List<Chapter> buildChapter(List<Chapter> chapters, final String personalCompleteProgress, final int classProgress) {
         return Lists.transform(chapters, new Function<Chapter, Chapter>() {
             public Chapter apply(Chapter chapter) {
                 boolean unlock = checkUnlock(chapter, classProgress);
-                boolean complete = checkComplete(chapter, personalProgress);
+                boolean complete = checkComplete(chapter, personalCompleteProgress);
                 chapter.setIcon(CourseType.getUrl(chapter.getType(), unlock, complete));
                 chapter.setUnlock(unlock);
                 chapter.setComplete(complete);
@@ -192,11 +189,21 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         });
     }
 
-    private boolean checkComplete(Chapter chapter, List<Integer> personalProgress) {
+    private boolean checkComplete(Chapter chapter, String personalProgress) {
         Assert.notNull(chapter, "chapter不能为空");
-        Assert.notNull(personalProgress, "个人进度不能为空");
-        if(personalProgress.contains(chapter.getId())){
-            return true;
+        if(personalProgress==null){
+            return false;
+        }
+
+        String[] arr = personalProgress.split(",");
+        for(String completeChapter:arr){
+            try {
+                if (Integer.valueOf(completeChapter).equals(chapter.getSequence())) {
+                    return true;
+                }
+            }catch (NumberFormatException e){
+                logger.error("{} is invalid", personalProgress);
+            }
         }
 
         return false;
