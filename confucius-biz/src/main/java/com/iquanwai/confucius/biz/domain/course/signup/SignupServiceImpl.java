@@ -242,6 +242,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {
+        logger.info("发送欢迎消息给{}", openid);
         String key = ConfigUtils.signupSuccessMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTouser(openid);
@@ -258,7 +259,7 @@ public class SignupServiceImpl implements SignupService {
         data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
         data.put("keyword2",new TemplateMessage.Keyword(quanwaiClass.getOpenTime()+"-"+quanwaiClass.getCloseTime()));
 
-        String remark = "你的学号是"+classMember.getMemberId()+"课程开始前先加入训练微信群，去认识一下你的同伴、助教和圈圈吧，点击查看群二维码。";
+        String remark = "你的学号是"+classMember.getMemberId()+"\n课程开始前先加入训练微信群，去认识一下你的同伴、助教和圈圈吧。\n点击查看群二维码。";
         data.put("remark",new TemplateMessage.Keyword(remark));
         templateMessage.setUrl(quanwaiClass.getWeixinGroup());
         templateMessageService.sendMessage(templateMessage);
