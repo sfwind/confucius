@@ -95,7 +95,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }else{
             String[] progressArr = classMember.getProgress().split(",");
             for(String prog:progressArr){
-                if(prog.equals(String.valueOf(chapterId))){
+                if(prog.equals(String.valueOf(chapter.getSequence()))){
                     mark = true;
                 }
             }
@@ -212,14 +212,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     public void completeChapter(String openid, Integer chapterId) {
-        ClassMember classMember = classMemberDao.activeCourse(openid);
-        String progress = "";
-        if(StringUtils.isEmpty(classMember.getProgress())){
-            progress = chapterId +"";
-        }else{
-            progress = progress + ","+ chapterId;
-        }
-        classMemberDao.progress(openid, classMember.getClassId(), progress);
+
     }
 
     public void remark(String openid, Integer classId, Integer homeworkId, boolean excellent, boolean fail) {
@@ -229,10 +222,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public void markPage(String openid, Integer chapterId, Integer pageSequence) {
         currentChapterPageDao.updatePage(openid, chapterId, pageSequence);
-        Integer page = pageDao.chapterPageNumber(chapterId);
-        if(page.equals(pageSequence)){
-            completeChapter(openid, chapterId);
-        }
     }
 
     private int getScore(boolean excellent, boolean fail) {

@@ -139,7 +139,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     }
 
     public void quitClass(String openid) {
-        Integer classId = signupMap.get(openid);
+        Integer classId = signupMap.remove(openid);
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
         if(quanwaiClass==null){
             return;

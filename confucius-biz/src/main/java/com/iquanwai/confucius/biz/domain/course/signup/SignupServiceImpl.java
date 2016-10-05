@@ -23,8 +23,10 @@ import javax.annotation.PostConstruct;
 import java.awt.*;
 import java.lang.ref.SoftReference;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by justin on 16/9/10.
@@ -55,6 +57,11 @@ public class SignupServiceImpl implements SignupService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
+     * 每个人的待付费班级id
+     * */
+    private Map<String, Integer> payMap = Maps.newConcurrentMap();
+
+    /**
      * 支付二维码的高度
      * */
     private static int QRCODE_HEIGHT = 200;
@@ -71,9 +78,28 @@ public class SignupServiceImpl implements SignupService {
     private Map<Integer, SoftReference<QuanwaiClass>> classMap = Maps.newHashMap();
     private Map<Integer, SoftReference<CourseIntroduction>> courseMap = Maps.newHashMap();
 
+    @PostConstruct
+    public void initClass(){
+        List<QuanwaiClass> quanwaiClassList = classDao.openClass();
+        List<Integer> openClass = Lists.newArrayList(); // 开放报名的班级id
+        payMap.clear();
+        //统计待付款的人数
+        for (QuanwaiClass quanwaiClass : quanwaiClassList) {
+            Integer classId = quanwaiClass.getId();
+            openClass.add(classId);
+        }
+        List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
+        for(CourseOrder courseOrder:courseOrders){
+            payMap.put(courseOrder.getOpenid(), courseOrder.getClassId());
+        }
+
+        logger.info("init under payment map complete");
+    }
+
+
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
         if(!ConfigUtils.pressTestSwitch()) {
-            if (classMemberCountRepo.isEntry(openid)) {
+            if (classMemberCountRepo.isEntry(openid) && !payMap.containsKey(openid)) {
                 return new ImmutablePair(-3, 0);
             }
         }
@@ -103,7 +129,8 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setCourseName(course.getCourseName());
 
         courseOrderDao.insert(courseOrder);
-
+        //加入待付款列表
+        payMap.put(openid, classId);
         return orderId;
     }
 
@@ -193,6 +220,8 @@ public class SignupServiceImpl implements SignupService {
         String memberId = memberId(courseId, classId);
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
+        //从待付款列表中去除
+        payMap.remove(openid);
         //发送录取消息
         sendWelcomeMsg(courseId, openid, classId);
         return memberId;
@@ -208,6 +237,7 @@ public class SignupServiceImpl implements SignupService {
 
     public void giveupSignup(String openid, String orderId) {
         courseOrderDao.closeOrder(orderId);
+        payMap.remove(openid);
         classMemberCountRepo.quitClass(openid);
     }
 

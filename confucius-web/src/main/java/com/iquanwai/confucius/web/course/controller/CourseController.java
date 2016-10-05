@@ -48,7 +48,8 @@ public class CourseController {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
             }
 
-            CoursePageDto course = getCourse(loginUser, classMember, classMember.getProgressWeek());
+            int week = getProgressWeek(classMember);
+            CoursePageDto course = getCourse(loginUser, classMember, week);
             if(course==null){
                 return WebUtils.error("获取当前课程失败");
             }
@@ -63,6 +64,26 @@ public class CourseController {
             LOGGER.error("获取当前课程失败", e);
             return WebUtils.error("获取当前课程失败");
         }
+    }
+
+    private int getProgressWeek(ClassMember classMember) {
+        String personalProgress = classMember.getProgress();
+        int last = 0;
+        if(personalProgress!=null) {
+            String[] progressArr = personalProgress.split(",");
+            for(int i=0;i<progressArr.length;i++){
+                try {
+                    int that = Integer.valueOf(progressArr[i]);
+                    if(that>last){
+                        last = that;
+                    }
+                }catch (NumberFormatException e){
+                    LOGGER.error(classMember.getOpenId()+" progress is abnormal,"+progressArr[i]+" is not a number");
+                }
+            }
+        }
+
+        return last/7+1;
     }
 
     private CoursePageDto getCourse(LoginUser loginUser, ClassMember classMember,
