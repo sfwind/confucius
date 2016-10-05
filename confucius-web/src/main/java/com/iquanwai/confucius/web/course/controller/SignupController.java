@@ -65,7 +65,7 @@ public class SignupController {
             }
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
             //去掉群二维码
-            quanwaiClass.setWeixinGroup(null);
+            //quanwaiClass.setWeixinGroup(null);
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
