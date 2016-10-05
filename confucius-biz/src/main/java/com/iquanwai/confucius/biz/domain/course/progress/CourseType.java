@@ -24,7 +24,7 @@ public class CourseType {
     static{
         iconLockMap.put(CHALLENGE, PICURL_PREFIX+"锁定图标.png");
         iconLockMap.put(HOMEWORK, PICURL_PREFIX+"锁定图标.png");
-        iconLockMap.put(ASSESSMENT, PICURL_PREFIX+"群点评解锁图标.png");
+        iconLockMap.put(ASSESSMENT, PICURL_PREFIX+"群点评锁定图标.png");
         iconLockMap.put(RELAX, PICURL_PREFIX+"休息日图标.png");
         iconLockMap.put(GRADUATE, PICURL_PREFIX+"毕业锁定图标.png");
 
@@ -36,9 +36,9 @@ public class CourseType {
 
         iconCompleteMap.put(CHALLENGE, PICURL_PREFIX+"完成图标.png");
         iconCompleteMap.put(HOMEWORK, PICURL_PREFIX+"完成图标.png");
-        iconCompleteMap.put(ASSESSMENT, PICURL_PREFIX+"群点评解锁图标.png");
+        iconCompleteMap.put(ASSESSMENT, PICURL_PREFIX+"群点评锁定图标.png");
         iconCompleteMap.put(RELAX, PICURL_PREFIX+"休息日图标.png");
-        iconCompleteMap.put(GRADUATE, PICURL_PREFIX+"毕业解锁图标.png");
+        iconCompleteMap.put(GRADUATE, PICURL_PREFIX+"毕业锁定图标.png");
     }
 
     public static String getUrl(int type, boolean unlock, boolean complete){
