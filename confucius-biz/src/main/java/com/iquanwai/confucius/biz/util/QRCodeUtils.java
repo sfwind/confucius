@@ -27,8 +27,8 @@ import java.util.Vector;
 public class QRCodeUtils {
     static Logger logger = LoggerFactory.getLogger(QRCodeUtils.class);
 
-    private static final int HEIGHT = 300;
-    private static final int WIDTH = 300;
+    private static final int HEIGHT = 400;
+    private static final int WIDTH = 400;
     private static final int IMAGE_WIDTH = 70;
     private static final int IMAGE_HEIGHT = 70;
     private static final int IMAGE_HALF_WIDTH = IMAGE_WIDTH / 2;
