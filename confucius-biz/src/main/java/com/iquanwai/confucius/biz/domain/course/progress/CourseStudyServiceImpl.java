@@ -133,7 +133,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
                 homework.setVoice(ConfigUtils.domainName() + homework.getVoice());
             }
             if(submit==null){
-                String url = "/homework/load/"+ CommonUtils.randomString(6);
+                String url = "/static/h?id="+ CommonUtils.randomString(6);
                 homework.setPcurl(ConfigUtils.domainName()+url);
                 homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url);
             }else{
