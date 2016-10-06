@@ -56,7 +56,8 @@ public class LogAspect {
         long endTimeMillis = System.currentTimeMillis();
         outputParamMap.put("result", result);
 
-        if(ConfigUtils.logDetail()) {
+        //超长请求也需要打印日志
+        if(ConfigUtils.logDetail()||endTimeMillis-startTimeMillis>=1000) {
             Gson gson = new Gson();
             String optTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTimeMillis);
             LoginUser loginUser = LoginUserResolver.getLoginUser(request);

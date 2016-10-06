@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.domain.course.signup.ClassMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.*;
@@ -34,6 +35,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private CurrentChapterPageDao currentChapterPageDao;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private ClassMemberCountRepo classMemberCountRepo;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -88,6 +91,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 }
             }
         }
+        classMemberCountRepo.initClass();
     }
 
     public void personalChapterPage(String openid, List<Chapter> chapters) {

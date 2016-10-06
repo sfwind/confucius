@@ -76,6 +76,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                         classList.add(classId);
                     }
                     remainingCount.put(classId, quanwaiClass.getLimit());
+                    logger.info("init classId {} has {} quota total", classId, quanwaiClass.getLimit());
                 }
             }
             //统计已付款和待付款的人数
@@ -98,6 +99,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                 Integer remaining = remainingCount.get(classId);
                 int rest = (remaining - maps.get(classId).get())<0?0:(remaining - maps.get(classId).get());
                 remainingCount.put(classId, rest);
+                logger.info("init classId {} has {} quota left", classId, rest);
             }
         }
         logger.info("init class sign up number complete");

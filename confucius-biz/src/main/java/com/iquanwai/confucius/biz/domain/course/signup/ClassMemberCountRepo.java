@@ -7,6 +7,11 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public interface ClassMemberCountRepo {
     /**
+     * 课程人数初始化
+     * */
+    void initClass();
+
+    /**
      * 是否报名
      * @param openid
      * TODO:只能同时报一门课

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         String url = SEND_MESSAGE_URL;
         String json = new Gson().toJson(templateMessage);
         String body = restfulHelper.post(url, json);
-        // TODO 记录messageid
-        return !CommonUtils.isError(body);
+
+        return StringUtils.isNotEmpty(body);
     }
 
     public String getTemplateId(String templateShortId) {
@@ -32,9 +33,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         String url = SEND_MESSAGE_URL;
         String json = new Gson().toJson(map);
         String body = restfulHelper.post(url, json);
-        if(CommonUtils.isError(body)){
-            return "";
-        }
+
         Map<String, Object> response = CommonUtils.jsonToMap(body);
         return (String)response.get("template_id");
     }

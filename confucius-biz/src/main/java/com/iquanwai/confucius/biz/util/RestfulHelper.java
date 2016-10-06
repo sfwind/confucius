@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.util;
 
 import com.iquanwai.confucius.biz.domain.weixin.accessToken.AccessTokenService;
+import com.iquanwai.confucius.biz.exception.WeixinException;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,8 +43,23 @@ public class RestfulHelper {
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
-                if(CommonUtils.isError(body)){
-                    logger.error("execute {} return error, error message is {}", url, body);
+                try {
+                    if (CommonUtils.isError(body)) {
+                        logger.error("execute {} return error, error message is {}", url, body);
+                    }
+                }catch (WeixinException e){
+                    //refresh token and try again
+                    accessToken = accessTokenService.refreshAccessToken();
+                    url = requestUrl.replace("{access_token}", accessToken);
+                    request = new Request.Builder()
+                            .url(url)
+                            .post(RequestBody.create(JSON, json))
+                            .build();
+                    response = client.newCall(request).execute();
+                    body = response.body().string();
+                    if (CommonUtils.isError(body)) {
+                        logger.error("execute {} return error, error message is {}", url, body);
+                    }
                 }
                 return body;
             } catch (Exception e) {
@@ -88,8 +104,22 @@ public class RestfulHelper {
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
-                if(CommonUtils.isError(body)){
-                    logger.error("execute {} return error, error message is {}", url, body);
+                try {
+                    if (CommonUtils.isError(body)) {
+                        logger.error("execute {} return error, error message is {}", url, body);
+                    }
+                }catch (WeixinException e){
+                    //refresh token and try again
+                    accessToken = accessTokenService.refreshAccessToken();
+                    url = requestUrl.replace("{access_token}", accessToken);
+                    request = new Request.Builder()
+                            .url(url)
+                            .build();
+                    response = client.newCall(request).execute();
+                    body = response.body().string();
+                    if (CommonUtils.isError(body)) {
+                        logger.error("execute {} return error, error message is {}", url, body);
+                    }
                 }
                 return body;
             } catch (Exception e) {
