@@ -34,7 +34,7 @@ public class PCHomeworkController {
     @RequestMapping("/load/{url}")
     public ResponseEntity<Map<String, Object>> loadHomework(@PathVariable("url") String url){
         try{
-            String completeUrl = "/homework/load/"+url;
+            String completeUrl = "/static/h?id="+url;
             HomeworkSubmit submit = courseStudyService.loadHomework(completeUrl);
 
             if(submit==null){
