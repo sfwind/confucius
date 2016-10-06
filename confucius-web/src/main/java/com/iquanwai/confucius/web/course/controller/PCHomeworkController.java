@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,19 +60,24 @@ public class PCHomeworkController {
         }
     }
 
-    @RequestMapping(value="/submit/{homeworkId}", method= RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> submit(@PathVariable("homeworkId") Integer homeworkId,
-            @RequestParam("openid") String openid,
+    @RequestMapping(value="/submit/{url}", method= RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> submit(@PathVariable("url") Integer url,
             @RequestBody HomeworkSubmitDto homeworkSubmitDto){
         try{
-            Assert.notNull(openid, "用户不能为空");
-            courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), openid, homeworkId);
+            String completeUrl = "/static/h?id="+url;
+            HomeworkSubmit submit = courseStudyService.loadHomework(completeUrl);
+
+            if(submit==null){
+                return WebUtils.error("提交作业失败");
+            }
+            String openid = submit.getSubmitOpenid();
+            courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), openid, submit.getHomeworkId());
 
             OperationLog operationLog = OperationLog.create().openid(openid)
                     .module("作业")
                     .function("做作业")
                     .action("PC提交作业")
-                    .memo(homeworkId+"");
+                    .memo(submit.getHomeworkId()+"");
             operationLogService.log(operationLog);
             return WebUtils.success();
         }catch (Exception e){
