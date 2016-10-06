@@ -61,7 +61,7 @@ public class PCHomeworkController {
     }
 
     @RequestMapping(value="/submit/{url}", method= RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> submit(@PathVariable("url") Integer url,
+    public ResponseEntity<Map<String, Object>> submit(@PathVariable("url") String url,
             @RequestBody HomeworkSubmitDto homeworkSubmitDto){
         try{
             String completeUrl = "/static/h?id="+url;
