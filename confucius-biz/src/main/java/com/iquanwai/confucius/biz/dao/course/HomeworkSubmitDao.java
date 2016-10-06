@@ -111,9 +111,9 @@ public class HomeworkSubmitDao extends DBUtil{
     }
 
     public void submit(int homeworkId, int classId, String openid, String submitContent){
-        if(submitted(openid, classId, homeworkId)){
-            return;
-        }
+//        if(submitted(openid, classId, homeworkId)){
+//            return;
+//        }
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
