@@ -36,6 +36,25 @@ public class CourseController {
     @Autowired
     private OperationLogService operationLogService;
 
+
+    @RequestMapping("/isentry/{courseId}")
+    public ResponseEntity<Map<String, Object>> isEntry(LoginUser loginUser,
+                                                       @PathVariable("courseId") Integer courseId){
+        try{
+            Assert.notNull(loginUser,"用户不能为空");
+            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+            if(classMember==null){
+                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
+                return WebUtils.result(false);
+            }
+
+            return WebUtils.result(true);
+        }catch (Exception e){
+            LOGGER.error("获取用户报名状态失败", e);
+            return WebUtils.error("获取用户报名状态失败");
+        }
+    }
+
     @RequestMapping("/load")
     public ResponseEntity<Map<String, Object>> loadCourse(LoginUser loginUser){
         try{
