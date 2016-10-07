@@ -90,14 +90,14 @@ public class HomeworkSubmitDao extends DBUtil{
         return null;
     }
 
-    public int insert(String openid, int classId, int homeworkId, String submitUrl) {
+    public int insert(String openid, int classId, int homeworkId, String submitUrl, String shortUrl) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "INSERT INTO HomeworkSubmit(SubmitOpenid, ClassId, HomeworkId, SubmitUrl) " +
-                "VALUES(?, ?, ?, ?)";
+        String insertSql = "INSERT INTO HomeworkSubmit(SubmitOpenid, ClassId, HomeworkId, SubmitUrl, ShortUrl) " +
+                "VALUES(?, ?, ?, ?, ?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
-                    openid, classId, homeworkId, submitUrl);
+                    openid, classId, homeworkId, submitUrl, shortUrl);
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -111,9 +111,9 @@ public class HomeworkSubmitDao extends DBUtil{
     }
 
     public void submit(int homeworkId, int classId, String openid, String submitContent){
-//        if(submitted(openid, classId, homeworkId)){
-//            return;
-//        }
+        if(submitted(openid, classId, homeworkId)){
+            return;
+        }
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 

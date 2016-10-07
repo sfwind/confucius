@@ -18,4 +18,5 @@ public class HomeworkSubmit {
     private Integer score; //作业分数
     private String remark; //作业评语
     private String submitUrl; //提交url
+    private String shortUrl; //提交短链接
 }

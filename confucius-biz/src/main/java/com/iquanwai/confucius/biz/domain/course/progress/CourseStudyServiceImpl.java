@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -40,11 +43,15 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private ClassMemberDao classMemberDao;
     @Autowired
     private CourseWeekDao courseWeekDao;
+    @Autowired
+    private RestfulHelper restfulHelper;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private String picUrlPrefix = ConfigUtils.domainName()+"/images/";
     private String audioUrlPrefix = ConfigUtils.domainName()+"/audio/";
+
+    private String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
 
     public Page loadPage(String openid, int chapterId, Integer pageSequence, Boolean lazyLoad) {
@@ -134,15 +141,26 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             }
             if(submit==null){
                 String url = "/static/h?id="+ CommonUtils.randomString(6);
-                homework.setPcurl(ConfigUtils.domainName()+url);
-                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url);
+                String shortUrl = generateShortUrl(ConfigUtils.domainName()+url);
+                homework.setPcurl(shortUrl);
+                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, shortUrl);
             }else{
                 if(submit.getSubmitUrl()!=null){
-                    homework.setPcurl(ConfigUtils.domainName()+submit.getSubmitUrl());
+                    homework.setPcurl(submit.getShortUrl());
                 }
             }
         }
         return homework;
+    }
+
+    private String generateShortUrl(String url) {
+        String requestUrl = shortUrlService;
+        try {
+            requestUrl = requestUrl + URLEncoder.encode(url, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+
+        }
+        return restfulHelper.getPlain(requestUrl);
     }
 
     public HomeworkSubmit loadHomework(String url) {

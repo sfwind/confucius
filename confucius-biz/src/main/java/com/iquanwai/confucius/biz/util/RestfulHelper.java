@@ -129,4 +129,22 @@ public class RestfulHelper {
         return "";
     }
 
+    public String getPlain(String requestUrl) {
+        if(StringUtils.isNotEmpty(requestUrl)) {
+            Request request = new Request.Builder()
+                    .url(requestUrl)
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                String body = response.body().string();
+
+                return body;
+            } catch (Exception e) {
+                logger.error("execute " + requestUrl + " error", e);
+            }
+        }
+        return "";
+    }
+
 }
