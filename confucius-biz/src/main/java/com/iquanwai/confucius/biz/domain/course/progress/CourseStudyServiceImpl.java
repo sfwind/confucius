@@ -116,7 +116,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             boolean submitted = questionSubmitDao.submitted(openid, classMember.getClassId(), questionId);
             question.setAnswered(submitted);
             //语音分析，拼接完整url
-            if(question.getAnalysisType()==2 && question.getAnalysis()!=null){
+            if(question.getAnalysisType()==3 && question.getAnalysis()!=null){
                 question.setAnalysis(audioUrlPrefix+question.getAnalysis());
             }
             List<Choice> choiceList = choiceDao.loadChoices(questionId);
