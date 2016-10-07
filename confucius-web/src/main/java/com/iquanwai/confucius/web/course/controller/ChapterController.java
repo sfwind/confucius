@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -181,6 +182,12 @@ public class ChapterController {
                                                       @RequestBody HomeworkSubmitDto homeworkSubmitDto){
         try{
             Assert.notNull(loginUser, "用户不能为空");
+            if(StringUtils.isEmpty(homeworkSubmitDto.getAnswer())){
+                return WebUtils.error("请写完后再提交");
+            }
+            if(homeworkSubmitDto.getAnswer().length()>10000){
+                return WebUtils.error("字数太长，请删减到10000字以下");
+            }
             courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), loginUser.getOpenId(), homeworkId);
 
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())

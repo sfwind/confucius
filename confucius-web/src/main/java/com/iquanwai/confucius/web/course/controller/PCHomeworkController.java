@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -65,6 +66,12 @@ public class PCHomeworkController {
 
             if(submit==null){
                 return WebUtils.error("提交作业失败");
+            }
+            if(StringUtils.isEmpty(homeworkSubmitDto.getAnswer())){
+                return WebUtils.error("请写完后再提交");
+            }
+            if(homeworkSubmitDto.getAnswer().length()>10000){
+                return WebUtils.error("字数太长，请删减到10000字以下");
             }
             String openid = submit.getSubmitOpenid();
             courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), openid, submit.getHomeworkId());
