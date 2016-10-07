@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,7 +43,7 @@ public class CourseController {
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), null);
             if(classMember==null){
                 LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
+                return WebUtils.error(220, ErrorMessageUtils.getErrmsg("course.load.nopaid"));
             }
 
             int week = getProgressWeek(classMember);
