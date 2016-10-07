@@ -54,6 +54,7 @@
             <mvc:exclude-mapping path="/wx/**" />
             <mvc:exclude-mapping path="/homework/**" />
             <mvc:exclude-mapping path="/static/**" />
+            <mvc:exclude-mapping path="/cache/**" />
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
     </mvc:interceptors>

@@ -13,4 +13,5 @@ public class Homework {
     private Integer point; //分值
     private String pcurl; //pc端打开url
     private boolean submitted; //是否提交过
+    private String content; //提交内容
 }

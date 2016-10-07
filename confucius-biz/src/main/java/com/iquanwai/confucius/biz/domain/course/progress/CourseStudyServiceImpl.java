@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.course.progress;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -12,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 16/8/31.
@@ -46,6 +50,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     @Autowired
     private RestfulHelper restfulHelper;
 
+    private Map<Integer, Question> questionMap = Maps.newConcurrentMap();
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private String picUrlPrefix = ConfigUtils.domainName()+"/images/";
@@ -53,6 +59,23 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
+
+    @PostConstruct
+    public void initQuestion(){
+        List<Question> questionList = questionDao.loadAll(Question.class);
+        List<Choice> choiceList = choiceDao.loadAll(Choice.class);
+        for(Question question:questionList){
+            List<Choice> choices = Lists.newArrayList();
+            for(Choice choice:choiceList){
+                if(choice.getQuestionId().equals(question.getId())){
+                    choices.add(choice);
+                }
+            }
+            question.setChoiceList(choices);
+            questionMap.put(question.getId(), question);
+        }
+
+    }
 
     public Page loadPage(String openid, int chapterId, Integer pageSequence, Boolean lazyLoad) {
         Assert.notNull(openid, "openid不能为空");
@@ -111,7 +134,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     public Question loadQuestion(String openid, int questionId) {
         Assert.notNull(openid, "openid不能为空");
         ClassMember classMember = classMemberDao.activeCourse(openid);
-        Question question = questionDao.load(Question.class, questionId);
+        Question question = questionMap.get(questionId);
         if(question!=null){
             boolean submitted = questionSubmitDao.submitted(openid, classMember.getClassId(), questionId);
             question.setAnswered(submitted);
@@ -119,7 +142,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             if(question.getAnalysisType()==3 && question.getAnalysis()!=null){
                 question.setAnalysis(audioUrlPrefix+question.getAnalysis());
             }
-            List<Choice> choiceList = choiceDao.loadChoices(questionId);
+            List<Choice> choiceList = question.getChoiceList();
             question.setChoiceList(choiceList);
         }
         return question;
@@ -148,6 +171,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
                 if(submit.getSubmitUrl()!=null){
                     homework.setPcurl(submit.getShortUrl());
                 }
+                homework.setContent(submit.getSubmitContent());
             }
         }
         return homework;
@@ -188,7 +212,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("{} has no active course", openid);
             return false;
         }
-        Question q = questionDao.load(Question.class, questionId);
+        Question q = questionMap.get(questionId);
         Integer score = score(q, choiceList);
         boolean right = false;
         if(score.equals(q.getPoint())){
@@ -284,7 +308,14 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private Integer score(Question question, List<Integer> choiceList) {
         Assert.notNull(choiceList, "选项不能为空");
-        List<Choice> right = choiceDao.loadRightChoices(question.getId());
+
+        List<Choice> all = question.getChoiceList();
+        List<Choice> right = Lists.newArrayList();
+        for(Choice choice:all){
+            if(choice.getRight()){
+                right.add(choice);
+            }
+        }
 
         for(Choice choice:right){
             if(!choiceList.contains(choice.getId())) {
@@ -300,5 +331,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
         return courseWeekDao.getCourseWeek(courseId, week);
+    }
+
+    public void reloadQuestion() {
+        initQuestion();
     }
 }

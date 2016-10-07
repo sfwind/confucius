@@ -73,5 +73,10 @@ public interface SignupService {
      * */
     void sendWelcomeMsg(Integer courseId, String openid, Integer classId);
 
+    /**
+     * 重新加载班级
+     * */
+    void reloadClass();
+
     String PAY_URL = "weixin://wxpay/bizpayurl?sign={sign}&appid={appid}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
 }

@@ -265,6 +265,11 @@ public class SignupServiceImpl implements SignupService {
         templateMessageService.sendMessage(templateMessage);
     }
 
+    public void reloadClass() {
+        initClass();
+        classMemberCountRepo.initClass();
+    }
+
     //生成学号 2位课程号2位班级号3位学号
     private String memberId(Integer courseId, Integer classId) {
         Integer classNumber = classDao.load(QuanwaiClass.class, classId).getClassNumber();
@@ -317,5 +322,6 @@ public class SignupServiceImpl implements SignupService {
         }
         logger.info("init white list complete");
     }
+
 
 }

@@ -92,4 +92,9 @@ public interface CourseStudyService {
      * 获取周主题
      * */
     CourseWeek loadCourseWeek(Integer courseId, Integer week);
+
+    /**
+     * 重新加载问题
+     * */
+    void reloadQuestion();
 }
