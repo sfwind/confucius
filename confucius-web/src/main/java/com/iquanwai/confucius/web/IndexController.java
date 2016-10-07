@@ -14,4 +14,9 @@ public class IndexController {
     public ModelAndView getIndex() {
         return new ModelAndView("course");
     }
+
+    @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
+    public ModelAndView getIntroductionIndex() {
+        return new ModelAndView("course");
+    }
 }
