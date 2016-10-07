@@ -73,6 +73,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             }
             question.setChoiceList(choices);
             questionMap.put(question.getId(), question);
+            //语音分析，拼接完整url
+            if(question.getAnalysisType()==3 && question.getAnalysis()!=null){
+                question.setAnalysis(audioUrlPrefix+question.getAnalysis());
+            }
         }
 
     }
@@ -138,12 +142,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         if(question!=null){
             boolean submitted = questionSubmitDao.submitted(openid, classMember.getClassId(), questionId);
             question.setAnswered(submitted);
-            //语音分析，拼接完整url
-            if(question.getAnalysisType()==3 && question.getAnalysis()!=null){
-                question.setAnalysis(audioUrlPrefix+question.getAnalysis());
-            }
-            List<Choice> choiceList = question.getChoiceList();
-            question.setChoiceList(choiceList);
         }
         return question;
     }
