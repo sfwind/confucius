@@ -8,7 +8,6 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.HomeworkReviewDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
-import com.iquanwai.confucius.web.course.dto.PCHomeworkDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,10 +49,7 @@ public class PCHomeworkController {
             if(homework==null){
                 return WebUtils.error("获取作业失败");
             }
-            PCHomeworkDto pcHomeworkDto = new PCHomeworkDto();
-            pcHomeworkDto.setOpenid(openid);
-            pcHomeworkDto.setHomework(homework);
-            return WebUtils.result(pcHomeworkDto);
+            return WebUtils.result(homework);
         }catch (Exception e){
             LOGGER.error("获取作业失败", e);
             return WebUtils.error("获取作业失败");
