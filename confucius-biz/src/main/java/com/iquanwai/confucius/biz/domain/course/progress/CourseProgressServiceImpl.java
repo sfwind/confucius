@@ -221,8 +221,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
 
         if(chapter.getType()==CourseType.RELAX||
-                chapter.getType()==CourseType.ASSESSMENT){
-            return true;
+                chapter.getType()==CourseType.ASSESSMENT||
+                chapter.getType()==CourseType.GRADUATE){
+            if(chapter.getStartDay()==classProgress && chapter.getEndDay()==classProgress) {
+                return true;
+            }
         }
 
         return false;
