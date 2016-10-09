@@ -45,10 +45,10 @@ public class CouponDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
-        String ids = StringUtils.join(couponIds, ",");
+        String questionMark = produceQuestionMark(couponIds.size());
         try {
             asyncRun.update("UPDATE Coupon SET Status =? " +
-                    "where Id in (?)", status, ids);
+                    "where Id in ("+questionMark+")", status, couponIds.toArray());
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

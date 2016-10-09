@@ -8,7 +8,6 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -85,10 +84,10 @@ public class CurrentChapterPageDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<CurrentChapterPage>> h = new BeanListHandler(CurrentChapterPage.class);
 
-        String chapterId = StringUtils.join(chapterIds, ",");
+        String questionMark = produceQuestionMark(chapterIds.size());
         try {
-            List<CurrentChapterPage> pages = run.query("SELECT * FROM CurrentChapterPage where Openid=? and ChapterId in (?)",
-                    h, openid, chapterId);
+            List<CurrentChapterPage> pages = run.query("SELECT * FROM CurrentChapterPage where Openid=? and ChapterId in ("+questionMark+")",
+                    h, openid, chapterIds.toArray());
 
             return pages;
         } catch (SQLException e) {

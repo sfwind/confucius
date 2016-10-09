@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.po.Material;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -27,6 +28,22 @@ public class MaterialDao extends DBUtil {
         try {
             List<Material> materialList = run.query("SELECT * FROM Material where PageId=? AND DEL = 0 order by Sequence",
                     h, pageId);
+            return materialList;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public List<Material> loadPageMaterials(List<Integer> pageIdList){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Material>> h = new BeanListHandler(Material.class);
+
+        String questionMark = produceQuestionMark(pageIdList.size());
+        try {
+            List<Material> materialList = run.query("SELECT * FROM Material where PageId in ("+questionMark+") AND DEL = 0",
+                    h, pageIdList.toArray());
             return materialList;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

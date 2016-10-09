@@ -35,6 +35,20 @@ public class ChapterDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<Chapter> loadChapters(int courseId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Chapter>> h = new BeanListHandler(Chapter.class);
+
+        try {
+            List<Chapter> chapterList = run.query("SELECT * FROM Chapter where CourseId=?", h, courseId);
+            return chapterList;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
     public Chapter getChapterByStartDay(Integer courseId, int startDay){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<Chapter> h = new BeanHandler(Chapter.class);

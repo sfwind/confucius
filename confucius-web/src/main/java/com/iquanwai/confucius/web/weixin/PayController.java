@@ -1,9 +1,11 @@
 package com.iquanwai.confucius.web.weixin;
 
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
+import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +28,8 @@ import java.io.IOException;
 public class PayController {
     @Autowired
     private PayService payService;
+    @Autowired
+    private SignupService signupService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -66,9 +70,12 @@ public class PayController {
         LOGGER.info(payCallback.toString());
         try {
             payService.handlePayResult(payCallback);
+            CourseOrder courseOrder = signupService.getCourseOrder(payCallback.getOut_trade_no());
+            signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
         }catch (Exception e){
             LOGGER.error("支付结果回调处理失败", e);
         }
+
         response.setHeader("Content-Type", "application/xml");
         response.getWriter().print(SUCCESS_RETURN);
         response.flushBuffer();
