@@ -11,6 +11,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by justin on 16/8/7.
@@ -113,4 +114,8 @@ public class CommonUtils {
         return MessageDigestHelper.getMD5String(digest);
     }
 
+    public static String filterEmoji(String source) {
+        Pattern emoji = Pattern.compile("[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]", Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
+        return source.replaceAll(emoji.pattern(), "[表情]");
+    }
 }
