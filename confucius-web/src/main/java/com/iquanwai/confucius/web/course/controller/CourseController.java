@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.CoursePageDto;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class CourseController {
     private int getProgressWeek(ClassMember classMember) {
         String personalProgress = classMember.getProgress();
         int last = 0;
-        if(personalProgress!=null) {
+        if(StringUtils.isNotEmpty(personalProgress)) {
             String[] progressArr = personalProgress.split(",");
             for(int i=0;i<progressArr.length;i++){
                 try {

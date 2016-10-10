@@ -82,6 +82,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             //统计已付款和待付款的人数
             List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
             for(CourseOrder courseOrder:courseOrders){
+                if(signupMap.get(courseOrder.getOpenid())!=null){
+                    continue;
+                }
                 Integer classId = courseOrder.getClassId();
                 AtomicInteger value = maps.get(classId);
 
@@ -114,24 +117,29 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             }
             int remain = 0;
             boolean isEntry = false; //是否已经进入某班
-            Integer entryId = 0;
+            Integer entryId = signupMap.get(openid);
             //轮询所有班级，查看未报满的
-            for(Integer classId:openClass){
-                int remainingNumber = remainingCount.get(classId);
-                if(remainingNumber<=0){
-                    continue;
-                }else{
-                    if(!isEntry) {
-                        //人数-1，记录班级id，标记分配进入某班
-                        remainingNumber--;
-                        remainingCount.put(classId, remainingNumber);
-                        signupMap.put(openid, classId);
-                        entryId = classId;
-                        isEntry = true;
+            if(entryId==null){
+                for(Integer classId:openClass){
+                    int remainingNumber = remainingCount.get(classId);
+                    if(remainingNumber<=0){
+                        continue;
+                    }else{
+                        if(!isEntry) {
+                            //人数-1，记录班级id，标记分配进入某班
+                            remainingNumber--;
+                            remainingCount.put(classId, remainingNumber);
+                            signupMap.put(openid, classId);
+                            entryId = classId;
+                            isEntry = true;
+                        }
                     }
+                    remain = remain+remainingNumber;
                 }
-                remain = remain+remainingNumber;
+            }else{
+                isEntry = true;
             }
+
             //找到未报满的班级，完成预报名
             if(isEntry) {
                 return new ImmutablePair<Integer, Integer>(remain, entryId);

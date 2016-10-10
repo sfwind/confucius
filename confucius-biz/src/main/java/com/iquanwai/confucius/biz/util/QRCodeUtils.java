@@ -111,7 +111,7 @@ public class QRCodeUtils {
 //            int y = (image.getHeight() - heightLogo);
             //开始绘制图片
             g.drawImage(logo, x, y, widthLogo, heightLogo, null);
-            g.drawRoundRect(x, y, widthLogo, heightLogo, 15, 15);
+//            g.drawRoundRect(x, y, widthLogo, heightLogo, 15, 15);
             g.setStroke(new BasicStroke(logoConfig.getBorder()));
             g.setColor(logoConfig.getBorderColor());
             g.drawRect(x, y, widthLogo, heightLogo);
@@ -288,13 +288,30 @@ public class QRCodeUtils {
         BitMatrix matrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE,
                 width, height, hint);
 
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
+        matrix = deleteWhite(matrix);
+        BufferedImage image = new BufferedImage(matrix.getWidth(), matrix.getHeight(), BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < matrix.getWidth(); x++) {
+            for (int y = 0; y < matrix.getHeight(); y++) {
                 image.setRGB(x, y, matrix.get(x, y) ? 0xff000000 : 0xfffffff);
             }
         }
         return image;
+    }
+
+    private static BitMatrix deleteWhite(BitMatrix matrix){
+        int[] rec = matrix.getEnclosingRectangle();
+        int resWidth = rec[2] + 1;
+        int resHeight = rec[3] + 1;
+
+        BitMatrix resMatrix = new BitMatrix(resWidth, resHeight);
+        resMatrix.clear();
+        for (int i = 0; i < resWidth; i++) {
+            for (int j = 0; j < resHeight; j++) {
+                if (matrix.get(i + rec[0], j + rec[1]))
+                    resMatrix.set(i, j);
+            }
+        }
+        return resMatrix;
     }
 
     private static BufferedImage scale(InputStream srcImageFile, int height,

@@ -238,7 +238,12 @@ public class SignupServiceImpl implements SignupService {
     public void giveupSignup(String openid, String orderId) {
         courseOrderDao.closeOrder(orderId);
         payMap.remove(openid);
-        classMemberCountRepo.quitClass(openid);
+        CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
+        ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), openid);
+        //已经报名成功的学员不需要退班
+        if(classMember==null) {
+            classMemberCountRepo.quitClass(openid);
+        }
     }
 
     public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {
@@ -255,11 +260,11 @@ public class SignupServiceImpl implements SignupService {
         Course course = courseDao.load(Course.class, courseId);
 
 
-        data.put("first",new TemplateMessage.Keyword("你已成功报名圈外训练营"));
+        data.put("first",new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
         data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
         data.put("keyword2",new TemplateMessage.Keyword(quanwaiClass.getOpenTime()+"-"+quanwaiClass.getCloseTime()));
 
-        String remark = "你的学号是"+classMember.getMemberId()+"\n课程开始前先加入训练微信群，去认识一下你的同伴、助教和圈圈吧。\n点击查看群二维码。";
+        String remark = "你的学号是"+classMember.getMemberId()+"\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
         data.put("remark",new TemplateMessage.Keyword(remark));
         templateMessage.setUrl(quanwaiClass.getWeixinGroup());
         templateMessageService.sendMessage(templateMessage);

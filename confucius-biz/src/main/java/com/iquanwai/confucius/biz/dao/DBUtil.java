@@ -76,4 +76,16 @@ public class DBUtil {
         return -1L;
     }
 
+    protected String produceQuestionMark(int size){
+        if(size==0){
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<size;i++){
+            sb.append("?,");
+        }
+
+        return sb.deleteCharAt(sb.length()-1).toString();
+    }
+
 }

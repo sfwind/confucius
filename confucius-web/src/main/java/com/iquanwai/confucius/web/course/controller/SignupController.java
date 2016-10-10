@@ -101,7 +101,7 @@ public class SignupController {
                 LOGGER.error("订单状态：{}", courseOrder.getStatus());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
-            signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
+//            signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
         }catch (Exception e){
             LOGGER.error("支付校验失败", e);
             return WebUtils.error("报名失败");

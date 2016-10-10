@@ -49,6 +49,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private CourseWeekDao courseWeekDao;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private ClassDao classDao;
 
     private Map<Integer, Question> questionMap = Maps.newConcurrentMap();
 
@@ -198,6 +200,40 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         ClassMember classMember = classMemberDao.activeCourse(openid);
         if(classMember!=null) {
             homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
+
+            completeHomework(homeworkId, classMember);
+        }
+    }
+
+    //完成作业章节
+    private void completeHomework(Integer homeworkId, ClassMember classMember) {
+        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
+        List<Chapter> chapters = chapterDao.loadChapters(quanwaiClass.getCourseId());
+        List<Chapter> homework = Lists.newArrayList();
+        for(Chapter chapter:chapters){
+            if(chapter.getType()== CourseType.HOMEWORK){
+                homework.add(chapter);
+            }
+        }
+        List<Integer> chapterIds = Lists.newArrayList();
+        for(Chapter chapter:homework){
+            chapterIds.add(chapter.getId());
+        }
+
+        Map<Integer, Integer> pageChapterMap = Maps.newHashMap();
+        List<Page> pages = pageDao.loadPages(chapterIds);
+        List<Integer> pageIds = Lists.newArrayList();
+        for(Page page:pages){
+            pageIds.add(page.getId());
+            pageChapterMap.put(page.getId(), page.getChapterId());
+        }
+
+        List<Material> materials = materialDao.loadPageMaterials(pageIds);
+        for(Material material:materials){
+            if(homeworkId.toString().equals(material.getContent())){
+                Chapter chapter = chapterDao.load(Chapter.class, pageChapterMap.get(material.getPageId()));
+                completeChapter(classMember.getOpenId(), chapter);
+            }
         }
     }
 
@@ -235,6 +271,13 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public void completeChapter(String openid, Integer chapterId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
+        if(chapter.getType()==CourseType.HOMEWORK){
+            return;
+        }
+        completeChapter(openid, chapter);
+    }
+
+    public void completeChapter(String openid, Chapter chapter) {
         ClassMember classMember = classMemberDao.activeCourse(openid);
         String progress = progressMark(classMember.getComplete(), chapter.getSequence());
         if(progress!=null) {

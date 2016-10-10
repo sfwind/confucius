@@ -3,21 +3,16 @@ package com.iquanwai.confucius.biz.dao.course;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.CurrentChapterPage;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by justin on 16/9/3.
@@ -46,15 +41,14 @@ public class CurrentChapterPageDao extends DBUtil {
 
     public void updatePage(String openid, int chapterId, int pageSequence){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         Integer value = currentPage(openid, chapterId);
         if(value==null){
-            insert(openid, chapterId, pageSequence, asyncRun);
+            insert(openid, chapterId, pageSequence, run);
         }else{
             String updateSql = "UPDATE CurrentChapterPage SET PageSequence=? WHERE Openid=? AND ChapterId=? ";
             try {
-                asyncRun.update(updateSql,
+                run.update(updateSql,
                         pageSequence, openid, chapterId);
             } catch (SQLException e) {
                 logger.error(e.getLocalizedMessage(), e);
@@ -62,19 +56,15 @@ public class CurrentChapterPageDao extends DBUtil {
         }
     }
 
-    public int insert(String openid, int chapterId, int pageSequence, AsyncQueryRunner asyncRun) {
+    public int insert(String openid, int chapterId, int pageSequence, QueryRunner run) {
         String insertSql = "INSERT INTO CurrentChapterPage(Openid, ChapterId, PageSequence) " +
                 "VALUES(?, ?, ?)";
         try {
-            Future<Integer> result = asyncRun.update(insertSql,
+            Integer result = run.update(insertSql,
                     openid, chapterId, pageSequence);
-            return result.get();
+            return result;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e) {
-            // ignore
-        } catch (ExecutionException e) {
-            logger.error(e.getMessage(), e);
         }
 
         return -1;
@@ -85,10 +75,13 @@ public class CurrentChapterPageDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<CurrentChapterPage>> h = new BeanListHandler(CurrentChapterPage.class);
 
-        String chapterId = StringUtils.join(chapterIds, ",");
+        String questionMark = produceQuestionMark(chapterIds.size());
+        List<Object> objects = Lists.newArrayList();
+        objects.add(openid);
+        objects.addAll(chapterIds);
         try {
-            List<CurrentChapterPage> pages = run.query("SELECT * FROM CurrentChapterPage where Openid=? and ChapterId in (?)",
-                    h, openid, chapterId);
+            List<CurrentChapterPage> pages = run.query("SELECT * FROM CurrentChapterPage where Openid=? and ChapterId in ("+questionMark+")",
+                    h, objects.toArray());
 
             return pages;
         } catch (SQLException e) {
