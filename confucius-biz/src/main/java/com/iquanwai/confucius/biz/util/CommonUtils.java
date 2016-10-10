@@ -68,14 +68,6 @@ public class CommonUtils {
         return false;
     }
 
-    public static String appendAccessToken(String url, String accessToken){
-        if(url.contains("?")){
-            return url+"&accessToken="+accessToken;
-        }else{
-            return url+"?accessToken="+accessToken;
-        }
-    }
-
     public static String jsSign(final Map<String, String> map) {
         if (map == null) {
             return "";

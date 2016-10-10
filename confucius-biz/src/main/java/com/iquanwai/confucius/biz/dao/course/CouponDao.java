@@ -7,7 +7,6 @@ import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -45,10 +44,13 @@ public class CouponDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
+        List<Object> objects = Lists.newArrayList();
+        objects.add(status);
+        objects.addAll(couponIds);
         String questionMark = produceQuestionMark(couponIds.size());
         try {
             asyncRun.update("UPDATE Coupon SET Status =? " +
-                    "where Id in ("+questionMark+")", status, couponIds.toArray());
+                    "where Id in ("+questionMark+")", objects.toArray());
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

@@ -238,7 +238,12 @@ public class SignupServiceImpl implements SignupService {
     public void giveupSignup(String openid, String orderId) {
         courseOrderDao.closeOrder(orderId);
         payMap.remove(openid);
-        classMemberCountRepo.quitClass(openid);
+        CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
+        ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), openid);
+        //已经报名成功的学员不需要退班
+        if(classMember==null) {
+            classMemberCountRepo.quitClass(openid);
+        }
     }
 
     public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {

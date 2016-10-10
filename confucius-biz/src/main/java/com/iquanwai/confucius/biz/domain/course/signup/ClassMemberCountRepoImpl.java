@@ -82,6 +82,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             //统计已付款和待付款的人数
             List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
             for(CourseOrder courseOrder:courseOrders){
+                if(signupMap.get(courseOrder.getOpenid())!=null){
+                    continue;
+                }
                 Integer classId = courseOrder.getClassId();
                 AtomicInteger value = maps.get(classId);
 

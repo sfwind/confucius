@@ -14,6 +14,6 @@ public class SignupServiceTest extends TestBase {
 
     @Test
     public void sendWelcomeMessageTest(){
-        signupService.sendWelcomeMsg(1, "o5h6ywlXxHLmoGrLzH9Nt7uyoHbM", 1);
+        signupService.sendWelcomeMsg(1, "o5h6ywsVggC1lVYOvp4-gAdpJ8QI", 3);
     }
 }
