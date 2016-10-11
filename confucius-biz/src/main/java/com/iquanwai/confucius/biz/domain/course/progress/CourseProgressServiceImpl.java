@@ -58,7 +58,6 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         //设置课程id和课程进度
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
         if(quanwaiClass!=null){
-            classMember.setCourseId(quanwaiClass.getCourseId());
             classMember.setClassProgress(quanwaiClass.getProgress());
         }
         return classMember;
@@ -106,7 +105,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         for(Chapter chapter:chapters){
             for(CurrentChapterPage currentChapterPage:currentChapterPages){
                 if(chapter.getId()==currentChapterPage.getChapterId()){
-                    chapter.setPageSequence(currentChapterPage.getPageSequence());
+                    //如果用户已经学习完，则从第一页开始学习
+                    if(!chapter.isComplete()) {
+                        chapter.setPageSequence(currentChapterPage.getPageSequence());
+                    }else{
+                        chapter.setPageSequence(1);
+                    }
                 }
             }
         }
