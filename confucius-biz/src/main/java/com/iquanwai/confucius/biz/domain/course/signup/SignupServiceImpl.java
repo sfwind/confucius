@@ -217,6 +217,7 @@ public class SignupServiceImpl implements SignupService {
         classMember = new ClassMember();
         classMember.setClassId(classId);
         classMember.setOpenId(openid);
+        classMember.setCourseId(courseId);
         String memberId = memberId(courseId, classId);
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
