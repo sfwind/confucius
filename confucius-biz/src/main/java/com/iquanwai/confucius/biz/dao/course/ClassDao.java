@@ -56,6 +56,22 @@ public class ClassDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<QuanwaiClass> loadClassByOpenDate(Date date){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
+
+        String dateStr = DateUtils.parseDateToString(date);
+        try {
+            List<QuanwaiClass> quanwaiClass = run.query("SELECT * FROM QuanwaiClass where OpenTime=? ",
+                    h, dateStr);
+            return quanwaiClass;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
     public List<QuanwaiClass> loadRunningClass(){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);

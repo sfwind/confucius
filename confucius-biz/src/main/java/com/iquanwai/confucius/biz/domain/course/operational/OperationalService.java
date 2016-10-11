@@ -5,7 +5,12 @@ package com.iquanwai.confucius.biz.domain.course.operational;
  */
 public interface OperationalService {
     /**
-     * 班级id
+     * 为班级成员分配天使
      * */
     boolean angelAssign(Integer classId);
+
+    /**
+     * 为所有明天开班的班级成员分配天使
+     * */
+    void angelAssign();
 }
