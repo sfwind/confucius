@@ -48,9 +48,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public ClassMember loadActiveCourse(String openid, Integer courseId) {
         Assert.notNull(openid, "openid不能为空");
         ClassMember classMember = classMemberDao.activeCourse(openid);
-        if(courseId!=null && courseId.equals(classMember.getCourseId())){
-            return null;
-        }
+
         if(classMember==null){
             logger.error("{} has no active course", openid);
             return null;
