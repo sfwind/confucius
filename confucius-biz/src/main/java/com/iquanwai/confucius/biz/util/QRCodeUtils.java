@@ -7,7 +7,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.iquanwai.confucius.biz.domain.weixin.qrcode.BufferedImageLuminanceSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Encoder;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,7 +16,9 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.awt.image.RenderedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;

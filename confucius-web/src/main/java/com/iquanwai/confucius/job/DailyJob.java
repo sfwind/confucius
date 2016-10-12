@@ -20,10 +20,15 @@ public class DailyJob {
     public void work(){
         logger.info("DailyJob start");
         courseProgress();
+        closeClass();
         logger.info("DailyJob end");
     }
 
     private void courseProgress(){
         courseProgressService.classProgress();
+    }
+
+    private void closeClass(){
+        courseProgressService.closeClassEntry();
     }
 }

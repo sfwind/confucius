@@ -98,4 +98,17 @@ public class ClassDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public void closeEntry(int classId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+
+        try {
+            asyncRun.update("UPDATE QuanwaiClass SET Open=0 " +
+                    "where Id=?", classId);
+
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
 }

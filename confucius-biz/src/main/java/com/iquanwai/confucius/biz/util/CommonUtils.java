@@ -64,7 +64,7 @@ public class CommonUtils {
                 throw new WeixinException(ErrorConstants.ACCESS_TOKEN_EXPIRED, "accessToken过期了");
             }
 
-            return errcode==0;
+            return errcode!=0;
         }
         return false;
     }
