@@ -81,6 +81,10 @@ public class ConfigUtils {
 		return config.getString("signup.success.msg");
 	}
 
+	public static String angelMsgKey(){
+		return config.getString("angel.msg");
+	}
+
 	public static String coursePassMsgKey(){
 		return config.getString("course.pass.msg");
 	}

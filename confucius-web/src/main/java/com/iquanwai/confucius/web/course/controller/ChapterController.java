@@ -215,7 +215,7 @@ public class ChapterController {
                     .module("章节")
                     .function("记录看到的页数")
                     .action("记录看到的页数")
-                    .memo(chapterId+""+sequence);
+                    .memo(chapterId+","+sequence);
             operationLogService.log(operationLog);
             return WebUtils.success();
         }catch (Exception e){

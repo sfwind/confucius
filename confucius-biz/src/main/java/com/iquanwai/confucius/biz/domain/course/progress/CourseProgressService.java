@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 import com.iquanwai.confucius.biz.po.Chapter;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseWeek;
 
 import java.util.List;
 
@@ -40,4 +39,9 @@ public interface CourseProgressService {
      * @param classId 班级id
      * */
     void graduate(Integer classId);
+
+    /**
+     * 每天定时关闭次日开班班级的报名
+     * */
+    void closeClassEntry();
 }

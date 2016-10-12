@@ -23,10 +23,8 @@ import javax.annotation.PostConstruct;
 import java.awt.*;
 import java.lang.ref.SoftReference;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by justin on 16/9/10.

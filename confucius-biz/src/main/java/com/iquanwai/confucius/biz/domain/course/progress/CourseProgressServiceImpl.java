@@ -16,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by justin on 16/8/29.
@@ -146,6 +149,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
 
         classMemberDao.graduate(classId);
+    }
+
+    public void closeClassEntry() {
+        Date date = DateUtils.afterDays(new Date(), 1);
+        List<QuanwaiClass> openClasses = classDao.loadClassByOpenDate(date);
+        for(QuanwaiClass quanwaiClass:openClasses){
+            classDao.closeEntry(quanwaiClass.getId());
+        }
     }
 
     private String generateCertificate(ClassMember classMember) {
