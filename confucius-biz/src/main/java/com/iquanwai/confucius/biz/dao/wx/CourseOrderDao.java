@@ -9,7 +9,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -71,9 +70,10 @@ public class CourseOrderDao extends DBUtil{
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<CourseOrder>> h = new BeanListHandler(CourseOrder.class);
 
-        String classIds = StringUtils.join(classId, ",");
+        String questionMark = produceQuestionMark(classId.size());
+
         try {
-            List<CourseOrder> order = run.query("SELECT * FROM CourseOrder where ClassId in (?) and Status in (0,1)", h, classIds);
+            List<CourseOrder> order = run.query("SELECT * FROM CourseOrder where ClassId in ("+questionMark+") and Status in (0,1)", h, classId.toArray());
             return order;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
