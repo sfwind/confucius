@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.util;
 
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,7 +53,7 @@ public class CookieUtils {
      */
     public static void addCookie(String name ,String value,
                                  int maxage, HttpServletResponse response){
-        addCookie(name, value, null, maxage, "/" , response);
+        addCookie(name, value, ConfigUtils.realDomainName(), maxage, "/" , response);
     }
 
     /**

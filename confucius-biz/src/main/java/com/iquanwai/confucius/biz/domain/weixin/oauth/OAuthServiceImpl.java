@@ -35,6 +35,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
         callback.setState(state);
+        logger.info("state is {}", state);
         callbackDao.insert(callback);
 
         Map<String,String> params = Maps.newHashMap();
