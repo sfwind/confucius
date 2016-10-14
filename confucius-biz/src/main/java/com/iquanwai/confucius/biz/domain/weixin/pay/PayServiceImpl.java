@@ -120,6 +120,12 @@ public class PayServiceImpl implements PayService{
     public void closeOrder() {
         Date date = DateUtils.afterMinutes(new Date(), 0-ConfigUtils.getBillOpenMinute());
         List<CourseOrder> underCloseOrders = courseOrderDao.queryUnderCloseOrders(date);
+        List<CourseOrder> underCloseOrdersRecent = courseOrderDao.queryUnderCloseOrders(new Date());
+        for(CourseOrder courseOrder:underCloseOrdersRecent){
+            if(courseOrder.getPrepayId()==null){
+                underCloseOrders.add(courseOrder);
+            }
+        }
         for(CourseOrder courseOrder:underCloseOrders){
             String orderId = courseOrder.getOrderId();
             PayClose payClose = buildPayClose(orderId);
