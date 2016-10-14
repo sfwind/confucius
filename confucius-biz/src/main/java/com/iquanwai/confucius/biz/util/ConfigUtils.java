@@ -107,6 +107,10 @@ public class ConfigUtils {
 		return url;
 	}
 
+	public static String gaId(){
+		return config.getString("ga.id");
+	}
+
 	public static String getDefaultOpenid(){
 		return config.getString("default.openid");
 	}

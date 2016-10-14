@@ -121,6 +121,7 @@ public class PayServiceImpl implements PayService{
         Date date = DateUtils.afterMinutes(new Date(), 0-ConfigUtils.getBillOpenMinute());
         List<CourseOrder> underCloseOrders = courseOrderDao.queryUnderCloseOrders(date);
         List<CourseOrder> underCloseOrdersRecent = courseOrderDao.queryUnderCloseOrders(new Date());
+        //点报名未扫描二维码的直接close
         for(CourseOrder courseOrder:underCloseOrdersRecent){
             if(courseOrder.getPrepayId()==null){
                 underCloseOrders.add(courseOrder);
