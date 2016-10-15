@@ -2,7 +2,9 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.CourseOrder;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -24,6 +28,8 @@ public class BackendController {
     private OperationalService operationalService;
     @Autowired
     private SignupService signupService;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -62,5 +68,21 @@ public class BackendController {
         }
 
         return WebUtils.result(result);
+    }
+
+    @RequestMapping("/b")
+    public ResponseEntity<Map<String, Object>> test(HttpServletRequest request){
+        Cookie[] cookies = request.getCookies();
+        StringBuilder sb = new StringBuilder();
+        for(Cookie cookie:cookies){
+            sb.append(cookie.getName()+":"+cookie.getValue()+",");
+        }
+        OperationLog operationLog = OperationLog.create().openid("")
+                .module("章节")
+                .function("学习章节")
+                .action("打开上次学习的章节页")
+                .memo(sb.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 }
