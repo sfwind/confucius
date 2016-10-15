@@ -78,9 +78,9 @@ public class BackendController {
             sb.append(cookie.getName()+":"+cookie.getValue()+",");
         }
         OperationLog operationLog = OperationLog.create().openid("")
-                .module("章节")
-                .function("学习章节")
-                .action("打开上次学习的章节页")
+                .module("测试")
+                .function("测试")
+                .action("获取cookie")
                 .memo(sb.toString());
         operationLogService.log(operationLog);
         return WebUtils.success();
