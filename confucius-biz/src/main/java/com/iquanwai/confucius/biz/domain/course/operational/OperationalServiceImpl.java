@@ -85,7 +85,16 @@ public class OperationalServiceImpl implements OperationalService {
             logger.error("the courseId of class {} is invalid", classId);
             return;
         }
-        for(Pair<ClassMember, ClassMember> pair:all) {
+        for(int i=0; i<all.size(); i++) {
+            // TODO: 消息太多等60秒，会发很久
+            if(i>0&&i%10==0){
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+            Pair<ClassMember, ClassMember> pair = all.get(i);
             Angel angel = new Angel();
             angel.setMemberId(pair.getLeft().getMemberId());
             angel.setAngelId(pair.getRight().getMemberId());
@@ -107,7 +116,7 @@ public class OperationalServiceImpl implements OperationalService {
         String date = DateUtils.parseDateToString(DateUtils.beforeDays(quanwaiClass.getOpenTime(), 1));
         if(quanwaiClass!=null) {
             String first = "今晚微信群里，圈圈带大家开启本期的训练营咯，记得准时参加！";
-            String remark = "记住这个号码：{number}；你是这个号码学员的天使哦！什么是天使？晚上圈圈告诉你。\n\n还没加群？点击查看群二维码。";
+            String remark = "记住这个号码：{number}；你是这个号码学员的天使哦！什么是天使？晚上圈圈告诉你。\n对了，课程结束前，不要互相交流号码信息~\n\n还没加群？点击查看群二维码。";
             data.put("first", new TemplateMessage.Keyword(first));
             data.put("keyword1", new TemplateMessage.Keyword(courseName+"训练营开营仪式"));
             data.put("keyword2", new TemplateMessage.Keyword(date+" 晚上8：30"));
