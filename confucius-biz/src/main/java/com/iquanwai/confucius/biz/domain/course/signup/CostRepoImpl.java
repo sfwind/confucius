@@ -6,7 +6,6 @@ import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseFreeListDao;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.CourseFreeList;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +29,13 @@ public class CostRepoImpl implements CostRepo {
     private Logger logger = LoggerFactory.getLogger(getClass());
     //课程白名单
     private Map<Integer, List<String>> whiteList = Maps.newHashMap();
-    //优惠券
-    private Map<String, List<Coupon>> couponList = Maps.newHashMap();
+    //有优惠券的名单
+    private List<String> couponList = Lists.newArrayList();
 
     @PostConstruct
     public void init(){
-        whiteList.clear();
-        couponList.clear();
         List<CourseFreeList> courseFreeLists = courseFreeListDao.loadAll(CourseFreeList.class);
+        whiteList.clear();
         for(CourseFreeList freeList:courseFreeLists){
             List<String> openids = whiteList.get(freeList.getCourseId());
             if(openids==null){
@@ -46,21 +44,13 @@ public class CostRepoImpl implements CostRepo {
             }
             openids.add(freeList.getOpenid());
         }
-        List<Coupon> coupons  = couponDao.loadAll(Coupon.class);
-        for(Coupon coupon:coupons){
-            if(coupon.getUsed()==0){
-                List<Coupon> list = couponList.get(coupon.getOpenid());
-                if(list==null){
-                    list = Lists.newArrayList();
-                    couponList.put(coupon.getOpenid(), list);
-                }
-                list.add(coupon);
-            }
-        }
+        //初始化优惠券
+        reloadCoupon();
+
         logger.info("init white list & coupon complete");
     }
 
-    public boolean free(Integer courseId, String openid) {
+    public boolean isWhite(Integer courseId, String openid) {
         List<String> classWhiteList = whiteList.get(courseId);
         if(classWhiteList==null||!classWhiteList.contains(openid)){
             return false;
@@ -69,39 +59,57 @@ public class CostRepoImpl implements CostRepo {
     }
 
     public double discount(Double price, String openid) {
-//        List<Coupon> coupons = couponDao.getCoupon(openid);
-//        List<Integer> usedCoupon = Lists.newArrayList();
-//        double remain = price;
-//        for(Coupon coupon:coupons){
-//            double amount = coupon.getAmount();
-//            if(remain>=amount){
-//                remain = remain-amount;
-//                if(remain==0.0){
-//                    break;
-//                }
-//            }else{
+        List<Coupon> coupons = couponDao.getCoupon(openid);
+        List<Integer> usedCoupon = Lists.newArrayList();
+        double remain = price;
+        for(Coupon coupon:coupons){
+            double amount = coupon.getAmount();
+            if(remain>amount){
+                remain = remain-amount;
+            //折扣券大于课程费用
+            }else{
+                remain = 0.0;
+                usedCoupon.add(coupon.getId());
 //                double newAmount = amount-remain;
 //                Coupon newCoupon = new Coupon();
 //                newCoupon.setAmount(newAmount);
-//                newCoupon.setExpiredDate(defaultExpiredDate());
+//                newCoupon.setExpiredDate(coupon.getExpiredDate());
 //                newCoupon.setOpenid(openid);
 //                newCoupon.setUsed(0);
 //                couponDao.insert(coupon);
-//                break;
-//            }
-//            usedCoupon.add(coupon.getId());
-//        }
-//        couponDao.updateCoupon(usedCoupon, 2);
-//        return price-remain;
+                break;
+            }
+            usedCoupon.add(coupon.getId());
+        }
+        couponDao.updateCoupon(usedCoupon, 2);
+        reloadCoupon();
+        return price-remain;
+    }
 
-        return price;
+    public boolean hasCoupon(String openid) {
+        return couponList.contains(openid);
     }
 
     public void reloadCache() {
         init();
     }
 
-    private Date defaultExpiredDate() {
-        return DateUtils.afterYears(new Date(), 100);
+    private void reloadCoupon(){
+        List<Coupon> coupons  = couponDao.loadAll(Coupon.class);
+        couponList.clear();
+        for(Coupon coupon:coupons){
+            //只包含未使用的优惠券
+            if(coupon.getUsed()==0){
+                if(coupon.getExpiredDate()!=null){
+                    //已过期的不算
+                    if(coupon.getExpiredDate().before(new Date())){
+                        continue;
+                    }
+                }
+                if(!couponList.contains(coupon.getOpenid())){
+                    couponList.add(coupon.getOpenid());
+                }
+            }
+        }
     }
 }

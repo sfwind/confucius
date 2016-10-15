@@ -59,9 +59,9 @@ public interface SignupService {
     String entry(Integer courseId, Integer classId, String openid);
 
     /**
-     * 是否是白名单
+     * 是否免费
      * */
-    boolean isWhite(Integer courseId, String openid);
+    boolean free(Integer courseId, String openid);
 
     /**
      * 未及时付款，去掉预报名抢占的名额

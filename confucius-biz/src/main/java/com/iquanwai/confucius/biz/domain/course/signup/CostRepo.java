@@ -7,11 +7,16 @@ public interface CostRepo {
     /**
      * 是否是课程免费用户
      * */
-    boolean free(Integer courseId, String openid);
+    boolean isWhite(Integer courseId, String openid);
     /**
      * 用户使用折扣后的实际金额
      * */
     double discount(Double price, String openid);
+
+    /**
+     * 是否有优惠券
+     * */
+    boolean hasCoupon(String openid);
 
     /**
      * 刷新缓存

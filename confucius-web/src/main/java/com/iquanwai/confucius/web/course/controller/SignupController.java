@@ -48,7 +48,7 @@ public class SignupController {
                     .memo(courseId+"");
             operationLogService.log(operationLog);
             //课程免单用户
-            if (signupService.isWhite(courseId, loginUser.getOpenId())) {
+            if (signupService.free(courseId, loginUser.getOpenId())) {
                 signupDto.setFree(true);
                 return WebUtils.result(signupDto);
             }

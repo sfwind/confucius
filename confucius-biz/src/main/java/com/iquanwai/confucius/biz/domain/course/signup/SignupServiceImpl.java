@@ -3,11 +3,16 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.zxing.WriterException;
-import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.dao.course.ClassDao;
+import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
+import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.CourseOrder;
+import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -34,8 +39,6 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ClassDao classDao;
     @Autowired
-    private CourseDao courseDao;
-    @Autowired
     private CourseIntroductionDao courseIntroductionDao;
     @Autowired
     private CourseOrderDao courseOrderDao;
@@ -44,13 +47,9 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ClassMemberDao classMemberDao;
     @Autowired
-    private CourseFreeListDao courseFreeListDao;
-    @Autowired
-    private CouponDao couponDao;
+    private CostRepo costRepo;
     @Autowired
     private TemplateMessageService templateMessageService;
-    //课程白名单
-    private Map<Integer, List<String>> whiteList = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -74,19 +73,25 @@ public class SignupServiceImpl implements SignupService {
     private Map<Integer, Integer> memberCount = Maps.newConcurrentMap();
 
     private Map<Integer, SoftReference<QuanwaiClass>> classMap = Maps.newHashMap();
-    private Map<Integer, SoftReference<CourseIntroduction>> courseMap = Maps.newHashMap();
+    private Map<Integer, CourseIntroduction> courseMap = Maps.newHashMap();
 
     @PostConstruct
-    public void initClass(){
+    /**
+     * 初始化缓存
+     * */
+    public void init(){
+        //统计待付款的人数
         List<QuanwaiClass> quanwaiClassList = classDao.openClass();
         List<Integer> openClass = Lists.newArrayList(); // 开放报名的班级id
-        payMap.clear();
-        //统计待付款的人数
         for (QuanwaiClass quanwaiClass : quanwaiClassList) {
             Integer classId = quanwaiClass.getId();
             openClass.add(classId);
         }
         List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
+        //清空缓存
+        payMap.clear();
+        classMap.clear();
+        courseMap.clear();
         for(CourseOrder courseOrder:courseOrders){
             payMap.put(courseOrder.getOpenid(), courseOrder.getClassId());
         }
@@ -118,7 +123,11 @@ public class SignupServiceImpl implements SignupService {
             logger.error("courseId {} is not existed", courseId);
             return null;
         }
-        double discount = discount(openid, course.getFee());
+        double discount = 0.0;
+        //计算优惠
+        if(costRepo.hasCoupon(openid)) {
+            discount = costRepo.discount(course.getFee(), openid);
+        }
         courseOrder.setDiscount(discount);
         courseOrder.setPrice(course.getFee()-discount);
         courseOrder.setStatus(0); //待支付
@@ -151,38 +160,6 @@ public class SignupServiceImpl implements SignupService {
         return picUrl;
     }
 
-    //折扣计算
-    private double discount(String openid, Double price) {
-        List<Coupon> coupons = couponDao.getCoupon(openid);
-        List<Integer> usedCoupon = Lists.newArrayList();
-        double remain = price;
-        for(Coupon coupon:coupons){
-            double amount = coupon.getAmount();
-            if(remain>=amount){
-                remain = remain-amount;
-                if(remain==0.0){
-                    break;
-                }
-            }else{
-                double newAmount = amount-remain;
-                Coupon newCoupon = new Coupon();
-                newCoupon.setAmount(newAmount);
-                newCoupon.setExpiredDate(defaultExpiredDate());
-                newCoupon.setOpenid(openid);
-                newCoupon.setUsed(0);
-                couponDao.insert(coupon);
-                break;
-            }
-            usedCoupon.add(coupon.getId());
-        }
-        couponDao.updateCoupon(usedCoupon, 2);
-        return price-remain;
-    }
-
-    private Date defaultExpiredDate() {
-        return DateUtils.afterYears(new Date(), 100);
-    }
-
     public QuanwaiClass getCachedClass(Integer classId) {
         if(classMap.get(classId)==null || classMap.get(classId).get()==null){
             QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
@@ -194,13 +171,13 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public CourseIntroduction getCachedCourse(Integer courseId) {
-        if(courseMap.get(courseId)==null || courseMap.get(courseId).get()==null){
+        if(courseMap.get(courseId)==null){
             CourseIntroduction course = courseIntroductionDao.getByCourseId(courseId);
             if(course!=null){
-                courseMap.put(courseId, new SoftReference<CourseIntroduction>(course));
+                courseMap.put(courseId, course);
             }
         }
-        return courseMap.get(courseId).get();
+        return courseMap.get(courseId);
     }
 
     public CourseOrder getCourseOrder(String orderId) {
@@ -226,12 +203,16 @@ public class SignupServiceImpl implements SignupService {
         return memberId;
     }
 
-    public boolean isWhite(Integer courseId, String openid) {
-        List<String> classWhiteList = whiteList.get(courseId);
-        if(classWhiteList==null||!classWhiteList.contains(openid)){
+    public boolean free(Integer courseId, String openid) {
+        CourseIntroduction courseIntroduction = this.getCachedCourse(courseId);
+        if(courseIntroduction==null){
+            logger.error("courseId {} is invalid", courseId);
             return false;
         }
-        return true;
+        if(courseIntroduction.getFree()){
+            return true;
+        }
+        return costRepo.isWhite(courseId, openid);
     }
 
     public void giveupSignup(String openid, String orderId) {
@@ -256,22 +237,24 @@ public class SignupServiceImpl implements SignupService {
 
         ClassMember classMember = classMemberDao.getClassMember(classId, openid);
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
-        Course course = courseDao.load(Course.class, courseId);
-
+        CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
 
         data.put("first",new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
-        data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
+        data.put("keyword1",new TemplateMessage.Keyword(course.getCourseName()));
         data.put("keyword2",new TemplateMessage.Keyword(quanwaiClass.getOpenTime()+"-"+quanwaiClass.getCloseTime()));
-
         String remark = "你的学号是"+classMember.getMemberId()+"\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
         data.put("remark",new TemplateMessage.Keyword(remark));
         templateMessage.setUrl(quanwaiClass.getWeixinGroup());
+
         templateMessageService.sendMessage(templateMessage);
     }
 
     public void reloadClass() {
-        initClass();
+        init();
+        //初始化班级剩余人数
         classMemberCountRepo.initClass();
+        //初始化白名单和优惠券
+        costRepo.reloadCache();
     }
 
     //生成学号 2位课程号2位班级号3位学号
@@ -312,20 +295,5 @@ public class SignupServiceImpl implements SignupService {
         memberCount.put(classId, count);
         return count;
     }
-
-    @PostConstruct
-    public void initWhiteList(){
-        List<CourseFreeList> courseFreeLists = courseFreeListDao.loadAll(CourseFreeList.class);
-        for(CourseFreeList freeList:courseFreeLists){
-            List<String> openids = whiteList.get(freeList.getCourseId());
-            if(openids==null){
-                openids = Lists.newArrayList();
-                whiteList.put(freeList.getCourseId(), openids);
-            }
-            openids.add(freeList.getOpenid());
-        }
-        logger.info("init white list complete");
-    }
-
 
 }
