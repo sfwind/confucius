@@ -86,17 +86,17 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
         try{
             Assert.notNull(loginUser, "用户不能为空");
+            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
+            if(courseOrder==null){
+                LOGGER.error("{} 订单不存在", orderId);
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+            }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("付费完成")
                     .action("点击付费完成")
                     .memo(orderId);
             operationLogService.log(operationLog);
-            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
-            if(courseOrder==null){
-                LOGGER.error("{} 订单不存在", orderId);
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
-            }
             if(courseOrder.getStatus()!=1){
                 LOGGER.error("订单状态：{}", courseOrder.getStatus());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
