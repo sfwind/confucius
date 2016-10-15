@@ -70,7 +70,7 @@ public class BackendController {
         return WebUtils.result(result);
     }
 
-    @RequestMapping("/b")
+    @RequestMapping("/t")
     public ResponseEntity<Map<String, Object>> test(HttpServletRequest request){
         Cookie[] cookies = request.getCookies();
         StringBuilder sb = new StringBuilder();
