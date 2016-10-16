@@ -76,7 +76,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             question.setChoiceList(choices);
             questionMap.put(question.getId(), question);
             //语音分析，拼接完整url
-            if(question.getAnalysisType()==3 && question.getAnalysis()!=null){
+            if(question.getAnalysis()!=null && question.getAnalysisType()==3 ){
                 question.setAnalysis(audioUrlPrefix+question.getAnalysis());
             }
         }
