@@ -118,9 +118,12 @@ public class PayServiceImpl implements PayService{
     }
 
     public void closeOrder() {
+        //点开付费的保留30分钟
         Date date = DateUtils.afterMinutes(new Date(), 0-ConfigUtils.getBillOpenMinute());
+        //临时的只保留3分钟
+        Date date2 = DateUtils.afterMinutes(new Date(), -3);
         List<CourseOrder> underCloseOrders = courseOrderDao.queryUnderCloseOrders(date);
-        List<CourseOrder> underCloseOrdersRecent = courseOrderDao.queryUnderCloseOrders(new Date());
+        List<CourseOrder> underCloseOrdersRecent = courseOrderDao.queryUnderCloseOrders(date2);
         //点报名未扫描二维码的直接close
         for(CourseOrder courseOrder:underCloseOrdersRecent){
             if(courseOrder.getPrepayId()==null){
