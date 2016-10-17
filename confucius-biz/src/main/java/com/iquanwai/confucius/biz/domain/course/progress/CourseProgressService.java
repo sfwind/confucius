@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 import com.iquanwai.confucius.biz.po.Chapter;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.QuanwaiClass;
 
 import java.util.List;
 
@@ -44,4 +45,15 @@ public interface CourseProgressService {
      * 每天定时关闭次日开班班级的报名
      * */
     void closeClassEntry();
+
+    /**
+     * 获取正在上课的班级
+     * */
+    List<QuanwaiClass> loadActiveClass();
+
+
+    /**
+     * 通知未完成学习任务的学员
+     * */
+    void noticeIncompleteMembers(QuanwaiClass quanwaiClass);
 }

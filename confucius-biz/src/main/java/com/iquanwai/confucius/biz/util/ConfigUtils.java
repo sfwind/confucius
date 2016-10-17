@@ -85,6 +85,14 @@ public class ConfigUtils {
 		return config.getString("angel.msg");
 	}
 
+	public static String incompleteTaskMsgKey(){
+		return config.getString("incomplete.task.msg");
+	}
+
+	public static boolean messageSwitch(){
+		return config.getBoolean("message.switch");
+	}
+
 	public static String coursePassMsgKey(){
 		return config.getString("course.pass.msg");
 	}

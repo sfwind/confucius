@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.weixin.message;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,14 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private RestfulHelper restfulHelper;
 
     public boolean sendMessage(TemplateMessage templateMessage) {
-        String url = SEND_MESSAGE_URL;
-        String json = new Gson().toJson(templateMessage);
-        String body = restfulHelper.post(url, json);
+        if(ConfigUtils.messageSwitch()) {
+            String url = SEND_MESSAGE_URL;
+            String json = new Gson().toJson(templateMessage);
+            String body = restfulHelper.post(url, json);
+            return StringUtils.isNotEmpty(body);
+        }
 
-        return StringUtils.isNotEmpty(body);
+        return false;
     }
 
     public String getTemplateId(String templateShortId) {

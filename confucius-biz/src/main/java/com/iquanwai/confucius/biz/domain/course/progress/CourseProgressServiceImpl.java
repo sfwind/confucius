@@ -120,35 +120,39 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     public void graduate(Integer classId) {
         List<ClassMember> classMembers = classMemberDao.getPassMember(classId);
-        String key = ConfigUtils.coursePassMsgKey();
         for(ClassMember classMember:classMembers){
-            boolean pass = classMember.getPass();
-            boolean superb = classMember.getSuperb();
-
-            TemplateMessage templateMessage = new TemplateMessage();
-            templateMessage.setTouser(classMember.getOpenId());
-
-            templateMessage.setTemplate_id(key);
-            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-            templateMessage.setData(data);
             //生成毕业证书
             String certificateNo = generateCertificate(classMember);
             classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
-
             Course course = courseDao.load(Course.class, classMember.getCourseId());
 
-            String first = coursePassStartMsg(pass, superb, course.getName());
-            String remark = courseRemarkStartMsg(pass, superb);
-            data.put("first",new TemplateMessage.Keyword(first));
-            data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
-            data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
-            data.put("remark",new TemplateMessage.Keyword(remark));
-            //TODO:url待定
-//            templateMessage.setUrl(quanwaiClass.getWeixinGroup());
-            templateMessageService.sendMessage(templateMessage);
+            graduateMessage(classMember, course);
         }
 
         classMemberDao.graduate(classId);
+    }
+
+    private void graduateMessage(ClassMember classMember, Course course) {
+        String key = ConfigUtils.coursePassMsgKey();
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(classMember.getOpenId());
+
+        boolean pass = classMember.getPass();
+        boolean superb = classMember.getSuperb();
+
+        templateMessage.setTemplate_id(key);
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setData(data);
+
+        String first = coursePassStartMsg(pass, superb, course.getName());
+        String remark = courseRemarkStartMsg(pass, superb);
+        data.put("first",new TemplateMessage.Keyword(first));
+        data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
+        data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+        data.put("remark",new TemplateMessage.Keyword(remark));
+        //TODO:url待定
+//            templateMessage.setUrl(quanwaiClass.getWeixinGroup());
+        templateMessageService.sendMessage(templateMessage);
     }
 
     public void closeClassEntry() {
@@ -157,6 +161,70 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         for(QuanwaiClass quanwaiClass:openClasses){
             classDao.closeEntry(quanwaiClass.getId());
         }
+    }
+
+    public List<QuanwaiClass> loadActiveClass() {
+        return classDao.loadRunningClass();
+    }
+
+    public void noticeIncompleteMembers(QuanwaiClass quanwaiClass) {
+        Integer progress = quanwaiClass.getProgress();
+        List<Chapter> chapters = chapterDao.loadChapters(quanwaiClass.getCourseId());
+
+        List<Integer> taskSequences = Lists.newArrayList();
+        //记录已经解锁的任务和作业序号
+        for(Chapter chapter:chapters){
+            if(chapter.getSequence()<progress){
+                if(chapter.getType()==CourseType.CHALLENGE || chapter.getType()==CourseType.HOMEWORK){
+                    taskSequences.add(chapter.getSequence());
+                }
+            }
+        }
+
+        List<ClassMember> classMembers = classMemberDao.getClassMember(quanwaiClass.getId());
+        List<ClassMember> incompleteMembers = Lists.newArrayList();
+        for(ClassMember classMember:classMembers){
+            String complete = classMember.getComplete();
+            if(complete==null){
+                incompleteMembers.add(classMember);
+                continue;
+            }
+            // 比较已经解锁的任务和已完成的任务
+            for(Integer sequence:taskSequences) {
+                boolean isComplete = false;
+                String[] completeChapters = complete.split(",");
+                for (String completeChapter : completeChapters) {
+                    if(sequence.toString().equals(completeChapter)){
+                        isComplete = true;
+                        break;
+                    }
+                }
+                if(!isComplete){
+                    incompleteMembers.add(classMember);
+                    break;
+                }
+            }
+        }
+        for(ClassMember classMember:incompleteMembers){
+            noticeMembers(classMember);
+        }
+    }
+
+    //通知未完成任务的学员
+    private void noticeMembers(ClassMember classMember){
+        String key = ConfigUtils.incompleteTaskMsgKey();
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(classMember.getOpenId());
+
+        templateMessage.setTemplate_id(key);
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setData(data);
+
+        data.put("first",new TemplateMessage.Keyword("童鞋，我们发现你最近的任务还有一些未完成。点击下方按钮“训练营”，进入页面开始补课吧！"));
+        data.put("keyword1",new TemplateMessage.Keyword("完成未完成的课程任务"));
+        data.put("keyword2",new TemplateMessage.Keyword("高"));
+        data.put("remark",new TemplateMessage.Keyword("对了，课程前面，圆圈表示待学习，打钩才是完成哦！"));
+        templateMessageService.sendMessage(templateMessage);
     }
 
     private String generateCertificate(ClassMember classMember) {
