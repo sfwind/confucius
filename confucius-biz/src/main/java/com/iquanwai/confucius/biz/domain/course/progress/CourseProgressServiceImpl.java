@@ -198,12 +198,32 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             public Chapter apply(Chapter chapter) {
                 boolean unlock = checkUnlock(chapter, classProgress);
                 boolean complete = checkComplete(chapter, personalCompleteProgress);
+                String comment = comment(unlock, chapter);
                 chapter.setIcon(CourseType.getUrl(chapter.getType(), unlock, complete));
                 chapter.setUnlock(unlock);
                 chapter.setComplete(complete);
+                chapter.setComment(comment);
                 return chapter;
             }
         });
+    }
+
+    private String comment(boolean unlock, Chapter chapter) {
+        if (chapter.getType() == CourseType.ASSESSMENT) {
+            return "圈圈叫你去红点房间做游戏啦，微信群里获取参与方式；当天晚上8：30准时开始~";
+        }
+        if (chapter.getType() == CourseType.RELAX) {
+            return "休息，休息一下~";
+        }
+        if (chapter.getType() == CourseType.GRADUATE) {
+            return "圈圈说晚上9点在红点参加毕业典礼，不要迟到哦";
+        }
+
+        if (!unlock){
+            return "耐心等待任务当天解锁哈";
+        }
+
+        return null;
     }
 
     private boolean checkComplete(Chapter chapter, String personalProgress) {

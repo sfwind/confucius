@@ -15,9 +15,10 @@ public class Chapter {
     private Integer week; //章节所在的周序号
     private Integer startDay; //开始于第几天
     private Integer endDay; //结束于第几天
-    private boolean unlock; //是否解锁
-    private boolean complete; //是否完成
-    private String icon; //icon链接
-    private Integer pageSequence; //当前第几页
-    private Integer totalPage; //一共几页
+    private boolean unlock; //是否解锁 非db字段
+    private boolean complete; //是否完成 非db字段
+    private String icon; //icon链接 非db字段
+    private Integer pageSequence; //当前第几页 非db字段
+    private Integer totalPage; //一共几页 非db字段
+    private String comment; //点击反馈 非db字段
 }
