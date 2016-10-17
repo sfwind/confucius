@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.util.CookieUtils;
+import com.iquanwai.confucius.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -45,7 +47,8 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
             return LoginUser.defaultUser();
         }
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
-        String accessToken = CookieUtils.getCookie(request, "_act");
+        HttpServletResponse response = nativeWebRequest.getNativeResponse(HttpServletResponse.class);
+        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
             return loginUserMap.get(accessToken);
         }
@@ -53,6 +56,8 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         String openId = oAuthService.openId(accessToken);
         if(StringUtils.isEmpty(openId)){
             logger.error("accessToken {} is not found in db", accessToken);
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
             return null;
         }
 
@@ -60,6 +65,8 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
 
         if(account==null){
             logger.error("openId {} is not found in db", openId);
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
             return null;
         }
 
@@ -73,7 +80,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     }
 
     public static LoginUser getLoginUser(HttpServletRequest request){
-        String accessToken = CookieUtils.getCookie(request, "_act");
+        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
             return loginUserMap.get(accessToken);
         }

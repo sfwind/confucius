@@ -3,6 +3,7 @@ package com.iquanwai.confucius.interceptor;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.util.CookieUtils;
+import com.iquanwai.confucius.util.WebUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -20,11 +21,7 @@ public class CourseHandlerInterceptor extends HandlerInterceptorAdapter {
             String value = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
             //没有access_token,跳转去授权
             if (StringUtils.isEmpty(value)) {
-                String url = request.getRequestURL().toString();
-                if(!StringUtils.isEmpty(request.getQueryString())){
-                    url = url +"?"+request.getQueryString();
-                }
-                response.sendRedirect("/wx/oauth/auth?callbackUrl="+url);
+                WebUtils.auth(request, response);
                 return false;
             }
         }

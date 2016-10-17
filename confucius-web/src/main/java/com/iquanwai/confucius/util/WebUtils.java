@@ -2,7 +2,10 @@ package com.iquanwai.confucius.util;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,5 +51,13 @@ public class WebUtils {
         json.put("msg", msg);
 
         return new ResponseEntity<Map<String, Object>>(json, status);
+    }
+
+    public static void auth(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        String url = request.getRequestURL().toString();
+        if(!StringUtils.isEmpty(request.getQueryString())){
+            url = url +"?"+request.getQueryString();
+        }
+        response.sendRedirect("/wx/oauth/auth?callbackUrl="+url);
     }
 }

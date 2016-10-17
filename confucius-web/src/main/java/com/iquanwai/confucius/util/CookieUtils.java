@@ -73,14 +73,11 @@ public class CookieUtils {
         return null;
     }
 
-    public static void removeCookie(String name, String domain, HttpServletRequest request, HttpServletResponse response) {
-        String cookieVal = getCookie(request, name);
-        if(cookieVal!=null){
-            addCookie(name, null, domain, 0, response);
-        }
+    public static void removeCookie(String name, String domain, HttpServletResponse response) {
+        addCookie(name, null, domain, 0, response);
     }
 
-    public static void removeCookie(String name, HttpServletRequest request, HttpServletResponse response) {
-        removeCookie(name, null, request, response);
+    public static void removeCookie(String name, HttpServletResponse response) {
+        removeCookie(name, null, response);
     }
 }
