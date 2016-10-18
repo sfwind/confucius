@@ -220,10 +220,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
 
-        data.put("first",new TemplateMessage.Keyword("童鞋，我们发现你最近的任务还有一些未完成。点击下方按钮“训练营”，进入页面开始补课吧！"));
-        data.put("keyword1",new TemplateMessage.Keyword("完成未完成的课程任务"));
-        data.put("keyword2",new TemplateMessage.Keyword("高"));
-        data.put("remark",new TemplateMessage.Keyword("对了，课程前面，圆圈表示待学习，打钩才是完成哦！"));
+        data.put("first",new TemplateMessage.Keyword("童鞋，我们发现你最近还有部分学习任务未完成。点击下方按钮“训练营”，进入页面开始补课吧！"));
+        data.put("keyword1",new TemplateMessage.Keyword("完成学习任务"));
+        data.put("keyword2",new TemplateMessage.Keyword("hin高"));
+        data.put("remark",new TemplateMessage.Keyword("课程前面的标示，圆圈表示待学习，打钩才是完成哦！"));
         templateMessageService.sendMessage(templateMessage);
     }
 
@@ -284,7 +284,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             return "休息，休息一下~";
         }
         if (chapter.getType() == CourseType.GRADUATE) {
-            return "圈圈说晚上9点在红点参加毕业典礼，不要迟到哦";
+            return "当天晚上9点，圈圈在红点主持毕业典礼，记得准时参加哦！";
         }
 
         if (!unlock){
