@@ -46,7 +46,7 @@ public class OAuthServiceImpl implements OAuthService {
             // ignore
         }
         params.put("state", state);
-        requestUrl = CommonUtils.urlReplace(requestUrl, params);
+        requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
         return requestUrl;
     }
 
@@ -70,7 +70,7 @@ public class OAuthServiceImpl implements OAuthService {
         Map<String,String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         params.put("refresh_token", callback.getRefreshToken());
-        requestUrl = CommonUtils.urlReplace(requestUrl, params);
+        requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
         String body = restfulHelper.get(requestUrl);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         String newAccessToken = (String)result.get("access_token");
@@ -92,7 +92,7 @@ public class OAuthServiceImpl implements OAuthService {
         params.put("appid", ConfigUtils.getAppid());
         params.put("secret", ConfigUtils.getSecret());
         params.put("code", code);
-        requestUrl = CommonUtils.urlReplace(requestUrl, params);
+        requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
         String body = restfulHelper.get(requestUrl);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
 

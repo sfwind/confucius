@@ -50,6 +50,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     public ClassMember loadActiveCourse(String openid, Integer courseId) {
         Assert.notNull(openid, "openid不能为空");
+        //TODO: 改成新接口
         ClassMember classMember = classMemberDao.activeCourse(openid);
 
         if(classMember==null){
@@ -262,18 +263,23 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, final String personalCompleteProgress, final int classProgress) {
-        return Lists.transform(chapters, new Function<Chapter, Chapter>() {
-            public Chapter apply(Chapter chapter) {
-                boolean unlock = checkUnlock(chapter, classProgress);
-                boolean complete = checkComplete(chapter, personalCompleteProgress);
-                String comment = comment(unlock, chapter);
-                chapter.setIcon(CourseType.getUrl(chapter.getType(), unlock, complete));
-                chapter.setUnlock(unlock);
-                chapter.setComplete(complete);
-                chapter.setComment(comment);
-                return chapter;
-            }
-        });
+        List<Chapter> chaptersNew = Lists.newArrayList();
+
+        //前序课程是否完成
+        boolean lastCompleted = true;
+        for(Chapter chapter:chapters){
+            boolean unlock = checkUnlock(chapter, classProgress, lastCompleted);
+            boolean complete = checkComplete(chapter, personalCompleteProgress);
+            String comment = comment(unlock, chapter);
+            chapter.setIcon(CourseType.getUrl(chapter.getType(), unlock, complete));
+            chapter.setUnlock(unlock);
+            chapter.setComplete(complete);
+            chapter.setComment(comment);
+            chaptersNew.add(chapter);
+            lastCompleted = complete;
+        }
+
+        return chaptersNew;
     }
 
     private String comment(boolean unlock, Chapter chapter) {
@@ -287,8 +293,16 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             return "当天晚上9点，圈圈在红点主持毕业典礼，记得准时参加哦！";
         }
 
-        if (!unlock){
-            return "耐心等待任务当天解锁哈";
+        if (chapter.getType() == CourseType.HOMEWORK || chapter.getType() == CourseType.CHALLENGE) {
+            if (!unlock) {
+                return "耐心等待任务当天解锁哈";
+            }
+        }
+
+        if (chapter.getType() == CourseType.NEW_HOMEWORK || chapter.getType() == CourseType.NEW_CHALLENGE) {
+            if (!unlock) {
+                return "先完成前一个任务才能解锁哈";
+            }
         }
 
         return null;
@@ -314,11 +328,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return false;
     }
 
-    private boolean checkUnlock(Chapter chapter, int classProgress) {
+    private boolean checkUnlock(Chapter chapter, int classProgress, boolean lastCompleted) {
         Assert.notNull(chapter, "chapter不能为空");
-        //章节进度小于课程当前进度，则当前章节解锁
-        if(chapter.getStartDay()<=classProgress){
-            return true;
+        if(chapter.getType()==CourseType.NEW_CHALLENGE||
+                chapter.getType()==CourseType.NEW_HOMEWORK){
+            return lastCompleted;
         }
 
         if(chapter.getType()==CourseType.RELAX||
@@ -327,6 +341,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             if(chapter.getStartDay()==classProgress && chapter.getEndDay()==classProgress) {
                 return true;
             }
+        }
+
+        //章节进度小于课程当前进度，则当前章节解锁
+        if(chapter.getStartDay()<=classProgress){
+            return true;
         }
 
         return false;

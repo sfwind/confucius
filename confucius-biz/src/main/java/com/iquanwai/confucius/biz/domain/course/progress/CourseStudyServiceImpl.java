@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -83,9 +85,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     }
 
-    public Page loadPage(String openid, int chapterId, Integer pageSequence, Boolean lazyLoad) {
+    public Page loadPage(String openid, Integer chapterId, Integer pageSequence, Boolean lazyLoad) {
         Assert.notNull(openid, "openid不能为空");
-
         //首次学习
         if(pageSequence==null){
             pageSequence = 1;
@@ -100,6 +101,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
                     m.setContent(picUrlPrefix+m.getContent());
                 }else if(m.getType()==3){
                     m.setContent(audioUrlPrefix+m.getContent());
+                }else if(m.getType()==6){
+                    m.setContent(placeholder(m.getContent(), chapterId, openid));
                 }
             }
             page.setMaterialList(materialList);
@@ -111,69 +114,103 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return page;
     }
 
-    public Chapter loadChapter(String openid, int chapterId) {
+    private String placeholder(String content, Integer chapterId, String openid) {
         Assert.notNull(openid, "openid不能为空");
-        ClassMember classMember = classMemberDao.activeCourse(openid);
+        Chapter chapter = chapterDao.load(Chapter.class, chapterId);
+        if(chapter==null){
+            logger.error("chapterId {} is invalid", chapterId);
+            return content;
+        }
+        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
-            return null;
+            return content;
         }
+        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
+        if(quanwaiClass==null){
+            //未报名不能获取数据
+            logger.error("classId {} is invalid", classMember.getClassId());
+            return content;
+        }
+        if(StringUtils.isEmpty(quanwaiClass.getMemo())){
+            return content;
+        }
+        Map<String, String> memos = new Gson().fromJson(quanwaiClass.getMemo(), new TypeToken<Map<String, String>>() {
+        }.getType());
+
+        return CommonUtils.placeholderReplace(content, memos);
+    }
+
+    public Chapter loadChapter(String openid, Integer chapterId) {
+        Assert.notNull(openid, "openid不能为空");
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
         if(chapter==null){
-            logger.error("{} is invalid", chapterId);
+            logger.error("chapterId {} is invalid", chapterId);
             return null;
         }
 
         Integer totalPage = pageDao.chapterPageNumber(chapterId);
         chapter.setTotalPage(totalPage);
-        // TODO:报过班才能看
-//        if(chapter.getCourseId().equals(classMember.getCourseId())){
-//            return chapter;
-//        }else{
-//            return null;
-//        }
 
         return chapter;
     }
 
-    public Question loadQuestion(String openid, int questionId) {
+    public Question loadQuestion(String openid, Integer questionId) {
         Assert.notNull(openid, "openid不能为空");
-        ClassMember classMember = classMemberDao.activeCourse(openid);
         Question question = questionMap.get(questionId);
-        if(question!=null){
-            boolean submitted = questionSubmitDao.submitted(openid, classMember.getClassId(), questionId);
-            question.setAnswered(submitted);
+        if(question==null){
+            logger.error("questionId {} is invalid", questionId);
+            return null;
         }
+        ClassMember classMember = classMemberDao.activeCourse(openid, question.getCourseId());
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return null;
+        }
+
+        boolean submitted = questionSubmitDao.submitted(openid, classMember.getClassId(), questionId);
+        question.setAnswered(submitted);
+
         return question;
     }
 
-    public Homework loadHomework(String openid, int homeworkId) {
+    public Homework loadHomework(String openid, Integer homeworkId) {
         Assert.notNull(openid, "openid不能为空");
-        ClassMember classMember = classMemberDao.activeCourse(openid);
         Homework homework = homeworkDao.load(Homework.class, homeworkId);
-        if(homework!=null){
-            HomeworkSubmit submit = homeworkSubmitDao.loadHomeworkSubmit(openid, classMember.getClassId(), homeworkId);
-            if(submit==null || submit.getSubmitContent()==null) {
-                homework.setSubmitted(false);
-            }else{
-                homework.setSubmitted(true);
-            }
-            if(homework.getVoice()!=null) {
-                homework.setVoice(ConfigUtils.domainName() + homework.getVoice());
-            }
-            if(submit==null){
-                String url = "/static/h?id="+ CommonUtils.randomString(6);
-                String shortUrl = generateShortUrl(ConfigUtils.domainName()+url);
-                homework.setPcurl(shortUrl);
-                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, shortUrl);
-            }else{
-                if(submit.getSubmitUrl()!=null){
-                    homework.setPcurl(submit.getShortUrl());
-                }
-                homework.setContent(submit.getSubmitContent());
-            }
+        if(homework==null){
+            logger.error("homeworkId {} is invalid", homeworkId);
+            return null;
         }
+        ClassMember classMember = classMemberDao.activeCourse(openid, homework.getCourseId());
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return null;
+        }
+
+        HomeworkSubmit submit = homeworkSubmitDao.loadHomeworkSubmit(openid, classMember.getClassId(), homeworkId);
+        if(submit==null || submit.getSubmitContent()==null) {
+            homework.setSubmitted(false);
+        }else{
+            homework.setSubmitted(true);
+        }
+        if(homework.getVoice()!=null) {
+            homework.setVoice(ConfigUtils.domainName() + homework.getVoice());
+        }
+        if(submit==null){
+            String url = "/static/h?id="+ CommonUtils.randomString(6);
+            String shortUrl = generateShortUrl(ConfigUtils.domainName()+url);
+            homework.setPcurl(shortUrl);
+            homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, shortUrl);
+        }else{
+            if(submit.getSubmitUrl()!=null){
+                homework.setPcurl(submit.getShortUrl());
+            }
+            homework.setContent(submit.getSubmitContent());
+        }
+
         return homework;
     }
 
@@ -197,16 +234,25 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public void submitHomework(String content, String openid, Integer homeworkId) {
         Assert.notNull(openid, "openid不能为空");
-        ClassMember classMember = classMemberDao.activeCourse(openid);
-        if(classMember!=null) {
-            homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
-
-            completeHomework(homeworkId, classMember);
+        Homework homework = homeworkDao.load(Homework.class, homeworkId);
+        if(homework==null){
+            logger.error("homeworkId {} is invalid", homeworkId);
+            return;
         }
+        ClassMember classMember = classMemberDao.activeCourse(openid, homework.getCourseId());
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return;
+        }
+
+        homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
+        completeHomework(homeworkId, classMember);
     }
 
     //完成作业章节
     private void completeHomework(Integer homeworkId, ClassMember classMember) {
+        Assert.notNull(classMember, "classMember不能为空");
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
         List<Chapter> chapters = chapterDao.loadChapters(quanwaiClass.getCourseId());
         List<Chapter> homework = Lists.newArrayList();
@@ -240,13 +286,17 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     public boolean submitQuestion(String openid, Integer questionId, List<Integer> choiceList) {
         Assert.notNull(openid, "openid不能为空");
         String answer = "";
-        ClassMember classMember = classMemberDao.activeCourse(openid);
+        Question q = questionMap.get(questionId);
+        if(q==null){
+            logger.error("questionId {} is invalid", q);
+            return false;
+        }
+        ClassMember classMember = classMemberDao.activeCourse(openid,q.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
             return false;
         }
-        Question q = questionMap.get(questionId);
         Integer score = score(q, choiceList);
         boolean right = false;
         if(score.equals(q.getPoint())){
@@ -271,6 +321,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public void completeChapter(String openid, Integer chapterId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
+        if(chapter==null){
+            logger.error("chapterId {} is invalid", chapterId);
+            return;
+        }
         if(chapter.getType()==CourseType.HOMEWORK){
             return;
         }
@@ -278,7 +332,12 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     public void completeChapter(String openid, Chapter chapter) {
-        ClassMember classMember = classMemberDao.activeCourse(openid);
+        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return;
+        }
         String progress = progressMark(classMember.getComplete(), chapter.getSequence());
         if(progress!=null) {
             classMemberDao.complete(openid, classMember.getClassId(), progress);
@@ -306,8 +365,16 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private void progressChapter(String openid, Integer chapterId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
-        ClassMember classMember = classMemberDao.activeCourse(openid);
-
+        if(chapter==null){
+            logger.error("chapterId {} is invalid", chapterId);
+            return;
+        }
+        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return;
+        }
         String progress = progressMark(classMember.getProgress(), chapter.getSequence());
         if(progress!=null) {
             classMemberDao.progress(openid, classMember.getClassId(), progress);

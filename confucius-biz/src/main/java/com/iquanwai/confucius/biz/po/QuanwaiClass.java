@@ -18,4 +18,5 @@ public class QuanwaiClass {
     private Integer limit; //班级人数上限
     private Boolean open; //0-关闭报名，1-已开放报名
     private String weixinGroup; //微信群二维码的链接
+    private String memo; //其他信息，json格式
 }

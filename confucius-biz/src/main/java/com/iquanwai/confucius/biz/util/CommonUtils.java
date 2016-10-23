@@ -17,15 +17,15 @@ import java.util.regex.Pattern;
  * Created by justin on 16/8/7.
  */
 public class CommonUtils {
-    public static String urlReplace(String url, Map<String, String> replacer){
-        if(StringUtils.isNotEmpty(url) && replacer!=null) {
+    public static String placeholderReplace(String content, Map<String, String> replacer){
+        if(StringUtils.isNotEmpty(content) && replacer!=null) {
             for (Iterator<Map.Entry<String, String>> it =
                  replacer.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, String> entry = it.next();
-                url = StringUtils.replace(url, "{"+entry.getKey()+"}", entry.getValue());
+                content = StringUtils.replace(content, "{"+entry.getKey()+"}", entry.getValue());
             }
         }
-        return url;
+        return content;
     }
 
     public static Map<String, Object> jsonToMap(String json){

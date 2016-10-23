@@ -41,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
-        url = CommonUtils.urlReplace(url, map);
+        url = CommonUtils.placeholderReplace(url, map);
 
         String body = restfulHelper.get(url);
         Map<String, Object> result = CommonUtils.jsonToMap(body);

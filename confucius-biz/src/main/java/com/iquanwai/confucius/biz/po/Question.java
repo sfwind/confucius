@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 public class Question {
     private int id;
+    private Integer courseId; //课程id
     private String subject; //题干
     private Integer type; //题目类型（1-单选题，2-多选题）
     private Integer emotionType; //题目类型（1-单选题，2-多选题）

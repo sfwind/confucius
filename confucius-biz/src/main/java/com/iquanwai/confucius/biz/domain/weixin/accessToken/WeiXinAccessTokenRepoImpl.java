@@ -24,7 +24,7 @@ public class WeiXinAccessTokenRepoImpl implements WeiXinAccessTokenRepo {
         Map<String, String> map = Maps.newHashMap();
         map.put("appid", ConfigUtils.getAppid());
         map.put("secret", ConfigUtils.getSecret());
-        String url = CommonUtils.urlReplace(ACCESS_TOKEN_URL, map);
+        String url = CommonUtils.placeholderReplace(ACCESS_TOKEN_URL, map);
         Request request = new Request.Builder()
                 .url(url)
                 .build();

@@ -14,14 +14,14 @@ public interface CourseStudyService {
      * @param chapterId 课程章节id
      * @param page 课程页码
      * */
-    Page loadPage(String openid, int chapterId, Integer page, Boolean lazyLoad);
+    Page loadPage(String openid, Integer chapterId, Integer page, Boolean lazyLoad);
 
     /**
      * 获取章节信息
      * @param openid
      * @param chapterId 课程章节id
      * */
-    Chapter loadChapter(String openid, int chapterId);
+    Chapter loadChapter(String openid, Integer chapterId);
 
 
     /**
@@ -29,14 +29,14 @@ public interface CourseStudyService {
      * @param openid
      * @param questionId 问题id
      * */
-    Question loadQuestion(String openid, int questionId);
+    Question loadQuestion(String openid, Integer questionId);
 
     /**
      * 获取作业信息
      * @param openid
      * @param homeworkId 作业id
      * */
-    Homework loadHomework(String openid, int homeworkId);
+    Homework loadHomework(String openid, Integer homeworkId);
 
     /**
      * 获取作业提交信息

@@ -281,7 +281,7 @@ public class SignupServiceImpl implements SignupService {
         String sign = CommonUtils.sign(map);
         map.put("sign",sign);
 
-        return CommonUtils.urlReplace(PAY_URL, map);
+        return CommonUtils.placeholderReplace(PAY_URL, map);
     }
 
     public synchronized Integer getMemberNumber(Integer classId){
