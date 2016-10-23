@@ -117,6 +117,10 @@ public class CourseController {
             }
         }
         if(last<=0){
+            //TODO:11月底去掉
+            if(classMember.getClassId()<7) {
+                return 1;
+            }
             return 0;
         }else {
             return (last - 1) / 7 + 1;
@@ -135,10 +139,6 @@ public class CourseController {
         CourseWeek courseWeek = courseStudyService.loadCourseWeek(classMember.getCourseId(), week);
         if(courseWeek!=null) {
             coursePageDto.setWeek(week);
-            //TODO:11月底去掉
-            if(week==0 && classMember.getClassId()<=7) {
-                coursePageDto.setWeek(1);
-            }
             coursePageDto.setTopic(courseWeek.getTopic());
         }
         //加载每周的index显示
@@ -149,8 +149,8 @@ public class CourseController {
     // TODO: 11月底去掉参数classId
     private void setWeekIndex(CoursePageDto coursePageDto, Course course, int classId) {
         List<WeekIndexDto> weekIndexes = Lists.newArrayList();
-        //hardcode，只适用于classId>7的班级
-        if(course.isPreChapter() && classId>7){
+        //hardcode，只适用于classId>=7的班级
+        if(course.isPreChapter() && classId>=7){
             WeekIndexDto weekIndexDto = new WeekIndexDto();
             weekIndexDto.setIndex(0);
             weekIndexDto.setIndexName(WEEK_INDEXES[0]);

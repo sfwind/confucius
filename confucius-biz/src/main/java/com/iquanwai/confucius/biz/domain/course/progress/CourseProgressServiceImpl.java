@@ -271,6 +271,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             boolean unlock = checkUnlock(chapter, classProgress, lastCompleted);
             boolean complete = checkComplete(chapter, personalCompleteProgress);
             String comment = comment(unlock, chapter);
+            String chapterName = chapterName(chapter);
+            chapter.setName(chapterName);
             chapter.setIcon(CourseType.getUrl(chapter.getType(), unlock, complete));
             chapter.setUnlock(unlock);
             chapter.setComplete(complete);
@@ -280,6 +282,19 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
 
         return chaptersNew;
+    }
+
+    private String chapterName(Chapter chapter) {
+        //预备课程用原名
+        if(chapter.getSequence()<0){
+            return chapter.getName();
+        }
+        int sequence = chapter.getSequence()%7;
+        if(sequence == 0){
+            sequence = 7;
+        }
+        //其他使用Day+序号+空格+章节名字
+        return "Day"+sequence+" "+chapter.getName();
     }
 
     private String comment(boolean unlock, Chapter chapter) {
