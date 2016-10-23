@@ -293,8 +293,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(sequence == 0){
             sequence = 7;
         }
-        //其他使用Day+序号+空格+章节名字
-        return "Day"+sequence+" "+chapter.getName();
+        //其他使用Day+空格+序号+空格+章节名字
+        return "Day "+sequence+" "+chapter.getName();
     }
 
     private String comment(boolean unlock, Chapter chapter) {
