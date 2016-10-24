@@ -79,7 +79,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         for(QuanwaiClass clazz:openClass){
             Integer courseId = clazz.getCourseId();
             //开课天数=今天-开课日期+1
-            int startDay = DateUtils.interval(clazz.getOpenTime())+1;
+            int startDay = DateUtils.interval(DateUtils.parseStringToDate(clazz.getOpenTime()))+1;
             Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
             if(chapter!=null){
                 Integer sequence = chapter.getSequence();

@@ -113,7 +113,7 @@ public class OperationalServiceImpl implements OperationalService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
 
-        String date = DateUtils.parseDateToString(DateUtils.beforeDays(quanwaiClass.getOpenTime(), 1));
+        String date = DateUtils.parseDateToString(DateUtils.beforeDays(DateUtils.parseStringToDate(quanwaiClass.getOpenTime()), 1));
         if(quanwaiClass!=null) {
             String first = "今晚微信群里，圈圈带大家开启本期的训练营咯，记得准时参加！";
             String remark = "记住这个号码：{number}；\n你是这个号码学员的天使哦！什么是天使？晚上圈圈告诉你。\n对了，课程结束前，不要互相交流号码信息~\n\n还没加群？点击查看群二维码。";

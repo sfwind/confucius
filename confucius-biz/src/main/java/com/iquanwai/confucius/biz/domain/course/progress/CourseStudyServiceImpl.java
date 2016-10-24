@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -53,6 +54,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private RestfulHelper restfulHelper;
     @Autowired
     private ClassDao classDao;
+    @Autowired
+    private AccountService accountService;
 
     private Map<Integer, Question> questionMap = Maps.newConcurrentMap();
 
@@ -97,13 +100,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             List<Material> materialList = materialDao.loadPageMaterials(page.getId());
             //拼接url前缀
             for(Material m:materialList){
-                if(m.getType()==2){
-                    m.setContent(picUrlPrefix+m.getContent());
-                }else if(m.getType()==3){
-                    m.setContent(audioUrlPrefix+m.getContent());
-                }else if(m.getType()==6){
-                    m.setContent(placeholder(m.getContent(), chapterId, openid));
-                }
+                materialHandle(openid, chapterId, m);
             }
             page.setMaterialList(materialList);
             //记录到阅读到第几页
@@ -114,7 +111,64 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return page;
     }
 
-    private String placeholder(String content, Integer chapterId, String openid) {
+    private void materialHandle(String openid, Integer chapterId, Material m) {
+        //图片，语音加前缀
+        if(m.getType()==2){
+            m.setContent(picUrlPrefix+m.getContent());
+        }else if(m.getType()==3){
+            m.setContent(audioUrlPrefix+m.getContent());
+        //占位符替换，当文字处理
+        }else if(m.getType()==11){
+            m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
+            m.setType(1);
+        }else if(m.getType()==12){
+            m.setContent(classMemberPlaceholder(m.getContent(), chapterId, openid));
+            m.setType(1);
+        }else if(m.getType()==13){
+            m.setContent(accountPlaceholder(m.getContent(), openid));
+            m.setType(1);
+        }
+    }
+
+    private String accountPlaceholder(String content, String openid) {
+        Assert.notNull(openid, "openid不能为空");
+        Account account = accountService.getAccount(openid, false);
+        if(account==null){
+            logger.error("openid {} is invalid", openid);
+            return content;
+        }
+        //去除“[表情]”文字
+        account.setNickname(account.getNickname().replaceAll("[表情]",""));
+
+        String json = new Gson().toJson(account);
+        Map<String, String> memos = new Gson().fromJson(json, new TypeToken<Map<String, String>>() {
+        }.getType());
+
+        return CommonUtils.placeholderReplace(content, memos);
+    }
+
+    private String classMemberPlaceholder(String content, Integer chapterId, String openid) {
+        Assert.notNull(openid, "openid不能为空");
+        Chapter chapter = chapterDao.load(Chapter.class, chapterId);
+        if(chapter==null){
+            logger.error("chapterId {} is invalid", chapterId);
+            return content;
+        }
+        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
+        if(classMember==null){
+            //未报名不能获取数据
+            logger.error("{} has no active course", openid);
+            return content;
+        }
+
+        String json = new Gson().toJson(classMember);
+        Map<String, String> memos = new Gson().fromJson(json, new TypeToken<Map<String, String>>() {
+        }.getType());
+
+        return CommonUtils.placeholderReplace(content, memos);
+    }
+
+    private String classPlaceholder(String content, Integer chapterId, String openid) {
         Assert.notNull(openid, "openid不能为空");
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
         if(chapter==null){
@@ -133,10 +187,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("classId {} is invalid", classMember.getClassId());
             return content;
         }
-        if(StringUtils.isEmpty(quanwaiClass.getMemo())){
-            return content;
-        }
-        Map<String, String> memos = new Gson().fromJson(quanwaiClass.getMemo(), new TypeToken<Map<String, String>>() {
+
+        String json = new Gson().toJson(quanwaiClass);
+        Map<String, String> memos = new Gson().fromJson(json, new TypeToken<Map<String, String>>() {
         }.getType());
 
         return CommonUtils.placeholderReplace(content, memos);
