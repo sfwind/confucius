@@ -66,6 +66,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
+    private static final Integer PREPARED_WEEK = 0;
 
     @PostConstruct
     public void initQuestion(){
@@ -81,7 +82,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             question.setChoiceList(choices);
             questionMap.put(question.getId(), question);
             //语音分析，拼接完整url
-            if(question.getAnalysis()!=null && question.getAnalysisType()==3 ){
+            if(question.getAnalysis()!=null && question.getAnalysisType()==3){
                 question.setAnalysis(audioUrlPrefix+question.getAnalysis());
             }
         }
@@ -138,7 +139,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             return content;
         }
         //去除“[表情]”文字
-        account.setNickname(account.getNickname().replaceAll("[表情]",""));
+        account.setNickname(account.getNickname().replaceAll("[表情]", ""));
 
         String json = new Gson().toJson(account);
         Map<String, String> memos = new Gson().fromJson(json, new TypeToken<Map<String, String>>() {
@@ -492,6 +493,21 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
         return courseWeekDao.getCourseWeek(courseId, week);
+    }
+
+    public Chapter loadFirstPreparedChapter(Integer courseId) {
+        List<Chapter> chapters = chapterDao.loadChapters(courseId, PREPARED_WEEK);
+        //初始化序号
+        int first = 0;
+        Chapter firstChapter = null;
+
+        for(Chapter chapter:chapters){
+            if(chapter.getSequence()<first){
+                first = chapter.getSequence();
+                firstChapter = chapter;
+            }
+        }
+        return firstChapter;
     }
 
     public void reloadQuestion() {
