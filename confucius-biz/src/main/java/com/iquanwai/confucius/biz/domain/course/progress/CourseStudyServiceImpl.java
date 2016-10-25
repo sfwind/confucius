@@ -130,7 +130,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             m.setType(1);
         //占位符替换，当图片处理
         }else if(m.getType()==21){
-            m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
+            m.setContent(picUrlPrefix+classPlaceholder(m.getContent(), chapterId, openid));
             m.setType(2);
         }
     }

@@ -40,7 +40,7 @@ public class CourseController {
     @Autowired
     private OperationLogService operationLogService;
 
-    private String[] WEEK_INDEXES = {"课程准备", "第一周", "第二周", "第三周"};
+    private String[] WEEK_INDEXES = {"开营前", "第一周", "第二周", "第三周"};
 
     @RequestMapping("/load")
     @Deprecated
