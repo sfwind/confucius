@@ -315,7 +315,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         List<Chapter> chapters = chapterDao.loadChapters(quanwaiClass.getCourseId());
         List<Chapter> homework = Lists.newArrayList();
         for(Chapter chapter:chapters){
-            if(chapter.getType()== CourseType.HOMEWORK){
+            if(chapter.getType()== CourseType.HOMEWORK || chapter.getType()== CourseType.NEW_HOMEWORK){
                 homework.add(chapter);
             }
         }
@@ -383,7 +383,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("chapterId {} is invalid", chapterId);
             return;
         }
-        if(chapter.getType()==CourseType.HOMEWORK){
+        if(chapter.getType()==CourseType.HOMEWORK || chapter.getType()==CourseType.NEW_HOMEWORK){
             return;
         }
         completeChapter(openid, chapter);
