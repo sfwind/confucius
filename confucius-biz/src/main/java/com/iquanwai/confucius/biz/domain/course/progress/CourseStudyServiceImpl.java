@@ -128,6 +128,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }else if(m.getType()==13){
             m.setContent(accountPlaceholder(m.getContent(), openid));
             m.setType(1);
+        //占位符替换，当图片处理
+        }else if(m.getType()==21){
+            m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
+            m.setType(2);
         }
     }
 

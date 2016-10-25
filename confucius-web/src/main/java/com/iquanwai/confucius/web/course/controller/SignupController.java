@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -34,6 +35,8 @@ public class SignupController {
     private OperationLogService operationLogService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private CourseStudyService courseStudyService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable int courseId){
@@ -132,6 +135,7 @@ public class SignupController {
     @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> infoSubmit(@RequestBody InfoSubmitDto infoSubmitDto,
                                                           LoginUser loginUser){
+        Integer chapterId = null;
         try{
             Assert.notNull(loginUser, "用户不能为空");
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -144,11 +148,16 @@ public class SignupController {
             mapper.map(infoSubmitDto, account);
             account.setOpenid(loginUser.getOpenId());
             accountService.submitPersonalInfo(account);
+
+            Chapter chapter = courseStudyService.loadFirstPreparedChapter(infoSubmitDto.getCourseId());
+            if(chapter!=null) {
+                chapterId = chapter.getId();
+            }
         }catch (Exception e){
             LOGGER.error("提交个人信息失败", e);
             return WebUtils.error("提交个人信息失败");
         }
-        return WebUtils.success();
+        return WebUtils.result(chapterId);
     }
 
     @RequestMapping("/welcome/{orderId}")
