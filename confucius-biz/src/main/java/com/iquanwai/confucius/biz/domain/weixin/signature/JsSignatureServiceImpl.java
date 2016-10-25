@@ -22,7 +22,7 @@ public class JsSignatureServiceImpl implements JsSignatureService {
 
     private String jsapi_ticket;
 
-    private static Object LOCK = new Object();
+    private final static Object LOCK = new Object();
 
     private long last_update = 0;
 
@@ -52,8 +52,8 @@ public class JsSignatureServiceImpl implements JsSignatureService {
         vars.put("timestamp", timestamp);
         vars.put("url", url);
         String signature = CommonUtils.jsSign(vars);
-        JsSignature jsSignature = new JsSignature(ConfigUtils.getAppid(), timestamp, noncestr, signature);
-        return jsSignature;
+        return new JsSignature(ConfigUtils.getAppid(),
+                timestamp, noncestr, signature);
     }
 
     private void refreshJsApiTicket() {

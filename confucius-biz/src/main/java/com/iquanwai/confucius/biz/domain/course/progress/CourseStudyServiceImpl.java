@@ -64,7 +64,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private String picUrlPrefix = ConfigUtils.domainName()+"/images/";
     private String audioUrlPrefix = ConfigUtils.domainName()+"/audio/";
 
-    private String shortUrlService = "http://tinyurl.com/api-create.php?url=";
+    private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
     private static final Integer PREPARED_WEEK = 0;
 
@@ -272,7 +272,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         String requestUrl = shortUrlService;
         try {
             requestUrl = requestUrl + URLEncoder.encode(url, "utf-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException ignored) {
 
         }
         return restfulHelper.getPlain(requestUrl);
@@ -342,7 +342,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         String answer = "";
         Question q = questionMap.get(questionId);
         if(q==null){
-            logger.error("questionId {} is invalid", q);
+            logger.error("questionId {} is invalid", questionId);
             return false;
         }
         ClassMember classMember = classMemberDao.activeCourse(openid,q.getCourseId());

@@ -105,14 +105,14 @@ public class CourseController {
         int last = 0;
         if(StringUtils.isNotEmpty(personalProgress)) {
             String[] progressArr = personalProgress.split(",");
-            for(int i=0;i<progressArr.length;i++){
+            for (String aProgressArr : progressArr) {
                 try {
-                    int that = Integer.valueOf(progressArr[i]);
-                    if(that>last){
+                    int that = Integer.valueOf(aProgressArr);
+                    if (that > last) {
                         last = that;
                     }
-                }catch (NumberFormatException e){
-                    LOGGER.error(classMember.getOpenId()+" progress is abnormal,"+progressArr[i]+" is not a number");
+                } catch (NumberFormatException e) {
+                    LOGGER.error(classMember.getOpenId() + " progress is abnormal," + aProgressArr + " is not a number");
                 }
             }
         }

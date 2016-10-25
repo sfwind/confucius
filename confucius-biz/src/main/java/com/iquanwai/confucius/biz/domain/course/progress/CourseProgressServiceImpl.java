@@ -359,10 +359,6 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
 
         //章节进度小于课程当前进度，则当前章节解锁
-        if(chapter.getStartDay()<=classProgress){
-            return true;
-        }
-
-        return false;
+        return chapter.getStartDay()<=classProgress;
     }
 }

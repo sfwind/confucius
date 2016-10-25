@@ -61,11 +61,11 @@ public class SignupServiceImpl implements SignupService {
     /**
      * 支付二维码的高度
      * */
-    private static int QRCODE_HEIGHT = 200;
+    private final static int QRCODE_HEIGHT = 200;
     /**
      * 支付二维码的宽度
      * */
-    private static int QRCODE_WIDTH = 200;
+    private final static int QRCODE_WIDTH = 200;
 
     /**
      * 每个班级的当前学号
@@ -209,10 +209,9 @@ public class SignupServiceImpl implements SignupService {
             logger.error("courseId {} is invalid", courseId);
             return false;
         }
-        if(courseIntroduction.getFree()){
-            return true;
-        }
-        return costRepo.isWhite(courseId, openid);
+
+        return courseIntroduction.getFree() ||
+                costRepo.isWhite(courseId, openid);
     }
 
     public void giveupSignup(String openid, String orderId) {
@@ -269,14 +268,13 @@ public class SignupServiceImpl implements SignupService {
         String time_stamp = String.valueOf(DateUtils.currentTimestamp());
         String appid = ConfigUtils.getAppid();
         String mch_id = ConfigUtils.getMch_id();
-        String product_id = productId;
 
         Map<String, String> map = Maps.newHashMap();
         map.put("nonce_str", nonce_str);
         map.put("time_stamp", time_stamp);
         map.put("appid", appid);
         map.put("mch_id", mch_id);
-        map.put("product_id", product_id);
+        map.put("product_id", productId);
         //生成签名
         String sign = CommonUtils.sign(map);
         map.put("sign",sign);

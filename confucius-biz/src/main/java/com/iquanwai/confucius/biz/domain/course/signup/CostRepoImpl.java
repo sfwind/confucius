@@ -52,10 +52,8 @@ public class CostRepoImpl implements CostRepo {
 
     public boolean isWhite(Integer courseId, String openid) {
         List<String> classWhiteList = whiteList.get(courseId);
-        if(classWhiteList==null||!classWhiteList.contains(openid)){
-            return false;
-        }
-        return true;
+        //白名单中包含用户openid
+        return classWhiteList!=null && classWhiteList.contains(openid);
     }
 
     public double discount(Double price, String openid) {

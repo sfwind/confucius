@@ -75,11 +75,7 @@ public class IndexController {
         }
 
         Account account = accountService.getAccount(openId, false);
-
-        if(account==null){
-            return false;
-        }
-
-        return true;
+        
+        return account!=null;
     }
 }

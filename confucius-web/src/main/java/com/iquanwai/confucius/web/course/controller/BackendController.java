@@ -47,7 +47,7 @@ public class BackendController {
 
     @RequestMapping("/entry/{orderId}")
     public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId){
-        String result = "";
+        String result;
         try {
             CourseOrder courseOrder = signupService.getCourseOrder(orderId);
             if(courseOrder!=null){
@@ -75,7 +75,10 @@ public class BackendController {
         Cookie[] cookies = request.getCookies();
         StringBuilder sb = new StringBuilder();
         for(Cookie cookie:cookies){
-            sb.append(cookie.getName()+":"+cookie.getValue()+",");
+            sb.append(cookie.getName())
+                    .append(":")
+                    .append(cookie.getValue())
+                    .append(",");
         }
         OperationLog operationLog = OperationLog.create().openid("")
                 .module("测试")

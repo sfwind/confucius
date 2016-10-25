@@ -32,7 +32,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     @Autowired
     private CourseOrderDao courseOrderDao;
 
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     /**
      * 每个课程的对应开班id
