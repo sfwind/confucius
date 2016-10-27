@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.course;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -28,14 +26,12 @@ import java.util.concurrent.Future;
 public class ClassMemberDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ClassMember activeCourse(String openid, Integer courseId){
+    public ClassMember classMember(String openid, Integer courseId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
-        //课程结束后,还能继续学习7天
-        String closeDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), 7));
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? and CloseTime >= ?",
-                    h, openid, courseId, closeDate);
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=?",
+                    h, openid, courseId);
             return classMember;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -45,7 +41,7 @@ public class ClassMemberDao extends DBUtil {
     }
 
     @Deprecated
-    public ClassMember activeCourse(String openid){
+    public ClassMember classMember(String openid){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
 

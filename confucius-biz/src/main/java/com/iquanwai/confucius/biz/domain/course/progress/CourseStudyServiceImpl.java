@@ -66,8 +66,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
-    private static final Integer PREPARED_WEEK = 0;
-
     @PostConstruct
     public void initQuestion(){
         List<Question> questionList = questionDao.loadAll(Question.class);
@@ -159,7 +157,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("chapterId {} is invalid", chapterId);
             return content;
         }
-        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -180,7 +178,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("chapterId {} is invalid", chapterId);
             return content;
         }
-        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -221,7 +219,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("questionId {} is invalid", questionId);
             return null;
         }
-        ClassMember classMember = classMemberDao.activeCourse(openid, question.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, question.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -241,7 +239,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("homeworkId {} is invalid", homeworkId);
             return null;
         }
-        ClassMember classMember = classMemberDao.activeCourse(openid, homework.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, homework.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -297,7 +295,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("homeworkId {} is invalid", homeworkId);
             return;
         }
-        ClassMember classMember = classMemberDao.activeCourse(openid, homework.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, homework.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -349,7 +347,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("questionId {} is invalid", questionId);
             return false;
         }
-        ClassMember classMember = classMemberDao.activeCourse(openid,q.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, q.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -390,7 +388,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     public void completeChapter(String openid, Chapter chapter) {
-        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -427,7 +425,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("chapterId {} is invalid", chapterId);
             return;
         }
-        ClassMember classMember = classMemberDao.activeCourse(openid, chapter.getCourseId());
+        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
             logger.error("{} has no active course", openid);
@@ -497,21 +495,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
         return courseWeekDao.getCourseWeek(courseId, week);
-    }
-
-    public Chapter loadFirstPreparedChapter(Integer courseId) {
-        List<Chapter> chapters = chapterDao.loadChapters(courseId, PREPARED_WEEK);
-        //初始化序号
-        int first = 0;
-        Chapter firstChapter = null;
-
-        for(Chapter chapter:chapters){
-            if(chapter.getSequence()<first){
-                first = chapter.getSequence();
-                firstChapter = chapter;
-            }
-        }
-        return firstChapter;
     }
 
     public void reloadQuestion() {

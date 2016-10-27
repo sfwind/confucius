@@ -223,30 +223,4 @@ public class ChapterController {
             return WebUtils.error("记录页数失败");
         }
     }
-
-    @RequestMapping("/prepared/page/{courseId}")
-    public ResponseEntity<Map<String, Object>> loadPrepareChapter(LoginUser loginUser,
-                                                    @PathVariable("courseId") Integer courseId){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            Chapter chapter = courseStudyService.loadFirstPreparedChapter(courseId);
-            if(chapter==null){
-                return WebUtils.error("获取课前准备首页失败");
-            }
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapter.getId(), null, false);
-            if(chapterPageDto==null){
-                return WebUtils.error("获取课前准备首页失败");
-            }
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("课程")
-                    .function("课前准备")
-                    .action("打开课前准备首页")
-                    .memo(courseId+"");
-            operationLogService.log(operationLog);
-            return WebUtils.result(chapterPageDto);
-        }catch (Exception e){
-            LOGGER.error("获取课前准备首页失败", e);
-            return WebUtils.error("获取课前准备首页失败");
-        }
-    }
 }

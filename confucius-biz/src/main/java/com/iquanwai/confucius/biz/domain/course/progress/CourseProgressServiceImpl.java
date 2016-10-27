@@ -51,14 +51,24 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public ClassMember loadActiveCourse(String openid, Integer courseId) {
         Assert.notNull(openid, "openid不能为空");
         //TODO: 改成新接口
-        ClassMember classMember = classMemberDao.activeCourse(openid);
+        ClassMember classMember;
+        if(courseId!=null) {
+            classMember = classMemberDao.classMember(openid, courseId);
+        }else{
+            classMember = classMemberDao.classMember(openid);
+        }
 
         if(classMember==null){
-//            logger.error("{} has no active course", openid);
             return null;
         }
         //设置课程id和课程进度
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
+        Date closeDate = DateUtils.parseStringToDate(quanwaiClass.getCloseTime());
+        if(closeDate.before(DateUtils.beforeDays(new Date(), 7))){
+            logger.info("{} has no active course {}", openid, courseId);
+            return null;
+        }
+
         if(quanwaiClass!=null){
             classMember.setClassProgress(quanwaiClass.getProgress());
         }
