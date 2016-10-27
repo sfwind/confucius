@@ -49,8 +49,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     @Autowired
     private ClassMemberDao classMemberDao;
     @Autowired
-    private CourseWeekDao courseWeekDao;
-    @Autowired
     private RestfulHelper restfulHelper;
     @Autowired
     private ClassDao classDao;
@@ -493,10 +491,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             return question.getPoint();
         }
         return 0;
-    }
-
-    public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
-        return courseWeekDao.getCourseWeek(courseId, week);
     }
 
     public Chapter loadFirstPreparedChapter(Integer courseId) {

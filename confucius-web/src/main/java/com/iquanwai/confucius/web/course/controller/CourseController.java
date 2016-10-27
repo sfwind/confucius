@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
@@ -11,6 +10,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.course.dto.CertificateDto;
 import com.iquanwai.confucius.web.course.dto.CoursePageDto;
 import com.iquanwai.confucius.web.course.dto.WeekIndexDto;
 import org.apache.commons.lang3.StringUtils;
@@ -35,8 +35,6 @@ public class CourseController {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Autowired
     private CourseProgressService courseProgressService;
-    @Autowired
-    private CourseStudyService courseStudyService;
     @Autowired
     private OperationLogService operationLogService;
 
@@ -136,7 +134,7 @@ public class CourseController {
         CoursePageDto coursePageDto = new CoursePageDto();
         coursePageDto.setCourse(course);
         //加载周主题
-        CourseWeek courseWeek = courseStudyService.loadCourseWeek(classMember.getCourseId(), week);
+        CourseWeek courseWeek = courseProgressService.loadCourseWeek(classMember.getCourseId(), week);
         if(courseWeek!=null) {
             coursePageDto.setWeek(week);
             coursePageDto.setTopic(courseWeek.getTopic());
@@ -201,6 +199,35 @@ public class CourseController {
         }catch (Exception e){
             LOGGER.error("触发毕业失败", e);
             return WebUtils.error("触发毕业失败");
+        }
+    }
+
+    @RequestMapping("/certificate/info/{courseId}")
+    public ResponseEntity<Map<String, Object>> certificateInfo(@PathVariable("courseId") Integer courseId,
+                                                               LoginUser loginUser){
+        CertificateDto certificateDto = new CertificateDto();
+        try{
+            certificateDto.setName(loginUser.getRealName());
+            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+            if(classMember!=null){
+                certificateDto.setCertificateNo(classMember.getCertificateNo());
+                Course course = courseProgressService.loadCourse(classMember.getCourseId());
+                if(course!=null){
+                    certificateDto.setCertificateBg(course.getCertificatePic());
+                }
+                certificateDto.setComment(courseProgressService.certificateComment(classMember));
+            }
+
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("课程")
+                    .function("毕业")
+                    .action("打开证书")
+                    .memo(courseId+"");
+            operationLogService.log(operationLog);
+            return WebUtils.result(certificateDto);
+        }catch (Exception e){
+            LOGGER.error("获取证书信息失败", e);
+            return WebUtils.error("获取证书信息失败");
         }
     }
 }

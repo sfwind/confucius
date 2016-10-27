@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +38,11 @@ public class AccountServiceImpl implements AccountService {
         if(!realTime && account != null) {
             return account;
         }
+
+        return getAccountFromWeixin(openid, account);
+    }
+
+    private Account getAccountFromWeixin(String openid, Account account) {
         //调用api查询account对象
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
@@ -45,9 +51,8 @@ public class AccountServiceImpl implements AccountService {
 
         String body = restfulHelper.get(url);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
-
+        Account accountNew = new Account();
         try {
-            Account accountNew = new Account();
             ConvertUtils.register(new Converter() {
                 public Object convert(Class aClass, Object value) {
                     if (value == null)
@@ -57,7 +62,7 @@ public class AccountServiceImpl implements AccountService {
                         logger.error("不是日期类型");
                         throw new ConversionException("不是日期类型");
                     }
-                    Double time = (Double)value*1000;
+                    Double time = (Double) value * 1000;
 
                     return new DateTime(time.longValue()).toDate();
                 }
@@ -71,11 +76,10 @@ public class AccountServiceImpl implements AccountService {
             }else{
                 followUserDao.updateMeta(accountNew);
             }
-            return accountNew;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-        return null;
+        return accountNew;
     }
 
     public void submitPersonalInfo(Account account) {
@@ -93,7 +97,23 @@ public class AccountServiceImpl implements AccountService {
         for(String openid:usersDto.getData().getOpenid()) {
             getAccount(openid, true);
         }
+        logger.info("处理完成");
     }
 
+    public void collectNewUsers() {
+        //调用api查询account对象
+        String url = GET_USERS_URL;
 
+        String body = restfulHelper.get(url);
+
+        UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
+
+        List<String> openids = followUserDao.queryAll();
+        for(String openid:usersDto.getData().getOpenid()) {
+            if(!openids.contains(openid)) {
+                getAccountFromWeixin(openid, null);
+            }
+        }
+        logger.info("处理完成");
+    }
 }

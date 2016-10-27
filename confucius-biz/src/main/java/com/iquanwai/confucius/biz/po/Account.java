@@ -29,4 +29,5 @@ public class Account {
     private String industry; //行业
     private String function; //职业
     private String workingLife; //工作年限
+    private String realName; //真名
 }

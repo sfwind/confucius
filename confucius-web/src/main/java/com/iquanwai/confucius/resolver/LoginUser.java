@@ -15,8 +15,9 @@ public class LoginUser {
     private String openId;
     private String weixinName;
     private String headimgUrl;
+    private String realName;
 
     public static LoginUser defaultUser(){
-        return new LoginUser(ConfigUtils.getDefaultOpenid(),"风之伤", null);
+        return new LoginUser(ConfigUtils.getDefaultOpenid(),"风之伤", null, null);
     }
 }

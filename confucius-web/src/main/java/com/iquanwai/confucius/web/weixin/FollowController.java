@@ -26,12 +26,33 @@ public class FollowController {
     @RequestMapping("/all")
     public ResponseEntity<Map<String, Object>> getAll() throws IOException {
         try {
-            accountService.collectUsers();
-            return WebUtils.success();
+            new Thread(new Runnable() {
+                public void run() {
+                    accountService.collectUsers();
+                }
+            }).start();
+
+            return WebUtils.result("正在运行中");
         }catch (Exception e){
             LOGGER.error("get all followers failed", e);
         }
         return WebUtils.error("get all followers failed");
+    }
+
+    @RequestMapping("/new")
+    public ResponseEntity<Map<String, Object>> getNew() throws IOException {
+        try {
+            new Thread(new Runnable() {
+                public void run() {
+                    accountService.collectNewUsers();
+                }
+            }).start();
+
+            return WebUtils.result("正在运行中");
+        }catch (Exception e){
+            LOGGER.error("get new followers failed", e);
+        }
+        return WebUtils.error("get new followers failed");
     }
 
 }

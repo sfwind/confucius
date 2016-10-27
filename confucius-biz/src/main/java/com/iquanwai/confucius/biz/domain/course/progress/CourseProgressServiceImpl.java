@@ -40,6 +40,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private TemplateMessageService templateMessageService;
     @Autowired
     private ClassMemberCountRepo classMemberCountRepo;
+    @Autowired
+    private CourseWeekDao courseWeekDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -98,6 +100,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         course.setChapterList(buildChapter(chapters, classMember.getComplete(), classMember.getClassProgress()));
 
         return course;
+    }
+
+    public Course loadCourse(Integer courseId) {
+        return courseDao.load(Course.class, courseId);
     }
 
     public void classProgress() {
@@ -386,5 +392,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
         //章节进度小于课程当前进度，则当前章节解锁
         return chapter.getStartDay()<=classProgress;
+    }
+
+    public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
+        return courseWeekDao.getCourseWeek(courseId, week);
+    }
+
+    //TODO: 文案确认
+    public String certificateComment(ClassMember classMember) {
+        return null;
     }
 }

@@ -1,16 +1,19 @@
 package com.iquanwai.confucius.biz.dao.wx;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Account;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -58,6 +61,21 @@ public class FollowUserDao extends DBUtil {
         }
 
         return null;
+    }
+
+
+    public List<String> queryAll() {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<String>> h = new ColumnListHandler<String>();
+
+        try {
+            List<String> account = run.query("SELECT OpenId FROM FollowUsers", h);
+            return account;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
     }
 
     public int updateMeta(Account account) {

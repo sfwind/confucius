@@ -22,6 +22,11 @@ public interface AccountService {
      * */
     void collectUsers();
 
+    /**
+     * 收集新关注用户的信息
+     * */
+    void collectNewUsers();
+
     String USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN";
 
     String GET_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}";

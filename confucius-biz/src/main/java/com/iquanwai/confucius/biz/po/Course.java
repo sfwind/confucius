@@ -15,5 +15,6 @@ public class Course {
     private Integer week; //开课周数
     private String pic;   //课程图片url
     private boolean preChapter;   //是否存在课程准备（0-无，1-有）
+    private String certificatePic;   //证书背景图片
     private List<Chapter> chapterList;
 }
