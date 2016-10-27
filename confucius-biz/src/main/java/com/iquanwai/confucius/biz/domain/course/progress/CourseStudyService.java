@@ -94,6 +94,12 @@ public interface CourseStudyService {
     CourseWeek loadCourseWeek(Integer courseId, Integer week);
 
     /**
+     * 获取课前准备的第一章节信息
+     * @param courseId 课程id
+     * */
+    Chapter loadFirstPreparedChapter(Integer courseId);
+
+    /**
      * 重新加载问题
      * */
     void reloadQuestion();

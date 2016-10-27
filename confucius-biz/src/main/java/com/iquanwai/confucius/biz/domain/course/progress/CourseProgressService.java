@@ -19,6 +19,12 @@ public interface CourseProgressService {
     ClassMember loadActiveCourse(String openid, Integer courseId);
 
     /**
+     * 获取用户正在就读的所有班级信息
+     * @param openid openid
+     * */
+    List<ClassMember> loadActiveCourse(String openid);
+
+    /**
      * 获取课程信息
      * @param classMember 学员详情
      * @param week 加载当前周的章节

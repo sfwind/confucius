@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.introduction.CourseIntroductionService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -9,6 +10,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.MyCourseDto;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,29 +41,35 @@ public class IntroductionController {
     public ResponseEntity<Map<String, Object>> mycourse(LoginUser loginUser){
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            MyCourseDto courseDto = new MyCourseDto();
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), null);
-            if(classMember==null){
+            List<MyCourseDto> courseDtos = Lists.newArrayList();
+            List<ClassMember> classMemberList = courseProgressService.loadActiveCourse(loginUser.getOpenId());
+            if(CollectionUtils.isEmpty(classMemberList)){
                 OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                         .module("服务号")
                         .function("介绍")
                         .action("训练营");
                 operationLogService.log(operationLog);
-                return WebUtils.result(courseDto);
+                return WebUtils.result(courseDtos);
             }
-            CourseIntroduction course = courseIntroductionService.loadCourse(classMember.getCourseId());
-            if(course==null){
-                return WebUtils.error("获取介绍失败");
+            for(ClassMember classMember:classMemberList) {
+                MyCourseDto courseDto = new MyCourseDto();
+                CourseIntroduction course = courseIntroductionService.loadCourse(classMember.getCourseId());
+                if (course == null) {
+                    return WebUtils.error("获取介绍失败");
+                }
+                //intro信息太大,去掉
+                course.setIntro(null);
+                courseDto.setCourse(course);
+                courseDto.setCourseProgress(courseProgress(course, classMember));
+                courseDto.setMyProgress(myProgress(course, classMember));
+                courseDtos.add(courseDto);
             }
-            courseDto.setCourse(course);
-            courseDto.setCourseProgress(courseProgress(course, classMember));
-            courseDto.setMyProgress(myProgress(course, classMember));
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("服务号")
                     .function("介绍")
                     .action("我的训练");
             operationLogService.log(operationLog);
-            return WebUtils.result(courseDto);
+            return WebUtils.result(courseDtos);
         }catch (Exception e){
             LOGGER.error("获取介绍失败", e);
             return WebUtils.error("获取介绍失败");
@@ -110,6 +118,10 @@ public class IntroductionController {
                     .action("更多训练");
             operationLogService.log(operationLog);
             List<CourseIntroduction> courseList = courseIntroductionService.loadAll();
+            for(CourseIntroduction course:courseList){
+                //intro信息太大,去掉
+                course.setIntro(null);
+            }
             return WebUtils.result(courseList);
         }catch (Exception e){
             LOGGER.error("获取更多训练失败", e);

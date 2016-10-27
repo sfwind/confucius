@@ -55,24 +55,40 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(courseId!=null) {
             classMember = classMemberDao.classMember(openid, courseId);
         }else{
-            classMember = classMemberDao.classMember(openid);
+            classMember = classMemberDao.classMember(openid).get(0);
         }
 
         if(classMember==null){
             return null;
         }
-        //设置课程id和课程进度
+        //设置课程进度
+        classProgress(classMember);
+        return classMember;
+    }
+
+    public List<ClassMember> loadActiveCourse(String openid) {
+        List<ClassMember> classMemberList = classMemberDao.classMember(openid);
+
+        return Lists.transform(classMemberList, new Function<ClassMember, ClassMember>() {
+
+            public ClassMember apply(ClassMember input) {
+                classProgress(input);
+                return input;
+            }
+        });
+    }
+
+    private void classProgress(ClassMember classMember){
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
+        if(quanwaiClass==null){
+            return;
+        }
         Date closeDate = DateUtils.parseStringToDate(quanwaiClass.getCloseTime());
         if(closeDate.before(DateUtils.beforeDays(new Date(), 7))){
-            logger.info("{} has no active course {}", openid, courseId);
-            return null;
+            logger.info("{} has no active course {}", classMember.getOpenId(), classMember.getCourseId());
         }
 
-        if(quanwaiClass!=null){
-            classMember.setClassProgress(quanwaiClass.getProgress());
-        }
-        return classMember;
+        classMember.setClassProgress(quanwaiClass.getProgress());
     }
 
     public Course loadCourse(ClassMember classMember, int week) {

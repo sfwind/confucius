@@ -66,6 +66,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
+    private static final Integer PREPARED_WEEK = 0;
+
     @PostConstruct
     public void initQuestion(){
         List<Question> questionList = questionDao.loadAll(Question.class);
@@ -495,6 +497,21 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
         return courseWeekDao.getCourseWeek(courseId, week);
+    }
+
+    public Chapter loadFirstPreparedChapter(Integer courseId) {
+        List<Chapter> chapters = chapterDao.loadChapters(courseId, PREPARED_WEEK);
+        //初始化序号
+        int first = 0;
+        Chapter firstChapter = null;
+
+        for(Chapter chapter:chapters){
+            if(chapter.getSequence()<first){
+                first = chapter.getSequence();
+                firstChapter = chapter;
+            }
+        }
+        return firstChapter;
     }
 
     public void reloadQuestion() {
