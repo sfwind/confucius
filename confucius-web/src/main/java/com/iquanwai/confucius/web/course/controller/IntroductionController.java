@@ -9,8 +9,8 @@ import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.course.dto.AllCourseDto;
 import com.iquanwai.confucius.web.course.dto.MyCourseDto;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,18 +39,13 @@ public class IntroductionController {
 
     @RequestMapping("/mycourse")
     public ResponseEntity<Map<String, Object>> mycourse(LoginUser loginUser){
+        AllCourseDto allCourseDto = new AllCourseDto();
         try{
             Assert.notNull(loginUser, "用户不能为空");
             List<MyCourseDto> courseDtos = Lists.newArrayList();
             List<ClassMember> classMemberList = courseProgressService.loadActiveCourse(loginUser.getOpenId());
-            if(CollectionUtils.isEmpty(classMemberList)){
-                OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                        .module("服务号")
-                        .function("介绍")
-                        .action("训练营");
-                operationLogService.log(operationLog);
-                return WebUtils.result(courseDtos);
-            }
+            List<CourseIntroduction> notEntryCourses = courseIntroductionService.loadNotEntryCourses(classMemberList);
+            allCourseDto.setOtherCourses(notEntryCourses);
             for(ClassMember classMember:classMemberList) {
                 MyCourseDto courseDto = new MyCourseDto();
                 CourseIntroduction course = courseIntroductionService.loadCourse(classMember.getCourseId());
@@ -64,12 +59,14 @@ public class IntroductionController {
                 courseDto.setMyProgress(myProgress(course, classMember));
                 courseDtos.add(courseDto);
             }
+
+            allCourseDto.setMyCourses(courseDtos);
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("服务号")
                     .function("介绍")
                     .action("我的训练");
             operationLogService.log(operationLog);
-            return WebUtils.result(courseDtos);
+            return WebUtils.result(allCourseDto);
         }catch (Exception e){
             LOGGER.error("获取介绍失败", e);
             return WebUtils.error("获取介绍失败");
@@ -118,10 +115,6 @@ public class IntroductionController {
                     .action("更多训练");
             operationLogService.log(operationLog);
             List<CourseIntroduction> courseList = courseIntroductionService.loadAll();
-            for(CourseIntroduction course:courseList){
-                //intro信息太大,去掉
-                course.setIntro(null);
-            }
             return WebUtils.result(courseList);
         }catch (Exception e){
             LOGGER.error("获取更多训练失败", e);

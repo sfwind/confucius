@@ -70,6 +70,31 @@ public class BackendController {
         return WebUtils.result(result);
     }
 
+    @RequestMapping("/log")
+    public ResponseEntity<Map<String, Object>> log(){
+//        String result;
+//        try {
+//            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
+//            if(courseOrder!=null){
+//                if(courseOrder.getStatus()==1){
+//                    String memberId = signupService.entry(courseOrder.getCourseId(),
+//                            courseOrder.getClassId(),
+//                            courseOrder.getOpenid());
+//                    result = "报名成功, 学号是"+memberId;
+//                }else{
+//                    result = "尚未付款";
+//                }
+//            }else{
+//                result = "订单不存在";
+//            }
+//        }catch (Exception e){
+//            result = "出现异常，报名失败";
+//            LOGGER.error(result, e);
+//        }
+
+        return WebUtils.success();
+    }
+
     @RequestMapping("/t")
     public ResponseEntity<Map<String, Object>> test(HttpServletRequest request){
         Cookie[] cookies = request.getCookies();

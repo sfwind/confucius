@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.introduction;
 
+import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.CourseIntroduction;
 
 import java.util.List;
@@ -18,4 +19,10 @@ public interface CourseIntroductionService {
      * @param courseId 课程id
      * */
     CourseIntroduction loadCourse(int courseId);
+
+    /**
+     * 获取用户未报名的课程
+     * @param classMemberList 用户的当前所有学员信息
+     * */
+    List<CourseIntroduction> loadNotEntryCourses(List<ClassMember> classMemberList);
 }
