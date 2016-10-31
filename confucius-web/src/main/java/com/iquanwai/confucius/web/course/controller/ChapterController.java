@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.AnswerDto;
@@ -28,6 +30,8 @@ public class ChapterController {
     @Autowired
     private CourseStudyService courseStudyService;
     @Autowired
+    private CourseProgressService courseProgressService;
+    @Autowired
     private OperationLogService operationLogService;
 
     @RequestMapping("/load/{chapterId}")
@@ -35,10 +39,20 @@ public class ChapterController {
                                                     @PathVariable("chapterId") Integer chapterId){
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, null, false);
+            Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+            if(chapter==null){
+                return WebUtils.error("获取用户当前章节页失败");
+            }
+            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
+            if(classMember==null){
+                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
+            }
+            ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, null, false);
             if(chapterPageDto==null){
                 return WebUtils.error("获取用户当前章节页失败");
             }
+
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("章节")
                     .function("学习章节")
@@ -52,15 +66,15 @@ public class ChapterController {
         }
     }
 
-    private ChapterPageDto loadPage(LoginUser loginUser, int chapterId, Integer pageSequence, Boolean lazyLoad) {
+    private ChapterPageDto loadPage(LoginUser loginUser, Chapter chapter, Integer pageSequence, Boolean lazyLoad) {
         ChapterPageDto chapterPageDto = new ChapterPageDto();
-        Page page = courseStudyService.loadPage(loginUser.getOpenId(), chapterId, pageSequence, lazyLoad);
+        Page page = courseStudyService.loadPage(loginUser.getOpenId(), chapter.getId(), pageSequence, lazyLoad);
         chapterPageDto.setPage(page);
-        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+
         chapterPageDto.setChapterPic(chapter.getIcon());
         chapterPageDto.setChapterType(chapter.getType());
         chapterPageDto.setChapterName(chapter.getName());
-        chapterPageDto.setChapterId(chapterId);
+        chapterPageDto.setChapterId(chapter.getId());
         chapterPageDto.setTotalPage(chapter.getTotalPage());
 
         return chapterPageDto;
@@ -72,16 +86,25 @@ public class ChapterController {
                                                     @PathVariable("sequence") Integer pageSequence){
         try{
             Assert.notNull(loginUser, "用户不能为空");
+            Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+            if(chapter==null){
+                return WebUtils.error("获取用户当前章节页失败");
+            }
+            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
+            if(classMember==null){
+                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
+            }
+            ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, pageSequence, false);
+            if(chapterPageDto==null){
+                return WebUtils.error("获取用户当前章节页失败");
+            }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("章节")
                     .function("学习章节")
                     .action("打开章节某页")
                     .memo(chapterId+","+pageSequence);
             operationLogService.log(operationLog);
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence, false);
-            if(chapterPageDto==null){
-                return WebUtils.error("获取用户当前章节页失败");
-            }
             return WebUtils.result(chapterPageDto);
         }catch (Exception e){
             LOGGER.error("获取用户当前章节页失败", e);
@@ -101,7 +124,11 @@ public class ChapterController {
 //                    .action("打开章节某页")
 //                    .memo(chapterId+","+pageSequence);
 //            operationLogService.log(operationLog);
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapterId, pageSequence, true);
+            Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+            if(chapter==null){
+                return WebUtils.error("懒加载章节页失败");
+            }
+            ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, pageSequence, true);
             if(chapterPageDto==null){
                 return WebUtils.error("懒加载章节页失败");
             }

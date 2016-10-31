@@ -54,9 +54,9 @@ public class SignupServiceImpl implements SignupService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-     * 每个人的待付费班级id
+     * 待付费名单(openid+courseId)
      * */
-    private Map<String, Integer> payMap = Maps.newConcurrentMap();
+    private List<String> payList = Lists.newArrayList();
 
     /**
      * 支付二维码的高度
@@ -89,11 +89,13 @@ public class SignupServiceImpl implements SignupService {
         }
         List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
         //清空缓存
-        payMap.clear();
+        payList.clear();
         classMap.clear();
         courseMap.clear();
         for(CourseOrder courseOrder:courseOrders){
-            payMap.put(courseOrder.getOpenid(), courseOrder.getClassId());
+            if(!payList.contains(courseOrder.getOpenid()+courseOrder.getCourseId())) {
+                payList.add(courseOrder.getOpenid() +courseOrder.getCourseId());
+            }
         }
 
         logger.info("init under payment map complete");
@@ -102,7 +104,7 @@ public class SignupServiceImpl implements SignupService {
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
         if(!ConfigUtils.pressTestSwitch()) {
-            if (classMemberCountRepo.isEntry(openid) && !payMap.containsKey(openid)) {
+            if (classMemberCountRepo.isEntry(openid, courseId) && !payList.contains(openid+courseId)) {
                 return new ImmutablePair(-3, 0);
             }
         }
@@ -137,7 +139,9 @@ public class SignupServiceImpl implements SignupService {
 
         courseOrderDao.insert(courseOrder);
         //加入待付款列表
-        payMap.put(openid, classId);
+        if(!payList.contains(openid+course.getCourseId())) {
+            payList.add(openid + course.getCourseId());
+        }
         return orderId;
     }
 
@@ -197,7 +201,7 @@ public class SignupServiceImpl implements SignupService {
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
         //从待付款列表中去除
-        payMap.remove(openid);
+        payList.remove(openid+courseId);
         //发送录取消息
         sendWelcomeMsg(courseId, openid, classId);
         return memberId;
@@ -216,12 +220,13 @@ public class SignupServiceImpl implements SignupService {
 
     public void giveupSignup(String openid, String orderId) {
         courseOrderDao.closeOrder(orderId);
-        payMap.remove(openid);
+
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
+        payList.remove(openid+courseOrder.getCourseId());
         ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), openid);
         //已经报名成功的学员不需要退班
         if(classMember==null) {
-            classMemberCountRepo.quitClass(openid);
+            classMemberCountRepo.quitClass(openid, courseOrder.getCourseId());
         }
     }
 

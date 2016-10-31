@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -46,11 +47,11 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     /**
      * 每个人的报名班级id
      * */
-    private Map<String, Integer> signupMap = Maps.newConcurrentMap();
+    private Map<String, List<CourseClass>> signupMap = Maps.newConcurrentMap();
 
-    public boolean isEntry(String openid) {
-        Integer id = signupMap.get(openid);
-        return id!=null;
+    public boolean isEntry(String openid, Integer courseId) {
+        List<CourseClass> classes = signupMap.get(openid);
+        return classes!=null && CourseClass.getCourse(classes, courseId)!=null;
     }
 
     @PostConstruct
@@ -93,7 +94,13 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                 } else {
                     maps.put(classId, new AtomicInteger(1));
                 }
-                signupMap.put(courseOrder.getOpenid(), classId);
+                String openid = courseOrder.getOpenid();
+                List<CourseClass> courseClasses = signupMap.get(openid);
+                if(courseClasses==null){
+                    courseClasses = Lists.newArrayList();
+                    signupMap.put(openid, courseClasses);
+                }
+                CourseClass.addCourse(courseClasses, courseOrder.getCourseId(), classId);
             }
             //原有人数减去已付费和待付费人数
             for(Iterator<Map.Entry<Integer, AtomicInteger>> it = maps.entrySet().iterator();it.hasNext();){
@@ -117,7 +124,8 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             }
             int remain = 0;
             boolean isEntry = false; //是否已经进入某班
-            Integer entryId = signupMap.get(openid);
+            List<CourseClass> classes = signupMap.get(openid);
+            Integer entryId = CourseClass.getCourse(classes, courseId).getClassId();
             //轮询所有班级，查看未报满的
             if(entryId==null){
                 for(Integer classId:openClass){
@@ -129,7 +137,12 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                             //人数-1，记录班级id，标记分配进入某班
                             remainingNumber--;
                             remainingCount.put(classId, remainingNumber);
-                            signupMap.put(openid, classId);
+                            List<CourseClass> courseClasses = signupMap.get(openid);
+                            if(courseClasses==null){
+                                courseClasses = Lists.newArrayList();
+                                signupMap.put(openid, courseClasses);
+                            }
+                            CourseClass.addCourse(courseClasses, courseId, classId);
                             entryId = classId;
                             isEntry = true;
                         }
@@ -148,8 +161,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         return new ImmutablePair(-1, 0);
     }
 
-    public void quitClass(String openid) {
-        Integer classId = signupMap.remove(openid);
+    public void quitClass(String openid, Integer courseId) {
+        List<CourseClass> classes = signupMap.get(openid);
+        Integer classId = CourseClass.removeCourse(classes, courseId).getClassId();
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
         if(quanwaiClass==null){
             return;
@@ -157,6 +171,39 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         synchronized (lock) {
             Integer remaining = remainingCount.get(quanwaiClass.getId());
             remainingCount.put(classId, remaining+1);
+        }
+    }
+
+    @Data
+    private static class CourseClass{
+        private Integer courseId;
+        private Integer classId;
+
+        public static CourseClass build(Integer courseId, Integer classId){
+            CourseClass courseClass = new CourseClass();
+            courseClass.setClassId(classId);
+            courseClass.setCourseId(courseId);
+
+            return courseClass;
+        }
+
+        public static void addCourse(List<CourseClass> classes, Integer courseId, Integer classId) {
+            classes.add(build(courseId, classId));
+        }
+
+        public static CourseClass getCourse(List<CourseClass> classes, Integer courseId) {
+            return classes.stream().filter(courseClass -> courseClass.getCourseId().equals(courseId))
+                    .findFirst().get();
+
+        }
+
+        public static CourseClass removeCourse(List<CourseClass> classes, Integer courseId) {
+            CourseClass result = classes.stream().filter(courseClass -> courseClass.getCourseId().equals(courseId))
+                    .findFirst().get();
+
+            classes.remove(result);
+
+            return result;
         }
     }
 }

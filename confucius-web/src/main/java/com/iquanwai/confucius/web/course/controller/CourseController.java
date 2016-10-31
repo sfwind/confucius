@@ -40,36 +40,6 @@ public class CourseController {
 
     private String[] WEEK_INDEXES = {"开营前", "第一周", "第二周", "第三周"};
 
-    @RequestMapping("/load")
-    @Deprecated
-    public ResponseEntity<Map<String, Object>> loadCourse(LoginUser loginUser){
-        try{
-            Assert.notNull(loginUser,"用户不能为空");
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), null);
-            if(classMember==null){
-                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
-            }
-
-            int week = getProgressWeek(classMember);
-            CoursePageDto course = getCourse(loginUser, classMember, week);
-            if(course==null){
-                return WebUtils.error("获取当前课程失败");
-            }
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("课程")
-                    .function("学习课程")
-                    .action("打开课程引导页")
-                    .memo(course.getCourse().getId()+"");
-            operationLogService.log(operationLog);
-            return WebUtils.result(course);
-        }catch (Exception e){
-            LOGGER.error("获取当前课程失败", e);
-            return WebUtils.error("获取当前课程失败");
-        }
-    }
-
-
     @RequestMapping("/load/{courseId}")
     public ResponseEntity<Map<String, Object>> loadCourse(LoginUser loginUser, @PathVariable Integer courseId){
         try{

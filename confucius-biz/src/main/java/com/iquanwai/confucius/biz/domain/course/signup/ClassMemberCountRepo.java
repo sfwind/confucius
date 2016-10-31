@@ -12,11 +12,11 @@ public interface ClassMemberCountRepo {
     void initClass();
 
     /**
-     * 是否报名
+     * 是否报名某课程
      * @param openid 学员id
-     * TODO:只能同时报一门课
+     * @param courseId 课程id
      * */
-    boolean isEntry(String openid);
+    boolean isEntry(String openid, Integer courseId);
 
     /**
      * 为用户预报名，占一个班级名额
@@ -31,5 +31,5 @@ public interface ClassMemberCountRepo {
      * @param openid 学员id
      * @return
      */
-    void quitClass(String openid);
+    void quitClass(String openid, Integer courseId);
 }

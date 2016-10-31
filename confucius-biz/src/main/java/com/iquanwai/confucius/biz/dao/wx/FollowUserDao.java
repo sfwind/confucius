@@ -66,7 +66,7 @@ public class FollowUserDao extends DBUtil {
 
     public List<String> queryAll() {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<String>> h = new ColumnListHandler<String>();
+        ResultSetHandler<List<String>> h = new ColumnListHandler<>();
 
         try {
             List<String> account = run.query("SELECT OpenId FROM FollowUsers", h);
@@ -100,13 +100,14 @@ public class FollowUserDao extends DBUtil {
     public int updateInfo(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String updateSql = "Update FollowUsers Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=? " +
+        String updateSql = "Update FollowUsers Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=?, RealName=? " +
                 "where Openid=?";
         try {
             Future<Integer> result = asyncRun.update(updateSql,
                     account.getMobileNo(), account.getEmail(),
                     account.getIndustry(), account.getFunction(),
-                    account.getWorkingLife(), account.getOpenid());
+                    account.getWorkingLife(), account.getRealName(),
+                    account.getOpenid());
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

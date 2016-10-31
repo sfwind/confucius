@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/4.
@@ -20,11 +20,11 @@ public class CourseIntroductionServiceImpl implements CourseIntroductionService 
 
     public List<CourseIntroduction> loadAll() {
         List<CourseIntroduction> courses = courseIntroductionDao.loadAll(CourseIntroduction.class);
-        for(CourseIntroduction courseIntroduction:courses){
-            //intro信息太大,去掉
+
+        return courses.parallelStream().map(courseIntroduction -> {
             courseIntroduction.setIntro(null);
-        }
-        return courses;
+            return courseIntroduction;
+        }).collect(Collectors.toList());
     }
 
     public CourseIntroduction loadCourse(int courseId) {
@@ -34,15 +34,13 @@ public class CourseIntroductionServiceImpl implements CourseIntroductionService 
     public List<CourseIntroduction> loadNotEntryCourses(List<ClassMember> classMemberList) {
         Assert.notNull(classMemberList, "学员信息不能为空");
         List<CourseIntroduction> courseList = loadAll();
-        for(ClassMember classMember:classMemberList) {
-            for (Iterator<CourseIntroduction> it = courseList.iterator(); it.hasNext(); ) {
-                CourseIntroduction courseIntroduction = it.next();
-
-                if(classMember.getCourseId().equals(courseIntroduction.getCourseId())){
-                    it.remove();
+        return courseList.stream().filter(course -> {
+            for(ClassMember classMember:classMemberList) {
+                if(classMember.getCourseId().equals(course.getCourseId())){
+                    return false;
                 }
             }
-        }
-        return courseList;
+            return true;
+        }).collect(Collectors.toList());
     }
 }

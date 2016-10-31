@@ -52,13 +52,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     public ClassMember loadActiveCourse(String openid, Integer courseId) {
         Assert.notNull(openid, "openid不能为空");
-        //TODO: 改成新接口
-        ClassMember classMember;
-        if(courseId!=null) {
-            classMember = classMemberDao.classMember(openid, courseId);
-        }else{
-            classMember = classMemberDao.classMember(openid).get(0);
-        }
+        ClassMember classMember = classMemberDao.classMember(openid, courseId);
 
         if(classMember==null){
             return null;

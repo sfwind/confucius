@@ -13,4 +13,5 @@ public class InfoSubmitDto {
     private String function; //职业
     private String workingLife; //工作年限
     private Integer courseId; //课程id
+    private String realName; //真名
 }
