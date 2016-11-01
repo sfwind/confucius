@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/31.
@@ -72,16 +73,13 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         List<Choice> choiceList = choiceDao.loadAll(Choice.class);
         for(Question question:questionList){
             List<Choice> choices = Lists.newArrayList();
-            for(Choice choice:choiceList){
-                if(choice.getQuestionId().equals(question.getId())){
-                    choices.add(choice);
-                }
-            }
+            choices.addAll(choiceList.stream().filter(choice -> choice.getQuestionId().
+                    equals(question.getId())).collect(Collectors.toList()));
             question.setChoiceList(choices);
             questionMap.put(question.getId(), question);
             //语音分析，拼接完整url
-            if(question.getAnalysis()!=null && question.getAnalysisType()==3){
-                question.setAnalysis(audioUrlPrefix+question.getAnalysis());
+            if(question.getVoice()!=null){
+                question.setVoice(audioUrlPrefix+question.getVoice());
             }
         }
 
@@ -312,15 +310,12 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
         List<Chapter> chapters = chapterDao.loadChapters(quanwaiClass.getCourseId());
         List<Chapter> homework = Lists.newArrayList();
-        for(Chapter chapter:chapters){
-            if(chapter.getType()== CourseType.HOMEWORK || chapter.getType()== CourseType.NEW_HOMEWORK){
-                homework.add(chapter);
-            }
-        }
+
+        homework.addAll(chapters.stream().filter(chapter -> chapter.getType() == CourseType.HOMEWORK
+                || chapter.getType() == CourseType.NEW_HOMEWORK).collect(Collectors.toList()));
+
         List<Integer> chapterIds = Lists.newArrayList();
-        for(Chapter chapter:homework){
-            chapterIds.add(chapter.getId());
-        }
+        chapterIds.addAll(homework.stream().map(Chapter::getId).collect(Collectors.toList()));
 
         Map<Integer, Integer> pageChapterMap = Maps.newHashMap();
         List<Page> pages = pageDao.loadPages(chapterIds);
@@ -331,12 +326,11 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }
 
         List<Material> materials = materialDao.loadPageMaterials(pageIds);
-        for(Material material:materials){
-            if(homeworkId.toString().equals(material.getContent())){
-                Chapter chapter = chapterDao.load(Chapter.class, pageChapterMap.get(material.getPageId()));
-                completeChapter(classMember.getOpenId(), chapter);
-            }
-        }
+
+        materials.stream().filter(material -> homeworkId.toString().equals(material.getContent())).forEach(material -> {
+            Chapter chapter = chapterDao.load(Chapter.class, pageChapterMap.get(material.getPageId()));
+            completeChapter(classMember.getOpenId(), chapter);
+        });
     }
 
     public boolean submitQuestion(String openid, Integer questionId, List<Integer> choiceList) {
@@ -475,11 +469,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
         List<Choice> all = question.getChoiceList();
         List<Choice> right = Lists.newArrayList();
-        for(Choice choice:all){
-            if(choice.getRight()){
-                right.add(choice);
-            }
-        }
+        right.addAll(all.stream().filter(choice -> choice.getRight()).
+                collect(Collectors.toList()));
 
         for(Choice choice:right){
             if(!choiceList.contains(choice.getId())) {

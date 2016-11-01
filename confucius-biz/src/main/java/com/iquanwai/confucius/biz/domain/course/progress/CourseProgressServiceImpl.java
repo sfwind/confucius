@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/29.
@@ -131,16 +132,15 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         //设置学员的章节上次看到的页码
         List<CurrentChapterPage> currentChapterPages = currentChapterPageDao.currentPages(openid, chapterIds);
         for(Chapter chapter:chapters){
-            for(CurrentChapterPage currentChapterPage:currentChapterPages){
-                if(chapter.getId()==currentChapterPage.getChapterId()){
-                    //如果用户已经学习完，则从第一页开始学习
-                    if(!chapter.isComplete()) {
-                        chapter.setPageSequence(currentChapterPage.getPageSequence());
-                    }else{
-                        chapter.setPageSequence(1);
-                    }
+            //如果用户已经学习完，则从第一页开始学习
+            currentChapterPages.stream().filter(currentChapterPage -> chapter.getId() == currentChapterPage.getChapterId()).forEach(currentChapterPage -> {
+                //如果用户已经学习完，则从第一页开始学习
+                if (!chapter.isComplete()) {
+                    chapter.setPageSequence(currentChapterPage.getPageSequence());
+                } else {
+                    chapter.setPageSequence(1);
                 }
-            }
+            });
         }
 
     }
@@ -200,13 +200,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
         List<Integer> taskSequences = Lists.newArrayList();
         //记录已经解锁的任务和作业序号
-        for(Chapter chapter:chapters){
-            if(chapter.getSequence()<progress){
-                if(chapter.getType()==CourseType.CHALLENGE || chapter.getType()==CourseType.HOMEWORK){
-                    taskSequences.add(chapter.getSequence());
-                }
-            }
-        }
+        taskSequences.addAll(chapters.stream().filter(chapter -> chapter.getSequence() < progress)
+                .filter(chapter -> chapter.getType() == CourseType.CHALLENGE || chapter.getType() == CourseType.HOMEWORK)
+                .map(Chapter::getSequence).collect(Collectors.toList()));
 
         List<ClassMember> classMembers = classMemberDao.getClassMember(quanwaiClass.getId());
         List<ClassMember> incompleteMembers = Lists.newArrayList();
@@ -232,9 +228,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 }
             }
         }
-        for(ClassMember classMember:incompleteMembers){
-            noticeMembers(classMember);
-        }
+        incompleteMembers.forEach(this::noticeMembers);
     }
 
     //通知未完成任务的学员

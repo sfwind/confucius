@@ -155,7 +155,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
             //找到未报满的班级，完成预报名
             if(isEntry) {
-                return new ImmutablePair<Integer, Integer>(remain, entryId);
+                return new ImmutablePair<>(remain, entryId);
             }
         }
         return new ImmutablePair(-1, 0);

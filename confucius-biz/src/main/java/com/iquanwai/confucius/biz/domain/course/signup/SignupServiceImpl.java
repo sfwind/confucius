@@ -92,11 +92,9 @@ public class SignupServiceImpl implements SignupService {
         payList.clear();
         classMap.clear();
         courseMap.clear();
-        for(CourseOrder courseOrder:courseOrders){
-            if(!payList.contains(courseOrder.getOpenid()+courseOrder.getCourseId())) {
-                payList.add(courseOrder.getOpenid() +courseOrder.getCourseId());
-            }
-        }
+        courseOrders.stream().filter(courseOrder -> !payList.contains(courseOrder.getOpenid() + courseOrder.getCourseId())).forEach(courseOrder -> {
+            payList.add(courseOrder.getOpenid() + courseOrder.getCourseId());
+        });
 
         logger.info("init under payment map complete");
     }
@@ -168,7 +166,7 @@ public class SignupServiceImpl implements SignupService {
         if(classMap.get(classId)==null || classMap.get(classId).get()==null){
             QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
             if(quanwaiClass!=null){
-                classMap.put(classId, new SoftReference<QuanwaiClass>(quanwaiClass));
+                classMap.put(classId, new SoftReference<>(quanwaiClass));
             }
         }
         return classMap.get(classId).get();

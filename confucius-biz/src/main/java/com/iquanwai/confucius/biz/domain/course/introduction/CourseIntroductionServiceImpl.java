@@ -21,7 +21,7 @@ public class CourseIntroductionServiceImpl implements CourseIntroductionService 
     public List<CourseIntroduction> loadAll() {
         List<CourseIntroduction> courses = courseIntroductionDao.loadAll(CourseIntroduction.class);
 
-        return courses.parallelStream().map(courseIntroduction -> {
+        return courses.stream().map(courseIntroduction -> {
             courseIntroduction.setIntro(null);
             return courseIntroduction;
         }).collect(Collectors.toList());
