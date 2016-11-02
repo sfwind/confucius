@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Account;
@@ -8,17 +9,24 @@ import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
+import com.iquanwai.confucius.web.course.dto.ProvinceDto;
+import com.iquanwai.confucius.web.course.dto.RegionDto;
+import org.apache.commons.collections.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/10/31.
@@ -46,8 +54,7 @@ public class PersonalInfoController {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("个人信息")
                     .function("编辑个人信息")
-                    .action("修改个人信息")
-                    .memo(loginUser.getRealName());
+                    .action("修改个人信息");
             operationLogService.log(operationLog);
         }catch (Exception e){
             LOGGER.error("提交个人信息失败", e);
@@ -80,8 +87,7 @@ public class PersonalInfoController {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("个人信息")
                     .function("编辑个人信息")
-                    .action("加载个人信息")
-                    .memo(loginUser.getRealName());
+                    .action("加载个人信息");
             operationLogService.log(operationLog);
         }catch (Exception e){
             LOGGER.error("加载个人信息失败", e);
@@ -92,33 +98,27 @@ public class PersonalInfoController {
 
     @RequestMapping(value = "/province/load", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadProvinceInfo(){
-        List<Region> region;
+        ProvinceDto provinceDto = new ProvinceDto();
         try{
-            region = accountService.loadAllProvinces();
+            List<Region> province = accountService.loadAllProvinces();
+            List<RegionDto> regionDtos = province.stream().map(region ->
+                    new RegionDto().id(region.getId()).name(region.getName()))
+                    .collect(Collectors.toList());
+            provinceDto.setProvince(regionDtos);
+            List<Region> city = accountService.loadCities();
+            city.stream().forEach(region -> {
+                List<RegionDto> cityList = provinceDto.getCity().get(region.getParentId());
+                if (CollectionUtils.isEmpty(cityList)) {
+                    cityList = Lists.newArrayList();
+                    provinceDto.getCity().put(region.getParentId(), cityList);
+                }
+                cityList.add(new RegionDto().id(region.getId()).name(region.getName()));
+            });
         }catch (Exception e){
             LOGGER.error("加载个人信息失败", e);
             return WebUtils.error("加载个人信息失败");
         }
-        return WebUtils.result(region);
+        return WebUtils.result(provinceDto);
     }
 
-    @RequestMapping(value = "/city/load/{provinceId}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadCities(@PathVariable Integer provinceId,
-                                                          LoginUser loginUser){
-        List<Region> region;
-        try{
-            region = accountService.loadCities(provinceId);
-
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("个人信息")
-                    .function("编辑个人信息")
-                    .action("获取城市信息")
-                    .memo(provinceId+"");
-            operationLogService.log(operationLog);
-        }catch (Exception e){
-            LOGGER.error("加载个人信息失败", e);
-            return WebUtils.error("加载个人信息失败");
-        }
-        return WebUtils.result(region);
-    }
 }

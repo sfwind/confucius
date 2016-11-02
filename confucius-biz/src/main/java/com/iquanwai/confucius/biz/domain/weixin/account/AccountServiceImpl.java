@@ -34,7 +34,9 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private RegionDao regionDao;
 
-    private List<Region> regionList;
+    private List<Region> provinceList;
+
+    private List<Region> cityList;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -125,14 +127,17 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadAllProvinces() {
-        if(regionList==null){
-            regionList = regionDao.loadAllProvinces();
+        if(provinceList ==null){
+            provinceList = regionDao.loadAllProvinces();
         }
-        return regionList;
+        return provinceList;
     }
 
     @Override
-    public List<Region> loadCities(Integer provinceId) {
-        return regionDao.loadByParentId(provinceId);
+    public List<Region> loadCities() {
+        if(cityList==null) {
+            cityList = regionDao.loadAllCities();
+        }
+        return cityList;
     }
 }

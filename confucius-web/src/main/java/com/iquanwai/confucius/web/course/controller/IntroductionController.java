@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -115,6 +116,27 @@ public class IntroductionController {
                     .action("更多训练");
             operationLogService.log(operationLog);
             List<CourseIntroduction> courseList = courseIntroductionService.loadAll();
+            return WebUtils.result(courseList);
+        }catch (Exception e){
+            LOGGER.error("获取更多训练失败", e);
+            return WebUtils.error("获取更多训练失败");
+        }
+    }
+
+    @RequestMapping("/course/{courseId}")
+    public ResponseEntity<Map<String, Object>> allcourse(@PathVariable Integer courseId,
+                                                             LoginUser loginUser){
+
+
+        try{
+            Assert.notNull(loginUser, "用户不能为空");
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("服务号")
+                    .function("介绍")
+                    .action("课程详情")
+                    .memo(courseId+"");
+            operationLogService.log(operationLog);
+            CourseIntroduction courseList = courseIntroductionService.loadCourse(courseId);
             return WebUtils.result(courseList);
         }catch (Exception e){
             LOGGER.error("获取更多训练失败", e);

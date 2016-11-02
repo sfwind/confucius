@@ -34,12 +34,12 @@ public class RegionDao extends DBUtil{
         return Lists.newArrayList();
     }
 
-    public List<Region> loadByParentId(Integer parentId) {
+    public List<Region> loadAllCities() {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Region>> h = new BeanListHandler(Region.class);
 
         try {
-            List<Region> regions = run.query("SELECT * FROM Region where ParentId=?", h, parentId);
+            List<Region> regions = run.query("SELECT * FROM Region where Type=30", h);
             return regions;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

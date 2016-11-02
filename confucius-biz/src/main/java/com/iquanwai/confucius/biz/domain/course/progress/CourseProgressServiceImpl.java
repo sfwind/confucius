@@ -49,6 +49,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     private final static String CERTIFICATE_PREFIX = "IQW";
 
+    private final static String CERTIFICATE_PERSONAL_INFO_URL = "/certificate/personal";
+
     private final static int CERTIFICATE_OFFSET = 51000;
 
 
@@ -132,12 +134,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             //如果用户已经学习完，则从第一页开始学习
             currentChapterPages.stream().filter(currentChapterPage -> chapter.getId() == currentChapterPage.getChapterId())
                     .forEach(currentChapterPage -> {
-                //如果用户已经学习完，则从第一页开始学习
-                if (!chapter.isComplete()) {
-                    chapter.setPageSequence(currentChapterPage.getPageSequence());
-                } else {
-                    chapter.setPageSequence(1);
-                }
+                        //如果用户已经学习完，则从第一页开始学习
+                        if (!chapter.isComplete()) {
+                            chapter.setPageSequence(currentChapterPage.getPageSequence());
+                        } else {
+                            chapter.setPageSequence(1);
+                        }
             });
         }
 
@@ -177,8 +179,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
         data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("remark",new TemplateMessage.Keyword(remark));
-        //TODO:url待定
-//            templateMessage.setUrl(quanwaiClass.getWeixinGroup());
+        templateMessage.setUrl(ConfigUtils.domainName()+CERTIFICATE_PERSONAL_INFO_URL);
         templateMessageService.sendMessage(templateMessage);
     }
 

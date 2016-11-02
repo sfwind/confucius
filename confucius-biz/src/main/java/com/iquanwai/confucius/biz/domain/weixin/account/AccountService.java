@@ -38,7 +38,7 @@ public interface AccountService {
     /**
      * 获取某省份的城市信息
      * */
-    List<Region> loadCities(Integer provinceId);
+    List<Region> loadCities();
 
     String USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN";
 
