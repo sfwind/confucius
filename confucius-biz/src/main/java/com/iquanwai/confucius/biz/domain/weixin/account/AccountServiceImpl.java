@@ -3,7 +3,9 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
+import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
@@ -29,6 +31,10 @@ public class AccountServiceImpl implements AccountService {
     public RestfulHelper restfulHelper;
     @Autowired
     private FollowUserDao followUserDao;
+    @Autowired
+    private RegionDao regionDao;
+
+    private List<Region> regionList;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -115,5 +121,18 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         logger.info("处理完成");
+    }
+
+    @Override
+    public List<Region> loadAllProvinces() {
+        if(regionList==null){
+            regionList = regionDao.loadAllProvinces();
+        }
+        return regionList;
+    }
+
+    @Override
+    public List<Region> loadCities(Integer provinceId) {
+        return regionDao.loadByParentId(provinceId);
     }
 }

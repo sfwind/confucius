@@ -16,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -103,11 +103,10 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                 CourseClass.addCourse(courseClasses, courseOrder.getCourseId(), classId);
             }
             //原有人数减去已付费和待付费人数
-            for(Iterator<Map.Entry<Integer, AtomicInteger>> it = maps.entrySet().iterator();it.hasNext();){
-                Map.Entry<Integer, AtomicInteger> entry = it.next();
+            for (Map.Entry<Integer, AtomicInteger> entry : maps.entrySet()) {
                 Integer classId = entry.getKey();
                 Integer remaining = remainingCount.get(classId);
-                int rest = (remaining - maps.get(classId).get())<0?0:(remaining - maps.get(classId).get());
+                int rest = (remaining - maps.get(classId).get()) < 0 ? 0 : (remaining - maps.get(classId).get());
                 remainingCount.put(classId, rest);
                 logger.info("init classId {} has {} quota left", classId, rest);
             }
@@ -192,16 +191,19 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         }
 
         public static CourseClass getCourse(List<CourseClass> classes, Integer courseId) {
-            return classes.stream().filter(courseClass -> courseClass.getCourseId().equals(courseId))
-                    .findFirst().get();
-
+            Optional<CourseClass> optional = classes.stream().filter(courseClass -> courseClass.getCourseId().equals(courseId))
+                    .findFirst();
+            return optional.isPresent()?optional.get():null;
         }
 
         public static CourseClass removeCourse(List<CourseClass> classes, Integer courseId) {
-            CourseClass result = classes.stream().filter(courseClass -> courseClass.getCourseId().equals(courseId))
-                    .findFirst().get();
+            Optional<CourseClass> optional = classes.stream().filter(courseClass -> courseClass.getCourseId().equals(courseId))
+                    .findFirst();
 
-            classes.remove(result);
+            CourseClass result = optional.isPresent()?optional.get():null;
+            if(result!=null) {
+                classes.remove(result);
+            }
 
             return result;
         }

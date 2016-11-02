@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.domain.course.progress;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.*;
@@ -68,16 +67,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public List<ClassMember> loadActiveCourse(String openid) {
         List<ClassMember> classMemberList = classMemberDao.classMember(openid);
 
-        return Lists.transform(classMemberList, new Function<ClassMember, ClassMember>() {
-
-            public ClassMember apply(ClassMember input) {
-                classProgress(input);
-                return input;
-            }
+        return Lists.transform(classMemberList, input -> {
+            classProgress(input);
+            return input;
         });
     }
 
     private void classProgress(ClassMember classMember){
+        Assert.notNull(classMember, "classMember不能为空");
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
         if(quanwaiClass==null){
             return;
@@ -91,6 +88,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     public Course loadCourse(ClassMember classMember, int week) {
+        Assert.notNull(classMember, "classMember不能为空");
         Course course = courseDao.load(Course.class, classMember.getCourseId());
         List<Chapter> chapters = chapterDao.loadChapters(classMember.getCourseId(), week);
 
@@ -125,17 +123,15 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     public void personalChapterPage(String openid, List<Chapter> chapters) {
-        List<Integer> chapterIds = Lists.transform(chapters, new Function<Chapter, Integer>() {
-            public Integer apply(Chapter input) {
-                return input.getId();
-            }
-        });
+        Assert.notNull(chapters, "chapters不能为空");
+        List<Integer> chapterIds = Lists.transform(chapters, Chapter::getId);
 
         //设置学员的章节上次看到的页码
         List<CurrentChapterPage> currentChapterPages = currentChapterPageDao.currentPages(openid, chapterIds);
         for(Chapter chapter:chapters){
             //如果用户已经学习完，则从第一页开始学习
-            currentChapterPages.stream().filter(currentChapterPage -> chapter.getId() == currentChapterPage.getChapterId()).forEach(currentChapterPage -> {
+            currentChapterPages.stream().filter(currentChapterPage -> chapter.getId() == currentChapterPage.getChapterId())
+                    .forEach(currentChapterPage -> {
                 //如果用户已经学习完，则从第一页开始学习
                 if (!chapter.isComplete()) {
                     chapter.setPageSequence(currentChapterPage.getPageSequence());
@@ -162,6 +158,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private void graduateMessage(ClassMember classMember, Course course) {
+        Assert.notNull(classMember, "classMember不能为空");
+        Assert.notNull(course, "course不能为空");
         String key = ConfigUtils.coursePassMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTouser(classMember.getOpenId());
@@ -197,6 +195,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     public void noticeIncompleteMembers(QuanwaiClass quanwaiClass) {
+        Assert.notNull(quanwaiClass, "quanwaiClass不能为空");
         Integer progress = quanwaiClass.getProgress();
         List<Chapter> chapters = chapterDao.loadChapters(quanwaiClass.getCourseId());
 
@@ -235,6 +234,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     //通知未完成任务的学员
     private void noticeMembers(ClassMember classMember){
+        Assert.notNull(classMember, "classMember不能为空");
         String key = ConfigUtils.incompleteTaskMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTouser(classMember.getOpenId());
@@ -251,7 +251,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private String generateCertificate(ClassMember classMember) {
-
+        Assert.notNull(classMember, "classMember不能为空");
         return String.format("%s%02d%02d%08d%s", CERTIFICATE_PREFIX,
                 classMember.getCourseId(),
                 new Random().nextInt(100),
@@ -285,6 +285,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, final String personalCompleteProgress, final int classProgress) {
+        Assert.notNull(chapters, "chapters不能为空");
         List<Chapter> chaptersNew = Lists.newArrayList();
 
         //前序课程是否完成
@@ -307,6 +308,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private String chapterName(Chapter chapter) {
+        Assert.notNull(chapter, "chapter不能为空");
         //预备课程用原名
         if(chapter.getSequence()<0){
             return chapter.getName();
@@ -320,6 +322,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private String comment(boolean unlock, Chapter chapter) {
+        Assert.notNull(chapter, "chapter不能为空");
         if (chapter.getType() == CourseType.ASSESSMENT) {
             return "圈圈叫你去红点房间做游戏啦，微信群里获取参与方式；当天晚上8：30准时开始~";
         }
@@ -389,9 +392,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     public String certificateComment(String courseName, ClassMember classMember) {
-        DateTime dateTime = new DateTime();
+        Assert.notNull(classMember, "classMember不能为空");
         StringBuilder sb = new StringBuilder();
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
+        if(quanwaiClass==null){
+            logger.error("classId {} is not found", classMember.getClassId());
+            return "";
+        }
+        DateTime dateTime = new DateTime(DateUtils.parseStringToDate(quanwaiClass.getCloseTime()));
         sb.append("在").append(dateTime.getDayOfYear()).append("年")
                 .append(dateTime.getDayOfMonth()).append("月").append("完成了圈外第")
                 .append(NumberToHanZi.formatInteger(quanwaiClass.getSeason())).append("期<br/>")

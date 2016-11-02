@@ -15,5 +15,6 @@ public class InfoSubmitDto {
     private Integer courseId; //课程id
     private String realName; //真名
     private String city; //城市
-    private String province; // 省份
+    private String province; //省份
+    private Integer provinceId; //省份id
 }

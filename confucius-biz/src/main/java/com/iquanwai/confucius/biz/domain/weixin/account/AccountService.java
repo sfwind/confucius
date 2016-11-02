@@ -2,6 +2,9 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.Region;
+
+import java.util.List;
 
 /**
  * Created by justin on 16/8/10.
@@ -26,6 +29,16 @@ public interface AccountService {
      * 收集新关注用户的信息
      * */
     void collectNewUsers();
+
+    /**
+     * 获取所有的省份信息
+     * */
+    List<Region> loadAllProvinces();
+
+    /**
+     * 获取某省份的城市信息
+     * */
+    List<Region> loadCities(Integer provinceId);
 
     String USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN";
 

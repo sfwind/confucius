@@ -109,6 +109,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     private void materialHandle(String openid, Integer chapterId, Material m) {
+        Assert.notNull(m, "material不能为空");
         //图片，语音加前缀
         if(m.getType()==2){
             m.setContent(picUrlPrefix+m.getContent());
@@ -382,6 +383,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     public void completeChapter(String openid, Chapter chapter) {
+        Assert.notNull(chapter, "chapter不能为空");
         ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
         if(classMember==null){
             //未报名不能获取数据
@@ -469,7 +471,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
         List<Choice> all = question.getChoiceList();
         List<Choice> right = Lists.newArrayList();
-        right.addAll(all.stream().filter(choice -> choice.getRight()).
+        right.addAll(all.stream().filter(Choice::getRight).
                 collect(Collectors.toList()));
 
         for(Choice choice:right){

@@ -92,9 +92,8 @@ public class SignupServiceImpl implements SignupService {
         payList.clear();
         classMap.clear();
         courseMap.clear();
-        courseOrders.stream().filter(courseOrder -> !payList.contains(courseOrder.getOpenid() + courseOrder.getCourseId())).forEach(courseOrder -> {
-            payList.add(courseOrder.getOpenid() + courseOrder.getCourseId());
-        });
+        courseOrders.stream().filter(courseOrder -> !payList.contains(courseOrder.getOpenid() + courseOrder.getCourseId()))
+                .forEach(courseOrder -> payList.add(courseOrder.getOpenid() + courseOrder.getCourseId()));
 
         logger.info("init under payment map complete");
     }
