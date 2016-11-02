@@ -14,6 +14,7 @@ public class QuanwaiClass {
     private Integer courseId; //课程id
     private Integer progress; //进度，当前课程进行到的章节id
     private Integer limit; //班级人数上限
+    private Integer season; //课程开班期数
     private Boolean open; //0-关闭报名，1-已开放报名
     private String weixinGroup; //微信群二维码的链接
     private String openDate; // 开营日期

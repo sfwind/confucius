@@ -56,6 +56,7 @@
             <mvc:exclude-mapping path="/image/**" />
             <mvc:exclude-mapping path="/js/**" />
             <mvc:exclude-mapping path="/homework/**" />
+            <mvc:exclude-mapping path="/share/**" />
             <mvc:exclude-mapping path="/static/**" />
             <mvc:exclude-mapping path="/cache/**" />
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>

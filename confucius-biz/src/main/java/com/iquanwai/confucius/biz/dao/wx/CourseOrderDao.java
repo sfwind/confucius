@@ -69,7 +69,9 @@ public class CourseOrderDao extends DBUtil{
     public List<CourseOrder> loadClassOrder(List<Integer> classId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<CourseOrder>> h = new BeanListHandler(CourseOrder.class);
-
+        if(classId.isEmpty()){
+            return Lists.newArrayList();
+        }
         String questionMark = produceQuestionMark(classId.size());
 
         try {

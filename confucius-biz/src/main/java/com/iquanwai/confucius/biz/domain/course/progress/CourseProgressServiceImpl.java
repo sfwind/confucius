@@ -10,6 +10,8 @@ import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.NumberToHanZi;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -386,8 +388,20 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return courseWeekDao.getCourseWeek(courseId, week);
     }
 
-    //TODO: 文案确认
-    public String certificateComment(ClassMember classMember) {
-        return null;
+    public String certificateComment(String courseName, ClassMember classMember) {
+        DateTime dateTime = new DateTime();
+        StringBuilder sb = new StringBuilder();
+        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
+        sb.append("在").append(dateTime.getDayOfYear()).append("年")
+                .append(dateTime.getDayOfMonth()).append("月").append("完成了圈外第")
+                .append(NumberToHanZi.formatInteger(quanwaiClass.getSeason())).append("期<br/>")
+                .append(courseName).append("训练营所有课程<br/>")
+                .append(classMember.getSuperb()?"荣膺优秀学员，":"").append("特此发证");
+        return sb.toString();
+    }
+
+    @Override
+    public ClassMember loadClassMemberByCertificateNo(String certificateNo) {
+        return classMemberDao.loadByCertificateNo(certificateNo);
     }
 }

@@ -183,4 +183,18 @@ public class ClassMemberDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public ClassMember loadByCertificateNo(String certificateNo){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+        try {
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where CertificateNo=?",
+                    h, certificateNo);
+            return classMember;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
+    }
 }

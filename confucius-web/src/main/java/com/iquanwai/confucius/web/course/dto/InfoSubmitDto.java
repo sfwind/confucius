@@ -14,4 +14,6 @@ public class InfoSubmitDto {
     private String workingLife; //工作年限
     private Integer courseId; //课程id
     private String realName; //真名
+    private String city; //城市
+    private String province; // 省份
 }

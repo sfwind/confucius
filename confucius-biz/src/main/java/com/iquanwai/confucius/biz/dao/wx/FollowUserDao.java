@@ -28,14 +28,14 @@ public class FollowUserDao extends DBUtil {
     public int insert(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "INSERT INTO FollowUsers(Openid, City, Country, Groupid, Headimgurl, " +
-                "Nickname, Province, Remark, Sex, Subscribe_time) " +
+        String insertSql = "INSERT INTO FollowUsers(Openid, Country, Groupid, Headimgurl, " +
+                "Nickname, Remark, Sex, Subscribe_time) " +
                 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
-                    account.getOpenid(), account.getCity(), account.getCountry(),
+                    account.getOpenid(), account.getCountry(),
                     account.getGroupid(), account.getHeadimgurl(),
-                    account.getNickname(), account.getProvince(), account.getRemark(),
+                    account.getNickname(), account.getRemark(),
                     account.getSex(), account.getSubscribe_time());
             return result.get();
         } catch (SQLException e) {
@@ -100,13 +100,14 @@ public class FollowUserDao extends DBUtil {
     public int updateInfo(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String updateSql = "Update FollowUsers Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=?, RealName=? " +
-                "where Openid=?";
+        String updateSql = "Update FollowUsers Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=?, " +
+                "RealName=?, City=?, Province=? where Openid=?";
         try {
             Future<Integer> result = asyncRun.update(updateSql,
                     account.getMobileNo(), account.getEmail(),
                     account.getIndustry(), account.getFunction(),
                     account.getWorkingLife(), account.getRealName(),
+                    account.getCity(), account.getProvince(),
                     account.getOpenid());
             return result.get();
         } catch (SQLException e) {

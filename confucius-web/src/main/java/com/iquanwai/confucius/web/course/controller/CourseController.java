@@ -161,17 +161,6 @@ public class CourseController {
         }
     }
 
-    @RequestMapping("/graduate/{classId}")
-    public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId){
-        try{
-            courseProgressService.graduate(classId);
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("触发毕业失败", e);
-            return WebUtils.error("触发毕业失败");
-        }
-    }
-
     @RequestMapping("/certificate/info/{courseId}")
     public ResponseEntity<Map<String, Object>> certificateInfo(@PathVariable("courseId") Integer courseId,
                                                                LoginUser loginUser){
@@ -185,7 +174,7 @@ public class CourseController {
                 if(course!=null){
                     certificateDto.setCertificateBg(course.getCertificatePic());
                 }
-                certificateDto.setComment(courseProgressService.certificateComment(classMember));
+                certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
             }
 
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())

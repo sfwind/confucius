@@ -26,10 +26,8 @@ public class FollowController {
     @RequestMapping("/all")
     public ResponseEntity<Map<String, Object>> getAll() throws IOException {
         try {
-            new Thread(new Runnable() {
-                public void run() {
-                    accountService.collectUsers();
-                }
+            new Thread(() -> {
+                accountService.collectUsers();
             }).start();
 
             return WebUtils.result("正在运行中");
@@ -42,10 +40,8 @@ public class FollowController {
     @RequestMapping("/new")
     public ResponseEntity<Map<String, Object>> getNew() throws IOException {
         try {
-            new Thread(new Runnable() {
-                public void run() {
-                    accountService.collectNewUsers();
-                }
+            new Thread(() -> {
+                accountService.collectNewUsers();
             }).start();
 
             return WebUtils.result("正在运行中");

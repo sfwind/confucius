@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.CourseOrder;
@@ -30,6 +31,8 @@ public class BackendController {
     private SignupService signupService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private CourseProgressService courseProgressService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -72,26 +75,6 @@ public class BackendController {
 
     @RequestMapping("/log")
     public ResponseEntity<Map<String, Object>> log(){
-//        String result;
-//        try {
-//            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
-//            if(courseOrder!=null){
-//                if(courseOrder.getStatus()==1){
-//                    String memberId = signupService.entry(courseOrder.getCourseId(),
-//                            courseOrder.getClassId(),
-//                            courseOrder.getOpenid());
-//                    result = "报名成功, 学号是"+memberId;
-//                }else{
-//                    result = "尚未付款";
-//                }
-//            }else{
-//                result = "订单不存在";
-//            }
-//        }catch (Exception e){
-//            result = "出现异常，报名失败";
-//            LOGGER.error(result, e);
-//        }
-
         return WebUtils.success();
     }
 
@@ -112,5 +95,19 @@ public class BackendController {
                 .memo(sb.toString());
         operationLogService.log(operationLog);
         return WebUtils.success();
+    }
+
+    @RequestMapping("/graduate/{classId}")
+    public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId){
+        try{
+            LOGGER.info("{} graduate start", classId);
+            new Thread(() -> {
+                courseProgressService.graduate(classId);
+            }).start();
+            return WebUtils.success();
+        }catch (Exception e){
+            LOGGER.error("触发毕业失败", e);
+            return WebUtils.error("触发毕业失败");
+        }
     }
 }

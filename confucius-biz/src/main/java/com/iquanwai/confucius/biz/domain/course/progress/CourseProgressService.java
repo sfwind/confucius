@@ -78,7 +78,14 @@ public interface CourseProgressService {
 
     /**
      * 生成证书上的文案
+     * @param courseName 课程名称
      * @param classMember 学员信息
      * */
-    String certificateComment(ClassMember classMember);
+    String certificateComment(String courseName, ClassMember classMember);
+
+    /**
+     * 通过证书编号获取班级信息
+     * @param certificateNo 证书编号
+     * */
+    ClassMember loadClassMemberByCertificateNo(String certificateNo);
 }
