@@ -68,7 +68,7 @@ public class IndexController {
         return new ModelAndView("course");
     }
 
-    @RequestMapping(value = "/certificate/personal",method = RequestMethod.GET)
+    @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
     public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
         String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         if(!checkAccessToken(accessToken)){
