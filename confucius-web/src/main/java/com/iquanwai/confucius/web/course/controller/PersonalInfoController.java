@@ -107,10 +107,10 @@ public class PersonalInfoController {
             provinceDto.setProvince(regionDtos);
             List<Region> city = accountService.loadCities();
             city.stream().forEach(region -> {
-                List<RegionDto> cityList = provinceDto.getCity().get(region.getParentId());
+                List<RegionDto> cityList = provinceDto.getCity().get(region.getName());
                 if (CollectionUtils.isEmpty(cityList)) {
                     cityList = Lists.newArrayList();
-                    provinceDto.getCity().put(region.getParentId(), cityList);
+                    provinceDto.getCity().put(region.getName(), cityList);
                 }
                 cityList.add(new RegionDto().id(region.getId()).name(region.getName()));
             });

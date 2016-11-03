@@ -13,5 +13,5 @@ import java.util.Map;
 @Data
 public class ProvinceDto {
     private List<RegionDto> province = Lists.newArrayList();
-    private Map<Integer, List<RegionDto>> city = Maps.newHashMap();
+    private Map<String, List<RegionDto>> city = Maps.newHashMap();
 }
