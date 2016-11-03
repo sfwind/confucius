@@ -401,8 +401,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             return "";
         }
         DateTime dateTime = new DateTime(DateUtils.parseStringToDate(quanwaiClass.getCloseTime()));
-        sb.append("在").append(dateTime.getDayOfYear()).append("年")
-                .append(dateTime.getDayOfMonth()).append("月").append("完成了圈外第")
+        sb.append("在").append(dateTime.getYearOfEra()).append("年")
+                .append(dateTime.getMonthOfYear()).append("月").append("完成了圈外第")
                 .append(NumberToHanZi.formatInteger(quanwaiClass.getSeason())).append("期<br/>")
                 .append(courseName).append("训练营所有课程<br/>")
                 .append(classMember.getSuperb()?"荣膺优秀学员，":"").append("特此发证");
