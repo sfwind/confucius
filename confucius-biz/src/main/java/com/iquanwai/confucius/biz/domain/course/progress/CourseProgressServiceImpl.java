@@ -179,7 +179,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
         data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("remark",new TemplateMessage.Keyword(remark));
-        templateMessage.setUrl(ConfigUtils.domainName()+CERTIFICATE_PERSONAL_INFO_URL);
+        templateMessage.setUrl(ConfigUtils.domainName()+CERTIFICATE_PERSONAL_INFO_URL+"?courseId="+classMember.getCourseId());
         templateMessageService.sendMessage(templateMessage);
     }
 
