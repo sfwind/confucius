@@ -100,7 +100,7 @@ public class BackendController {
     @RequestMapping("/graduate/{classId}")
     public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId){
         try{
-            LOGGER.info("{} graduate start", classId);
+            LOGGER.info("classId {} graduate start", classId);
             new Thread(() -> {
                 courseProgressService.graduate(classId);
             }).start();

@@ -46,6 +46,9 @@ public class PersonalInfoController {
                          LoginUser loginUser){
         try{
             Assert.notNull(loginUser, "用户不能为空");
+            if(infoSubmitDto.getRealName()==null){
+                return WebUtils.error("请填写姓名");
+            }
             Account account = new Account();
             ModelMapper mapper = new ModelMapper();
             mapper.map(infoSubmitDto, account);

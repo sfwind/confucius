@@ -167,7 +167,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         templateMessage.setTouser(classMember.getOpenId());
 
         boolean pass = classMember.getPass();
-        boolean superb = classMember.getSuperb();
+        boolean superb = classMember.getSuperb()==null?false:classMember.getSuperb();
 
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
