@@ -276,7 +276,13 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         } catch (UnsupportedEncodingException ignored) {
 
         }
-        return restfulHelper.getPlain(requestUrl);
+        //FIX:偶尔调用失败的bug
+        String shortUrl = restfulHelper.getPlain(requestUrl);
+        if(shortUrl.startsWith("http")){
+            return shortUrl;
+        }else{
+            return url;
+        }
     }
 
     public HomeworkSubmit loadHomework(String url) {
