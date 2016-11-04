@@ -48,7 +48,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
             LoginUser cacheUser = loginUserMap.get(accessToken);
-            if(cacheUser.getRealName()!=null){
+            if(cacheUser!=null && cacheUser.getRealName()!=null){
                 return cacheUser;
             }
         }
