@@ -44,7 +44,6 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         if(ConfigUtils.isDebug()){
             return LoginUser.defaultUser();
         }
-        logger.info("resolve argument");
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
         String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
@@ -53,7 +52,6 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
                 return cacheUser;
             }
         }
-        logger.info("renew argument");
 
         String openId = oAuthService.openId(accessToken);
         if(StringUtils.isEmpty(openId)){
