@@ -73,12 +73,12 @@ public class SignupController {
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
-//            productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
-//            LOGGER.info("signup");
-//            signupDto.setProductId(productId);
-//            String qrcode = signupService.payQRCode(productId);
-//            LOGGER.info("payqrcode");
-//            signupDto.setQrcode(qrcode);
+            productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            LOGGER.info("signup");
+            signupDto.setProductId(productId);
+            String qrcode = signupService.payQRCode(productId);
+            LOGGER.info("payqrcode");
+            signupDto.setQrcode(qrcode);
         }catch (Exception e){
             //异常关闭订单
             signupService.giveupSignup(loginUser.getOpenId(), productId);
