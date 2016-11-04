@@ -28,7 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/signup")
 public class SignupController {
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Autowired
     private SignupService signupService;
     @Autowired

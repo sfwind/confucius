@@ -39,7 +39,7 @@ public class PersonalInfoController {
     @Autowired
     private OperationLogService operationLogService;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> updateInfo(@RequestBody InfoSubmitDto infoSubmitDto,

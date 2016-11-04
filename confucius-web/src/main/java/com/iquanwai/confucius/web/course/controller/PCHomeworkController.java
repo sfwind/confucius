@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/homework")
 public class PCHomeworkController {
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Autowired
     private CourseStudyService courseStudyService;
     @Autowired

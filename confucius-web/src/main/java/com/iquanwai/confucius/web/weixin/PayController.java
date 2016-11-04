@@ -31,7 +31,7 @@ public class PayController {
     @Autowired
     private SignupService signupService;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private static final String SUCCESS_RETURN = "<xml>\n" +
             "  <return_code><![CDATA[SUCCESS]]></return_code>\n" +

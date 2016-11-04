@@ -34,7 +34,7 @@ public class BackendController {
     @Autowired
     private CourseProgressService courseProgressService;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @RequestMapping("/assign/angel/{classId}")
     public ResponseEntity<Map<String, Object>> submit(@PathVariable("classId") Integer classId){

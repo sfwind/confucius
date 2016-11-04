@@ -21,7 +21,7 @@ public class QRCodeController {
     @Autowired
     private QRCodeService qrCodeService;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @RequestMapping("/{scene}")
     public ResponseEntity<Map<String, Object>> generate(@PathVariable String scene) {

@@ -18,7 +18,7 @@ import java.util.Map;
 @RequestMapping("/wx/user")
 @Controller
 public class FollowController {
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private AccountService accountService;

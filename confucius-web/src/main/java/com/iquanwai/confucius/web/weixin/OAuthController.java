@@ -23,7 +23,7 @@ import java.util.Map;
 @RequestMapping("/wx/oauth")
 @Controller
 public class OAuthController {
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private OAuthService oAuthService;

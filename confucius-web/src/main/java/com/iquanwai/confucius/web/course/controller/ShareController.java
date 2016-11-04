@@ -32,7 +32,7 @@ public class ShareController {
     @Autowired
     private AccountService accountService;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @RequestMapping("/certificate/{certificateNo}")
     public ResponseEntity<Map<String, Object>> certificateInfo(@PathVariable("certificateNo") String certificateNo){

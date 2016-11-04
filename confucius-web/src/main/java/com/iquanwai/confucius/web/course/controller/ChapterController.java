@@ -26,7 +26,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/chapter")
 public class ChapterController {
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Autowired
     private CourseStudyService courseStudyService;
     @Autowired

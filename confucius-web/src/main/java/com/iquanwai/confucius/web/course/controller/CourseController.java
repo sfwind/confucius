@@ -32,7 +32,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/course")
 public class CourseController {
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Autowired
     private CourseProgressService courseProgressService;
     @Autowired
