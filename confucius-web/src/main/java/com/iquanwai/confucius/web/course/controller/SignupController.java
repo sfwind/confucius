@@ -39,46 +39,46 @@ public class SignupController {
     private CourseStudyService courseStudyService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable int courseId){
+    public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
         SignupDto signupDto = new SignupDto();
         String productId = "";
         try{
-            Assert.notNull(loginUser, "用户不能为空");
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("报名")
-                    .function("课程报名")
-                    .action("进入报名页")
-                    .memo(courseId+"");
-            operationLogService.log(operationLog);
-            //课程免单用户
-            if (signupService.free(courseId, loginUser.getOpenId())) {
-                signupDto.setFree(true);
-                return WebUtils.result(signupDto);
-            }
-            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
-            LOGGER.info("check");
-            if(result.getLeft()==-1){
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
-            }
-            if(result.getLeft()==-2){
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.noclass"));
-            }
-            if(result.getLeft()==-3){
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
-            }
-            QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
-            LOGGER.info("cacheclass");
-            //去掉群二维码
-            //quanwaiClass.setWeixinGroup(null);
-            signupDto.setQuanwaiClass(quanwaiClass);
-            signupDto.setRemaining(result.getLeft());
-            signupDto.setCourse(signupService.getCachedCourse(courseId));
-            productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
-            LOGGER.info("signup");
-            signupDto.setProductId(productId);
-            String qrcode = signupService.payQRCode(productId);
-            LOGGER.info("payqrcode");
-            signupDto.setQrcode(qrcode);
+//            Assert.notNull(loginUser, "用户不能为空");
+//            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+//                    .module("报名")
+//                    .function("课程报名")
+//                    .action("进入报名页")
+//                    .memo(courseId+"");
+//            operationLogService.log(operationLog);
+//            //课程免单用户
+//            if (signupService.free(courseId, loginUser.getOpenId())) {
+//                signupDto.setFree(true);
+//                return WebUtils.result(signupDto);
+//            }
+//            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
+//            LOGGER.info("check");
+//            if(result.getLeft()==-1){
+//                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
+//            }
+//            if(result.getLeft()==-2){
+//                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.noclass"));
+//            }
+//            if(result.getLeft()==-3){
+//                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
+//            }
+//            QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
+//            LOGGER.info("cacheclass");
+//            //去掉群二维码
+//            //quanwaiClass.setWeixinGroup(null);
+//            signupDto.setQuanwaiClass(quanwaiClass);
+//            signupDto.setRemaining(result.getLeft());
+//            signupDto.setCourse(signupService.getCachedCourse(courseId));
+//            productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+//            LOGGER.info("signup");
+//            signupDto.setProductId(productId);
+//            String qrcode = signupService.payQRCode(productId);
+//            LOGGER.info("payqrcode");
+//            signupDto.setQrcode(qrcode);
         }catch (Exception e){
             //异常关闭订单
             signupService.giveupSignup(loginUser.getOpenId(), productId);
