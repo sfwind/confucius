@@ -38,7 +38,7 @@ public class SignupController {
     @Autowired
     private CourseStudyService courseStudyService;
 
-    @RequestMapping(value = "/course/{courseId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
         SignupDto signupDto = new SignupDto();
         String productId = "";
