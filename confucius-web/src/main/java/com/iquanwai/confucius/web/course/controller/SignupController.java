@@ -55,24 +55,24 @@ public class SignupController {
                 signupDto.setFree(true);
                 return WebUtils.result(signupDto);
             }
-//            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
-//            LOGGER.info("check");
-//            if(result.getLeft()==-1){
-//                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
-//            }
-//            if(result.getLeft()==-2){
-//                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.noclass"));
-//            }
-//            if(result.getLeft()==-3){
-//                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
-//            }
-//            QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
-//            LOGGER.info("cacheclass");
-//            //去掉群二维码
-//            //quanwaiClass.setWeixinGroup(null);
-//            signupDto.setQuanwaiClass(quanwaiClass);
-//            signupDto.setRemaining(result.getLeft());
-//            signupDto.setCourse(signupService.getCachedCourse(courseId));
+            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
+            LOGGER.info("check");
+            if(result.getLeft()==-1){
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
+            }
+            if(result.getLeft()==-2){
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.noclass"));
+            }
+            if(result.getLeft()==-3){
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
+            }
+            QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
+            LOGGER.info("cacheclass");
+            //去掉群二维码
+            //quanwaiClass.setWeixinGroup(null);
+            signupDto.setQuanwaiClass(quanwaiClass);
+            signupDto.setRemaining(result.getLeft());
+            signupDto.setCourse(signupService.getCachedCourse(courseId));
 //            productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
 //            LOGGER.info("signup");
 //            signupDto.setProductId(productId);
