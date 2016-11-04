@@ -43,18 +43,18 @@ public class SignupController {
         SignupDto signupDto = new SignupDto();
         String productId = "";
         try{
-//            Assert.notNull(loginUser, "用户不能为空");
-//            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-//                    .module("报名")
-//                    .function("课程报名")
-//                    .action("进入报名页")
-//                    .memo(courseId+"");
-//            operationLogService.log(operationLog);
-//            //课程免单用户
-//            if (signupService.free(courseId, loginUser.getOpenId())) {
-//                signupDto.setFree(true);
-//                return WebUtils.result(signupDto);
-//            }
+            Assert.notNull(loginUser, "用户不能为空");
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("课程报名")
+                    .action("进入报名页")
+                    .memo(courseId+"");
+            operationLogService.log(operationLog);
+            //课程免单用户
+            if (signupService.free(courseId, loginUser.getOpenId())) {
+                signupDto.setFree(true);
+                return WebUtils.result(signupDto);
+            }
 //            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
 //            LOGGER.info("check");
 //            if(result.getLeft()==-1){
