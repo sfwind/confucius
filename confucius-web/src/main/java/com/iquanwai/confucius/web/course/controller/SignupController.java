@@ -56,7 +56,7 @@ public class SignupController {
                 return WebUtils.result(signupDto);
             }
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
-
+            LOGGER.info("check");
             if(result.getLeft()==-1){
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
             }
@@ -67,14 +67,17 @@ public class SignupController {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
             }
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
+            LOGGER.info("cacheclass");
             //去掉群二维码
             //quanwaiClass.setWeixinGroup(null);
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
             productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            LOGGER.info("signup");
             signupDto.setProductId(productId);
             String qrcode = signupService.payQRCode(productId);
+            LOGGER.info("payqrcode");
             signupDto.setQrcode(qrcode);
         }catch (Exception e){
             //异常关闭订单
