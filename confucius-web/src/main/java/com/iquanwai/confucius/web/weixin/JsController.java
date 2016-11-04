@@ -20,7 +20,7 @@ import java.util.Map;
 @RequestMapping("/wx/js")
 @Controller
 public class JsController {
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private JsSignatureService jsSignatureService;
