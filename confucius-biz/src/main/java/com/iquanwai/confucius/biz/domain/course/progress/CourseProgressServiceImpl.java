@@ -263,10 +263,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private String courseRemarkStartMsg(boolean pass, boolean superb) {
         if(pass){
             if(superb){
-                return "作为优秀学员，你的奖励是待定\n" +
-                        "现在获取你的专属毕业证书吧！";
+                return "请耐心等待圈外助手联系你发奖品哦\n" +
+                        "点击获取你的专属毕业证书吧！";
             }else{
-                return "现在获取你的专属毕业证书吧！";
+                return "点击获取你的专属毕业证书吧！";
             }
         }else{
             return "在下周之内补完作业，还可以顺利毕业、拿到专属毕业证书哦！";
