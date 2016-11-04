@@ -38,7 +38,7 @@ public class SignupController {
     @Autowired
     private CourseStudyService courseStudyService;
 
-    @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/course/{courseId}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
         SignupDto signupDto = new SignupDto();
         String productId = "";
@@ -56,7 +56,6 @@ public class SignupController {
                 return WebUtils.result(signupDto);
             }
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
-            LOGGER.info("check");
             if(result.getLeft()==-1){
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
             }
@@ -80,7 +79,6 @@ public class SignupController {
             //异常关闭订单
             signupService.giveupSignup(loginUser.getOpenId(), productId);
             LOGGER.error("报名失败", e);
-            e.printStackTrace();
             return WebUtils.error("报名人数已满");
         }
         return WebUtils.result(signupDto);

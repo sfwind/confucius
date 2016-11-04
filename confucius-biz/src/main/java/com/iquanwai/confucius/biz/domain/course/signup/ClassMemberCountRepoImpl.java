@@ -124,7 +124,12 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             int remain = 0;
             boolean isEntry = false; //是否已经进入某班
             List<CourseClass> classes = signupMap.get(openid);
-            Integer entryId = CourseClass.getCourse(classes, courseId).getClassId();
+            if(classes==null){
+                classes = Lists.newArrayList();
+                signupMap.put(openid, classes);
+            }
+            CourseClass courseClass = CourseClass.getCourse(classes, courseId);
+            Integer entryId = courseClass!=null?courseClass.getClassId():null;
             //轮询所有班级，查看未报满的
             if(entryId==null){
                 for(Integer classId:openClass){
