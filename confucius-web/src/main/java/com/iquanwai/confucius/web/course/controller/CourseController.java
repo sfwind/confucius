@@ -3,10 +3,8 @@ package com.iquanwai.confucius.web.course.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseWeek;
-import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.util.WebUtils;
@@ -37,6 +35,8 @@ public class CourseController {
     private CourseProgressService courseProgressService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private AccountService accountService;
 
     private String[] WEEK_INDEXES = {"开营前", "第一周", "第二周", "第三周"};
 
@@ -164,9 +164,13 @@ public class CourseController {
     @RequestMapping("/certificate/info/{courseId}")
     public ResponseEntity<Map<String, Object>> certificateInfo(@PathVariable("courseId") Integer courseId,
                                                                LoginUser loginUser){
+        Assert.notNull(loginUser,"用户不能为空");
         CertificateDto certificateDto = new CertificateDto();
         try{
-            certificateDto.setName(loginUser.getRealName());
+            Account account = accountService.getAccount(loginUser.getOpenId(), false);
+            if(account!=null){
+                certificateDto.setName(account.getRealName());
+            }
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
             if(classMember!=null){
                 certificateDto.setCertificateNo(classMember.getCertificateNo());

@@ -47,10 +47,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
         String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
-            LoginUser cacheUser = loginUserMap.get(accessToken);
-            if(cacheUser!=null && cacheUser.getRealName()!=null){
-                return cacheUser;
-            }
+            return loginUserMap.get(accessToken);
         }
 
         String openId = oAuthService.openId(accessToken);

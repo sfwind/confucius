@@ -76,9 +76,11 @@ public class SignupController {
             String qrcode = signupService.payQRCode(productId);
             signupDto.setQrcode(qrcode);
         }catch (Exception e){
-            //异常关闭订单
-            signupService.giveupSignup(loginUser.getOpenId(), productId);
             LOGGER.error("报名失败", e);
+            //异常关闭订单
+            if(productId!=null) {
+                signupService.giveupSignup(loginUser.getOpenId(), productId);
+            }
             return WebUtils.error("报名人数已满");
         }
         return WebUtils.result(signupDto);

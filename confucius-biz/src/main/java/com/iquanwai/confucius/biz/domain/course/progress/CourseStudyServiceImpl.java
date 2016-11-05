@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -55,6 +56,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private ClassDao classDao;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private Map<Integer, Question> questionMap = Maps.newConcurrentMap();
 
@@ -399,6 +402,12 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         String progress = progressMark(classMember.getComplete(), chapter.getSequence());
         if(progress!=null) {
             classMemberDao.complete(openid, classMember.getClassId(), progress);
+            OperationLog operationLog = OperationLog.create().openid(openid)
+                    .module("课程")
+                    .function("学习章节")
+                    .action("完成章节")
+                    .memo(chapter.getId()+"");
+            operationLogService.log(operationLog);
         }
     }
 
