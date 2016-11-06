@@ -30,7 +30,7 @@ public class FollowUserDao extends DBUtil {
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "INSERT INTO FollowUsers(Openid, Country, Groupid, Headimgurl, " +
                 "Nickname, Remark, Sex, Subscribe_time) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
                     account.getOpenid(), account.getCountry(),
