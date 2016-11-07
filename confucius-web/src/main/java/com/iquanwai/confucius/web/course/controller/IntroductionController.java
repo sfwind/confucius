@@ -58,6 +58,10 @@ public class IntroductionController {
                 courseDto.setCourse(course);
                 courseDto.setCourseProgress(courseProgress(course, classMember));
                 courseDto.setMyProgress(myProgress(course, classMember));
+                //我的进度不能大于课程进度
+                if(courseDto.getMyProgress()>courseDto.getCourseProgress()){
+                    courseDto.setMyProgress(courseDto.getCourseProgress());
+                }
                 courseDtos.add(courseDto);
             }
 
@@ -89,19 +93,20 @@ public class IntroductionController {
         }
 
         String[] chapterArr = progress.split(",");
-        Integer largest = 1;
-        for(String chapter:chapterArr){
+        List<Integer> challengeChapter = Lists.newArrayList();
+        //去掉sequence<0的课程准备
+        for(String chapterSequence:chapterArr){
             try {
-                if(Integer.valueOf(chapter)>largest){
-                    largest = Integer.valueOf(chapter);
+                int sequence = Integer.valueOf(chapterSequence);
+                if(sequence>0){
+                    challengeChapter.add(sequence);
                 }
             }catch (NumberFormatException e){
-                LOGGER.error("chapter {} is not a number", chapter);
+                LOGGER.error("{}是不合法的章节序号",chapterSequence);
             }
-
         }
 
-        return largest*1.0/course.getLength();
+        return challengeChapter.size()*1.0/course.getTaskLength();
     }
 
     @RequestMapping("/allcourse")

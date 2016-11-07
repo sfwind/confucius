@@ -13,6 +13,7 @@ public class CourseIntroduction {
     private Boolean free; //是否免费
     private Double fee;   //课程费用
     private Integer length; //开课天数
+    private Integer taskLength; //有任务的天数
     private Integer week; //开课周数
     private String voice; //语音介绍
     private String intro; //文字介绍
