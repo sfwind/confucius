@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.util.DateUtils;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,27 @@ public class ClassDao extends DBUtil {
         }
 
         return Lists.newArrayList();
+    }
+
+    public boolean isOver(Integer classId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<QuanwaiClass> h = new BeanHandler(QuanwaiClass.class);
+
+        try {
+            QuanwaiClass quanwaiClass = run.query("SELECT * FROM QuanwaiClass where Id = ?",
+                    h, classId);
+            if(quanwaiClass==null){
+                return true;
+            }
+            //大于结束日期7天就算终结
+            Date completeDate = DateUtils.parseStringToDate(quanwaiClass.getCloseTime());
+            Date closeDate = DateUtils.afterDays(completeDate, 7);
+            return closeDate.before(new Date());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return true;
     }
 
     public List<QuanwaiClass> loadClassByOpenDate(Date date){

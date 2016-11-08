@@ -61,6 +61,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(classMember==null){
             return null;
         }
+        //课程关闭
+        if(classDao.isOver(classMember.getClassId())){
+            return null;
+        }
         //设置课程进度
         classProgress(classMember);
         return classMember;
@@ -69,10 +73,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public List<ClassMember> loadActiveCourse(String openid) {
         List<ClassMember> classMemberList = classMemberDao.classMember(openid);
 
-        return Lists.transform(classMemberList, input -> {
-            classProgress(input);
-            return input;
-        });
+        return classMemberList.stream().filter(classMember -> !classDao.isOver(classMember.getClassId()))
+                .map(classMember -> {
+                    classProgress(classMember);
+                    return classMember;
+                }).collect(Collectors.toList());
     }
 
     private void classProgress(ClassMember classMember){
@@ -256,7 +261,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return String.format("%s%02d%02d%08d%s", CERTIFICATE_PREFIX,
                 classMember.getCourseId(),
                 new Random().nextInt(100),
-                classMember.getId()+CERTIFICATE_OFFSET,
+                classMember.getId() + CERTIFICATE_OFFSET,
                 classMember.getMemberId());
     }
 
