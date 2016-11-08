@@ -11,6 +11,7 @@ import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.CertificateDto;
 import com.iquanwai.confucius.web.course.dto.CoursePageDto;
 import com.iquanwai.confucius.web.course.dto.WeekIndexDto;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,8 +172,10 @@ public class CourseController {
             if(account!=null){
                 certificateDto.setName(account.getRealName());
             }
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
-            if(classMember!=null){
+            // TODO:传classId
+            List<ClassMember> classMemberList = courseProgressService.loadGraduateClassMember(loginUser.getOpenId(), courseId);
+            if(CollectionUtils.isNotEmpty(classMemberList)){
+                ClassMember classMember = classMemberList.get(0);
                 certificateDto.setCertificateNo(classMember.getCertificateNo());
                 Course course = courseProgressService.loadCourse(classMember.getCourseId());
                 if(course!=null){

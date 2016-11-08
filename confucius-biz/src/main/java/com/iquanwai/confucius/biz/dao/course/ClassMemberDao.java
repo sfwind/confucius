@@ -54,6 +54,21 @@ public class ClassMemberDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<ClassMember> graduateInfo(String openid, Integer courseId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? and Graduate = 1 " +
+                    "order by UpdateTime desc", h, openid, courseId);
+            return classMember;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
 
     public void progress(String openid, Integer classId, String progress){
         QueryRunner run = new QueryRunner(getDataSource());

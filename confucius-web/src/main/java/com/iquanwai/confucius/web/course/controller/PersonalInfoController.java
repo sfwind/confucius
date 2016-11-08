@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Account;
@@ -104,16 +105,20 @@ public class PersonalInfoController {
         ProvinceDto provinceDto = new ProvinceDto();
         try{
             List<Region> province = accountService.loadAllProvinces();
-            List<RegionDto> regionDtos = province.stream().map(region ->
-                    new RegionDto().id(region.getId()).name(region.getName()))
-                    .collect(Collectors.toList());
+            Map<Integer, Region> provinceMap = Maps.newHashMap();
+            List<RegionDto> regionDtos = province.stream().map(region -> {
+                provinceMap.put(region.getId(), region);
+                return new RegionDto().id(region.getId()).name(region.getName());
+            }).collect(Collectors.toList());
+
             provinceDto.setProvince(regionDtos);
             List<Region> city = accountService.loadCities();
             city.stream().forEach(region -> {
-                List<RegionDto> cityList = provinceDto.getCity().get(region.getName());
+                Region p = provinceMap.get(region.getParentId());
+                List<RegionDto> cityList = provinceDto.getCity().get(p.getName());
                 if (CollectionUtils.isEmpty(cityList)) {
                     cityList = Lists.newArrayList();
-                    provinceDto.getCity().put(region.getName(), cityList);
+                    provinceDto.getCity().put(p.getName(), cityList);
                 }
                 cityList.add(new RegionDto().id(region.getId()).name(region.getName()));
             });

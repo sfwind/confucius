@@ -80,6 +80,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 }).collect(Collectors.toList());
     }
 
+    @Override
+    public List<ClassMember> loadGraduateClassMember(String openid, Integer courseId) {
+        return classMemberDao.graduateInfo(openid, courseId).stream().filter(
+                classMember -> classMember.getCertificateNo()!=null).collect(Collectors.toList());
+    }
+
     private void classProgress(ClassMember classMember){
         Assert.notNull(classMember, "classMember不能为空");
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
