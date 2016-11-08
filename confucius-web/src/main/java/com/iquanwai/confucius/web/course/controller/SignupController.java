@@ -114,6 +114,7 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/info/load", method = RequestMethod.GET)
+    @Deprecated
     public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser){
         InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
         try{

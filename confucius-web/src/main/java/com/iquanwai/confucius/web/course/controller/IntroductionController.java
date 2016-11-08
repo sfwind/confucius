@@ -87,7 +87,7 @@ public class IntroductionController {
     private Double myProgress(CourseIntroduction course, ClassMember classMember) {
         Assert.notNull(course, "课程不能为空");
         Assert.notNull(classMember, "班级不能为空");
-        String progress = classMember.getProgress();
+        String progress = classMember.getComplete();
         if(StringUtils.isEmpty(progress)){
             return 0.0;
         }
