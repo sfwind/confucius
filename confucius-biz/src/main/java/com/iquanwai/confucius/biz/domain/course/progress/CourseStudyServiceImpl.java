@@ -261,7 +261,11 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             String url = "/static/h?id="+ CommonUtils.randomString(6);
             String shortUrl = generateShortUrl(ConfigUtils.domainName()+url);
             homework.setPcurl(shortUrl);
-            homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, shortUrl);
+            if(shortUrl.equals(ConfigUtils.domainName()+url)){
+                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, null);
+            }else {
+                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, shortUrl);
+            }
         }else{
             if(submit.getSubmitUrl()!=null){
                 homework.setPcurl(submit.getShortUrl());
