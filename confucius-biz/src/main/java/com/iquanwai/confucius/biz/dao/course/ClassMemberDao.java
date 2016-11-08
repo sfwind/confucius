@@ -30,7 +30,7 @@ public class ClassMemberDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? " +
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? and Graduate=0 " +
                             "order by updateTime desc",
                     h, openid, courseId);
             return classMember;
