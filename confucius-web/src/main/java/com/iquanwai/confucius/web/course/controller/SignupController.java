@@ -151,7 +151,7 @@ public class SignupController {
             account.setOpenid(loginUser.getOpenId());
             accountService.submitPersonalInfo(account);
 
-            Chapter chapter = courseStudyService.loadFirstPreparedChapter(infoSubmitDto.getCourseId());
+            Chapter chapter = courseStudyService.loadFirstChapter(infoSubmitDto.getCourseId());
             if(chapter!=null) {
                 chapterId = chapter.getId();
             }

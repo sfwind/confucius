@@ -92,10 +92,10 @@ public interface CourseStudyService {
     void markPage(String openid, Integer chapterId, Integer pageSequence);
 
     /**
-     * 获取课前准备的第一章节信息
+     * 获取课程第一章节信息
      * @param courseId 课程id
      * */
-    Chapter loadFirstPreparedChapter(Integer courseId);
+    Chapter loadFirstChapter(Integer courseId);
 
     /**
      * 重新加载问题

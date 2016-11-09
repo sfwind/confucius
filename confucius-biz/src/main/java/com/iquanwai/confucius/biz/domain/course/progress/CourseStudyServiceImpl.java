@@ -505,10 +505,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return 0;
     }
 
-    public Chapter loadFirstPreparedChapter(Integer courseId) {
-        List<Chapter> chapters = chapterDao.loadChapters(courseId, PREPARED_WEEK);
+    public Chapter loadFirstChapter(Integer courseId) {
+        List<Chapter> chapters = chapterDao.loadChapters(courseId);
         //初始化序号
-        int first = 0;
+        int first = Integer.MAX_VALUE;
         Chapter firstChapter = null;
 
         for(Chapter chapter:chapters){

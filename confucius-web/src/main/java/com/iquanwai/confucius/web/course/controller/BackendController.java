@@ -4,15 +4,18 @@ import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.course.dto.ErrorLogDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
@@ -33,6 +36,8 @@ public class BackendController {
     private OperationLogService operationLogService;
     @Autowired
     private CourseProgressService courseProgressService;
+    @Autowired
+    private OAuthService oAuthService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -73,8 +78,25 @@ public class BackendController {
         return WebUtils.result(result);
     }
 
-    @RequestMapping("/log")
-    public ResponseEntity<Map<String, Object>> log(){
+    @RequestMapping(value = "/log", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> log(ErrorLogDto errorLogDto){
+        try {
+            String data = errorLogDto.getResult();
+            if(data.length()>1024){
+                data = data.substring(0, 1024);
+            }
+            String cookieStr= errorLogDto.getCookie();
+
+            String openid = oAuthService.openId(getAccessTokenFromCookie(cookieStr));
+            OperationLog operationLog = OperationLog.create().openid(openid)
+                    .module("bug")
+                    .function("bug")
+                    .action("记录前端bug")
+                    .memo(data);
+            operationLogService.log(operationLog);
+        }catch (Exception e){
+            LOGGER.error("日志记录失败", e);
+        }
         return WebUtils.success();
     }
 
@@ -110,4 +132,17 @@ public class BackendController {
             return WebUtils.error("触发毕业失败");
         }
     }
+
+    private static String getAccessTokenFromCookie(String cookieStr){
+        String[] cookies = cookieStr.split(";");
+        String accessToken ="";
+        for(String cookie:cookies){
+            if(cookie.startsWith(OAuthService.ACCESS_TOKEN_COOKIE_NAME+"=")){
+                accessToken = cookie.substring(OAuthService.ACCESS_TOKEN_COOKIE_NAME.length()+1);
+                break;
+            }
+        }
+        return accessToken;
+    }
+
 }

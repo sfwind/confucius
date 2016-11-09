@@ -51,6 +51,9 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     public String openId(String accessToken) {
+        if(accessToken==null){
+            return null;
+        }
         Callback callback = callbackDao.queryByAccessToken(accessToken);
         if(callback==null){
             logger.error("accessToken {} is invalid", accessToken);
