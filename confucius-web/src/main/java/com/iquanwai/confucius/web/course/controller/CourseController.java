@@ -71,7 +71,7 @@ public class CourseController {
 
     private int getProgressWeek(ClassMember classMember) {
         String personalProgress = classMember.getProgress();
-        int last = 0;
+        int last = 1;
         if(StringUtils.isNotEmpty(personalProgress)) {
             String[] progressArr = personalProgress.split(",");
             for (String aProgressArr : progressArr) {
@@ -106,8 +106,8 @@ public class CourseController {
         coursePageDto.setCourse(course);
         //加载周主题
         CourseWeek courseWeek = courseProgressService.loadCourseWeek(classMember.getCourseId(), week);
+        coursePageDto.setWeek(week);
         if(courseWeek!=null) {
-            coursePageDto.setWeek(week);
             coursePageDto.setTopic(courseWeek.getTopic());
         }
         //加载每周的index显示

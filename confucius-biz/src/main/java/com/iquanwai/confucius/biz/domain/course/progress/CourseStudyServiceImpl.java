@@ -68,8 +68,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
-    private static final Integer PREPARED_WEEK = 0;
-
     @PostConstruct
     public void initQuestion(){
         List<Question> questionList = questionDao.loadAll(Question.class);
