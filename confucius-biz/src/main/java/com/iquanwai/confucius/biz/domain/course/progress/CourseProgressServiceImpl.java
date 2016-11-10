@@ -321,8 +321,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     private String chapterName(Chapter chapter) {
         Assert.notNull(chapter, "chapter不能为空");
-        //预备课程用原名
-        if(chapter.getSequence()<0){
+        //任务型课程用原名
+        if(chapter.getType()==6||chapter.getType()==7){
             return chapter.getName();
         }
         int sequence = chapter.getSequence()%7;

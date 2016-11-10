@@ -10,7 +10,7 @@ public class Chapter {
     private int id;
     private Integer courseId; //课程id
     private String name;  //章节名称
-    private Integer type; //章节类型（1-挑战，2-作业，3-讨论，4-休息）
+    private Integer type; //章节类型（1-挑战，2-作业，3-讨论，4-休息，5-毕业，6-任务挑战，7-任务作业）
     private Integer sequence; //课程内顺序
     private Integer week; //章节所在的周序号
     private Integer startDay; //开始于第几天
