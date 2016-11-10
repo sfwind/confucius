@@ -45,7 +45,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     private Map<Integer, Integer> remainingCount = Maps.newConcurrentMap();
 
     /**
-     * 每个人的报名班级id
+     * 每个人的报名班级
      * */
     private Map<String, List<CourseClass>> signupMap = Maps.newConcurrentMap();
 
@@ -83,10 +83,23 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             //统计已付款和待付款的人数
             List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
             for(CourseOrder courseOrder:courseOrders){
-                if(signupMap.get(courseOrder.getOpenid())!=null){
-                    continue;
-                }
+                String openid = courseOrder.getOpenid();
+                Integer courseId = courseOrder.getCourseId();
                 Integer classId = courseOrder.getClassId();
+                //维护报名列表
+                List<CourseClass> courseClasses = signupMap.get(openid);
+                if(courseClasses!=null){
+                    //已经计算过的课程报名,不重复计算
+                    if(courseClasses.contains(CourseClass.build(courseId, classId))) {
+                        continue;
+                    }
+                }else{
+                    courseClasses = Lists.newArrayList();
+                    signupMap.put(openid, courseClasses);
+                }
+                CourseClass.addCourse(courseClasses, courseId, classId);
+
+                //计算班级已付费和待付费的人数
                 AtomicInteger value = maps.get(classId);
 
                 if (value != null) {
@@ -94,15 +107,8 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                 } else {
                     maps.put(classId, new AtomicInteger(1));
                 }
-                String openid = courseOrder.getOpenid();
-                List<CourseClass> courseClasses = signupMap.get(openid);
-                if(courseClasses==null){
-                    courseClasses = Lists.newArrayList();
-                    signupMap.put(openid, courseClasses);
-                }
-                CourseClass.addCourse(courseClasses, courseOrder.getCourseId(), classId);
             }
-            //原有人数减去已付费和待付费人数
+            //原有人数减去已付费和待付费人数=各班剩余名额
             for (Map.Entry<Integer, AtomicInteger> entry : maps.entrySet()) {
                 Integer classId = entry.getKey();
                 Integer remaining = remainingCount.get(classId);
@@ -167,7 +173,11 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
     public void quitClass(String openid, Integer courseId) {
         List<CourseClass> classes = signupMap.get(openid);
-        Integer classId = CourseClass.removeCourse(classes, courseId).getClassId();
+        CourseClass result = CourseClass.removeCourse(classes, courseId);
+        if(result==null){
+            return;
+        }
+        Integer classId = result.getClassId();
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
         if(quanwaiClass==null){
             return;
@@ -192,7 +202,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         }
 
         public static void addCourse(List<CourseClass> classes, Integer courseId, Integer classId) {
-            classes.add(build(courseId, classId));
+            if(!classes.contains(build(courseId, classId))) {
+                classes.add(build(courseId, classId));
+            }
         }
 
         public static CourseClass getCourse(List<CourseClass> classes, Integer courseId) {

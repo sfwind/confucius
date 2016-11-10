@@ -142,7 +142,7 @@ public class PayServiceImpl implements PayService{
                             logger.error(payCloseReply.getErr_code_des()+", orderId="+orderId);
                         }
                         logger.info("orderId: {} closed automatically", orderId);
-                        closeOrder(courseOrder.getOpenid(), orderId);
+                        closeOrder(orderId);
                     }
                 }
             }catch (Exception e){
@@ -151,8 +151,8 @@ public class PayServiceImpl implements PayService{
         }
     }
 
-    public void closeOrder(String openid, String orderId) {
-        signupService.giveupSignup(openid, orderId);
+    public void closeOrder(String orderId) {
+        signupService.giveupSignup(orderId);
     }
 
     private PayClose buildPayClose(String orderId) {

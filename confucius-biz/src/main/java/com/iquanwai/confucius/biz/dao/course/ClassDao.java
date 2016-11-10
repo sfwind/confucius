@@ -65,9 +65,9 @@ public class ClassDao extends DBUtil {
             if(quanwaiClass==null){
                 return true;
             }
-            //大于结束日期7天就算终结
+            //大于结束日期8天就算终结
             Date completeDate = DateUtils.parseStringToDate(quanwaiClass.getCloseTime());
-            Date closeDate = DateUtils.afterDays(completeDate, 7);
+            Date closeDate = DateUtils.afterDays(completeDate, 8);
             return closeDate.before(new Date());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

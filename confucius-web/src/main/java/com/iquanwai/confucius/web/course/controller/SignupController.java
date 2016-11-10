@@ -79,7 +79,7 @@ public class SignupController {
             LOGGER.error("报名失败", e);
             //异常关闭订单
             if(productId!=null) {
-                signupService.giveupSignup(loginUser.getOpenId(), productId);
+                signupService.giveupSignup(productId);
             }
             return WebUtils.error("报名人数已满");
         }

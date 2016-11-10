@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
+import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ public class SignupServiceImpl implements SignupService {
     /**
      * 待付费名单(openid+courseId)
      * */
-    private List<String> payList = Lists.newArrayList();
+    private List<Payment> payList = Lists.newArrayList();
 
     /**
      * 支付二维码的高度
@@ -92,8 +93,8 @@ public class SignupServiceImpl implements SignupService {
         payList.clear();
         classMap.clear();
         courseMap.clear();
-        courseOrders.stream().filter(courseOrder -> !payList.contains(courseOrder.getOpenid() + courseOrder.getCourseId()))
-                .forEach(courseOrder -> payList.add(courseOrder.getOpenid() + courseOrder.getCourseId()));
+        courseOrders.stream().filter(courseOrder -> !payList.contains(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId())))
+                .forEach(courseOrder -> payList.add(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId())));
 
         logger.info("init under payment map complete");
     }
@@ -101,7 +102,8 @@ public class SignupServiceImpl implements SignupService {
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
         if(!ConfigUtils.pressTestSwitch()) {
-            if (classMemberCountRepo.isEntry(openid, courseId) && !payList.contains(openid+courseId)) {
+            //非待付款和已付款状态
+            if (classMemberCountRepo.isEntry(openid, courseId) && !payList.contains(new Payment(openid,courseId))) {
                 return new ImmutablePair(-3, 0);
             }
         }
@@ -136,8 +138,8 @@ public class SignupServiceImpl implements SignupService {
 
         courseOrderDao.insert(courseOrder);
         //加入待付款列表
-        if(!payList.contains(openid+course.getCourseId())) {
-            payList.add(openid + course.getCourseId());
+        if(!payList.contains(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()))) {
+            payList.add(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()));
         }
         return orderId;
     }
@@ -198,7 +200,7 @@ public class SignupServiceImpl implements SignupService {
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
         //从待付款列表中去除
-        payList.remove(openid+courseId);
+        payList.remove(new Payment(openid, courseId));
         //发送录取消息
         sendWelcomeMsg(courseId, openid, classId);
         return memberId;
@@ -215,15 +217,16 @@ public class SignupServiceImpl implements SignupService {
                 costRepo.isWhite(courseId, openid);
     }
 
-    public void giveupSignup(String openid, String orderId) {
+    public void giveupSignup(String orderId) {
         courseOrderDao.closeOrder(orderId);
 
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
-        payList.remove(openid+courseOrder.getCourseId());
-        ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), openid);
+        //从待付款中去掉
+        payList.remove(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()));
+        ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getOpenid());
         //已经报名成功的学员不需要退班
         if(classMember==null) {
-            classMemberCountRepo.quitClass(openid, courseOrder.getCourseId());
+            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId());
         }
     }
 
@@ -294,6 +297,17 @@ public class SignupServiceImpl implements SignupService {
         int count = memberCount.get(classId)+1;
         memberCount.put(classId, count);
         return count;
+    }
+
+    @Data
+    private static class Payment {
+        private String openid;
+        private Integer courseId;
+
+        public Payment(String openid, Integer courseId){
+            this.openid = openid;
+            this.courseId = courseId;
+        }
     }
 
 }

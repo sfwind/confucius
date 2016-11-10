@@ -6,16 +6,15 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class PayController {
             if ("N".equals(orderCallback.getIs_subscribe())) {
                 LOGGER.info("{}还没关注服务号", orderCallback.getOpenid());
                 orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "请先关注圈外服务号", "");
-                return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);
+                return new ResponseEntity<>(orderCallbackReply, HttpStatus.OK);
             }
             String prepayId = payService.unifiedOrder(orderCallback.getProduct_id());
             if (StringUtils.isEmpty(prepayId)) {
@@ -58,11 +57,11 @@ public class PayController {
             LOGGER.info(orderCallbackReply.toString());
         }catch (Exception e){
             //异常关闭订单
-            payService.closeOrder(orderCallback.getOpenid(), orderCallback.getProduct_id());
+            payService.closeOrder(orderCallback.getProduct_id());
             LOGGER.error("扫码支付回调处理失败", e);
         }
 
-        return new ResponseEntity<OrderCallbackReply>(orderCallbackReply, HttpStatus.OK);
+        return new ResponseEntity<>(orderCallbackReply, HttpStatus.OK);
     }
 
     @RequestMapping(value="/result/callback")

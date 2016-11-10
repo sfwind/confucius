@@ -25,8 +25,9 @@ public interface PayService {
 
     /**
      * 关闭订单
+     * @param orderId 订单号
      * */
-    void closeOrder(String openid, String orderId);
+    void closeOrder(String orderId);
 
     String UNIFIED_ORDER_URL ="https://api.mch.weixin.qq.com/pay/unifiedorder";
 

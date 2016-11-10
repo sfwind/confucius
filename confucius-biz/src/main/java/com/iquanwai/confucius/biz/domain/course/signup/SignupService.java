@@ -66,7 +66,7 @@ public interface SignupService {
     /**
      * 未及时付款，去掉预报名抢占的名额
      * */
-    void giveupSignup(String openid, String orderId);
+    void giveupSignup(String orderId);
 
     /**
      * 发送课程报名成功消息
