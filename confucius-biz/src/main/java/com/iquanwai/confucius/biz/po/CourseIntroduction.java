@@ -15,7 +15,7 @@ public class CourseIntroduction {
     private Integer length; //开课天数
     private Integer taskLength; //有任务的天数
     private Integer week; //开课周数
-    private String voice; //语音介绍
+    private Integer type; //课程类型（1-长课程，2-短课程）
     private String intro; //文字介绍
     private String introPic; //介绍课程的图片url
 }

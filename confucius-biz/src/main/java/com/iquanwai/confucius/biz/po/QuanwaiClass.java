@@ -21,4 +21,6 @@ public class QuanwaiClass {
     private String broadcastUrl; //红点链接
     private String broadcastRoomNo; //红点房间号
     private String broadcastPassword; //红点密码
+    private String qqGroup; //qq群二维码的链接
+    private String qqGroupNo; //qq群号
 }
