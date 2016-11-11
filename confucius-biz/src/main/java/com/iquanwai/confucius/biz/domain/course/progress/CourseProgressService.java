@@ -94,4 +94,10 @@ public interface CourseProgressService {
      * @param certificateNo 证书编号
      * */
     ClassMember loadClassMemberByCertificateNo(String certificateNo);
+
+    /**
+     * 通过学号获取班级信息
+     * @param memberId 学号
+     * */
+    ClassMember loadClassMemberByMemberId(String memberId);
 }

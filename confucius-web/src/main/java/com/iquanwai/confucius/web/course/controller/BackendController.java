@@ -1,25 +1,29 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.util.WebUtils;
-import com.iquanwai.confucius.web.course.dto.ErrorLogDto;
+import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
+import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +42,8 @@ public class BackendController {
     private CourseProgressService courseProgressService;
     @Autowired
     private OAuthService oAuthService;
+    @Autowired
+    private TemplateMessageService templateMessageService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -79,7 +85,7 @@ public class BackendController {
     }
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> log(ErrorLogDto errorLogDto){
+    public ResponseEntity<Map<String, Object>> log(@RequestBody ErrorLogDto errorLogDto){
         try {
             String data = errorLogDto.getResult();
             if(data.length()>1024){
@@ -121,16 +127,15 @@ public class BackendController {
 
     @RequestMapping("/graduate/{classId}")
     public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId){
-        try{
-            LOGGER.info("classId {} graduate start", classId);
-            new Thread(() -> {
+        LOGGER.info("classId {} graduate start", classId);
+        new Thread(() -> {
+            try {
                 courseProgressService.graduate(classId);
-            }).start();
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("触发毕业失败", e);
-            return WebUtils.error("触发毕业失败");
-        }
+            }catch (Exception e){
+                LOGGER.error("触发毕业失败", e);
+            }
+        }).start();
+        return WebUtils.result("正在运行中");
     }
 
     private static String getAccessTokenFromCookie(String cookieStr){
@@ -143,6 +148,33 @@ public class BackendController {
             }
         }
         return accessToken;
+    }
+
+    @RequestMapping(value = "/notice", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto){
+        new Thread(() -> {
+            try {
+                List<String> memberIds = noticeMsgDto.getMemberIds();
+                memberIds.stream().forEach(memberId -> {
+                    ClassMember classMember = courseProgressService.loadClassMemberByMemberId(memberId);
+                    if (classMember != null) {
+                        TemplateMessage templateMessage = new TemplateMessage();
+                        templateMessage.setTouser(classMember.getOpenId());
+                        templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+                        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                        templateMessage.setData(data);
+                        data.put("first", new TemplateMessage.Keyword("童鞋，我们发现你最近还有部分任务未完成。"));
+                        data.put("keyword1", new TemplateMessage.Keyword(noticeMsgDto.getNoticeMsg()));
+                        data.put("keyword2", new TemplateMessage.Keyword("hin高"));
+                        data.put("remark", new TemplateMessage.Keyword(noticeMsgDto.getRemark()));
+                        templateMessageService.sendMessage(templateMessage);
+                    }
+                });
+            }catch (Exception e){
+                LOGGER.error("发送通知失败", e);
+            }
+        }).start();
+        return WebUtils.result("正在运行中");
     }
 
 }

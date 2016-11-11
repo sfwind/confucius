@@ -212,4 +212,18 @@ public class ClassMemberDao extends DBUtil {
 
         return null;
     }
+
+    public ClassMember loadByMemberId(String memberId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+        try {
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where MemberId=?",
+                    h, memberId);
+            return classMember;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
+    }
 }

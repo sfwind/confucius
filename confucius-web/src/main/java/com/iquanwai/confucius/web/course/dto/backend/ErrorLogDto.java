@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.dto;
+package com.iquanwai.confucius.web.course.dto.backend;
 
 import lombok.Data;
 

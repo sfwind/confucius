@@ -424,4 +424,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public ClassMember loadClassMemberByCertificateNo(String certificateNo) {
         return classMemberDao.loadByCertificateNo(certificateNo);
     }
+
+    @Override
+    public ClassMember loadClassMemberByMemberId(String memberId) {
+        return classMemberDao.loadByMemberId(memberId);
+    }
 }
