@@ -244,14 +244,14 @@ public class SignupServiceImpl implements SignupService {
         CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
 
         //TODO:改成各课程分开的方式
-        if(course.getType()==1) {
+        if(course.getCourseId()==1) {
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(quanwaiClass.getOpenTime() + "-" + quanwaiClass.getCloseTime()));
             String remark = "你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
-        }else if(course.getType()==2){
+        }else if(course.getCourseId()==2){
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营—求职背后的秘密。请在14天内完成学习哦！"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "-" +
