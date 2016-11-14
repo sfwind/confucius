@@ -16,5 +16,6 @@ public class Course {
     private String pic;   //课程图片url
     private boolean preChapter;   //是否存在课程准备（0-无，1-有）
     private String certificatePic;   //证书背景图片
+    private Integer type; //课程类型（1-长课程，2-短课程）
     private List<Chapter> chapterList;
 }

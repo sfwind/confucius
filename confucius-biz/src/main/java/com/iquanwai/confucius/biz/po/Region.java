@@ -11,4 +11,11 @@ public class Region {
     private String name; //地区名称
     private Integer parentId; //父节点id
     private String type; //10-国家,20-省份,30-城市,40-区县
+
+    public static Region defaultRegion(){
+        Region def = new Region();
+        def.setId(-1);
+        def.setName("请选择");
+        return def;
+    }
 }

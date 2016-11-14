@@ -70,7 +70,12 @@ public class OperationalServiceImpl implements OperationalService {
         List<QuanwaiClass> quanwaiClasses = classDao.loadClassByOpenDate(DateUtils.afterDays(new Date(), 1));
 
         for(QuanwaiClass quanwaiClass:quanwaiClasses){
-            angelAssign(quanwaiClass.getId());
+            Integer courseId = quanwaiClass.getCourseId();
+            Course course = courseDao.load(Course.class, courseId);
+            //长课程才有天使活动
+            if(course!=null && course.getType()==1) {
+                angelAssign(quanwaiClass.getId());
+            }
         }
     }
 

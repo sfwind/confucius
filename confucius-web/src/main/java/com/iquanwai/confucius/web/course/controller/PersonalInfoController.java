@@ -84,7 +84,7 @@ public class PersonalInfoController {
                 infoSubmitDto.setProvinceId(find.get().getId());
             }else{
                 //没找到让用户重新填
-                infoSubmitDto.setProvince(null);
+                infoSubmitDto.setProvince("请选择");
                 infoSubmitDto.setCity(null);
             }
 
@@ -105,6 +105,7 @@ public class PersonalInfoController {
         ProvinceDto provinceDto = new ProvinceDto();
         try{
             List<Region> province = accountService.loadAllProvinces();
+            province.add(Region.defaultRegion());
             Map<Integer, Region> provinceMap = Maps.newHashMap();
             List<RegionDto> regionDtos = province.stream().map(region -> {
                 provinceMap.put(region.getId(), region);
