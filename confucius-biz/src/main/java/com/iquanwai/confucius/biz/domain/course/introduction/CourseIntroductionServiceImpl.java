@@ -35,12 +35,12 @@ public class CourseIntroductionServiceImpl implements CourseIntroductionService 
         Assert.notNull(classMemberList, "学员信息不能为空");
         List<CourseIntroduction> courseList = loadAll();
         return courseList.stream().filter(course -> {
-            for(ClassMember classMember:classMemberList) {
-                if(classMember.getCourseId().equals(course.getCourseId())){
+            for (ClassMember classMember : classMemberList) {
+                if (classMember.getCourseId().equals(course.getCourseId())) {
                     return false;
                 }
             }
             return true;
-        }).collect(Collectors.toList());
+        }).filter(course -> !course.getHidden()).collect(Collectors.toList());
     }
 }

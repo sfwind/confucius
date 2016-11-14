@@ -18,4 +18,5 @@ public class CourseIntroduction {
     private Integer type; //课程类型（1-长课程，2-短课程）
     private String intro; //文字介绍
     private String introPic; //介绍课程的图片url
+    private Boolean hidden; //是否在报名页隐藏（0-否，1-是）
 }

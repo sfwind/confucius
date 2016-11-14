@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/4.
@@ -121,6 +122,7 @@ public class IntroductionController {
                     .action("更多训练");
             operationLogService.log(operationLog);
             List<CourseIntroduction> courseList = courseIntroductionService.loadAll();
+            courseList = courseList.stream().filter(course -> !course.getHidden()).collect(Collectors.toList());
             return WebUtils.result(courseList);
         }catch (Exception e){
             LOGGER.error("获取更多训练失败", e);
