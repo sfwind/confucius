@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
-import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
@@ -48,8 +47,6 @@ public class SignupServiceImpl implements SignupService {
     private CostRepo costRepo;
     @Autowired
     private TemplateMessageService templateMessageService;
-    @Autowired
-    private CouponDao couponDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -205,7 +202,7 @@ public class SignupServiceImpl implements SignupService {
         classMemberDao.entry(classMember);
         //使用优惠券
         if(courseOrder.getDiscount()!=0.0){
-            couponDao.updateCouponByOrderId(Coupon.USED, courseOrder.getOrderId());
+            costRepo.updateCoupon(Coupon.USED, courseOrder.getOrderId());
         }
         //从待付款列表中去除
         payList.remove(new Payment(openid, courseId));

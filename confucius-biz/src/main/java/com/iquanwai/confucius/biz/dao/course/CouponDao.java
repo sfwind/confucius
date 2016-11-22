@@ -40,6 +40,21 @@ public class CouponDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<Coupon> getUnusedCoupon(){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Coupon>> h = new BeanListHandler(Coupon.class);
+
+        try {
+            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Used=0 and ExpiredDate>=?",
+                    h, new Date());
+            return coupon;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
     public void updateCoupon(Integer couponId, Integer status, String orderId, Double cost){
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);

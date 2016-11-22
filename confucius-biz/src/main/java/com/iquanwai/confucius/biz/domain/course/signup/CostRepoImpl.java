@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -88,21 +87,18 @@ public class CostRepoImpl implements CostRepo {
         init();
     }
 
+    @Override
+    public void updateCoupon(Integer status, String orderId) {
+        couponDao.updateCouponByOrderId(status, orderId);
+        reloadCoupon();
+    }
+
     private void reloadCoupon(){
-        List<Coupon> coupons  = couponDao.loadAll(Coupon.class);
+        List<Coupon> coupons  = couponDao.getUnusedCoupon();
         couponList.clear();
         for(Coupon coupon:coupons){
-            //只包含未使用的优惠券
-            if(coupon.getUsed()==0){
-                if(coupon.getExpiredDate()!=null){
-                    //已过期的不算
-                    if(coupon.getExpiredDate().before(new Date())){
-                        continue;
-                    }
-                }
-                if(!couponList.contains(coupon.getOpenid())){
-                    couponList.add(coupon.getOpenid());
-                }
+            if(!couponList.contains(coupon.getOpenid())){
+                couponList.add(coupon.getOpenid());
             }
         }
     }
