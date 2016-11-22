@@ -43,9 +43,8 @@ public class CouponDao extends DBUtil {
     public void updateCoupon(Integer couponId, Integer status, String orderId, Double cost){
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-
         try {
-            asyncRun.update("UPDATE Coupon SET Status =?, OrderId=?, Cost=? " +
+            asyncRun.update("UPDATE Coupon SET Used =?, OrderId=?, Cost=? " +
                     "where Id = ?", status, orderId, cost, couponId);
 
         } catch (SQLException e) {
@@ -58,7 +57,7 @@ public class CouponDao extends DBUtil {
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE Coupon SET Status =?, OrderId=null, Cost=null " +
+            asyncRun.update("UPDATE Coupon SET Used =?, OrderId=null, Cost=null " +
                     "where OrderId = ?", status, orderId);
 
         } catch (SQLException e) {
