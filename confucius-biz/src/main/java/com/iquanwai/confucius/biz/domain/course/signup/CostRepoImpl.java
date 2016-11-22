@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseFreeListDao;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.CourseFreeList;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,14 +57,13 @@ public class CostRepoImpl implements CostRepo {
         return classWhiteList!=null && classWhiteList.contains(openid);
     }
 
-    //TODO:double的减法改成BigDecimal
     public double discount(Double price, String openid, String orderId) {
         List<Coupon> coupons = couponDao.getCoupon(openid);
         Double remain = price;
         for(Coupon coupon:coupons){
             Double amount = coupon.getAmount();
             if(remain>amount){
-                remain = remain-amount;
+                remain = CommonUtils.substract(remain, amount);
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
             //余额为0时,仍然付0.01元
             }else if(remain==amount){
@@ -72,12 +72,12 @@ public class CostRepoImpl implements CostRepo {
                 break;
             }else{
                 remain = 0.01;
-                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount-remain);
+                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
                 break;
             }
         }
         reloadCoupon();
-        return price-remain;
+        return CommonUtils.substract(price,remain);
     }
 
     public boolean hasCoupon(String openid) {

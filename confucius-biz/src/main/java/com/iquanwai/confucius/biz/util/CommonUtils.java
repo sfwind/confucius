@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.exception.WeixinException;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -109,5 +110,15 @@ public class CommonUtils {
         }
         Pattern emoji = Pattern.compile("[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]", Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
         return source.replaceAll(emoji.pattern(), "[表情]");
+    }
+
+    //保留两位小数
+    public static Double substract(Double a, Double b){
+        if(a==null||b==null){
+            return null;
+        }
+
+        return new BigDecimal(a).subtract(new BigDecimal(b)).
+                setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 }

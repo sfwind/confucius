@@ -131,7 +131,7 @@ public class SignupServiceImpl implements SignupService {
             discount = costRepo.discount(course.getFee(), openid, orderId);
         }
         courseOrder.setDiscount(discount);
-        courseOrder.setPrice(course.getFee()-discount);
+        courseOrder.setPrice(CommonUtils.substract(course.getFee(),discount));
         courseOrder.setStatus(CourseOrder.UNDER_PAY); //待支付
         courseOrder.setCourseName(course.getCourseName());
 
