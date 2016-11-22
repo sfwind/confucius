@@ -11,7 +11,7 @@ public interface CostRepo {
     /**
      * 用户使用折扣后的实际金额
      * */
-    double discount(Double price, String openid);
+    double discount(Double price, String openid, String orderId);
 
     /**
      * 是否有优惠券

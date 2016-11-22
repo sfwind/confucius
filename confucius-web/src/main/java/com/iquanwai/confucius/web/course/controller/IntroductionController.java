@@ -143,11 +143,11 @@ public class IntroductionController {
                     .action("课程详情")
                     .memo(courseId+"");
             operationLogService.log(operationLog);
-            CourseIntroduction courseList = courseIntroductionService.loadCourse(courseId);
-            return WebUtils.result(courseList);
+            CourseIntroduction course = courseIntroductionService.loadCourse(courseId);
+            return WebUtils.result(course);
         }catch (Exception e){
-            LOGGER.error("获取更多训练失败", e);
-            return WebUtils.error("获取更多训练失败");
+            LOGGER.error("获取介绍失败", e);
+            return WebUtils.error("获取介绍失败");
         }
     }
 }

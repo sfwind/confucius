@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.job;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 public class DailyJob {
     @Autowired
     private CourseProgressService courseProgressService;
+    @Autowired
+    private SignupService signupService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Scheduled(cron="${dailyJob.cron}")
@@ -21,6 +24,7 @@ public class DailyJob {
         logger.info("DailyJob start");
         courseProgress();
         closeClass();
+        signupService.reloadClass();
         logger.info("DailyJob end");
     }
 

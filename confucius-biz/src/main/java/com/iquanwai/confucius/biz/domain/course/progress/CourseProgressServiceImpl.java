@@ -322,9 +322,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private String chapterName(Chapter chapter) {
         Assert.notNull(chapter, "chapter不能为空");
         //任务型课程用原名
-        if(chapter.getType()==6||chapter.getType()==7){
+        if(chapter.getType()==CourseType.NEW_CHALLENGE||chapter.getType()==CourseType.NEW_HOMEWORK){
             return chapter.getName();
         }
+        //长课程章节名前增加Day 1, Day 2。。。Day 7
         int sequence = chapter.getSequence()%7;
         if(sequence == 0){
             sequence = 7;

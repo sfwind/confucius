@@ -281,13 +281,18 @@ public class QRCodeUtils {
         return image;
     }
 
-    public static BufferedImage genQRCode(String content, int width, int height) throws WriterException {
+    public static BufferedImage genQRCode(String content, int width, int height) {
         java.util.Hashtable hint = new java.util.Hashtable();
         hint.put(EncodeHintType.CHARACTER_SET, "utf-8");
         hint.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         // 生成二维码
-        BitMatrix matrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE,
-                width, height, hint);
+        BitMatrix matrix = null;
+        try {
+            matrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE,
+                    width, height, hint);
+        } catch (WriterException e) {
+            return null;
+        }
 
         matrix = deleteWhite(matrix);
         BufferedImage image = new BufferedImage(matrix.getWidth(), matrix.getHeight(), BufferedImage.TYPE_INT_RGB);

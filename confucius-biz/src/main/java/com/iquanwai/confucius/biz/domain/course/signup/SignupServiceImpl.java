@@ -2,17 +2,14 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.zxing.WriterException;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
+import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.CourseIntroduction;
-import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -51,6 +48,8 @@ public class SignupServiceImpl implements SignupService {
     private CostRepo costRepo;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private CouponDao couponDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -118,7 +117,9 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setCourseId(courseId);
         courseOrder.setCreateTime(new Date());
         courseOrder.setOpenid(openid);
-
+        //orderId 16位随机字符
+        String orderId = CommonUtils.randomString(16);
+        courseOrder.setOrderId(orderId);
         CourseIntroduction course = getCachedCourse(courseId);
         if(course == null){
             logger.error("courseId {} is not existed", courseId);
@@ -127,13 +128,11 @@ public class SignupServiceImpl implements SignupService {
         double discount = 0.0;
         //计算优惠
         if(costRepo.hasCoupon(openid)) {
-            discount = costRepo.discount(course.getFee(), openid);
+            discount = costRepo.discount(course.getFee(), openid, orderId);
         }
         courseOrder.setDiscount(discount);
         courseOrder.setPrice(course.getFee()-discount);
-        courseOrder.setStatus(0); //待支付
-        String orderId = CommonUtils.randomString(16);
-        courseOrder.setOrderId(orderId);
+        courseOrder.setStatus(CourseOrder.UNDER_PAY); //待支付
         courseOrder.setCourseName(course.getCourseName());
 
         courseOrderDao.insert(courseOrder);
@@ -152,14 +151,15 @@ public class SignupServiceImpl implements SignupService {
         String payUrl = payUrl(productId);
         String path = "/data/static/images/qrcode/"+productId+".jpg";
         String picUrl = ConfigUtils.domainName()+"/images/qrcode/"+productId+".jpg";
-        try {
-            //生成二维码base64编码
-            Image image = QRCodeUtils.genQRCode(payUrl, QRCODE_WIDTH, QRCODE_HEIGHT);
 
+        //生成二维码base64编码
+        Image image = QRCodeUtils.genQRCode(payUrl, QRCODE_WIDTH, QRCODE_HEIGHT);
+        if(image==null){
+            logger.error("二维码生成失败");
+        }else {
             QRCodeUtils.image2FS(image, path);
-        } catch (WriterException e) {
-            logger.error("二维码生成失败", e);
         }
+
         return picUrl;
     }
 
@@ -187,7 +187,10 @@ public class SignupServiceImpl implements SignupService {
         return courseOrderDao.loadOrder(orderId);
     }
 
-    public String entry(Integer courseId, Integer classId, String openid) {
+    public String entry(CourseOrder courseOrder) {
+        Integer classId = courseOrder.getClassId();
+        Integer courseId = courseOrder.getCourseId();
+        String openid = courseOrder.getOpenid();
         ClassMember classMember = classMemberDao.getClassMember(classId, openid);
         if(classMember!=null){
             return classMember.getMemberId();
@@ -199,6 +202,10 @@ public class SignupServiceImpl implements SignupService {
         String memberId = memberId(courseId, classId);
         classMember.setMemberId(memberId);
         classMemberDao.entry(classMember);
+        //使用优惠券
+        if(courseOrder.getDiscount()!=0.0){
+            couponDao.updateCouponByOrderId(Coupon.USED, courseOrder.getOrderId());
+        }
         //从待付款列表中去除
         payList.remove(new Payment(openid, courseId));
         //发送录取消息

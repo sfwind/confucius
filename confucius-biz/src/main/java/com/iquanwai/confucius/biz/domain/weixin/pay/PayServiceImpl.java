@@ -3,8 +3,10 @@ package com.iquanwai.confucius.biz.domain.weixin.pay;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.util.*;
 import org.slf4j.Logger;
@@ -24,6 +26,8 @@ import java.util.Map;
 public class PayServiceImpl implements PayService{
     @Autowired
     private CourseOrderDao courseOrderDao;
+    @Autowired
+    private CouponDao couponDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
@@ -143,6 +147,10 @@ public class PayServiceImpl implements PayService{
                         }
                         logger.info("orderId: {} closed automatically", orderId);
                         closeOrder(orderId);
+                        //如果有使用优惠券,还原优惠券状态
+                        if(courseOrder.getDiscount()!=0.0){
+                            couponDao.updateCouponByOrderId(Coupon.UNUSED, orderId);
+                        }
                     }
                 }
             }catch (Exception e){

@@ -70,7 +70,11 @@ public class PayController {
         try {
             payService.handlePayResult(payCallback);
             CourseOrder courseOrder = signupService.getCourseOrder(payCallback.getOut_trade_no());
-            signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
+            if(payCallback.getResult_code().equals("SUCCESS")) {
+                signupService.entry(courseOrder);
+            }else{
+                LOGGER.error("{}付费失败", courseOrder.getOrderId());
+            }
         }catch (Exception e){
             LOGGER.error("支付结果回调处理失败", e);
         }

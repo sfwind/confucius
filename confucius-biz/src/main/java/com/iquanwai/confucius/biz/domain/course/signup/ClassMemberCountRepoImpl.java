@@ -62,6 +62,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         synchronized (lock) {
             remainingCount.clear();
             signupMap.clear();
+            openClassList.clear();
             //初始化班级记录
             for (QuanwaiClass quanwaiClass : quanwaiClassList) {
                 Integer classId = quanwaiClass.getId();

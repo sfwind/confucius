@@ -24,4 +24,8 @@ public class CourseOrder {
     private String returnMsg; //微信返回信息
     private String transactionId; // 微信支付订单号
 
+    public static final int UNDER_PAY = 0;
+    public static final int PAID = 1;
+    public static final int CANCELLED = 2;
+
 }

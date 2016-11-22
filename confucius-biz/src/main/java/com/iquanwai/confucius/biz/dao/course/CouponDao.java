@@ -40,17 +40,26 @@ public class CouponDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public void updateCoupon(List<Integer> couponIds, Integer status){
+    public void updateCoupon(Integer couponId, Integer status, String orderId, Double cost){
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
-        List<Object> objects = Lists.newArrayList();
-        objects.add(status);
-        objects.addAll(couponIds);
-        String questionMark = produceQuestionMark(couponIds.size());
         try {
-            asyncRun.update("UPDATE Coupon SET Status =? " +
-                    "where Id in ("+questionMark+")", objects.toArray());
+            asyncRun.update("UPDATE Coupon SET Status =?, OrderId=?, Cost=? " +
+                    "where Id = ?", status, orderId, cost, couponId);
+
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void updateCouponByOrderId(Integer status, String orderId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+
+        try {
+            asyncRun.update("UPDATE Coupon SET Status =?, OrderId=null, Cost=null " +
+                    "where OrderId = ?", status, orderId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

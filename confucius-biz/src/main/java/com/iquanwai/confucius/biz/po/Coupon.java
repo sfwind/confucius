@@ -13,5 +13,14 @@ public class Coupon {
     private String openid;
     private Double amount;
     private Integer used; //是否使用（0-否，1-是，2-正在使用）
+    private Double cost; //本次订单已消耗的金额，当orderId不为空时有值
+    private String orderId; //用于订单的id，当Used=2时有值
     private Date expiredDate; //过期日期
+
+    //已使用
+    public static final int USED = 1;
+    //未使用
+    public static final int UNUSED = 0;
+    //正在使用
+    public static final int USING = 2;
 }

@@ -56,30 +56,26 @@ public class CostRepoImpl implements CostRepo {
         return classWhiteList!=null && classWhiteList.contains(openid);
     }
 
-    public double discount(Double price, String openid) {
+    //TODO:double的减法改成BigDecimal
+    public double discount(Double price, String openid, String orderId) {
         List<Coupon> coupons = couponDao.getCoupon(openid);
-        List<Integer> usedCoupon = Lists.newArrayList();
-        double remain = price;
+        Double remain = price;
         for(Coupon coupon:coupons){
-            double amount = coupon.getAmount();
+            Double amount = coupon.getAmount();
             if(remain>amount){
                 remain = remain-amount;
-            //折扣券大于课程费用
+                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
+            //余额为0时,仍然付0.01元
+            }else if(remain==amount){
+                remain = 0.01;
+                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
+                break;
             }else{
-                remain = 0.0;
-                usedCoupon.add(coupon.getId());
-//                double newAmount = amount-remain;
-//                Coupon newCoupon = new Coupon();
-//                newCoupon.setAmount(newAmount);
-//                newCoupon.setExpiredDate(coupon.getExpiredDate());
-//                newCoupon.setOpenid(openid);
-//                newCoupon.setUsed(0);
-//                couponDao.insert(coupon);
+                remain = 0.01;
+                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount-remain);
                 break;
             }
-            usedCoupon.add(coupon.getId());
         }
-        couponDao.updateCoupon(usedCoupon, 2);
         reloadCoupon();
         return price-remain;
     }

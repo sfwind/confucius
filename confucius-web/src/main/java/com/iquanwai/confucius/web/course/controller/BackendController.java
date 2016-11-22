@@ -66,9 +66,7 @@ public class BackendController {
             CourseOrder courseOrder = signupService.getCourseOrder(orderId);
             if(courseOrder!=null){
                 if(courseOrder.getStatus()==1){
-                    String memberId = signupService.entry(courseOrder.getCourseId(),
-                            courseOrder.getClassId(),
-                            courseOrder.getOpenid());
+                    String memberId = signupService.entry(courseOrder);
                     result = "报名成功, 学号是"+memberId;
                 }else{
                     result = "尚未付款";

@@ -56,7 +56,7 @@ public interface SignupService {
      * 付款成功后入学
      * @return 返回学号
      * */
-    String entry(Integer courseId, Integer classId, String openid);
+    String entry(CourseOrder courseOrder);
 
     /**
      * 是否免费
