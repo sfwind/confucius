@@ -23,6 +23,7 @@ public class CourseOrder {
     private Date createTime; //订单生成时间
     private String returnMsg; //微信返回信息
     private String transactionId; // 微信支付订单号
+    private Double total; //非db字段,不计折扣金额
 
     public static final int UNDER_PAY = 0;
     public static final int PAID = 1;

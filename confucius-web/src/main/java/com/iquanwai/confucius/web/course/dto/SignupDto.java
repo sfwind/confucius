@@ -13,6 +13,9 @@ public class SignupDto {
     private String qrcode;
     private CourseIntroduction course;
     private String productId;
+    private Double fee; //实际金额
+    private Double normal; //正常金额
+    private Double discount; //折扣金额
     private boolean isFree = false;
     private QuanwaiClass quanwaiClass;
 }

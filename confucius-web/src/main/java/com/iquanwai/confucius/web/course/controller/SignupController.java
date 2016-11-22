@@ -11,6 +11,7 @@ import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.SignupDto;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -71,14 +72,20 @@ public class SignupController {
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
-            productId = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            CourseOrder courseOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            productId = courseOrder.getOrderId();
+            if(courseOrder.getDiscount()!=0.0){
+                signupDto.setNormal(courseOrder.getTotal());
+                signupDto.setDiscount(courseOrder.getDiscount());
+            }
+            signupDto.setFee(courseOrder.getPrice());
             signupDto.setProductId(productId);
             String qrcode = signupService.payQRCode(productId);
             signupDto.setQrcode(qrcode);
         }catch (Exception e){
             LOGGER.error("报名失败", e);
             //异常关闭订单
-            if(productId!=null) {
+            if(StringUtils.isNotEmpty(productId)) {
                 signupService.giveupSignup(productId);
             }
             return WebUtils.error("报名人数已满");

@@ -23,9 +23,9 @@ public interface SignupService {
 
     /**
      * 课程报名，生成预付订单
-     * @return 报名订单号
+     * @return 订单
      * */
-    String signup(String openid, Integer courseId, Integer classId);
+    CourseOrder signup(String openid, Integer courseId, Integer classId);
 
     /**
      * 获取学员详情

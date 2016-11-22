@@ -110,7 +110,7 @@ public class SignupServiceImpl implements SignupService {
         return classMemberCountRepo.prepareSignup(openid, courseId);
     }
 
-    public String signup(String openid, Integer courseId, Integer classId) {
+    public CourseOrder signup(String openid, Integer courseId, Integer classId) {
         //生成订单
         CourseOrder courseOrder = new CourseOrder();
         courseOrder.setClassId(classId);
@@ -130,6 +130,7 @@ public class SignupServiceImpl implements SignupService {
         if(costRepo.hasCoupon(openid)) {
             discount = costRepo.discount(course.getFee(), openid, orderId);
         }
+        courseOrder.setTotal(course.getFee());
         courseOrder.setDiscount(discount);
         courseOrder.setPrice(CommonUtils.substract(course.getFee(),discount));
         courseOrder.setStatus(CourseOrder.UNDER_PAY); //待支付
@@ -140,7 +141,7 @@ public class SignupServiceImpl implements SignupService {
         if(!payList.contains(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()))) {
             payList.add(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()));
         }
-        return orderId;
+        return courseOrder;
     }
 
     public ClassMember classMember(String openid, Integer classId) {
