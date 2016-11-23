@@ -202,6 +202,7 @@ public class SignupServiceImpl implements SignupService {
         classMemberDao.entry(classMember);
         //使用优惠券
         if(courseOrder.getDiscount()!=0.0){
+            logger.info("{}使用优惠券", openid);
             costRepo.updateCoupon(Coupon.USED, courseOrder.getOrderId());
         }
         //从待付款列表中去除

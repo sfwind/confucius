@@ -71,7 +71,7 @@ public class CourseController {
 
     private int getProgressWeek(ClassMember classMember) {
         String personalProgress = classMember.getProgress();
-        int last = 1;
+        int last = -99;
         if(StringUtils.isNotEmpty(personalProgress)) {
             String[] progressArr = personalProgress.split(",");
             for (String aProgressArr : progressArr) {
@@ -113,6 +113,12 @@ public class CourseController {
 
     private void setWeekIndex(CoursePageDto coursePageDto, Course course) {
         List<WeekIndexDto> weekIndexes = Lists.newArrayList();
+        if(course.isPreChapter()){
+            WeekIndexDto weekIndexDto = new WeekIndexDto();
+            weekIndexDto.setIndex(0);
+            weekIndexDto.setIndexName(WEEK_INDEXES[0]);
+            weekIndexes.add(weekIndexDto);
+        }
         for(int i=1;i<=course.getWeek();i++){
             WeekIndexDto weekIndexDto = new WeekIndexDto();
             weekIndexDto.setIndex(i);
