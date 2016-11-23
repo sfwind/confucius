@@ -50,8 +50,8 @@ public class CourseController {
                 LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
             }
-
-            int week = getProgressWeek(classMember);
+            Course c = courseProgressService.loadCourse(courseId);
+            int week = getProgressWeek(classMember, c.getType());
             CoursePageDto course = getCourse(loginUser, classMember, week);
             if(course==null){
                 return WebUtils.error("获取当前课程失败");
@@ -69,7 +69,11 @@ public class CourseController {
         }
     }
 
-    private int getProgressWeek(ClassMember classMember) {
+    private int getProgressWeek(ClassMember classMember, int type) {
+        //短课程只有1周
+        if(type==2){
+            return 1;
+        }
         String personalProgress = classMember.getProgress();
         int last = -99;
         if(StringUtils.isNotEmpty(personalProgress)) {
@@ -85,9 +89,9 @@ public class CourseController {
                 }
             }
         }
-        // TODO:需要回到第0周
+
         if(last<=0){
-            return 1;
+            return 0;
         }else {
             return (last - 1) / 7 + 1;
         }
