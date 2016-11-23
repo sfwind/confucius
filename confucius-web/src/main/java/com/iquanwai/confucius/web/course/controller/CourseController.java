@@ -85,8 +85,9 @@ public class CourseController {
                 }
             }
         }
+        // TODO:需要回到第0周
         if(last<=0){
-            return 0;
+            return 1;
         }else {
             return (last - 1) / 7 + 1;
         }
