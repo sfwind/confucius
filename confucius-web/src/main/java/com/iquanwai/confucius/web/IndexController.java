@@ -3,6 +3,7 @@ package com.iquanwai.confucius.web;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.util.CookieUtils;
 import com.iquanwai.confucius.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,8 +31,8 @@ public class IndexController {
     private Logger logger = LoggerFactory.getLogger(IndexController.class);
 
     @RequestMapping(value = "/static/**",method = RequestMethod.GET)
-    public ModelAndView getIndex() {
-        return new ModelAndView("course");
+    public ModelAndView getIndex(HttpServletRequest request) {
+        return courseView(request);
     }
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
@@ -43,7 +44,7 @@ public class IndexController {
             return null;
         }
 
-        return new ModelAndView("course");
+        return courseView(request);
     }
 
     @RequestMapping(value = "/pay",method = RequestMethod.GET)
@@ -54,7 +55,7 @@ public class IndexController {
             WebUtils.auth(request, response);
             return null;
         }
-        return new ModelAndView("course");
+        return courseView(request);
     }
 
     @RequestMapping(value = "/personal/edit",method = RequestMethod.GET)
@@ -65,7 +66,7 @@ public class IndexController {
             WebUtils.auth(request, response);
             return null;
         }
-        return new ModelAndView("course");
+        return courseView(request);
     }
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
@@ -76,7 +77,7 @@ public class IndexController {
             WebUtils.auth(request, response);
             return null;
         }
-        return new ModelAndView("course");
+        return courseView(request);
     }
 
     private boolean checkAccessToken(String accessToken){
@@ -88,5 +89,20 @@ public class IndexController {
         Account account = accountService.getAccount(openId, false);
         
         return account!=null;
+    }
+
+    private ModelAndView courseView(HttpServletRequest request){
+        ModelAndView mav = new ModelAndView("course");
+        if(request.getParameter("debug")!=null){
+            if(ConfigUtils.isFrontDebug()){
+                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
+            }else{
+                mav.addObject("resource", ConfigUtils.staticResourceUrl());
+            }
+        }else{
+            mav.addObject("resource", ConfigUtils.staticResourceUrl());
+        }
+
+        return mav;
     }
 }

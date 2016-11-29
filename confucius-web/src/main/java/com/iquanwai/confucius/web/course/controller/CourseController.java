@@ -45,14 +45,15 @@ public class CourseController {
     public ResponseEntity<Map<String, Object>> loadCourse(LoginUser loginUser, @PathVariable Integer courseId){
         try{
             Assert.notNull(loginUser,"用户不能为空");
+            Course c = courseProgressService.loadCourse(courseId);
+
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
             if(classMember==null){
                 LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
             }
-            Course c = courseProgressService.loadCourse(courseId);
             int week = getProgressWeek(classMember, c.getType());
-            CoursePageDto course = getCourse(loginUser, classMember, week);
+            CoursePageDto course = getCourse(loginUser, classMember, week, c);
             if(course==null){
                 return WebUtils.error("获取当前课程失败");
             }
@@ -98,9 +99,8 @@ public class CourseController {
     }
 
     private CoursePageDto getCourse(LoginUser loginUser, ClassMember classMember,
-                                           int week) {
+                                           int week, Course course) {
 
-        Course course = courseProgressService.loadCourse(classMember, week);
         //设置看到某一页
         courseProgressService.personalChapterPage(loginUser.getOpenId(), course.getChapterList());
         CoursePageDto coursePageDto = new CoursePageDto();
@@ -143,8 +143,9 @@ public class CourseController {
             if(classMember==null){
                 WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
             }
+            Course c = courseProgressService.loadCourse(courseId);
 
-            CoursePageDto course = getCourse(loginUser, classMember, week);
+            CoursePageDto course = getCourse(loginUser, classMember, week, c);
             if(course==null){
                 return WebUtils.error("获取用户当前课程失败");
             }

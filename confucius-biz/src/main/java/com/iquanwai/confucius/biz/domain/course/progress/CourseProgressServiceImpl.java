@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  * Created by justin on 16/8/29.
  */
-@Service
+@Service("courseProgressService")
 public class CourseProgressServiceImpl implements CourseProgressService {
     @Autowired
     private CourseDao courseDao;
@@ -86,6 +86,17 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 classMember -> classMember.getCertificateNo()!=null).collect(Collectors.toList());
     }
 
+    @Override
+    public Course loadChapter(ClassMember classMember, int week, Course course) {
+        Assert.notNull(classMember, "classMember不能为空");
+        Assert.notNull(course, "course不能为空");
+        List<Chapter> chapters = chapterDao.loadChapters(classMember.getCourseId(), week);
+
+        course.setChapterList(buildChapter(chapters, classMember.getComplete(), classMember.getClassProgress(), course.getType()));
+
+        return course;
+    }
+
     private void classProgress(ClassMember classMember){
         Assert.notNull(classMember, "classMember不能为空");
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
@@ -98,16 +109,6 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
 
         classMember.setClassProgress(quanwaiClass.getProgress());
-    }
-
-    public Course loadCourse(ClassMember classMember, int week) {
-        Assert.notNull(classMember, "classMember不能为空");
-        Course course = courseDao.load(Course.class, classMember.getCourseId());
-        List<Chapter> chapters = chapterDao.loadChapters(classMember.getCourseId(), week);
-
-        course.setChapterList(buildChapter(chapters, classMember.getComplete(), classMember.getClassProgress()));
-
-        return course;
     }
 
     public Course loadCourse(Integer courseId) {
@@ -296,7 +297,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
     }
 
-    private List<Chapter> buildChapter(List<Chapter> chapters, final String personalCompleteProgress, final int classProgress) {
+    private List<Chapter> buildChapter(List<Chapter> chapters, String personalCompleteProgress,
+                                       int classProgress, int classType) {
         Assert.notNull(chapters, "chapters不能为空");
         List<Chapter> chaptersNew = Lists.newArrayList();
 

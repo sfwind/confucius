@@ -61,6 +61,10 @@ public class ConfigUtils {
 		return config.getBoolean("debug")||config.getBoolean("press.test");
 	}
 
+	public static boolean isFrontDebug(){
+		return config.getBoolean("front.debug");
+	}
+
 	public static boolean logDetail(){
 		return config.getBoolean("log.debug");
 	}

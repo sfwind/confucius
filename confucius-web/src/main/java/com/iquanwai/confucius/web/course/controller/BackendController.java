@@ -110,11 +110,12 @@ public class BackendController {
         StringBuilder sb = new StringBuilder();
         for(Cookie cookie:cookies){
             sb.append(cookie.getName())
-                    .append(":")
+                    .append("=")
                     .append(cookie.getValue())
-                    .append(",");
+                    .append(";");
         }
-        OperationLog operationLog = OperationLog.create().openid("")
+        String openid = oAuthService.openId(getAccessTokenFromCookie(sb.toString()));
+        OperationLog operationLog = OperationLog.create().openid(openid)
                 .module("测试")
                 .function("测试")
                 .action("获取cookie")

@@ -59,9 +59,11 @@ public class IntroductionController {
                 courseDto.setCourse(course);
                 courseDto.setCourseProgress(courseProgress(course, classMember));
                 courseDto.setMyProgress(myProgress(course, classMember));
-                //我的进度不能大于课程进度
-                if(courseDto.getMyProgress()>courseDto.getCourseProgress()){
-                    courseDto.setMyProgress(courseDto.getCourseProgress());
+                //长课程,我的进度不能大于课程进度
+                if(course.getType()==1) {
+                    if (courseDto.getMyProgress() > courseDto.getCourseProgress()) {
+                        courseDto.setMyProgress(courseDto.getCourseProgress());
+                    }
                 }
                 courseDtos.add(courseDto);
             }
