@@ -33,7 +33,7 @@ public interface CourseProgressService {
      * @param week 加载当前周的章节
      * @param course 课程信息
      * */
-    Course loadChapter(ClassMember classMember, int week, Course course);
+    void loadChapter(ClassMember classMember, int week, Course course);
 
     /**
      * 获取课程信息

@@ -87,14 +87,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     @Override
-    public Course loadChapter(ClassMember classMember, int week, Course course) {
+    public void loadChapter(ClassMember classMember, int week, Course course) {
         Assert.notNull(classMember, "classMember不能为空");
         Assert.notNull(course, "course不能为空");
         List<Chapter> chapters = chapterDao.loadChapters(classMember.getCourseId(), week);
 
-        course.setChapterList(buildChapter(chapters, classMember.getComplete(), classMember.getClassProgress(), course.getType()));
-
-        return course;
+        course.setChapterList(buildChapter(chapters, classMember.getComplete(), classMember.getClassProgress()));
     }
 
     private void classProgress(ClassMember classMember){
@@ -298,7 +296,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private List<Chapter> buildChapter(List<Chapter> chapters, String personalCompleteProgress,
-                                       int classProgress, int classType) {
+                                       int classProgress) {
         Assert.notNull(chapters, "chapters不能为空");
         List<Chapter> chaptersNew = Lists.newArrayList();
 

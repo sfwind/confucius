@@ -101,6 +101,7 @@ public class CourseController {
     private CoursePageDto getCourse(LoginUser loginUser, ClassMember classMember,
                                            int week, Course course) {
 
+        courseProgressService.loadChapter(classMember, week, course);
         //设置看到某一页
         courseProgressService.personalChapterPage(loginUser.getOpenId(), course.getChapterList());
         CoursePageDto coursePageDto = new CoursePageDto();
