@@ -96,20 +96,24 @@ public class IntroductionController {
         }
 
         String[] chapterArr = progress.split(",");
-        List<Integer> challengeChapter = Lists.newArrayList();
-        //去掉sequence<0的课程准备
+        int validChapterSize = 0;
         for(String chapterSequence:chapterArr){
             try {
                 int sequence = Integer.valueOf(chapterSequence);
-                if(sequence>0){
-                    challengeChapter.add(sequence);
+                // 长课程去掉sequence<0的课程准备
+                if(course.getType()==1) {
+                    if (sequence > 0) {
+                        validChapterSize++;
+                    }
+                }else{
+                    validChapterSize++;
                 }
             }catch (NumberFormatException e){
                 LOGGER.error("{}是不合法的章节序号",chapterSequence);
             }
         }
 
-        return challengeChapter.size()*1.0/course.getTaskLength();
+        return validChapterSize*1.0/course.getTaskLength();
     }
 
     @RequestMapping("/allcourse")
