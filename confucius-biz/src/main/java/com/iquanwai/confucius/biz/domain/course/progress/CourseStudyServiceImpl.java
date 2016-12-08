@@ -376,6 +376,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             questionSubmit.setQuestionId(questionId);
             questionSubmit.setSubmitAnswer(answer);
             questionSubmit.setSubmitOpenid(openid);
+            questionSubmit.setIsRight(right ? 1 : 0);
             questionSubmitDao.insert(questionSubmit);
         }
         return right;

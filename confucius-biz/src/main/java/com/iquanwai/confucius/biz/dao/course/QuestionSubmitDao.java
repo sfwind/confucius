@@ -41,17 +41,18 @@ public class QuestionSubmitDao extends DBUtil{
     }
 
     public int insert(QuestionSubmit questionSubmit) {
+        // 一个用户在一个班级里对一个选择题只能提交一次
         if(submitted(questionSubmit.getSubmitOpenid(), questionSubmit.getClassId(), questionSubmit.getQuestionId())){
            return 0;
         }
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "INSERT INTO QuestionSubmit(SubmitOpenid, ClassId, QuestionId, SubmitAnswer, SubmitTime, Score) " +
-                "VALUES(?, ?, ?, ?, now(), ?)";
+        String insertSql = "INSERT INTO QuestionSubmit(SubmitOpenid, ClassId, QuestionId, SubmitAnswer, SubmitTime, Score, `IsRight`) " +
+                "VALUES(?, ?, ?, ?, now(), ?, ?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
                     questionSubmit.getSubmitOpenid(), questionSubmit.getClassId(), questionSubmit.getQuestionId(),
-                    questionSubmit.getSubmitAnswer(), questionSubmit.getScore());
+                    questionSubmit.getSubmitAnswer(), questionSubmit.getScore(),questionSubmit.getIsRight());
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -63,4 +64,5 @@ public class QuestionSubmitDao extends DBUtil{
 
         return -1;
     }
+    
 }
