@@ -250,7 +250,7 @@ public class SignupServiceImpl implements SignupService {
         CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
 
         //TODO:改成各课程分开的方式
-        if(course.getCourseId()==1) {
+        if(course.getCourseId()==1 || course.getCourseId()==3) {
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(quanwaiClass.getOpenTime() + "-" + quanwaiClass.getCloseTime()));

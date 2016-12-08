@@ -16,5 +16,6 @@ public class QuestionSubmit {
     private Date submitTime;  //提交时间
     private String submitAnswer; //提交答案的序号，多选用逗号隔开
     private Integer score; //作业分数
+    private Integer isRight;
 
 }
