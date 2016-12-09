@@ -161,7 +161,11 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                     remain = remain+remainingNumber;
                 }
             }else{
-                isEntry = true;
+                // 如果名额已满,不能再报
+                int remainingNumber = remainingCount.get(entryId);
+                if(remainingNumber>0){
+                    isEntry = true;
+                }
             }
 
             //找到未报满的班级，完成预报名
