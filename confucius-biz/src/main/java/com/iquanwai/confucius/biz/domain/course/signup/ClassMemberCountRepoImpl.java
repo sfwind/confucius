@@ -182,13 +182,10 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             return;
         }
         Integer classId = result.getClassId();
-        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
-        if(quanwaiClass==null){
-            return;
-        }
         synchronized (lock) {
-            Integer remaining = remainingCount.get(quanwaiClass.getId());
+            Integer remaining = remainingCount.get(classId);
             remainingCount.put(classId, remaining+1);
+            logger.info("init classId {} has {} quota left", classId, remaining+1);
         }
     }
 
