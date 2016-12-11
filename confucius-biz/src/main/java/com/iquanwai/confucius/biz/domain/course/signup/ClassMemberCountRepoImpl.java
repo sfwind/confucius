@@ -128,8 +128,6 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             if(CollectionUtils.isEmpty(openClass)){
                 return new ImmutablePair(-2, 0);
             }
-            int remain = 0;
-            boolean isEntry = false; //是否已经进入某班
             List<CourseClass> classes = signupMap.get(openid);
             if(classes==null){
                 classes = Lists.newArrayList();
@@ -137,43 +135,44 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             }
             CourseClass courseClass = CourseClass.getCourse(classes, courseId);
             Integer entryId = courseClass!=null?courseClass.getClassId():null;
-            //轮询所有班级，查看未报满的
+            //轮询所有班级，查看未报满的班级
             if(entryId==null){
-                for(Integer classId:openClass){
-                    int remainingNumber = remainingCount.get(classId);
-                    if(remainingNumber<=0){
-                        continue;
-                    }else{
-                        if(!isEntry) {
-                            //人数-1，记录班级id，标记分配进入某班
-                            remainingNumber--;
-                            remainingCount.put(classId, remainingNumber);
-                            List<CourseClass> courseClasses = signupMap.get(openid);
-                            if(courseClasses==null){
-                                courseClasses = Lists.newArrayList();
-                                signupMap.put(openid, courseClasses);
-                            }
-                            CourseClass.addCourse(courseClasses, courseId, classId);
-                            entryId = classId;
-                            isEntry = true;
-                        }
-                    }
-                    remain = remain+remainingNumber;
-                }
+                entryId = preEntry(openid, courseId, openClass);
             }else{
-                // 如果名额已满,不能再报
                 int remainingNumber = remainingCount.get(entryId);
-                if(remainingNumber>0){
-                    isEntry = true;
+                // 如果名额已满,不能再报当前班级,需重新查找未报满的班级
+                if(remainingNumber<=0){
+                    CourseClass.removeCourse(classes, courseId);
+                    entryId = preEntry(openid, courseId, openClass);
                 }
             }
 
             //找到未报满的班级，完成预报名
-            if(isEntry) {
-                return new ImmutablePair<>(remain, entryId);
+            if(entryId!=null) {
+                return new ImmutablePair<>(1, entryId);
             }
         }
         return new ImmutablePair(-1, 0);
+    }
+
+    private Integer preEntry(String openid, Integer courseId, List<Integer> openClass) {
+        for(Integer classId:openClass){
+            int remainingNumber = remainingCount.get(classId);
+            if(remainingNumber>0){
+                //人数-1，记录班级id，标记分配进入某班
+                remainingNumber--;
+                remainingCount.put(classId, remainingNumber);
+                List<CourseClass> courseClasses = signupMap.get(openid);
+                if(courseClasses==null){
+                    courseClasses = Lists.newArrayList();
+                    signupMap.put(openid, courseClasses);
+                }
+                CourseClass.addCourse(courseClasses, courseId, classId);
+                return classId;
+            }
+        }
+        //全部报满时,返回null
+        return null;
     }
 
     public void quitClass(String openid, Integer courseId) {

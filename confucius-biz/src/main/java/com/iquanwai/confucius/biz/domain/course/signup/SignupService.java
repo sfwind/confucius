@@ -17,7 +17,7 @@ public interface SignupService {
      * @return {-1,0} 已报满，
      *         {-2,0} 没有设置课程，
      *         {-3,0} 已报名成功，
-     *          其余情况返回剩余多少名额和班级id
+     *         {1,*} 预报名成功,返回班级id
      * */
     Pair<Integer, Integer> signupCheck(String openid, Integer courseId);
 

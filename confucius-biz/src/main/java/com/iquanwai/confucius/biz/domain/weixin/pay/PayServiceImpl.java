@@ -122,7 +122,7 @@ public class PayServiceImpl implements PayService{
     }
 
     public void closeOrder() {
-        //点开付费的保留30分钟
+        //点开付费的保留5分钟
         Date date = DateUtils.afterMinutes(new Date(), 0-ConfigUtils.getBillOpenMinute());
         //临时的只保留3分钟
         Date date2 = DateUtils.afterMinutes(new Date(), -3);
