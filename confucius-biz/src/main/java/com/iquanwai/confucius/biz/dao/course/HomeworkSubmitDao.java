@@ -115,10 +115,9 @@ public class HomeworkSubmitDao extends DBUtil{
             return;
         }
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE HomeworkSubmit SET SubmitContent =?, SubmitTime=now() " +
+            run.update("UPDATE HomeworkSubmit SET SubmitContent =?, SubmitTime=now() " +
                     "where SubmitOpenid=? and ClassId=? and HomeworkId=?", submitContent, openid, classId, homeworkId);
 
         } catch (SQLException e) {
