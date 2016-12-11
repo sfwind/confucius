@@ -17,7 +17,7 @@ public class CourseType {
     public static final int NEW_CHALLENGE =6;
     public static final int NEW_HOMEWORK =7;
 
-    public static final String PICURL_PREFIX = ConfigUtils.domainName()+"/images/";
+    public static final String PICURL_PREFIX = ConfigUtils.resourceDomainName()+"/images/";
 
     public static final Map<Integer, String> iconLockMap = Maps.newHashMap();
     public static final Map<Integer, String> iconUnLockMap = Maps.newHashMap();

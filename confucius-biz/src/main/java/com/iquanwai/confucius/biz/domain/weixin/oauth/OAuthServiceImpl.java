@@ -41,7 +41,7 @@ public class OAuthServiceImpl implements OAuthService {
         Map<String,String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         try {
-            params.put("redirect_url", URLEncoder.encode(ConfigUtils.domainName()+REDIRECT_PATH, "utf-8"));
+            params.put("redirect_url", URLEncoder.encode(ConfigUtils.adapterDomainName()+REDIRECT_PATH, "utf-8"));
         } catch (UnsupportedEncodingException e) {
             // ignore
         }

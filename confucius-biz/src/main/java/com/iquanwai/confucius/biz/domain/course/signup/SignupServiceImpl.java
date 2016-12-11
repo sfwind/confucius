@@ -148,7 +148,7 @@ public class SignupServiceImpl implements SignupService {
     public String payQRCode(String productId) {
         String payUrl = payUrl(productId);
         String path = "/data/static/images/qrcode/"+productId+".jpg";
-        String picUrl = ConfigUtils.domainName()+"/images/qrcode/"+productId+".jpg";
+        String picUrl = ConfigUtils.resourceDomainName()+"/images/qrcode/"+productId+".jpg";
 
         //生成二维码base64编码
         Image image = QRCodeUtils.genQRCode(payUrl, QRCODE_WIDTH, QRCODE_HEIGHT);

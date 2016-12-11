@@ -198,7 +198,7 @@ public class PayServiceImpl implements PayService{
         map.put("body", body);
         String openid = courseOrder.getOpenid();
         map.put("openid", openid);
-        String notify_url = ConfigUtils.domainName()+PAY_CALLBACK_PATH;
+        String notify_url = ConfigUtils.adapterDomainName()+PAY_CALLBACK_PATH;
         map.put("notify_url", notify_url);
         String out_trade_no = courseOrder.getOrderId();
         map.put("out_trade_no", out_trade_no);
