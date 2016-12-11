@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -215,15 +216,15 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         }
 
         public static CourseClass removeCourse(List<CourseClass> classes, Integer courseId) {
-            Optional<CourseClass> optional = classes.stream().filter(courseClass -> courseClass.getCourseId().equals(courseId))
-                    .findFirst();
-
-            CourseClass result = optional.isPresent()?optional.get():null;
-            if(result!=null) {
-                classes.remove(result);
+            for(Iterator<CourseClass> it = classes.iterator();it.hasNext();){
+                CourseClass courseClass = it.next();
+                if(courseClass.getCourseId().equals(courseId)){
+                    it.remove();
+                    return courseClass;
+                }
             }
 
-            return result;
+            return null;
         }
     }
 }
