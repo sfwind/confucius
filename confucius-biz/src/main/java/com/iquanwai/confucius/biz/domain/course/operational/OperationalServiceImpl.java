@@ -91,14 +91,6 @@ public class OperationalServiceImpl implements OperationalService {
             return;
         }
         for(int i=0; i<all.size(); i++) {
-            // TODO: 消息太多等60秒，会发很久
-            if(i>0&&i%10==0){
-                try {
-                    Thread.sleep(60000);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
             Pair<ClassMember, ClassMember> pair = all.get(i);
             Angel angel = new Angel();
             angel.setMemberId(pair.getLeft().getMemberId());
@@ -106,6 +98,11 @@ public class OperationalServiceImpl implements OperationalService {
             angel.setClassId(pair.getLeft().getClassId());
             angelDao.insert(angel);
             sendAngelMessage(pair, quanwaiClass, course.getName());
+        }
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            // ignore
         }
     }
 
