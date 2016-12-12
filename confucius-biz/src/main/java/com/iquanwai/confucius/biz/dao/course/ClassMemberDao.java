@@ -173,13 +173,13 @@ public class ClassMemberDao extends DBUtil {
         return null;
     }
 
-    public void graduate(Integer classId){
+    public void graduate(String memberId){
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
             asyncRun.update("UPDATE ClassMember SET Graduate =1 " +
-                    "where ClassId=? and Graduate=0", classId);
+                    "where MemberId=? and Graduate=0", memberId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

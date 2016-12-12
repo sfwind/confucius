@@ -63,6 +63,10 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
         //课程关闭
         if(classDao.isOver(classMember.getClassId())){
+            //课程关闭以后,如果用户还未毕业,强制设置成毕业
+            if(!classMember.getGraduate()){
+                classMemberDao.graduate(classMember.getMemberId());
+            }
             return null;
         }
         //设置课程进度
@@ -162,11 +166,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             String certificateNo = generateCertificate(classMember);
             classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
             Course course = courseDao.load(Course.class, classMember.getCourseId());
-
+            classMemberDao.graduate(classMember.getMemberId());
             graduateMessage(classMember, course);
         }
 
-        classMemberDao.graduate(classId);
+
     }
 
     private void graduateMessage(ClassMember classMember, Course course) {
