@@ -63,9 +63,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         }
         //课程关闭
         if(classDao.isOver(classMember.getClassId())){
-            //课程关闭以后,如果用户还未毕业,强制设置成毕业
             if(!classMember.getGraduate()){
-                classMemberDao.graduate(classMember.getMemberId());
+                Course course = courseDao.load(Course.class, courseId);
+                //短课程关闭以后,如果用户还未毕业,强制设置成毕业
+                if(course.getType()==2) {
+                    classMemberDao.graduate(classMember.getMemberId());
+                }
             }
             return null;
         }
