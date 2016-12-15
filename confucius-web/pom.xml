@@ -50,6 +50,21 @@
             <version>1.2.16</version>
         </dependency>
 
+        <!-- fileUpload 解析上传的文件用到的jar-->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.iquanwai</groupId>
             <artifactId>confucius-biz</artifactId>
