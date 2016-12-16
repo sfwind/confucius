@@ -101,4 +101,10 @@ public interface CourseStudyService {
      * 重新加载问题
      * */
     void reloadQuestion();
+
+    /**
+     * 根据主键Id获取用户提交的大作业
+     * @param submitId 提交的大作业Id
+     */
+    HomeworkSubmit loadMemberSubmittedHomework(Integer submitId);
 }

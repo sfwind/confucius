@@ -2,11 +2,16 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.po.HomeworkSubmit;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
 import com.iquanwai.confucius.util.WebUtils;
 import okhttp3.MultipartBody;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +31,12 @@ import java.util.Map;
 @RequestMapping("/file")
 public class FileController {
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
-    private void log(Object obj){
-        System.out.println(obj);
-    }
-
+    @Autowired
+    private OperationLogService operationLogService;
     @Autowired
     private PictureService pictureService;
+    @Autowired
+    private CourseStudyService courseStudyService;
 
     /**
      * 上传图片
@@ -45,56 +50,61 @@ public class FileController {
                                                            @PathVariable("referId") Integer referId,
                                                            @RequestParam("file") MultipartFile file,
                                                            HttpServletRequest request
-
     ) {
-        /**
-         * 记得把这个C加到拦截器排除配置里
-         *
-         * 模块表：模块Id，模块名，相对地址，是否有缩略图，大小限制，类型限制
-         *      Id,ModuleName,Path,HasThumbnail,SizeLimit,TypeLimit
-         * 图片表：,根据ModuleName查询出数据
-         *      图片Id，模块，依赖id，上传Ip？ ，不重复的唯一文件名，图片大小，图片类型,缩略图地址
-         *      Id,ModuleName(ModuleId),ReferId,Ip,RealName,Length,Type,Thumbnail
-         */
-        if(moduleId!=null && file!=null && !file.isEmpty()){
-            String fileName = file.getOriginalFilename();
-            Long fileSize = file.getSize();
-            String contentType = file.getContentType();
-            String remoteIp = request.getHeader("X-Forwarded-For");
-            System.out.println(remoteIp);
-            PictureModule pictureModule = pictureService.getPictureModule(moduleId);
-            Picture picture = new Picture(fileSize,referId,contentType,remoteIp);
-            if(pictureModule!=null){
-                Map<String, String> checkMap = pictureService.checkAvaliable(pictureModule, picture);
-                if("1".equals(checkMap.get("status"))){
-                    // 可上传
-                    try{
-                        picture = pictureService.uploadPicture(pictureModule,referId,remoteIp,fileName,fileSize,contentType,file);
-                    } catch (FileNotFoundException e){
-                        return WebUtils.error("该模块目录未创建");
-                    } catch (Exception e){
-                        return WebUtils.error(e.getLocalizedMessage());
+        try {
+            if (moduleId != null && file != null && !file.isEmpty()) {
+                String fileName = file.getOriginalFilename();
+                Long fileSize = file.getSize();
+                String contentType = file.getContentType();
+                String remoteIp = request.getHeader("X-Forwarded-For");
+                PictureModule pictureModule = pictureService.getPictureModule(moduleId);
+                Picture picture = new Picture(fileSize, referId, contentType, remoteIp);
+                if (pictureModule != null) {
+                    Pair<Integer,String> checkResult = pictureService.checkAvaliable(pictureModule, picture);
+                    if (checkResult.getLeft() == 1) {
+                        // 可上传
+                        try {
+                            HomeworkSubmit submit = courseStudyService.loadMemberSubmittedHomework(referId);
+                            OperationLog operationLog = OperationLog.create().openid(submit.getSubmitOpenid())
+                                    .module("文件")
+                                    .function("上传图片")
+                                    .action("PC上传图片")
+                                    .memo(moduleId + "");
+                            operationLogService.log(operationLog);
+                            picture = pictureService.uploadPicture(pictureModule, referId, remoteIp, fileName, fileSize, contentType, file);
+                        } catch (FileNotFoundException e) {
+                            LOGGER.error("upload image error:上传图片失败，模块目录:" + pictureModule.getModuleName() + "未创建!", e);
+                            return WebUtils.error("该模块目录未创建");
+                        } catch (Exception e) {
+                            LOGGER.error("upload image error:上传图片失败", e);
+                            return WebUtils.error(e.getLocalizedMessage());
+                        }
+                        String url = pictureService.getModulePrefix(moduleId) + picture.getRealName();
+                        Map<String, Object> map = Maps.newHashMap();
+                        map.put("picUrl", url);
+                        return WebUtils.result(map);
+                    } else {
+                        // 不可上传
+                        LOGGER.error("upload image error:上传校验失败," + checkResult.getRight());
+                        return WebUtils.error(checkResult.getRight());
                     }
-                    String url = pictureService.getModulePrefix(moduleId)+picture.getRealName();
-                    Map<String,Object> map = Maps.newHashMap();
-                    map.put("picUrl",url);
-                    return WebUtils.result(map);
                 } else {
-                    // 不可上传
-                    return WebUtils.error(checkMap.get("error"));
+                    LOGGER.error("upload image error:无该图片模块," + moduleId);
+                    return WebUtils.error("无该模块:+" + moduleId);
                 }
             } else {
-                return WebUtils.error("无该模块:+" + moduleId);
+                // 模块名为空,禁止上传
+                if (moduleId == null) {
+                    LOGGER.error("upload image error:moduleId为空");
+                    return WebUtils.error("请求异常，请重试");
+                } else {
+                    LOGGER.error("upload image error:文件解析失败");
+                    return WebUtils.error("该图片无法解析，请重新选择");
+                }
             }
-        } else {
-            // 模块名为空,禁止上传
-            if(moduleId==null){
-                return WebUtils.error("请求异常，请重试");
-            } else {
-                return WebUtils.error("该图片无法解析，请重新选择");
-            }
+        } catch (Exception e){
+            LOGGER.error("upload image error:上传图片失败", e);
+            return WebUtils.error("上传图片失败");
         }
     }
-
-
 }

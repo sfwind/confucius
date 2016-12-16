@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.file;
 
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public interface PictureService {
      * @param picture {length: 图片大小，单位是字节; type: 图片类型 }
      * @return 返回值 {status:"0",error:"失败原因"},{status:"1",error:"0"}
      */
-    Map<String,String> checkAvaliable(PictureModule pictureModule, Picture picture);
+    Pair<Integer,String> checkAvaliable(PictureModule pictureModule, Picture picture);
 
 
     /**

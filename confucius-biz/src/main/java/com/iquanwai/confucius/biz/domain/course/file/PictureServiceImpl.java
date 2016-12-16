@@ -8,6 +8,8 @@ import com.iquanwai.confucius.biz.po.PictureModule;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,35 +64,26 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    public Map<String, String> checkAvaliable(PictureModule pictureModule, Picture picture) {
+    public Pair<Integer,String> checkAvaliable(PictureModule pictureModule, Picture picture) {
         Map<String, String> map = Maps.newHashMap();
         Integer sizeLimit = pictureModule.getSizeLimit();
         if(picture.getLength()==null){
-            map.put("status","0");
-            map.put("error","该图片大小未知，无法上传");
+            return new ImmutablePair<Integer,String>(0,"该图片大小未知，无法上传");
         }
         if(picture.getType()==null){
-            map.put("status","0");
-            map.put("error","该图片类型未知，无法上传");
-            return map;
+            return new ImmutablePair<Integer, String>(0, "该图片类型未知，无法上传");
         }
 
         if(sizeLimit!=null && picture.getLength()>sizeLimit){
-            map.put("status", "0");
-            map.put("error", "该图片过大，请压缩后上传");
-            return map;
+            return new ImmutablePair<Integer, String>(0, "该图片过大，请压缩后上传");
         }
         List<String> typeList = pictureModule.getTypeLimit()==null? Lists.newArrayList():Lists.newArrayList(pictureModule.getTypeLimit().split(","));
         long matchTypeCount = typeList.stream().filter(contentType -> contentType.equals(picture.getType())).count();
         if(matchTypeCount==0){
-            map.put("status","0");
-            map.put("error",pictureModule.getModuleName()+"模块不支持该图片类型");
-            return map;
+            return new ImmutablePair<Integer, String>(0, pictureModule.getModuleName() + "模块不支持该图片类型");
         }
         // 通过校验开始上传
-        map.put("status","1");
-        map.put("error","0");
-        return map;
+        return new ImmutablePair<Integer,String>(1,null);
     }
 
     @Override
@@ -99,18 +92,11 @@ public class PictureServiceImpl implements PictureService {
         String path = pictureModule.getPath();
         // 文件名
         String suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
-        // 不用存储带有意义的文件名
-        // fileName = fileName.substring(0, fileName.lastIndexOf(".") == -1 ? fileName.length() : fileName.lastIndexOf("."));
-
         // 命名规则 {module}-{date}-{rand(8)}-{referId}.{filename的后缀}
         Date today = new Date();
         String realName = pictureModule.getModuleName()+"-"+ DateUtils.parseDateToString3(today)+"-"+CommonUtils.randomString(9)+"-"+referId+suffix;
         //获取该文件的文件名
         File targetFile = new File(path, realName);
-        // 不要自动创建 文件夹
-        // if (!targetFile.exists()) {
-        //      targetFile.mkdirs();
-        // }
         // 保存
         try {
             file.transferTo(targetFile);
@@ -142,7 +128,6 @@ public class PictureServiceImpl implements PictureService {
 
     @Override
     public List<Picture> loadPicture(Integer moduleId, Integer referencedId) {
-
         return pictureDao.picture(moduleId, referencedId);
     }
 
