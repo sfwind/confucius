@@ -142,7 +142,8 @@ public class PictureServiceImpl implements PictureService {
 
     @Override
     public List<Picture> loadPicture(Integer moduleId, Integer referencedId) {
-        return pictureDao.loadAll(Picture.class);
+
+        return pictureDao.picture(moduleId, referencedId);
     }
 
 }
