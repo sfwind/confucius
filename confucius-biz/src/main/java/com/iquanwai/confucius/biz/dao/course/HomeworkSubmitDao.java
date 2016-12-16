@@ -111,9 +111,10 @@ public class HomeworkSubmitDao extends DBUtil{
     }
 
     public void submit(int homeworkId, int classId, String openid, String submitContent){
-        if(submitted(openid, classId, homeworkId)){
-            return;
-        }
+        // 可以重复提交
+//        if(submitted(openid, classId, homeworkId)){
+//            return;
+//        }
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
