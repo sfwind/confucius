@@ -31,6 +31,7 @@ public class PictureDao extends DBUtil {
         ResultSetHandler<List<Picture>> h = new BeanListHandler(Picture.class);
         try{
             List<Picture> pictureList = run.query("select * from Picture where ModuleId=? and ReferencedId=?", h, moduleId, referId);
+            return pictureList;
         } catch (SQLException e){
             logger.error(e.getLocalizedMessage(), e);
         }
