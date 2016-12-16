@@ -88,7 +88,11 @@ public class FileController {
             }
         } else {
             // 模块名为空,禁止上传
-            return WebUtils.error("请选择上传模块");
+            if(moduleId==null){
+                return WebUtils.error("请求异常，请重试");
+            } else {
+                return WebUtils.error("该图片无法解析，请重新选择");
+            }
         }
     }
 
