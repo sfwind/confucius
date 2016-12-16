@@ -102,9 +102,9 @@ public class PictureServiceImpl implements PictureService {
         // 不用存储带有意义的文件名
         // fileName = fileName.substring(0, fileName.lastIndexOf(".") == -1 ? fileName.length() : fileName.lastIndexOf("."));
 
-        // 命名规则 {module}-{date}-{rand(8)}{referId}.{filename的后缀}
+        // 命名规则 {module}-{date}-{rand(8)}-{referId}.{filename的后缀}
         Date today = new Date();
-        String realName = pictureModule.getModuleName()+"-"+ DateUtils.parseDateToString3(today)+"-"+CommonUtils.randomString(9)+referId+suffix;
+        String realName = pictureModule.getModuleName()+"-"+ DateUtils.parseDateToString3(today)+"-"+CommonUtils.randomString(9)+"-"+referId+suffix;
         //获取该文件的文件名
         File targetFile = new File(path, realName);
         // 不要自动创建 文件夹
