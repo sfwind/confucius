@@ -45,6 +45,7 @@
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
           p:prefix="/" p:suffix=".jsp" p:order="1"/>
 
@@ -59,6 +60,7 @@
             <mvc:exclude-mapping path="/share/**" />
             <mvc:exclude-mapping path="/static/**" />
             <mvc:exclude-mapping path="/cache/**" />
+            <mvc:exclude-mapping path="/file/image/**" />
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
     </mvc:interceptors>

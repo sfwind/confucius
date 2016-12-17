@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web;
 
+import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.util.WebUtils;
@@ -22,6 +23,8 @@ public class CacheReloadController {
     private CourseStudyService courseStudyService;
     @Autowired
     private SignupService signupService;
+    @Autowired
+    private PictureService pictureService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -45,5 +48,16 @@ public class CacheReloadController {
             LOGGER.error("reload class", e);
         }
         return WebUtils.error("reload class");
+    }
+
+    @RequestMapping("/file/module/reload")
+    public ResponseEntity<Map<String,Object>> fileModuleReload(){
+        try{
+            pictureService.reloadModule();
+            return WebUtils.success();
+        } catch(Exception e){
+            LOGGER.error("reload file module info",e);
+        }
+        return WebUtils.error("reload module file");
     }
 }

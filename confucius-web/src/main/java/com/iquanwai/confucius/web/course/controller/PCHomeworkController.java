@@ -1,13 +1,18 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.iquanwai.confucius.biz.domain.course.file.PictureModuleType;
+import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.Homework;
 import com.iquanwai.confucius.biz.po.HomeworkSubmit;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.course.dto.HomeworkLoadDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkReviewDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
+import com.iquanwai.confucius.web.course.dto.PictureDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/3.
@@ -29,6 +35,8 @@ public class PCHomeworkController {
     private CourseStudyService courseStudyService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private PictureService pictureService;
 
     @RequestMapping("/load/{url}")
     public ResponseEntity<Map<String, Object>> loadHomework(@PathVariable("url") String url){
@@ -50,7 +58,16 @@ public class PCHomeworkController {
             if(homework==null){
                 return WebUtils.error("获取作业失败");
             }
-            return WebUtils.result(homework);
+            // 加载大作业的图片
+            List<Picture> pictureList = pictureService.loadPicture(PictureModuleType.HOMEWORK, submit.getId());
+
+            HomeworkLoadDto homeworkLoadDto = new HomeworkLoadDto(PictureModuleType.HOMEWORK, submit.getId(),
+                    homework, pictureList.stream().map(item -> {
+                String picUrl = pictureService.getModulePrefix(PictureModuleType.HOMEWORK) + item.getRealName();
+                return new PictureDto(PictureModuleType.HOMEWORK, submit.getId(), picUrl);
+            }).collect(Collectors.toList()));
+
+            return WebUtils.result(homeworkLoadDto);
         }catch (Exception e){
             LOGGER.error("获取作业失败", e);
             return WebUtils.error("获取作业失败");

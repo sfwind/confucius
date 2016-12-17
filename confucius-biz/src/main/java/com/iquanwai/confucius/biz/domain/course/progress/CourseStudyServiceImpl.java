@@ -522,4 +522,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     public void reloadQuestion() {
         initQuestion();
     }
+
+    @Override
+    public HomeworkSubmit loadMemberSubmittedHomework(Integer submitId){
+        return homeworkSubmitDao.load(HomeworkSubmit.class,submitId);
+    }
 }
