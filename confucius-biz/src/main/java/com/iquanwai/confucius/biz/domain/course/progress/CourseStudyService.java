@@ -107,4 +107,7 @@ public interface CourseStudyService {
      * @param submitId 提交的大作业Id
      */
     HomeworkSubmit loadMemberSubmittedHomework(Integer submitId);
+
+    // 课程结束后额外开放天数
+    int EXTRA_OPEN_DAYS = 7;
 }

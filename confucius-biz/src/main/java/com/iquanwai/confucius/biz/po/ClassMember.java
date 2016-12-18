@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.po;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created by justin on 16/8/29.
  */
@@ -20,6 +22,7 @@ public class ClassMember {
     private String complete; //学员完成进度，章节的sequence集合，用逗号隔开
     private Boolean pass;  //是否通过课程（0-否，1-是）
     private String certificateNo; // 毕业证书编号
+    private Date closeDate; //课程关闭时间
 
     private Integer classProgress; //课程进度，章节的id 非db字段
 }

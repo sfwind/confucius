@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.*;
@@ -197,8 +198,20 @@ public class SignupServiceImpl implements SignupService {
         classMember.setClassId(classId);
         classMember.setOpenId(openid);
         classMember.setCourseId(courseId);
-        String memberId = memberId(courseId, classId);
-        classMember.setMemberId(memberId);
+        //只有长课程有学号
+        String memberId = "";
+        if(getCachedCourse(courseId).getType()==1) {
+            memberId = memberId(courseId, classId);
+            classMember.setMemberId(memberId);
+        }
+        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
+        if(getCachedCourse(courseId).getType()==1) {
+            Date closeTime = getCachedClass(classId).getCloseTime();
+            classMember.setCloseDate(DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS));
+        }else if(getCachedCourse(courseId).getType()==2){
+            int length = getCachedCourse(courseId).getLength();
+            classMember.setCloseDate(DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS));
+        }
         classMemberDao.entry(classMember);
         //使用优惠券
         if(courseOrder.getDiscount()!=0.0){

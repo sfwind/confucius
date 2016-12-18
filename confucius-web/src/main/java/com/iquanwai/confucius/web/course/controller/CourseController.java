@@ -71,7 +71,7 @@ public class CourseController {
     }
 
     private int getProgressWeek(ClassMember classMember, int type) {
-        //短课程只有1周
+        //短课程默认返回第一周
         if(type==2){
             return 1;
         }

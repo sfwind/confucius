@@ -61,7 +61,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(classMember==null){
             return null;
         }
-        //课程关闭
+        //TODO:根据closeDate判断结束日期
         if(classDao.isOver(classMember.getClassId())){
             if(!classMember.getGraduate()){
                 Course course = courseDao.load(Course.class, courseId);
@@ -108,7 +108,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(quanwaiClass==null){
             return;
         }
-        Date closeDate = DateUtils.parseStringToDate(quanwaiClass.getCloseTime());
+        Date closeDate = quanwaiClass.getCloseTime();
         if(closeDate.before(DateUtils.beforeDays(new Date(), 7))){
             logger.info("{} has no active course {}", classMember.getOpenId(), classMember.getCourseId());
         }
@@ -125,7 +125,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         for(QuanwaiClass clazz:openClass){
             Integer courseId = clazz.getCourseId();
             //开课天数=今天-开课日期+1
-            int startDay = DateUtils.interval(DateUtils.parseStringToDate(clazz.getOpenTime()))+1;
+            int startDay = DateUtils.interval(clazz.getOpenTime())+1;
             Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
             if(chapter!=null){
                 Integer sequence = chapter.getSequence();
@@ -419,7 +419,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             logger.error("classId {} is not found", classMember.getClassId());
             return "";
         }
-        DateTime dateTime = new DateTime(DateUtils.parseStringToDate(quanwaiClass.getCloseTime()));
+        DateTime dateTime = new DateTime(quanwaiClass.getCloseTime());
         sb.append("在").append(dateTime.getYearOfEra()).append("年")
                 .append(dateTime.getMonthOfYear()).append("月").append("完成了圈外第")
                 .append(NumberToHanZi.formatInteger(quanwaiClass.getSeason())).append("期<br/>")
