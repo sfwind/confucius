@@ -127,11 +127,13 @@ public class ClassMemberDao extends DBUtil {
     public int entry(ClassMember classMember) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "INSERT INTO ClassMember(ClassId, CourseId, Openid, MemberId, Graduate) " +
-                "VALUES(?, ?, ?, ?, 0)";
+        String insertSql = "INSERT INTO ClassMember(ClassId, CourseId, Openid, MemberId, Graduate, CloseDate) " +
+                "VALUES(?, ?, ?, ?, 0, ?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
-                    classMember.getClassId(), classMember.getCourseId(), classMember.getOpenId(), classMember.getMemberId());
+                    classMember.getClassId(), classMember.getCourseId(),
+                    classMember.getOpenId(), classMember.getMemberId(),
+                    classMember.getCloseDate());
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
