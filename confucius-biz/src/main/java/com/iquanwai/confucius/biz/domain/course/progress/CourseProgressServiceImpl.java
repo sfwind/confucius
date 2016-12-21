@@ -61,13 +61,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(classMember==null){
             return null;
         }
-        //TODO:根据closeDate判断结束日期
-        if(classDao.isOver(classMember.getClassId())){
+
+        Date today = DateUtils.parseStringToDate(DateUtils.parseDateToString(new Date()));
+        if(classMember.getCloseDate().before(today)){
             if(!classMember.getGraduate()){
                 Course course = courseDao.load(Course.class, courseId);
                 //短课程关闭以后,如果用户还未毕业,强制设置成毕业
-                if(course.getType()==2) {
-                    classMemberDao.graduate(classMember.getMemberId());
+                if(course.getType()==Course.SHORT_COURSE) {
+                    classMemberDao.graduate(classMember.getId());
                 }
             }
             return null;
@@ -169,11 +170,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             String certificateNo = generateCertificate(classMember);
             classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
             Course course = courseDao.load(Course.class, classMember.getCourseId());
-            classMemberDao.graduate(classMember.getMemberId());
+            classMemberDao.graduate(classMember.getId());
             graduateMessage(classMember, course);
         }
-
-
     }
 
     private void graduateMessage(ClassMember classMember, Course course) {
@@ -204,7 +203,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Date date = DateUtils.afterDays(new Date(), 1);
         List<QuanwaiClass> openClasses = classDao.loadClassByOpenDate(date);
         for(QuanwaiClass quanwaiClass:openClasses){
-            classDao.closeEntry(quanwaiClass.getId());
+            Integer courseId = quanwaiClass.getCourseId();
+            Course course = courseDao.load(Course.class, courseId);
+            //短课程永不关闭报名
+            if(course!=null && course.getType() == Course.LONG_COURSE) {
+                classDao.closeEntry(quanwaiClass.getId());
+            }
         }
     }
 

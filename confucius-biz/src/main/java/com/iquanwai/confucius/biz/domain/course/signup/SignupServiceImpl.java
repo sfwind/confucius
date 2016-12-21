@@ -200,15 +200,15 @@ public class SignupServiceImpl implements SignupService {
         classMember.setCourseId(courseId);
         //只有长课程有学号
         String memberId = "";
-        if(getCachedCourse(courseId).getType()==1) {
+        if(getCachedCourse(courseId).getType()==Course.LONG_COURSE) {
             memberId = memberId(courseId, classId);
             classMember.setMemberId(memberId);
         }
         //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
-        if(getCachedCourse(courseId).getType()==1) {
+        if(getCachedCourse(courseId).getType()==Course.LONG_COURSE) {
             Date closeTime = getCachedClass(classId).getCloseTime();
             classMember.setCloseDate(DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS));
-        }else if(getCachedCourse(courseId).getType()==2){
+        }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
             int length = getCachedCourse(courseId).getLength();
             classMember.setCloseDate(DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS));
         }
@@ -262,14 +262,14 @@ public class SignupServiceImpl implements SignupService {
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
         CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
 
-        if(course.getType()==1) {
+        if(course.getType()==Course.LONG_COURSE) {
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(quanwaiClass.getOpenTime() + "-" + quanwaiClass.getCloseTime()));
             String remark = "你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
-        }else if(course.getType()==2){
+        }else if(course.getType()==Course.SHORT_COURSE){
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "-" +

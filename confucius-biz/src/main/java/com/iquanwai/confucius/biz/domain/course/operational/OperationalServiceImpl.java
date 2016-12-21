@@ -73,7 +73,7 @@ public class OperationalServiceImpl implements OperationalService {
             Integer courseId = quanwaiClass.getCourseId();
             Course course = courseDao.load(Course.class, courseId);
             //长课程才有天使活动
-            if(course!=null && course.getType()==1) {
+            if(course!=null && course.getType()==Course.LONG_COURSE) {
                 angelAssign(quanwaiClass.getId());
             }
         }
