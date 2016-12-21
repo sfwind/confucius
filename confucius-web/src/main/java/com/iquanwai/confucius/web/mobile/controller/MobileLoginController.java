@@ -79,16 +79,16 @@ public class MobileLoginController {
                 if (!"".equals(body1)) {
                     // PC端处理结果成功
                     Map<String, Object> result = CommonUtils.jsonToMap(body1);
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/success?debug=true");
+                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/success");
                 } else {
                     // PC端登录失败
                     logger.error("PC端登录失败,sessionId:" + sessionId);
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error?debug=true");
+                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
                 }
             } else {
                 // 移动端校验失败，链接无效
                 logger.error("移动端校验失败，链接无效");
-                response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error?debug=true");
+                response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
             }
         } catch (Exception e){
             logger.error("处理登录结果失败");

@@ -275,7 +275,7 @@ public class SessionSocketHandler implements WebSocketHandler{
         String name = sessionId+ CommonUtils.randomString(8)+".jpg";
         String path = "/data/static/images/qrcode/" + name;
         String picUrl = ConfigUtils.resourceDomainName() + "/images/qrcode/" + name;
-        log(loginUrl);
+        logger.error("二维码url:" + loginUrl);
         //生成二维码base64编码
         Image image = QRCodeUtils.genQRCode(loginUrl,QRCODE_WIDTH,QRCODE_HEIGHT);
         if(image==null){
@@ -283,7 +283,6 @@ public class SessionSocketHandler implements WebSocketHandler{
         } else {
             QRCodeUtils.image2FS(image, path);
         }
-        log(picUrl);
         return picUrl;
     }
 
