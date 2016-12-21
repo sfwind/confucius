@@ -35,6 +35,13 @@ public class IndexController {
         return courseView(request);
     }
 
+    @RequestMapping(value = "/login",method = RequestMethod.GET)
+    public ModelAndView getLoginPage(HttpServletRequest request) {
+        return courseView(request);
+    }
+
+
+
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
     public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
         String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);

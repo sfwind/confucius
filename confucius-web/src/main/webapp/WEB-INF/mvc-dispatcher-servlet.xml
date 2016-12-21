@@ -75,6 +75,7 @@
             <!--<mvc:exclude-mapping path="/mobile/**"/>-->
             <mvc:exclude-mapping path="/account/login/**"/>
             <mvc:exclude-mapping path="/session/**"/>
+            <mvc:exclude-mapping path="/login" />
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
     </mvc:interceptors>
