@@ -3,11 +3,9 @@ package com.iquanwai.confucius.web.mobile.controller;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.resolver.LoginUser;
-import com.iquanwai.confucius.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,6 +44,11 @@ public class MobileLoginController {
                            HttpServletResponse response)
     {
         try {
+            if(loginUser==null){
+                logger.error("扫码登录失败，用户信息不能为空");
+                response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
+            }
+
             long interval = DateUtils.currentTimestamp() - Long.parseLong(time);
             if (interval > 60) {
                 // 该链接超过一分钟，已失效
@@ -91,7 +94,7 @@ public class MobileLoginController {
                 response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
             }
         } catch (Exception e){
-            logger.error("处理登录结果失败");
+            logger.error("处理登录结果失败",e);
         }
     }
 }
