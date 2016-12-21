@@ -83,14 +83,20 @@ public class SessionSocketHandler implements WebSocketHandler{
             String sessionId = this.getSessionId(session);
             if (sessionId == null) {
                 logger.error("error 无法获得sessionid");
-                session.sendMessage(new TextMessage("无法获得sessionid"));
+                Map<String, Object> errorMap = Maps.newHashMap();
+                errorMap.put("type", "ERROR");
+                errorMap.put("msg", "该二维码异常，请刷新二维码");
+                session.sendMessage(new TextMessage(CommonUtils.mapToJson(errorMap)));
                 session.close();
                 return;
             }
             WebSocketSession oldSocket = getLoginSocket(sessionId);
             if (oldSocket != null) {
                 // 这里保证一个sessionid只能对应一个Socket
-                session.sendMessage(new TextMessage("您已经打开登录页面，请不要重复打开哦"));
+                Map<String, Object> errorMap = Maps.newHashMap();
+                errorMap.put("type", "ERROR");
+                errorMap.put("msg", "您已经打开登录页面，请不要重复打开哦");
+                session.sendMessage(new TextMessage(CommonUtils.mapToJson(errorMap)));
                 session.close();
                 return;
             }
