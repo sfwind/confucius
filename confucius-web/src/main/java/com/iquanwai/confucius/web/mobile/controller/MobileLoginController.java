@@ -47,6 +47,7 @@ public class MobileLoginController {
             if(loginUser==null){
                 logger.error("扫码登录失败，用户信息不能为空");
                 response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
+                return;
             }
 
             long interval = DateUtils.currentTimestamp() - Long.parseLong(time);
@@ -64,6 +65,7 @@ public class MobileLoginController {
                     logger.error("刷新验证码失败");
                 }
                 response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
+                return;
             }
 
             Map<String, String> map = Maps.newHashMap();
@@ -83,15 +85,18 @@ public class MobileLoginController {
                     // PC端处理结果成功
                     Map<String, Object> result = CommonUtils.jsonToMap(body1);
                     response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/success");
+                    return;
                 } else {
                     // PC端登录失败
                     logger.error("PC端登录失败,sessionId:" + sessionId);
                     response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
+                    return;
                 }
             } else {
                 // 移动端校验失败，链接无效
                 logger.error("移动端校验失败，链接无效");
                 response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error");
+                return;
             }
         } catch (Exception e){
             logger.error("处理登录结果失败",e);
