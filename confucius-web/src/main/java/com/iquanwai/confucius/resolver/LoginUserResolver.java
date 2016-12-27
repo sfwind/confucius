@@ -45,9 +45,15 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
             return LoginUser.defaultUser();
         }
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
-        //前端调试开启时，返回mock user
+
         if(request.getParameter("debug")!=null && ConfigUtils.isFrontDebug()){
-            return LoginUser.defaultUser();
+            //前端调试开启时，如果debug=true,返回mockuser
+            if(request.getParameter("debug").equalsIgnoreCase("true")) {
+                return LoginUser.defaultUser();
+            }else{
+                //返回模拟的openid user
+                return getLoginUser(request.getParameter("debug"));
+            }
         }
         String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
@@ -60,6 +66,14 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
             return null;
         }
 
+        LoginUser loginUser = getLoginUser(openId);
+        if (loginUser == null) return null;
+        loginUserMap.put(accessToken, loginUser);
+
+        return loginUser;
+    }
+
+    private LoginUser getLoginUser(String openId) {
         Account account = accountService.getAccount(openId, false);
 
         if(account==null){
@@ -72,8 +86,6 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         loginUser.setWeixinName(account.getNickname());
         loginUser.setHeadimgUrl(account.getHeadimgurl());
         loginUser.setRealName(account.getRealName());
-        loginUserMap.put(accessToken, loginUser);
-
         return loginUser;
     }
 

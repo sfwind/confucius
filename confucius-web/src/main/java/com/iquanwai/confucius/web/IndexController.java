@@ -28,17 +28,22 @@ public class IndexController {
     @Autowired
     private AccountService accountService;
 
-    private Logger logger = LoggerFactory.getLogger(IndexController.class);
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @RequestMapping(value = "/static/**",method = RequestMethod.GET)
-    public ModelAndView getIndex(HttpServletRequest request) {
+    public ModelAndView getIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
+
         return courseView(request);
     }
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
     public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
-        if(!checkAccessToken(accessToken)){
+        if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
@@ -49,8 +54,7 @@ public class IndexController {
 
     @RequestMapping(value = "/pay",method = RequestMethod.GET)
     public ModelAndView getPayIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
-        if(!checkAccessToken(accessToken)){
+        if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
@@ -60,8 +64,7 @@ public class IndexController {
 
     @RequestMapping(value = "/personal/edit",method = RequestMethod.GET)
     public ModelAndView getPersonalEditIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
-        if(!checkAccessToken(accessToken)){
+        if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
@@ -71,8 +74,7 @@ public class IndexController {
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
     public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
-        if(!checkAccessToken(accessToken)){
+        if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
@@ -80,14 +82,20 @@ public class IndexController {
         return courseView(request);
     }
 
-    private boolean checkAccessToken(String accessToken){
+    private boolean checkAccessToken(HttpServletRequest request){
+        if(request.getParameter("debug")!=null && ConfigUtils.isFrontDebug()){
+            return true;
+        }
+
+        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         String openId = oAuthService.openId(accessToken);
+
         if(StringUtils.isEmpty(openId)){
             return false;
         }
 
         Account account = accountService.getAccount(openId, false);
-        
+
         return account!=null;
     }
 
