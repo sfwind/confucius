@@ -108,7 +108,7 @@ public class CommonUtils {
         if(source==null){
             return null;
         }
-        Pattern emoji = Pattern.compile("[\u0000-\uFFFF]", Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
+        Pattern emoji = Pattern.compile("[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]", Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
         return source.replaceAll(emoji.pattern(), "[表情]");
     }
 
