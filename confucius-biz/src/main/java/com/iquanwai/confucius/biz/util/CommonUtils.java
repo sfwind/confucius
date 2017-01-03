@@ -105,11 +105,7 @@ public class CommonUtils {
     }
 
     public static String filterEmoji(String source) {
-        if(source==null){
-            return null;
-        }
-        Pattern emoji = Pattern.compile("[^\u0000-\uFFFF]", Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
-        return source.replaceAll(emoji.pattern(), "[表情]");
+        return source;
     }
 
     //保留两位小数
