@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -143,7 +144,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         //去除“[表情]”文字
         account.setNickname(account.getNickname().replaceAll("[表情]", ""));
 
-        String json = new Gson().toJson(account);
+        String json = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd")
+                .create().toJson(account);
         Map<String, String> memos = new Gson().fromJson(json, new TypeToken<Map<String, String>>() {
         }.getType());
 
@@ -164,7 +167,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             return content;
         }
 
-        String json = new Gson().toJson(classMember);
+        String json = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd")
+                .create().toJson(classMember);
         Map<String, String> memos = new Gson().fromJson(json, new TypeToken<Map<String, String>>() {
         }.getType());
 
@@ -191,7 +196,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             return content;
         }
 
-        String json = new Gson().toJson(quanwaiClass);
+        String json = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd")
+                .create().toJson(quanwaiClass);
         Map<String, String> memos = new Gson().fromJson(json, new TypeToken<Map<String, String>>() {
         }.getType());
 
