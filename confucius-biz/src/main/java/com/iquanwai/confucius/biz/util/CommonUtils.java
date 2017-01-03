@@ -104,10 +104,6 @@ public class CommonUtils {
         return MessageDigestHelper.getMD5String(digest);
     }
 
-    public static String filterEmoji(String source) {
-        return source;
-    }
-
     //保留两位小数
     public static Double substract(Double a, Double b){
         if(a==null||b==null){
