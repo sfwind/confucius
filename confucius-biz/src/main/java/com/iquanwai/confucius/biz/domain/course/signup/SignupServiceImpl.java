@@ -265,17 +265,17 @@ public class SignupServiceImpl implements SignupService {
         if(course.getType()==Course.LONG_COURSE) {
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword(quanwaiClass.getOpenTime() + "-" + quanwaiClass.getCloseTime()));
-            String remark = "你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(quanwaiClass.getOpenTime()) + "-" + DateUtils.parseDateToStringByCommon(quanwaiClass.getCloseTime())));
+            String remark = "到期后自动关闭\n你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
         }else if(course.getType()==Course.SHORT_COURSE){
-            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
+//            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "-" +
-                    DateUtils.parseDateToString(DateUtils.afterDays(new Date(), course.getLength()+6))));
-            String remark = "想要和更多同伴一起讨论学习？\n加入训练QQ群吧， 群号："+quanwaiClass.getQqGroupNo()
-                    +"。点击可查看群二维码。";
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
+                    DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
+            String remark = "到期后自动关闭\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
+                    +"。点击查看群二维码。";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
         }
