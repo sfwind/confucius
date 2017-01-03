@@ -189,13 +189,10 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         return null;
     }
 
-    public void quitClass(String openid, Integer courseId) {
+    public void quitClass(String openid, Integer classId) {
         List<CourseClass> classes = signupMap.get(openid);
-        CourseClass result = CourseClass.removeCourse(classes, courseId);
-        if(result==null){
-            return;
-        }
-        Integer classId = result.getClassId();
+        CourseClass.removeClass(classes, classId);
+
         synchronized (lock) {
             Integer remaining = remainingCount.get(classId);
             remainingCount.put(classId, remaining+1);
@@ -232,6 +229,18 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             for(Iterator<CourseClass> it = classes.iterator();it.hasNext();){
                 CourseClass courseClass = it.next();
                 if(courseClass.getCourseId().equals(courseId)){
+                    it.remove();
+                    return courseClass;
+                }
+            }
+
+            return null;
+        }
+
+        public static CourseClass removeClass(List<CourseClass> classes, Integer classId) {
+            for(Iterator<CourseClass> it = classes.iterator();it.hasNext();){
+                CourseClass courseClass = it.next();
+                if(courseClass.getClassId().equals(classId)){
                     it.remove();
                     return courseClass;
                 }
