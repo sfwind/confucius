@@ -72,6 +72,8 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public Boolean checkPermission(String role, String uri) {
         List<Authority> permissions = this.loadPermissions(role);
+        logger.error("role:{},uri:{}",role,uri);
+        logger.error("permiss:{}",permissions);
         if(permissions==null){
             return false;
         } else {
