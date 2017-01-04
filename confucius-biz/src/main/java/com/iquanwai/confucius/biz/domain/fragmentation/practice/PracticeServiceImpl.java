@@ -215,15 +215,15 @@ public class PracticeServiceImpl implements PracticeService {
             return false;
         }
         boolean result = challengeSubmitDao.answer(challengeSubmit.getId(), content);
-        if (result) {
-            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(challengeSubmit.getPlanId(),
-                    challengeSubmit.getChallengeId(), PracticePlan.CHALLENGE);
-            if (practicePlan != null && practicePlan.getStatus() == 0) {
-                practicePlanDao.complete(practicePlan.getId());
-                improvementPlanDao.updateComplete(challengeSubmit.getPlanId());
-                pointRepo.risePoint(challengeSubmit.getPlanId(), PointRepo.CHALLENGE_PRACTICE_SCORE);
-            }
-        }
+//        if (result) {
+//            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(challengeSubmit.getPlanId(),
+//                    challengeSubmit.getChallengeId(), PracticePlan.CHALLENGE);
+//            if (practicePlan != null && practicePlan.getStatus() == 0) {
+//                practicePlanDao.complete(practicePlan.getId());
+//                improvementPlanDao.updateComplete(challengeSubmit.getPlanId());
+//                pointRepo.risePoint(challengeSubmit.getPlanId(), PointRepo.CHALLENGE_PRACTICE_SCORE);
+//            }
+//        }
         return result;
     }
 
