@@ -1,6 +1,9 @@
 package com.iquanwai.confucius.web.pc.dto;
 
+import com.iquanwai.confucius.web.course.dto.PictureDto;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/1/2.
@@ -20,5 +23,6 @@ public class ChallengeShowDto {
     private Integer voteStatus;// 0 没有点赞，1 点赞中
     private Integer planId;
     private Integer challengeId;
+    private List<PictureDto> picList;
 
 }

@@ -45,8 +45,6 @@ public class ChallengeController {
     @Autowired
     private PracticeService practiceService;
     @Autowired
-    private ChallengeSubmitDao challengeSubmitDao;
-    @Autowired
     private PlanService planService;
     @Autowired
     private OperationLogService operationLogService;
@@ -177,6 +175,12 @@ public class ChallengeController {
             Problem problem = problemService.getProblem(challengePractice.getProblemId());
             show.setProblemId(problem.getId());
             show.setTitle(problem.getProblem());
+            // 查询照片
+            List<Picture> pictureList = pictureService.loadPicture(PictureModuleType.CHALLENGE, submit.getId());
+            show.setPicList(pictureList.stream().map(item -> {
+                String picUrl = pictureService.getModulePrefix(PictureModuleType.CHALLENGE) + item.getRealName();
+                return new PictureDto(PictureModuleType.CHALLENGE, submit.getId(), picUrl);
+            }).collect(Collectors.toList()));
             return WebUtils.result(show);
         }
     }
@@ -292,6 +296,7 @@ public class ChallengeController {
                         dto.setContent(dto.getContent().length() > 180 ? dto.getContent().substring(0, 180)+"......" : dto.getContent());
                         dto.setUpTime(DateUtils.parseDateToFormat5(challengePractice.getSubmitUpdateTime()));
                     }
+                    // 查询照片
                     dto.setVoteCount(practiceService.loadHomeworkVotesCount(1, challengePractice.getSubmitId()));
                     HomeworkVote vote = practiceService.loadVoteRecord(1, challengeId, openId);
                     dto.setCanVote(vote == null || vote.getDel() == 1);

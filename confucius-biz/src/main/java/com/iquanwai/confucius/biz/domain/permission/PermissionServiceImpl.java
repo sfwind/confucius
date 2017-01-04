@@ -46,10 +46,10 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void initPermission() {
         List<Role> roles = roleDao.loadAll(Role.class);
-        logger.error("roles",roles);
+        logger.error("rolesL{}",roles);
         roles.forEach(role->{
             List<Permission> permissions = permissionDao.loadPermissions(role.getId());
-            logger.error("perrmission",permissions);
+            logger.error("perrmission:{}",permissions);
             rolePermissions.put(role.getName(), permissions.stream().map(permission -> {
                 Authority authority = new Authority();
                 authority.setRoleId(role.getId());
