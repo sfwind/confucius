@@ -29,7 +29,8 @@ public interface ClassMemberCountRepo {
     /**
      * 用户放弃报名
      * @param openid 学员id
+     * @param classId 班级id
      * @return
      */
-    void quitClass(String openid, Integer courseId);
+    void quitClass(String openid, Integer classId);
 }

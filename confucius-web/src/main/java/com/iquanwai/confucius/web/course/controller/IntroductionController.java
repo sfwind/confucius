@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.course.introduction.CourseIntroductionS
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.resolver.LoginUser;
@@ -60,7 +61,7 @@ public class IntroductionController {
                 courseDto.setCourseProgress(courseProgress(course, classMember));
                 courseDto.setMyProgress(myProgress(course, classMember));
                 //长课程,我的进度不能大于课程进度
-                if(course.getType()==1) {
+                if(course.getType()== Course.LONG_COURSE) {
                     if (courseDto.getMyProgress() > courseDto.getCourseProgress()) {
                         courseDto.setMyProgress(courseDto.getCourseProgress());
                     }
@@ -101,7 +102,7 @@ public class IntroductionController {
             try {
                 int sequence = Integer.valueOf(chapterSequence);
                 // 长课程去掉sequence<0的课程准备
-                if(course.getType()==1) {
+                if(course.getType()==Course.LONG_COURSE) {
                     if (sequence > 0) {
                         validChapterSize++;
                     }

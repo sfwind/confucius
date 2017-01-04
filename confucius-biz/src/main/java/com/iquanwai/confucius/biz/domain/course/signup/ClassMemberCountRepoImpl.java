@@ -3,7 +3,9 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
+import com.iquanwai.confucius.biz.dao.course.CourseDao;
 import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
+import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import lombok.Data;
@@ -31,6 +33,8 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
     @Autowired
     private ClassDao classDao;
+    @Autowired
+    private CourseDao courseDao;
     @Autowired
     private CourseOrderDao courseOrderDao;
 
@@ -67,7 +71,11 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             //初始化班级记录
             for (QuanwaiClass quanwaiClass : quanwaiClassList) {
                 Integer classId = quanwaiClass.getId();
-                openClass.add(classId);
+                Integer courseId = quanwaiClass.getCourseId();
+                Course course = courseDao.load(Course.class, courseId);
+                if(course!=null && course.getType()==Course.LONG_COURSE) {
+                    openClass.add(classId);
+                }
                 Integer remaining = remainingCount.get(classId);
                 if (remaining == null) {
                     List<Integer> classList = openClassList.get(quanwaiClass.getCourseId());
@@ -78,8 +86,13 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                     if(!classList.contains(classId)){
                         classList.add(classId);
                     }
-                    remainingCount.put(classId, quanwaiClass.getLimit());
-                    logger.info("init classId {} has {} quota total", classId, quanwaiClass.getLimit());
+                    if(course!=null && course.getType()==Course.LONG_COURSE) {
+                        remainingCount.put(classId, quanwaiClass.getLimit());
+                    }else{
+                        //短课程班级容量无限
+                        remainingCount.put(classId, 1000000);
+                    }
+                    logger.info("init classId {} has {} quota total", classId, remainingCount.get(classId));
                 }
             }
             //统计已付款和待付款的人数
@@ -176,13 +189,10 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         return null;
     }
 
-    public void quitClass(String openid, Integer courseId) {
+    public void quitClass(String openid, Integer classId) {
         List<CourseClass> classes = signupMap.get(openid);
-        CourseClass result = CourseClass.removeCourse(classes, courseId);
-        if(result==null){
-            return;
-        }
-        Integer classId = result.getClassId();
+        CourseClass.removeClass(classes, classId);
+
         synchronized (lock) {
             Integer remaining = remainingCount.get(classId);
             remainingCount.put(classId, remaining+1);
@@ -219,6 +229,18 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             for(Iterator<CourseClass> it = classes.iterator();it.hasNext();){
                 CourseClass courseClass = it.next();
                 if(courseClass.getCourseId().equals(courseId)){
+                    it.remove();
+                    return courseClass;
+                }
+            }
+
+            return null;
+        }
+
+        public static CourseClass removeClass(List<CourseClass> classes, Integer classId) {
+            for(Iterator<CourseClass> it = classes.iterator();it.hasNext();){
+                CourseClass courseClass = it.next();
+                if(courseClass.getClassId().equals(classId)){
                     it.remove();
                     return courseClass;
                 }

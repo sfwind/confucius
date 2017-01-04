@@ -58,18 +58,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Assert.notNull(openid, "openid不能为空");
         ClassMember classMember = classMemberDao.classMember(openid, courseId);
 
-        if(classMember==null){
-            return null;
-        }
-        //TODO:根据closeDate判断结束日期
-        if(classDao.isOver(classMember.getClassId())){
-            if(!classMember.getGraduate()){
-                Course course = courseDao.load(Course.class, courseId);
-                //短课程关闭以后,如果用户还未毕业,强制设置成毕业
-                if(course.getType()==2) {
-                    classMemberDao.graduate(classMember.getMemberId());
-                }
-            }
+        //如果课程已结束,返回空
+        if (isOver(classMember)){
             return null;
         }
         //设置课程进度
@@ -77,10 +67,28 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return classMember;
     }
 
+    private boolean isOver(ClassMember classMember) {
+        if(classMember==null){
+            return true;
+        }
+        Date today = DateUtils.parseStringToDate(DateUtils.parseDateToString(new Date()));
+        if(classMember.getCloseDate().before(today)){
+            if(!classMember.getGraduate()){
+                Course course = courseDao.load(Course.class, classMember.getCourseId());
+                //短课程关闭以后,如果用户还未毕业,强制设置成毕业
+                if(course.getType()==Course.SHORT_COURSE) {
+                    classMemberDao.graduate(classMember.getId());
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     public List<ClassMember> loadActiveCourse(String openid) {
         List<ClassMember> classMemberList = classMemberDao.classMember(openid);
 
-        return classMemberList.stream().filter(classMember -> !classDao.isOver(classMember.getClassId()))
+        return classMemberList.stream().filter(classMember -> !isOver(classMember))
                 .map(classMember -> {
                     classProgress(classMember);
                     return classMember;
@@ -169,11 +177,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             String certificateNo = generateCertificate(classMember);
             classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
             Course course = courseDao.load(Course.class, classMember.getCourseId());
-            classMemberDao.graduate(classMember.getMemberId());
+            classMemberDao.graduate(classMember.getId());
             graduateMessage(classMember, course);
         }
-
-
     }
 
     private void graduateMessage(ClassMember classMember, Course course) {
@@ -204,7 +210,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Date date = DateUtils.afterDays(new Date(), 1);
         List<QuanwaiClass> openClasses = classDao.loadClassByOpenDate(date);
         for(QuanwaiClass quanwaiClass:openClasses){
-            classDao.closeEntry(quanwaiClass.getId());
+            Integer courseId = quanwaiClass.getCourseId();
+            Course course = courseDao.load(Course.class, courseId);
+            //短课程永不关闭报名
+            if(course!=null && course.getType() == Course.LONG_COURSE) {
+                classDao.closeEntry(quanwaiClass.getId());
+            }
         }
     }
 

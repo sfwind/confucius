@@ -200,15 +200,15 @@ public class SignupServiceImpl implements SignupService {
         classMember.setCourseId(courseId);
         //只有长课程有学号
         String memberId = "";
-        if(getCachedCourse(courseId).getType()==1) {
+        if(getCachedCourse(courseId).getType()==Course.LONG_COURSE) {
             memberId = memberId(courseId, classId);
             classMember.setMemberId(memberId);
         }
         //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
-        if(getCachedCourse(courseId).getType()==1) {
+        if(getCachedCourse(courseId).getType()==Course.LONG_COURSE) {
             Date closeTime = getCachedClass(classId).getCloseTime();
             classMember.setCloseDate(DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS));
-        }else if(getCachedCourse(courseId).getType()==2){
+        }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
             int length = getCachedCourse(courseId).getLength();
             classMember.setCloseDate(DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS));
         }
@@ -245,7 +245,7 @@ public class SignupServiceImpl implements SignupService {
         ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getOpenid());
         //已经报名成功的学员不需要退班
         if(classMember==null) {
-            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId());
+            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getClassId());
         }
     }
 
@@ -262,20 +262,20 @@ public class SignupServiceImpl implements SignupService {
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
         CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
 
-        if(course.getType()==1) {
+        if(course.getType()==Course.LONG_COURSE) {
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword(quanwaiClass.getOpenTime() + "-" + quanwaiClass.getCloseTime()));
-            String remark = "你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(quanwaiClass.getOpenTime()) + "-" + DateUtils.parseDateToStringByCommon(quanwaiClass.getCloseTime())));
+            String remark = "到期后自动关闭\n你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
-        }else if(course.getType()==2){
-            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
+        }else if(course.getType()==Course.SHORT_COURSE){
+//            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "-" +
-                    DateUtils.parseDateToString(DateUtils.afterDays(new Date(), course.getLength()+6))));
-            String remark = "想要和更多同伴一起讨论学习？\n加入训练QQ群吧， 群号："+quanwaiClass.getQqGroupNo()
-                    +"。点击可查看群二维码。";
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
+                    DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
+            String remark = "到期后自动关闭\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
+                    +"。点击查看群二维码。";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
         }
