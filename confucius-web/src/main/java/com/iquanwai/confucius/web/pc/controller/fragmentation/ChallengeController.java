@@ -323,7 +323,9 @@ public class ChallengeController {
                     .action("PC加载他人挑战训练")
                     .memo(challengeId+"");
             operationLogService.log(operationLog);
-            List<ChallengeSubmit> submits = practiceService.getChallengeSubmitList(challengeId);
+            List<ChallengeSubmit> submits = practiceService.getChallengeSubmitList(challengeId)
+                    .stream().filter(item->item.getOpenid().equals(loginUser.getOpenId())).collect(Collectors.toList());
+            // 过滤掉自己
             if (submits.isEmpty()) {
                 return WebUtils.result(submits);
             } else {
