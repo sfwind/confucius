@@ -301,6 +301,7 @@ public class ChallengeController {
                     HomeworkVote vote = practiceService.loadVoteRecord(1, challengeId, openId);
                     dto.setCanVote(vote == null || vote.getDel() == 1);
                     dto.setPlanId(item.getId());
+                    dto.setDescription(challengePractice.getDescription());
                     return dto;
                 }).collect(Collectors.toList());
                 return WebUtils.result(mineChallenges);
