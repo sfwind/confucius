@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CourseDao;
+import com.iquanwai.confucius.biz.dao.course.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.dao.operational.AngelDao;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;

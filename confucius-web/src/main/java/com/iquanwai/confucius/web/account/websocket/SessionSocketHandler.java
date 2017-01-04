@@ -1,15 +1,11 @@
 package com.iquanwai.confucius.web.account.websocket;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.domain.session.SessionManagerService;
-import com.iquanwai.confucius.biz.domain.session.SessionManagerServiceImpl;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
-import com.iquanwai.confucius.web.account.controller.AccountController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.*;
 
@@ -42,9 +38,6 @@ public class SessionSocketHandler implements WebSocketHandler{
         mobileLoginUrl = ConfigUtils.domainName() + mobileLoginUrl;
     }
 
-    @Autowired
-    private SessionManagerService sessionService;
-
 
     /**
      * 这个map里存放的是SessionId与Socket的对应<br/>
@@ -54,23 +47,6 @@ public class SessionSocketHandler implements WebSocketHandler{
      * 移动端扫码时调用通知pc端Http接口时必须要调用确定的ip
      */
     private static final Map<String,WebSocketSession> socketSessionMap = Maps.newConcurrentMap();
-
-    /**
-     * 记得加入拦截器排除
-     *
-     */
-    public static void log(Object... obj){
-        for (Object o : obj) {
-            System.out.print(o);
-        }
-        System.out.print("\n");
-    }
-    public static void main(String[] args){
-        String param = "{data:[1,2,3]}";
-        Map<String,Object> test = CommonUtils.jsonToMap(param);
-        log(test.get("data").getClass());
-
-    }
 
     /**
      * 建立链接，将sessionid加入到session缓存里
@@ -129,8 +105,8 @@ public class SessionSocketHandler implements WebSocketHandler{
     @Override
     public void handleMessage(WebSocketSession session,WebSocketMessage<?> message) throws Exception {
         try{
-            if(message.getPayload().getClass().equals(String.class)){
-                Map<String, Object> body = CommonUtils.jsonToMap( message.getPayload().toString());
+            if(message.getClass().equals(TextMessage.class)){
+                Map<String, Object> body = CommonUtils.jsonToMap(((TextMessage) message).getPayload());
                 String type = body.get("type") == null ? "" : (String) body.get("type");
                 switch(type){
                     case "REFRESH_CODE":{
@@ -158,7 +134,6 @@ public class SessionSocketHandler implements WebSocketHandler{
      */
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log("error：",exception);
         session.close();
         this.removeSocketSession(session);
     }
@@ -171,7 +146,6 @@ public class SessionSocketHandler implements WebSocketHandler{
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        log(session.getId(),",",session.isOpen());
         try {
             // 从静态变量里删除
             this.removeSocketSession(session);

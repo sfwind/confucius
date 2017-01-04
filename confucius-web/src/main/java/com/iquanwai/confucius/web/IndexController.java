@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,17 +31,11 @@ public class IndexController {
 
     private Logger logger = LoggerFactory.getLogger(IndexController.class);
 
+
     @RequestMapping(value = "/static/**",method = RequestMethod.GET)
     public ModelAndView getIndex(HttpServletRequest request) {
         return courseView(request);
     }
-
-    @RequestMapping(value = "/login",method = RequestMethod.GET)
-    public ModelAndView getLoginPage(HttpServletRequest request) {
-        return courseView(request);
-    }
-
-
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
     public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
@@ -94,9 +89,10 @@ public class IndexController {
         }
 
         Account account = accountService.getAccount(openId, false);
-        
+
         return account!=null;
     }
+
 
     private ModelAndView courseView(HttpServletRequest request){
         ModelAndView mav = new ModelAndView("course");

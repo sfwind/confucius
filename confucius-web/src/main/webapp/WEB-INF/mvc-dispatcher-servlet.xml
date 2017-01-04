@@ -44,6 +44,7 @@
         </mvc:message-converters>
         <mvc:argument-resolvers>
             <bean class="com.iquanwai.confucius.resolver.LoginUserResolver"/>
+            <bean class="com.iquanwai.confucius.resolver.PCLoginUserResolver"/>
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
@@ -74,9 +75,22 @@
             <mvc:exclude-mapping path="/file/image/**" />
             <!--<mvc:exclude-mapping path="/mobile/**"/>-->
             <mvc:exclude-mapping path="/account/login/**"/>
+            <mvc:exclude-mapping path="/account/get"/>
             <mvc:exclude-mapping path="/session/**"/>
             <mvc:exclude-mapping path="/login" />
+            <mvc:exclude-mapping path="/pc/**"/>
+            <mvc:exclude-mapping path="/home/**" />
+            <mvc:exclude-mapping path="/fragment/**"/>
+            <mvc:exclude-mapping path="/c/*"/>
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/pc/**"/>
+            <mvc:mapping path="/account/get"/>
+            <mvc:mapping path="/image/upload/**"/>
+            <bean class="com.iquanwai.confucius.interceptor.PCHandlerInterceptor">
+                <constructor-arg ref="permissionServiceImpl"/>
+            </bean>
         </mvc:interceptor>
     </mvc:interceptors>
 </beans>

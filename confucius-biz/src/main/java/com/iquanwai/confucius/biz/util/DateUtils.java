@@ -10,6 +10,11 @@ public class DateUtils {
     private static DateTimeFormatter format1 = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static DateTimeFormatter format2 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     private static DateTimeFormatter format3 = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+    private static DateTimeFormatter format5 = DateTimeFormat.forPattern("yyyy年MM月dd日");
+
+    public static String parseDateToFormat5(Date date){
+        return format5.print(new DateTime(date));
+    }
     public static String parseDateToString(Date date) {
         return format1.print(new DateTime(date));
     }

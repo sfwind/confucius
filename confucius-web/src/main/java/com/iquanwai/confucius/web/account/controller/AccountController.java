@@ -1,24 +1,41 @@
 package com.iquanwai.confucius.web.account.controller;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.domain.session.SessionManagerService;
+import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
+import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemList;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
+import com.iquanwai.confucius.resolver.PCLoginUser;
+import com.iquanwai.confucius.resolver.PCLoginUserResolver;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.account.dto.AccountDto;
+import com.iquanwai.confucius.web.account.dto.CourseDto;
+import com.iquanwai.confucius.web.account.dto.FragmentDto;
 import com.iquanwai.confucius.web.account.dto.LoginCheckDto;
 import com.iquanwai.confucius.web.account.websocket.SessionSocketHandler;
+import com.iquanwai.confucius.web.pc.dto.ChallengeDto;
+import com.iquanwai.confucius.web.pc.dto.ProblemDto;
 import org.modelmapper.internal.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2016/12/20.
@@ -29,12 +46,19 @@ public class AccountController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private SessionManagerService sessionService;
+    private CourseProgressService courseProgressService;
+    @Autowired
+    private ProblemService problemService;
+    @Autowired
+    private PracticeService practiceService;
+    @Autowired
+    private ChallengeSubmitDao challengeSubmitDao;
 
     /**
      * mobile扫描二维码结果
      * @param loginCheckDto 登录检查结果
      * @return pc端处理结果 <br/> 返回值格式：{code:200,msg:{type:1}} <br/>
+     * 由于是扫码登录，所以登录逻辑只判断是否是我们的用户,具体的权限在拦截器里判断
      * code：200 处理成功<br/>
      * type:1-登录,2-刷新二维码<br/>
      * code:!200 处理失败<br/>
@@ -53,9 +77,33 @@ public class AccountController {
             // 判断sessionId是否有效
             if (status.equals(Constants.Status.OK)) {
                 Assert.notNull(loginCheckDto.getLoginUser(),"用户信息不能为空");
-                //校验成功
-                this.loginSuccess(sessionId,loginCheckDto.getLoginUser());
-                return WebUtils.success();
+                // 这里登录成功了，需要获取基本信息
+                // 获得用户的openid，根据openid查询用户的学号
+                // TODO 总之这是判断用户是否是学员的，待修改
+                List<ClassMember> classMembers = courseProgressService.loadActiveCourse(loginCheckDto.getLoginUser().getOpenId());
+                PCLoginUser pcLoginUser = new PCLoginUser();
+                pcLoginUser.setWeixin(loginCheckDto.getLoginUser());
+                pcLoginUser.setOpenId(loginCheckDto.getLoginUser().getOpenId());
+                // 下面的数据返回前端
+                AccountDto accountDto = new AccountDto();
+                accountDto.setWeixin(loginCheckDto.getLoginUser());
+                accountDto.setOpenId(loginCheckDto.getLoginUser().getOpenId());
+                if(classMembers.isEmpty()){
+                    pcLoginUser.setRole("stranger");
+                    accountDto.setRole("stranger");
+                    // 没有正在就读的班级
+                    this.handlerLoginSocket(sessionId,LoginType.PERMISSION_DENIED,accountDto);
+                    return WebUtils.success();
+                } else {
+                    // 缓存起来
+                    pcLoginUser.setRole("student");
+                    accountDto.setRole("student");
+                    // 查询用户的碎片化课程信息
+                    accountDto.setCourse(loadStudentCourse(loginCheckDto.getLoginUser().getOpenId()));
+                    PCLoginUserResolver.login(sessionId,pcLoginUser);
+                    this.handlerLoginSocket(sessionId,LoginType.LOGIN_SUCCESS,accountDto);
+                    return WebUtils.success();
+                }
             } else {
                 // 校验失败,超时的话刷新二维码
                 // TODO 就算校验失败，也应该是能拿到用户信息的
@@ -75,21 +123,90 @@ public class AccountController {
         }
     }
 
-
-    /**
-     *  登录成功
-     * @param sessionId sessionId
-     * @param data 需要发送到页面的数据
-     * @throws IOException
-     */
-    private void loginSuccess(String sessionId, Object data) throws IOException {
-        WebSocketSession session = SessionSocketHandler.getLoginSocket(sessionId);
-        Map<String,Object> map = Maps.newHashMap();
-        map.put("type","LOGIN_SUCCESS");
-        map.put("data",data);
-        session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
-        // 登录成功后链接由谁来关闭？ TODO
+    @RequestMapping("/get")
+    public ResponseEntity<Map<String,Object>> getAccount(PCLoginUser pcLoginUser){
+        AccountDto accountDto = new AccountDto();
+        accountDto.setWeixin(pcLoginUser.getWeixin());
+        accountDto.setOpenId(pcLoginUser.getOpenId());
+        accountDto.setRole("student");
+        // 查询用户的碎片化课程信息
+//        accountDto.setCourse(loadStudentCourse(pcLoginUser.getOpenId()));
+        return WebUtils.result(accountDto);
     }
 
+    /**
+     * 根据openId获取课程信息<br/>
+     * TODO 这里其实初始化用户信息，登录者是学生时才需要
+     * @param openId openId
+     * @return 用户的课程信息
+     */
+    private CourseDto loadStudentCourse(String openId){
+        CourseDto courseDto = new CourseDto();
+        FragmentDto fragmentDto = new FragmentDto();
+        courseDto.setFragment(fragmentDto);
+        List<ProblemList> problemLists = problemService.loadProblems(openId);
+        fragmentDto.setProblemList(problemLists.stream().map(item->{
+            // 循环获取问题
+            Problem problem = problemService.getProblem(item.getProblemId());
+            ProblemDto problemDto = new ProblemDto();
+            problemDto.setId(problem.getId());
+            problemDto.setPic(problem.getPic());
+            problemDto.setProblem(problem.getProblem());
+            problemDto.setStatus(item.getStatus());
+            // 获取所有挑战训练
+            List<ChallengePractice> challengePractices =  practiceService.loadPractice(item.getProblemId());
+            problemDto.setChallengeLis(challengePractices.stream().map(challenge->{
+                ChallengeDto challengeDto = new ChallengeDto();
+                challengeDto.setPic(challenge.getPic());
+                // 用户的挑战训练置空
+                challengeDto.setContent(null);
+                challengeDto.setDescription(null);
+                challengeDto.setId(challenge.getId());
+                challengeDto.setPcurl(challenge.getPcurl());
+                challengeDto.setProblemId(challenge.getProblemId());
+
+                // 查询用户是否完成该挑战，不论哪一个计划
+                challengeDto.setSubmitted(false);
+                List<ChallengeSubmit> submitList = challengeSubmitDao.load(challenge.getId(), openId);
+                for(ChallengeSubmit submit:submitList){
+                    if(submit.getContent()!=null){
+                        challengeDto.setSubmitted(true);
+                        break;
+                    }
+                }
+
+
+                return challengeDto;
+            }).collect(Collectors.toList()));
+            return problemDto;
+        }).collect(Collectors.toList()));
+
+        return courseDto;
+    }
+
+
+    /**
+     * 处理登录信息
+     * @param sessionId sessionId
+     * @param type 处理结果
+     * @param data 发送到前端的数据
+     * @throws IOException IO异常信息
+     */
+    private void handlerLoginSocket(String sessionId,String type, Object data) throws IOException {
+        WebSocketSession session = SessionSocketHandler.getLoginSocket(sessionId);
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("type",type);
+        map.put("data",data);
+        session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
+    }
+
+    /**
+     * 登录处理结果
+     */
+    interface LoginType{
+        String LOGIN_SUCCESS = "LOGIN_SUCCESS";
+        String PERMISSION_DENIED = "PERMISSION_DENIED";
+
+    }
 }
 

@@ -65,4 +65,15 @@ public class WebUtils {
 
         response.sendRedirect(ConfigUtils.adapterDomainName()+"/wx/oauth/auth?callbackUrl="+url);
     }
+
+    public static void login(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        String url = request.getRequestURL().toString();
+        if(!StringUtils.isEmpty(request.getQueryString())){
+            url = url +"?"+request.getQueryString();
+        }
+        url = URLEncoder.encode(url,"UTF-8");
+        // TODO 测试先写本机
+        response.sendRedirect("http://127.0.0.1"+"/login?callbackUrl="+url);
+    }
+
 }
