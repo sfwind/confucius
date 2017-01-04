@@ -324,7 +324,7 @@ public class ChallengeController {
                     .memo(challengeId+"");
             operationLogService.log(operationLog);
             List<ChallengeSubmit> submits = practiceService.getChallengeSubmitList(challengeId)
-                    .stream().filter(item->item.getOpenid().equals(loginUser.getOpenId())).collect(Collectors.toList());
+                    .stream().filter(item->!item.getOpenid().equals(loginUser.getOpenId())).collect(Collectors.toList());
             // 过滤掉自己
             if (submits.isEmpty()) {
                 return WebUtils.result(submits);
