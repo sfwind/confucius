@@ -68,6 +68,7 @@ public class IntroductionController {
                 }
                 courseDtos.add(courseDto);
             }
+            allCourseDto.setMyCourses(courseDtos);
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("服务号")
                     .function("介绍")
