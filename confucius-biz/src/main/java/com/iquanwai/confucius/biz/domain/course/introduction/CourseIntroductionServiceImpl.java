@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.introduction;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.CourseIntroduction;
@@ -40,29 +41,15 @@ public class CourseIntroductionServiceImpl implements CourseIntroductionService 
     public List<CourseIntroduction> loadNotEntryCourses(List<ClassMember> classMemberList) {
         Assert.notNull(classMemberList, "学员信息不能为空");
         List<CourseIntroduction> courseList = loadAll();
-        // 在开放的训练课程中，按照课程最近一次的开启时间，逆序排列（越晚开课的，越在上方）；和导入顺序无关
-        List<CourseIntroduction> tempList = courseList.stream().filter(course -> {
+        return courseList.stream().filter(course -> {
             for (ClassMember classMember : classMemberList) {
                 if (classMember.getCourseId().equals(course.getCourseId())) {
                     return false;
                 }
             }
             return true;
-        }).filter(course -> !course.getHidden()).collect(Collectors.toList());
-        // 根据courseId，查询对应的最大开启时间
-        tempList.sort(new Comparator<CourseIntroduction>() {
-            @Override
-            public int compare(CourseIntroduction leftCourse, CourseIntroduction rightCourse) {
-                try{
-                    long leftUpdateTime = leftCourse.getUpdateTime().getTime();
-                    long rightUpdateTime = rightCourse.getUpdateTime().getTime();
-                    return rightUpdateTime - leftUpdateTime == 0 ? 0 : rightUpdateTime - leftUpdateTime > 0 ? 1 : -1;
-                } catch (NullPointerException e){
-                    logger.error(e.getLocalizedMessage());
-                    return 0;
-                }
-            }
-        });
-        return tempList;
+        }).filter(course -> !course.getHidden())
+                .sorted((left,right)->right.getSequence()-left.getSequence())
+                .collect(Collectors.toList());
     }
 }

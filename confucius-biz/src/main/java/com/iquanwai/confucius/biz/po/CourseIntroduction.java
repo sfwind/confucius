@@ -21,5 +21,5 @@ public class CourseIntroduction {
     private String intro; //文字介绍
     private String introPic; //介绍课程的图片url
     private Boolean hidden; //是否在报名页隐藏（0-否，1-是）
-    private Date updateTime;
+    private Integer sequence; //课程列表页面的排序，越大越靠前
 }
