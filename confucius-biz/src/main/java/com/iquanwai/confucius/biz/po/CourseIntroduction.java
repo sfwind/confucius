@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.po;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created by justin on 16/9/29.
  */
@@ -19,4 +21,5 @@ public class CourseIntroduction {
     private String intro; //文字介绍
     private String introPic; //介绍课程的图片url
     private Boolean hidden; //是否在报名页隐藏（0-否，1-是）
+    private Date updateTime;
 }

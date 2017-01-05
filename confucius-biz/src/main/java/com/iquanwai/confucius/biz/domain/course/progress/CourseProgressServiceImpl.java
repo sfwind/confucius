@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -88,11 +85,26 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public List<ClassMember> loadActiveCourse(String openid) {
         List<ClassMember> classMemberList = classMemberDao.classMember(openid);
 
-        return classMemberList.stream().filter(classMember -> !isOver(classMember))
+        List<ClassMember> tempList =  classMemberList.stream().filter(classMember -> !isOver(classMember))
                 .map(classMember -> {
                     classProgress(classMember);
                     return classMember;
                 }).collect(Collectors.toList());
+        // 在我的训练中，从上到下，按照课程结束时间，顺序排列（越早结束的，越在上方）
+        tempList.sort(new Comparator<ClassMember>() {
+            @Override
+            public int compare(ClassMember classMember1, ClassMember classMember2) {
+                try{
+                    long leftTime = classMember1.getCloseDate().getTime();
+                    long rightTime = classMember2.getCloseDate().getTime();
+                    return leftTime - rightTime == 0 ? 0 : leftTime - rightTime > 0 ? 1 : -1;
+                } catch (NullPointerException e){
+                    logger.error(e.getLocalizedMessage());
+                    return 0;
+                }
+            }
+        });
+        return tempList;
     }
 
     @Override
@@ -131,17 +143,21 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public void classProgress() {
         List<QuanwaiClass> openClass = classDao.loadRunningClass();
         for(QuanwaiClass clazz:openClass){
-            Integer courseId = clazz.getCourseId();
-            //开课天数=今天-开课日期+1
-            int startDay = DateUtils.interval(clazz.getOpenTime())+1;
-            Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
-            if(chapter!=null){
-                Integer sequence = chapter.getSequence();
-                if(sequence==null){
-                    logger.error("{} has no sequence", chapter.getId());
-                }else {
-                    if (!sequence.equals(clazz.getProgress())) {
-                        classDao.progress(clazz.getId(), sequence);
+            Course course = courseDao.load(Course.class, clazz.getId());
+            // 短课程不需要修改progress
+            if(course!=null && course.getType()!=Course.SHORT_COURSE){
+                Integer courseId = clazz.getCourseId();
+                //开课天数=今天-开课日期+1
+                int startDay = DateUtils.interval(clazz.getOpenTime())+1;
+                Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
+                if(chapter!=null){
+                    Integer sequence = chapter.getSequence();
+                    if(sequence==null){
+                        logger.error("{} has no sequence", chapter.getId());
+                    }else {
+                        if (!sequence.equals(clazz.getProgress())) {
+                            classDao.progress(clazz.getId(), sequence);
+                        }
                     }
                 }
             }
