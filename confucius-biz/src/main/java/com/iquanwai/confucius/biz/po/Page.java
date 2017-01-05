@@ -14,4 +14,6 @@ public class Page {
     private Integer sequence;  //章节内顺序
     private String topic; //页标题
     private List<Material> materialList;
+    test
 }
+
