@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.resolver.PCLoginUser;
 import com.iquanwai.confucius.util.WebUtils;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,11 @@ import java.util.List;
 public class PCIndexController {
     @Autowired
     private PlanService planService;
+    @RequestMapping(value = "/pc/static/**")
+    public ModelAndView getStatic(HttpServletRequest request){
+        return pcView(request);
+    }
+
     /**
      * 前往home页面
      */

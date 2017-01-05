@@ -88,6 +88,7 @@
             <mvc:mapping path="/pc/**"/>
             <mvc:mapping path="/account/get"/>
             <mvc:mapping path="/image/upload/**"/>
+            <mvc:exclude-mapping path="/pc/static/**"/>
             <bean class="com.iquanwai.confucius.interceptor.PCHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>
             </bean>
