@@ -68,12 +68,6 @@ public class IntroductionController {
                 }
                 courseDtos.add(courseDto);
             }
-            allCourseDto.setMyCourses(
-                    courseDtos
-                            .stream()
-                            .sorted((left,right)->right.getCourse().getSequence()-left.getCourse().getSequence())
-                            .collect(Collectors.toList())
-            );
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("服务号")
                     .function("介绍")
