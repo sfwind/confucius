@@ -143,7 +143,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public void classProgress() {
         List<QuanwaiClass> openClass = classDao.loadRunningClass();
         for(QuanwaiClass clazz:openClass){
-            Course course = courseDao.load(Course.class, clazz.getId());
+            Course course = courseDao.load(Course.class, clazz.getCourseId());
             // 短课程不需要修改progress
             if(course!=null && course.getType()!=Course.SHORT_COURSE){
                 Integer courseId = clazz.getCourseId();
