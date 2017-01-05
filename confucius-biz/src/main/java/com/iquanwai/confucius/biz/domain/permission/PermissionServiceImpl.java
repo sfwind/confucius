@@ -46,7 +46,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void initPermission() {
         List<Role> roles = roleDao.loadAll(Role.class);
-        logger.error("rolesL{}",roles);
+        logger.error("roles:{}",roles);
         roles.forEach(role->{
             List<Permission> permissions = permissionDao.loadPermissions(role.getId());
             logger.error("perrmission:{}",permissions);
@@ -75,8 +75,6 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public Boolean checkPermission(String role, String uri) {
         List<Authority> permissions = this.loadPermissions(role);
-        logger.error("role:{},uri:{}",role,uri);
-        logger.error("permiss:{}",permissions);
         if(permissions==null){
             return false;
         } else {
