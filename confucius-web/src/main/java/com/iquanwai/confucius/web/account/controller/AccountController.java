@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
@@ -107,18 +108,19 @@ public class AccountController {
             } else {
                 // 校验失败,超时的话刷新二维码
                 // TODO 就算校验失败，也应该是能拿到用户信息的
-                if (Constants.AccountError.TIME_OUT.equals(error)) {
+                if (ErrorConstants.SESSION_TIME_OUT==error) {
                     // 扫二维码超时，通知socket更新
+                    logger.error("刷新二维码,异常码:{}",error);
                     SessionSocketHandler.refreshQRCode(sessionId);
                     return WebUtils.success();
                 } else {
                     // 非超时，单纯校验失败,不做处理
-                    logger.error("异常的校验信息");
+                    logger.error("异常的校验信息,异常码:{}",error);
                     return WebUtils.success();
                 }
             }
         } catch (Exception e){
-            logger.error("error",e);
+            logger.error("pc登陆结果处理error",e);
             return WebUtils.error(e.getLocalizedMessage());
         }
     }

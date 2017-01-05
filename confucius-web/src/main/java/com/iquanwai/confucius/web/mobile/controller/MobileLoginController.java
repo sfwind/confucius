@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.mobile.controller;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.resolver.LoginUser;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class MobileLoginController {
                 Map<String, Object> map = Maps.newHashMap();
                 map.put("sessionId", sessionId);
                 map.put("status", Constants.Status.FAIL);
-                map.put("error", Constants.AccountError.TIME_OUT);
+                map.put("error", ErrorConstants.SESSION_TIME_OUT);
                 String body = restfulHelper.post(CHECK_RESULT_URL, CommonUtils.mapToJson(map));
                 if ("".equals(body)) {
                     // 刷新失败
