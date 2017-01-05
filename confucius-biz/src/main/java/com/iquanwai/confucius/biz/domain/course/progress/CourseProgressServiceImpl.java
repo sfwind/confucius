@@ -89,21 +89,18 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 .map(classMember -> {
                     classProgress(classMember);
                     return classMember;
+                }).sorted((classMember1, classMember2) -> {
+                    // 在我的训练中，从上到下，按照课程结束时间，顺序排列（越早结束的，越在上方）
+                    try {
+                        long leftTime = classMember1.getCloseDate().getTime();
+                        long rightTime = classMember2.getCloseDate().getTime();
+                        return leftTime - rightTime == 0 ? 0 : leftTime - rightTime > 0 ? 1 : -1;
+                    } catch (NullPointerException e) {
+                        logger.error(e.getLocalizedMessage());
+                        return 0;
+                    }
                 }).collect(Collectors.toList());
-        // 在我的训练中，从上到下，按照课程结束时间，顺序排列（越早结束的，越在上方）
-        tempList.sort(new Comparator<ClassMember>() {
-            @Override
-            public int compare(ClassMember classMember1, ClassMember classMember2) {
-                try{
-                    long leftTime = classMember1.getCloseDate().getTime();
-                    long rightTime = classMember2.getCloseDate().getTime();
-                    return leftTime - rightTime == 0 ? 0 : leftTime - rightTime > 0 ? 1 : -1;
-                } catch (NullPointerException e){
-                    logger.error(e.getLocalizedMessage());
-                    return 0;
-                }
-            }
-        });
+
         return tempList;
     }
 
