@@ -80,8 +80,9 @@ public class AccountController {
                 Assert.notNull(loginCheckDto.getLoginUser(),"用户信息不能为空");
                 // 这里登录成功了，需要获取基本信息
                 // 获得用户的openid，根据openid查询用户的学号
-                // TODO 总之这是判断用户是否是学员的，待修改
                 List<ClassMember> classMembers = courseProgressService.loadActiveCourse(loginCheckDto.getLoginUser().getOpenId());
+
+
                 PCLoginUser pcLoginUser = new PCLoginUser();
                 pcLoginUser.setWeixin(loginCheckDto.getLoginUser());
                 pcLoginUser.setOpenId(loginCheckDto.getLoginUser().getOpenId());
