@@ -89,7 +89,7 @@ public class MobileLoginController {
                     // PC端处理结果成功
                     Map<String, Object> result = CommonUtils.jsonToMap(body1);
                     // 解析处理结果
-
+                    logger.info("PC登录校验成功.{}",result);
                     response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result");
                     return;
                 } else {
