@@ -29,9 +29,6 @@ public class PCIndexController {
 
     @RequestMapping(value = "/pc/static/**")
     public ModelAndView getStatic(HttpServletRequest request){
-        // todo  临时，查一下socket和user的缓存数量
-        logger.error("socket size:{}",SessionSocketHandler.count());
-        logger.error("user size:{}", PCLoginUserResolver.count());
         return pcView(request);
     }
 

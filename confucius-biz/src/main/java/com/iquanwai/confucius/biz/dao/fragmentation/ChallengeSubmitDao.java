@@ -108,7 +108,19 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
             return false;
         }
+        return true;
+    }
 
+    public boolean updatePointStatus(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update ChallengeSubmit set PointStatus=1 where Id=?";
+        try {
+
+            runner.update(sql, id);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return false;
+        }
         return true;
     }
 }

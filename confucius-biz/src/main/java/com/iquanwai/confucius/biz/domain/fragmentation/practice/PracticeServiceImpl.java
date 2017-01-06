@@ -195,8 +195,21 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public  Boolean submit(Integer id,String content){
+        ChallengeSubmit submit =  challengeSubmitDao.load(ChallengeSubmit.class,id);
+        if(submit==null){
+            logger.error("submitId {} is not existed", id);
+            return false;
+        }
+
+        if(submit.getPointStatus()==0 && content.length()>50){
+            logger.info("加分:",id);
+            // 未加分并且字数大于50(字母)
+            pointRepo.risePoint(id,PointRepo.CHALLENGE_PRACTICE_SCORE);
+            challengeSubmitDao.updatePointStatus(id);
+        }
         return challengeSubmitDao.answer(id,content);
     }
+
     @Override
     public Boolean submit(String code, String content) {
         String submitUrl = submitUrlPrefix + code;

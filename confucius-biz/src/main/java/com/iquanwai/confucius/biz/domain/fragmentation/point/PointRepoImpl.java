@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.point;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import org.apache.commons.lang3.tuple.ImmutablePair;
