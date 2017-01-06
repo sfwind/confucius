@@ -20,7 +20,7 @@ public class PCLoginUser {
     private LoginUser weixin;
     private List<Role> roles;
     private String role;
-    private Long sleepTime;// 多久没有调用接口了，如果超过两小时则清理掉
+//    private Long sleepTime;// 多久没有调用接口了，如果超过两小时则清理掉
 
     public static PCLoginUser defaultUser(){
         List<Role> roles = Lists.newArrayList();
