@@ -176,15 +176,24 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         return null;
     }
 
-    public void quitClass(String openid, Integer courseId, Integer classId) {
+    //如果用户已报名,订单的classId和预报名课程classId不相同时才退名额。如果用户未报名,则直接退名额
+    public void quitClass(String openid, Integer courseId, Integer orderClassId, Integer entryClassId) {
         CourseClass classes = signupMap.get(openid);
         Integer realClassId = CourseClass.getClassId(classes, courseId);
-        //订单的classId和课程classId相同时才退名额
-        if (classId.equals(realClassId)) {
+        boolean rollbackEntry = false;
+        if(entryClassId!=null) {
+            if (!orderClassId.equals(realClassId)) {
+                rollbackEntry = true;
+            }
+        }else{
+            rollbackEntry = true;
+        }
+
+        if(rollbackEntry){
             synchronized (lock) {
-                Integer remaining = remainingCount.get(classId);
-                remainingCount.put(classId, remaining+1);
-                logger.info("init classId {} has {} quota left", classId, remaining+1);
+                Integer remaining = remainingCount.get(orderClassId);
+                remainingCount.put(orderClassId, remaining + 1);
+                logger.info("init classId {} has {} quota left", orderClassId, remaining + 1);
             }
         }
     }
