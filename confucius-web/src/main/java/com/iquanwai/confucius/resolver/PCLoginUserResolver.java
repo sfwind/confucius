@@ -28,6 +28,10 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         return false;
     }
 
+    public static int count(){
+        return pcLoginUserMap.size();
+    }
+
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         //调试时，返回mock user

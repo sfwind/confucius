@@ -4,8 +4,12 @@ import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.resolver.PCLoginUser;
+import com.iquanwai.confucius.resolver.PCLoginUserResolver;
 import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.account.websocket.SessionSocketHandler;
 import com.sun.org.apache.xpath.internal.operations.Mod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +25,13 @@ import java.util.List;
  */
 @Controller
 public class PCIndexController {
-    @Autowired
-    private PlanService planService;
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @RequestMapping(value = "/pc/static/**")
     public ModelAndView getStatic(HttpServletRequest request){
+        // todo  临时，查一下socket和user的缓存数量
+        logger.error("socket size:{}",SessionSocketHandler.count());
+        logger.error("user size:{}", PCLoginUserResolver.count());
         return pcView(request);
     }
 

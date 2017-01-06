@@ -137,6 +137,7 @@ public class AccountController {
         return WebUtils.result(accountDto);
     }
 
+
     /**
      * 根据openId获取课程信息<br/>
      * TODO 这里其实初始化用户信息，登录者是学生时才需要

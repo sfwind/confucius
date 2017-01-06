@@ -48,6 +48,10 @@ public class SessionSocketHandler implements WebSocketHandler{
      */
     private static final Map<String,WebSocketSession> socketSessionMap = Maps.newConcurrentMap();
 
+    public static Integer count(){
+        return socketSessionMap.size();
+    }
+
     /**
      * 建立链接，将sessionid加入到session缓存里
      * @param session WebSocketSession，socket的会话
@@ -154,6 +158,7 @@ public class SessionSocketHandler implements WebSocketHandler{
 
     /**
      * 从WebSocketSession中获取SessionId
+     * 简单支持一个session多个socket
      * @param session WebSocketSession
      * @return SessionId <br/> 如果没有取到SessionId则返回null
      */
@@ -233,7 +238,6 @@ public class SessionSocketHandler implements WebSocketHandler{
         Map<String,Object> map = Maps.newHashMap();
         map.put("picUrl",picUrl);
         map.put("type","QR_CREATE");
-        // 保持websocket,将salt也存起来
         session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
     }
 
