@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -147,6 +148,10 @@ public class ConfigUtils {
 
 	public static String getValue(String key){
 		return config.getString(key);
+	}
+
+	public static List<Integer> getNeedAngelClasses(){
+		return config.getIntList("class.need.angel");
 	}
 
 	public static String getLoginSalt(){

@@ -69,14 +69,17 @@ public class OperationalServiceImpl implements OperationalService {
     public void angelAssign() {
         //获取明天开班的所有班级
         List<QuanwaiClass> quanwaiClasses = classDao.loadClassByOpenDate(DateUtils.afterDays(new Date(), 1));
-
+        List<Integer> angelClasses = ConfigUtils.getNeedAngelClasses();
         for(QuanwaiClass quanwaiClass:quanwaiClasses){
             Integer courseId = quanwaiClass.getCourseId();
             Course course = courseDao.load(Course.class, courseId);
-            //长课程才有天使活动
-            if(course!=null && course.getType()==Course.LONG_COURSE) {
+            if(course!=null && angelClasses.contains(courseId)){
                 angelAssign(quanwaiClass.getId());
             }
+//            //长课程才有天使活动
+//            if(course!=null && course.getType()==Course.LONG_COURSE) {
+//                angelAssign(quanwaiClass.getId());
+//            }
         }
     }
 
