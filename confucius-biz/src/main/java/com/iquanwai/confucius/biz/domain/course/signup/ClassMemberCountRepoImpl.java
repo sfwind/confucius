@@ -148,15 +148,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
             //轮询所有班级，查看未报满的班级
             if(entryId==null){
                 entryId = preEntry(entryRecord, courseId, openClass);
-            }else{
-                int remainingNumber = remainingCount.get(entryId);
-                // 如果名额已满,不能再报当前班级,需重新查找未报满的班级
-                if(remainingNumber<=0){
-                    CourseClass.removeCourse(entryRecord, courseId);
-                    entryId = preEntry(entryRecord, courseId, openClass);
-                }
             }
-
             //找到未报满的班级，完成预报名
             if(entryId!=null) {
                 return new ImmutablePair<>(1, entryId);
@@ -180,41 +172,33 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         return null;
     }
 
-    //如果用户已报名,订单的classId和预报名课程classId不相同时才退名额。如果用户未报名,则直接退名额
-    public void quitClass(String openid, Integer courseId, Integer orderClassId, Integer entryClassId) {
+    //如果用户未报名,则直接退名额
+    public void quitClass(String openid, Integer courseId, Integer orderClassId) {
         CourseClass classes = signupMap.get(openid);
-        Integer realClassId = CourseClass.getClassId(classes, courseId);
-        boolean rollbackEntry = false;
-        if(entryClassId!=null) {
-            if (!orderClassId.equals(realClassId)) {
-                rollbackEntry = true;
+
+        synchronized (lock) {
+            //名额每人每班只退一次
+            if (returnCountMap.get(openid) != null) {
+                returnCountMap.get(openid).contains(orderClassId);
+                return;
             }
-        }else{
-            rollbackEntry = true;
+            //如果是用户最后一个退单,释放名额
+            int underPaidCount = courseOrderDao.underPaidCount(openid, orderClassId);
+            if (underPaidCount == 0) {
+                Integer remaining = remainingCount.get(orderClassId);
+                remainingCount.put(orderClassId, remaining + 1);
+                logger.info("init classId {} has {} quota left", orderClassId, remaining + 1);
+            }
+            CourseClass.removeCourse(classes, courseId);
+
+            List<Integer> returnClasses = returnCountMap.get(openid);
+            if(returnClasses==null){
+                returnClasses = Lists.newArrayList();
+                returnCountMap.put(openid, returnClasses);
+            }
+            returnClasses.add(orderClassId);
         }
 
-        if(rollbackEntry) {
-            synchronized (lock) {
-                //名额每人每班只退一次
-                if (returnCountMap.get(openid) != null) {
-                    returnCountMap.get(openid).contains(orderClassId);
-                    return;
-                }
-                //如果是用户最后一个退单,释放名额
-                int underPaidCount = courseOrderDao.underPaidCount(openid, orderClassId);
-                if (underPaidCount == 0) {
-                    Integer remaining = remainingCount.get(orderClassId);
-                    remainingCount.put(orderClassId, remaining + 1);
-                    logger.info("init classId {} has {} quota left", orderClassId, remaining + 1);
-                }
-                List<Integer> returnClasses = returnCountMap.get(openid);
-                if(returnClasses==null){
-                    returnClasses = Lists.newArrayList();
-                    returnCountMap.put(openid, returnClasses);
-                }
-                returnClasses.add(orderClassId);
-            }
-        }
     }
 
     @Data

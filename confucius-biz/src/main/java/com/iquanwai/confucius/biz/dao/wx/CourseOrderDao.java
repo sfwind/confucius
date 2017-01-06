@@ -155,10 +155,9 @@ public class CourseOrderDao extends DBUtil{
 
     public void closeOrder(String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE CourseOrder SET Status=2 " +
+            run.update("UPDATE CourseOrder SET Status=2 " +
                     "where OrderId=?", orderId);
 
         } catch (SQLException e) {

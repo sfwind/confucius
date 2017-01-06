@@ -243,9 +243,11 @@ public class SignupServiceImpl implements SignupService {
         //从待付款中去掉
         payList.remove(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()));
         ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getOpenid());
-
-        classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId(),
-                    courseOrder.getClassId(), classMember==null?null:classMember.getClassId());
+        //未付款时退还名额
+        if(classMember==null) {
+            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId(),
+                    courseOrder.getClassId());
+        }
     }
 
     public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {
