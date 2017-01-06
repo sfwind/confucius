@@ -100,7 +100,7 @@ public class ProblemController {
     private RedirectRouteDto getFragmentRoute(String pathName,Integer cid,Integer planId){
         RedirectRouteDto route = new RedirectRouteDto();
         route.setPathName(pathName);
-        if(cid!=null && planId!=null){
+        if(cid!=null || planId!=null){
             Map<String,Object> map = Maps.newHashMap();
             if(cid!=null){
                 map.put("cid",cid);

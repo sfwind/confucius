@@ -160,8 +160,9 @@ public class SessionSocketHandler implements WebSocketHandler{
     private String getSessionId(WebSocketSession session){
         Object sessionId =  session.getAttributes().get("HTTP.SESSION.ID");
         if(sessionId!=null){
-            return sessionId.toString();
+            return sessionId.toString() +"..."+ session.getId();
         } else {
+
             return null;
         }
     }

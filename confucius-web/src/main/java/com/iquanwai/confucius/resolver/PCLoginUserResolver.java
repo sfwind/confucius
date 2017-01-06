@@ -49,11 +49,12 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
 
     /**
      * 登录，就是缓存起来
-     * @param sessionId sessionId
+     * @param sessionId sessionId,这个sessionIds是三个点拼起来的
      * @param pcLoginUser 用户
      */
     public static void login(String sessionId, PCLoginUser pcLoginUser) {
-        pcLoginUserMap.put(sessionId, pcLoginUser);
+        String[] list = sessionId.split("\\.\\.\\.");
+        pcLoginUserMap.put(list[0], pcLoginUser);
     }
 
     /**
