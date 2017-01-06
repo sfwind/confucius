@@ -176,27 +176,28 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     public void quitClass(String openid, Integer courseId, Integer orderClassId) {
         CourseClass classes = signupMap.get(openid);
 
-        synchronized (lock) {
-            //名额每人每班只退一次
-            if (returnCountMap.get(openid) != null) {
-                returnCountMap.get(openid).contains(orderClassId);
-                return;
-            }
-            //如果是用户最后一个退单,释放名额
-            int underPaidCount = courseOrderDao.underPaidCount(openid, orderClassId);
-            if (underPaidCount == 0) {
+        //如果是用户最后一个退单,释放名额
+        int underPaidCount = courseOrderDao.underPaidCount(openid, orderClassId);
+        if (underPaidCount == 0) {
+            synchronized (lock) {
+                //名额每人每班只退一次
+                if (returnCountMap.get(openid) != null) {
+                    returnCountMap.get(openid).contains(orderClassId);
+                    return;
+                }
+
                 Integer remaining = remainingCount.get(orderClassId);
                 remainingCount.put(orderClassId, remaining + 1);
                 logger.info("init classId {} has {} quota left", orderClassId, remaining + 1);
+                CourseClass.removeCourse(classes, courseId);
+                //增加退班记录
+                List<Integer> returnClasses = returnCountMap.get(openid);
+                if(returnClasses==null){
+                    returnClasses = Lists.newArrayList();
+                    returnCountMap.put(openid, returnClasses);
+                }
+                returnClasses.add(orderClassId);
             }
-            CourseClass.removeCourse(classes, courseId);
-
-            List<Integer> returnClasses = returnCountMap.get(openid);
-            if(returnClasses==null){
-                returnClasses = Lists.newArrayList();
-                returnCountMap.put(openid, returnClasses);
-            }
-            returnClasses.add(orderClassId);
         }
 
     }
