@@ -245,7 +245,7 @@ public class SignupServiceImpl implements SignupService {
         ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getOpenid());
         //已经报名成功的学员不需要退班
         if(classMember==null) {
-            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getClassId());
+            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId(), courseOrder.getClassId());
         }
     }
 
