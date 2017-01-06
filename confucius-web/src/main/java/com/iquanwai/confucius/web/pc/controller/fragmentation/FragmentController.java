@@ -22,8 +22,11 @@ import com.iquanwai.confucius.web.pc.dto.RedirectRouteDto;
 import okhttp3.Route;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +45,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/pc/fragment")
 public class FragmentController {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
@@ -53,55 +57,62 @@ public class FragmentController {
 
     @RequestMapping("/page")
     public ResponseEntity<Map<String, Object>> loadFragmentPage(PCLoginUser pcLoginUser) {
-        // 这里检查一遍是否付费
-        // 进入fragmentpage
-        /**
-         * 1.加载所有挑战作业
-         * 2.查出用户正在进行的训练计划
-         * 3.根据训练计划id查询挑战任务
-         */
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                .module("PC")
-                .function("碎片化")
-                .action("进入碎片化页面")
-                .memo(null);
-        operationLogService.log(operationLog);
+        try {
+            Assert.notNull(pcLoginUser, "用户不能为空");
+            // 这里检查一遍是否付费
+            // 进入fragmentpage
+            /**
+             * 1.加载所有挑战作业
+             * 2.查出用户正在进行的训练计划
+             * 3.根据训练计划id查询挑战任务
+             */
+            OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                    .module("PC")
+                    .function("碎片化")
+                    .action("进入碎片化页面")
+                    .memo(null);
+            operationLogService.log(operationLog);
 
-        // 加载所有问题
-        List<Problem> problems = problemService.loadProblems();
-        List<ProblemDto> problemDtos = Lists.newArrayList();
-        // 初始化问题list
-        problemDtos.addAll(problems.stream().map(problem -> {
-            ProblemDto problemDto = new ProblemDto();
-            problemDto.setId(problem.getId());
-            problemDto.setPic(problem.getPic());
-            problemDto.setProblem(problem.getProblem());
-            return problemDto;
-        }).collect(Collectors.toList()));
-        // 获取用户已经付过钱的计划
-        List<ImprovementPlan> improvementPlans = planService.loadUserPlans(pcLoginUser.getOpenId());
-        Map<Integer, Integer> paiedPlan = Maps.newHashMap();
-        // 记录问题对应的status
-        improvementPlans.forEach(item -> {
-            paiedPlan.put(item.getProblemId(), item.getStatus());
-        });
-        problemDtos.forEach(item -> {
-            item.setPay(paiedPlan.containsKey(item.getId()));
-            item.setStatus(paiedPlan.get(item.getId()));
-        });
-        Integer doingId = null;
-        for (Map.Entry<Integer, Integer> pair : paiedPlan.entrySet()) {
-            if (pair.getValue() == 1) {
-                doingId = pair.getKey();
+            // 加载所有问题
+            List<Problem> problems = problemService.loadProblems();
+            List<ProblemDto> problemDtos = Lists.newArrayList();
+            // 初始化问题list
+            problemDtos.addAll(problems.stream().map(problem -> {
+                ProblemDto problemDto = new ProblemDto();
+                problemDto.setId(problem.getId());
+                problemDto.setPic(problem.getPic());
+                problemDto.setProblem(problem.getProblem());
+                return problemDto;
+            }).collect(Collectors.toList()));
+            // 获取用户已经付过钱的计划
+            List<ImprovementPlan> improvementPlans = planService.loadUserPlans(pcLoginUser.getOpenId());
+            Map<Integer, Integer> paiedPlan = Maps.newHashMap();
+            // 记录问题对应的status
+            improvementPlans.forEach(item -> {
+                paiedPlan.put(item.getProblemId(), item.getStatus());
+            });
+            problemDtos.forEach(item -> {
+                item.setPay(paiedPlan.containsKey(item.getId()));
+                item.setStatus(paiedPlan.get(item.getId()));
+            });
+            Integer doingId = null;
+            for (Map.Entry<Integer, Integer> pair : paiedPlan.entrySet()) {
+                if (pair.getValue() == 1) {
+                    doingId = pair.getKey();
+                }
             }
+
+            // 如果没有正在进行的，就取第一个
+            doingId = doingId == null ? problemDtos.get(0).getId() : doingId;
+            FragmentPageDto fragmentPageDto = new FragmentPageDto();
+            fragmentPageDto.setProblemList(problemDtos);
+            fragmentPageDto.setDoingId(doingId);
+            return WebUtils.result(fragmentPageDto);
+        } catch (Exception e) {
+            logger.error("pc加载碎片化页面失败", e.getLocalizedMessage());
+            return WebUtils.error("加载失败");
         }
 
-        // 如果没有正在进行的，就取第一个
-        doingId = doingId == null ? problemDtos.get(0).getId() : doingId;
-        FragmentPageDto fragmentPageDto = new FragmentPageDto();
-        fragmentPageDto.setProblemList(problemDtos);
-        fragmentPageDto.setDoingId(doingId);
-        return WebUtils.result(fragmentPageDto);
     }
 
     /**
@@ -137,20 +148,20 @@ public class FragmentController {
                 }
             } else {
                 // 没有正在进行的任务,找到一个用户提交过的
-                for(ImprovementPlan plan:plans){
+                for (ImprovementPlan plan : plans) {
                     // 获取所有challenge
                     List<ChallengePractice> cList = practiceService.getChallengePracticesByProblem(plan.getProblemId());
                     List<ChallengePractice> sList = cList.stream()
                             .map(item -> practiceService.getChallengePracticeNoCreate(item.getId(), openId, plan.getId()))
                             .filter(ChallengePractice::getSubmitted)
                             .collect(Collectors.toList());
-                    if(!sList.isEmpty()){
+                    if (!sList.isEmpty()) {
                         // 找到了,做完的
                         ChallengePractice mySubmitted = sList.get(0);
                         RedirectRouteDto route = new RedirectRouteDto();
                         route.setPathName("/fragment/c/list");
-                        Map<String,Object> params = Maps.newHashMap();
-                        params.put("cid",mySubmitted.getId());
+                        Map<String, Object> params = Maps.newHashMap();
+                        params.put("cid", mySubmitted.getId());
                         route.setQuery(params);
                         return WebUtils.result(route);
                     }
@@ -161,13 +172,11 @@ public class FragmentController {
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         Pattern pattern = Pattern.compile("/pc/fragment/.*");
-        System.out.print( pattern.matcher("/pc/fragment/test/gg?33ff=f").matches());
+        System.out.print(pattern.matcher("/pc/fragment/test/gg?33ff=f").matches());
 
     }
-
-
 
 
     /**

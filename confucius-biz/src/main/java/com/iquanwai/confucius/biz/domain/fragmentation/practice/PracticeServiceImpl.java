@@ -116,29 +116,16 @@ public class PracticeServiceImpl implements PracticeService {
         }
         //生成挑战训练提交记录
         if (submit == null) {
-            String url = submitUrlPrefix + CommonUtils.randomString(6);
-            String shortUrl = generateShortUrl(ConfigUtils.domainName() + url);
-            challengePractice.setPcurl(shortUrl);
             submit = new ChallengeSubmit();
             submit.setOpenid(openid);
             submit.setPlanId(planId);
-            submit.setSubmitUrl(url);
             submit.setChallengeId(id);
             int submitId = -1;
-            if (shortUrl.equals(ConfigUtils.domainName() + url)) {
-                submitId = challengeSubmitDao.insert(submit);
-            } else {
-                submit.setShortUrl(shortUrl);
-                submitId = challengeSubmitDao.insert(submit);
-            }
+            submitId = challengeSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
         } else {
-            if (submit.getSubmitUrl() != null) {
-                challengePractice.setPcurl(submit.getShortUrl());
-            }
             challengePractice.setContent(submit.getContent());
-            challengePractice.setSubmitUrl(submit.getSubmitUrl());
             challengePractice.setSubmitId(submit.getId());
             challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
         }
@@ -206,6 +193,10 @@ public class PracticeServiceImpl implements PracticeService {
         }
     }
 
+    @Override
+    public  Boolean submit(Integer id,String content){
+        return challengeSubmitDao.answer(id,content);
+    }
     @Override
     public Boolean submit(String code, String content) {
         String submitUrl = submitUrlPrefix + code;

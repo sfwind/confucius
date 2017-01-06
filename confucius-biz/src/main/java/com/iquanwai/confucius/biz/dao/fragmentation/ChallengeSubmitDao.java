@@ -27,14 +27,12 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
 
     public int insert(ChallengeSubmit challengeSubmit){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into ChallengeSubmit(Openid, ChallengeId, PlanId, " +
-                "SubmitUrl, ShortUrl) " +
-                "values(?,?,?,?,?)";
+        String sql = "insert into ChallengeSubmit(Openid, ChallengeId, PlanId) " +
+                "values(?,?,?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
                     challengeSubmit.getOpenid(), challengeSubmit.getChallengeId(),
-                    challengeSubmit.getPlanId(),
-                    challengeSubmit.getSubmitUrl(), challengeSubmit.getShortUrl());
+                    challengeSubmit.getPlanId());
             return insertRs.intValue();
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

@@ -42,6 +42,8 @@ public interface PracticeService {
 
     ChallengePractice getChallenge(Integer id);
 
+    Boolean submit(Integer id, String content);
+
     /**
      * 提交挑战训练
      * @param code 随机码

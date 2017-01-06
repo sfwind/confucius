@@ -15,8 +15,6 @@ import java.util.Map;
  * Created by nethunder on 2016/12/23.
  */
 public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
-
-
     /**
      * 缓存已经登录的用户
      */

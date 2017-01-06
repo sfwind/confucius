@@ -3,14 +3,12 @@ package com.iquanwai.confucius.web.account.controller;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.biz.po.fragmentation.ProblemList;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.resolver.PCLoginUser;
@@ -54,6 +52,8 @@ public class AccountController {
     private PracticeService practiceService;
     @Autowired
     private ChallengeSubmitDao challengeSubmitDao;
+    @Autowired
+    private PlanService planService;
 
     /**
      * mobile扫描二维码结果
@@ -81,8 +81,7 @@ public class AccountController {
                 // 这里登录成功了，需要获取基本信息
                 // 获得用户的openid，根据openid查询用户的学号
                 List<ClassMember> classMembers = courseProgressService.loadActiveCourse(loginCheckDto.getLoginUser().getOpenId());
-
-
+                List<ImprovementPlan> plans = planService.loadUserPlans(loginCheckDto.getLoginUser().getOpenId());
                 PCLoginUser pcLoginUser = new PCLoginUser();
                 pcLoginUser.setWeixin(loginCheckDto.getLoginUser());
                 pcLoginUser.setOpenId(loginCheckDto.getLoginUser().getOpenId());
@@ -90,7 +89,7 @@ public class AccountController {
                 AccountDto accountDto = new AccountDto();
                 accountDto.setWeixin(loginCheckDto.getLoginUser());
                 accountDto.setOpenId(loginCheckDto.getLoginUser().getOpenId());
-                if(classMembers.isEmpty()){
+                if(classMembers.isEmpty() && plans.isEmpty()){
                     pcLoginUser.setRole("stranger");
                     accountDto.setRole("stranger");
                     // 没有正在就读的班级
@@ -100,8 +99,9 @@ public class AccountController {
                     // 缓存起来
                     pcLoginUser.setRole("student");
                     accountDto.setRole("student");
+                    // 只查询用户信息
                     // 查询用户的碎片化课程信息
-                    accountDto.setCourse(loadStudentCourse(loginCheckDto.getLoginUser().getOpenId()));
+//                    accountDto.setCourse(loadStudentCourse(loginCheckDto.getLoginUser().getOpenId()));
                     PCLoginUserResolver.login(sessionId,pcLoginUser);
                     this.handlerLoginSocket(sessionId,LoginType.LOGIN_SUCCESS,accountDto);
                     return WebUtils.success();

@@ -12,6 +12,7 @@ import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.pc.dto.RedirectRouteDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,38 +77,39 @@ public class ProblemController {
                     ChallengePractice myChallenge = practiceService.getChallengePractice(challenge.getId(), openId, plan.getId());
                     if (myChallenge.getSubmitted()) {
                         // 已提交，进入列表页
-                        route.setPathName("/fragment/c/list");
-                        Map<String,Object> params = Maps.newHashMap();
-                        params.put("cid",myChallenge.getId());
-                        route.setQuery(params);
-                        return WebUtils.result(route);
+                        return WebUtils.result(getFragmentRoute("/fragment/c/list",myChallenge.getId(),null));
                     } else {
                         // 未提交，进入doing页面
-                        route.setPathName("/fragment/c");
-                        Map<String, Object> params = Maps.newHashMap();
-                        params.put("cid", challenge.getId());
-                        params.put("planId", plan.getId());
-                        route.setQuery(params);
-                        return WebUtils.result(route);
+                        return WebUtils.result(getFragmentRoute("/fragment/c",challenge.getId(),plan.getId()));
                     }
                 } else {
                     // 不是正在做的，获取挑战任务
                     ChallengePractice myChallenge = practiceService.getChallengePracticeNoCreate(challenge.getId(), openId, plan.getId());
                     if (myChallenge.getSubmitted()) {
                         // 已提交，进入列表页
-                        route.setPathName("/fragment/c/list");
-                        Map<String,Object> params = Maps.newHashMap();
-                        params.put("cid",myChallenge.getId());
-                        route.setQuery(params);
-                        return WebUtils.result(route);
+                        return WebUtils.result(getFragmentRoute("/fragment/c/list",myChallenge.getId(),null));
                     } else {
                         // 未提交，进入doing页面,提示无法查看
-                        route.setPathName("/servercode");
-                        return WebUtils.result(route);
+                        return WebUtils.result(getFragmentRoute("/servercode",null,null));
                     }
                 }
             }
         }
     }
 
+    private RedirectRouteDto getFragmentRoute(String pathName,Integer cid,Integer planId){
+        RedirectRouteDto route = new RedirectRouteDto();
+        route.setPathName(pathName);
+        if(cid!=null && planId!=null){
+            Map<String,Object> map = Maps.newHashMap();
+            if(cid!=null){
+                map.put("cid",cid);
+            }
+            if(planId!=null){
+                map.put("planId",planId);
+            }
+            route.setQuery(map);
+        }
+        return route;
+    }
 }

@@ -56,6 +56,7 @@ public class SessionSocketHandler implements WebSocketHandler{
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         try {
+            // 建立握手
             String sessionId = this.getSessionId(session);
             if (sessionId == null) {
                 logger.error("error 无法获得sessionid");
@@ -66,16 +67,16 @@ public class SessionSocketHandler implements WebSocketHandler{
                 session.close();
                 return;
             }
-            WebSocketSession oldSocket = getLoginSocket(sessionId);
-            if (oldSocket != null) {
-                // 这里保证一个sessionid只能对应一个Socket
-                Map<String, Object> errorMap = Maps.newHashMap();
-                errorMap.put("type", "ERROR");
-                errorMap.put("msg", "您已经打开登录页面，请不要重复打开哦");
-                session.sendMessage(new TextMessage(CommonUtils.mapToJson(errorMap)));
-                session.close();
-                return;
-            }
+//            WebSocketSession oldSocket = getLoginSocket(sessionId);
+//            if (oldSocket != null) {
+//                // 已经加载过socketId了
+//                Map<String, Object> errorMap = Maps.newHashMap();
+//                errorMap.put("type", "ERROR");
+//                errorMap.put("msg", "您已经打开登录页面，请不要重复打开哦");
+//                session.sendMessage(new TextMessage(CommonUtils.mapToJson(errorMap)));
+//                session.close();
+//                return;
+//            }
             // 生成二维码
             String picUrl = createLoginCode(sessionId);
             Map<String, Object> map = Maps.newHashMap();
@@ -126,12 +127,6 @@ public class SessionSocketHandler implements WebSocketHandler{
         }
     }
 
-    /**
-     * TODO
-     * @param session
-     * @param exception
-     * @throws Exception
-     */
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         session.close();
@@ -140,9 +135,6 @@ public class SessionSocketHandler implements WebSocketHandler{
 
     /**
      * websocket断掉之后不应该删掉httpsession
-     * @param session
-     * @param closeStatus
-     * @throws Exception
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
@@ -201,16 +193,16 @@ public class SessionSocketHandler implements WebSocketHandler{
     /**
      * 从WebSocket换从中删掉<br/>
      * 如果socket的id和缓存的id不是同一个，则关闭的不是缓存的id
-     * TODO 这里存在问题，如果它关闭链接之前故意将cookie删掉，这里会获取不到sessionid<br/>
+     * TODO 这里存在问题，如果它关闭链接之前将cookie删掉，这里会获取不到sessionid<br/>
      * TODO 需要加上一个定时任务，定时的去扫描缓存，将已经关闭的socket缓存移除
      * @param session WebSocketSession
      */
     private void removeSocketSession(WebSocketSession session){
         String sessionId = this.getSessionId(session);
-        WebSocketSession oldSocket = getLoginSocket(sessionId);
-        if (sessionId != null && oldSocket != null) {
+        WebSocketSession curSocket = getLoginSocket(sessionId);
+        if (sessionId != null && curSocket != null) {
             // 临时变量，用来与老socket做比较
-            if (oldSocket.equals(session)) {
+            if (curSocket.equals(session)) {
                 // 如果关掉的这个socket就是老的，则将它从map中移除
                 socketSessionMap.remove(sessionId);
             }
