@@ -81,7 +81,6 @@ public class PCIndexController {
         }else{
             mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
         }
-        mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
         return mav;
     }
 
