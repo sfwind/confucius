@@ -48,7 +48,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     private Map<Integer, Integer> remainingCount = Maps.newConcurrentMap();
 
     /**
-     * 每个班级的剩余人数
+     * 每个人的退名额记录
      * */
     private Map<String, List<Integer>> returnCountMap = Maps.newConcurrentMap();
     /**
