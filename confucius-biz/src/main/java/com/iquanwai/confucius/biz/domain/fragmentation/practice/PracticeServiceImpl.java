@@ -200,14 +200,18 @@ public class PracticeServiceImpl implements PracticeService {
             logger.error("submitId {} is not existed", id);
             return false;
         }
-
-        if(submit.getPointStatus()==0 && content.length()>50){
+        boolean result = challengeSubmitDao.answer(id,content);;
+        if(result && submit.getPointStatus()==0 && content.length()>50){
             logger.info("加分:",id);
             // 未加分并且字数大于50(字母)
-            pointRepo.risePoint(id,PointRepo.CHALLENGE_PRACTICE_SCORE);
+            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
+                    submit.getChallengeId(), PracticePlan.CHALLENGE);
+            if (practicePlan != null) {
+                pointRepo.risePoint(submit.getPlanId(), PointRepo.CHALLENGE_PRACTICE_SCORE);
+            }
             challengeSubmitDao.updatePointStatus(id);
         }
-        return challengeSubmitDao.answer(id,content);
+        return result;
     }
 
     @Override
@@ -219,15 +223,15 @@ public class PracticeServiceImpl implements PracticeService {
             return false;
         }
         boolean result = challengeSubmitDao.answer(challengeSubmit.getId(), content);
-//        if (result) {
-//            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(challengeSubmit.getPlanId(),
-//                    challengeSubmit.getChallengeId(), PracticePlan.CHALLENGE);
-//            if (practicePlan != null && practicePlan.getStatus() == 0) {
-//                practicePlanDao.complete(practicePlan.getId());
-//                improvementPlanDao.updateComplete(challengeSubmit.getPlanId());
-//                pointRepo.risePoint(challengeSubmit.getPlanId(), PointRepo.CHALLENGE_PRACTICE_SCORE);
-//            }
-//        }
+        if (result) {
+            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(challengeSubmit.getPlanId(),
+                    challengeSubmit.getChallengeId(), PracticePlan.CHALLENGE);
+            if (practicePlan != null && practicePlan.getStatus() == 0) {
+                practicePlanDao.complete(practicePlan.getId());
+                improvementPlanDao.updateComplete(challengeSubmit.getPlanId());
+                pointRepo.risePoint(challengeSubmit.getPlanId(), PointRepo.CHALLENGE_PRACTICE_SCORE);
+            }
+        }
         return result;
     }
 
