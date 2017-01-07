@@ -48,7 +48,12 @@ public class MobileLoginController {
         try {
             if(loginUser==null){
                 logger.error("扫码登录失败，用户信息不能为空");
-                response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error?err=获取信息失败，请重试");
+                Map<String, Object> map = Maps.newHashMap();
+                map.put("sessionId", sessionId);
+                map.put("status", Constants.Status.FAIL);
+                map.put("error", ErrorConstants.NOT_FOLLOW);
+                String body = restfulHelper.post(CHECK_RESULT_URL, CommonUtils.mapToJson(map));
+                response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=您还为关注公众号");
                 return;
             }
             // 校验是否过期
@@ -64,10 +69,10 @@ public class MobileLoginController {
                 if ("".equals(body)) {
                     // 刷新失败
                     logger.error("刷新验证码失败");
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error?err=刷新验证码失败,请手动刷新PC页面");
+                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=刷新验证码失败,请手动刷新PC页面");
                     return;
                 } else {
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/error?err=二维码超时，已自动刷新，请重新扫描");
+                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=二维码超时，已自动刷新，请重新扫描");
                     return;
 
                 }

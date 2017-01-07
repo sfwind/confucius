@@ -27,5 +27,7 @@ public class ErrorConstants {
 
     // 登陆逻辑错误码
     public static final int SESSION_TIME_OUT = 10001;
+    // 未关注公众号
+    public static final int NOT_FOLLOW = 10002;
 
 }

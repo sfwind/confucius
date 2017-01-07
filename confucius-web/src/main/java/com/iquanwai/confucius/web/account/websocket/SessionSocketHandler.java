@@ -239,6 +239,13 @@ public class SessionSocketHandler implements WebSocketHandler{
         session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
     }
 
+    public static void jumpServerCode(String sessionId) throws IOException {
+        WebSocketSession session = SessionSocketHandler.getLoginSocket(sessionId);
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("type","NOT_FOLLOW");
+        session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
+    }
+
 
     /**
      * 根据SessionId生成二维码链接,返回二维码地址
