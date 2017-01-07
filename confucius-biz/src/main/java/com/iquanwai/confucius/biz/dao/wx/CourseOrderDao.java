@@ -84,13 +84,13 @@ public class CourseOrderDao extends DBUtil{
         return Lists.newArrayList();
     }
 
-    public int paidCount(Integer classId){
+    public int underPaidCount(String openid, Integer classId){
         QueryRunner run = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();
 
         try {
-            Long count = run.query("SELECT count(*) FROM CourseOrder where ClassId=? and Status=1",
-                    h, classId);
+            Long count = run.query("SELECT count(*) FROM CourseOrder where Openid=? and ClassId=? and Status=0",
+                    h, openid, classId);
             return count.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -155,10 +155,9 @@ public class CourseOrderDao extends DBUtil{
 
     public void closeOrder(String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE CourseOrder SET Status=2 " +
+            run.update("UPDATE CourseOrder SET Status=2 " +
                     "where OrderId=?", orderId);
 
         } catch (SQLException e) {

@@ -141,8 +141,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             logger.error("openid {} is invalid", openid);
             return content;
         }
-        //去除“[表情]”文字
-        account.setNickname(account.getNickname().replaceAll("[表情]", ""));
 
         String json = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd")

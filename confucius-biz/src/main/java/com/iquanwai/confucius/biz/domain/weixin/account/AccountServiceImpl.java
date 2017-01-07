@@ -61,28 +61,26 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         Account accountNew = new Account();
         try {
-            ConvertUtils.register(new Converter() {
-                public Object convert(Class aClass, Object value) {
-                    if (value == null)
-                        return null;
+            ConvertUtils.register((aClass, value) -> {
+                if (value == null)
+                    return null;
 
-                    if (!(value instanceof Double)) {
-                        logger.error("不是日期类型");
-                        throw new ConversionException("不是日期类型");
-                    }
-                    Double time = (Double) value * 1000;
-
-                    return new DateTime(time.longValue()).toDate();
+                if (!(value instanceof Double)) {
+                    logger.error("不是日期类型");
+                    throw new ConversionException("不是日期类型");
                 }
+                Double time = (Double) value * 1000;
+
+                return new DateTime(time.longValue()).toDate();
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            //去除昵称里的表情
-            accountNew.setNickname(accountNew.getNickname());
             if(account==null) {
                 followUserDao.insert(accountNew);
             }else{
-                followUserDao.updateMeta(accountNew);
+                if(account.getNickname()!=null) {
+                    followUserDao.updateMeta(accountNew);
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

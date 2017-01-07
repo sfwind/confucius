@@ -76,7 +76,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     private LoginUser getLoginUser(String openId) {
         Account account = accountService.getAccount(openId, false);
 
-        if(account==null){
+        if(account==null || account.getNickname()==null){
             logger.error("openId {} is not found in db", openId);
             return null;
         }
