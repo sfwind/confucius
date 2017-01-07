@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.util;
 
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -17,6 +19,8 @@ import java.util.Map;
  * Created by justin on 7/23/15.
  */
 public class WebUtils {
+    private static Logger logger = LoggerFactory.getLogger(WebUtils.class);
+
     public static ResponseEntity<Map<String, Object>> success() {
         Map<String, Object> json = new HashMap<String, Object>();
         json.put("code", 200);
@@ -104,6 +108,8 @@ public class WebUtils {
      * 移动端跳转
      */
     public static void mobileRedirect(HttpServletResponse response,String url) throws Exception {
-        response.sendRedirect(URLEncoder.encode(ConfigUtils.adapterDomainName() + url, "UTF-8"));
+        String encodeUrl = URLEncoder.encode(ConfigUtils.adapterDomainName() + url, "UTF-8");
+        logger.error("encode,{}",encodeUrl);
+        response.sendRedirect(encodeUrl);
     }
 }
