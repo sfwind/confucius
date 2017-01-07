@@ -94,8 +94,6 @@ public class AccountController {
                     pcLoginUser.setRole("student");
                     accountDto.setRole("student");
                     // 只查询用户信息
-                    // 查询用户的碎片化课程信息
-//                    accountDto.setCourse(loadStudentCourse(loginCheckDto.getLoginUser().getOpenId()));
                     PCLoginUserResolver.login(sessionId,pcLoginUser);
                     this.handlerLoginSocket(sessionId,LoginType.LOGIN_SUCCESS,accountDto);
                     return WebUtils.success();
