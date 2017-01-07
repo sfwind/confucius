@@ -46,7 +46,7 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         }
         String pcToken = request.getRequestedSessionId();
         if (pcLoginUserMap.containsKey(pcToken)) {
-            return pcLoginUserMap.get(pcToken);
+            return pcLoginUserMap.get(pcToken).get();
         }
         // 只能从缓存中获得用户信息，只有一个登录入口
         return null;
