@@ -126,8 +126,6 @@ public class AccountController {
         accountDto.setWeixin(pcLoginUser.getWeixin());
         accountDto.setOpenId(pcLoginUser.getOpenId());
         accountDto.setRole("student");
-        // 查询用户的碎片化课程信息
-//        accountDto.setCourse(loadStudentCourse(pcLoginUser.getOpenId()));
         return WebUtils.result(accountDto);
     }
 
