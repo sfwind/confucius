@@ -72,8 +72,7 @@ public class WebUtils {
             url = url +"?"+request.getQueryString();
         }
         url = URLEncoder.encode(url,"UTF-8");
-        // TODO 测试先写本机
-        response.sendRedirect("http://127.0.0.1"+"/login?callbackUrl="+url);
+        response.sendRedirect(ConfigUtils.adapterDomainName()+"/login?callbackUrl="+url);
     }
 
 }
