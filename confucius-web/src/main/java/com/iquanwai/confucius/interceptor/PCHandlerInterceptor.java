@@ -38,11 +38,7 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
             String value = request.getRequestedSessionId();
             // 没有session信息
             if (StringUtils.isEmpty(value) || !PCLoginUserResolver.isLogin(value)) {
-                Map<String, Object> map = Maps.newHashMap();
-                PrintWriter out = response.getWriter();
-                map.put("code", 401);
-                map.put("msg", "没有登录");
-                out.write(CommonUtils.mapToJson(map));
+                WebUtils.login(request, response);
                 return false;
             }
 
@@ -51,11 +47,7 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
             String role = pcLoginUser.getRole();
             // 根据role查询所有权限列表
             if (!permissionService.checkPermission(role, request.getRequestURI())) {
-                PrintWriter out = response.getWriter();
-                Map<String, Object> map = Maps.newHashMap();
-                map.put("code", 403);
-                map.put("msg", "没有该权限");
-                out.write(CommonUtils.mapToJson(map));
+                WebUtils.reject(request,response);
                 return false;
             }
         }

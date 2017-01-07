@@ -20,6 +20,7 @@ public class PCLoginUser {
     private LoginUser weixin;
     private List<Role> roles;
     private String role;
+    // TODO 权限改为用户组，加入过时
 //    private Long sleepTime;// 多久没有调用接口了，如果超过两小时则清理掉
 
     public static PCLoginUser defaultUser(){

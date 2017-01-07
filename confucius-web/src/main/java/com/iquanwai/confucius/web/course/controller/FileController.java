@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,6 +55,7 @@ public class FileController {
                                                            PCLoginUser pcLoginUser
     ) {
         try {
+            Assert.notNull(pcLoginUser,"用户不能为空");
             if (moduleId != null && file != null && !file.isEmpty()) {
                 String fileName = file.getOriginalFilename();
                 Long fileSize = file.getSize();
