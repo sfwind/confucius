@@ -47,12 +47,6 @@ public class AccountController {
     @Autowired
     private CourseProgressService courseProgressService;
     @Autowired
-    private ProblemService problemService;
-    @Autowired
-    private PracticeService practiceService;
-    @Autowired
-    private ChallengeSubmitDao challengeSubmitDao;
-    @Autowired
     private PlanService planService;
 
     /**
@@ -136,58 +130,6 @@ public class AccountController {
 //        accountDto.setCourse(loadStudentCourse(pcLoginUser.getOpenId()));
         return WebUtils.result(accountDto);
     }
-
-
-    /**
-     * 根据openId获取课程信息<br/>
-     * TODO 这里其实初始化用户信息，登录者是学生时才需要
-     * @param openId openId
-     * @return 用户的课程信息
-     */
-    private CourseDto loadStudentCourse(String openId){
-        CourseDto courseDto = new CourseDto();
-        FragmentDto fragmentDto = new FragmentDto();
-        courseDto.setFragment(fragmentDto);
-        List<ProblemList> problemLists = problemService.loadProblems(openId);
-        fragmentDto.setProblemList(problemLists.stream().map(item->{
-            // 循环获取问题
-            Problem problem = problemService.getProblem(item.getProblemId());
-            ProblemDto problemDto = new ProblemDto();
-            problemDto.setId(problem.getId());
-            problemDto.setPic(problem.getPic());
-            problemDto.setProblem(problem.getProblem());
-            problemDto.setStatus(item.getStatus());
-            // 获取所有挑战训练
-            List<ChallengePractice> challengePractices =  practiceService.loadPractice(item.getProblemId());
-            problemDto.setChallengeLis(challengePractices.stream().map(challenge->{
-                ChallengeDto challengeDto = new ChallengeDto();
-                challengeDto.setPic(challenge.getPic());
-                // 用户的挑战训练置空
-                challengeDto.setContent(null);
-                challengeDto.setDescription(null);
-                challengeDto.setId(challenge.getId());
-                challengeDto.setPcurl(challenge.getPcurl());
-                challengeDto.setProblemId(challenge.getProblemId());
-
-                // 查询用户是否完成该挑战，不论哪一个计划
-                challengeDto.setSubmitted(false);
-                List<ChallengeSubmit> submitList = challengeSubmitDao.load(challenge.getId(), openId);
-                for(ChallengeSubmit submit:submitList){
-                    if(submit.getContent()!=null){
-                        challengeDto.setSubmitted(true);
-                        break;
-                    }
-                }
-
-
-                return challengeDto;
-            }).collect(Collectors.toList()));
-            return problemDto;
-        }).collect(Collectors.toList()));
-
-        return courseDto;
-    }
-
 
     /**
      * 处理登录信息
