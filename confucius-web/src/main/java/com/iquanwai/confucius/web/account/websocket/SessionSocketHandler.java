@@ -55,7 +55,7 @@ public class SessionSocketHandler implements WebSocketHandler{
     /**
      * 建立链接，将sessionid加入到session缓存里
      * @param session WebSocketSession，socket的会话
-     * @throws Exception 这个要捕获吗 TODO 测试一下不捕获和捕获的区别
+     * @throws Exception
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -167,7 +167,6 @@ public class SessionSocketHandler implements WebSocketHandler{
         if(sessionId!=null){
             return sessionId.toString() +"..."+ session.getId();
         } else {
-
             return null;
         }
     }
@@ -190,7 +189,6 @@ public class SessionSocketHandler implements WebSocketHandler{
      * @param sessionId sessionId
      * @return sessionId是否在缓存中
      */
-
     public static boolean isValidSession(String sessionId){
         return socketSessionMap.get(sessionId) != null;
     }

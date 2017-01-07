@@ -9,6 +9,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.ref.SoftReference;
 import java.util.Map;
 
 /**
@@ -18,7 +19,7 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
     /**
      * 缓存已经登录的用户
      */
-    private static Map<String, PCLoginUser> pcLoginUserMap = Maps.newHashMap();
+    private static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -58,7 +59,8 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
      */
     public static void login(String sessionId, PCLoginUser pcLoginUser) {
         String[] list = sessionId.split("\\.\\.\\.");
-        pcLoginUserMap.put(list[0], pcLoginUser);
+        SoftReference<PCLoginUser> temp = new SoftReference<PCLoginUser>(pcLoginUser);
+        pcLoginUserMap.put(list[0], temp);
     }
 
     /**
@@ -76,6 +78,6 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
      * @return 登录的用户
      */
     public static PCLoginUser getLoginUser(String sessionId){
-        return pcLoginUserMap.get(sessionId);
+        return pcLoginUserMap.get(sessionId).get();
     }
 }

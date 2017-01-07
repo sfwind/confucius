@@ -91,6 +91,7 @@ public class FragmentController {
             improvementPlans.forEach(item -> {
                 paiedPlan.put(item.getProblemId(), item.getStatus());
             });
+            // 设置问题付费状态
             problemDtos.forEach(item -> {
                 item.setPay(paiedPlan.containsKey(item.getId()));
                 item.setStatus(paiedPlan.get(item.getId()));
