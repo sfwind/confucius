@@ -97,7 +97,6 @@ public class PCIndexController {
             userParam.put("headImage",pcLoginUser.getWeixin().getHeadimgUrl());
             mav.addAllObjects(userParam);
         }
-        mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
         return mav;
     }
 
