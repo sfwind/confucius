@@ -1,7 +1,9 @@
 package com.iquanwai.confucius.resolver;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.util.CookieUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -79,5 +81,13 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
      */
     public static PCLoginUser getLoginUser(String sessionId){
         return pcLoginUserMap.get(sessionId).get();
+    }
+
+    public static PCLoginUser getLoginUser(HttpServletRequest request){
+        String sessionId = request.getRequestedSessionId();
+        if(pcLoginUserMap.containsKey(sessionId)){
+            return pcLoginUserMap.get(sessionId).get();
+        }
+        return null;
     }
 }

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.resolver.LoginUser;
 import com.iquanwai.confucius.resolver.LoginUserResolver;
+import com.iquanwai.confucius.resolver.PCLoginUser;
+import com.iquanwai.confucius.resolver.PCLoginUserResolver;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -61,8 +63,11 @@ public class LogAspect {
             Gson gson = new Gson();
             String optTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTimeMillis);
             LoginUser loginUser = LoginUserResolver.getLoginUser(request);
+            PCLoginUser pcLoginUser = PCLoginUserResolver.getLoginUser(request);
             if (loginUser != null) {
                 userName = loginUser.getWeixinName();
+            } else if (pcLoginUser != null) {
+                userName = pcLoginUser.getWeixin().getWeixinName();
             }
             logger.info("\n user：" + userName
                     + "  url：" + requestPath + "; op_time：" + optTime + " pro_time：" + (endTimeMillis - startTimeMillis) + "ms ;"
