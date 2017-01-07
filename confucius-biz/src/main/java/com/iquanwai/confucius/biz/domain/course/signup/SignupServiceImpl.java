@@ -243,9 +243,10 @@ public class SignupServiceImpl implements SignupService {
         //从待付款中去掉
         payList.remove(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()));
         ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getOpenid());
-        //已经报名成功的学员不需要退班
+        //未付款时退还名额
         if(classMember==null) {
-            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getClassId());
+            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId(),
+                    courseOrder.getClassId());
         }
     }
 
