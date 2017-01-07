@@ -90,13 +90,20 @@ public class WebUtils {
      * TODO 跳转至异常页面
      */
     public static void redirectError(HttpServletRequest request, HttpServletResponse response, String err) throws Exception {
-        response.sendRedirect(ConfigUtils.adapterDomainName() + "/pc/static/error?err=" + err);
+        response.sendRedirect(URLEncoder.encode(ConfigUtils.adapterDomainName() + "/pc/static/error?err=" + err, "UTF-8"));
     }
 
     /**
      * 普通跳转
      */
     public static void redirect(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
-        response.sendRedirect(ConfigUtils.adapterDomainName() + uri);
+        response.sendRedirect(URLEncoder.encode(ConfigUtils.adapterDomainName() + uri, "UTF-8"));
+    }
+
+    /**
+     * 移动端跳转
+     */
+    public static void mobileRedirect(HttpServletResponse response,String url) throws Exception {
+        response.sendRedirect(URLEncoder.encode(ConfigUtils.adapterDomainName() + url, "UTF-8"));
     }
 }

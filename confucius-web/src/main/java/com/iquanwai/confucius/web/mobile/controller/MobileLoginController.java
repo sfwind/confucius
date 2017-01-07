@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.resolver.LoginUser;
+import com.iquanwai.confucius.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +53,8 @@ public class MobileLoginController {
                 map.put("sessionId", sessionId);
                 map.put("status", Constants.Status.FAIL);
                 map.put("error", ErrorConstants.NOT_FOLLOW);
-                String body = restfulHelper.post(CHECK_RESULT_URL, CommonUtils.mapToJson(map));
-                response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=您还为关注公众号");
+                restfulHelper.post(CHECK_RESULT_URL, CommonUtils.mapToJson(map));
+                WebUtils.mobileRedirect(response,"/static/login/result?err=您还未关注公众号");
                 return;
             }
             // 校验是否过期
@@ -69,10 +70,10 @@ public class MobileLoginController {
                 if ("".equals(body)) {
                     // 刷新失败
                     logger.error("刷新验证码失败");
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=刷新验证码失败,请手动刷新PC页面");
+                    WebUtils.mobileRedirect(response,"/static/login/result?err=刷新验证码失败,请手动刷新PC页面");
                     return;
                 } else {
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=二维码超时，已自动刷新，请重新扫描");
+                    WebUtils.mobileRedirect(response,"/static/login/result?err=二维码超时，已自动刷新，请重新扫描");
                     return;
 
                 }
@@ -96,26 +97,26 @@ public class MobileLoginController {
                     Map<String, Object> result = CommonUtils.jsonToMap(body1);
                     // 解析处理结果
                     logger.info("PC登录校验成功.{}",result);
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result");
+                    WebUtils.mobileRedirect(response,"/static/login/result");
                     return;
                 } else {
                     // PC端登录失败
                     logger.error("PC端登录失败,sessionId:" + sessionId);
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=登录异常，请联系管理员");
+                    WebUtils.mobileRedirect(response,"/static/login/result?err=登录异常，请联系管理员");
                     return;
                 }
             } else {
                 // 移动端校验失败，链接无效
                 logger.error("移动端校验失败，链接无效");
-                response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err=登录失败，信息校验错误");
+                WebUtils.mobileRedirect(response,"/static/login/result?err=登录失败，信息校验错误");
                 return;
             }
         } catch (Exception e){
             logger.error("处理登录结果失败",e);
             if(!e.getClass().equals(IOException.class)){
                 try {
-                    response.sendRedirect(ConfigUtils.adapterDomainName()+"/static/login/result?err="+e.getLocalizedMessage());
-                } catch (IOException e1) {
+                    WebUtils.mobileRedirect(response,"/static/login/result?err="+e.getLocalizedMessage());
+                } catch (Exception e1) {
                     logger.error("校验二维码，移动端重定向失败");
                 }
             }
