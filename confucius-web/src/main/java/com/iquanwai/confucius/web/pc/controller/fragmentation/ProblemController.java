@@ -54,11 +54,11 @@ public class ProblemController {
              * 2.查出用户正在进行的训练计划
              * 3.根据训练计划id查询挑战任务
              */
-            OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+            OperationLog operationLog = OperationLog.create().openid(pcLoginUser != null ? pcLoginUser.getOpenId() : null)
                     .module("PC")
                     .function("碎片化")
                     .action("进入碎片化页面")
-                    .memo(null);
+                    .memo(pcLoginUser == null ? "未关注" : pcLoginUser.getRole());
             operationLogService.log(operationLog);
             // 加载所有问题
             List<Problem> problems = problemService.loadProblems();
@@ -72,7 +72,7 @@ public class ProblemController {
                 return problemDto;
             }).collect(Collectors.toList()));
             // 获取用户已经付过钱的计划
-            List<ImprovementPlan> improvementPlans = planService.loadUserPlans(pcLoginUser.getOpenId());
+            List<ImprovementPlan> improvementPlans = pcLoginUser != null ? planService.loadUserPlans(pcLoginUser.getOpenId()) : Lists.newArrayList();
             Map<Integer, Integer> paiedPlan = Maps.newHashMap();
             // 记录问题对应的status
             improvementPlans.forEach(item -> {
@@ -96,7 +96,7 @@ public class ProblemController {
             fragmentPageDto.setDoingId(doingId);
             return WebUtils.result(fragmentPageDto);
         } catch (Exception e) {
-            logger.error("pc加载碎片化页面失败", e.getLocalizedMessage());
+            logger.error("pc加载碎片化页面失败", e);
             return WebUtils.error("加载失败");
         }
 
@@ -117,7 +117,7 @@ public class ProblemController {
                 .module("训练")
                 .function("挑战训练")
                 .action("PC点击问题菜单")
-                .memo(problemId+"");
+                .memo(problemId + "");
         operationLogService.log(operationLog);
         if (userPlans.isEmpty()) {
             // 用户没有报名
@@ -145,36 +145,36 @@ public class ProblemController {
                     ChallengePractice myChallenge = practiceService.getChallengePractice(challenge.getId(), openId, plan.getId());
                     if (myChallenge.getSubmitted()) {
                         // 已提交，进入列表页
-                        return WebUtils.result(getFragmentRoute("/fragment/c/list",myChallenge.getId(),null));
+                        return WebUtils.result(getFragmentRoute("/fragment/c/list", myChallenge.getId(), null));
                     } else {
                         // 未提交，进入doing页面
-                        return WebUtils.result(getFragmentRoute("/fragment/c",challenge.getId(),plan.getId()));
+                        return WebUtils.result(getFragmentRoute("/fragment/c", challenge.getId(), plan.getId()));
                     }
                 } else {
                     // 不是正在做的，获取挑战任务
                     ChallengePractice myChallenge = practiceService.getChallengePracticeNoCreate(challenge.getId(), openId, plan.getId());
                     if (myChallenge.getSubmitted()) {
                         // 已提交，进入列表页
-                        return WebUtils.result(getFragmentRoute("/fragment/c/list",myChallenge.getId(),null));
+                        return WebUtils.result(getFragmentRoute("/fragment/c/list", myChallenge.getId(), null));
                     } else {
                         // 未提交，进入doing页面,提示无法查看
-                        return WebUtils.result(getFragmentRoute("/servercode",null,null));
+                        return WebUtils.result(getFragmentRoute("/servercode", null, null));
                     }
                 }
             }
         }
     }
 
-    private RedirectRouteDto getFragmentRoute(String pathName,Integer cid,Integer planId){
+    private RedirectRouteDto getFragmentRoute(String pathName, Integer cid, Integer planId) {
         RedirectRouteDto route = new RedirectRouteDto();
         route.setPathName(pathName);
-        if(cid!=null || planId!=null){
-            Map<String,Object> map = Maps.newHashMap();
-            if(cid!=null){
-                map.put("cid",cid);
+        if (cid != null || planId != null) {
+            Map<String, Object> map = Maps.newHashMap();
+            if (cid != null) {
+                map.put("cid", cid);
             }
-            if(planId!=null){
-                map.put("planId",planId);
+            if (planId != null) {
+                map.put("planId", planId);
             }
             route.setQuery(map);
         }
