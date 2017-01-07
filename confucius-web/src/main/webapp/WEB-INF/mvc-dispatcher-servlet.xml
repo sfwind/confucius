@@ -73,7 +73,6 @@
             <mvc:exclude-mapping path="/static/**" />
             <mvc:exclude-mapping path="/cache/**" />
             <mvc:exclude-mapping path="/file/image/**" />
-            <!--<mvc:exclude-mapping path="/mobile/**"/>-->
             <mvc:exclude-mapping path="/account/login/**"/>
             <mvc:exclude-mapping path="/account/get"/>
             <mvc:exclude-mapping path="/session/**"/>
@@ -81,7 +80,6 @@
             <mvc:exclude-mapping path="/pc/**"/>
             <mvc:exclude-mapping path="/home/**" />
             <mvc:exclude-mapping path="/fragment/**"/>
-            <mvc:exclude-mapping path="/c/*"/>
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
         <mvc:interceptor>
