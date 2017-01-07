@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Map;
 
 /**
@@ -30,13 +31,12 @@ public class MobileLoginController {
     private RestfulHelper restfulHelper;
 
     @PostConstruct
-    public void initConfig(){
-        CHECK_RESULT_URL = ConfigUtils.domainName()+CHECK_RESULT_URL;
+    public void initConfig() {
+        CHECK_RESULT_URL = ConfigUtils.domainName() + CHECK_RESULT_URL;
     }
 
     /**
      * 记得加入拦截器排除
-     *
      */
     @RequestMapping("/login/check")
     public void loginCheck(@RequestParam(name = "sign", required = true) String sign,
@@ -44,17 +44,18 @@ public class MobileLoginController {
                            @RequestParam(name = "s", required = true) String sessionId,
                            HttpServletRequest request,
                            LoginUser loginUser,
-                           HttpServletResponse response)
-    {
+                           HttpServletResponse response) {
         try {
-            if(loginUser==null){
+            if (loginUser == null) {
                 logger.error("扫码登录失败，用户信息不能为空");
                 Map<String, Object> map = Maps.newHashMap();
                 map.put("sessionId", sessionId);
                 map.put("status", Constants.Status.FAIL);
                 map.put("error", ErrorConstants.NOT_FOLLOW);
                 restfulHelper.post(CHECK_RESULT_URL, CommonUtils.mapToJson(map));
-                WebUtils.mobileRedirect(response,"/static/login/result?err=您还未关注公众号");
+                response.sendRedirect(ConfigUtils.adapterDomainName() +
+                        "/static/login/result?err=" +
+                        URLEncoder.encode("您还未关注公众号", "UTF-8"));
                 return;
             }
             // 校验是否过期
@@ -70,10 +71,15 @@ public class MobileLoginController {
                 if ("".equals(body)) {
                     // 刷新失败
                     logger.error("刷新验证码失败");
-                    WebUtils.mobileRedirect(response,"/static/login/result?err=刷新验证码失败,请手动刷新PC页面");
+
+                    response.sendRedirect(ConfigUtils.adapterDomainName() +
+                            "/static/login/result?err=" +
+                            URLEncoder.encode("刷新验证码失败,请手动刷新PC页面", "UTF-8"));
                     return;
                 } else {
-                    WebUtils.mobileRedirect(response,"/static/login/result?err=二维码超时，已自动刷新，请重新扫描");
+                    response.sendRedirect(ConfigUtils.adapterDomainName() +
+                            "/static/login/result?err=" +
+                            URLEncoder.encode("二维码超时，已自动刷新，请重新扫描", "UTF-8"));
                     return;
 
                 }
@@ -96,26 +102,32 @@ public class MobileLoginController {
                     // PC端处理结果成功
                     Map<String, Object> result = CommonUtils.jsonToMap(body1);
                     // 解析处理结果
-                    logger.info("PC登录校验成功.{}",result);
-                    WebUtils.mobileRedirect(response,"/static/login/result");
+                    logger.info("PC登录校验成功.{}", result);
+                    response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/login/result");
                     return;
                 } else {
                     // PC端登录失败
                     logger.error("PC端登录失败,sessionId:" + sessionId);
-                    WebUtils.mobileRedirect(response,"/static/login/result?err=登录异常，请联系管理员");
+                    response.sendRedirect(ConfigUtils.adapterDomainName() +
+                            "/static/login/result?err=" +
+                            URLEncoder.encode("登录异常，请联系管理员", "UTF-8"));
                     return;
                 }
             } else {
                 // 移动端校验失败，链接无效
                 logger.error("移动端校验失败，链接无效");
-                WebUtils.mobileRedirect(response,"/static/login/result?err=登录失败，信息校验错误");
+                response.sendRedirect(ConfigUtils.adapterDomainName() +
+                        "/static/login/result?err=" +
+                        URLEncoder.encode("登录失败，信息校验错误", "UTF-8"));
                 return;
             }
-        } catch (Exception e){
-            logger.error("处理登录结果失败",e);
-            if(!e.getClass().equals(IOException.class)){
+        } catch (Exception e) {
+            logger.error("处理登录结果失败", e);
+            if (!e.getClass().equals(IOException.class)) {
                 try {
-                    WebUtils.mobileRedirect(response,"/static/login/result?err="+e.getLocalizedMessage());
+                    response.sendRedirect(ConfigUtils.adapterDomainName() +
+                            "/static/login/result?err=" +
+                            URLEncoder.encode(e.getLocalizedMessage(), "UTF-8"));
                 } catch (Exception e1) {
                     logger.error("校验二维码，移动端重定向失败");
                 }

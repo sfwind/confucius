@@ -103,13 +103,4 @@ public class WebUtils {
     public static void redirect(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
         response.sendRedirect(URLEncoder.encode(ConfigUtils.adapterDomainName() + uri, "UTF-8"));
     }
-
-    /**
-     * 移动端跳转
-     */
-    public static void mobileRedirect(HttpServletResponse response,String url) throws Exception {
-        String encodeUrl = URLEncoder.encode(ConfigUtils.adapterDomainName() + url, "UTF-8");
-        logger.error("encode,{}",encodeUrl);
-        response.sendRedirect(encodeUrl);
-    }
 }
