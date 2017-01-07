@@ -48,7 +48,7 @@ public class ProblemController {
     @RequestMapping("/problems")
     public ResponseEntity<Map<String, Object>> loadFragmentPage(PCLoginUser pcLoginUser) {
         try {
-            Assert.notNull(pcLoginUser, "用户不能为空");
+//            Assert.notNull(pcLoginUser, "用户不能为空");
             /**
              * 1.加载所有挑战作业
              * 2.查出用户正在进行的训练计划
