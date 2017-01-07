@@ -94,13 +94,14 @@ public class WebUtils {
      * TODO 跳转至异常页面
      */
     public static void redirectError(HttpServletRequest request, HttpServletResponse response, String err) throws Exception {
-        response.sendRedirect(URLEncoder.encode(ConfigUtils.adapterDomainName() + "/pc/static/error?err=" + err, "UTF-8"));
+        err = URLEncoder.encode(err, "UTF-8");
+        response.sendRedirect(ConfigUtils.adapterDomainName() + "/pc/static/error?err=" + err);
     }
 
     /**
      * 普通跳转
      */
     public static void redirect(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
-        response.sendRedirect(URLEncoder.encode(ConfigUtils.adapterDomainName() + uri, "UTF-8"));
+        response.sendRedirect(ConfigUtils.adapterDomainName() + uri);
     }
 }
