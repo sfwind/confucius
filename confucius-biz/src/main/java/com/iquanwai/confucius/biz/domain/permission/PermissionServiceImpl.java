@@ -46,10 +46,10 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void initPermission() {
         List<Role> roles = roleDao.loadAll(Role.class);
-        logger.error("roles:{}",roles);
+        logger.info("roles:{}",roles);
         roles.forEach(role->{
             List<Permission> permissions = permissionDao.loadPermissions(role.getId());
-            logger.error("perrmission:{}",permissions);
+            logger.info("perrmission:{}",permissions);
             rolePermissions.put(role.getName(), permissions.stream().map(permission -> {
                 Authority authority = new Authority();
                 authority.setRoleId(role.getId());
@@ -61,7 +61,6 @@ public class PermissionServiceImpl implements PermissionService {
                     logger.error("正则表达式异常,permission:{}",permission);
                     return null;
                 }
-                logger.error("authority:{}",authority);
                 return authority;
             }).filter(item-> item.getPattern()!=null).collect(Collectors.toList()));
         });
