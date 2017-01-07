@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.po.HomeworkSubmit;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
+import com.iquanwai.confucius.resolver.PCLoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import okhttp3.MultipartBody;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,8 @@ public class FileController {
     public ResponseEntity<Map<String, Object>> imageUpload(@PathVariable("moduleId") Integer moduleId,
                                                            @PathVariable("referId") Integer referId,
                                                            @RequestParam("file") MultipartFile file,
-                                                           HttpServletRequest request
+                                                           HttpServletRequest request,
+                                                           PCLoginUser pcLoginUser
     ) {
         try {
             if (moduleId != null && file != null && !file.isEmpty()) {
@@ -64,8 +66,7 @@ public class FileController {
                     if (checkResult.getLeft() == 1) {
                         // 可上传
                         try {
-                            HomeworkSubmit submit = courseStudyService.loadMemberSubmittedHomework(referId);
-                            OperationLog operationLog = OperationLog.create().openid(submit.getSubmitOpenid())
+                            OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                                     .module("文件")
                                     .function("上传图片")
                                     .action("PC上传图片")

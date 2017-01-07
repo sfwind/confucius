@@ -128,6 +128,16 @@ public class ConfigUtils {
 		return url;
 	}
 
+	public static String staticPcResourceUrl(){
+		String url = config.getString("static.pc.resource.url");
+		//测试环境防浏览器缓存，添加随机参数
+		if(url.endsWith("?")){
+			url = url.concat("_t=").concat(new Random().nextInt()+"");
+		}
+
+		return url;
+	}
+
 	public static String gaId(){
 		return config.getString("ga.id");
 	}
@@ -143,4 +153,7 @@ public class ConfigUtils {
 	public static List<Integer> getNeedAngelClasses(){
 		return config.getIntList("class.need.angel");
 	}
+
+	public static String getLoginSalt(){
+		return config.getString("login.salt"); }
 }

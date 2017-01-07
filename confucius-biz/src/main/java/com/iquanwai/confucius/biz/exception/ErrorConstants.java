@@ -24,4 +24,8 @@ public class ErrorConstants {
     public static final String INTERNAL_ERROR_MSG = "内部错误，亲，烦请联系系统管理员！";
 
     public static final String NO_AUTHORITY_MSG = "亲，你不能调用当前方法";
+
+    // 登陆逻辑错误码
+    public static final int SESSION_TIME_OUT = 10001;
+
 }

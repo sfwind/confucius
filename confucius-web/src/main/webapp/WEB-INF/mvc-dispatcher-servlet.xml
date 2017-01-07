@@ -5,7 +5,7 @@
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns:aop="http://www.springframework.org/schema/aop"
-
+       xmlns:websocket="http://www.springframework.org/schema/websocket"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
                            http://www.springframework.org/schema/context
@@ -13,7 +13,9 @@
                            http://www.springframework.org/schema/aop
 	                       http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
                            http://www.springframework.org/schema/mvc
-                           http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
+                           http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+                           http://www.springframework.org/schema/websocket
+                           http://www.springframework.org/schema/websocket/spring-websocket.xsd">
     <aop:aspectj-autoproxy proxy-target-class="true"/>
     <context:annotation-config/>
     <context:component-scan base-package="com.iquanwai.confucius.web" />
@@ -42,12 +44,22 @@
         </mvc:message-converters>
         <mvc:argument-resolvers>
             <bean class="com.iquanwai.confucius.resolver.LoginUserResolver"/>
+            <bean class="com.iquanwai.confucius.resolver.PCLoginUserResolver"/>
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
           p:prefix="/" p:suffix=".jsp" p:order="1"/>
+
+    <websocket:handlers allowed-origins="*">
+        <websocket:mapping path="/session" handler="sessionHandler"/>
+        <websocket:handshake-interceptors>
+            <bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>
+        </websocket:handshake-interceptors>
+    </websocket:handlers>
+    <bean id="sessionHandler" class="com.iquanwai.confucius.web.account.websocket.SessionSocketHandler"/>
+
 
     <mvc:interceptors>
         <mvc:interceptor>
@@ -61,7 +73,23 @@
             <mvc:exclude-mapping path="/static/**" />
             <mvc:exclude-mapping path="/cache/**" />
             <mvc:exclude-mapping path="/file/image/**" />
+            <mvc:exclude-mapping path="/account/login/**"/>
+            <mvc:exclude-mapping path="/account/get"/>
+            <mvc:exclude-mapping path="/session/**"/>
+            <mvc:exclude-mapping path="/login" />
+            <mvc:exclude-mapping path="/pc/**"/>
+            <mvc:exclude-mapping path="/home/**" />
+            <mvc:exclude-mapping path="/fragment/**"/>
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/pc/**"/>
+            <mvc:mapping path="/account/get"/>
+            <mvc:mapping path="/image/upload/**"/>
+            <mvc:exclude-mapping path="/pc/static/**"/>
+            <bean class="com.iquanwai.confucius.interceptor.PCHandlerInterceptor">
+                <constructor-arg ref="permissionServiceImpl"/>
+            </bean>
         </mvc:interceptor>
     </mvc:interceptors>
 </beans>

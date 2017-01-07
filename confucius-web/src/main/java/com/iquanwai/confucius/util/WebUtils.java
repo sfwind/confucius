@@ -7,6 +7,8 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +61,18 @@ public class WebUtils {
         if(!StringUtils.isEmpty(request.getQueryString())){
             url = url +"?"+request.getQueryString();
         }
+        url = URLEncoder.encode(url,"UTF-8");
 
         response.sendRedirect(ConfigUtils.adapterDomainName()+"/wx/oauth/auth?callbackUrl="+url);
     }
+
+    public static void login(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        String url = request.getRequestURL().toString();
+        if(!StringUtils.isEmpty(request.getQueryString())){
+            url = url +"?"+request.getQueryString();
+        }
+        url = URLEncoder.encode(url,"UTF-8");
+        response.sendRedirect(ConfigUtils.adapterDomainName()+"/login?callbackUrl="+url);
+    }
+
 }

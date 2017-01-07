@@ -13,4 +13,5 @@ public interface OperationalService {
      * 为所有明天开班的班级成员分配天使
      * */
     void angelAssign();
+
 }

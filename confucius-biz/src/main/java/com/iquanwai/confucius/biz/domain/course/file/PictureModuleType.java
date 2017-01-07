@@ -5,4 +5,5 @@ package com.iquanwai.confucius.biz.domain.course.file;
  */
 public class PictureModuleType {
     public static final int HOMEWORK = 1;
+    public static final int CHALLENGE = 2;
 }

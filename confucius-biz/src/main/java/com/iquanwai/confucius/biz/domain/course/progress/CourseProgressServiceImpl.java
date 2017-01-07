@@ -461,4 +461,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     public ClassMember loadClassMemberByMemberId(String memberId) {
         return classMemberDao.loadByMemberId(memberId);
     }
+
+
+
 }
