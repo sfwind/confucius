@@ -1,7 +1,8 @@
-package com.iquanwai.confucius.biz.dao.course;
+package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.HomeworkSubmit;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
@@ -25,7 +26,7 @@ import java.util.concurrent.Future;
  * Created by nethunder on 2017/1/2.
  */
 @Repository
-public class HomeworkVoteDao extends DBUtil {
+public class HomeworkVoteDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**

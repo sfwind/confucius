@@ -31,7 +31,15 @@ public class PCIndexController {
     public ModelAndView getStatic(HttpServletRequest request){
         return pcView(request);
     }
-
+    /**
+     * 前往碎片化页面
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/fragment/**")
+    public ModelAndView getFragmentPage(HttpServletRequest request) {
+        return pcView(request);
+    }
     /**
      * 前往home页面
      */
@@ -39,30 +47,29 @@ public class PCIndexController {
     public ModelAndView getHome(HttpServletRequest request) {
         return pcView(request);
     }
-
-    /**
-     * 前往挑战任务修改页面
-     */
-    @RequestMapping(value = "/fragment/c")
-    public ModelAndView getChallenge(HttpServletRequest request) {
-        return pcView(request);
-    }
-
-    /**
-     * 前往挑战任务列表页面
-     */
-    @RequestMapping(value = "/fragment/c/list")
-    public ModelAndView getChallengeList(HttpServletRequest request) {
-        return pcView(request);
-    }
-
-    /**
-     * 前往挑战任务显示页面
-     */
-    @RequestMapping(value = "/fragment/c/show")
-    public ModelAndView showChallenge(HttpServletRequest request) {
-        return pcView(request);
-    }
+//    /**
+//     * 前往挑战任务修改页面
+//     */
+//    @RequestMapping(value = "/fragment/c")
+//    public ModelAndView getChallenge(HttpServletRequest request) {
+//        return pcView(request);
+//    }
+//
+//    /**
+//     * 前往挑战任务列表页面
+//     */
+//    @RequestMapping(value = "/fragment/c/list")
+//    public ModelAndView getChallengeList(HttpServletRequest request) {
+//        return pcView(request);
+//    }
+//
+//    /**
+//     * 前往挑战任务显示页面
+//     */
+//    @RequestMapping(value = "/fragment/c/show")
+//    public ModelAndView showChallenge(HttpServletRequest request) {
+//        return pcView(request);
+//    }
 
     /**
      * 前往登录页面

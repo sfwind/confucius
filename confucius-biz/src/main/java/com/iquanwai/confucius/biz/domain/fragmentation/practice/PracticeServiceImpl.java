@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.course.HomeworkVoteDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
@@ -10,8 +9,6 @@ import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,15 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.web.util.WebUtils;
 
-import javax.jws.WebResult;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/12/11.
