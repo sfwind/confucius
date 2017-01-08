@@ -155,5 +155,11 @@ public class ConfigUtils {
 	}
 
 	public static String getLoginSalt(){
-		return config.getString("login.salt"); }
+		return config.getString("login.salt");
+	}
+
+	public static String getLoginSocketUrl(){
+		return config.getString("static.pc.socket.url");
+	}
+
 }

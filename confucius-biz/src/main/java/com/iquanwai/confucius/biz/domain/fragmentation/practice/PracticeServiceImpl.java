@@ -196,7 +196,7 @@ public class PracticeServiceImpl implements PracticeService {
         }
         boolean result = challengeSubmitDao.answer(id,content);;
         if(result && submit.getPointStatus()==0 && content.length()>50){
-            logger.info("加分:",id);
+            logger.info("挑战训练加分:{}",id);
             // 未加分并且字数大于50(字母)
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
                     submit.getChallengeId(), PracticePlan.CHALLENGE);

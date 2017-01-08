@@ -80,6 +80,8 @@
             <mvc:exclude-mapping path="/pc/**"/>
             <mvc:exclude-mapping path="/home/**" />
             <mvc:exclude-mapping path="/fragment/**"/>
+            <mvc:exclude-mapping path="/servercode"/>
+            <mvc:exclude-mapping path="/community"/>
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
         <mvc:interceptor>
@@ -87,6 +89,14 @@
             <mvc:mapping path="/account/get"/>
             <mvc:mapping path="/image/upload/**"/>
             <mvc:exclude-mapping path="/pc/static/**"/>
+            <mvc:exclude-mapping path="/pc/fragment/problem/problems"/>
+            <bean class="com.iquanwai.confucius.interceptor.PCAjaxHandlerInterceptor">
+                <constructor-arg ref="permissionServiceImpl"/>
+            </bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/fragment/**"/>
+            <mvc:mapping path="/community"/>
             <bean class="com.iquanwai.confucius.interceptor.PCHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>
             </bean>

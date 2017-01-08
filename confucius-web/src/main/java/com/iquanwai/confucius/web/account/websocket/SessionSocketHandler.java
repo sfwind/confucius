@@ -239,6 +239,13 @@ public class SessionSocketHandler implements WebSocketHandler{
         session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
     }
 
+    public static void jumpServerCode(String sessionId) throws IOException {
+        WebSocketSession session = SessionSocketHandler.getLoginSocket(sessionId);
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("type","NOT_FOLLOW");
+        session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
+    }
+
 
     /**
      * 根据SessionId生成二维码链接,返回二维码地址
@@ -250,7 +257,7 @@ public class SessionSocketHandler implements WebSocketHandler{
         String name = sessionId+ CommonUtils.randomString(8)+".jpg";
         String path = "/data/static/images/qrcode/" + name;
         String picUrl = ConfigUtils.resourceDomainName() + "/images/qrcode/" + name;
-        logger.error("二维码url:" + loginUrl);
+        logger.info("二维码url:" + loginUrl);
         //生成二维码base64编码
         Image image = QRCodeUtils.genQRCode(loginUrl,QRCODE_WIDTH,QRCODE_HEIGHT);
         if(image==null){
