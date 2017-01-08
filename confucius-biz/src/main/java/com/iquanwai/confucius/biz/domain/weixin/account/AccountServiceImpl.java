@@ -76,9 +76,11 @@ public class AccountServiceImpl implements AccountService {
 
             BeanUtils.populate(accountNew, result);
             if(account==null) {
-                followUserDao.insert(accountNew);
+                if(accountNew.getNickname()!=null){
+                    followUserDao.insert(accountNew);
+                }
             }else{
-                if(account.getNickname()!=null) {
+                if(accountNew.getNickname()!=null) {
                     followUserDao.updateMeta(accountNew);
                 }
             }
