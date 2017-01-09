@@ -94,6 +94,9 @@ public class ChallengeController {
                     String picUrl = pictureService.getModulePrefix(PictureModuleType.CHALLENGE) + item.getRealName();
                     return new PictureDto(PictureModuleType.CHALLENGE, result.getId(), picUrl);
                 }).collect(Collectors.toList()));
+                // 先写死
+                String description = "Hi，欢迎来到圈外社区。<br/>请按照手机端挑战任务的页面提示，在这里记录下你学习的小目标、感悟或经历吧！";
+                result.setDescription(description);
                 OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                         .module("训练")
                         .function("挑战训练")
