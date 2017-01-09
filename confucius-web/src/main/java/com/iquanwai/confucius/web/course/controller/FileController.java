@@ -55,7 +55,7 @@ public class FileController {
                                                            PCLoginUser pcLoginUser
     ) {
         try {
-            Assert.notNull(pcLoginUser,"用户不能为空");
+//            Assert.notNull(pcLoginUser,"用户不能为空");
             if (moduleId != null && file != null && !file.isEmpty()) {
                 String fileName = file.getOriginalFilename();
                 Long fileSize = file.getSize();
@@ -68,7 +68,7 @@ public class FileController {
                     if (checkResult.getLeft() == 1) {
                         // 可上传
                         try {
-                            OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                            OperationLog operationLog = OperationLog.create().openid(pcLoginUser!=null?pcLoginUser.getOpenId():"")
                                     .module("文件")
                                     .function("上传图片")
                                     .action("PC上传图片")
