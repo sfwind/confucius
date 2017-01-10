@@ -11,4 +11,7 @@ public interface Constants {
     interface AccountError{
         Integer TIME_OUT = 100001;
     }
+    interface PracticeType{
+        int CHALLENGE=4;
+    }
 }

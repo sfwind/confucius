@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -195,6 +196,15 @@ public class PracticeServiceImpl implements PracticeService {
             return false;
         }
         boolean result = challengeSubmitDao.answer(id,content);;
+        if(result){
+            // 修改挑战任务记录
+            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(), submit.getChallengeId(), Constants.PracticeType.CHALLENGE);
+            if(practicePlan!=null){
+                practicePlanDao.improve(practicePlan.getId());
+            } else {
+                logger.error("practicePlan is not existed,submitId:{},challengeId:{},type:{}",submit.getPlanId(),submit.getChallengeId(),Constants.PracticeType.CHALLENGE);
+            }
+        }
         if(result && submit.getPointStatus()==0 && content.length()>50){
             logger.info("挑战训练加分:{}",id);
             // 未加分并且字数大于50(字母)
@@ -205,6 +215,7 @@ public class PracticeServiceImpl implements PracticeService {
             }
             challengeSubmitDao.updatePointStatus(id);
         }
+
         return result;
     }
 

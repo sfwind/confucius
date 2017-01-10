@@ -103,6 +103,17 @@ public class PracticePlanDao extends PracticeDBUtil {
         }
     }
 
+    public void improve(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
+        String sql = "update PracticePlan set Status=2 where Id=?";
+        try {
+            asyncRun.update(sql, id);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public void unlock(Integer id){
         QueryRunner runner = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
