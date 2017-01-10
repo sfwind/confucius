@@ -202,7 +202,7 @@ public class PracticeServiceImpl implements PracticeService {
             if(practicePlan!=null){
                 practicePlanDao.improve(practicePlan.getId());
             } else {
-                logger.error("practicePlan is not existed,submitId:{},challengeId:{},type:{}",submit.getPlanId(),submit.getChallengeId(),Constants.PracticeType.CHALLENGE);
+                logger.error("practicePlan is not existed,planId:{},challengeId:{},type:{}",submit.getPlanId(),submit.getChallengeId(),Constants.PracticeType.CHALLENGE);
             }
         }
         if(result && submit.getPointStatus()==0 && content.length()>50){
