@@ -12,6 +12,6 @@ public interface Constants {
         Integer TIME_OUT = 100001;
     }
     interface PracticeType{
-        int CHALLENGE=4;
+        int CHALLENGE=21;
     }
 }
