@@ -55,9 +55,11 @@ public class AccountServiceImpl implements AccountService {
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
+        logger.info("请求用户信息:{}",openid);
         url = CommonUtils.placeholderReplace(url, map);
 
         String body = restfulHelper.get(url);
+        logger.info("请求用户信息结果:{}",body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         Account accountNew = new Account();
         try {
@@ -76,10 +78,12 @@ public class AccountServiceImpl implements AccountService {
 
             BeanUtils.populate(accountNew, result);
             if(account==null) {
+                logger.info("插入用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null){
                     followUserDao.insert(accountNew);
                 }
             }else{
+                logger.info("更新用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null) {
                     followUserDao.updateMeta(accountNew);
                 }
