@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.pc.controller.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
@@ -11,7 +10,6 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.biz.po.fragmentation.ProblemList;
 import com.iquanwai.confucius.resolver.PCLoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.pc.dto.*;
@@ -53,6 +51,7 @@ public class ProblemController {
             // 获取用户正在进行的任务
             ImprovementPlan runningPlan = planService.getRunningPlan(pcLoginUser.getOpenId());
             // 返回到页面的数据
+            // pay：是否付款，status：是否完成，id：难题id,
             ProblemDto dto = new ProblemDto();
             if(runningPlan==null){
                 // 没有正在进行的任务（难题），选一个之前做过的
@@ -76,11 +75,15 @@ public class ProblemController {
                     dto.setId(problem.getId());
                     dto.setStatus(plan.getStatus());
                     List<ChallengePractice> challenges = practiceService.getChallengePracticesByProblem(problem.getId());
-                    // 查询挑战任务,
-                    List<ChallengeDto> challengeSubmits = challenges.stream().map(item->{
-                       return practiceService.getChallengePracticeNoCreate(item.getId(),pcLoginUser.getOpenId(),plan.getId());
-                    }).collect(Collectors.toList());
-                    dto.setChallengeLis(challengeSubmits);
+                    // 查询挑战任务
+                    List<ChallengeDto> challengeSubmits = challenges.stream().map(item ->
+                            ChallengeDto.getFromPo(
+                                    // 不是正在进行的任务，只查看是否完成
+                                    practiceService.getChallengePracticeNoCreate(item.getId(), pcLoginUser.getOpenId(), plan.getId())
+                            )
+                    ).collect(Collectors.toList());
+                    dto.setChallengeList(challengeSubmits);
+                    return WebUtils.result(dto);
                 }
             } else {
                 // 有正在进行的任务(难题)
@@ -89,10 +92,17 @@ public class ProblemController {
                 dto.setId(problem.getId());
                 dto.setStatus(runningPlan.getStatus());
                 // 查看是否提交
-
+                List<ChallengePractice> challenges = practiceService.getChallengePracticesByProblem(problem.getId());
+                // 查询挑战任务
+                List<ChallengeDto> challengeSubmits = challenges.stream().map(item ->
+                        ChallengeDto.getFromPo(
+                                // 正在进行的任务可以生成一条记录
+                                practiceService.getChallengePractice(item.getId(), pcLoginUser.getOpenId(), runningPlan.getId())
+                        )
+                ).collect(Collectors.toList());
+                dto.setChallengeList(challengeSubmits);
+                return WebUtils.result(dto);
             }
-            // pay：是否付款，status：是否完成，id：难题id
-            return WebUtils.result(dto);
         } catch (Exception e) {
             logger.error("pc加载碎片化页面失败", e);
             return WebUtils.error("加载失败");

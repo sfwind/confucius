@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.pc.controller.fragmentation;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
 import com.iquanwai.confucius.biz.domain.course.file.PictureModuleType;
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
@@ -350,32 +349,5 @@ public class ChallengeController {
             logger.error("记载他人信息失败", e);
             return WebUtils.error("加载失败");
         }
-    }
-
-
-    private List<ProblemDto> loadAllProblems() {
-        List<Problem> problems = problemService.loadProblems();
-        List<ProblemDto> problemDtos = Lists.newArrayList();
-        problemDtos.addAll(problems.stream().map(problem -> {
-            ProblemDto problemDto = new ProblemDto();
-            problemDto.setId(problem.getId());
-            problemDto.setPic(problem.getPic());
-            problemDto.setProblem(problem.getProblem());
-            // 获取所有挑战训练
-            List<ChallengePractice> challengePractices = practiceService.loadPractice(problem.getId());
-            problemDto.setChallengeLis(challengePractices.stream().map(challenge -> {
-                ChallengeDto challengeDto = new ChallengeDto();
-                challengeDto.setPic(challenge.getPic());
-                // 用户的挑战训练置空
-                challengeDto.setContent(null);
-                challengeDto.setDescription(null);
-                challengeDto.setId(challenge.getId());
-                challengeDto.setPcurl(challenge.getPcurl());
-                challengeDto.setProblemId(challenge.getProblemId());
-                return challengeDto;
-            }).collect(Collectors.toList()));
-            return problemDto;
-        }).collect(Collectors.toList()));
-        return problemDtos;
     }
 }

@@ -14,5 +14,5 @@ public class ProblemDto {
     private Boolean pay; // 是否已付费
     private String problem; // 工作生活中遇到的问题
     private String pic; //头图
-    private List<ChallengeDto> challengeLis;
+    private List<ChallengeDto> challengeList;
 }
