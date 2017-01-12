@@ -74,12 +74,12 @@ public class MobileLoginController {
 
                     response.sendRedirect(ConfigUtils.adapterDomainName() +
                             "/static/login/result?err=" +
-                            URLEncoder.encode("刷新验证码失败,请手动刷新PC页面", "UTF-8"));
+                            URLEncoder.encode("二维码超时，请刷新页面，重新扫描", "UTF-8"));
                     return;
                 } else {
                     response.sendRedirect(ConfigUtils.adapterDomainName() +
                             "/static/login/result?err=" +
-                            URLEncoder.encode("二维码超时，已自动刷新，请重新扫描", "UTF-8"));
+                            URLEncoder.encode("二维码超时，请刷新页面，重新扫描", "UTF-8"));
                     return;
 
                 }
