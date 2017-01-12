@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.pc.controller.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
@@ -10,11 +11,10 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemList;
 import com.iquanwai.confucius.resolver.PCLoginUser;
 import com.iquanwai.confucius.util.WebUtils;
-import com.iquanwai.confucius.web.pc.dto.FragmentPageDto;
-import com.iquanwai.confucius.web.pc.dto.ProblemDto;
-import com.iquanwai.confucius.web.pc.dto.RedirectRouteDto;
+import com.iquanwai.confucius.web.pc.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,56 +45,54 @@ public class ProblemController {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @RequestMapping("/problems")
+    @RequestMapping("/current")
     public ResponseEntity<Map<String, Object>> loadFragmentPage(PCLoginUser pcLoginUser) {
         try {
-//            Assert.notNull(pcLoginUser, "用户不能为空");
-            /**
-             * 1.加载所有挑战作业
-             * 2.查出用户正在进行的训练计划
-             * 3.根据训练计划id查询挑战任务
-             */
-            OperationLog operationLog = OperationLog.create().openid(pcLoginUser != null ? pcLoginUser.getOpenId() : null)
-                    .module("PC")
-                    .function("碎片化")
-                    .action("进入碎片化页面")
-                    .memo(pcLoginUser == null ? "未关注" : pcLoginUser.getRole());
-            operationLogService.log(operationLog);
-            // 加载所有问题
-            List<Problem> problems = problemService.loadProblems();
-            List<ProblemDto> problemDtos = Lists.newArrayList();
-            // 初始化问题list
-            problemDtos.addAll(problems.stream().map(problem -> {
-                ProblemDto problemDto = new ProblemDto();
-                problemDto.setId(problem.getId());
-                problemDto.setPic(problem.getPic());
-                problemDto.setProblem(problem.getProblem());
-                return problemDto;
-            }).collect(Collectors.toList()));
-            // 获取用户已经付过钱的计划
-            List<ImprovementPlan> improvementPlans = pcLoginUser != null ? planService.loadUserPlans(pcLoginUser.getOpenId()) : Lists.newArrayList();
-            Map<Integer, Integer> paiedPlan = Maps.newHashMap();
-            // 记录问题对应的status
-            improvementPlans.forEach(item -> {
-                paiedPlan.put(item.getProblemId(), item.getStatus());
-            });
-            // 设置问题付费状态
-            problemDtos.forEach(item -> {
-                item.setPay(paiedPlan.containsKey(item.getId()));
-                item.setStatus(paiedPlan.get(item.getId()));
-            });
-            Integer doingId = null;
-            for (Map.Entry<Integer, Integer> pair : paiedPlan.entrySet()) {
-                if (pair.getValue() == 1) {
-                    doingId = pair.getKey();
+            Assert.notNull(pcLoginUser,"用户不能为空");
+            // 获取正在做的
+            // 获取用户正在进行的任务
+            ImprovementPlan runningPlan = planService.getRunningPlan(pcLoginUser.getOpenId());
+            // 返回到页面的数据
+            ProblemDto dto = new ProblemDto();
+            if(runningPlan==null){
+                // 没有正在进行的任务（难题），选一个之前做过的
+                List<ImprovementPlan> plans = planService.loadUserPlans(pcLoginUser.getOpenId());
+                if(plans.isEmpty()){
+                    // 没有购买难题,选第一个问题,页面跳转到serverCode
+                    List<Problem> problems = problemService.loadProblems();
+                    if(problems.isEmpty()){
+                        logger.error("problem is empty");
+                        return WebUtils.error("获取难题失败");
+                    } else {
+                        dto.setId(problems.get(0).getId());
+                        dto.setPay(false);
+                        return WebUtils.result(dto);
+                    }
+                } else {
+                    // 购买过难题，选择最后一个购买的难题,查询挑战任务完成状态
+                    ImprovementPlan plan = plans.get(plans.size() - 1);
+                    Problem problem =  problemService.getProblem(plan.getProblemId());
+                    dto.setPay(true);
+                    dto.setId(problem.getId());
+                    dto.setStatus(plan.getStatus());
+                    List<ChallengePractice> challenges = practiceService.getChallengePracticesByProblem(problem.getId());
+                    // 查询挑战任务,
+                    List<ChallengeDto> challengeSubmits = challenges.stream().map(item->{
+                       return practiceService.getChallengePracticeNoCreate(item.getId(),pcLoginUser.getOpenId(),plan.getId());
+                    }).collect(Collectors.toList());
+                    dto.setChallengeLis(challengeSubmits);
                 }
+            } else {
+                // 有正在进行的任务(难题)
+                Problem problem = problemService.getProblem(runningPlan.getProblemId());
+                dto.setPay(true);
+                dto.setId(problem.getId());
+                dto.setStatus(runningPlan.getStatus());
+                // 查看是否提交
+
             }
-            // 如果没有正在进行的，就取第一个
-            doingId = doingId == null ? problemDtos.get(0).getId() : doingId;
-            FragmentPageDto fragmentPageDto = new FragmentPageDto();
-            fragmentPageDto.setProblemList(problemDtos);
-            fragmentPageDto.setDoingId(doingId);
-            return WebUtils.result(fragmentPageDto);
+            // pay：是否付款，status：是否完成，id：难题id
+            return WebUtils.result(dto);
         } catch (Exception e) {
             logger.error("pc加载碎片化页面失败", e);
             return WebUtils.error("加载失败");
@@ -164,6 +162,27 @@ public class ProblemController {
             }
         }
     }
+
+    /**
+     * 加载问题列表
+     */
+    @RequestMapping(value = "/list")
+    public ResponseEntity<Map<String, Object>> loadProblemList() {
+        try {
+            List<Problem> problems = problemService.loadProblems();
+            List<ProblemListDto> result = Lists.newArrayList();
+            problems.forEach(item -> {
+                ProblemListDto dto = new ProblemListDto();
+                dto.setId(item.getId());
+                dto.setProblem(item.getProblem());
+            });
+            return WebUtils.result(result);
+        } catch (Exception e){
+            logger.error("加载问题列表失败",e);
+            return WebUtils.error("加载问题列表失败");
+        }
+    }
+
 
     private RedirectRouteDto getFragmentRoute(String pathName, Integer cid, Integer planId) {
         RedirectRouteDto route = new RedirectRouteDto();

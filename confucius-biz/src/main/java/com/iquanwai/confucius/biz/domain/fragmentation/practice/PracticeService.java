@@ -13,9 +13,8 @@ import java.util.List;
 public interface PracticeService {
 
 
-    ChallengePractice getChallengePracticeNoCreate(Integer id, String openId, Integer planId);
+    ChallengePractice getChallengePracticeNoCreate(Integer challengeId, String openId, Integer planId);
 
-    ChallengeSubmit getChallengeSubmit(Integer id, String openId, Integer planId);
 
 
     /**
@@ -44,12 +43,6 @@ public interface PracticeService {
 
     Boolean submit(Integer id, String content);
 
-    /**
-     * 提交挑战训练
-     * @param code 随机码
-     * @param content 挑战训练答案
-     * */
-    Boolean submit(String code, String content);
 
     /**
      * 加载该问题的所有挑战训练

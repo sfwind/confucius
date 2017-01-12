@@ -53,10 +53,13 @@ public class PracticeServiceImpl implements PracticeService {
 
     private final static String submitUrlPrefix = "/fragment/c?id=";
 
+
+
+
     @Override
-    public ChallengePractice getChallengePractice(Integer id, String openId) {
-        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, id);
-        List<ChallengeSubmit> submits = challengeSubmitDao.load(id, openId);
+    public ChallengePractice getChallengePractice(Integer challengeId, String openId) {
+        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, challengeId);
+        List<ChallengeSubmit> submits = challengeSubmitDao.load(challengeId, openId);
         Optional<ChallengeSubmit> optional = submits.stream().filter(item -> item.getContent() != null).findFirst();
         challengePractice.setSubmitted(optional.isPresent());
         if (challengePractice.getSubmitted()) {
@@ -69,12 +72,14 @@ public class PracticeServiceImpl implements PracticeService {
         return challengePractice;
     }
 
-    @Override
-    public ChallengePractice getChallengePracticeNoCreate(Integer id, String openId, Integer planId) {
-        Assert.notNull(openId, "openId不能为空");
-        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, id);
 
-        ChallengeSubmit submit = challengeSubmitDao.load(id, planId, openId);
+
+    @Override
+    public ChallengePractice getChallengePracticeNoCreate(Integer challengeId, String openId, Integer planId) {
+        Assert.notNull(openId, "openId不能为空");
+        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, challengeId);
+
+        ChallengeSubmit submit = challengeSubmitDao.load(challengeId, planId, openId);
         if (submit == null || submit.getContent() == null) {
             challengePractice.setSubmitted(false);
         } else {
@@ -90,11 +95,6 @@ public class PracticeServiceImpl implements PracticeService {
             challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
         }
         return challengePractice;
-    }
-
-    @Override
-    public ChallengeSubmit getChallengeSubmit(Integer id, String openId, Integer planId) {
-        return challengeSubmitDao.load(id, planId, openId);
     }
 
 
@@ -173,20 +173,6 @@ public class PracticeServiceImpl implements PracticeService {
         return challengePracticeDao.load(ChallengePractice.class, id);
     }
 
-    private String generateShortUrl(String url) {
-        String requestUrl = shortUrlService;
-        try {
-            requestUrl = requestUrl + URLEncoder.encode(url, "utf-8");
-        } catch (UnsupportedEncodingException ignored) {
-
-        }
-        String shortUrl = restfulHelper.getPlain(requestUrl);
-        if (shortUrl.startsWith("http")) {
-            return shortUrl;
-        } else {
-            return url;
-        }
-    }
 
     @Override
     public  Boolean submit(Integer id,String content){
@@ -216,27 +202,6 @@ public class PracticeServiceImpl implements PracticeService {
             challengeSubmitDao.updatePointStatus(id);
         }
 
-        return result;
-    }
-
-    @Override
-    public Boolean submit(String code, String content) {
-        String submitUrl = submitUrlPrefix + code;
-        ChallengeSubmit challengeSubmit = challengeSubmitDao.load(submitUrl);
-        if (challengeSubmit == null) {
-            logger.error("code {} is not existed", submitUrl);
-            return false;
-        }
-        boolean result = challengeSubmitDao.answer(challengeSubmit.getId(), content);
-        if (result) {
-            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(challengeSubmit.getPlanId(),
-                    challengeSubmit.getChallengeId(), PracticePlan.CHALLENGE);
-            if (practicePlan != null && practicePlan.getStatus() == 0) {
-                practicePlanDao.complete(practicePlan.getId());
-                improvementPlanDao.updateComplete(challengeSubmit.getPlanId());
-                pointRepo.risePoint(challengeSubmit.getPlanId(), PointRepo.CHALLENGE_PRACTICE_SCORE);
-            }
-        }
         return result;
     }
 

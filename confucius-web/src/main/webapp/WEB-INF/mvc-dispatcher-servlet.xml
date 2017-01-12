@@ -90,6 +90,7 @@
             <!--<mvc:mapping path="/image/upload/**"/>-->
             <mvc:exclude-mapping path="/pc/static/**"/>
             <mvc:exclude-mapping path="/pc/fragment/problem/problems"/>
+            <mvc:exclude-mapping path="/pc/fragment/problem/list"/>
             <bean class="com.iquanwai.confucius.interceptor.PCAjaxHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>
             </bean>
