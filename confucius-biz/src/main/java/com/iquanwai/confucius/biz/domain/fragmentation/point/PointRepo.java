@@ -14,10 +14,8 @@ public interface PointRepo {
     void risePoint(Integer planId, Integer increment);
 
 
-    //单选题得分
-    int RADIO_PRACTICE_SCORE = 20;
-    //多选题得分
-    int MULTI_CHOICE_PRACTICE_SCORE = 50;
     //挑战训练得分
     int CHALLENGE_PRACTICE_SCORE = 500;
+
+    void reloadScore();
 }

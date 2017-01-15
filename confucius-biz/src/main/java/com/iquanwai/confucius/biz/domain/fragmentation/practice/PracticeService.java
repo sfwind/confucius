@@ -25,7 +25,6 @@ public interface PracticeService {
      * */
     ChallengePractice getChallengePractice(Integer id, String openid, Integer planId);
 
-    List<ChallengePractice> getChallengePracticesByProblem(Integer problem);
 
 
 
@@ -33,15 +32,8 @@ public interface PracticeService {
 
     ChallengePractice getChallenge(Integer id);
 
-    Boolean submit(Integer id, String content);
 
 
-    /**
-     * 加载该问题的所有挑战训练
-     * @param problemId 问题id
-     * @return 挑战训练列表
-     */
-    List<ChallengePractice> loadPractice(int problemId);
 
     ChallengeSubmit loadChallengeSubmit(Integer challengeId);
 

@@ -9,4 +9,7 @@ public interface ChallengeService {
     ChallengePractice loadChallengePractice(Integer id);
 
     ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId);
+
+    Boolean submit(Integer id, String content);
+
 }

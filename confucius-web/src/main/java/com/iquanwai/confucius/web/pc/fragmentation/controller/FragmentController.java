@@ -131,12 +131,12 @@ public class FragmentController {
                             if (applicationPractice == null) {
                                 logger.error("查询应用训练失败,训练计划:{}", item);
                             } else {
-                                dto.setTitle(applicationPractice.getTopic());
+                                dto.setTitle(applicationPractice.getTitle());
                                 dto.setScore(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
                                 applicationList.add(dto);
                             }
                         } else {
-                            dto.setTitle("挑战任务");
+                            dto.setTitle("设定目标、记录进展、总结心得");
                             dto.setScore(ConfigUtils.getChallengeScore());
                             challengeList.add(dto);
                         }

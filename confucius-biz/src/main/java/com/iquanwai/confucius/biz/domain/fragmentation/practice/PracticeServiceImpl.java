@@ -3,14 +3,10 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -19,11 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by justin on 16/12/11.
@@ -94,10 +87,6 @@ public class PracticeServiceImpl implements PracticeService {
         return challengePractice;
     }
 
-    @Override
-    public List<ChallengePractice> getChallengePracticesByProblem(Integer problem) {
-        return challengePracticeDao.loadPractice(problem);
-    }
 
 
     @Override
@@ -111,43 +100,7 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
 
-    @Override
-    public Boolean submit(Integer id, String content) {
-        ChallengeSubmit submit = challengeSubmitDao.load(ChallengeSubmit.class, id);
-        if (submit == null) {
-            logger.error("submitId {} is not existed", id);
-            return false;
-        }
-        boolean result = challengeSubmitDao.answer(id, content);
-        ;
-        if (result) {
-            // 修改挑战任务记录
-            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(), submit.getChallengeId(), Constants.PracticeType.CHALLENGE);
-            if (practicePlan != null) {
-                practicePlanDao.complete(practicePlan.getId());
-            } else {
-                logger.error("practicePlan is not existed,planId:{},challengeId:{},type:{}", submit.getPlanId(), submit.getChallengeId(), Constants.PracticeType.CHALLENGE);
-            }
-        }
-        if (result && submit.getPointStatus() == 0 && content.length() > 50) {
-            logger.info("挑战训练加分:{}", id);
-            // 未加分并且字数大于50(字母)
-            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
-                    submit.getChallengeId(), PracticePlan.CHALLENGE);
-            if (practicePlan != null) {
-                pointRepo.risePoint(submit.getPlanId(), PointRepo.CHALLENGE_PRACTICE_SCORE);
-            }
-            challengeSubmitDao.updatePointStatus(id);
-        }
 
-        return result;
-    }
-
-
-    @Override
-    public List<ChallengePractice> loadPractice(int problemId) {
-        return challengePracticeDao.loadPractice(problemId);
-    }
 
     @Override
     public ChallengeSubmit loadChallengeSubmit(Integer submitId) {

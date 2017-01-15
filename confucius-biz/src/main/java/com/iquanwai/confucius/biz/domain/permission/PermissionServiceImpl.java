@@ -33,10 +33,6 @@ public class PermissionServiceImpl implements PermissionService {
     private RoleDao roleDao;
     @Autowired
     private PermissionDao permissionDao;
-    @Autowired
-    private ChallengePracticeDao challengePracticeDao;
-    @Autowired
-    private PlanService planService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -88,19 +84,8 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public void reloadPermission(){
+        rolePermissions.clear();
         initPermission();
     }
-
-    @Override
-    public Boolean isFragmentStudent(String openId) {
-        List<ImprovementPlan> improvementPlans = planService.loadUserPlans(openId);
-        if(improvementPlans==null || improvementPlans.size()==0){
-            // 没有碎片化课程的学习计划
-            return false;
-        } else {
-            return true;
-        }
-    }
-
 
 }

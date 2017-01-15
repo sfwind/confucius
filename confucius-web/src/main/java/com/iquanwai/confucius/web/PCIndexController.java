@@ -65,6 +65,10 @@ public class PCIndexController {
 
     private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser) {
         ModelAndView mav = new ModelAndView("home");
+        if(ConfigUtils.isPcMaintenance()){
+            // 正在维护
+            mav = new ModelAndView("maintenance");
+        }
         if(request.getParameter("debug")!=null){
             if(ConfigUtils.isFrontDebug()){
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
@@ -83,6 +87,7 @@ public class PCIndexController {
             userParam.put("headImage",pcLoginUser.getWeixin().getHeadimgUrl());
             mav.addAllObjects(userParam);
         }
+        mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
         return mav;
     }
 

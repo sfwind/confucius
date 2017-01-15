@@ -7,7 +7,6 @@ import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,9 +74,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             return false;
         }
         boolean result = applicationSubmitDao.answer(id, content);
-        if (result && submit.getPointStatus() == 0) {
-
-        }
         if (result && submit.getPointStatus() == 0) {
             // 修改应用任务记录
             ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, submit.getPlanId());

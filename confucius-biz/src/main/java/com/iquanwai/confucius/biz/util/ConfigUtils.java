@@ -169,4 +169,13 @@ public class ConfigUtils {
 		return config.getInt("challenge.score");
 	}
 
+	public static Boolean isDevelopment(){
+		return config.getBoolean("development");
+	}
+
+	public static Boolean isPcMaintenance(){
+		return config.getBoolean("pc.server.maintenance");
+	}
+
+
 }

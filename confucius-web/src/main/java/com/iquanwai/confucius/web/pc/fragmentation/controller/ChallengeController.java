@@ -210,7 +210,7 @@ public class ChallengeController {
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         try {
             Assert.notNull(loginUser, "用户不能为空");
-            Boolean result = practiceService.submit(submitId, challengeSubmitDto.getAnswer());
+            Boolean result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
                     .function("挑战训练")

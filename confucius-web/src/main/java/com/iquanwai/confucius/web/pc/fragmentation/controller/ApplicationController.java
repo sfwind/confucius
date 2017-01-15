@@ -64,7 +64,7 @@ public class ApplicationController {
                     .memo(applicationId+"");
             operationLogService.log(operationLog);
             ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(applicationId);
-            return WebUtils.result(applicationPractice.getTopic());
+            return WebUtils.result(applicationPractice.getTitle());
         } catch (Exception e) {
             logger.error("查询应用训练标题失败", e);
             return WebUtils.error("查询标题失败");
@@ -93,7 +93,7 @@ public class ApplicationController {
             ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId());
             RiseWorkEditDto dto = new RiseWorkEditDto();
             dto.setSubmitId(applicationPractice.getSubmitId());
-            dto.setTitle(applicationPractice.getTopic());
+            dto.setTitle(applicationPractice.getTitle());
             dto.setContent(applicationPractice.getContent());
             dto.setDescription(applicationPractice.getDescription());
             dto.setModuleId(Constants.PictureType.APPLICATION);
@@ -131,7 +131,7 @@ public class ApplicationController {
 
             RiseWorkInfoDto info = new RiseWorkInfoDto();
             info.setSubmitId(applicationPractice.getSubmitId());
-            info.setTitle(applicationPractice.getTopic());
+            info.setTitle(applicationPractice.getTitle());
             info.setContent(applicationPractice.getContent().length() > 180 ?
                     applicationPractice.getContent().substring(0, 180) + "......" :
                     applicationPractice.getContent());
@@ -271,7 +271,7 @@ public class ApplicationController {
                 }
                 show.setVoteCount(votesCount);
                 // 根据challengeId查询problemId
-                show.setTitle(applicationService.loadApplicationPractice(submit.getApplicationId()).getTopic());
+                show.setTitle(applicationService.loadApplicationPractice(submit.getApplicationId()).getTitle());
                 // 查询照片
                 List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
                 show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
