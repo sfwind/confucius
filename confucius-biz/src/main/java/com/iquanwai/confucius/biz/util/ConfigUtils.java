@@ -165,4 +165,8 @@ public class ConfigUtils {
 		return config.getIntList("work.difficulty.score");
 	}
 
+	public static Integer getChallengeScore(){
+		return config.getInt("challenge.score");
+	}
+
 }

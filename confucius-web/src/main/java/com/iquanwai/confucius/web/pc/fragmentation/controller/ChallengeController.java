@@ -60,6 +60,12 @@ public class ChallengeController {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
 
+    /**
+     * 加载挑战训练内容
+     * @param pcLoginUser 登陆人
+     * @param planId 计划id
+     * @param cid 挑战任务id
+     */
     @RequestMapping("/mine/{planId}/{cid}")
     public ResponseEntity<Map<String, Object>> loadMineChallenge(PCLoginUser pcLoginUser,
                                                                  @PathVariable("planId") Integer planId,
@@ -119,6 +125,11 @@ public class ChallengeController {
         }
     }
 
+    /**
+     * 展示挑战任务提交内容
+     * @param pcLoginUser 登陆人
+     * @param submitId 提交id
+     */
     @RequestMapping("/show/{submitId}")
     public ResponseEntity<Map<String, Object>> showChallenge(PCLoginUser pcLoginUser, @PathVariable("submitId") Integer submitId) {
         try {
@@ -187,6 +198,12 @@ public class ChallengeController {
     }
 
 
+    /**
+     * 提交挑战任务
+     * @param loginUser 登陆人
+     * @param submitId 提交id
+     * @param challengeSubmitDto 内容
+     */
     @RequestMapping("/submit/{submitId}")
     public ResponseEntity<Map<String, Object>> submit(PCLoginUser loginUser,
                                                       @PathVariable Integer submitId,
@@ -212,14 +229,23 @@ public class ChallengeController {
     }
 
 
-
-
-
+    /**
+     * 挑战任务列表展示自己的
+     * @param loginUser 登陆人
+     * @param planId 计划id
+     * @param challengeId 挑战任务id
+     */
     @RequestMapping("/list/mine/{planId}/{challengeId}")
     public ResponseEntity<Map<String, Object>> loadMineChallengeList(PCLoginUser loginUser, @PathVariable("planId") Integer planId, @PathVariable("challengeId") Integer challengeId) {
         try {
             Assert.notNull(planId, "planId不能为空");
             Assert.notNull(challengeId, "challengeId不能为空");
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("训练")
+                    .function("挑战训练")
+                    .action("挑战训练列表加载自己的")
+                    .memo(planId + ":" + challengeId);
+            operationLogService.log(operationLog);
             ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, challengeId, loginUser.getOpenId());
             // 查询
             RiseWorkInfoDto info = new RiseWorkInfoDto();
@@ -247,7 +273,7 @@ public class ChallengeController {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
                     .function("挑战训练")
-                    .action("PC加载他人挑战训练")
+                    .action("挑战训练列表加载他人的")
                     .memo(challengeId + "");
             operationLogService.log(operationLog);
             List<RiseWorkInfoDto> submits = practiceService.getChallengeSubmitList(challengeId)

@@ -93,7 +93,7 @@ public class FileController {
                     }
                 } else {
                     LOGGER.error("upload image error:无该图片模块," + moduleId);
-                    return WebUtils.error("无该模块:+" + moduleId);
+                    return WebUtils.error("无该模块:" + moduleId);
                 }
             } else {
                 // 模块名为空,禁止上传

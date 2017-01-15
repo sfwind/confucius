@@ -69,12 +69,18 @@ public class FragmentController {
      * 点击fragment菜单后，确定需要跳转到的位置
      */
     @RequestMapping(value = "/community", method = RequestMethod.GET)
-    public void fragmentGoWhere(HttpServletRequest request, HttpServletResponse response, PCLoginUser pcLoginUser) {
+    public void fragmentGoWhere(HttpServletRequest request, HttpServletResponse response, PCLoginUser loginUser) {
         /**
          * 1.检查用户是否是我们的学员
          * 2.检查正在进行的任务
          */
         try {
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("训练")
+                    .function("碎片化")
+                    .action("跳转碎片化页面")
+                    .memo("");
+            operationLogService.log(operationLog);
             response.sendRedirect("/fragment/rise");
         } catch (Exception e) {
             logger.error("前往碎片化失败");
@@ -84,47 +90,21 @@ public class FragmentController {
 
 
     /**
-     * 获取用户在这个计划里应该去的路径
+     * 碎片化总任务列表加载
+     * @param problemId 问题id
+     * @param pcLoginUser 登陆人
      */
-    private Pair<Integer, String> getRunningPlanRoute(ImprovementPlan plan, String openId) {
-        ChallengePractice wannaChallenge = null;
-        // 查询挑战任务
-        List<ChallengePractice> challengePractices = practiceService.loadPractice(plan.getProblemId());
-        List<ChallengePractice> submits = challengePractices.stream().map(item -> {
-            // 找到用户提交的记录
-            return practiceService.getChallengePractice(item.getId(), openId, plan.getId());
-        }).collect(Collectors.toList());
-        // 目前挑战任务只有一个
-        if (!submits.isEmpty()) {
-            // 取出第一个
-            wannaChallenge = submits.get(0);
-            if (wannaChallenge.getSubmitted()) {
-                // 已提交，进入list
-                Map<String, String> params = Maps.newHashMap();
-                params.put("cid", wannaChallenge.getId() + "");
-                params.put("debug", "true");
-                return new MutablePair<Integer, String>(200, CommonUtils.placeholderReplace(challengeListUrl, params));
-            } else {
-                // 未提交，进入doing
-                Map<String, String> params = Maps.newHashMap();
-                params.put("cid", wannaChallenge.getId() + "");
-                params.put("planId", plan.getId() + "");
-                params.put("debug", "true");
-
-                return new MutablePair<Integer, String>(200, CommonUtils.placeholderReplace(doChallengeUrl, params));
-            }
-        } else {
-            // 该计划找不到挑战任务，报错
-            return new MutablePair<Integer, String>(221, null);
-        }
-    }
-
-
     @RequestMapping("/pc/fragment/homework/{problemId}")
     public ResponseEntity<Map<String, Object>> getProblemHomeworkList(@PathVariable Integer problemId, PCLoginUser pcLoginUser) {
         try {
             Assert.notNull(problemId, "问题id不能为空");
             Assert.notNull(pcLoginUser, "用户信息能不能为空");
+            OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                    .module("训练")
+                    .function("碎片化")
+                    .action("总任务列表加载")
+                    .memo(problemId+"");
+            operationLogService.log(operationLog);
             // 查询该用户有没有购买过这个问题的计划
             List<ImprovementPlan> plans = planService.loadUserPlans(pcLoginUser.getOpenId());
             List<ImprovementPlan> matchPlans = plans.stream().filter(item -> item.getProblemId().equals(problemId)).collect(Collectors.toList());
@@ -157,8 +137,7 @@ public class FragmentController {
                             }
                         } else {
                             dto.setTitle("挑战任务");
-                            // TODO 分数 可配置
-                            dto.setScore(500);
+                            dto.setScore(ConfigUtils.getChallengeScore());
                             challengeList.add(dto);
                         }
                     });
