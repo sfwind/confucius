@@ -75,54 +75,7 @@ public class FragmentController {
          * 2.检查正在进行的任务
          */
         try {
-            String openId = pcLoginUser.getOpenId();
-            List<ImprovementPlan> plans = planService.loadUserPlans(openId);
-            if (plans.isEmpty()) {
-                // 不是碎片化的学员，进入扫公众号关注的界面
-                response.sendRedirect(serverCode);
-                return;
-            } else {
-                OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                        .module("课程")
-                        .function("碎片化")
-                        .action("进入")
-                        .memo("");
-                operationLogService.log(operationLog);
-                // 查询正在进行的计划
-                ImprovementPlan runningPlan = planService.getRunningPlan(openId);
-                if (runningPlan != null) {
-                    Pair<Integer, String> pair = getRunningPlanRoute(runningPlan, openId);
-                    if (pair.getLeft() == 200) {
-                        WebUtils.redirect(request, response, pair.getRight());
-                        return;
-                    } else {
-                        // 生成失败
-                        WebUtils.redirectError(request, response, "生成挑战任务失败 ");
-                        return;
-                    }
-                } else {
-                    // 没有正在进行的任务,找到一个用户提交过的
-                    for (ImprovementPlan plan : plans) {
-                        // 获取所有challenge
-                        List<ChallengePractice> cList = practiceService.getChallengePracticesByProblem(plan.getProblemId());
-                        List<ChallengePractice> sList = cList.stream()
-                                .map(item -> practiceService.getChallengePracticeNoCreate(item.getId(), openId, plan.getId()))
-                                .filter(ChallengePractice::getSubmitted)
-                                .collect(Collectors.toList());
-                        if (!sList.isEmpty()) {
-                            // 找到了,做完的
-                            ChallengePractice mySubmitted = sList.get(0);
-                            Map<String, String> params = Maps.newHashMap();
-                            params.put("cid", mySubmitted.getId() + "");
-                            WebUtils.redirect(request, response, CommonUtils.placeholderReplace(challengeListUrl, params));
-                            return;
-                        }
-                    }
-                    // 没有正在进行的 也没有做完的。。。。。
-                    WebUtils.redirectError(request, response, "没有能够查看的作业OTZ");
-                    return;
-                }
-            }
+            response.sendRedirect("/fragment/rise");
         } catch (Exception e) {
             logger.error("前往碎片化失败");
             return;
