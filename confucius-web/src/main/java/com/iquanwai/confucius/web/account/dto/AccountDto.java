@@ -14,8 +14,7 @@ import java.util.List;
  **/
 @Data
 public class AccountDto {
-    private String openId;
-    private LoginUser weixin;
     private String role;
-    private CourseDto course;
+    private String weixinName;
+    private String headimgUrl;
 }

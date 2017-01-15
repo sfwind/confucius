@@ -27,17 +27,9 @@ public interface PracticeService {
 
     List<ChallengePractice> getChallengePracticesByProblem(Integer problem);
 
-    ChallengePractice getDoingChallengePractice(String openId);
 
-    ChallengePractice getChallengePractice(Integer id, String openId);
 
     List<ChallengeSubmit> getChallengeSubmitList(Integer challengeId);
-
-    /**
-     * 获取挑战训练
-     * @param code 随机码
-     * */
-    ChallengePractice getChallengePractice(String code);
 
     ChallengePractice getChallenge(Integer id);
 

@@ -46,29 +46,11 @@ public class PCIndexController {
         return pcView(request,pcLoginUser);
     }
 
-//    /**
-//     * 前往挑战任务修改页面
-//     */
-//    @RequestMapping(value = "/fragment/c")
-//    public ModelAndView getChallenge(HttpServletRequest request) {
-//        return pcView(request);
-//    }
-//
-//    /**
-//     * 前往挑战任务列表页面
-//     */
-//    @RequestMapping(value = "/fragment/c/list")
-//    public ModelAndView getChallengeList(HttpServletRequest request) {
-//        return pcView(request);
-//    }
-//
-//    /**
-//     * 前往挑战任务显示页面
-//     */
-//    @RequestMapping(value = "/fragment/c/show")
-//    public ModelAndView showChallenge(HttpServletRequest request) {
-//        return pcView(request);
-//    }
+    @RequestMapping(value="/rise")
+    public ModelAndView getRise(HttpServletRequest request,PCLoginUser pcLoginUser){
+        return pcView(request,pcLoginUser);
+    }
+
 
     /**
      * 前往登录页面
@@ -77,6 +59,7 @@ public class PCIndexController {
     public ModelAndView getLoginPage(HttpServletRequest request,PCLoginUser pcLoginUser) {
         return pcView(request,pcLoginUser);
     }
+
 
 
 

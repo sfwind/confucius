@@ -30,5 +30,7 @@ public class ErrorConstants {
     public static final int SESSION_TIME_OUT = 10001;
     // 未关注公众号
     public static final int NOT_FOLLOW = 10002;
+    // 没有购买过碎片化任务
+    public static final int NOT_PAY_FRAGMENT = 20001;
 
 }

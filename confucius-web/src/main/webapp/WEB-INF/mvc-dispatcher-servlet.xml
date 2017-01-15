@@ -82,6 +82,7 @@
             <mvc:exclude-mapping path="/fragment/**"/>
             <mvc:exclude-mapping path="/servercode"/>
             <mvc:exclude-mapping path="/community"/>
+            <mvc:exclude-mapping path="/rise"/>
             <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
         <mvc:interceptor>
@@ -98,6 +99,7 @@
         <mvc:interceptor>
             <mvc:mapping path="/fragment/**"/>
             <mvc:mapping path="/community"/>
+            <mvc:mapping path="/rise"/>
             <bean class="com.iquanwai.confucius.interceptor.PCHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>
             </bean>

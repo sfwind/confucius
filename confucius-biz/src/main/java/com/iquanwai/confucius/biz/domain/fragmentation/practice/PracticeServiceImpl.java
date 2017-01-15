@@ -37,41 +37,11 @@ public class PracticeServiceImpl implements PracticeService {
     @Autowired
     private PracticePlanDao practicePlanDao;
     @Autowired
-    private ImprovementPlanDao improvementPlanDao;
-    @Autowired
     private PointRepo pointRepo;
-    @Autowired
-    private RestfulHelper restfulHelper;
-    @Autowired
-    private ProblemService problemService;
     @Autowired
     private HomeworkVoteDao homeworkVoteDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
-
-    private final static String submitUrlPrefix = "/fragment/c?id=";
-
-
-
-
-    @Override
-    public ChallengePractice getChallengePractice(Integer challengeId, String openId) {
-        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, challengeId);
-        List<ChallengeSubmit> submits = challengeSubmitDao.load(challengeId, openId);
-        Optional<ChallengeSubmit> optional = submits.stream().filter(item -> item.getContent() != null).findFirst();
-        challengePractice.setSubmitted(optional.isPresent());
-        if (challengePractice.getSubmitted()) {
-            // 如果用户提交的话，则将提交的放上来
-            challengePractice.setSubmitUrl(optional.get().getSubmitUrl());
-            challengePractice.setSubmitId(optional.get().getId());
-            challengePractice.setContent(optional.get().getContent());
-            challengePractice.setPcurl(optional.get().getShortUrl());
-        }
-        return challengePractice;
-    }
-
 
 
     @Override
@@ -86,14 +56,11 @@ public class PracticeServiceImpl implements PracticeService {
             challengePractice.setSubmitted(true);
         }
         if (submit != null) {
-            if (submit.getSubmitUrl() != null) {
-                challengePractice.setPcurl(submit.getShortUrl());
-            }
             challengePractice.setContent(submit.getContent());
-            challengePractice.setSubmitUrl(submit.getSubmitUrl());
             challengePractice.setSubmitId(submit.getId());
             challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
         }
+        challengePractice.setPlanId(planId);
         return challengePractice;
     }
 
@@ -119,11 +86,11 @@ public class PracticeServiceImpl implements PracticeService {
             submitId = challengeSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
-        } else {
-            challengePractice.setContent(submit.getContent());
-            challengePractice.setSubmitId(submit.getId());
-            challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
         }
+        challengePractice.setContent(submit.getContent());
+        challengePractice.setSubmitId(submit.getId());
+        challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
+        challengePractice.setPlanId(planId);
         return challengePractice;
     }
 
@@ -134,38 +101,8 @@ public class PracticeServiceImpl implements PracticeService {
 
 
     @Override
-    public ChallengePractice getDoingChallengePractice(String openId) {
-        List<ProblemList> problemLists = problemService.loadProblems(openId);
-        Integer doingProblem = null;
-        for (ProblemList problemList : problemLists) {
-            if (problemList.getStatus() == 1) {
-                doingProblem = problemList.getProblemId();
-                break;
-            }
-        }
-        if (doingProblem == null && problemLists.size() != 0) {
-            doingProblem = problemLists.get(0).getProblemId();
-        }
-        return this.getChallengePractice(doingProblem, openId);
-    }
-
-    @Override
-    public List<ChallengeSubmit> getChallengeSubmitList(Integer challengeId){
+    public List<ChallengeSubmit> getChallengeSubmitList(Integer challengeId) {
         return challengeSubmitDao.loadList(challengeId);
-    }
-
-
-
-    @Override
-    public ChallengePractice getChallengePractice(String code) {
-        String submitUrl = submitUrlPrefix + code;
-        ChallengeSubmit challengeSubmit = challengeSubmitDao.load(submitUrl);
-        if (challengeSubmit == null) {
-            logger.error("code {} is not existed", submitUrl);
-            return null;
-        }
-        return getChallengePractice(challengeSubmit.getChallengeId(), challengeSubmit.getOpenid(),
-                challengeSubmit.getPlanId());
     }
 
     @Override
@@ -175,24 +112,25 @@ public class PracticeServiceImpl implements PracticeService {
 
 
     @Override
-    public  Boolean submit(Integer id,String content){
-        ChallengeSubmit submit =  challengeSubmitDao.load(ChallengeSubmit.class,id);
-        if(submit==null){
+    public Boolean submit(Integer id, String content) {
+        ChallengeSubmit submit = challengeSubmitDao.load(ChallengeSubmit.class, id);
+        if (submit == null) {
             logger.error("submitId {} is not existed", id);
             return false;
         }
-        boolean result = challengeSubmitDao.answer(id,content);;
-        if(result){
+        boolean result = challengeSubmitDao.answer(id, content);
+        ;
+        if (result) {
             // 修改挑战任务记录
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(), submit.getChallengeId(), Constants.PracticeType.CHALLENGE);
-            if(practicePlan!=null){
-                practicePlanDao.improve(practicePlan.getId());
+            if (practicePlan != null) {
+                practicePlanDao.complete(practicePlan.getId());
             } else {
-                logger.error("practicePlan is not existed,planId:{},challengeId:{},type:{}",submit.getPlanId(),submit.getChallengeId(),Constants.PracticeType.CHALLENGE);
+                logger.error("practicePlan is not existed,planId:{},challengeId:{},type:{}", submit.getPlanId(), submit.getChallengeId(), Constants.PracticeType.CHALLENGE);
             }
         }
-        if(result && submit.getPointStatus()==0 && content.length()>50){
-            logger.info("挑战训练加分:{}",id);
+        if (result && submit.getPointStatus() == 0 && content.length() > 50) {
+            logger.info("挑战训练加分:{}", id);
             // 未加分并且字数大于50(字母)
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
                     submit.getChallengeId(), PracticePlan.CHALLENGE);

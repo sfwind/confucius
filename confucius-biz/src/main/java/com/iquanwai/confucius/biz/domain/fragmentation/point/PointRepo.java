@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.point;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * Created by justin on 16/12/14.
  */

@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -82,8 +83,8 @@ public class AccountController {
                 pcLoginUser.setOpenId(loginCheckDto.getLoginUser().getOpenId());
                 // 下面的数据返回前端
                 AccountDto accountDto = new AccountDto();
-                accountDto.setWeixin(loginCheckDto.getLoginUser());
-                accountDto.setOpenId(loginCheckDto.getLoginUser().getOpenId());
+                accountDto.setHeadimgUrl(loginCheckDto.getLoginUser().getHeadimgUrl());
+                accountDto.setWeixinName(loginCheckDto.getLoginUser().getWeixinName());
                 if (classMembers.isEmpty() && plans.isEmpty()) {
                     pcLoginUser.setRole("stranger");
                     accountDto.setRole("stranger");
@@ -123,13 +124,20 @@ public class AccountController {
         }
     }
 
+
     @RequestMapping("/get")
     public ResponseEntity<Map<String, Object>> getAccount(PCLoginUser pcLoginUser) {
-        AccountDto accountDto = new AccountDto();
-        accountDto.setWeixin(pcLoginUser.getWeixin());
-        accountDto.setOpenId(pcLoginUser.getOpenId());
-        accountDto.setRole("student");
-        return WebUtils.result(accountDto);
+        try{
+            Assert.notNull(pcLoginUser,"用户不能为空");
+            AccountDto accountDto = new AccountDto();
+            accountDto.setWeixinName(pcLoginUser.getWeixin().getWeixinName());
+            accountDto.setHeadimgUrl(pcLoginUser.getWeixin().getHeadimgUrl());
+            accountDto.setRole(pcLoginUser.getRole());
+            return WebUtils.result(accountDto);
+        } catch (Exception err){
+            logger.error("获取用户信息失败",err.getLocalizedMessage());
+            return WebUtils.error("获取用户信息失败");
+        }
     }
 
     /**

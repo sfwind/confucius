@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.pc.controller.fragmentation;
+package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.file.PictureModuleType;
@@ -6,16 +6,19 @@ import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
+import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.resolver.PCLoginUser;
 import com.iquanwai.confucius.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.PictureDto;
 import com.iquanwai.confucius.web.pc.dto.*;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
  * Created by nethunder on 2016/12/26.
  */
 @RestController
-@RequestMapping("/pc/fragment/c")
+@RequestMapping("/pc/fragment/challenge")
 public class ChallengeController {
     @Autowired
     private CourseProgressService courseProgressService;
@@ -51,6 +54,8 @@ public class ChallengeController {
     private PictureService pictureService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private ChallengeService challengeService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -207,144 +212,62 @@ public class ChallengeController {
     }
 
 
-    /**
-     * 点赞或者取消点赞
-     *
-     * @param vote 1：点赞，2：取消点赞
-     */
-    @RequestMapping(value = "vote", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> vote(PCLoginUser loginUser, @RequestBody HomeworkVoteDto vote) {
-        try {
-            Assert.notNull(loginUser, "用户不能为空");
-            Assert.isTrue(vote.getStatus() == 1 || vote.getStatus() == 2, "点赞状态异常");
-            Integer refer = vote.getReferencedId();
-            Integer status = vote.getStatus();
-            String openId = loginUser.getOpenId();
-            Pair<Integer, String> voteResult = null;
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("课程")
-                    .function("挑战任务");
-            if (status == 1) {
-                // 点赞
-                practiceService.vote(1, refer, openId);
-                voteResult = new MutablePair<Integer, String>(1, "success");
-                operationLog.action("点赞").memo(loginUser.getOpenId() + "点赞" + refer);
-            } else {
-                // 取消点赞
-                voteResult = practiceService.disVote(1, refer, openId);
-                operationLog.action("取消点赞").memo(loginUser.getOpenId() + "取消点赞" + refer);
-            }
 
-            operationLogService.log(operationLog);
-            if (voteResult.getLeft() == 1) {
-                return WebUtils.success();
-            } else {
-                return WebUtils.error(voteResult.getRight());
-            }
-        } catch (Exception e) {
-            logger.error("点赞失败,{}", e.getLocalizedMessage());
-            return WebUtils.error("点赞失败");
-        }
-    }
 
-    @RequestMapping("/list/mine/{challengeId}")
-    ResponseEntity<Map<String, Object>> showList(PCLoginUser loginUser, @PathVariable("challengeId") Integer challengeId) {
+
+    @RequestMapping("/list/mine/{planId}/{challengeId}")
+    public ResponseEntity<Map<String, Object>> loadMineChallengeList(PCLoginUser loginUser, @PathVariable("planId") Integer planId, @PathVariable("challengeId") Integer challengeId) {
         try {
+            Assert.notNull(planId, "planId不能为空");
             Assert.notNull(challengeId, "challengeId不能为空");
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("训练")
-                    .function("挑战训练")
-                    .action("PC加载自己的挑战训练")
-                    .memo(challengeId + "");
-            operationLogService.log(operationLog);
-            // 先查询用户自己的该挑战，是否已提交
-            String openId = loginUser.getOpenId();
-            List<ImprovementPlan> runningPlans = planService.loadUserPlans(openId);
-            List<ImprovementPlan> thisPlans = runningPlans.stream().filter(item -> {
-                List<ChallengePractice> challenges = practiceService.getChallengePracticesByProblem(item.getProblemId());
-                for (ChallengePractice challenge : challenges) {
-                    if (challenge.getId() == challengeId) {
-                        return true;
-                    }
-                }
-                return false;
-            }).collect(Collectors.toList());
-            // thisPlans是匹配到的计划
-            if (thisPlans.isEmpty()) {
-                // 该用户没有制定过包含这个挑战任务的计划
-                logger.info("{} 用户未制定包含{}挑战任务的问题", openId, challengeId);
-                return WebUtils.error("您没有制定过这个问题的解决计划哦");
-            } else {
-                // 查到了
-                List<ChallengeDto> mineChallenges = thisPlans.stream().map(item -> {
-                    ChallengeDto dto = null;
-                    ChallengePractice challengePractice = null;
-                    if (item.getStatus() == 1) {
-                        // 是否是正在做的
-                        challengePractice = practiceService.getChallengePractice(challengeId, openId, item.getId());
-                    } else {
-                        // 不是正在做的
-                        challengePractice = practiceService.getChallengePracticeNoCreate(challengeId, openId, item.getId());
-                    }
-                    dto = ChallengeDto.getFromPo(challengePractice);
-                    dto.setHeadImg(loginUser.getWeixin().getHeadimgUrl());
-                    dto.setUpName(loginUser.getWeixin().getWeixinName());
-                    if (dto.getSubmitted()) {
-                        // 提交过
-                        dto.setContent(dto.getContent().length() > 180 ? dto.getContent().substring(0, 180) + "......" : dto.getContent());
-                        dto.setUpTime(DateUtils.parseDateToFormat5(challengePractice.getSubmitUpdateTime()));
-                    }
-                    dto.setVoteCount(practiceService.loadHomeworkVotesCount(1, challengePractice.getSubmitId()));
-                    HomeworkVote vote = practiceService.loadVoteRecord(1, challengeId, openId);
-                    dto.setCanVote(vote == null || vote.getDel() == 1);
-                    dto.setPlanId(item.getId());
-                    dto.setProblemId(challengePractice.getProblemId());
-                    return dto;
-                }).collect(Collectors.toList());
-                return WebUtils.result(mineChallenges);
-            }
+            ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, challengeId, loginUser.getOpenId());
+            // 查询
+            RiseWorkInfoDto info = new RiseWorkInfoDto();
+            info.setSubmitId(challengePractice.getSubmitId());
+            info.setContent(challengePractice.getContent().length() > 180 ?
+                    challengePractice.getContent().substring(0, 180) + "......" :
+                    challengePractice.getContent());
+            info.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
+            info.setType(Constants.PracticeType.CHALLENGE);
+            info.setUpName(loginUser.getWeixin().getWeixinName());
+            info.setUpTime(DateUtils.parseDateToFormat5(challengePractice.getSubmitUpdateTime()));
+            info.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.CHALLENGE, challengePractice.getSubmitId()));
+            return WebUtils.result(info);
         } catch (Exception e) {
-            logger.error("加载个人信息失败:{}", e.getLocalizedMessage());
-            return WebUtils.error("加载个人信息失败");
+            logger.error("查询自己的挑战任务失败");
+            return WebUtils.error("查询自己的挑战任务失败");
         }
     }
+
 
     @RequestMapping("/list/other/{challengeId}")
     public ResponseEntity<Map<String, Object>> showOtherList(PCLoginUser loginUser, @PathVariable("challengeId") Integer challengeId) {
         try {
             Assert.notNull(challengeId, "challengeId不能为空");
-            Assert.notNull(loginUser, "登陆人不能未空");
-            //
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
                     .function("挑战训练")
                     .action("PC加载他人挑战训练")
                     .memo(challengeId + "");
             operationLogService.log(operationLog);
-            List<ChallengeSubmit> submits = practiceService.getChallengeSubmitList(challengeId)
-                    .stream().filter(item -> !item.getOpenid().equals(loginUser.getOpenId())).collect(Collectors.toList());
-            // 过滤掉自己
-            if (submits.isEmpty()) {
-                return WebUtils.result(submits);
-            } else {
-                List<ChallengeDto> list = submits.stream().map(item -> {
-                    // 这些都是提交的
-                    ChallengeDto dto = new ChallengeDto();
-                    dto.setContent(item.getContent().length() > 180 ? item.getContent().substring(0, 180) + "......" : item.getContent());
-                    dto.setSubmitId(item.getId());
-                    dto.setUpTime(DateUtils.parseDateToFormat5(item.getUpdateTime()));
-                    // 查询用户信息
-                    Account account = accountService.getAccount(item.getOpenid(), false);
-                    dto.setUpName(account.getNickname());
-                    dto.setHeadImg(account.getHeadimgurl());
-                    // 查询点赞信息
-                    dto.setVoteCount(practiceService.loadHomeworkVotesCount(1, item.getId()));
-                    HomeworkVote vote = practiceService.loadVoteRecord(1, item.getId(), loginUser.getOpenId());
-                    dto.setCanVote(vote == null || vote.getDel() == 1);
-                    return dto;
-                }).collect(Collectors.toList());
-                return WebUtils.result(list);
-            }
+            List<RiseWorkInfoDto> submits = practiceService.getChallengeSubmitList(challengeId)
+                    .stream()
+                    .filter(item -> !item.getOpenid().equals(loginUser.getOpenId()))
+                    .map(item -> {
+                        RiseWorkInfoDto dto = new RiseWorkInfoDto();
+                        dto.setSubmitId(item.getId());
+                        dto.setType(Constants.PracticeType.CHALLENGE);
+                        dto.setContent(item.getContent().length() > 180 ?
+                                item.getContent().substring(0, 180) + "......" :
+                                item.getContent());
+                        dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.CHALLENGE, item.getId()));
+                        Account account = accountService.getAccount(item.getOpenid(), false);
+                        dto.setUpName(account.getNickname());
+                        dto.setHeadPic(account.getHeadimgurl());
+                        dto.setUpTime(DateUtils.parseDateToFormat5(item.getUpdateTime()));
+                        return dto;
+                    }).collect(Collectors.toList());
+            return WebUtils.result(submits);
         } catch (Exception e) {
             logger.error("记载他人信息失败", e);
             return WebUtils.error("加载失败");

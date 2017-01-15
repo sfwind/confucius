@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.pc.controller.fragmentation;
+package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
@@ -42,6 +43,37 @@ public class ProblemController {
     private OperationLogService operationLogService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+
+
+
+    @RequestMapping("/curId")
+    public ResponseEntity<Map<String,Object>> loadCurProblemId(PCLoginUser pcLoginUser){
+        try{
+            Assert.notNull(pcLoginUser, "用户不能为空");
+            ImprovementPlan runningPlan = planService.getRunningPlan(pcLoginUser.getOpenId());
+            if(runningPlan == null){
+                // 没有正在进行的主题，选一个之前做过的
+                List<ImprovementPlan> plans = planService.loadUserPlans(pcLoginUser.getOpenId());
+                if(plans.isEmpty()){
+                    // 没有买过难题
+                    return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT,"为购买过碎片化任务");
+                } else {
+                    // 购买过直接选最后一个
+                    ImprovementPlan plan = plans.get(plans.size()-1);
+                    return WebUtils.result(plan.getProblemId());
+                }
+            } else {
+                // 有正在进行的主题，直接返回id
+                return WebUtils.result(runningPlan.getProblemId());
+            }
+        } catch (Exception e){
+            logger.error("获取正在进行的主题失败",e);
+            return WebUtils.error(e.getLocalizedMessage());
+        }
+    }
+
+
 
     @RequestMapping("/current")
     public ResponseEntity<Map<String, Object>> loadFragmentPage(PCLoginUser pcLoginUser) {
@@ -185,6 +217,7 @@ public class ProblemController {
                 ProblemListDto dto = new ProblemListDto();
                 dto.setId(item.getId());
                 dto.setProblem(item.getProblem());
+                result.add(dto);
             });
             return WebUtils.result(result);
         } catch (Exception e){
