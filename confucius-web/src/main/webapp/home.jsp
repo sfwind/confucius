@@ -15,6 +15,7 @@
         userName: "${userName}",
         headImage:"${headImage}",
         loginSocketUrl:"${loginSocketUrl}",
+        isDevelopment:${isDevelopment},
     }
 </script>
 

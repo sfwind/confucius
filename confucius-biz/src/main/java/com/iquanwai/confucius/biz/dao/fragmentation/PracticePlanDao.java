@@ -23,30 +23,6 @@ import java.util.concurrent.Executors;
 public class PracticePlanDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public void batchInsert(List<PracticePlan> planList){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into PracticePlan(PracticeId, PlanId, Type, Unlocked, Status, KnowledgeId, Sequence, Series) " +
-                "values(?,?,?,?,?,?,?,?)";
-        try {
-            Object[][] param = new Object[planList.size()][];
-            for (int i = 0; i < planList.size(); i++) {
-                PracticePlan practicePlan = planList.get(i);
-                param[i] = new Object[8];
-                param[i][0] = practicePlan.getPracticeId();
-                param[i][1] = practicePlan.getPlanId();
-                param[i][2] = practicePlan.getType();
-                param[i][3] = practicePlan.getUnlocked();
-                param[i][4] = practicePlan.getStatus();
-                param[i][5] = practicePlan.getKnowledgeId();
-                param[i][6] = practicePlan.getSequence();
-                param[i][7] = practicePlan.getSeries();
-            }
-            runner.batch(sql, param);
-        }catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
     public List<PracticePlan> loadPracticePlan(Integer planId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<PracticePlan>> h = new BeanListHandler(PracticePlan.class);
@@ -113,6 +89,7 @@ public class PracticePlanDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
 
     public void unlock(Integer id){
         QueryRunner runner = new QueryRunner(getDataSource());

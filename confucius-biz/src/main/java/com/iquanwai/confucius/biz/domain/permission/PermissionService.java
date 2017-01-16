@@ -19,8 +19,4 @@ public interface PermissionService {
 
     void reloadPermission();
 
-    /**
-     * 检查是否是我们的学员
-     */
-    Boolean isFragmentStudent(String openId);
 }

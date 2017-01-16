@@ -16,13 +16,11 @@ public class ChallengeDto {
     private String description;// "图文混排内容", //html
     private String pic;// "http://someurl",  //图片url
     private Integer problemId;//问题id
-    private String pcurl;//"http://someurl", //pc端url
     private Boolean submitted;//true, //是否提交过
     private String content;// "balbal" //提交内容
     private List<PictureDto> picList;
     private Integer submitId;
     private Integer moduleId;
-    private String submitUrl;
     private String headImg;
     private String upName;
     private String upTime;
@@ -39,11 +37,9 @@ public class ChallengeDto {
         result.setDescription(param.getDescription());
         result.setPic(param.getPic());
         result.setProblemId(param.getProblemId());
-        result.setPcurl(param.getPcurl());
         result.setSubmitId(param.getSubmitId());
         result.setSubmitted(param.getSubmitted());
         result.setContent(param.getContent());
-        result.setSubmitUrl(param.getSubmitUrl());
         return result;
     }
 }

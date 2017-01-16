@@ -134,7 +134,6 @@ public class ConfigUtils {
 		if(url.endsWith("?")){
 			url = url.concat("_t=").concat(new Random().nextInt()+"");
 		}
-
 		return url;
 	}
 
@@ -161,5 +160,22 @@ public class ConfigUtils {
 	public static String getLoginSocketUrl(){
 		return config.getString("static.pc.socket.url");
 	}
+
+	public static List<Integer> getWorkScoreList(){
+		return config.getIntList("work.difficulty.score");
+	}
+
+	public static Integer getChallengeScore(){
+		return config.getInt("challenge.score");
+	}
+
+	public static Boolean isDevelopment(){
+		return config.getBoolean("development");
+	}
+
+	public static Boolean isPcMaintenance(){
+		return config.getBoolean("pc.server.maintenance");
+	}
+
 
 }

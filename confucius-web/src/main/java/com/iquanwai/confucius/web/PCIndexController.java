@@ -46,29 +46,11 @@ public class PCIndexController {
         return pcView(request,pcLoginUser);
     }
 
-//    /**
-//     * 前往挑战任务修改页面
-//     */
-//    @RequestMapping(value = "/fragment/c")
-//    public ModelAndView getChallenge(HttpServletRequest request) {
-//        return pcView(request);
-//    }
-//
-//    /**
-//     * 前往挑战任务列表页面
-//     */
-//    @RequestMapping(value = "/fragment/c/list")
-//    public ModelAndView getChallengeList(HttpServletRequest request) {
-//        return pcView(request);
-//    }
-//
-//    /**
-//     * 前往挑战任务显示页面
-//     */
-//    @RequestMapping(value = "/fragment/c/show")
-//    public ModelAndView showChallenge(HttpServletRequest request) {
-//        return pcView(request);
-//    }
+    @RequestMapping(value="/rise")
+    public ModelAndView getRise(HttpServletRequest request,PCLoginUser pcLoginUser){
+        return pcView(request,pcLoginUser);
+    }
+
 
     /**
      * 前往登录页面
@@ -80,8 +62,13 @@ public class PCIndexController {
 
 
 
+
     private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser) {
         ModelAndView mav = new ModelAndView("home");
+        if(ConfigUtils.isPcMaintenance()){
+            // 正在维护
+            mav = new ModelAndView("maintenance");
+        }
         if(request.getParameter("debug")!=null){
             if(ConfigUtils.isFrontDebug()){
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
@@ -100,6 +87,7 @@ public class PCIndexController {
             userParam.put("headImage",pcLoginUser.getWeixin().getHeadimgUrl());
             mav.addAllObjects(userParam);
         }
+        mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
         return mav;
     }
 

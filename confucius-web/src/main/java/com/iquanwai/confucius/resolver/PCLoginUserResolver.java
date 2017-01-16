@@ -71,7 +71,19 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
      * @return  是否登录
      */
     public static boolean isLogin(String sessionId){
-        return pcLoginUserMap.get(sessionId)!=null;
+        SoftReference<PCLoginUser> softReference = pcLoginUserMap.get(sessionId);
+        if(softReference!=null){
+            PCLoginUser pcLoginUser = softReference.get();
+            if(pcLoginUser!=null){
+                return true;
+            } else {
+                // 清理
+                pcLoginUserMap.remove(sessionId);
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**

@@ -63,10 +63,10 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         }
     }
 
-    public void updateComplete(Integer planId){
+    public void updateApplicationComplete(Integer planId){
         QueryRunner runner = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
-        String sql = "UPDATE ImprovementPlan SET Complete = Complete+1 where Id=?";
+        String sql = "UPDATE ImprovementPlan SET ApplicationComplete = ApplicationComplete+1 where Id=?";
         try {
             asyncRun.update(sql, planId);
         } catch (SQLException e) {

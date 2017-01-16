@@ -13,9 +13,8 @@ import java.util.List;
 public interface PracticeService {
 
 
-    ChallengePractice getChallengePracticeNoCreate(Integer id, String openId, Integer planId);
+    ChallengePractice getChallengePracticeNoCreate(Integer challengeId, String openId, Integer planId);
 
-    ChallengeSubmit getChallengeSubmit(Integer id, String openId, Integer planId);
 
 
     /**
@@ -26,37 +25,15 @@ public interface PracticeService {
      * */
     ChallengePractice getChallengePractice(Integer id, String openid, Integer planId);
 
-    List<ChallengePractice> getChallengePracticesByProblem(Integer problem);
 
-    ChallengePractice getDoingChallengePractice(String openId);
 
-    ChallengePractice getChallengePractice(Integer id, String openId);
 
     List<ChallengeSubmit> getChallengeSubmitList(Integer challengeId);
 
-    /**
-     * 获取挑战训练
-     * @param code 随机码
-     * */
-    ChallengePractice getChallengePractice(String code);
-
     ChallengePractice getChallenge(Integer id);
 
-    Boolean submit(Integer id, String content);
 
-    /**
-     * 提交挑战训练
-     * @param code 随机码
-     * @param content 挑战训练答案
-     * */
-    Boolean submit(String code, String content);
 
-    /**
-     * 加载该问题的所有挑战训练
-     * @param problemId 问题id
-     * @return 挑战训练列表
-     */
-    List<ChallengePractice> loadPractice(int problemId);
 
     ChallengeSubmit loadChallengeSubmit(Integer challengeId);
 

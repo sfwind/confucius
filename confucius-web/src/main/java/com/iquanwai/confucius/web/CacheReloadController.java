@@ -3,6 +3,7 @@ package com.iquanwai.confucius.web;
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.util.WebUtils;
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ public class CacheReloadController {
     private PictureService pictureService;
     @Autowired
     private PermissionService permissionService;
+    @Autowired
+    private PointRepo pointRepo;
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -73,5 +76,16 @@ public class CacheReloadController {
             LOGGER.error("reload permission error",e);
         }
         return WebUtils.error("reload permission");
+    }
+
+    @RequestMapping("/score/reload")
+    public ResponseEntity<Map<String,Object>> reloadScore(){
+        try{
+            pointRepo.reloadScore();
+            return WebUtils.success();
+        } catch (Exception e){
+            LOGGER.error("reload score error", e);
+        }
+        return WebUtils.error("reload score");
     }
 }

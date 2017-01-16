@@ -5,14 +5,14 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * Created by justin on 16/12/4.
+ * Created by nethunder on 2017/1/13.
  */
 @Data
-public class ChallengeSubmit {
+public class ApplicationSubmit {
     private int id;
-    private String openid; // 提交人openid 
-    private Integer challengeId; // 挑战训练id 
-    private Integer planId; // 提升计划id 
+    private String openid; // 提交人openid
+    private Integer applicationId; // 应用训练Id
+    private Integer planId; // 提升计划id
     private String content; // 提交内容
     private Integer pointStatus;
     private Date updateTime;
