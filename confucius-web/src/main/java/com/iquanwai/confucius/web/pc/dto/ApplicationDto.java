@@ -14,7 +14,6 @@ import java.util.List;
 @Data
 public class ApplicationDto {
     private Integer id; // 应用训练id
-    private String title;
     private String topic; //任务标题
     private String description; // 题干
     private Integer knowledgeId; //知识点id
@@ -40,7 +39,6 @@ public class ApplicationDto {
         }
         ApplicationDto result = new ApplicationDto();
         result.setId(param.getId());
-        result.setTitle(param.getTitle());
         result.setTopic(param.getTopic());
         result.setDescription(param.getDescription());
         result.setKnowledgeId(param.getKnowledgeId());

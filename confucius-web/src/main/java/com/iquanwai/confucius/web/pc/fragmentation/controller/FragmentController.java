@@ -131,7 +131,7 @@ public class FragmentController {
                             if (applicationPractice == null) {
                                 logger.error("查询应用训练失败,训练计划:{}", item);
                             } else {
-                                dto.setTitle(applicationPractice.getTitle());
+                                dto.setTitle(applicationPractice.getTopic());
                                 dto.setScore(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
                                 applicationList.add(dto);
                             }
