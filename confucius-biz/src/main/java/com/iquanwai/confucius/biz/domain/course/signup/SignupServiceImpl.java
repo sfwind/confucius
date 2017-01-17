@@ -191,7 +191,12 @@ public class SignupServiceImpl implements SignupService {
         Integer courseId = courseOrder.getCourseId();
         String openid = courseOrder.getOpenid();
         ClassMember classMember = classMemberDao.getClassMember(classId, openid);
+        Date closeDate = getCloseDate(classId, courseId);
         if(classMember!=null){
+            //已经毕业或者已经超过关闭时间,重置学员数据
+            if(classMember.getGraduate() || classMember.getCloseDate().before(DateUtils.startDay(new Date()))){
+                classMemberDao.reEntry(classMember.getId(), closeDate);
+            }
             return classMember.getMemberId();
         }
         classMember = new ClassMember();
@@ -204,14 +209,9 @@ public class SignupServiceImpl implements SignupService {
             memberId = memberId(courseId, classId);
             classMember.setMemberId(memberId);
         }
-        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
-        if(getCachedCourse(courseId).getType()==Course.LONG_COURSE) {
-            Date closeTime = getCachedClass(classId).getCloseTime();
-            classMember.setCloseDate(DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS));
-        }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
-            int length = getCachedCourse(courseId).getLength();
-            classMember.setCloseDate(DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS));
-        }
+        //设置课程关闭时间
+        classMember.setCloseDate(closeDate);
+
         classMemberDao.entry(classMember);
         //使用优惠券
         if(courseOrder.getDiscount()!=0.0){
@@ -223,6 +223,19 @@ public class SignupServiceImpl implements SignupService {
         //发送录取消息
         sendWelcomeMsg(courseId, openid, classId);
         return memberId;
+    }
+
+    private Date getCloseDate(Integer classId, Integer courseId) {
+        Date closeDate = null;
+        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
+        if(getCachedCourse(courseId).getType()== Course.LONG_COURSE) {
+            Date closeTime = getCachedClass(classId).getCloseTime();
+            closeDate = DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS);
+        }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
+            int length = getCachedCourse(courseId).getLength();
+            closeDate = DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS);
+        }
+        return closeDate;
     }
 
     public boolean free(Integer courseId, String openid) {

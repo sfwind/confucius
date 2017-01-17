@@ -30,7 +30,7 @@ public class CouponDao extends DBUtil {
         ResultSetHandler<List<Coupon>> h = new BeanListHandler(Coupon.class);
 
         try {
-            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Openid=? and Used=0 and ExpiredDate>=?",
+            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Openid=? and Used in (0,2) and ExpiredDate>=?",
                     h, openid, new Date());
             return coupon;
         } catch (SQLException e) {
@@ -45,7 +45,7 @@ public class CouponDao extends DBUtil {
         ResultSetHandler<List<Coupon>> h = new BeanListHandler(Coupon.class);
 
         try {
-            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Used=0 and ExpiredDate>=?",
+            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Used in (0,2) and ExpiredDate>=?",
                     h, new Date());
             return coupon;
         } catch (SQLException e) {
@@ -69,10 +69,9 @@ public class CouponDao extends DBUtil {
 
     public void updateCouponByOrderId(Integer status, String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE Coupon SET Used =?, OrderId=null, Cost=null " +
+            run.update("UPDATE Coupon SET Used =?, OrderId=null, Cost=null " +
                     "where OrderId = ?", status, orderId);
 
         } catch (SQLException e) {

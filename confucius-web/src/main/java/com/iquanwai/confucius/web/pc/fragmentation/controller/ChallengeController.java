@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
-import com.iquanwai.confucius.biz.domain.course.file.PictureModuleType;
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
@@ -8,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.OperationLog;
@@ -75,7 +75,15 @@ public class ChallengeController {
     public ResponseEntity<Map<String, Object>> loadMineChallenge(PCLoginUser pcLoginUser,
                                                                  @PathVariable("planId") Integer planId,
                                                                  @PathVariable("cid") Integer cid) {
-        Assert.notNull(pcLoginUser);
+        Assert.notNull(pcLoginUser,"用户信息不能为空");
+        Assert.notNull(planId, "计划id不能为空");
+        Assert.notNull(cid,"挑战训练id不能为空");
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                .module("训练")
+                .function("挑战训练")
+                .action("PC加载挑战训练")
+                .memo(planId+":"+cid);
+        operationLogService.log(operationLog);
         String openId = pcLoginUser.getOpenId();
         // 先检查该用户有没有买这个作业
         List<ImprovementPlan> userPlans = planService.loadUserPlans(openId);
@@ -84,44 +92,25 @@ public class ChallengeController {
         if (plan.isPresent()) {
             // planId正确
             ImprovementPlan improvementPlan = plan.get();
-            // 获取该问题的挑战任务
-            ImprovementPlan running = planService.getRunningPlan(openId);
-            ChallengePractice challengePractice = null;
-            if (running.getId() == improvementPlan.getId()) {
-                // 该问题是正在解决的问题
-                challengePractice = practiceService.getChallengePractice(cid, openId, running.getId());
-            } else {
-                // 不是正在解决的问题，不能自动生成
-                challengePractice = practiceService.getChallengePracticeNoCreate(cid, openId, improvementPlan.getId());
-                if (!challengePractice.getSubmitted()) {
-                    // 不是正在进行的问题，也没做
-                    return WebUtils.error(100002, "同学，该挑战任务已超过提交时限");
-                }
-            }
+            ChallengePractice challengePractice = practiceService.getChallengePractice(cid, openId, improvementPlan.getId());
             // 转换为dto
             ChallengeDto result = ChallengeDto.getFromPo(challengePractice);
-            result.setModuleId(PictureModuleType.CHALLENGE);
+            result.setModuleId(Constants.PictureType.CHALLENGE);
             // 查询图片
             // 加载大作业的图片
-            List<Picture> pictureList = pictureService.loadPicture(PictureModuleType.CHALLENGE, result.getSubmitId());
+            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.CHALLENGE, result.getSubmitId());
             result.setPicList(pictureList.stream().map(item -> {
-                String picUrl = pictureService.getModulePrefix(PictureModuleType.CHALLENGE) + item.getRealName();
-                return new PictureDto(PictureModuleType.CHALLENGE, result.getId(), picUrl);
+                String picUrl = pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName();
+                return new PictureDto(Constants.PictureType.CHALLENGE, result.getId(), picUrl);
             }).collect(Collectors.toList()));
             // 先写死
             String description = "Hi，欢迎来到圈外社区。<br/>请按照手机端挑战任务的页面提示，在这里记录下你学习的小目标、感悟或经历吧！";
             result.setDescription(description);
-            OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                    .module("训练")
-                    .function("挑战训练")
-                    .action("PC加载挑战训练")
-                    .memo(cid.toString());
-            operationLogService.log(operationLog);
             return WebUtils.result(result);
-
         } else {
             // 没有买这个问题
-            return WebUtils.error(100001, "未购买的问题");
+            logger.error("用户:{},没有该训练计划:{}，挑战训练:{}",openId,plan,cid);
+            return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
     }
 
@@ -183,10 +172,10 @@ public class ChallengeController {
             show.setProblemId(problem.getId());
             show.setTitle(problem.getProblem());
             // 查询照片
-            List<Picture> pictureList = pictureService.loadPicture(PictureModuleType.CHALLENGE, submit.getId());
+            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.CHALLENGE, submit.getId());
             show.setPicList(pictureList.stream().map(item -> {
-                String picUrl = pictureService.getModulePrefix(PictureModuleType.CHALLENGE) + item.getRealName();
-                return new PictureDto(PictureModuleType.CHALLENGE, submit.getId(), picUrl);
+                String picUrl = pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName();
+                return new PictureDto(Constants.PictureType.CHALLENGE, submit.getId(), picUrl);
             }).collect(Collectors.toList()));
             return WebUtils.result(show);
         }

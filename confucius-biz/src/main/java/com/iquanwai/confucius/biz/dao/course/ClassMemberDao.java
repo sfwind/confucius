@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -227,5 +228,18 @@ public class ClassMemberDao extends DBUtil {
         }
 
         return null;
+    }
+
+    public void reEntry(Integer classMemberId, Date closeDate){
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+
+        try {
+            asyncRun.update("UPDATE ClassMember SET Graduate =0, closeDate=? " +
+                    "where Id=?", closeDate, classMemberId);
+
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
     }
 }
