@@ -65,7 +65,7 @@ public class CostRepoImpl implements CostRepo {
                 remain = CommonUtils.substract(remain, amount);
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
             //余额为0时,仍然付0.01元
-            }else if(remain==amount){
+            }else if(remain.equals(amount)){
                 remain = 0.01;
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
                 break;
@@ -96,10 +96,7 @@ public class CostRepoImpl implements CostRepo {
     private void reloadCoupon(){
         List<Coupon> coupons  = couponDao.getUnusedCoupon();
         couponList.clear();
-        for(Coupon coupon:coupons){
-            if(!couponList.contains(coupon.getOpenid())){
-                couponList.add(coupon.getOpenid());
-            }
-        }
+        coupons.stream().filter(coupon -> !couponList.contains(coupon.getOpenid()))
+                .forEach(coupon -> couponList.add(coupon.getOpenid()));
     }
 }
