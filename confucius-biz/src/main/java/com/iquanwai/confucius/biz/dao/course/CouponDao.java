@@ -69,10 +69,9 @@ public class CouponDao extends DBUtil {
 
     public void updateCouponByOrderId(Integer status, String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE Coupon SET Used =?, OrderId=null, Cost=null " +
+            run.update("UPDATE Coupon SET Used =?, OrderId=null, Cost=null " +
                     "where OrderId = ?", status, orderId);
 
         } catch (SQLException e) {
