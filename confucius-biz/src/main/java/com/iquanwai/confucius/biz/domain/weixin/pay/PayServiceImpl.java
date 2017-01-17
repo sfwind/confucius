@@ -146,12 +146,12 @@ public class PayServiceImpl implements PayService{
                             logger.error(payCloseReply.getErr_code_des()+", orderId="+orderId);
                         }
                         logger.info("orderId: {} closed automatically", orderId);
-                        closeOrder(orderId);
-                        //如果有使用优惠券,还原优惠券状态
-                        if(courseOrder.getDiscount()!=0.0){
-                            costRepo.updateCoupon(Coupon.UNUSED, orderId);
-                        }
                     }
+                }
+                closeOrder(orderId);
+                //如果有使用优惠券,还原优惠券状态
+                if(courseOrder.getDiscount()!=0.0){
+                    costRepo.updateCoupon(Coupon.UNUSED, orderId);
                 }
             }catch (Exception e){
                 logger.error("orderId: {} close failed", orderId);
