@@ -177,5 +177,11 @@ public class ConfigUtils {
 		return config.getBoolean("pc.server.maintenance");
 	}
 
-
+	public static String getSurveyUrl(Integer id){
+		try {
+			return config.getString("wjx.survey." + id);
+		} catch (Exception e){
+			return null;
+		}
+	}
 }
