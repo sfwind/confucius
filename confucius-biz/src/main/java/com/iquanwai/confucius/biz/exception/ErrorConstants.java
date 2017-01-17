@@ -32,5 +32,7 @@ public class ErrorConstants {
     public static final int NOT_FOLLOW = 10002;
     // 没有购买过碎片化任务
     public static final int NOT_PAY_FRAGMENT = 20001;
+    // 没购买过这个任务
+    public static final int NOT_PAY_PROBLEM = 20002;
 
 }

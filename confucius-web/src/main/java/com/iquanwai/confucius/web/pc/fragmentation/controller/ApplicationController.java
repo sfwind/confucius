@@ -1,32 +1,41 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.web.resolver.PCLoginUser;
-import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.pc.dto.ChallengeSubmitDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkEditDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.modelmapper.internal.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -46,10 +55,13 @@ public class ApplicationController {
     private PictureService pictureService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private PlanService planService;
 
     /**
      * 获取应用训练标题
-     * @param loginUser 登陆人
+     *
+     * @param loginUser     登陆人
      * @param applicationId 应用训练Id
      */
     @RequestMapping("/title/{applicationId}")
@@ -59,7 +71,7 @@ public class ApplicationController {
                 .module("训练")
                 .function("应用任务")
                 .action("加载应用任务标题")
-                .memo(applicationId+"");
+                .memo(applicationId + "");
         operationLogService.log(operationLog);
         ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(applicationId);
         return WebUtils.result(applicationPractice.getTopic());
@@ -67,8 +79,9 @@ public class ApplicationController {
 
     /**
      * 获取应用训练
-     * @param loginUser 登陆人
-     * @param planId 计划ID
+     *
+     * @param loginUser     登陆人
+     * @param planId        计划ID
      * @param applicationId 应用训练ID
      * @return
      */
@@ -76,32 +89,45 @@ public class ApplicationController {
     public ResponseEntity<Map<String, Object>> loadMineApplication(PCLoginUser loginUser,
                                                                    @PathVariable("planId") Integer planId,
                                                                    @PathVariable("applicationId") Integer applicationId) {
+        Assert.notNull(loginUser,"用户信息不能为空");
+        Assert.notNull(planId, "计划id不能为空");
         Assert.notNull(applicationId, "应用训练id不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
                 .action("加载自己的应用任务")
-                .memo(planId+":"+applicationId);
+                .memo(planId + ":" + applicationId);
         operationLogService.log(operationLog);
-        ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId());
-        RiseWorkEditDto dto = new RiseWorkEditDto();
-        dto.setSubmitId(applicationPractice.getSubmitId());
-        dto.setTitle(applicationPractice.getTopic());
-        dto.setContent(applicationPractice.getContent());
-        dto.setDescription(applicationPractice.getDescription());
-        dto.setModuleId(Constants.PictureType.APPLICATION);
-        List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, dto.getSubmitId());
-        dto.setPicList(pictureList
-                .stream()
-                .map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName())
-                .collect(Collectors.toList()));
-        return WebUtils.result(dto);
+        String openId = loginUser.getOpenId();
+        // 先检查该用户有没有买这个作业
+        List<ImprovementPlan> userPlans = planService.loadUserPlans(openId);
+        // 看看这个id在不在
+        Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
+        if (plan.isPresent()) {
+            ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId());
+            RiseWorkEditDto dto = new RiseWorkEditDto();
+            dto.setSubmitId(applicationPractice.getSubmitId());
+            dto.setTitle(applicationPractice.getTopic());
+            dto.setContent(applicationPractice.getContent());
+            dto.setDescription(applicationPractice.getDescription());
+            dto.setModuleId(Constants.PictureType.APPLICATION);
+            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, dto.getSubmitId());
+            dto.setPicList(pictureList
+                    .stream()
+                    .map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName())
+                    .collect(Collectors.toList()));
+            return WebUtils.result(dto);
+        } else {
+            return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
+        }
+
     }
 
     /**
      * 应用列表页加载自己的任务
-     * @param loginUser 登陆人
-     * @param planId 计划Id
+     *
+     * @param loginUser     登陆人
+     * @param planId        计划Id
      * @param applicationId 挑战任务ID
      */
     @RequestMapping("/list/mine/{planId}/{applicationId}")
@@ -113,7 +139,7 @@ public class ApplicationController {
                 .module("训练")
                 .function("应用任务")
                 .action("应用任务列表加载自己的应用任务")
-                .memo(applicationId+"");
+                .memo(applicationId + "");
         operationLogService.log(operationLog);
         ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId());
 
@@ -133,7 +159,8 @@ public class ApplicationController {
 
     /**
      * 应用任务列表页加载他人的任务信息
-     * @param loginUser 登陆人
+     *
+     * @param loginUser     登陆人
      * @param applicationId 应用任务Id
      */
     @RequestMapping("/list/other/{applicationId}")
@@ -145,7 +172,7 @@ public class ApplicationController {
                 .module("训练")
                 .function("应用任务")
                 .action("应用任务列表加载他人的应用任务")
-                .memo(applicationId+"");
+                .memo(applicationId + "");
         operationLogService.log(operationLog);
         List<RiseWorkInfoDto> submits = applicationService.loadApplicationSubmitList(applicationId).stream()
                 .filter(item -> !item.getOpenid().equals(loginUser.getOpenId())).map(item -> {
@@ -168,8 +195,9 @@ public class ApplicationController {
 
     /**
      * 提交应用任务
-     * @param loginUser 登陆人
-     * @param submitId 提交人id
+     *
+     * @param loginUser          登陆人
+     * @param submitId           提交人id
      * @param challengeSubmitDto 任务内容
      */
     @RequestMapping("/submit/{submitId}")
@@ -193,8 +221,9 @@ public class ApplicationController {
 
     /**
      * 展示应用任务
+     *
      * @param loginUser 登陆人
-     * @param submitId 提交id
+     * @param submitId  提交id
      */
     @RequestMapping("/show/{submitId}")
     public ResponseEntity<Map<String, Object>> show(PCLoginUser loginUser, @PathVariable Integer submitId) {
