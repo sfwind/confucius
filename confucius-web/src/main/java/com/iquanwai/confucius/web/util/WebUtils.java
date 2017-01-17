@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.util;
+package com.iquanwai.confucius.web.util;
 
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.slf4j.Logger;
@@ -9,8 +9,6 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;

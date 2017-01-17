@@ -5,8 +5,8 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.resolver.LoginUser;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.AnswerDto;
 import com.iquanwai.confucius.web.course.dto.ChapterPageDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
@@ -37,33 +37,28 @@ public class ChapterController {
     @RequestMapping("/load/{chapterId}")
     public ResponseEntity<Map<String, Object>> load(LoginUser loginUser,
                                                     @PathVariable("chapterId") Integer chapterId){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
-            if(chapter==null){
-                return WebUtils.error("获取用户当前章节页失败");
-            }
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
-            if(classMember==null){
-                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
-            }
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, null, false);
-            if(chapterPageDto==null){
-                return WebUtils.error("获取用户当前章节页失败");
-            }
-
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("章节")
-                    .function("学习章节")
-                    .action("打开上次学习的章节页")
-                    .memo(chapterId+","+chapterPageDto.getPage().getSequence());
-            operationLogService.log(operationLog);
-            return WebUtils.result(chapterPageDto);
-        }catch (Exception e){
-            LOGGER.error("获取用户当前章节页失败", e);
+        Assert.notNull(loginUser, "用户不能为空");
+        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+        if(chapter==null){
             return WebUtils.error("获取用户当前章节页失败");
         }
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
+        if(classMember==null){
+            LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
+            return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
+        }
+        ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, null, false);
+        if(chapterPageDto==null){
+            return WebUtils.error("获取用户当前章节页失败");
+        }
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("章节")
+                .function("学习章节")
+                .action("打开上次学习的章节页")
+                .memo(chapterId+","+chapterPageDto.getPage().getSequence());
+        operationLogService.log(operationLog);
+        return WebUtils.result(chapterPageDto);
     }
 
     private ChapterPageDto loadPage(LoginUser loginUser, Chapter chapter, Integer pageSequence, Boolean lazyLoad) {
@@ -84,170 +79,135 @@ public class ChapterController {
     public ResponseEntity<Map<String, Object>> load(LoginUser loginUser,
                                                     @PathVariable("chapterId") Integer chapterId,
                                                     @PathVariable("sequence") Integer pageSequence){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
-            if(chapter==null){
-                return WebUtils.error("获取用户当前章节页失败");
-            }
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
-            if(classMember==null){
-                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
-            }
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, pageSequence, false);
-            if(chapterPageDto==null){
-                return WebUtils.error("获取用户当前章节页失败");
-            }
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("章节")
-                    .function("学习章节")
-                    .action("打开章节某页")
-                    .memo(chapterId+","+pageSequence);
-            operationLogService.log(operationLog);
-            return WebUtils.result(chapterPageDto);
-        }catch (Exception e){
-            LOGGER.error("获取用户当前章节页失败", e);
+        Assert.notNull(loginUser, "用户不能为空");
+        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+        if(chapter==null){
             return WebUtils.error("获取用户当前章节页失败");
         }
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
+        if(classMember==null){
+            LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
+            return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
+        }
+        ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, pageSequence, false);
+        if(chapterPageDto==null){
+            return WebUtils.error("获取用户当前章节页失败");
+        }
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("章节")
+                .function("学习章节")
+                .action("打开章节某页")
+                .memo(chapterId+","+pageSequence);
+        operationLogService.log(operationLog);
+        return WebUtils.result(chapterPageDto);
     }
 
     @RequestMapping("/page/lazyLoad/{chapterId}/{sequence}")
     public ResponseEntity<Map<String, Object>> lazyLoad(LoginUser loginUser,
-                                                    @PathVariable("chapterId") Integer chapterId,
-                                                    @PathVariable("sequence") Integer pageSequence){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
+                                                        @PathVariable("chapterId") Integer chapterId,
+                                                        @PathVariable("sequence") Integer pageSequence){
+        Assert.notNull(loginUser, "用户不能为空");
 //            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
 //                    .module("章节")
 //                    .function("学习章节")
 //                    .action("打开章节某页")
 //                    .memo(chapterId+","+pageSequence);
 //            operationLogService.log(operationLog);
-            Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
-            if(chapter==null){
-                return WebUtils.error("懒加载章节页失败");
-            }
-            ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, pageSequence, true);
-            if(chapterPageDto==null){
-                return WebUtils.error("懒加载章节页失败");
-            }
-            return WebUtils.result(chapterPageDto);
-        }catch (Exception e){
-            LOGGER.error("懒加载章节页失败", e);
+        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+        if(chapter==null){
             return WebUtils.error("懒加载章节页失败");
         }
+        ChapterPageDto chapterPageDto = loadPage(loginUser, chapter, pageSequence, true);
+        if(chapterPageDto==null){
+            return WebUtils.error("懒加载章节页失败");
+        }
+        return WebUtils.result(chapterPageDto);
     }
 
     @RequestMapping("/question/load/{questionId}")
     public ResponseEntity<Map<String, Object>> loadQuestion(LoginUser loginUser,
                                                             @PathVariable("questionId") Integer questionId){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("章节")
-                    .function("学习章节")
-                    .action("加载选择题")
-                    .memo(questionId+"");
-            operationLogService.log(operationLog);
-            Question question = courseStudyService.loadQuestion(loginUser.getOpenId(), questionId);
-            if(question==null){
-                return WebUtils.error("获取选择题失败");
-            }
-            return WebUtils.result(question);
-        }catch (Exception e){
-            LOGGER.error("获取选择题失败", e);
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("章节")
+                .function("学习章节")
+                .action("加载选择题")
+                .memo(questionId+"");
+        operationLogService.log(operationLog);
+        Question question = courseStudyService.loadQuestion(loginUser.getOpenId(), questionId);
+        if(question==null){
             return WebUtils.error("获取选择题失败");
         }
+        return WebUtils.result(question);
     }
 
     @RequestMapping(value="/answer/{questionId}", method= RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submitQuestion(LoginUser loginUser,
                                                               @PathVariable("questionId") Integer questionId,
                                                               @RequestBody AnswerDto answerDto){
-        try{
-            boolean right = courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
+        boolean right = courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
 
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("章节")
-                    .function("回答问题")
-                    .action("提交问题")
-                    .memo(questionId+":"+right);
-            operationLogService.log(operationLog);
-            return WebUtils.result(right);
-        }catch (Exception e){
-            LOGGER.error("回答问题失败", e);
-            return WebUtils.error("回答问题失败");
-        }
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("章节")
+                .function("回答问题")
+                .action("提交问题")
+                .memo(questionId+":"+right);
+        operationLogService.log(operationLog);
+        return WebUtils.result(right);
     }
 
     @RequestMapping("/homework/load/{homeworkId}")
     public ResponseEntity<Map<String, Object>> loadHomework(LoginUser loginUser,
                                                             @PathVariable("homeworkId") Integer homeworkId){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("作业")
-                    .function("做作业")
-                    .action("加载作业")
-                    .memo(homeworkId+"");
-            operationLogService.log(operationLog);
-            Homework homework = courseStudyService.loadHomework(loginUser.getOpenId(), homeworkId);
-            if(homework==null){
-                return WebUtils.error("获取作业失败");
-            }
-            return WebUtils.result(homework);
-        }catch (Exception e){
-            LOGGER.error("获取作业失败", e);
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("作业")
+                .function("做作业")
+                .action("加载作业")
+                .memo(homeworkId+"");
+        operationLogService.log(operationLog);
+        Homework homework = courseStudyService.loadHomework(loginUser.getOpenId(), homeworkId);
+        if(homework==null){
             return WebUtils.error("获取作业失败");
         }
+        return WebUtils.result(homework);
     }
 
     @RequestMapping(value="/homework/submit/{homeworkId}", method= RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submitHomework(LoginUser loginUser,
-                                                      @PathVariable("homeworkId") Integer homeworkId,
-                                                      @RequestBody HomeworkSubmitDto homeworkSubmitDto){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            if(StringUtils.isEmpty(homeworkSubmitDto.getAnswer())){
-                return WebUtils.error("请写完后再提交");
-            }
-            if(homeworkSubmitDto.getAnswer().length()>10000){
-                return WebUtils.error("字数太长，请删减到10000字以下");
-            }
-            courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), loginUser.getOpenId(), homeworkId);
-
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("作业")
-                    .function("做作业")
-                    .action("提交作业")
-                    .memo(homeworkId+"");
-            operationLogService.log(operationLog);
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("提交作业失败", e);
-            return WebUtils.error("提交作业失败");
+                                                              @PathVariable("homeworkId") Integer homeworkId,
+                                                              @RequestBody HomeworkSubmitDto homeworkSubmitDto){
+        Assert.notNull(loginUser, "用户不能为空");
+        if(StringUtils.isEmpty(homeworkSubmitDto.getAnswer())){
+            return WebUtils.error("请写完后再提交");
         }
+        if(homeworkSubmitDto.getAnswer().length()>10000){
+            return WebUtils.error("字数太长，请删减到10000字以下");
+        }
+        courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), loginUser.getOpenId(), homeworkId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("作业")
+                .function("做作业")
+                .action("提交作业")
+                .memo(homeworkId+"");
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 
     @RequestMapping(value="/mark/page/{chapterId}/{sequence}", method= RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> markPage(LoginUser loginUser,
-                                                                @PathVariable("chapterId") Integer chapterId,
-                                                                @PathVariable("sequence") Integer sequence){
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            courseStudyService.markPage(loginUser.getOpenId(), chapterId, sequence);
+                                                        @PathVariable("chapterId") Integer chapterId,
+                                                        @PathVariable("sequence") Integer sequence){
+        Assert.notNull(loginUser, "用户不能为空");
+        courseStudyService.markPage(loginUser.getOpenId(), chapterId, sequence);
 
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("章节")
-                    .function("记录看到的页数")
-                    .action("记录看到的页数")
-                    .memo(chapterId+","+sequence);
-            operationLogService.log(operationLog);
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("记录页数失败", e);
-            return WebUtils.error("记录页数失败");
-        }
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("章节")
+                .function("记录看到的页数")
+                .action("记录看到的页数")
+                .memo(chapterId+","+sequence);
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 }

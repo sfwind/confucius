@@ -12,7 +12,7 @@ import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import org.slf4j.Logger;
@@ -49,12 +49,7 @@ public class BackendController {
 
     @RequestMapping("/assign/angel/{classId}")
     public ResponseEntity<Map<String, Object>> submit(@PathVariable("classId") Integer classId){
-        boolean result = false;
-        try {
-            result = operationalService.angelAssign(classId);
-        }catch (Exception e){
-            LOGGER.error("分配天使失败", e);
-        }
+        boolean result = operationalService.angelAssign(classId);
 
         return WebUtils.result(result);
     }
@@ -62,21 +57,16 @@ public class BackendController {
     @RequestMapping("/entry/{orderId}")
     public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId){
         String result;
-        try {
-            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
-            if(courseOrder!=null){
-                if(courseOrder.getStatus()==1){
-                    String memberId = signupService.entry(courseOrder);
-                    result = "报名成功, 学号是"+memberId;
-                }else{
-                    result = "尚未付款";
-                }
+        CourseOrder courseOrder = signupService.getCourseOrder(orderId);
+        if(courseOrder!=null){
+            if(courseOrder.getStatus()==1){
+                String memberId = signupService.entry(courseOrder);
+                result = "报名成功, 学号是"+memberId;
             }else{
-                result = "订单不存在";
+                result = "尚未付款";
             }
-        }catch (Exception e){
-            result = "出现异常，报名失败";
-            LOGGER.error(result, e);
+        }else{
+            result = "订单不存在";
         }
 
         return WebUtils.result(result);
@@ -84,23 +74,19 @@ public class BackendController {
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> log(@RequestBody ErrorLogDto errorLogDto){
-        try {
-            String data = errorLogDto.getResult();
-            if(data.length()>1024){
-                data = data.substring(0, 1024);
-            }
-            String cookieStr= errorLogDto.getCookie();
-
-            String openid = oAuthService.openId(getAccessTokenFromCookie(cookieStr));
-            OperationLog operationLog = OperationLog.create().openid(openid)
-                    .module("bug")
-                    .function("bug")
-                    .action("记录前端bug")
-                    .memo(data);
-            operationLogService.log(operationLog);
-        }catch (Exception e){
-            LOGGER.error("日志记录失败", e);
+        String data = errorLogDto.getResult();
+        if(data.length()>1024){
+            data = data.substring(0, 1024);
         }
+        String cookieStr= errorLogDto.getCookie();
+
+        String openid = oAuthService.openId(getAccessTokenFromCookie(cookieStr));
+        OperationLog operationLog = OperationLog.create().openid(openid)
+                .module("bug")
+                .function("bug")
+                .action("记录前端bug")
+                .memo(data);
+        operationLogService.log(operationLog);
         return WebUtils.success();
     }
 

@@ -2,8 +2,8 @@ package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
-import com.iquanwai.confucius.util.CookieUtils;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.util.CookieUtils;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

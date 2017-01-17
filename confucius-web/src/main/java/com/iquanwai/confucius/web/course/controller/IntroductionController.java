@@ -8,8 +8,8 @@ import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.resolver.LoginUser;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.AllCourseDto;
 import com.iquanwai.confucius.web.course.dto.MyCourseDto;
 import org.apache.commons.lang3.StringUtils;
@@ -43,42 +43,37 @@ public class IntroductionController {
     @RequestMapping("/mycourse")
     public ResponseEntity<Map<String, Object>> mycourse(LoginUser loginUser){
         AllCourseDto allCourseDto = new AllCourseDto();
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            List<MyCourseDto> courseDtos = Lists.newArrayList();
-            List<ClassMember> classMemberList = courseProgressService.loadActiveCourse(loginUser.getOpenId());
-            List<CourseIntroduction> notEntryCourses = courseIntroductionService.loadNotEntryCourses(classMemberList);
-            allCourseDto.setOtherCourses(notEntryCourses);
-            for(ClassMember classMember:classMemberList) {
-                MyCourseDto courseDto = new MyCourseDto();
-                CourseIntroduction course = courseIntroductionService.loadCourse(classMember.getCourseId());
-                if (course == null) {
-                    return WebUtils.error("获取介绍失败");
-                }
-                //intro信息太大,去掉
-                course.setIntro(null);
-                courseDto.setCourse(course);
-                courseDto.setCourseProgress(courseProgress(course, classMember));
-                courseDto.setMyProgress(myProgress(course, classMember));
-                //长课程,我的进度不能大于课程进度
-                if(course.getType()== Course.LONG_COURSE) {
-                    if (courseDto.getMyProgress() > courseDto.getCourseProgress()) {
-                        courseDto.setMyProgress(courseDto.getCourseProgress());
-                    }
-                }
-                courseDtos.add(courseDto);
+        Assert.notNull(loginUser, "用户不能为空");
+        List<MyCourseDto> courseDtos = Lists.newArrayList();
+        List<ClassMember> classMemberList = courseProgressService.loadActiveCourse(loginUser.getOpenId());
+        List<CourseIntroduction> notEntryCourses = courseIntroductionService.loadNotEntryCourses(classMemberList);
+        allCourseDto.setOtherCourses(notEntryCourses);
+        for(ClassMember classMember:classMemberList) {
+            MyCourseDto courseDto = new MyCourseDto();
+            CourseIntroduction course = courseIntroductionService.loadCourse(classMember.getCourseId());
+            if (course == null) {
+                return WebUtils.error("获取介绍失败");
             }
-            allCourseDto.setMyCourses(courseDtos);
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("服务号")
-                    .function("介绍")
-                    .action("我的训练");
-            operationLogService.log(operationLog);
-            return WebUtils.result(allCourseDto);
-        }catch (Exception e){
-            LOGGER.error("获取介绍失败", e);
-            return WebUtils.error("获取介绍失败");
+            //intro信息太大,去掉
+            course.setIntro(null);
+            courseDto.setCourse(course);
+            courseDto.setCourseProgress(courseProgress(course, classMember));
+            courseDto.setMyProgress(myProgress(course, classMember));
+            //长课程,我的进度不能大于课程进度
+            if(course.getType()== Course.LONG_COURSE) {
+                if (courseDto.getMyProgress() > courseDto.getCourseProgress()) {
+                    courseDto.setMyProgress(courseDto.getCourseProgress());
+                }
+            }
+            courseDtos.add(courseDto);
         }
+        allCourseDto.setMyCourses(courseDtos);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("服务号")
+                .function("介绍")
+                .action("我的训练");
+        operationLogService.log(operationLog);
+        return WebUtils.result(allCourseDto);
     }
 
     private Double courseProgress(CourseIntroduction course, ClassMember classMember) {
@@ -120,40 +115,29 @@ public class IntroductionController {
     public ResponseEntity<Map<String, Object>> allcourse(LoginUser loginUser){
 
 
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("服务号")
-                    .function("介绍")
-                    .action("更多训练");
-            operationLogService.log(operationLog);
-            List<CourseIntroduction> courseList = courseIntroductionService.loadAll();
-            courseList = courseList.stream().filter(course -> !course.getHidden()).collect(Collectors.toList());
-            return WebUtils.result(courseList);
-        }catch (Exception e){
-            LOGGER.error("获取更多训练失败", e);
-            return WebUtils.error("获取更多训练失败");
-        }
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("服务号")
+                .function("介绍")
+                .action("更多训练");
+        operationLogService.log(operationLog);
+        List<CourseIntroduction> courseList = courseIntroductionService.loadAll();
+        courseList = courseList.stream().filter(course -> !course.getHidden()).collect(Collectors.toList());
+        return WebUtils.result(courseList);
     }
 
     @RequestMapping("/course/{courseId}")
     public ResponseEntity<Map<String, Object>> allcourse(@PathVariable Integer courseId,
-                                                             LoginUser loginUser){
+                                                         LoginUser loginUser){
 
-
-        try{
-            Assert.notNull(loginUser, "用户不能为空");
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("服务号")
-                    .function("介绍")
-                    .action("课程详情")
-                    .memo(courseId+"");
-            operationLogService.log(operationLog);
-            CourseIntroduction course = courseIntroductionService.loadCourse(courseId);
-            return WebUtils.result(course);
-        }catch (Exception e){
-            LOGGER.error("获取介绍失败", e);
-            return WebUtils.error("获取介绍失败");
-        }
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("服务号")
+                .function("介绍")
+                .action("课程详情")
+                .memo(courseId+"");
+        operationLogService.log(operationLog);
+        CourseIntroduction course = courseIntroductionService.loadCourse(courseId);
+        return WebUtils.result(course);
     }
 }

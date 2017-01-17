@@ -2,7 +2,7 @@ package com.iquanwai.confucius.web;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;

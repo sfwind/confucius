@@ -1,11 +1,11 @@
-package com.iquanwai.confucius.resolver;
+package com.iquanwai.confucius.web.resolver;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.util.CookieUtils;
+import com.iquanwai.confucius.web.util.CookieUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

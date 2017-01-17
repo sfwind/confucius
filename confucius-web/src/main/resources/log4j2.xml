@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
 	<Appenders>
-		<File name="appAppender" fileName="/data/applogs/confucius-web/logs/app.log" append="true">
-			<PatternLayout pattern="[confucius-web]%d %-5p [%c] %m%n"/>
-		</File>
+		<RollingFile name="appAppender" fileName="/data/applogs/confucius-web/logs/app.log"
+					 filePattern="/data/applogs/confucius-web/logs/app-%d{MM-dd-yyyy}-%i.log.gz">
+			<PatternLayout pattern="[platon-web]%d %-5p [%c] %m%n"/>
+			<SizeBasedTriggeringPolicy size="2MB"/>
+		</RollingFile>
 		<Console name="STDOUT" target="SYSTEM_OUT">
 			<PatternLayout pattern="[confucius-web]%d %-5p [%c] %m%n"/>
 		</Console>

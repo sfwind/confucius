@@ -8,7 +8,7 @@ import com.iquanwai.confucius.biz.po.Homework;
 import com.iquanwai.confucius.biz.po.HomeworkSubmit;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.HomeworkLoadDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkReviewDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
@@ -40,97 +40,77 @@ public class PCHomeworkController {
 
     @RequestMapping("/load/{url}")
     public ResponseEntity<Map<String, Object>> loadHomework(@PathVariable("url") String url){
-        try{
-            String completeUrl = "/static/h?id="+url;
-            HomeworkSubmit submit = courseStudyService.loadHomework(completeUrl);
+        String completeUrl = "/static/h?id="+url;
+        HomeworkSubmit submit = courseStudyService.loadHomework(completeUrl);
 
-            if(submit==null){
-                return WebUtils.error("获取作业失败");
-            }
-            String openid = submit.getSubmitOpenid();
-            OperationLog operationLog = OperationLog.create().openid(openid)
-                    .module("作业")
-                    .function("做作业")
-                    .action("PC加载作业")
-                    .memo(submit.getHomeworkId()+"");
-            operationLogService.log(operationLog);
-            Homework homework = courseStudyService.loadHomework(openid, submit.getHomeworkId());
-            if(homework==null){
-                return WebUtils.error("获取作业失败");
-            }
-            // 加载大作业的图片
-            List<Picture> pictureList = pictureService.loadPicture(PictureModuleType.HOMEWORK, submit.getId());
-
-            HomeworkLoadDto homeworkLoadDto = new HomeworkLoadDto(PictureModuleType.HOMEWORK, submit.getId(),
-                    homework, pictureList.stream().map(item -> {
-                String picUrl = pictureService.getModulePrefix(PictureModuleType.HOMEWORK) + item.getRealName();
-                return new PictureDto(PictureModuleType.HOMEWORK, submit.getId(), picUrl);
-            }).collect(Collectors.toList()));
-
-            return WebUtils.result(homeworkLoadDto);
-        }catch (Exception e){
-            LOGGER.error("获取作业失败", e);
+        if(submit==null){
             return WebUtils.error("获取作业失败");
         }
+        String openid = submit.getSubmitOpenid();
+        OperationLog operationLog = OperationLog.create().openid(openid)
+                .module("作业")
+                .function("做作业")
+                .action("PC加载作业")
+                .memo(submit.getHomeworkId()+"");
+        operationLogService.log(operationLog);
+        Homework homework = courseStudyService.loadHomework(openid, submit.getHomeworkId());
+        if(homework==null){
+            return WebUtils.error("获取作业失败");
+        }
+        // 加载大作业的图片
+        List<Picture> pictureList = pictureService.loadPicture(PictureModuleType.HOMEWORK, submit.getId());
+
+        HomeworkLoadDto homeworkLoadDto = new HomeworkLoadDto(PictureModuleType.HOMEWORK, submit.getId(),
+                homework, pictureList.stream().map(item -> {
+            String picUrl = pictureService.getModulePrefix(PictureModuleType.HOMEWORK) + item.getRealName();
+            return new PictureDto(PictureModuleType.HOMEWORK, submit.getId(), picUrl);
+        }).collect(Collectors.toList()));
+
+        return WebUtils.result(homeworkLoadDto);
     }
 
     @RequestMapping(value="/submit/{url}", method= RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submit(@PathVariable("url") String url,
-            @RequestBody HomeworkSubmitDto homeworkSubmitDto){
-        try{
-            String completeUrl = "/static/h?id="+url;
-            HomeworkSubmit submit = courseStudyService.loadHomework(completeUrl);
+                                                      @RequestBody HomeworkSubmitDto homeworkSubmitDto){
+        String completeUrl = "/static/h?id="+url;
+        HomeworkSubmit submit = courseStudyService.loadHomework(completeUrl);
 
-            if(submit==null){
-                return WebUtils.error("提交作业失败");
-            }
-            if(StringUtils.isEmpty(homeworkSubmitDto.getAnswer())){
-                return WebUtils.error("请写完后再提交");
-            }
-            if(homeworkSubmitDto.getAnswer().length()>10000){
-                return WebUtils.error("字数太长，请删减到10000字以下");
-            }
-            String openid = submit.getSubmitOpenid();
-            courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), openid, submit.getHomeworkId());
-
-            OperationLog operationLog = OperationLog.create().openid(openid)
-                    .module("作业")
-                    .function("做作业")
-                    .action("PC提交作业")
-                    .memo(submit.getHomeworkId()+"");
-            operationLogService.log(operationLog);
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("提交作业失败", e);
+        if(submit==null){
             return WebUtils.error("提交作业失败");
         }
+        if(StringUtils.isEmpty(homeworkSubmitDto.getAnswer())){
+            return WebUtils.error("请写完后再提交");
+        }
+        if(homeworkSubmitDto.getAnswer().length()>10000){
+            return WebUtils.error("字数太长，请删减到10000字以下");
+        }
+        String openid = submit.getSubmitOpenid();
+        courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), openid, submit.getHomeworkId());
+
+        OperationLog operationLog = OperationLog.create().openid(openid)
+                .module("作业")
+                .function("做作业")
+                .action("PC提交作业")
+                .memo(submit.getHomeworkId()+"");
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 
     @RequestMapping("/load/{homeworkId}/all")
     public ResponseEntity<Map<String, Object>> loadHomeworkAll(@PathVariable("homeworkId") Integer homeworkId){
-        try{
-            List<HomeworkSubmit> submit = courseStudyService.loadSubmittedHomework(homeworkId);
+        List<HomeworkSubmit> submit = courseStudyService.loadSubmittedHomework(homeworkId);
 
-            return WebUtils.result(submit);
-        }catch (Exception e){
-            LOGGER.error("获取作业失败", e);
-            return WebUtils.error("获取作业失败");
-        }
+        return WebUtils.result(submit);
     }
 
     @RequestMapping(value = "/remark", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> remark(@RequestBody HomeworkReviewDto homeworkReviewDto){
-        try{
-            courseStudyService.remark(homeworkReviewDto.getOpenid(),
-                    homeworkReviewDto.getClassId(),
-                    homeworkReviewDto.getHomeworkId(),
-                    homeworkReviewDto.isExcellent(),
-                    homeworkReviewDto.isFail());
+        courseStudyService.remark(homeworkReviewDto.getOpenid(),
+                homeworkReviewDto.getClassId(),
+                homeworkReviewDto.getHomeworkId(),
+                homeworkReviewDto.isExcellent(),
+                homeworkReviewDto.isFail());
 
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("批改作业失败", e);
-            return WebUtils.error("批改作业失败");
-        }
+        return WebUtils.success();
     }
 }

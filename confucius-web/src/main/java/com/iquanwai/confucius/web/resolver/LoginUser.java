@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.resolver;
+package com.iquanwai.confucius.web.resolver;
 
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import lombok.AllArgsConstructor;

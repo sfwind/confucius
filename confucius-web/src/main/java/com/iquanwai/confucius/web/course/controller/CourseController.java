@@ -6,8 +6,8 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.resolver.LoginUser;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.CertificateDto;
 import com.iquanwai.confucius.web.course.dto.CoursePageDto;
 import com.iquanwai.confucius.web.course.dto.WeekIndexDto;
@@ -43,31 +43,26 @@ public class CourseController {
 
     @RequestMapping("/load/{courseId}")
     public ResponseEntity<Map<String, Object>> loadCourse(LoginUser loginUser, @PathVariable Integer courseId){
-        try{
-            Assert.notNull(loginUser,"用户不能为空");
-            Course c = courseProgressService.loadCourse(courseId);
+        Assert.notNull(loginUser,"用户不能为空");
+        Course c = courseProgressService.loadCourse(courseId);
 
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
-            if(classMember==null){
-                LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
-            }
-            int week = getProgressWeek(classMember, c.getType());
-            CoursePageDto course = getCourse(loginUser, classMember, week, c);
-            if(course==null){
-                return WebUtils.error("获取当前课程失败");
-            }
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("课程")
-                    .function("学习课程")
-                    .action("打开课程引导页")
-                    .memo(course.getCourse().getId()+"");
-            operationLogService.log(operationLog);
-            return WebUtils.result(course);
-        }catch (Exception e){
-            LOGGER.error("获取当前课程失败", e);
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+        if(classMember==null){
+            LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
+            return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
+        }
+        int week = getProgressWeek(classMember, c.getType());
+        CoursePageDto course = getCourse(loginUser, classMember, week, c);
+        if(course==null){
             return WebUtils.error("获取当前课程失败");
         }
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("课程")
+                .function("学习课程")
+                .action("打开课程引导页")
+                .memo(course.getCourse().getId()+"");
+        operationLogService.log(operationLog);
+        return WebUtils.result(course);
     }
 
     private int getProgressWeek(ClassMember classMember, int type) {
@@ -99,7 +94,7 @@ public class CourseController {
     }
 
     private CoursePageDto getCourse(LoginUser loginUser, ClassMember classMember,
-                                           int week, Course course) {
+                                    int week, Course course) {
 
         courseProgressService.loadChapter(classMember, week, course);
         //设置看到某一页
@@ -138,29 +133,24 @@ public class CourseController {
     public ResponseEntity<Map<String, Object>> loadWeek(@PathVariable("courseId") Integer courseId,
                                                         @PathVariable("week") Integer week,
                                                         LoginUser loginUser){
-        try{
-            Assert.notNull(loginUser,"用户不能为空");
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
-            if(classMember==null){
-                WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
-            }
-            Course c = courseProgressService.loadCourse(courseId);
+        Assert.notNull(loginUser,"用户不能为空");
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+        if(classMember==null){
+            WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
+        }
+        Course c = courseProgressService.loadCourse(courseId);
 
-            CoursePageDto course = getCourse(loginUser, classMember, week, c);
-            if(course==null){
-                return WebUtils.error("获取用户当前课程失败");
-            }
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("课程")
-                    .function("学习课程")
-                    .action("打开某一周的课程")
-                    .memo(courseId+","+week);
-            operationLogService.log(operationLog);
-            return WebUtils.result(course);
-        }catch (Exception e){
-            LOGGER.error("获取用户当前课程失败", e);
+        CoursePageDto course = getCourse(loginUser, classMember, week, c);
+        if(course==null){
             return WebUtils.error("获取用户当前课程失败");
         }
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("课程")
+                .function("学习课程")
+                .action("打开某一周的课程")
+                .memo(courseId+","+week);
+        operationLogService.log(operationLog);
+        return WebUtils.result(course);
     }
 
     @RequestMapping("/certificate/info/{courseId}")
@@ -168,33 +158,28 @@ public class CourseController {
                                                                LoginUser loginUser){
         Assert.notNull(loginUser,"用户不能为空");
         CertificateDto certificateDto = new CertificateDto();
-        try{
-            Account account = accountService.getAccount(loginUser.getOpenId(), false);
-            if(account!=null){
-                certificateDto.setName(account.getRealName());
-            }
-            // TODO:传classId
-            List<ClassMember> classMemberList = courseProgressService.loadGraduateClassMember(loginUser.getOpenId(), courseId);
-            if(CollectionUtils.isNotEmpty(classMemberList)){
-                ClassMember classMember = classMemberList.get(0);
-                certificateDto.setCertificateNo(classMember.getCertificateNo());
-                Course course = courseProgressService.loadCourse(classMember.getCourseId());
-                if(course!=null){
-                    certificateDto.setCertificateBg(course.getCertificatePic());
-                }
-                certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
-            }
-
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("课程")
-                    .function("毕业")
-                    .action("打开证书")
-                    .memo(courseId+"");
-            operationLogService.log(operationLog);
-            return WebUtils.result(certificateDto);
-        }catch (Exception e){
-            LOGGER.error("获取证书信息失败", e);
-            return WebUtils.error("获取证书信息失败");
+        Account account = accountService.getAccount(loginUser.getOpenId(), false);
+        if(account!=null){
+            certificateDto.setName(account.getRealName());
         }
+        // TODO:传classId
+        List<ClassMember> classMemberList = courseProgressService.loadGraduateClassMember(loginUser.getOpenId(), courseId);
+        if(CollectionUtils.isNotEmpty(classMemberList)){
+            ClassMember classMember = classMemberList.get(0);
+            certificateDto.setCertificateNo(classMember.getCertificateNo());
+            Course course = courseProgressService.loadCourse(classMember.getCourseId());
+            if(course!=null){
+                certificateDto.setCertificateBg(course.getCertificatePic());
+            }
+            certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
+        }
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("课程")
+                .function("毕业")
+                .action("打开证书")
+                .memo(courseId+"");
+        operationLogService.log(operationLog);
+        return WebUtils.result(certificateDto);
     }
 }

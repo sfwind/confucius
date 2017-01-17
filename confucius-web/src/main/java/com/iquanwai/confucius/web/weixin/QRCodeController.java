@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.weixin.qrcode.QRCodeService;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

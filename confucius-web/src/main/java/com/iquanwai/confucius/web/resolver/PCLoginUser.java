@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.resolver;
+package com.iquanwai.confucius.web.resolver;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.po.permisson.Role;

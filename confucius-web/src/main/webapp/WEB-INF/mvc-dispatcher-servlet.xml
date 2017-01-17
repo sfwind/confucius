@@ -43,8 +43,8 @@
             </bean>
         </mvc:message-converters>
         <mvc:argument-resolvers>
-            <bean class="com.iquanwai.confucius.resolver.LoginUserResolver"/>
-            <bean class="com.iquanwai.confucius.resolver.PCLoginUserResolver"/>
+            <bean class="com.iquanwai.confucius.web.resolver.LoginUserResolver"/>
+            <bean class="com.iquanwai.confucius.web.resolver.PCLoginUserResolver"/>
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
@@ -83,7 +83,7 @@
             <mvc:exclude-mapping path="/servercode"/>
             <mvc:exclude-mapping path="/community"/>
             <mvc:exclude-mapping path="/rise"/>
-            <bean class="com.iquanwai.confucius.interceptor.CourseHandlerInterceptor"></bean>
+            <bean class="com.iquanwai.confucius.web.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
         <mvc:interceptor>
             <mvc:mapping path="/pc/**"/>
@@ -91,7 +91,7 @@
             <!--<mvc:mapping path="/image/upload/**"/>-->
             <mvc:exclude-mapping path="/pc/static/**"/>
             <mvc:exclude-mapping path="/pc/fragment/problem/list"/>
-            <bean class="com.iquanwai.confucius.interceptor.PCAjaxHandlerInterceptor">
+            <bean class="com.iquanwai.confucius.web.interceptor.PCAjaxHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>
             </bean>
         </mvc:interceptor>
@@ -99,7 +99,7 @@
             <mvc:mapping path="/fragment/**"/>
             <mvc:mapping path="/community"/>
             <mvc:mapping path="/rise"/>
-            <bean class="com.iquanwai.confucius.interceptor.PCHandlerInterceptor">
+            <bean class="com.iquanwai.confucius.web.interceptor.PCHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>
             </bean>
         </mvc:interceptor>

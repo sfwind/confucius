@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.util;
+package com.iquanwai.confucius.web.util;
 
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 

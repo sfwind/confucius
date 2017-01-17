@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.account.dto;
 
-import com.iquanwai.confucius.resolver.LoginUser;
+import com.iquanwai.confucius.web.resolver.LoginUser;
 import lombok.Data;
 
 /**

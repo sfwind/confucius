@@ -1,32 +1,23 @@
 package com.iquanwai.confucius.web.account.controller;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
-import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.ClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.resolver.PCLoginUser;
-import com.iquanwai.confucius.resolver.PCLoginUserResolver;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
+import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.account.dto.AccountDto;
-import com.iquanwai.confucius.web.account.dto.CourseDto;
-import com.iquanwai.confucius.web.account.dto.FragmentDto;
 import com.iquanwai.confucius.web.account.dto.LoginCheckDto;
 import com.iquanwai.confucius.web.account.websocket.SessionSocketHandler;
-import com.iquanwai.confucius.web.pc.dto.ChallengeDto;
-import com.iquanwai.confucius.web.pc.dto.ProblemDto;
 import org.modelmapper.internal.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.TextMessage;
@@ -35,7 +26,6 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2016/12/20.

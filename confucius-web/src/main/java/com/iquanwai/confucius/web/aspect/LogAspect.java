@@ -2,10 +2,10 @@ package com.iquanwai.confucius.web.aspect;
 
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.resolver.LoginUser;
-import com.iquanwai.confucius.resolver.LoginUserResolver;
-import com.iquanwai.confucius.resolver.PCLoginUser;
-import com.iquanwai.confucius.resolver.PCLoginUserResolver;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.resolver.LoginUserResolver;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

@@ -1,12 +1,11 @@
-package com.iquanwai.confucius.interceptor;
+package com.iquanwai.confucius.web.interceptor;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.resolver.PCLoginUser;
-import com.iquanwai.confucius.resolver.PCLoginUserResolver;
-import com.iquanwai.confucius.util.WebUtils;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -16,17 +15,16 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 /**
- * Created by nethunder on 2016/12/23.
+ * Created by nethunder on 2017/1/7.
  */
-public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
-
+public class PCAjaxHandlerInterceptor extends HandlerInterceptorAdapter {
     private PermissionService permissionService;
 
-    public PCHandlerInterceptor() {
+    public PCAjaxHandlerInterceptor() {
 
     }
 
-    public PCHandlerInterceptor(PermissionService permissionService) {
+    public PCAjaxHandlerInterceptor(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
 
@@ -38,7 +36,11 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
             String value = request.getRequestedSessionId();
             // 没有session信息
             if (StringUtils.isEmpty(value) || !PCLoginUserResolver.isLogin(value)) {
-                WebUtils.login(request, response);
+                Map<String, Object> map = Maps.newHashMap();
+                PrintWriter out = response.getWriter();
+                map.put("code", 401);
+                map.put("msg", "没有登录");
+                out.write(CommonUtils.mapToJson(map));
                 return false;
             }
 
@@ -47,7 +49,11 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
             String role = pcLoginUser.getRole();
             // 根据role查询所有权限列表
             if (!permissionService.checkPermission(role, request.getRequestURI())) {
-                WebUtils.reject(request,response);
+                PrintWriter out = response.getWriter();
+                Map<String, Object> map = Maps.newHashMap();
+                map.put("code", 403);
+                map.put("msg", "没有该权限");
+                out.write(CommonUtils.mapToJson(map));
                 return false;
             }
         }
