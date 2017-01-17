@@ -55,27 +55,6 @@ public class ClassDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public boolean isOver(Integer classId){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<QuanwaiClass> h = new BeanHandler(QuanwaiClass.class);
-
-        try {
-            QuanwaiClass quanwaiClass = run.query("SELECT * FROM QuanwaiClass where Id = ?",
-                    h, classId);
-            if(quanwaiClass==null){
-                return true;
-            }
-            //大于结束日期8天就算终结
-            Date completeDate = quanwaiClass.getCloseTime();
-            Date closeDate = DateUtils.afterDays(completeDate, 8);
-            return closeDate.before(new Date());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return true;
-    }
-
     public List<QuanwaiClass> loadClassByOpenDate(Date date){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);

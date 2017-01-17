@@ -193,7 +193,8 @@ public class SignupServiceImpl implements SignupService {
         ClassMember classMember = classMemberDao.getClassMember(classId, openid);
         Date closeDate = getCloseDate(classId, courseId);
         if(classMember!=null){
-            if(classMember.getGraduate()){
+            //已经毕业或者已经超过关闭时间,重置学员数据
+            if(classMember.getGraduate() || classMember.getCloseDate().before(DateUtils.startDay(new Date()))){
                 classMemberDao.reEntry(classMember.getId(), closeDate);
             }
             return classMember.getMemberId();

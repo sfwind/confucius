@@ -68,8 +68,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(classMember==null){
             return true;
         }
-        Date today = DateUtils.parseStringToDate(DateUtils.parseDateToString(new Date()));
-        if(classMember.getCloseDate().before(today)){
+        if(classMember.getCloseDate().before(DateUtils.startDay(new Date()))){
             if(!classMember.getGraduate()){
                 Course course = courseDao.load(Course.class, classMember.getCourseId());
                 //短课程关闭以后,如果用户还未毕业,强制设置成毕业
@@ -125,9 +124,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(quanwaiClass==null){
             return;
         }
-        Date closeDate = quanwaiClass.getCloseTime();
-        if(closeDate.before(DateUtils.beforeDays(new Date(), 7))){
+        if(classMember.getGraduate()){
             logger.info("{} has no active course {}", classMember.getOpenId(), classMember.getCourseId());
+            return;
         }
 
         classMember.setClassProgress(quanwaiClass.getProgress());
