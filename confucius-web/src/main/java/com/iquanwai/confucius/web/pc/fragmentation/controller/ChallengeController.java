@@ -109,6 +109,7 @@ public class ChallengeController {
             return WebUtils.result(result);
         } else {
             // 没有买这个问题
+            logger.error("用户:{},没有该训练计划:{}，挑战训练:{}",openId,plan,cid);
             return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
     }

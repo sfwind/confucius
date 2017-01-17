@@ -118,6 +118,7 @@ public class ApplicationController {
                     .collect(Collectors.toList()));
             return WebUtils.result(dto);
         } else {
+            logger.error("用户:{},没有该训练计划:{}，应用训练:{}",openId,plan,applicationId);
             return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
 
