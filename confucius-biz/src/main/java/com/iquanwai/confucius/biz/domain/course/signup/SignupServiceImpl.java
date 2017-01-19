@@ -137,6 +137,7 @@ public class SignupServiceImpl implements SignupService {
         quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY); //待支付
         quanwaiOrder.setGoodsId(courseId+"");
         quanwaiOrder.setGoodsName(course.getCourseName());
+        quanwaiOrder.setGoodsType(QuanwaiOrder.SYSTEMATISM);
         quanwaiOrderDao.insert(quanwaiOrder);
 
         //生成体系化报名数据
