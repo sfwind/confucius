@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -206,6 +207,7 @@ public class ApplicationController {
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
+        ApplicationSubmit submit = applicationService.loadSubmit(submitId);
         Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
@@ -214,7 +216,13 @@ public class ApplicationController {
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if (result) {
-            return WebUtils.success();
+            if(submit.getPointStatus()==0){
+                ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
+                return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
+            } else {
+                return WebUtils.success();
+            }
+
         } else {
             return WebUtils.error("提交失败");
         }

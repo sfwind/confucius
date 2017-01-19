@@ -25,6 +25,7 @@ import com.iquanwai.confucius.web.pc.dto.ChallengeSubmitDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -193,15 +194,19 @@ public class ChallengeController {
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        Boolean result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
+        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("挑战训练")
                 .action("PC提交挑战训练答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
-        if (result) {
-            return WebUtils.success();
+        if (result.getLeft() > 0) {
+            if (result.getLeft() == 2) {
+                return WebUtils.result(result.getRight());
+            } else {
+                return WebUtils.success();
+            }
         } else {
             return WebUtils.error("提交失败");
         }

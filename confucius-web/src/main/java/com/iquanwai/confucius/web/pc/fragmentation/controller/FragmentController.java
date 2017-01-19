@@ -2,8 +2,10 @@ package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
+import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
@@ -18,14 +20,17 @@ import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkItemDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,7 +52,11 @@ public class FragmentController {
     @Autowired
     private PracticeService practiceService;
     @Autowired
+    private ChallengeService challengeService;
+    @Autowired
     private ApplicationService applicationService;
+    @Autowired
+    private PointRepo pointRepo;
 
     public static String challengeListUrl = "/fragment/c/list?cid={cid}";
     public static String doChallengeUrl = "/fragment/c?cid={cid}&planId={planId}";
@@ -155,20 +164,34 @@ public class FragmentController {
         if (status == 1) {
             // 点赞
             practiceService.vote(vote.getType(), refer, openId);
-            voteResult = new MutablePair(1, "success");
+//            voteResult = new MutablePair(1, "success");
+            // 点赞加积分
+            // 点赞加积分
+            Integer planId = null;
+            if(vote.getType()== Constants.VoteType.CHALLENGE){
+                // 挑战任务点赞
+                planId = challengeService.loadSubmit(refer).getPlanId();
+            } else {
+                // 应用任务点赞
+                planId = applicationService.loadSubmit(refer).getPlanId();
+            }
+            pointRepo.risePoint(planId,2);
             operationLog.action("点赞").memo(loginUser.getOpenId() + "点赞" + refer);
         } else {
+            // 禁止取消点赞
+            logger.error("取消点赞！已禁止!");
             // 取消点赞
-            voteResult = practiceService.disVote(vote.getType(), refer, openId);
-            operationLog.action("取消点赞").memo(loginUser.getOpenId() + "取消点赞" + refer);
+//            voteResult = practiceService.disVote(vote.getType(), refer, openId);
+//            operationLog.action("取消点赞").memo(loginUser.getOpenId() + "取消点赞" + refer);
         }
 
         operationLogService.log(operationLog);
-        if (voteResult.getLeft() == 1) {
-            return WebUtils.success();
-        } else {
-            return WebUtils.error(voteResult.getRight());
-        }
+        return WebUtils.success();
+//        if (voteResult.getLeft() == 1) {
+//            return WebUtils.success();
+//        } else {
+//            return WebUtils.error(voteResult.getRight());
+//        }
     }
 
 
