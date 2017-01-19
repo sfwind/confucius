@@ -92,6 +92,7 @@
             <mvc:exclude-mapping path="/pc/static/**"/>
             <mvc:exclude-mapping path="/pc/fragment/problem/list"/>
             <mvc:exclude-mapping path="/pc/survey/wjx"/>
+            <mvc:exclude-mapping path="/pc/survey/wjx/submit"/>
             <bean class="com.iquanwai.confucius.web.interceptor.PCAjaxHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>
             </bean>
