@@ -158,17 +158,20 @@ public class FragmentController {
             voteResult = new MutablePair(1, "success");
             operationLog.action("点赞").memo(loginUser.getOpenId() + "点赞" + refer);
         } else {
+            // 禁止取消点赞
+            logger.error("取消点赞！已禁止!");
             // 取消点赞
-            voteResult = practiceService.disVote(vote.getType(), refer, openId);
-            operationLog.action("取消点赞").memo(loginUser.getOpenId() + "取消点赞" + refer);
+//            voteResult = practiceService.disVote(vote.getType(), refer, openId);
+//            operationLog.action("取消点赞").memo(loginUser.getOpenId() + "取消点赞" + refer);
         }
 
         operationLogService.log(operationLog);
-        if (voteResult.getLeft() == 1) {
-            return WebUtils.success();
-        } else {
-            return WebUtils.error(voteResult.getRight());
-        }
+        return WebUtils.success();
+//        if (voteResult.getLeft() == 1) {
+//            return WebUtils.success();
+//        } else {
+//            return WebUtils.error(voteResult.getRight());
+//        }
     }
 
 
