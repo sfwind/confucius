@@ -1,7 +1,5 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.point;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 /**
  * Created by justin on 16/12/14.
  */
@@ -16,6 +14,8 @@ public interface PointRepo {
 
     //挑战训练得分
     int CHALLENGE_PRACTICE_SCORE = 500;
+
+    int VOTE_SCORE = 2;
 
     void reloadScore();
 }
