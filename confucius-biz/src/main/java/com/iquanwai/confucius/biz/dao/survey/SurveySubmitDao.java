@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.dao.survey;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.po.survey.SurveySubmit;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -29,6 +30,18 @@ public class SurveySubmitDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    public Boolean submit(SurveySubmit surveySubmit){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update SurveySubmit SET Sequence = ?,Status = 1,TimeTaken = ?,SubmitTime = ?,TotalValue= ? where Id = ?";
+        try {
+            runner.update(sql, surveySubmit.getSequence(), surveySubmit.getTimeTaken(), surveySubmit.getSubmitTime(), surveySubmit.getTotalValue(), surveySubmit.getId());
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return false;
+        }
+        return true;
     }
 
 }

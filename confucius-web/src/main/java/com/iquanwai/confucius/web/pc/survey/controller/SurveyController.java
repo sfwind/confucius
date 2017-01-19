@@ -1,10 +1,15 @@
 package com.iquanwai.confucius.web.pc.survey.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
+import com.iquanwai.confucius.biz.po.survey.SurveyQuestionSubmit;
 import com.iquanwai.confucius.biz.po.survey.SurveySubmit;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.web.pc.survey.dto.SurveyResultDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,7 +45,7 @@ public class SurveyController {
         try {
             Assert.notNull(pcLoginUser, "用户的登录信息不能为空");
             // 插入问卷提交表
-            Integer submitId = surveyService.insert(pcLoginUser.getOpenId(), activity);
+            Integer submitId = surveyService.insertSurveySubmit(pcLoginUser.getOpenId(), activity);
             if (submitId != null && submitId > 0) {
                 // 获取url
                 String wjxUrl = ConfigUtils.getSurveyUrl(activity);
@@ -66,26 +73,74 @@ public class SurveyController {
     }
 
     @RequestMapping("/wjx/submit")
-    public ResponseEntity<Map<String, Object>> wjxSubmit(PCLoginUser loginUser, @RequestBody Map<String, Object> submitObject) {
-        // 问卷星提交回调接口,数据如下
-        /**
-         * {activity=11853325,
-         * name=全测试1,
-         * sojumpparm=4,
-         * q1=1, q2=1,2,
-         * q3=填空, q4_1=姓名, q4_2=21, q4_3=test, q5=2, q6=2,3,
-         * index=2,
-         * timetaken=19,
-         * submittime=2017-01-17 19:26:01}
-
-
-         */
-        logger.info("User:{}", loginUser);
-        logger.info("submitObject:{}", submitObject);
-        SurveySubmit surveySubmit = new SurveySubmit();
-
-
+    public ResponseEntity<Map<String, Object>> wjxSubmit(@RequestBody Map<String, Object> submitObject) {
+        Assert.notNull(submitObject,"提交数据不能为空");
+        SurveyResultDto surveyResultDto = new SurveyResultDto();
+        try {
+            BeanUtils.populate(surveyResultDto,submitObject);
+            SurveySubmit surveySubmit = this.buildSurveySubmit(surveyResultDto);
+            SurveySubmit oldSubmit = surveyService.load(surveySubmit.getId());
+            if (oldSubmit == null) {
+                logger.error("提交问卷数据异常:{}",submitObject);
+                return WebUtils.error("提交问卷数据异常");
+            }
+            Boolean updateStatus = surveyService.submitSurvey(surveySubmit);
+            if (updateStatus) {
+                List<SurveyQuestionSubmit> questionSubmits = this.buildQuestionSubmits(oldSubmit,submitObject);
+                surveyService.batchSubmitQuestions(questionSubmits);
+            } else {
+                // 提交失败
+                logger.error("提交问卷数据异常,插入问题异常:{}", submitObject);
+                return WebUtils.error ("提交问卷数据异常,插入问题异常");
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            logger.error("接收问卷提交数据失败",e);
+            return WebUtils.error(e.getLocalizedMessage());
+        }
         return WebUtils.success();
     }
+
+    private List<SurveyQuestionSubmit> buildQuestionSubmits(SurveySubmit oldSubmit,Map<String,Object>submitObject){
+        // 先取出之前生成的数据
+        List<SurveyQuestionSubmit> surveyQuestionSubmits = Lists.newArrayList();
+        for (Map.Entry<String, Object> entry : submitObject.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if('q' == key.charAt(0)){
+                // 是问题，后面是序号
+                try {
+                    Integer sequence = Integer.parseInt(key.substring(1));
+                    SurveyQuestionSubmit surveyQuestionSubmit = new SurveyQuestionSubmit();
+                    surveyQuestionSubmit.setOpenId(oldSubmit.getOpenId());
+                    surveyQuestionSubmit.setSequence(sequence);
+                    surveyQuestionSubmit.setActivity(oldSubmit.getActivity());
+                    surveyQuestionSubmit.setContent(value.toString());
+                    surveyQuestionSubmit.setSurveySubmitId(oldSubmit.getId());
+                    surveyQuestionSubmits.add(surveyQuestionSubmit);
+                } catch (Exception e){
+                    // 解析信息失败
+                    logger.error("解析失败", e);
+                }
+            }
+        }
+        return surveyQuestionSubmits;
+    }
+
+    private SurveySubmit buildSurveySubmit(SurveyResultDto dto){
+            SurveySubmit surveySubmit = new SurveySubmit();
+            surveySubmit.setId(dto.getSojumpparm());
+            surveySubmit.setTotalValue(dto.getTotalvalue());
+            surveySubmit.setSubmitTime(DateUtils.parseStringToDateTime(dto.getSubmittime()));
+            surveySubmit.setTimeTaken(dto.getTimetaken());
+            surveySubmit.setActivity(dto.getActivity());
+            surveySubmit.setSequence(dto.getIndex());
+            return surveySubmit;
+    }
+
+    public static void main(String[] args){
+        String str = "1^fwef,3,2ˆ,2^,3,4^";
+        System.out.println(str.indexOf("2^"));
+    }
+
 
 }
