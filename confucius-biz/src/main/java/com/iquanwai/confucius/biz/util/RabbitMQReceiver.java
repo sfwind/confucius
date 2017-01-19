@@ -40,8 +40,11 @@ public class RabbitMQReceiver {
         try {
             connection = factory.newConnection();
             channel = connection.createChannel();
+            //队列声明,广播形式
             channel.exchangeDeclare(topic, "fanout");
+            //交换机声明,默认不持久化
             channel.queueDeclare(queue, false, false, false, null);
+            //队列交换机绑定
             channel.queueBind(queue, topic, "");
         }catch (IOException e) {
             //ignore

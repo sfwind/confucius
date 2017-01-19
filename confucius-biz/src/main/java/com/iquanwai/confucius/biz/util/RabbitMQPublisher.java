@@ -36,6 +36,7 @@ public class RabbitMQPublisher {
         try {
             connection = factory.newConnection();
             channel = connection.createChannel();
+            //队列声明,广播形式
             channel.exchangeDeclare(topic, "fanout");
         }catch (IOException e) {
             //ignore
