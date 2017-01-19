@@ -58,7 +58,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> load(Integer applicationId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Content is not null";
+        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Content is not null order by UpdateTime desc";
         try {
             return run.query(sql, h, applicationId);
         } catch (SQLException e) {
