@@ -9,8 +9,8 @@ import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
@@ -57,10 +57,10 @@ public class BackendController {
     @RequestMapping("/entry/{orderId}")
     public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId){
         String result;
-        QuanwaiOrder quanwaiOrder = signupService.getOrder(orderId);
-        if(quanwaiOrder !=null){
-            if(quanwaiOrder.getStatus()==1){
-                String memberId = signupService.entry(quanwaiOrder);
+        CourseOrder courseOrder = signupService.getOrder(orderId);
+        if(courseOrder !=null){
+            if(courseOrder.getEntry()){
+                String memberId = signupService.entry(orderId);
                 result = "报名成功, 学号是"+memberId;
             }else{
                 result = "尚未付款";

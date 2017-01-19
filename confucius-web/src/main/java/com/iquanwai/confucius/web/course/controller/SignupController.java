@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -99,7 +100,7 @@ public class SignupController {
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
         Assert.notNull(loginUser, "用户不能为空");
-        QuanwaiOrder courseOrder = signupService.getOrder(orderId);
+        CourseOrder courseOrder = signupService.getOrder(orderId);
         if(courseOrder==null){
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
@@ -110,8 +111,8 @@ public class SignupController {
                 .action("点击付费完成")
                 .memo(orderId);
         operationLogService.log(operationLog);
-        if(courseOrder.getStatus()!=1){
-            LOGGER.error("订单状态：{}", courseOrder.getStatus());
+        if(!courseOrder.getEntry()){
+            LOGGER.error("订单{}未支付", courseOrder.getOrderId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
         }
 //        signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
@@ -167,13 +168,13 @@ public class SignupController {
                 .action("打开报名成功页面")
                 .memo(orderId);
         operationLogService.log(operationLog);
-        QuanwaiOrder courseOrder = signupService.getOrder(orderId);
+        CourseOrder courseOrder = signupService.getOrder(orderId);
         if(courseOrder==null){
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
-        if(courseOrder.getStatus()!=1){
-            LOGGER.error("订单状态：{}", courseOrder.getStatus());
+        if(courseOrder.getEntry()){
+            LOGGER.error("订单{}未支付", courseOrder.getOrderId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
         }
         ClassMember classMember = signupService.classMember(orderId);

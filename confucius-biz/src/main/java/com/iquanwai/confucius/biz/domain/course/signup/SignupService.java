@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -50,13 +51,14 @@ public interface SignupService {
     /**
      * 根据订单号获取订单
      * */
-    QuanwaiOrder getOrder(String orderId);
+    CourseOrder getOrder(String orderId);
 
     /**
      * 付款成功后入学
+     * @param orderId 订单id
      * @return 返回学号
      * */
-    String entry(QuanwaiOrder quanwaiOrder);
+    String entry(String orderId);
 
     /**
      * 是否免费

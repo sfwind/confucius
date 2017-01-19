@@ -10,7 +10,7 @@ import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.awt.*;
@@ -202,14 +201,11 @@ public class SignupServiceImpl implements SignupService {
         return courseMap.get(courseId);
     }
 
-    public QuanwaiOrder getOrder(String orderId) {
-        return quanwaiOrderDao.loadOrder(orderId);
+    public CourseOrder getOrder(String orderId) {
+        return courseOrderDao.loadOrder(orderId);
     }
 
-    public String entry(QuanwaiOrder quanwaiOrder) {
-        Assert.notNull(quanwaiOrder, "订单对象不能为空");
-        String orderId = quanwaiOrder.getOrderId();
-
+    public String entry(String orderId) {
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
         Integer classId = courseOrder.getClassId();
         Integer courseId = courseOrder.getCourseId();
@@ -239,11 +235,6 @@ public class SignupServiceImpl implements SignupService {
         classMember.setCloseDate(closeDate);
 
         classMemberDao.entry(classMember);
-        //使用优惠券
-        if(quanwaiOrder.getDiscount()!=0.0){
-            logger.info("{}使用优惠券", openid);
-            costRepo.updateCoupon(Coupon.USED, quanwaiOrder.getOrderId());
-        }
         //从待付款列表中去除
         payList.remove(new Payment(openid, courseId));
         //发送录取消息

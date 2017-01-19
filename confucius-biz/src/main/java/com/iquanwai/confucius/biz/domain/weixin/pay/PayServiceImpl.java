@@ -130,7 +130,13 @@ public class PayServiceImpl implements PayService{
         }
         //TODO:改成消息中间件
         if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
-            signupService.entry(quanwaiOrder);
+            signupService.entry(quanwaiOrder.getOrderId());
+        }
+
+        //使用优惠券
+        if(quanwaiOrder.getDiscount()!=0.0){
+            logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
+            costRepo.updateCoupon(Coupon.USED, orderId);
         }
     }
 
