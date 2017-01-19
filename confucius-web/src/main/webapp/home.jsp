@@ -16,6 +16,7 @@
         headImage:"${headImage}",
         loginSocketUrl:"${loginSocketUrl}",
         isDevelopment:${isDevelopment},
+        feedBack:${feedBack},
     }
 </script>
 

@@ -184,4 +184,8 @@ public class ConfigUtils {
 			return null;
 		}
 	}
+
+	public static Integer getFeedBackId(){
+		return config.getInt("wjx.feedback");
+	}
 }
