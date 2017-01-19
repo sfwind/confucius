@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -61,7 +62,7 @@ public class SignupController {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
             }
             if(result.getLeft()==-2){
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.noclass"));
+                return WebUtils.error(ErrorConstants.COURSE_NOT_OPEN,ErrorMessageUtils.getErrmsg("signup.noclass"));
             }
             if(result.getLeft()==-3){
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
