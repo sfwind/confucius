@@ -87,10 +87,19 @@ public class CourseOrderDao extends DBUtil{
 
     public void closeOrder(String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String sql = "Update CourseOrder set IsDel=1 where OrderId=?";
         try {
-            asyncRun.update(sql,orderId);
+            run.update(sql,orderId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void entry(String orderId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "Update CourseOrder set Entry=1 where OrderId=?";
+        try {
+            run.update(sql,orderId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -213,6 +213,8 @@ public class SignupServiceImpl implements SignupService {
         Integer classId = courseOrder.getClassId();
         Integer courseId = courseOrder.getCourseId();
         String openid = courseOrder.getOpenid();
+        //体系化订单标记已报名
+        courseOrderDao.entry(orderId);
         ClassMember classMember = classMemberDao.getClassMember(classId, openid);
         Date closeDate = getCloseDate(classId, courseId);
         if(classMember!=null){

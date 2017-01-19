@@ -21,8 +21,12 @@ public class QuanwaiOrder {
     private String returnMsg; //微信返回信息
     private String transactionId; // 微信支付订单号
     private String goodsId; //商品id
+    private String goodsType; //商品类型
     private String goodsName; //商品名称
     private Double total; //非db字段,订单的原始金额,不计折扣金额
+
+    //体系化课程
+    public static final String SYSTEMATISM = "systematism";
 
     public static final int UNDER_PAY = 0;
     public static final int PAID = 1;

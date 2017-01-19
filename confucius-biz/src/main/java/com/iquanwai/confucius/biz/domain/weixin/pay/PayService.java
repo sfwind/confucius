@@ -19,6 +19,12 @@ public interface PayService {
     void handlePayResult(PayCallback payCallback);
 
     /**
+     * 订单付款成功
+     * @param orderId 订单id
+     * */
+    void paySuccess(String orderId);
+
+    /**
      * 定期关闭过期订单
      * */
     void closeOrder();

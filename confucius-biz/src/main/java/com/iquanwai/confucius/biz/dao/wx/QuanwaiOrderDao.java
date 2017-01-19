@@ -28,13 +28,14 @@ public class QuanwaiOrderDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "INSERT INTO QuanwaiOrder(OrderId, Openid, Price, Discount, PrepayId, " +
-                " Status, CreateTime, GoodsId, GoodsName) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                " Status, CreateTime, GoodsId, GoodsName, GoodsType) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             asyncRun.update(insertSql,
                     quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
                     quanwaiOrder.getDiscount(), quanwaiOrder.getPrepayId(), quanwaiOrder.getStatus(),
-                    quanwaiOrder.getCreateTime(), quanwaiOrder.getGoodsId(), quanwaiOrder.getGoodsName());
+                    quanwaiOrder.getCreateTime(), quanwaiOrder.getGoodsId(), quanwaiOrder.getGoodsName(),
+                    quanwaiOrder.getGoodsType());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -56,10 +57,9 @@ public class QuanwaiOrderDao extends DBUtil {
 
     public void updatePrepayId(String prepayId, String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE QuanwaiOrder SET PrepayId =? " +
+            run.update("UPDATE QuanwaiOrder SET PrepayId =? " +
                     "where OrderId=?", prepayId, orderId);
 
         } catch (SQLException e) {

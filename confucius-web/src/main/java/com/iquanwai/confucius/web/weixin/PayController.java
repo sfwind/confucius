@@ -1,11 +1,9 @@
 package com.iquanwai.confucius.web.weixin;
 
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
-import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +25,6 @@ import java.io.IOException;
 public class PayController {
     @Autowired
     private PayService payService;
-    @Autowired
-    private SignupService signupService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -69,11 +65,10 @@ public class PayController {
         LOGGER.info(payCallback.toString());
         try {
             payService.handlePayResult(payCallback);
-            QuanwaiOrder courseOrder = signupService.getOrder(payCallback.getOut_trade_no());
             if(payCallback.getResult_code().equals("SUCCESS")) {
-                signupService.entry(courseOrder);
+                payService.paySuccess(payCallback.getOut_trade_no());
             }else{
-                LOGGER.error("{}付费失败", courseOrder.getOrderId());
+                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
             }
         }catch (Exception e){
             LOGGER.error("支付结果回调处理失败", e);

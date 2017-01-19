@@ -18,6 +18,7 @@ import org.springframework.util.Assert;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/14.
@@ -121,6 +122,18 @@ public class PayServiceImpl implements PayService{
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
     }
 
+    @Override
+    public void paySuccess(String orderId) {
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        if(quanwaiOrder==null){
+            logger.error("订单 {} 不存在", orderId);
+        }
+        //TODO:改成消息中间件
+        if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
+            signupService.entry(quanwaiOrder);
+        }
+    }
+
     public void closeOrder() {
         //点开付费的保留5分钟
         Date date = DateUtils.afterMinutes(new Date(), 0-ConfigUtils.getBillOpenMinute());
@@ -129,13 +142,10 @@ public class PayServiceImpl implements PayService{
         List<QuanwaiOrder> underCloseOrders = quanwaiOrderDao.queryUnderCloseOrders(date);
         List<QuanwaiOrder> underCloseOrdersRecent = quanwaiOrderDao.queryUnderCloseOrders(date2);
         //点报名未扫描二维码的直接close
-        for(QuanwaiOrder courseOrder:underCloseOrdersRecent){
-            if(courseOrder.getPrepayId()==null){
-                underCloseOrders.add(courseOrder);
-            }
-        }
-        for(QuanwaiOrder courseOrder:underCloseOrders){
-            String orderId = courseOrder.getOrderId();
+        underCloseOrders.addAll(underCloseOrdersRecent.stream().filter(courseOrder -> courseOrder.getPrepayId() == null).collect(Collectors.toList()));
+
+        for(QuanwaiOrder order:underCloseOrders){
+            String orderId = order.getOrderId();
             PayClose payClose = buildPayClose(orderId);
             try {
                 String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
@@ -150,7 +160,7 @@ public class PayServiceImpl implements PayService{
                 }
                 closeOrder(orderId);
                 //如果有使用优惠券,还原优惠券状态
-                if(courseOrder.getDiscount()!=0.0){
+                if(order.getDiscount()!=0.0){
                     costRepo.updateCoupon(Coupon.UNUSED, orderId);
                 }
             }catch (Exception e){
@@ -159,8 +169,16 @@ public class PayServiceImpl implements PayService{
         }
     }
 
+    @Override
     public void closeOrder(String orderId) {
-        signupService.giveupSignup(orderId);
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        if(quanwaiOrder==null){
+            logger.error("订单 {} 不存在", orderId);
+        }
+        //TODO:改成消息中间件
+        if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
+            signupService.giveupSignup(orderId);
+        }
     }
 
     private PayClose buildPayClose(String orderId) {
