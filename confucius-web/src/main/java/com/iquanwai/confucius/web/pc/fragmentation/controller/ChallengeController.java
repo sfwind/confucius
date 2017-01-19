@@ -16,6 +16,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.course.dto.PictureDto;
@@ -201,7 +202,7 @@ public class ChallengeController {
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if (result) {
-            return WebUtils.success();
+            return WebUtils.result(ConfigUtils.getChallengeScore());
         } else {
             return WebUtils.error("提交失败");
         }

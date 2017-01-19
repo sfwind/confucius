@@ -136,10 +136,4 @@ public class SurveyController {
             return surveySubmit;
     }
 
-    public static void main(String[] args){
-        String str = "1^fwef,3,2ˆ,2^,3,4^";
-        System.out.println(str.indexOf("2^"));
-    }
-
-
 }

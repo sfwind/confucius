@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -214,7 +215,9 @@ public class ApplicationController {
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if (result) {
-            return WebUtils.success();
+            ApplicationSubmit submit = applicationService.loadSubmit(submitId);
+            ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
+            return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
         } else {
             return WebUtils.error("提交失败");
         }
