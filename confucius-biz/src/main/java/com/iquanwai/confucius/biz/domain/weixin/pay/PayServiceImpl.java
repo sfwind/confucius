@@ -3,11 +3,11 @@ package com.iquanwai.confucius.biz.domain.weixin.pay;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
+import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.po.Coupon;
-import com.iquanwai.confucius.biz.po.CourseOrder;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ import java.util.Map;
 @Service
 public class PayServiceImpl implements PayService{
     @Autowired
-    private CourseOrderDao courseOrderDao;
+    private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
     private CostRepo costRepo;
 
@@ -41,7 +41,7 @@ public class PayServiceImpl implements PayService{
 
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
-        CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
+        QuanwaiOrder courseOrder = quanwaiOrderDao.loadOrder(orderId);
         if(courseOrder==null){
             logger.error("order id {} not existed", orderId);
             return "";
@@ -54,14 +54,14 @@ public class PayServiceImpl implements PayService{
         if(reply!=null){
             String prepay_id = reply.getPrepay_id();
             if(prepay_id!=null){
-                courseOrderDao.updatePrepayId(prepay_id, orderId);
+                quanwaiOrderDao.updatePrepayId(prepay_id, orderId);
                 return prepay_id;
             }
             if(reply.getErr_code_des()!=null){
                 logger.error("response is------\n"+response);
                 logger.error(reply.getErr_code_des()+", orderId="+orderId);
                 if(!ignoreCode(reply.getErr_code())) {
-                    courseOrderDao.payError(reply.getErr_code_des(), orderId);
+                    quanwaiOrderDao.payError(reply.getErr_code_des(), orderId);
                 }
             }
 
@@ -110,7 +110,7 @@ public class PayServiceImpl implements PayService{
         if(payCallback.getErr_code_des()!=null){
             logger.error(payCallback.getErr_code_des()+", orderId="+orderId);
             if(!ignoreCode(payCallback.getErr_code())) {
-                courseOrderDao.payError(payCallback.getErr_code_des(), orderId);
+                quanwaiOrderDao.payError(payCallback.getErr_code_des(), orderId);
             }
             return;
         }
@@ -118,7 +118,7 @@ public class PayServiceImpl implements PayService{
         String transactionId = payCallback.getTransaction_id();
         String paidTimeStr = payCallback.getTime_end();
         Date paidTime = DateUtils.parseStringToDate3(paidTimeStr);
-        courseOrderDao.paySuccess(paidTime, transactionId, orderId);
+        quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
     }
 
     public void closeOrder() {
@@ -126,15 +126,15 @@ public class PayServiceImpl implements PayService{
         Date date = DateUtils.afterMinutes(new Date(), 0-ConfigUtils.getBillOpenMinute());
         //临时的只保留3分钟
         Date date2 = DateUtils.afterMinutes(new Date(), -3);
-        List<CourseOrder> underCloseOrders = courseOrderDao.queryUnderCloseOrders(date);
-        List<CourseOrder> underCloseOrdersRecent = courseOrderDao.queryUnderCloseOrders(date2);
+        List<QuanwaiOrder> underCloseOrders = quanwaiOrderDao.queryUnderCloseOrders(date);
+        List<QuanwaiOrder> underCloseOrdersRecent = quanwaiOrderDao.queryUnderCloseOrders(date2);
         //点报名未扫描二维码的直接close
-        for(CourseOrder courseOrder:underCloseOrdersRecent){
+        for(QuanwaiOrder courseOrder:underCloseOrdersRecent){
             if(courseOrder.getPrepayId()==null){
                 underCloseOrders.add(courseOrder);
             }
         }
-        for(CourseOrder courseOrder:underCloseOrders){
+        for(QuanwaiOrder courseOrder:underCloseOrders){
             String orderId = courseOrder.getOrderId();
             PayClose payClose = buildPayClose(orderId);
             try {
@@ -185,7 +185,7 @@ public class PayServiceImpl implements PayService{
     }
 
 
-    private UnifiedOrder buildOrder(CourseOrder courseOrder){
+    private UnifiedOrder buildOrder(QuanwaiOrder quanwaiOrder){
         UnifiedOrder unifiedOrder = new UnifiedOrder();
         Map<String, String> map = Maps.newHashMap();
         String appid = ConfigUtils.getAppid();
@@ -196,11 +196,11 @@ public class PayServiceImpl implements PayService{
         map.put("nonce_str", nonce_str);
         String body = GOODS_BODY;
         map.put("body", body);
-        String openid = courseOrder.getOpenid();
+        String openid = quanwaiOrder.getOpenid();
         map.put("openid", openid);
         String notify_url = ConfigUtils.adapterDomainName()+PAY_CALLBACK_PATH;
         map.put("notify_url", notify_url);
-        String out_trade_no = courseOrder.getOrderId();
+        String out_trade_no = quanwaiOrder.getOrderId();
         map.put("out_trade_no", out_trade_no);
         String trade_type = WEIXIN;
         map.put("trade_type", trade_type);
@@ -211,10 +211,10 @@ public class PayServiceImpl implements PayService{
         String time_expire = DateUtils.parseDateToString3(
                 DateUtils.afterMinutes(new Date(), ConfigUtils.getBillOpenMinute()));
         map.put("time_expire", time_expire);
-        Integer total_fee = (int)(courseOrder.getPrice()*100);
+        Integer total_fee = (int)(quanwaiOrder.getPrice()*100);
         map.put("total_fee", total_fee.toString());
 
-        String detail = buildOrderDetail(courseOrder, total_fee);
+        String detail = buildOrderDetail(quanwaiOrder, total_fee);
         map.put("detail", detail);
 
         String sign = CommonUtils.sign(map);
@@ -238,14 +238,14 @@ public class PayServiceImpl implements PayService{
         return unifiedOrder;
     }
 
-    private String buildOrderDetail(CourseOrder courseOrder, Integer total_fee) {
+    private String buildOrderDetail(QuanwaiOrder quanwaiOrder, Integer total_fee) {
         OrderDetail orderDetail = new OrderDetail();
         List<GoodsDetail> goodsDetailList = Lists.newArrayList();
         orderDetail.setGoodsDetail(goodsDetailList);
         GoodsDetail goodsDetail = new GoodsDetail();
         goodsDetail.setPrice(total_fee);
-        goodsDetail.setGoods_id(courseOrder.getCourseId()+"");
-        goodsDetail.setGoods_name(courseOrder.getCourseName());
+        goodsDetail.setGoods_id(quanwaiOrder.getGoodsId());
+        goodsDetail.setGoods_name(quanwaiOrder.getGoodsName());
         goodsDetail.setGoods_num(1);
         goodsDetailList.add(goodsDetail);
         return new Gson().toJson(orderDetail);

@@ -4,10 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.CourseDao;
-import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
+import com.iquanwai.confucius.biz.po.systematism.Course;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -98,7 +98,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                 }
             }
             //统计已付款和待付款的人数
-            List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
+            List<CourseOrder> courseOrders = courseOrderDao.loadNotExpiredClassOrder(openClass);
             for(CourseOrder courseOrder:courseOrders){
                 String openid = courseOrder.getOpenid();
                 Integer courseId = courseOrder.getCourseId();

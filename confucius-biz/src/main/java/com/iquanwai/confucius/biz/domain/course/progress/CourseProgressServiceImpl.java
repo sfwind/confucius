@@ -6,7 +6,7 @@ import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.domain.course.signup.ClassMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.NumberToHanZi;

@@ -1,17 +1,14 @@
 package com.iquanwai.confucius.biz.domain.course.introduction;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.CourseIntroduction;
-import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 

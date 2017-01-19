@@ -2,7 +2,7 @@ package com.iquanwai.confucius.biz.dao.course;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.HomeworkSubmit;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkSubmit;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;

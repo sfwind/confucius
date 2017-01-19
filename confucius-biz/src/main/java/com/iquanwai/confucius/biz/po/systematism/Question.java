@@ -1,5 +1,6 @@
-package com.iquanwai.confucius.biz.po;
+package com.iquanwai.confucius.biz.po.systematism;
 
+import com.iquanwai.confucius.biz.po.systematism.Choice;
 import lombok.Data;
 
 import java.util.List;

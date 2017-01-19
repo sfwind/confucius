@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.CourseIntroduction;
-import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -25,12 +25,12 @@ public interface SignupService {
      * 课程报名，生成预付订单
      * @return 订单
      * */
-    CourseOrder signup(String openid, Integer courseId, Integer classId);
+    QuanwaiOrder signup(String openid, Integer courseId, Integer classId);
 
     /**
      * 获取学员详情
      * */
-    ClassMember classMember(String openid, Integer classId);
+    ClassMember classMember(String orderId);
 
     /**
      * 生成付款二维码
@@ -50,13 +50,13 @@ public interface SignupService {
     /**
      * 根据订单号获取订单
      * */
-    CourseOrder getCourseOrder(String orderId);
+    QuanwaiOrder getOrder(String orderId);
 
     /**
      * 付款成功后入学
      * @return 返回学号
      * */
-    String entry(CourseOrder courseOrder);
+    String entry(QuanwaiOrder quanwaiOrder);
 
     /**
      * 是否免费

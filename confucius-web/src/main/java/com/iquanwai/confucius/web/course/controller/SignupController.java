@@ -5,6 +5,9 @@ import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.systematism.Chapter;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -72,7 +75,7 @@ public class SignupController {
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
-            CourseOrder courseOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            QuanwaiOrder courseOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
             productId = courseOrder.getOrderId();
             if(courseOrder.getDiscount()!=0.0){
                 signupDto.setNormal(courseOrder.getTotal());
@@ -96,7 +99,7 @@ public class SignupController {
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
         Assert.notNull(loginUser, "用户不能为空");
-        CourseOrder courseOrder = signupService.getCourseOrder(orderId);
+        QuanwaiOrder courseOrder = signupService.getOrder(orderId);
         if(courseOrder==null){
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
@@ -164,7 +167,7 @@ public class SignupController {
                 .action("打开报名成功页面")
                 .memo(orderId);
         operationLogService.log(operationLog);
-        CourseOrder courseOrder = signupService.getCourseOrder(orderId);
+        QuanwaiOrder courseOrder = signupService.getOrder(orderId);
         if(courseOrder==null){
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
@@ -173,14 +176,14 @@ public class SignupController {
             LOGGER.error("订单状态：{}", courseOrder.getStatus());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
         }
-        ClassMember classMember = signupService.classMember(courseOrder.getOpenid(), courseOrder.getClassId());
+        ClassMember classMember = signupService.classMember(orderId);
         if(classMember==null || classMember.getMemberId()==null){
-            LOGGER.error("{} 尚未报班 {}", courseOrder.getOpenid(), courseOrder.getClassId());
+            LOGGER.error("{} 尚未报班", loginUser.getOpenId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
         entryDto.setMemberId(classMember.getMemberId());
-        entryDto.setQuanwaiClass(signupService.getCachedClass(courseOrder.getClassId()));
-        entryDto.setCourse(signupService.getCachedCourse(courseOrder.getCourseId()));
+        entryDto.setQuanwaiClass(signupService.getCachedClass(classMember.getClassId()));
+        entryDto.setCourse(signupService.getCachedCourse(classMember.getCourseId()));
         Account account = accountService.getAccount(loginUser.getOpenId(), true);
         if(account!=null) {
             entryDto.setUsername(account.getNickname());

@@ -8,13 +8,13 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.CourseOrder;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,10 +57,10 @@ public class BackendController {
     @RequestMapping("/entry/{orderId}")
     public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId){
         String result;
-        CourseOrder courseOrder = signupService.getCourseOrder(orderId);
-        if(courseOrder!=null){
-            if(courseOrder.getStatus()==1){
-                String memberId = signupService.entry(courseOrder);
+        QuanwaiOrder quanwaiOrder = signupService.getOrder(orderId);
+        if(quanwaiOrder !=null){
+            if(quanwaiOrder.getStatus()==1){
+                String memberId = signupService.entry(quanwaiOrder);
                 result = "报名成功, 学号是"+memberId;
             }else{
                 result = "尚未付款";

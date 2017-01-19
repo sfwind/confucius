@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.dao.operational;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.Angel;
+import com.iquanwai.confucius.biz.po.systematism.Angel;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.slf4j.Logger;

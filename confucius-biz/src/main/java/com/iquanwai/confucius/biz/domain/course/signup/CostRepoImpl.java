@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseFreeListDao;
 import com.iquanwai.confucius.biz.po.Coupon;
-import com.iquanwai.confucius.biz.po.CourseFreeList;
+import com.iquanwai.confucius.biz.po.systematism.CourseFreeList;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

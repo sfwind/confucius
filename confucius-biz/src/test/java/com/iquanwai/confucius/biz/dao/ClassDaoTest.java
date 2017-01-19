@@ -1,10 +1,9 @@
 package com.iquanwai.confucius.biz.dao;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.iquanwai.confucius.biz.TestBase;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

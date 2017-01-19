@@ -5,16 +5,13 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * Created by justin on 16/9/10.
+ * Created by justin on 17/1/19.
  */
 @Data
-public class CourseOrder {
+public class QuanwaiOrder {
     private int id;
     private String orderId; //订单id
     private String openid; //openid
-    private Integer courseId; //课程id
-    private String courseName; //课程名称
-    private Integer classId; //班级id
     private Double price;   //实际金额 总金额-折扣金额
     private Double discount; //折扣金额
     private String prepayId; //预支付交易会话标识
@@ -23,10 +20,11 @@ public class CourseOrder {
     private Date createTime; //订单生成时间
     private String returnMsg; //微信返回信息
     private String transactionId; // 微信支付订单号
+    private String goodsId; //商品id
+    private String goodsName; //商品名称
     private Double total; //非db字段,订单的原始金额,不计折扣金额
 
     public static final int UNDER_PAY = 0;
     public static final int PAID = 1;
     public static final int CANCELLED = 2;
-
 }

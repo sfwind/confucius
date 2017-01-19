@@ -1,11 +1,8 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.HomeworkSubmit;
-import com.iquanwai.confucius.biz.po.HomeworkVote;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;

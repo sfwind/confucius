@@ -5,7 +5,7 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
-import com.iquanwai.confucius.biz.po.CourseOrder;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class PayController {
         LOGGER.info(payCallback.toString());
         try {
             payService.handlePayResult(payCallback);
-            CourseOrder courseOrder = signupService.getCourseOrder(payCallback.getOut_trade_no());
+            QuanwaiOrder courseOrder = signupService.getOrder(payCallback.getOut_trade_no());
             if(payCallback.getResult_code().equals("SUCCESS")) {
                 signupService.entry(courseOrder);
             }else{

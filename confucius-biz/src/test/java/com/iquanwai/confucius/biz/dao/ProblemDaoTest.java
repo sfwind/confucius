@@ -3,7 +3,7 @@ package com.iquanwai.confucius.biz.dao;
 import com.iquanwai.confucius.biz.TestBase;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
-import com.iquanwai.confucius.biz.po.HomeworkVote;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

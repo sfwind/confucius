@@ -2,7 +2,7 @@ package com.iquanwai.confucius.biz.dao.course;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.Choice;
+import com.iquanwai.confucius.biz.po.systematism.Choice;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;

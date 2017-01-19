@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.course.introduction;
 
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 
 import java.util.List;
 
