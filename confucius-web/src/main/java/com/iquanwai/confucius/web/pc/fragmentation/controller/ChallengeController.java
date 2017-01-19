@@ -194,6 +194,7 @@ public class ChallengeController {
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
+        ChallengeSubmit submit = challengeService.loadSubmit(submitId);
         Boolean result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
@@ -202,7 +203,11 @@ public class ChallengeController {
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if (result) {
-            return WebUtils.result(ConfigUtils.getChallengeScore());
+            if(submit.getPointStatus()==0){
+                return WebUtils.result(ConfigUtils.getChallengeScore());
+            } else {
+                return WebUtils.success();
+            }
         } else {
             return WebUtils.error("提交失败");
         }

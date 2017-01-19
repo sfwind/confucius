@@ -207,6 +207,7 @@ public class ApplicationController {
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
+        ApplicationSubmit submit = applicationService.loadSubmit(submitId);
         Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
@@ -215,9 +216,13 @@ public class ApplicationController {
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if (result) {
-            ApplicationSubmit submit = applicationService.loadSubmit(submitId);
-            ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
-            return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
+            if(submit.getPointStatus()==0){
+                ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
+                return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
+            } else {
+                return WebUtils.success();
+            }
+
         } else {
             return WebUtils.error("提交失败");
         }

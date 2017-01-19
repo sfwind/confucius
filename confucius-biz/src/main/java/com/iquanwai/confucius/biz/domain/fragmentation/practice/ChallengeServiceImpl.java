@@ -91,4 +91,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         return result;
     }
+
+    @Override
+    public ChallengeSubmit loadSubmit(Integer id){
+        return challengeSubmitDao.load(ChallengeSubmit.class, id);
+    }
 }
