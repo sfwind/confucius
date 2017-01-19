@@ -29,7 +29,7 @@ public class QuanwaiOrderDao extends DBUtil {
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "INSERT INTO QuanwaiOrder(OrderId, Openid, Price, Discount, PrepayId, " +
                 " Status, CreateTime, GoodsId, GoodsName) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             asyncRun.update(insertSql,
                     quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
