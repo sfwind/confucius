@@ -23,7 +23,7 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
 
     public int insert(ChallengeSubmit challengeSubmit){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert SurveySubmit into ChallengeSubmit(Openid, ChallengeId, PlanId) " +
+        String sql = "insert into ChallengeSubmit(Openid, ChallengeId, PlanId) " +
                 "values(?,?,?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),

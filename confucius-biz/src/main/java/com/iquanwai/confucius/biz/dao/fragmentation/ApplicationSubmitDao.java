@@ -24,7 +24,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public int insert(ApplicationSubmit applicationSubmit){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert SurveySubmit into ApplicationSubmit(Openid, ApplicationId, PlanId) " +
+        String sql = "insert into ApplicationSubmit(Openid, ApplicationId, PlanId) " +
                 "values(?,?,?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
