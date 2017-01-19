@@ -107,12 +107,11 @@ public class SurveyController {
             String key = entry.getKey();
             Object value = entry.getValue();
             if('q' == key.charAt(0)){
-                // 是问题，后面是序号
+                // 是问题
                 try {
-                    Integer sequence = Integer.parseInt(key.substring(1));
                     SurveyQuestionSubmit surveyQuestionSubmit = new SurveyQuestionSubmit();
                     surveyQuestionSubmit.setOpenId(oldSubmit.getOpenId());
-                    surveyQuestionSubmit.setSequence(sequence);
+                    surveyQuestionSubmit.setQuestionLabel(key);
                     surveyQuestionSubmit.setActivity(oldSubmit.getActivity());
                     surveyQuestionSubmit.setContent(value.toString());
                     surveyQuestionSubmit.setSurveySubmitId(oldSubmit.getId());

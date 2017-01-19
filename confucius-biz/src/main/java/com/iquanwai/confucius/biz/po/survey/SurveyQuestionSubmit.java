@@ -12,16 +12,8 @@ public class SurveyQuestionSubmit {
     private Integer activity; // 问卷id
     private String openId; //用户openId
 
-    private Integer type; // 题目类型 1-单选 2-多选 3-填空 4-多行填空
-    private Integer sequence; // 问卷中的题目顺序，即第几道题
+//    private Integer type; // 题目类型 1-单选 2-多选 3-填空 4-多行填空
+//    private Integer sequence; // 问卷中的题目顺序，即第几道题
+    private String questionLabel;
     private String content; // 提交的内容
-    /**
-     * {activity= 2=21, q4_3=test, q5=2, q6=2,3,
-     * index=2,
-     * timetaken=19,
-     * submittime=2017-01-17 19:26:01}
-     */
-
-
-
 }

@@ -19,19 +19,18 @@ public class SurveyQuestionSubmitDao extends DBUtil{
 
     public void batchInsert(List<SurveyQuestionSubmit> submitList){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into SurveyQuestionSubmit(SurveySubmitId, Activity, OpenId, Type, Sequence, Content) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "insert into SurveyQuestionSubmit(SurveySubmitId, Activity, OpenId,QuestionLabel,Content) " +
+                "VALUES (?, ?, ?, ?, ?)";
         try {
             Object[][] param = new Object[submitList.size()][];
             for (int i = 0; i < submitList.size(); i++) {
                 SurveyQuestionSubmit submit = submitList.get(i);
-                param[i] = new Object[6];
+                param[i] = new Object[5];
                 param[i][0] = submit.getSurveySubmitId();
                 param[i][1] = submit.getActivity();
                 param[i][2] = submit.getOpenId();
-                param[i][3] = 0;
-                param[i][4] = submit.getSequence();
-                param[i][5] = submit.getContent();
+                param[i][3] = submit.getQuestionLabel();
+                param[i][4] = submit.getContent();
             }
             runner.batch(sql, param);
         }catch (SQLException e) {

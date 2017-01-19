@@ -45,7 +45,6 @@ public class ProblemDaoTest extends TestBase {
         SurveyQuestionSubmit surveyQuestionSubmit = new SurveyQuestionSubmit();
         surveyQuestionSubmit.setOpenId("12");
         surveyQuestionSubmit.setSurveySubmitId(1);
-        surveyQuestionSubmit.setSequence(1);
         surveyQuestionSubmit.setActivity(1);
         surveyQuestionSubmit.setContent("123");
         surveyQuestionSubmits.add(surveyQuestionSubmit);
