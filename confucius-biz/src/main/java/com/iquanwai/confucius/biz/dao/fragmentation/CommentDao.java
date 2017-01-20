@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 public class CommentDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public int insert(Comment comment){
+    public int insert(Comment comment) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "insert into Comment(Type, ReferencedId, CommentOpenId, Content) " +
@@ -44,12 +44,12 @@ public class CommentDao extends PracticeDBUtil {
         return -1;
     }
 
-    public List<Comment> loadComments(Integer type,Integer referId){
+    public List<Comment> loadComments(Integer type, Integer referId, Integer page) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<Comment>(Comment.class);
-        String sql = "SELECT * FROM Comment where Type = ? and ReferencedId = ?";
-        try{
-            return run.query(sql,h,type,referId);
+        String sql = "SELECT * FROM Comment where Type = ? and ReferencedId = ? order by AddTime desc limit " + page + ",5";
+        try {
+            return run.query(sql, h, type, referId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

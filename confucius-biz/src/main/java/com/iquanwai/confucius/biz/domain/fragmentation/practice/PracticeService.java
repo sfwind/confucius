@@ -67,5 +67,5 @@ public interface PracticeService {
     /**
      * 查询评论
      */
-    List<Comment> loadComments(Integer type,Integer referId);
+    List<Comment> loadComments(Integer type,Integer referId,Integer page);
 }

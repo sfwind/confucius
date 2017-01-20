@@ -22,5 +22,4 @@ public class RiseWorkShowDto {
     private Integer planId;
     private Integer workId;
     private List<String> picList;
-    private List<RiseWorkCommentDto> commentList;
 }

@@ -8,14 +8,18 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationServi
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.pc.dto.HomeworkVoteDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkItemDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -30,12 +34,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -57,6 +63,8 @@ public class FragmentController {
     private ApplicationService applicationService;
     @Autowired
     private PointRepo pointRepo;
+    @Autowired
+    private AccountService accountService;
 
     public static String challengeListUrl = "/fragment/c/list?cid={cid}";
     public static String doChallengeUrl = "/fragment/c?cid={cid}&planId={planId}";
@@ -192,6 +200,31 @@ public class FragmentController {
 //        } else {
 //            return WebUtils.error(voteResult.getRight());
 //        }
+    }
+
+    @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}")
+    public ResponseEntity<Map<String,Object>> loadComments(PCLoginUser loginUser,
+                                                           @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
+                                                           @RequestParam("page") Integer page){
+        Assert.notNull(type, "评论类型不能为空");
+        Assert.notNull(submitId, "文章不能为空");
+        Assert.notNull(page, "页码不能为空");
+        List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId,page).stream().map(item->{
+            Account account = accountService.getAccount(item.getCommentOpenId(), false);
+            if(account!=null){
+                RiseWorkCommentDto dto = new RiseWorkCommentDto();
+                dto.setId(item.getId());
+                dto.setContent(item.getContent());
+                dto.setUpTime(DateUtils.parseDateToFormat5(item.getAddTime()));
+                dto.setUpName(account.getNickname());
+                dto.setHeadPic(account.getHeadimgurl());
+                return dto;
+            } else {
+                logger.error("未找到该评论用户:{}",item);
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());;
+        return WebUtils.result(comments);
     }
 
 

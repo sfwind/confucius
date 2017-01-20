@@ -142,8 +142,8 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public List<Comment> loadComments(Integer type, Integer referId) {
-        return commentDao.loadComments(type,referId);
+    public List<Comment> loadComments(Integer type, Integer referId, Integer page) {
+        return commentDao.loadComments(type,referId,page);
     }
 
 
