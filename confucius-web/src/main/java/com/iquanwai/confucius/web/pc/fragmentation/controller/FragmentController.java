@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -202,7 +203,7 @@ public class FragmentController {
 //        }
     }
 
-    @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}")
+    @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}",method = RequestMethod.GET)
     public ResponseEntity<Map<String,Object>> loadComments(PCLoginUser loginUser,
                                                            @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
                                                            @RequestParam("page") Integer page){
@@ -225,6 +226,29 @@ public class FragmentController {
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());;
         return WebUtils.result(comments);
+    }
+
+    @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> comment(PCLoginUser loginUser,
+                                                           @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
+                                                           @RequestBody RiseWorkCommentDto dto) {
+        Assert.notNull(loginUser,"登陆用户不能为空");
+        Assert.notNull(type, "评论类型不能为空");
+        Assert.notNull(submitId, "文章不能为空");
+        Assert.notNull(dto, "内容不能为空");
+        Pair<Boolean, String> result = practiceService.comment(type, submitId, loginUser.getOpenId(), dto.getContent());
+
+        if(result.getLeft()){
+            RiseWorkCommentDto resultDto = new RiseWorkCommentDto();
+            resultDto.setContent(dto.getContent());
+            resultDto.setUpName(loginUser.getWeixin().getWeixinName());
+            resultDto.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
+            resultDto.setUpTime(DateUtils.parseDateToFormat5(new Date()));
+            return WebUtils.result(resultDto);
+        } else {
+            return WebUtils.error("评论失败");
+        }
+
     }
 
 

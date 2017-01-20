@@ -1,13 +1,16 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
+import com.iquanwai.confucius.biz.util.Constants;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -32,6 +35,8 @@ public class PracticeServiceImpl implements PracticeService {
     private HomeworkVoteDao homeworkVoteDao;
     @Autowired
     private CommentDao commentDao;
+    @Autowired
+    private ApplicationSubmitDao applicationSubmitDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -144,6 +149,30 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public List<Comment> loadComments(Integer type, Integer referId, Integer page) {
         return commentDao.loadComments(type,referId,page);
+    }
+
+    @Override
+    public Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content){
+        if(type== Constants.CommentType.CHALLENGE){
+            ChallengeSubmit load = challengeSubmitDao.load(ChallengeSubmit.class, referId);
+            if (load == null) {
+                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}",type,referId,content);
+                return new MutablePair<>(false,"没有该文章");
+            }
+        } else {
+            ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
+            if (load == null) {
+                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}",type,referId,content);
+                return new MutablePair<>(false,"没有该文章");
+            }
+        }
+        Comment comment = new Comment();
+        comment.setType(type);
+        comment.setReferencedId(referId);
+        comment.setContent(content);
+        comment.setCommentOpenId(openId);
+        commentDao.insert(comment);
+        return new MutablePair<>(true,"评论成功");
     }
 
 

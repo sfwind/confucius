@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -181,7 +182,7 @@ public class ChallengeController {
      * @param submitId 提交id
      * @param challengeSubmitDto 内容
      */
-    @RequestMapping("/submit/{submitId}")
+    @RequestMapping(value = "/submit/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submit(PCLoginUser loginUser,
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {

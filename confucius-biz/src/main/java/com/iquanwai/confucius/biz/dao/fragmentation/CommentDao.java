@@ -47,7 +47,7 @@ public class CommentDao extends PracticeDBUtil {
     public List<Comment> loadComments(Integer type, Integer referId, Integer page) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<Comment>(Comment.class);
-        String sql = "SELECT * FROM Comment where Type = ? and ReferencedId = ? order by AddTime desc limit " + page + ",5";
+        String sql = "SELECT * FROM Comment where Type = ? and ReferencedId = ? order by AddTime desc limit " + (page-1)*5 + ",5";
         try {
             return run.query(sql, h, type, referId);
         } catch (SQLException e) {

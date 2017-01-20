@@ -68,4 +68,6 @@ public interface PracticeService {
      * 查询评论
      */
     List<Comment> loadComments(Integer type,Integer referId,Integer page);
+
+    Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content);
 }
