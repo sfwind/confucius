@@ -82,7 +82,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             } else {
                 logger.error("ImprovementPlan is not existed,planId:{}", submit.getPlanId());
             }
-            logger.info("引用训练加分:{}", id);
+            logger.info("应用训练加分:{}", id);
             // 未加分并且字数大于50(字母)
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
                     submit.getApplicationId(), PracticePlan.APPLICATION);

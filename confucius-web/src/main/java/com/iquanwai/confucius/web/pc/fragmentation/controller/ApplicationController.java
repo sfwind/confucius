@@ -18,6 +18,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.pc.dto.ChallengeSubmitDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkEditDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
@@ -287,6 +288,24 @@ public class ApplicationController {
             // 查询照片
             List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
             show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
+            // 查询评论
+            List<RiseWorkCommentDto> comments = practiceService.loadComments(Constants.CommentType.APPLICATION,submitId).stream().map(item->{
+
+                Account account = accountService.getAccount(item.getCommentOpenId(), false);
+                if(account!=null){
+                    RiseWorkCommentDto dto = new RiseWorkCommentDto();
+                    dto.setId(item.getId());
+                    dto.setContent(item.getContent());
+                    dto.setUpTime(DateUtils.parseDateToFormat5(item.getAddTime()));
+                    dto.setUpTime(account.getNickname());
+                    dto.setHeadPic(account.getHeadimgurl());
+                    return dto;
+                } else {
+                    logger.error("未找到该评论用户:{}",item);
+                    return null;
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList());
+            show.setCommentList(comments);
             return WebUtils.result(show);
         }
     }

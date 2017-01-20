@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.fragmentation.dto;
 
-import com.iquanwai.confucius.web.course.dto.PictureDto;
 import lombok.Data;
 
 import java.util.List;
@@ -23,4 +22,5 @@ public class RiseWorkShowDto {
     private Integer planId;
     private Integer workId;
     private List<String> picList;
+    private List<RiseWorkCommentDto> commentList;
 }

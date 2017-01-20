@@ -12,17 +12,22 @@ public interface Constants {
         Integer TIME_OUT = 100001;
     }
     interface PracticeType{
-        int CHALLENGE=21;
-        int APPLICATION=11;
+        int CHALLENGE = 21;
+        int APPLICATION = 11;
     }
     interface VoteType{
-        int CHALLENGE=1;
-        int APPLICATION=2;
+        int CHALLENGE = 1;
+        int APPLICATION = 2;
     }
 
     interface PictureType {
         int HOMEWORK = 1;
         int CHALLENGE = 2;
         int APPLICATION = 3;
+    }
+
+    interface CommentType{
+        int CHALLENGE = 1;
+        int APPLICATION = 2;
     }
 }

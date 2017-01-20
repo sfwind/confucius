@@ -2,12 +2,12 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -29,11 +29,9 @@ public class PracticeServiceImpl implements PracticeService {
     @Autowired
     private ChallengeSubmitDao challengeSubmitDao;
     @Autowired
-    private PracticePlanDao practicePlanDao;
-    @Autowired
-    private PointRepo pointRepo;
-    @Autowired
     private HomeworkVoteDao homeworkVoteDao;
+    @Autowired
+    private CommentDao commentDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -141,6 +139,11 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public HomeworkVote loadVoteRecord(Integer type, Integer referId, String openId) {
         return homeworkVoteDao.loadVoteRecord(type, referId, openId);
+    }
+
+    @Override
+    public List<Comment> loadComments(Integer type, Integer referId) {
+        return commentDao.loadComments(type,referId);
     }
 
 
