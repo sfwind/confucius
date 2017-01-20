@@ -69,5 +69,7 @@ public interface PracticeService {
      */
     List<Comment> loadComments(Integer type,Integer referId,Integer page);
 
+    Integer commentCount(Integer type, Integer referId);
+
     Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content);
 }

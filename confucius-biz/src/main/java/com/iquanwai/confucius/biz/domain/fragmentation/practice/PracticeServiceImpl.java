@@ -152,6 +152,11 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
+    public Integer commentCount(Integer type,Integer referId){
+        return commentDao.commentCount(type,referId);
+    }
+
+    @Override
     public Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content){
         if(type== Constants.CommentType.CHALLENGE){
             ChallengeSubmit load = challengeSubmitDao.load(ChallengeSubmit.class, referId);

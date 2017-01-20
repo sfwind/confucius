@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -50,12 +51,26 @@ public class CommentDao extends PracticeDBUtil {
         }
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<Comment>(Comment.class);
-        String sql = "SELECT * FROM Comment where Type = ? and ReferencedId = ? order by AddTime desc limit " + (page-1)*5 + ",5";
+        String sql = "SELECT * FROM Comment where Type = ? and ReferencedId = ? and Del = 0 order by AddTime desc limit " + (page-1)*5 + ",5";
         try {
             return run.query(sql, h, type, referId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public Integer commentCount(Integer type,Integer referId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+
+        try {
+            Long count = run.query("SELECT count(*) FROM Comment where Type=? and ReferencedId=? and Del=0",
+                    h, type, referId);
+            return count.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return 0;
     }
 }

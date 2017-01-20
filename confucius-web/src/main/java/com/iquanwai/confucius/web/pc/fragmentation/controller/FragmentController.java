@@ -20,6 +20,7 @@ import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.pc.dto.HomeworkVoteDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentListDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkItemDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -210,6 +211,12 @@ public class FragmentController {
         Assert.notNull(type, "评论类型不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(page, "页码不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("训练")
+                .function("碎片化")
+                .action("加载评论")
+                .memo(type+":"+submitId);
+        operationLogService.log(operationLog);
         List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId,page).stream().map(item->{
             Account account = accountService.getAccount(item.getCommentOpenId(), false);
             if(account!=null){
@@ -225,7 +232,11 @@ public class FragmentController {
                 return null;
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());;
-        return WebUtils.result(comments);
+        Integer count = practiceService.commentCount(type,submitId);
+        RiseWorkCommentListDto listDto = new RiseWorkCommentListDto();
+        listDto.setCount(count);
+        listDto.setList(comments);
+        return WebUtils.result(listDto);
     }
 
     @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}", method = RequestMethod.POST)
@@ -239,6 +250,12 @@ public class FragmentController {
         Pair<Boolean, String> result = practiceService.comment(type, submitId, loginUser.getOpenId(), dto.getContent());
 
         if(result.getLeft()){
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("训练")
+                    .function("碎片化")
+                    .action("评论")
+                    .memo(type+":"+submitId);
+            operationLogService.log(operationLog);
             RiseWorkCommentDto resultDto = new RiseWorkCommentDto();
             resultDto.setContent(dto.getContent());
             resultDto.setUpName(loginUser.getWeixin().getWeixinName());
