@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -62,4 +63,13 @@ public interface PracticeService {
      * 查询点赞记录
      */
     HomeworkVote loadVoteRecord(Integer type, Integer referId, String openId);
+
+    /**
+     * 查询评论
+     */
+    List<Comment> loadComments(Integer type,Integer referId,Integer page);
+
+    Integer commentCount(Integer type, Integer referId);
+
+    Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content);
 }

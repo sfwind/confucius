@@ -17,6 +17,9 @@
         loginSocketUrl:"${loginSocketUrl}",
         isDevelopment:${isDevelopment},
         feedBack:${feedBack},
+        openFeedBack:${openFeedBack},
+        openComment:${openComment}
+
     }
 </script>
 
