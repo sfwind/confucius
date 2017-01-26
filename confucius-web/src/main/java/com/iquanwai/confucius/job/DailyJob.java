@@ -24,8 +24,13 @@ public class DailyJob {
         logger.info("DailyJob start");
         courseProgress();
         closeClass();
+        noticeBeforeMemberClose();
         signupService.reloadClass();
         logger.info("DailyJob end");
+    }
+
+    private void noticeBeforeMemberClose() {
+        courseProgressService.noticeWillCloseMember();
     }
 
     private void courseProgress(){

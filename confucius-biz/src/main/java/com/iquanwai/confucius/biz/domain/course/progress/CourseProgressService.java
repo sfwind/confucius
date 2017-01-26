@@ -102,5 +102,5 @@ public interface CourseProgressService {
      * */
     ClassMember loadClassMemberByMemberId(String memberId);
 
-
+    void noticeWillCloseMember();
 }
