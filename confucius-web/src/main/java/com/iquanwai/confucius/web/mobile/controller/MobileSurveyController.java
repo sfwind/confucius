@@ -44,7 +44,6 @@ public class MobileSurveyController {
                 } else {
                     // 拼接url
                     wjxUrl = wjxUrl + "?sojumpparm=" + submitId;
-                    logger.info("跳转:{}",wjxUrl);
                     WebUtils.wjx(request, response, wjxUrl);
                 }
             } else {
