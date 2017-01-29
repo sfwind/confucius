@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @RestController
 @RequestMapping("/survey")
-public class SurveyController {
+public class MobileSurveyController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private SurveyService surveyService;
