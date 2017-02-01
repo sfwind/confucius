@@ -152,27 +152,27 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Integer commentCount(Integer type,Integer referId){
-        return commentDao.commentCount(type,referId);
+    public Integer commentCount(Integer moduleId,Integer referId){
+        return commentDao.commentCount(moduleId,referId);
     }
 
     @Override
-    public Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content){
-        if(type== Constants.CommentType.CHALLENGE){
+    public Pair<Boolean,String> comment(Integer moduleId, Integer referId, String openId, String content){
+        if(moduleId== Constants.CommentModule.CHALLENGE){
             ChallengeSubmit load = challengeSubmitDao.load(ChallengeSubmit.class, referId);
             if (load == null) {
-                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}",type,referId,content);
+                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}",moduleId,referId,content);
                 return new MutablePair<>(false,"没有该文章");
             }
         } else {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
             if (load == null) {
-                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}",type,referId,content);
+                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}",moduleId,referId,content);
                 return new MutablePair<>(false,"没有该文章");
             }
         }
         Comment comment = new Comment();
-        comment.setType(type);
+        comment.setModuleId(moduleId);
         comment.setReferencedId(referId);
         comment.setContent(content);
         comment.setCommentOpenId(openId);

@@ -26,7 +26,7 @@ public interface Constants {
         int APPLICATION = 3;
     }
 
-    interface CommentType{
+    interface CommentModule {
         int CHALLENGE = 1;
         int APPLICATION = 2;
     }

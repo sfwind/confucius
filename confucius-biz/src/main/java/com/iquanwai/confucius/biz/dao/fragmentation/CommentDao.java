@@ -28,11 +28,11 @@ public class CommentDao extends PracticeDBUtil {
     public int insert(Comment comment) {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
-        String insertSql = "insert into Comment(Type, ReferencedId, CommentOpenId, Content) " +
-                "VALUES (?,?,?,?)";
+        String insertSql = "insert into Comment(ModuleId, Type, ReferencedId, CommentOpenId, Content) " +
+                "VALUES (?,?,?,?,?)";
         try {
             Future<Integer> result = asyncRun.update(insertSql,
-                    comment.getType(), comment.getReferencedId(), comment.getCommentOpenId(), comment.getContent());
+                    comment.getModuleId(),comment.getType(), comment.getReferencedId(), comment.getCommentOpenId(), comment.getContent());
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -45,28 +45,28 @@ public class CommentDao extends PracticeDBUtil {
         return -1;
     }
 
-    public List<Comment> loadComments(Integer type, Integer referId, Integer page) {
+    public List<Comment> loadComments(Integer moduleId, Integer referId, Integer page) {
         if(page<1){
             page = 1;
         }
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<Comment>(Comment.class);
-        String sql = "SELECT * FROM Comment where Type = ? and ReferencedId = ? and Del = 0 order by AddTime desc limit " + (page-1)*5 + ",5";
+        String sql = "SELECT * FROM Comment where ModuleId = ? and ReferencedId = ? and Del = 0 order by Type desc, AddTime desc limit " + (page-1)*5 + ",5";
         try {
-            return run.query(sql, h, type, referId);
+            return run.query(sql, h, moduleId, referId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-    public Integer commentCount(Integer type,Integer referId){
+    public Integer commentCount(Integer moduleId,Integer referId){
         QueryRunner run = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();
 
         try {
-            Long count = run.query("SELECT count(*) FROM Comment where Type=? and ReferencedId=? and Del=0",
-                    h, type, referId);
+            Long count = run.query("SELECT count(*) FROM Comment where ModuleId=? and ReferencedId=? and Del=0",
+                    h, moduleId, referId);
             return count.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

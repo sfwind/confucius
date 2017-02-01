@@ -239,22 +239,29 @@ public class FragmentController {
         return WebUtils.result(listDto);
     }
 
-    @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}", method = RequestMethod.POST)
+    /**
+     * 评论
+     * TODO 根据角色设置评论类型
+     * @param loginUser 登陆人
+     * @param moduleId 评论模块
+     * @param submitId 文章id
+     * @param dto 评论内容
+     */
+    @RequestMapping(value = "/pc/fragment/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String,Object>> comment(PCLoginUser loginUser,
-                                                           @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
+                                                           @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
                                                            @RequestBody RiseWorkCommentDto dto) {
         Assert.notNull(loginUser,"登陆用户不能为空");
-        Assert.notNull(type, "评论类型不能为空");
+        Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
-        Pair<Boolean, String> result = practiceService.comment(type, submitId, loginUser.getOpenId(), dto.getContent());
-
+        Pair<Boolean, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent());
         if(result.getLeft()){
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
                     .function("碎片化")
                     .action("评论")
-                    .memo(type+":"+submitId);
+                    .memo(moduleId+":"+submitId);
             operationLogService.log(operationLog);
             RiseWorkCommentDto resultDto = new RiseWorkCommentDto();
             resultDto.setContent(dto.getContent());
