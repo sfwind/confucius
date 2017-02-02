@@ -30,4 +30,8 @@ public interface Constants {
         int CHALLENGE = 1;
         int APPLICATION = 2;
     }
+
+    interface CommentType{
+        int STUDENT  = 1;
+    }
 }

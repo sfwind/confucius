@@ -174,6 +174,7 @@ public class PracticeServiceImpl implements PracticeService {
         Comment comment = new Comment();
         comment.setModuleId(moduleId);
         comment.setReferencedId(referId);
+        comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
         commentDao.insert(comment);
