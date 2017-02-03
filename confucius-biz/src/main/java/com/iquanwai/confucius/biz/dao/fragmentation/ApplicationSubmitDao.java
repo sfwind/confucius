@@ -71,7 +71,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> load(Integer applicationId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "select a.*,ifnull(CommentCount.count,0) as CommentCount,ifnull(VoteCount.count,0) as VoteCount,ifnull(CommentCount.count+VoteCount.count,0) as TotalCount from ApplicationSubmit a " +
+        String sql = "select a.*,ifnull(CommentCount.count,0) as CommentCount,ifnull(VoteCount.count,0) as VoteCount,ifnull(CommentCount.count,0)+ifnull(VoteCount.count,0) as TotalCount from ApplicationSubmit a " +
                 "  left join (SELECT " +
                 "               ReferencedId, " +
                 "               COUNT(1) AS count " +
