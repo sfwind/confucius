@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.util.Constants;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -147,7 +148,7 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public List<Comment> loadComments(Integer type, Integer referId, Integer page) {
+    public List<Comment> loadComments(Integer type, Integer referId, Page page) {
         return commentDao.loadComments(type,referId,page);
     }
 

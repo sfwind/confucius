@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.po.HomeworkVote;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public interface PracticeService {
     /**
      * 查询评论
      */
-    List<Comment> loadComments(Integer type,Integer referId,Integer page);
+    List<Comment> loadComments(Integer type,Integer referId,Page page);
 
     Integer commentCount(Integer type, Integer referId);
 

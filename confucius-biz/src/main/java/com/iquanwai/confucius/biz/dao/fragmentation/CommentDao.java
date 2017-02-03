@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -45,13 +46,10 @@ public class CommentDao extends PracticeDBUtil {
         return -1;
     }
 
-    public List<Comment> loadComments(Integer moduleId, Integer referId, Integer page) {
-        if(page<1){
-            page = 1;
-        }
+    public List<Comment> loadComments(Integer moduleId, Integer referId, Page page) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<Comment>(Comment.class);
-        String sql = "SELECT * FROM Comment where ModuleId = ? and ReferencedId = ? and Del = 0 order by Type desc, AddTime desc limit " + (page-1)*5 + ",5";
+        String sql = "SELECT * FROM Comment where ModuleId = ? and ReferencedId = ? and Del = 0 order by Type desc, AddTime desc limit " + page.getOffset() + "," + page.getLimit();
         try {
             return run.query(sql, h, moduleId, referId);
         } catch (SQLException e) {
