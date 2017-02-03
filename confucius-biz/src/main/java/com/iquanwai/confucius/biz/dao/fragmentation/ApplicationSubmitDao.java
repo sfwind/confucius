@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.util.Constants;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -55,10 +56,39 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return null;
     }
 
+//    public List<ApplicationSubmit> load(Integer applicationId){
+//        QueryRunner run = new QueryRunner(getDataSource());
+//        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+//        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Content is not null order by UpdateTime desc";
+//        try {
+//            return run.query(sql, h, applicationId);
+//        } catch (SQLException e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
+//        return Lists.newArrayList();
+//    }
+
     public List<ApplicationSubmit> load(Integer applicationId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Content is not null order by UpdateTime desc";
+        String sql = "select a.*,ifnull(CommentCount.count,0) as CommentCount,ifnull(VoteCount.count,0) as VoteCount,ifnull(CommentCount.count+VoteCount.count,0) as TotalCount from ApplicationSubmit a " +
+                "  left join (SELECT " +
+                "               ReferencedId, " +
+                "               COUNT(1) AS count " +
+                "             FROM Comment " +
+                "             WHERE ModuleId = "+ Constants.CommentModule.APPLICATION+ " " +
+                "             GROUP BY ReferencedId " +
+                "            ) as CommentCount on a.Id = CommentCount.ReferencedId " +
+                "  left join ( " +
+                "              SELECT " +
+                "                ReferencedId, " +
+                "                COUNT(1) AS count " +
+                "              FROM HomeworkVote " +
+                "              WHERE Type = "+Constants.VoteType.APPLICATION + " " +
+                "              GROUP BY ReferencedId " +
+                "            ) as VoteCount on a.Id = VoteCount.ReferencedId " +
+                " where a.ApplicationId=? and a.Content is not null " +
+                "  order by TotalCount desc,a.UpdateTime desc";
         try {
             return run.query(sql, h, applicationId);
         } catch (SQLException e) {
