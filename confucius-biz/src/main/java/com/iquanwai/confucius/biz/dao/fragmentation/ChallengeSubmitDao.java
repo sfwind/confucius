@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
-import com.iquanwai.confucius.biz.util.Constants;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -86,24 +85,7 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
     public List<ChallengeSubmit> loadList(Integer challengeId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ChallengeSubmit>> h = new BeanListHandler<ChallengeSubmit>(ChallengeSubmit.class);
-        String sql = "select a.*,ifnull(CommentCount.count,0) as CommentCount,ifnull(VoteCount.count,0) as VoteCount,ifnull(CommentCount.count,0)+ifnull(VoteCount.count,0) as TotalCount from ChallengeSubmit a " +
-                "  left join (SELECT " +
-                "               ReferencedId, " +
-                "               COUNT(1) AS count " +
-                "             FROM Comment " +
-                "             WHERE ModuleId = "+ Constants.CommentModule.CHALLENGE+ " " +
-                "             GROUP BY ReferencedId " +
-                "            ) as CommentCount on a.Id = CommentCount.ReferencedId " +
-                "  left join ( " +
-                "              SELECT " +
-                "                ReferencedId, " +
-                "                COUNT(1) AS count " +
-                "              FROM HomeworkVote " +
-                "              WHERE Type = "+Constants.VoteType.CHALLENGE + " " +
-                "              GROUP BY ReferencedId " +
-                "            ) as VoteCount on a.Id = VoteCount.ReferencedId " +
-                " where a.ChallengeId=? and a.Content is not null " +
-                "  order by TotalCount desc,a.UpdateTime desc";
+        String sql = "SELECT * FROM ChallengeSubmit where ChallengeId=? and Content is not null order by UpdateTime desc";
         try{
             return run.query(sql,h,challengeId);
         } catch (SQLException e) {

@@ -13,7 +13,7 @@ public class RiseWorkInfoDto {
     private String headPic;
     private String content;
     private Integer voteCount;
-
+    private Integer commentCount;
     private Integer submitId;
     private Integer type;
 }

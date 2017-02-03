@@ -262,7 +262,17 @@ public class ChallengeController {
                     dto.setUpName(account.getNickname());
                     dto.setHeadPic(account.getHeadimgurl());
                     dto.setUpTime(DateUtils.parseDateToFormat5(item.getUpdateTime()));
+                    dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.CHALLENGE,item.getId()));
                     return dto;
+                }).sorted((left,right)->{
+                    try {
+                        int leftWeight = left.getCommentCount() + left.getVoteCount();
+                        int rightWeight = right.getCommentCount() + right.getVoteCount();
+                        return rightWeight - leftWeight;
+                    } catch (Exception e){
+                        logger.error("挑战任务文章排序异常",e);
+                        return 0;
+                    }
                 }).collect(Collectors.toList());
         return WebUtils.result(submits);
     }
