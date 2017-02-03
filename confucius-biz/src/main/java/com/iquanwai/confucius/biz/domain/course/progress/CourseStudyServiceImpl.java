@@ -134,7 +134,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         } else if(m.getType()==22){
             // 支付链接，占位符替换，当文字处理
             Map<String,String> payPlaceMap = Maps.newHashMap();
-            payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/pay?courseId=" + chapterDao.load(Chapter.class, chapterId).getCourseId());
+            payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/static/signup?courseId=" + chapterDao.load(Chapter.class, chapterId).getCourseId());
             m.setContent(CommonUtils.placeholderReplace(m.getContent(), payPlaceMap));
             m.setType(1);
         }
