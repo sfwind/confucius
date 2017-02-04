@@ -1,7 +1,9 @@
 package com.iquanwai.confucius.web.pc.survey.controller;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.survey.SurveyQuestionSubmit;
 import com.iquanwai.confucius.biz.po.survey.SurveySubmit;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -36,6 +38,8 @@ public class SurveyController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private SurveyService surveyService;
+    @Autowired
+    private OperationLogService operationLogService;
 
     @RequestMapping(value = "/wjx", method = RequestMethod.GET)
     public void redirectToSurvey(PCLoginUser pcLoginUser,
@@ -44,6 +48,12 @@ public class SurveyController {
                                  @RequestParam("activity") Integer activity) {
         try {
             Assert.notNull(pcLoginUser, "用户的登录信息不能为空");
+            OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                    .module("问卷")
+                    .function("问卷调查")
+                    .action("PC端打开问卷")
+                    .memo(activity+"");
+            operationLogService.log(operationLog);
             // 插入问卷提交表
             Integer submitId = surveyService.insertSurveySubmit(pcLoginUser.getOpenId(), activity);
             if (submitId != null && submitId > 0) {

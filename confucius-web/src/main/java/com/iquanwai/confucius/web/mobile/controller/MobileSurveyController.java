@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.web.mobile.controller;
 
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -26,6 +28,8 @@ public class MobileSurveyController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private SurveyService surveyService;
+    @Autowired
+    private OperationLogService operationLogService;
 
     @RequestMapping(value = "/wjx", method = RequestMethod.GET)
     public void redirectToSurvey(LoginUser loginUser,
@@ -37,6 +41,12 @@ public class MobileSurveyController {
                     "/static/login/result?err=" +
                     URLEncoder.encode("您还未关注公众号", "UTF-8"));
         } else {
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("问卷")
+                    .function("问卷调查")
+                    .action("手机端打开问卷")
+                    .memo(activity+"");
+            operationLogService.log(operationLog);
             // 插入问卷提交表
             Integer submitId = surveyService.insertSurveySubmit(loginUser.getOpenId(), activity);
             if (submitId != null && submitId > 0) {
