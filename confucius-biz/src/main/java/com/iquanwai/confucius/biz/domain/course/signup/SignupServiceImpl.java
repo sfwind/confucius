@@ -227,13 +227,16 @@ public class SignupServiceImpl implements SignupService {
 
     private Date getCloseDate(Integer classId, Integer courseId) {
         Date closeDate = null;
-        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
+        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7,试听课程关闭时间为2999
         if(getCachedCourse(courseId).getType()== Course.LONG_COURSE) {
             Date closeTime = getCachedClass(classId).getCloseTime();
             closeDate = DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS);
         }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
             int length = getCachedCourse(courseId).getLength();
             closeDate = DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS);
+        } else if(getCachedCourse(courseId).getType() == Course.AUDITION_COURSE){
+            // TODO 试听课程不关闭
+            closeDate = DateUtils.afterDays(new Date(),2999);
         }
         return closeDate;
     }

@@ -506,13 +506,20 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-
-
-        data.put("first", new TemplateMessage.Keyword("你的课程即将到期，请检查自己是否完成随堂练习并提交大作业。小组作业提交情况可咨询小组长。"));
-        data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
-        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
-        data.put("remark",new TemplateMessage.Keyword("课程到期后将自动关闭。完成所有作业的学员，会在关闭后的一天内收到毕业证书。如有疑问请咨询助教。"));
-        templateMessageService.sendMessage(templateMessage);
+        Course course = courseDao.load(Course.class,classMember.getCourseId());
+        // 只有长／短课程会发送课程关闭提醒
+        if(course.getType() == Course.LONG_COURSE){
+            data.put("first", new TemplateMessage.Keyword("你的课程即将到期，请检查自己是否完成随堂练习并提交大作业。小组作业提交情况可咨询小组长。"));
+            data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
+            data.put("remark",new TemplateMessage.Keyword("课程到期后将自动关闭。完成所有作业的学员，会在关闭后的一天内收到毕业证书。如有疑问请咨询助教。"));
+            templateMessageService.sendMessage(templateMessage);
+        } else if(course.getType() == Course.SHORT_COURSE){
+            data.put("first", new TemplateMessage.Keyword("你的以下课程即将到期："));
+            data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
+            data.put("remark",new TemplateMessage.Keyword("到期后将自动关闭。"));
+            templateMessageService.sendMessage(templateMessage);
+        }
     }
-
 }
