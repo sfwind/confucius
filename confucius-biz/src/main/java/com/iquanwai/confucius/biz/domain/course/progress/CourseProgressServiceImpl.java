@@ -2,11 +2,21 @@ package com.iquanwai.confucius.biz.domain.course.progress;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.dao.course.ChapterDao;
+import com.iquanwai.confucius.biz.dao.course.ClassDao;
+import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
+import com.iquanwai.confucius.biz.dao.course.CourseDao;
+import com.iquanwai.confucius.biz.dao.course.CourseWeekDao;
+import com.iquanwai.confucius.biz.dao.course.CurrentChapterPageDao;
 import com.iquanwai.confucius.biz.domain.course.signup.ClassMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.Chapter;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseWeek;
+import com.iquanwai.confucius.biz.po.CurrentChapterPage;
+import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.NumberToHanZi;
@@ -17,7 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -461,6 +474,45 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return classMemberDao.loadByMemberId(memberId);
     }
 
+    @Override
+    public void noticeWillCloseMember() {
+        logger.info("noticeWillCloseMember start");
+        List<ClassMember> classMembers = classMemberDao.willCloseMembers(DateUtils.afterDays(new Date(), 3));
+        List<Course> courses = courseDao.loadAll(Course.class);
+        Map<Integer,String> courseName = Maps.newHashMap();
+        courses.forEach(item->{
+            courseName.put(item.getId(),item.getName());
+        });
+        classMembers.stream().filter(item->{
+            String name = courseName.get(item.getCourseId());
+            if(name==null){
+                logger.error("用户:{}的课程异常:{}", item.getOpenId(), item.getCourseId());
+                return false;
+            } else {
+                item.setCourseName(name);
+                return true;
+            }
+        }).forEach(this::noticeMembersWillClose);
+        logger.info("noticeWillCloseMember end");
+    }
 
+    //通知未完成任务的学员
+    private void noticeMembersWillClose(ClassMember classMember){
+        Assert.notNull(classMember, "classMember不能为空");
+        String key = ConfigUtils.willCloseMsgKey();
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(classMember.getOpenId());
+
+        templateMessage.setTemplate_id(key);
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setData(data);
+
+
+        data.put("first", new TemplateMessage.Keyword("你的课程即将到期，请检查自己是否完成随堂练习并提交大作业。小组作业提交情况可咨询小组长。"));
+        data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
+        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
+        data.put("remark",new TemplateMessage.Keyword("课程到期后将自动关闭。完成所有作业的学员，会在关闭后的一天内收到毕业证书。如有疑问请咨询助教。"));
+        templateMessageService.sendMessage(templateMessage);
+    }
 
 }

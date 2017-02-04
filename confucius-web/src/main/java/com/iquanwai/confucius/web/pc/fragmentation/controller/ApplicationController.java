@@ -190,7 +190,17 @@ public class ApplicationController {
                     Account account = accountService.getAccount(item.getOpenid(), false);
                     dto.setUpName(account.getNickname());
                     dto.setHeadPic(account.getHeadimgurl());
+                    dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.APPLICATION,item.getId()));
                     return dto;
+                }).sorted((left,right)->{
+                    try {
+                        int leftWeight = left.getCommentCount() + left.getVoteCount();
+                        int rightWeight = right.getCommentCount() + right.getVoteCount();
+                        return rightWeight - leftWeight;
+                    } catch (Exception e){
+                        logger.error("应用任务文章排序异常",e);
+                        return 0;
+                    }
                 }).collect(Collectors.toList());
         return WebUtils.result(submits);
     }

@@ -80,7 +80,7 @@ public class AccountController {
                     accountDto.setRole("stranger");
                     // 没有正在就读的班级
                     this.handlerLoginSocket(sessionId, LoginType.PERMISSION_DENIED, accountDto);
-                    return WebUtils.success();
+                    return WebUtils.error("您还未报名课程，关注圈外了解更多!");
                 } else {
                     // 缓存起来
                     pcLoginUser.setRole("student");

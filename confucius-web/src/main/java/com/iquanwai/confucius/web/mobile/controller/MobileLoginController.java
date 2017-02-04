@@ -102,8 +102,15 @@ public class MobileLoginController {
                     Map<String, Object> result = CommonUtils.jsonToMap(body1);
                     // 解析处理结果
                     logger.info("PC登录校验成功.{}", result);
-                    response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/login/result");
-                    return;
+                    if(Double.parseDouble(result.get("code").toString()) != 200){
+                        response.sendRedirect(ConfigUtils.adapterDomainName() +
+                                "/static/login/result?err=" +
+                                URLEncoder.encode(result.get("msg").toString(), "UTF-8"));
+                        return;
+                    } else {
+                        response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/login/result");
+                        return;
+                    }
                 } else {
                     // PC端登录失败
                     logger.error("PC端登录失败,sessionId:" + sessionId);

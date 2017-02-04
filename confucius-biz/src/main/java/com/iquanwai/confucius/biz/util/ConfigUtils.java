@@ -188,4 +188,8 @@ public class ConfigUtils {
 	public static Integer getFeedBackId(){
 		return config.getInt("wjx.feedback");
 	}
+
+	public static String willCloseMsgKey(){
+		return config.getString("will.close.task.msg");
+	}
 }
