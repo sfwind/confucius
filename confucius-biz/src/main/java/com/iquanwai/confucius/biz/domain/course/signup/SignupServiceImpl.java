@@ -296,7 +296,7 @@ public class SignupServiceImpl implements SignupService {
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
         } else if(course.getType()==Course.AUDITION_COURSE){
-            // TODO xiugai
+            // TODO 试听课程上线之前修改
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
                     DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
