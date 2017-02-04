@@ -84,8 +84,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(classMember.getCloseDate().before(DateUtils.startDay(new Date()))){
             if(!classMember.getGraduate()){
                 Course course = courseDao.load(Course.class, classMember.getCourseId());
-                //短课程关闭以后,如果用户还未毕业,强制设置成毕业
-                if(course.getType()==Course.SHORT_COURSE) {
+                //短课程或者试听课程关闭以后,如果用户还未毕业,强制设置成毕业
+                if(course.getType()==Course.SHORT_COURSE || course.getType() == Course.AUDITION_COURSE) {
                     classMemberDao.graduate(classMember.getId());
                 }
             }
@@ -153,17 +153,17 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         List<QuanwaiClass> openClass = classDao.loadRunningClass();
         for(QuanwaiClass clazz:openClass){
             Course course = courseDao.load(Course.class, clazz.getCourseId());
-            // 短课程不需要修改progress
-            if(course!=null && course.getType()!=Course.SHORT_COURSE){
+            // 短课程,试听课程不需要修改progress
+            if (course != null && course.getType() != Course.SHORT_COURSE && course.getType() != Course.AUDITION_COURSE) {
                 Integer courseId = clazz.getCourseId();
                 //开课天数=今天-开课日期+1
-                int startDay = DateUtils.interval(clazz.getOpenTime())+1;
+                int startDay = DateUtils.interval(clazz.getOpenTime()) + 1;
                 Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
-                if(chapter!=null){
+                if (chapter != null) {
                     Integer sequence = chapter.getSequence();
-                    if(sequence==null){
+                    if (sequence == null) {
                         logger.error("{} has no sequence", chapter.getId());
-                    }else {
+                    } else {
                         if (!sequence.equals(clazz.getProgress())) {
                             classDao.progress(clazz.getId(), sequence);
                         }
@@ -237,7 +237,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         for(QuanwaiClass quanwaiClass:openClasses){
             Integer courseId = quanwaiClass.getCourseId();
             Course course = courseDao.load(Course.class, courseId);
-            //短课程永不关闭报名
+            //只有长课程会关闭报名
             if(course!=null && course.getType() == Course.LONG_COURSE) {
                 classDao.closeEntry(quanwaiClass.getId());
             }
@@ -506,13 +506,20 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-
-
-        data.put("first", new TemplateMessage.Keyword("你的课程即将到期，请检查自己是否完成随堂练习并提交大作业。小组作业提交情况可咨询小组长。"));
-        data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
-        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
-        data.put("remark",new TemplateMessage.Keyword("课程到期后将自动关闭。完成所有作业的学员，会在关闭后的一天内收到毕业证书。如有疑问请咨询助教。"));
-        templateMessageService.sendMessage(templateMessage);
+        Course course = courseDao.load(Course.class,classMember.getCourseId());
+        // 只有长／短课程会发送课程关闭提醒
+        if(course.getType() == Course.LONG_COURSE){
+            data.put("first", new TemplateMessage.Keyword("你的课程即将到期，请检查自己是否完成随堂练习并提交大作业。小组作业提交情况可咨询小组长。"));
+            data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
+            data.put("remark",new TemplateMessage.Keyword("课程到期后将自动关闭。完成所有作业的学员，会在关闭后的一天内收到毕业证书。如有疑问请咨询助教。"));
+            templateMessageService.sendMessage(templateMessage);
+        } else if(course.getType() == Course.SHORT_COURSE){
+            data.put("first", new TemplateMessage.Keyword("你的以下课程即将到期："));
+            data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
+            data.put("remark",new TemplateMessage.Keyword("到期后将自动关闭。"));
+            templateMessageService.sendMessage(templateMessage);
+        }
     }
-
 }

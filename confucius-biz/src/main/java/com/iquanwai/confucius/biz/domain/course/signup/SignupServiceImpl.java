@@ -227,13 +227,16 @@ public class SignupServiceImpl implements SignupService {
 
     private Date getCloseDate(Integer classId, Integer courseId) {
         Date closeDate = null;
-        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
+        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7,试听课程关闭时间为2999
         if(getCachedCourse(courseId).getType()== Course.LONG_COURSE) {
             Date closeTime = getCachedClass(classId).getCloseTime();
             closeDate = DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS);
         }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
             int length = getCachedCourse(courseId).getLength();
             closeDate = DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS);
+        } else if(getCachedCourse(courseId).getType() == Course.AUDITION_COURSE){
+            // TODO 试听课程不关闭
+            closeDate = DateUtils.afterDays(new Date(),2999);
         }
         return closeDate;
     }
@@ -285,6 +288,15 @@ public class SignupServiceImpl implements SignupService {
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
         }else if(course.getType()==Course.SHORT_COURSE){
 //            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
+            data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
+                    DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
+            String remark = "到期后自动关闭\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
+                    +"。点击查看群二维码。";
+            data.put("remark", new TemplateMessage.Keyword(remark));
+            templateMessage.setUrl(quanwaiClass.getQqGroup());
+        } else if(course.getType()==Course.AUDITION_COURSE){
+            // TODO 试听课程上线之前修改
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
                     DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
