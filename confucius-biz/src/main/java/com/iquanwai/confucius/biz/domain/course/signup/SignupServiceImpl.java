@@ -292,6 +292,15 @@ public class SignupServiceImpl implements SignupService {
                     +"。点击查看群二维码。";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
+        } else if(course.getType()==Course.AUDITION_COURSE){
+            // TODO xiugai
+            data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
+                    DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
+            String remark = "到期后自动关闭\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
+                    +"。点击查看群二维码。";
+            data.put("remark", new TemplateMessage.Keyword(remark));
+            templateMessage.setUrl(quanwaiClass.getQqGroup());
         }
 
         templateMessageService.sendMessage(templateMessage);

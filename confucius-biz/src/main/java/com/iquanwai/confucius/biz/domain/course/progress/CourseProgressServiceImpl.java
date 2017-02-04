@@ -84,8 +84,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         if(classMember.getCloseDate().before(DateUtils.startDay(new Date()))){
             if(!classMember.getGraduate()){
                 Course course = courseDao.load(Course.class, classMember.getCourseId());
-                //短课程关闭以后,如果用户还未毕业,强制设置成毕业
-                if(course.getType()==Course.SHORT_COURSE) {
+                //短课程或者试听课程关闭以后,如果用户还未毕业,强制设置成毕业
+                if(course.getType()==Course.SHORT_COURSE || course.getType() == Course.AUDITION_COURSE) {
                     classMemberDao.graduate(classMember.getId());
                 }
             }
@@ -153,17 +153,17 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         List<QuanwaiClass> openClass = classDao.loadRunningClass();
         for(QuanwaiClass clazz:openClass){
             Course course = courseDao.load(Course.class, clazz.getCourseId());
-            // 短课程不需要修改progress
-            if(course!=null && course.getType()!=Course.SHORT_COURSE){
+            // 短课程,试听课程不需要修改progress
+            if (course != null && course.getType() != Course.SHORT_COURSE && course.getType() != Course.AUDITION_COURSE) {
                 Integer courseId = clazz.getCourseId();
                 //开课天数=今天-开课日期+1
-                int startDay = DateUtils.interval(clazz.getOpenTime())+1;
+                int startDay = DateUtils.interval(clazz.getOpenTime()) + 1;
                 Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
-                if(chapter!=null){
+                if (chapter != null) {
                     Integer sequence = chapter.getSequence();
-                    if(sequence==null){
+                    if (sequence == null) {
                         logger.error("{} has no sequence", chapter.getId());
-                    }else {
+                    } else {
                         if (!sequence.equals(clazz.getProgress())) {
                             classDao.progress(clazz.getId(), sequence);
                         }
@@ -237,7 +237,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         for(QuanwaiClass quanwaiClass:openClasses){
             Integer courseId = quanwaiClass.getCourseId();
             Course course = courseDao.load(Course.class, courseId);
-            //短课程永不关闭报名
+            //只有长课程会关闭报名
             if(course!=null && course.getType() == Course.LONG_COURSE) {
                 classDao.closeEntry(quanwaiClass.getId());
             }

@@ -66,8 +66,8 @@ public class CourseController {
     }
 
     private int getProgressWeek(ClassMember classMember, int type) {
-        //短课程默认返回第一周
-        if(type==2){
+        //短课程,试听课默认返回第一周
+        if(type==Course.SHORT_COURSE || type==Course.AUDITION_COURSE){
             return 1;
         }
         String personalProgress = classMember.getProgress();
