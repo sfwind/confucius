@@ -296,14 +296,11 @@ public class SignupServiceImpl implements SignupService {
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
         } else if(course.getType()==Course.AUDITION_COURSE){
-            // TODO 试听课程上线之前修改
-            data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
-                    DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
-            String remark = "到期后自动关闭\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
-                    +"。点击查看群二维码。";
+            data.put("keyword1", new TemplateMessage.Keyword("【一分试听】 "+course.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword("7天"));
+            String remark = "试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍\n有疑问？点击看直播答疑";
             data.put("remark", new TemplateMessage.Keyword(remark));
-            templateMessage.setUrl(quanwaiClass.getQqGroup());
+            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
         }
 
         templateMessageService.sendMessage(templateMessage);
