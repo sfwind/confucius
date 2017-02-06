@@ -1,14 +1,13 @@
-package com.iquanwai.confucius.web.personal.controller;
+package com.iquanwai.confucius.web.customer.controller;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Region;
-import com.iquanwai.confucius.web.personal.dto.AreaDto;
-import com.iquanwai.confucius.web.personal.dto.ProfileDto;
+import com.iquanwai.confucius.web.customer.dto.AreaDto;
+import com.iquanwai.confucius.web.customer.dto.ProfileDto;
+import com.iquanwai.confucius.web.customer.dto.RegionDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.modelmapper.ModelMapper;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2017/2/4.
@@ -48,6 +48,11 @@ public class CustomerController {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.map(account, profileDto);
         profileDto.isFullCheck();
+        // 查询id
+        Region city = accountService.loadCityByName(account.getCity());
+        Region province = accountService.loadProvinceByName(account.getProvince());
+        profileDto.setCityId(city == null ? null : city.getId());
+        profileDto.setProvinceId(province == null ? null : province.getId());
         return WebUtils.result(profileDto);
     }
 
@@ -55,18 +60,11 @@ public class CustomerController {
     @RequestMapping("/region")
     public ResponseEntity<Map<String, Object>> loadRegion() {
         List<Region> provinces = accountService.loadAllProvinces();
-        provinces.add(Region.defaultRegion());
-        Map<Integer, AreaDto> provinceMap = Maps.newHashMap();
-        provinces.forEach(region -> provinceMap.put(region.getId(), new AreaDto(region.getName(), Lists.newArrayList())));
         List<Region> cities = accountService.loadCities();
-        cities.forEach(item -> {
-            try {
-                provinceMap.get(item.getParentId()).getSub().add(new AreaDto(item.getName()));
-            } catch (NullPointerException e) {
-                logger.error("设置城市失败", e);
-            }
-        });
-        return WebUtils.result(provinceMap.values());
+        RegionDto regionDto = new RegionDto();
+        regionDto.setProvinceList(provinces.stream().map(item -> new AreaDto(item.getId()+"", item.getName(), item.getParentId()+"")).collect(Collectors.toList()));
+        regionDto.setCityList(cities.stream().map(item -> new AreaDto(item.getId()+"", item.getName(), item.getParentId()+"")).collect(Collectors.toList()));
+        return WebUtils.result(regionDto);
     }
 
 }

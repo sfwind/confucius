@@ -59,7 +59,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     private final static String CERTIFICATE_PREFIX = "IQW";
 
-    private final static String CERTIFICATE_PERSONAL_INFO_URL = "/certificate/personal";
+    private final static String CERTIFICATE_PERSONAL_INFO_URL = "/certificate/customer";
 
     private final static int CERTIFICATE_OFFSET = 51000;
 

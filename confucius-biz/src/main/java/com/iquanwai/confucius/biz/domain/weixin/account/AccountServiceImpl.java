@@ -11,7 +11,7 @@ import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.Converter;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,5 +143,33 @@ public class AccountServiceImpl implements AccountService {
             cityList = regionDao.loadAllCities();
         }
         return cityList;
+    }
+
+    @Override
+    public Region loadProvinceByName(String name) {
+        Region result = null;
+        if(cityList!=null){
+            for(Region city:cityList){
+                if(StringUtils.equals(city.getName(),name)){
+                    result = city;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Region loadCityByName(String name) {
+        Region result = null;
+        if(provinceList!=null){
+            for(Region province:provinceList){
+                if(StringUtils.equals(province.getName(),name)){
+                    result = province;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }

@@ -1,10 +1,8 @@
-package com.iquanwai.confucius.web.personal.dto;
+package com.iquanwai.confucius.web.customer.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * Created by nethunder on 2017/2/4.
@@ -13,10 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AreaDto {
-    private String name;
-    private List<AreaDto> sub;
-
-    public AreaDto(String name){
-        this.name = name;
-    }
+    private String id;
+    private String value;
+    private String parentId;
 }

@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.personal.dto;
+package com.iquanwai.confucius.web.customer.dto;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +12,9 @@ public class ProfileDto {
     private String function; //职业
     private String workingLife; //工作年限
     private String city; //城市
+    private Integer cityId;
     private String province; //省份
+    private Integer provinceId;
     private Boolean isFull;
 
     public void isFullCheck() {
