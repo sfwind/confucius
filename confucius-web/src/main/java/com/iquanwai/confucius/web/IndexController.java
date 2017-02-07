@@ -73,6 +73,17 @@ public class IndexController {
         return courseView(request);
     }
 
+
+    @RequestMapping(value = "/personal/profile",method = RequestMethod.GET)
+    public ModelAndView getPersonalProfieIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
+        return courseView(request);
+    }
+
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
     public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
         if(!checkAccessToken(request)){
