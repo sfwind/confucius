@@ -15,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -55,6 +58,19 @@ public class CustomerController {
         profileDto.setProvinceId(province == null ? null : province.getId());
         return WebUtils.result(profileDto);
     }
+
+    @RequestMapping(value = "/profile/region",method = RequestMethod.POST,consumes = "application/json")
+    public ResponseEntity<Map<String,Object>> submitRegion(LoginUser loginUser, @RequestBody ProfileDto profileDto){
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("个人信息")
+                .action("提交位置信息");
+        operationLogService.log(operationLog);
+        accountService.submitRegion(loginUser.getOpenId(), profileDto.getProvince(), profileDto.getCity());
+        return WebUtils.success();
+    }
+
 
 
     @RequestMapping("/region")

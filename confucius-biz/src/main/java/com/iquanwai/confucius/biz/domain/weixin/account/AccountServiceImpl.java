@@ -160,6 +160,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public void submitRegion(String openId,String province,String city){
+        followUserDao.updateRegion(openId,province,city);
+    }
+
+    @Override
     public Region loadCityByName(String name) {
         Region result = null;
         if(provinceList!=null){

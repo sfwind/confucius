@@ -114,4 +114,22 @@ public class FollowUserDao extends DBUtil {
 
         return -1;
     }
+
+    public int updateRegion(String openId, String province, String city) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        String updateSql = "Update FollowUsers Set City=?, Province=? where Openid=?";
+        try {
+            Future<Integer> result = asyncRun.update(updateSql,city, province,openId);
+            return result.get();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        } catch (InterruptedException e) {
+            // ignore
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return -1;
+    }
 }

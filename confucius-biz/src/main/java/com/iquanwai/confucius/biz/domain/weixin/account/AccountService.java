@@ -44,6 +44,9 @@ public interface AccountService {
      * 根据名字获取省
      */
     Region loadProvinceByName(String name);
+
+    void submitRegion(String openId,String province, String city);
+
     /**
      * 根据名字获取城市
      */
