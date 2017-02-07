@@ -11,7 +11,6 @@ import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.Converter;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,14 @@ public class AccountServiceImpl implements AccountService {
             return account;
         }
 
-        return getAccountFromWeixin(openid, account);
+        synchronized (this){
+            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
+            Account accountTemp = followUserDao.queryByOpenid(openid);
+            if(!realTime && accountTemp != null) {
+                return accountTemp;
+            }
+            return getAccountFromWeixin(openid, accountTemp);
+        }
     }
 
     private Account getAccountFromWeixin(String openid, Account account) {

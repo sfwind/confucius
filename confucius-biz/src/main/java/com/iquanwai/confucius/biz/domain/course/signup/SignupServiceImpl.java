@@ -9,7 +9,12 @@ import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.Coupon;
+import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.CourseOrder;
+import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -235,8 +240,7 @@ public class SignupServiceImpl implements SignupService {
             int length = getCachedCourse(courseId).getLength();
             closeDate = DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS);
         } else if(getCachedCourse(courseId).getType() == Course.AUDITION_COURSE){
-            // TODO 试听课程不关闭
-            closeDate = DateUtils.afterDays(new Date(),2999);
+            closeDate = DateUtils.afterDays(new Date(), CourseStudyService.AUDITION_OPEN_DAYS);
         }
         return closeDate;
     }
