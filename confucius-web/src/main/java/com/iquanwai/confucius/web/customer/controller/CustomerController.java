@@ -71,6 +71,32 @@ public class CustomerController {
         return WebUtils.success();
     }
 
+    @RequestMapping(value="/profile/industry",method= RequestMethod.POST,consumes = "application/json")
+    public ResponseEntity<Map<String,Object>> submitIndustry(LoginUser loginUser, @RequestBody ProfileDto profileDto){
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("个人信息")
+                .action("提交行业信息");
+        operationLogService.log(operationLog);
+        accountService.submitIndustry(loginUser.getOpenId(),profileDto.getIndustry());
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value="/profile/workinglife",method= RequestMethod.POST,consumes = "application/json")
+    public ResponseEntity<Map<String,Object>> submitWorkingLife(LoginUser loginUser, @RequestBody ProfileDto profileDto){
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("个人信息")
+                .action("提交工作年限信息");
+        operationLogService.log(operationLog);
+        accountService.submitWorkingLife(loginUser.getOpenId(),profileDto.getWorkingLife());
+        return WebUtils.success();
+    }
+
+
+
 
 
     @RequestMapping("/region")

@@ -165,6 +165,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public void submitIndustry(String openId, String industry) {
+        followUserDao.updateIndustry(openId,industry);
+    }
+
+    @Override
+    public void submitWorkingLife(String openId, String workingLife) {
+        followUserDao.updateWorkingLife(openId,workingLife);
+    }
+
+    @Override
     public Region loadCityByName(String name) {
         Region result = null;
         if(provinceList!=null){
@@ -177,4 +187,6 @@ public class AccountServiceImpl implements AccountService {
         }
         return result;
     }
+
+
 }
