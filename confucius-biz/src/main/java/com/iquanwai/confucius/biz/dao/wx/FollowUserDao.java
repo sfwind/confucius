@@ -120,7 +120,7 @@ public class FollowUserDao extends DBUtil {
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String updateSql = "Update FollowUsers Set City=?, Province=? where Openid=?";
         try {
-            Future<Integer> result = asyncRun.update(updateSql,city, province,openId);
+            Future<Integer> result = asyncRun.update(updateSql, city, province, openId);
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -138,7 +138,7 @@ public class FollowUserDao extends DBUtil {
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String updateSql = "Update FollowUsers Set Industry=? where Openid=?";
         try {
-            Future<Integer> result = asyncRun.update(updateSql,industry, openId);
+            Future<Integer> result = asyncRun.update(updateSql, industry, openId);
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -156,7 +156,44 @@ public class FollowUserDao extends DBUtil {
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String updateSql = "Update FollowUsers Set WorkingLife=? where Openid=?";
         try {
-            Future<Integer> result = asyncRun.update(updateSql,workingLife, openId);
+            Future<Integer> result = asyncRun.update(updateSql, workingLife, openId);
+            return result.get();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        } catch (InterruptedException e) {
+            // ignore
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return -1;
+    }
+
+    public int updateFunction(String openId, String function) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        String updateSql = "Update FollowUsers Set Function=? where Openid=?";
+        try {
+            Future<Integer> result = asyncRun.update(updateSql, function, openId);
+            return result.get();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        } catch (InterruptedException e) {
+            // ignore
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return -1;
+    }
+
+    public int updateProfile(String openId, String province, String city, String function, String industry, String workingLife) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        String updateSql = "Update FollowUsers Set Industry=?, Function=?, WorkingLife=?, City=?, Province=? where Openid=?";
+        try {
+            Future<Integer> result = asyncRun.update(updateSql,
+                    industry, function, workingLife, city, province, openId);
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

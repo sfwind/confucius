@@ -39,8 +39,9 @@ public class CustomerController {
     @Autowired
     private OperationLogService operationLogService;
 
-    @RequestMapping("/profile")
+    @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadProfile(LoginUser loginUser) {
+        Assert.notNull(loginUser, "用户信息不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("个人信息")
@@ -59,8 +60,20 @@ public class CustomerController {
         return WebUtils.result(profileDto);
     }
 
-    @RequestMapping(value = "/profile/region",method = RequestMethod.POST,consumes = "application/json")
-    public ResponseEntity<Map<String,Object>> submitRegion(LoginUser loginUser, @RequestBody ProfileDto profileDto){
+    @RequestMapping(value = "/profile", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> submitProfile(LoginUser loginUser, @RequestBody ProfileDto profileDto) {
+        Assert.notNull(loginUser, "用户信息不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("个人信息")
+                .action("提交个人信息");
+        operationLogService.log(operationLog);
+        accountService.submitProfile(loginUser.getOpenId(),profileDto.getProvince(),profileDto.getCity(),profileDto.getFunction(),profileDto.getIndustry(),profileDto.getWorkingLife());
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/profile/region", method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> submitRegion(LoginUser loginUser, @RequestBody ProfileDto profileDto) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
@@ -71,32 +84,41 @@ public class CustomerController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value="/profile/industry",method= RequestMethod.POST,consumes = "application/json")
-    public ResponseEntity<Map<String,Object>> submitIndustry(LoginUser loginUser, @RequestBody ProfileDto profileDto){
+    @RequestMapping(value = "/profile/industry", method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> submitIndustry(LoginUser loginUser, @RequestBody ProfileDto profileDto) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("个人信息")
                 .action("提交行业信息");
         operationLogService.log(operationLog);
-        accountService.submitIndustry(loginUser.getOpenId(),profileDto.getIndustry());
+        accountService.submitIndustry(loginUser.getOpenId(), profileDto.getIndustry());
         return WebUtils.success();
     }
 
-    @RequestMapping(value="/profile/workinglife",method= RequestMethod.POST,consumes = "application/json")
-    public ResponseEntity<Map<String,Object>> submitWorkingLife(LoginUser loginUser, @RequestBody ProfileDto profileDto){
+    @RequestMapping(value = "/profile/workinglife", method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> submitWorkingLife(LoginUser loginUser, @RequestBody ProfileDto profileDto) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("个人信息")
                 .action("提交工作年限信息");
         operationLogService.log(operationLog);
-        accountService.submitWorkingLife(loginUser.getOpenId(),profileDto.getWorkingLife());
+        accountService.submitWorkingLife(loginUser.getOpenId(), profileDto.getWorkingLife());
         return WebUtils.success();
     }
 
-
-
+    @RequestMapping(value = "/profile/function", method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> submitFunction(LoginUser loginUser, @RequestBody ProfileDto profileDto) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("个人信息")
+                .action("提交职位信息");
+        operationLogService.log(operationLog);
+        accountService.submitFunction(loginUser.getOpenId(), profileDto.getFunction());
+        return WebUtils.success();
+    }
 
 
     @RequestMapping("/region")
@@ -104,8 +126,8 @@ public class CustomerController {
         List<Region> provinces = accountService.loadAllProvinces();
         List<Region> cities = accountService.loadCities();
         RegionDto regionDto = new RegionDto();
-        regionDto.setProvinceList(provinces.stream().map(item -> new AreaDto(item.getId()+"", item.getName(), item.getParentId()+"")).collect(Collectors.toList()));
-        regionDto.setCityList(cities.stream().map(item -> new AreaDto(item.getId()+"", item.getName(), item.getParentId()+"")).collect(Collectors.toList()));
+        regionDto.setProvinceList(provinces.stream().map(item -> new AreaDto(item.getId() + "", item.getName(), item.getParentId() + "")).collect(Collectors.toList()));
+        regionDto.setCityList(cities.stream().map(item -> new AreaDto(item.getId() + "", item.getName(), item.getParentId() + "")).collect(Collectors.toList()));
         return WebUtils.result(regionDto);
     }
 

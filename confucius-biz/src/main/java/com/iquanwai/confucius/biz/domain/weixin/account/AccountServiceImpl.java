@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +41,16 @@ public class AccountServiceImpl implements AccountService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    @PostConstruct
+    public void init() {
+        loadAllProvinces();
+        loadCities();
+    }
+
     public Account getAccount(String openid, boolean realTime) {
         //从数据库查询account对象
         Account account = followUserDao.queryByOpenid(openid);
-        if(!realTime && account != null) {
+        if (!realTime && account != null) {
             return account;
         }
 
@@ -55,11 +62,11 @@ public class AccountServiceImpl implements AccountService {
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
-        logger.info("请求用户信息:{}",openid);
+        logger.info("请求用户信息:{}", openid);
         url = CommonUtils.placeholderReplace(url, map);
 
         String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}",body);
+        logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         Account accountNew = new Account();
         try {
@@ -77,14 +84,14 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if(account==null) {
-                logger.info("插入用户信息:{}",accountNew);
-                if(accountNew.getNickname()!=null){
+            if (account == null) {
+                logger.info("插入用户信息:{}", accountNew);
+                if (accountNew.getNickname() != null) {
                     followUserDao.insert(accountNew);
                 }
-            }else{
-                logger.info("更新用户信息:{}",accountNew);
-                if(accountNew.getNickname()!=null) {
+            } else {
+                logger.info("更新用户信息:{}", accountNew);
+                if (accountNew.getNickname() != null) {
                     followUserDao.updateMeta(accountNew);
                 }
             }
@@ -106,7 +113,7 @@ public class AccountServiceImpl implements AccountService {
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
-        for(String openid:usersDto.getData().getOpenid()) {
+        for (String openid : usersDto.getData().getOpenid()) {
             getAccount(openid, true);
         }
         logger.info("处理完成");
@@ -121,8 +128,8 @@ public class AccountServiceImpl implements AccountService {
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
         List<String> openids = followUserDao.queryAll();
-        for(String openid:usersDto.getData().getOpenid()) {
-            if(!openids.contains(openid)) {
+        for (String openid : usersDto.getData().getOpenid()) {
+            if (!openids.contains(openid)) {
                 getAccountFromWeixin(openid, null);
             }
         }
@@ -131,7 +138,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadAllProvinces() {
-        if(provinceList ==null){
+        if (provinceList == null) {
             provinceList = regionDao.loadAllProvinces();
         }
         return provinceList;
@@ -139,7 +146,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadCities() {
-        if(cityList==null) {
+        if (cityList == null) {
             cityList = regionDao.loadAllCities();
         }
         return cityList;
@@ -148,10 +155,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Region loadProvinceByName(String name) {
         Region result = null;
-        if(cityList!=null){
-            for(Region city:cityList){
-                if(StringUtils.equals(city.getName(),name)){
-                    result = city;
+        if (provinceList != null) {
+            for (Region province : provinceList) {
+                if (StringUtils.equals(province.getName(), name)) {
+                        result = province;
                     break;
                 }
             }
@@ -160,27 +167,37 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void submitRegion(String openId,String province,String city){
-        followUserDao.updateRegion(openId,province,city);
+    public void submitRegion(String openId, String province, String city) {
+        followUserDao.updateRegion(openId, province, city);
+    }
+
+    @Override
+    public void submitProfile(String openId, String province, String city, String function, String industry, String workingLife) {
+        followUserDao.updateProfile(openId, province, city, function, industry, workingLife);
     }
 
     @Override
     public void submitIndustry(String openId, String industry) {
-        followUserDao.updateIndustry(openId,industry);
+        followUserDao.updateIndustry(openId, industry);
     }
 
     @Override
     public void submitWorkingLife(String openId, String workingLife) {
-        followUserDao.updateWorkingLife(openId,workingLife);
+        followUserDao.updateWorkingLife(openId, workingLife);
+    }
+
+    @Override
+    public void submitFunction(String openId, String function) {
+        followUserDao.updateFunction(openId, function);
     }
 
     @Override
     public Region loadCityByName(String name) {
         Region result = null;
-        if(provinceList!=null){
-            for(Region province:provinceList){
-                if(StringUtils.equals(province.getName(),name)){
-                    result = province;
+        if (cityList != null) {
+            for (Region city : cityList) {
+                if (StringUtils.equals(city.getName(), name)) {
+                    result = city;
                     break;
                 }
             }
