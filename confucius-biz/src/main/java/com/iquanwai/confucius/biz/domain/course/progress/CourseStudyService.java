@@ -110,4 +110,6 @@ public interface CourseStudyService {
 
     // 课程结束后额外开放天数
     int EXTRA_OPEN_DAYS = 7;
+    // 试听课开放天数
+    int AUDITION_OPEN_DAYS = 7;
 }
