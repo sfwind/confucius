@@ -1,13 +1,16 @@
 package com.iquanwai.confucius.web.customer.controller;
 
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Region;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.web.customer.dto.AreaDto;
 import com.iquanwai.confucius.web.customer.dto.ProfileDto;
 import com.iquanwai.confucius.web.customer.dto.RegionDto;
+import com.iquanwai.confucius.web.customer.dto.RiseDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.modelmapper.ModelMapper;
@@ -38,6 +41,8 @@ public class CustomerController {
     private AccountService accountService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private PlanService planService;
 
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadProfile(LoginUser loginUser) {
@@ -68,7 +73,7 @@ public class CustomerController {
                 .function("个人信息")
                 .action("提交个人信息");
         operationLogService.log(operationLog);
-        accountService.submitProfile(loginUser.getOpenId(),profileDto.getProvince(),profileDto.getCity(),profileDto.getFunction(),profileDto.getIndustry(),profileDto.getWorkingLife());
+        accountService.submitProfile(loginUser.getOpenId(), profileDto.getProvince(), profileDto.getCity(), profileDto.getFunction(), profileDto.getIndustry(), profileDto.getWorkingLife());
         return WebUtils.success();
     }
 
@@ -129,6 +134,25 @@ public class CustomerController {
         regionDto.setProvinceList(provinces.stream().map(item -> new AreaDto(item.getId() + "", item.getName(), item.getParentId() + "")).collect(Collectors.toList()));
         regionDto.setCityList(cities.stream().map(item -> new AreaDto(item.getId() + "", item.getName(), item.getParentId() + "")).collect(Collectors.toList()));
         return WebUtils.result(regionDto);
+    }
+
+    @RequestMapping(value = "/rise",method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadRiseInfo(LoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("RISE")
+                .action("查询rise信息");
+        operationLogService.log(operationLog);
+        List<ImprovementPlan> plans = planService.loadUserPlans(loginUser.getOpenId());
+        RiseDto riseDto = new RiseDto();
+        riseDto.setPoint(0);
+        plans.forEach(item -> {
+            if (item.getPoint() != null) {
+                riseDto.setPoint(riseDto.getPoint() + item.getPoint());
+            }
+        });
+        return WebUtils.result(riseDto);
     }
 
 }
