@@ -3,10 +3,8 @@ package com.iquanwai.confucius.biz.domain.customer;
 import com.iquanwai.confucius.biz.dao.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +28,16 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public Profile getProfile(String openId) {
         Profile profile =  profileDao.queryByOpenId(openId);
-        if(profile==null){
-            // 查询一下account
-            Account account = followUserDao.queryByOpenid(openId);
-            if(account!=null){
-                profile = new Profile();
-                ModelMapper modelMapper = new ModelMapper();
-                modelMapper.map(account, profile);
-                profileDao.insertProfile(profile);
-            }
-        }
+//        if(profile==null){
+//            // 查询一下account
+//            Account account = followUserDao.queryByOpenid(openId);
+//            if(account!=null){
+//                profile = new Profile();
+//                ModelMapper modelMapper = new ModelMapper();
+//                modelMapper.map(account, profile);
+//                profileDao.insertProfile(profile);
+//            }
+//        }
         return profile;
     }
 
@@ -48,6 +46,20 @@ public class ProfileServiceImpl implements ProfileService {
         Assert.notNull(profile.getOpenid(), "openID不能为空");
         Profile oldProfile = profileDao.queryByOpenId(profile.getOpenid());
         Boolean result = profileDao.submitPersonalCenterProfile(profile);
+        if(result && oldProfile.getIsFull()==0){
+            logger.info("用户:{} 完成个人信息填写,加{}积分",profile.getOpenid(),ConfigUtils.getProfileFullScore());
+            // 第一次提交，加分
+            pointRepo.riseCustomerPoint(profile.getOpenid(), ConfigUtils.getProfileFullScore());
+            // 更新信息状态
+            profileDao.completeProfile(profile.getOpenid());
+        }
+    }
+
+    @Override
+    public void submitPersonalInfo(Profile profile) {
+        Assert.notNull(profile.getOpenid(), "openID不能为空");
+        Profile oldProfile = profileDao.queryByOpenId(profile.getOpenid());
+        Boolean result = profileDao.submitPersonalProfile(profile);
         if(result && oldProfile.getIsFull()==0){
             logger.info("用户:{} 完成个人信息填写,加{}积分",profile.getOpenid(),ConfigUtils.getProfileFullScore());
             // 第一次提交，加分

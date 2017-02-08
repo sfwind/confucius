@@ -2,10 +2,12 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Region;
+import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
@@ -13,6 +15,7 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,8 @@ public class AccountServiceImpl implements AccountService {
     private FollowUserDao followUserDao;
     @Autowired
     private RegionDao regionDao;
+    @Autowired
+    private ProfileDao profileDao;
 
     private List<Region> provinceList;
 
@@ -95,6 +100,13 @@ public class AccountServiceImpl implements AccountService {
                 logger.info("插入用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null){
                     followUserDao.insert(accountNew);
+                }
+                Profile profile = profileDao.queryByOpenId(accountNew.getOpenid());
+                if(profile==null){
+                    profile = new Profile();
+                    ModelMapper modelMapper = new ModelMapper();
+                    modelMapper.map(accountNew, profile);
+                    profileDao.insertProfile(profile);
                 }
             }else{
                 logger.info("更新用户信息:{}",accountNew);

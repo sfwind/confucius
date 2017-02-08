@@ -2,16 +2,18 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Region;
-import com.iquanwai.confucius.web.resolver.LoginUser;
-import com.iquanwai.confucius.web.util.WebUtils;
+import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.ProvinceDto;
 import com.iquanwai.confucius.web.course.dto.RegionDto;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -39,6 +41,8 @@ public class PersonalInfoController {
     private AccountService accountService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private ProfileService profileService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -50,11 +54,11 @@ public class PersonalInfoController {
             if(infoSubmitDto.getRealName()==null){
                 return WebUtils.error("请填写姓名");
             }
-            Account account = new Account();
+            Profile account = new Profile();
             ModelMapper mapper = new ModelMapper();
             mapper.map(infoSubmitDto, account);
             account.setOpenid(loginUser.getOpenId());
-            accountService.submitPersonalInfo(account);
+            profileService.submitPersonalInfo(account);
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("个人信息")
                     .function("编辑个人信息")

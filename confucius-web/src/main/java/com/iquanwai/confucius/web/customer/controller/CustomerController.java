@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -71,7 +72,6 @@ public class CustomerController {
         Profile account = profileService.getProfile(loginUser.getOpenId());
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.map(account, profileDto);
-        profileDto.isFullCheck();
         // 查询id
         Region city = accountService.loadCityByName(account.getCity());
         Region province = accountService.loadProvinceByName(account.getProvince());
@@ -163,14 +163,24 @@ public class CustomerController {
                 .function("训练营")
                 .action("查询报过的课程列表 ");
         operationLogService.log(operationLog);
+        // 查询是否有真实姓名
+        Profile profile = profileService.getProfile(loginUser.getOpenId());
         List<ClassMember> classMembers = courseProgressService.loadClassMembers(loginUser.getOpenId());
-        List<CourseDto> list = classMembers.stream().map(item -> {
-            CourseDto dto = new CourseDto();
-            Course course = courseProgressService.loadCourse(item.getCourseId());
-            dto.setName(course.getName());
-            dto.setId(course.getId());
-            return dto;
-        }).collect(Collectors.toList());
+        List<CourseDto> list = classMembers
+                .stream().map(item -> {
+                    CourseDto dto = new CourseDto();
+                    Course course = courseProgressService.loadCourse(item.getCourseId());
+                    if(course.getType()==Course.AUDITION_COURSE){
+                        return null;
+                    } else {
+                        dto.setName(course.getName());
+                        dto.setId(course.getId());
+                        dto.setHasCertificateNo(item.getCertificateNo() != null);
+                        dto.setHasRealName(profile.getRealName() != null);
+                        dto.setNoCertificate(course.getType()==Course.SHORT_COURSE);
+                        return dto;
+                    }
+                }).filter(Objects::nonNull).collect(Collectors.toList());
         return WebUtils.result(list);
     }
 

@@ -8,4 +8,5 @@ import com.iquanwai.confucius.biz.po.customer.Profile;
 public interface ProfileService {
     Profile getProfile(String openId);
     void submitPersonalCenterProfile(Profile profile);
+    void submitPersonalInfo(Profile profile);
 }

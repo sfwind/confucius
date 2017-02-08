@@ -92,4 +92,22 @@ public class ProfileDao extends DBUtil{
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public Boolean submitPersonalProfile(Profile account) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        String updateSql = "Update Profile Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=?, " +
+                "RealName=?, City=?, Province=? where Openid=?";
+        try {
+            run.update(updateSql,
+                    account.getMobileNo(), account.getEmail(),
+                    account.getIndustry(), account.getFunction(),
+                    account.getWorkingLife(), account.getRealName(),
+                    account.getCity(), account.getProvince(),
+                    account.getOpenid());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return false;
+        }
+        return true;
+    }
 }

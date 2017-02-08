@@ -9,4 +9,7 @@ import lombok.Data;
 public class CourseDto {
     private Integer id;
     private String name;
+    private Boolean hasCertificateNo;
+    private Boolean hasRealName;
+    private Boolean noCertificate;
 }

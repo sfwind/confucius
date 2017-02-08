@@ -2,10 +2,12 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -39,6 +41,8 @@ public class SignupController {
     private AccountService accountService;
     @Autowired
     private CourseStudyService courseStudyService;
+    @Autowired
+    private ProfileService profileService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
@@ -126,7 +130,7 @@ public class SignupController {
                 .function("提交个人信息")
                 .action("加载个人信息");
         operationLogService.log(operationLog);
-        Account account = accountService.getAccount(loginUser.getOpenId(), false);
+        Profile account = profileService.getProfile(loginUser.getOpenId());
         ModelMapper mapper = new ModelMapper();
         mapper.map(account, infoSubmitDto);
         return WebUtils.result(infoSubmitDto);
@@ -142,11 +146,11 @@ public class SignupController {
                 .function("提交个人信息")
                 .action("提交个人信息");
         operationLogService.log(operationLog);
-        Account account = new Account();
+        Profile account = new Profile();
         ModelMapper mapper = new ModelMapper();
         mapper.map(infoSubmitDto, account);
         account.setOpenid(loginUser.getOpenId());
-        accountService.submitPersonalInfo(account);
+        profileService.submitPersonalInfo(account);
 
         Chapter chapter = courseStudyService.loadFirstChapter(infoSubmitDto.getCourseId());
         if(chapter!=null) {
