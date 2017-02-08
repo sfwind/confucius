@@ -83,17 +83,16 @@ public class ApplicationServiceImpl implements ApplicationService {
                 logger.error("ImprovementPlan is not existed,planId:{}", submit.getPlanId());
             }
             logger.info("应用训练加分:{}", id);
-            // 未加分并且字数大于50(字母)
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
                     submit.getApplicationId(), PracticePlan.APPLICATION);
             if (practicePlan != null) {
                 practicePlanDao.complete(practicePlan.getId());
-                // 查看难度
+                // 查看难度，加分
                 pointRepo.risePoint(submit.getPlanId(),
                         PointRepoImpl.score.get(applicationPracticeDao.load(ApplicationPractice.class, submit.getApplicationId()).getDifficulty()));
+                // 修改status
+                applicationSubmitDao.updatePointStatus(id);
             }
-            // 修改status
-            applicationSubmitDao.updatePointStatus(id);
         }
         return result;
     }

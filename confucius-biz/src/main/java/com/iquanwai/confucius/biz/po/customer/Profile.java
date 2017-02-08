@@ -20,4 +20,8 @@ public class Profile {
     private String workingLife; //工作年限
     private String realName; //真名
     private Integer point;
+    private Integer isFull;
+
+
+
 }

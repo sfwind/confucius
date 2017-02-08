@@ -17,5 +17,7 @@ public interface PointRepo {
 
     int VOTE_SCORE = 2;
 
+    void riseCustomerPoint(String openId, Integer increment);
+
     void reloadScore();
 }

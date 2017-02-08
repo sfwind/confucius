@@ -12,9 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by nethunder on 2017/2/8.
@@ -37,23 +35,22 @@ public class ProfileDao extends DBUtil{
         return null;
     }
 
-    public int submitPersonalCenterProfile(Profile profile) {
+    public boolean submitPersonalCenterProfile(Profile profile) {
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String updateSql = "Update Profile Set Industry=?, Function=?, WorkingLife=?, City=?, Province=? where Openid=?";
         try {
-            Future<Integer> result = asyncRun.update(updateSql,
-                    profile.getIndustry(), profile.getFunction(), profile.getWorkingLife(), profile.getCity(), profile.getProvince(), profile.getOpenid());
-            return result.get();
+            run.update(updateSql,
+                    profile.getIndustry(),
+                    profile.getFunction(),
+                    profile.getWorkingLife(),
+                    profile.getCity(),
+                    profile.getProvince(),
+                    profile.getOpenid());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e) {
-            // ignore
-        } catch (ExecutionException e) {
-            logger.error(e.getMessage(), e);
+            return false;
         }
-
-        return -1;
+        return true;
     }
 
 
@@ -72,5 +69,27 @@ public class ProfileDao extends DBUtil{
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    public void updatePoint(String openId, int point) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
+        String sql = "UPDATE Profile SET Point = ? where Openid = ?";
+        try {
+            asyncRun.update(sql, point, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void completeProfile(String openId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
+        String sql = "UPDATE Profile SET IsFull = 1 where Openid = ?";
+        try {
+            asyncRun.update(sql, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
     }
 }
