@@ -380,13 +380,13 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private String comment(boolean unlock, Chapter chapter) {
         Assert.notNull(chapter, "chapter不能为空");
         if (chapter.getType() == CourseType.ASSESSMENT) {
-            return "圈圈叫你去红点房间做游戏啦，微信群里获取参与方式；当天晚上8：30准时开始~";
+            return "圈圈叫你去千聊房间做游戏啦，微信群里获取参与方式；当天晚上8：30准时开始~";
         }
         if (chapter.getType() == CourseType.RELAX) {
             return "休息，休息一下~";
         }
         if (chapter.getType() == CourseType.GRADUATE) {
-            return "当天晚上9点，圈圈在红点主持毕业典礼，记得准时参加哦！";
+            return "当天晚上8点半，圈圈在千聊主持毕业典礼，记得准时参加哦！";
         }
 
         if (chapter.getType() == CourseType.HOMEWORK || chapter.getType() == CourseType.CHALLENGE) {
