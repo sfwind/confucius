@@ -1,9 +1,11 @@
 package com.iquanwai.confucius.web;
 
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * Created by justin on 16/9/9.
@@ -74,14 +77,14 @@ public class IndexController {
     }
 
 
-    @RequestMapping(value = "/personal/profile",method = RequestMethod.GET)
-    public ModelAndView getPersonalProfieIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
+    @RequestMapping(value = "/personal",method = RequestMethod.GET)
+    public ModelAndView getPersonalIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
         }
-        return courseView(request);
+        return courseView(request,loginUser);
     }
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
@@ -122,6 +125,29 @@ public class IndexController {
             }
         }else{
             mav.addObject("resource", ConfigUtils.staticResourceUrl());
+        }
+
+        return mav;
+    }
+
+    private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser){
+        ModelAndView mav = new ModelAndView("course");
+
+        if(request.getParameter("debug")!=null){
+            if(ConfigUtils.isFrontDebug()){
+                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
+            }else{
+                mav.addObject("resource", ConfigUtils.staticResourceUrl());
+            }
+        }else{
+            mav.addObject("resource", ConfigUtils.staticResourceUrl());
+        }
+
+        if (loginUser != null) {
+            Map<String, String> userParam = Maps.newHashMap();
+            userParam.put("userName", loginUser.getWeixinName());
+            userParam.put("headImage",loginUser.getHeadimgUrl());
+            mav.addAllObjects(userParam);
         }
 
         return mav;
