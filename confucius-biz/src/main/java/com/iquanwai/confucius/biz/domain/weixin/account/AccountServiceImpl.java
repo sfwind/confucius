@@ -174,31 +174,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void submitRegion(String openId, String province, String city) {
-        followUserDao.updateRegion(openId, province, city);
-    }
-
-    @Override
-    public void submitProfile(String openId, String province, String city, String function, String industry, String workingLife) {
-        followUserDao.updateProfile(openId, province, city, function, industry, workingLife);
-    }
-
-    @Override
-    public void submitIndustry(String openId, String industry) {
-        followUserDao.updateIndustry(openId, industry);
-    }
-
-    @Override
-    public void submitWorkingLife(String openId, String workingLife) {
-        followUserDao.updateWorkingLife(openId, workingLife);
-    }
-
-    @Override
-    public void submitFunction(String openId, String function) {
-        followUserDao.updateFunction(openId, function);
-    }
-
-    @Override
     public Region loadCityByName(String name) {
         Region result = null;
         if (cityList != null) {

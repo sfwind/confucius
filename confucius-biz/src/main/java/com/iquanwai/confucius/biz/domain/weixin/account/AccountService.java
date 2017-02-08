@@ -45,17 +45,6 @@ public interface AccountService {
      */
     Region loadProvinceByName(String name);
 
-
-    void submitIndustry(String openId, String industry);
-
-    void submitWorkingLife(String openId, String workingLife);
-
-    void submitFunction(String openId, String function);
-
-    void submitRegion(String openId,String province, String city);
-
-    void submitProfile(String openId, String province, String city, String function, String industry, String workingLife);
-
     /**
      * 根据名字获取城市
      */
