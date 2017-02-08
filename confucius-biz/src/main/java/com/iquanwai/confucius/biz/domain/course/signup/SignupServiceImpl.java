@@ -9,7 +9,12 @@ import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.Coupon;
+import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.CourseOrder;
+import com.iquanwai.confucius.biz.po.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -227,13 +232,15 @@ public class SignupServiceImpl implements SignupService {
 
     private Date getCloseDate(Integer classId, Integer courseId) {
         Date closeDate = null;
-        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
+        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7,试听课程关闭时间为2999
         if(getCachedCourse(courseId).getType()== Course.LONG_COURSE) {
             Date closeTime = getCachedClass(classId).getCloseTime();
             closeDate = DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS);
         }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
             int length = getCachedCourse(courseId).getLength();
             closeDate = DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS);
+        } else if(getCachedCourse(courseId).getType() == Course.AUDITION_COURSE){
+            closeDate = DateUtils.afterDays(new Date(), CourseStudyService.AUDITION_OPEN_DAYS);
         }
         return closeDate;
     }
@@ -292,6 +299,12 @@ public class SignupServiceImpl implements SignupService {
                     +"。点击查看群二维码。";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
+        } else if(course.getType()==Course.AUDITION_COURSE){
+            data.put("keyword1", new TemplateMessage.Keyword("【一分试听】 "+course.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword("7天"));
+            String remark = "试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍\n有疑问？点击看直播答疑";
+            data.put("remark", new TemplateMessage.Keyword(remark));
+            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
         }
 
         templateMessageService.sendMessage(templateMessage);

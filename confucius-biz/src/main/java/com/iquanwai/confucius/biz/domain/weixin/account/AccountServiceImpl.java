@@ -50,11 +50,18 @@ public class AccountServiceImpl implements AccountService {
     public Account getAccount(String openid, boolean realTime) {
         //从数据库查询account对象
         Account account = followUserDao.queryByOpenid(openid);
-        if (!realTime && account != null) {
+        if(!realTime && account != null) {
             return account;
         }
 
-        return getAccountFromWeixin(openid, account);
+        synchronized (this){
+            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
+            Account accountTemp = followUserDao.queryByOpenid(openid);
+            if(!realTime && accountTemp != null) {
+                return accountTemp;
+            }
+            return getAccountFromWeixin(openid, accountTemp);
+        }
     }
 
     private Account getAccountFromWeixin(String openid, Account account) {
@@ -62,11 +69,11 @@ public class AccountServiceImpl implements AccountService {
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
-        logger.info("请求用户信息:{}", openid);
+        logger.info("请求用户信息:{}",openid);
         url = CommonUtils.placeholderReplace(url, map);
 
         String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}", body);
+        logger.info("请求用户信息结果:{}",body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         Account accountNew = new Account();
         try {
@@ -84,14 +91,14 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if (account == null) {
-                logger.info("插入用户信息:{}", accountNew);
-                if (accountNew.getNickname() != null) {
+            if(account==null) {
+                logger.info("插入用户信息:{}",accountNew);
+                if(accountNew.getNickname()!=null){
                     followUserDao.insert(accountNew);
                 }
-            } else {
-                logger.info("更新用户信息:{}", accountNew);
-                if (accountNew.getNickname() != null) {
+            }else{
+                logger.info("更新用户信息:{}",accountNew);
+                if(accountNew.getNickname()!=null) {
                     followUserDao.updateMeta(accountNew);
                 }
             }
@@ -113,7 +120,7 @@ public class AccountServiceImpl implements AccountService {
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
-        for (String openid : usersDto.getData().getOpenid()) {
+        for(String openid:usersDto.getData().getOpenid()) {
             getAccount(openid, true);
         }
         logger.info("处理完成");
@@ -128,8 +135,8 @@ public class AccountServiceImpl implements AccountService {
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
         List<String> openids = followUserDao.queryAll();
-        for (String openid : usersDto.getData().getOpenid()) {
-            if (!openids.contains(openid)) {
+        for(String openid:usersDto.getData().getOpenid()) {
+            if(!openids.contains(openid)) {
                 getAccountFromWeixin(openid, null);
             }
         }
@@ -138,7 +145,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadAllProvinces() {
-        if (provinceList == null) {
+        if(provinceList ==null){
             provinceList = regionDao.loadAllProvinces();
         }
         return provinceList;
@@ -146,7 +153,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadCities() {
-        if (cityList == null) {
+        if(cityList==null) {
             cityList = regionDao.loadAllCities();
         }
         return cityList;
