@@ -261,4 +261,17 @@ public class ClassMemberDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public List<ClassMember> loadByOpenId(String openId) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            return run.query("SELECT * FROM ClassMember where Openid=?", h, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
 }

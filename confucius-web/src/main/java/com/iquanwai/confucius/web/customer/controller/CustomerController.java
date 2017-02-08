@@ -1,13 +1,21 @@
 package com.iquanwai.confucius.web.customer.controller;
 
+import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.Course;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.web.customer.dto.AreaDto;
+import com.iquanwai.confucius.web.customer.dto.CourseDto;
+import com.iquanwai.confucius.web.customer.dto.PlanDto;
+import com.iquanwai.confucius.web.customer.dto.PlanListDto;
 import com.iquanwai.confucius.web.customer.dto.ProfileDto;
 import com.iquanwai.confucius.web.customer.dto.RegionDto;
 import com.iquanwai.confucius.web.customer.dto.RiseDto;
@@ -43,6 +51,10 @@ public class CustomerController {
     private OperationLogService operationLogService;
     @Autowired
     private PlanService planService;
+    @Autowired
+    private ProblemService problemService;
+    @Autowired
+    private CourseProgressService courseProgressService;
 
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadProfile(LoginUser loginUser) {
@@ -136,7 +148,7 @@ public class CustomerController {
         return WebUtils.result(regionDto);
     }
 
-    @RequestMapping(value = "/rise",method = RequestMethod.GET)
+    @RequestMapping(value = "/rise", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadRiseInfo(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -154,5 +166,53 @@ public class CustomerController {
         });
         return WebUtils.result(riseDto);
     }
+
+    @RequestMapping(value = "/rise/plans", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadUserPlans(LoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("RISE")
+                .action("查询专题信息 ");
+        operationLogService.log(operationLog);
+        List<ImprovementPlan> plans = planService.loadUserPlans(loginUser.getOpenId());
+        PlanListDto list = new PlanListDto();
+        List<PlanDto> runningPlans = Lists.newArrayList();
+        List<PlanDto> donePlans = Lists.newArrayList();
+        plans.forEach(item -> {
+            PlanDto planDto = new PlanDto();
+            planDto.setName(problemService.getProblem(item.getProblemId()).getProblem());
+            planDto.setPoint(item.getPoint());
+            if (item.getStatus() == 1 || item.getStatus() == 2) {
+                runningPlans.add(planDto);
+            } else if (item.getStatus() == 3) {
+                donePlans.add(planDto);
+            }
+        });
+        list.setRunningPlans(runningPlans);
+        list.setDonePlans(donePlans);
+        return WebUtils.result(list);
+    }
+
+
+    @RequestMapping(value = "/course/list", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadUserCourses(LoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("训练营")
+                .action("查询报过的课程列表 ");
+        operationLogService.log(operationLog);
+        List<ClassMember> classMembers = courseProgressService.loadClassMembers(loginUser.getOpenId());
+        List<CourseDto> list = classMembers.stream().map(item -> {
+            CourseDto dto = new CourseDto();
+            Course course = courseProgressService.loadCourse(item.getCourseId());
+            dto.setName(course.getName());
+            dto.setId(course.getId());
+            return dto;
+        }).collect(Collectors.toList());
+        return WebUtils.result(list);
+    }
+
 
 }
