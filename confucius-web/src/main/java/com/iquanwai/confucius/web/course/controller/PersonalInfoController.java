@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.customer.Profile;
@@ -76,7 +75,7 @@ public class PersonalInfoController {
         InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            Account account = accountService.getAccount(loginUser.getOpenId(), false);
+            Profile account = profileService.getProfile(loginUser.getOpenId());
             ModelMapper mapper = new ModelMapper();
             mapper.map(account, infoSubmitDto);
             //找到名字匹配的省份,设置省份id
