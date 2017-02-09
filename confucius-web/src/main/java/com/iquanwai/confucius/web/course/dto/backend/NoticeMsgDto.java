@@ -9,7 +9,8 @@ import java.util.List;
  */
 @Data
 public class NoticeMsgDto {
-    private String noticeMsg;
+    private String task;
+    private String first;
     private String remark;
-    private List<String> memberIds;
+    private List<String> openids;
 }

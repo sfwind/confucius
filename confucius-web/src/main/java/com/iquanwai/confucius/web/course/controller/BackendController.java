@@ -139,21 +139,23 @@ public class BackendController {
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto){
         new Thread(() -> {
             try {
-                List<String> memberIds = noticeMsgDto.getMemberIds();
-                memberIds.stream().forEach(memberId -> {
-                    ClassMember classMember = courseProgressService.loadClassMemberByMemberId(memberId);
-                    if (classMember != null) {
-                        TemplateMessage templateMessage = new TemplateMessage();
-                        templateMessage.setTouser(classMember.getOpenId());
-                        templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
-                        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-                        templateMessage.setData(data);
-                        data.put("first", new TemplateMessage.Keyword("童鞋，我们发现你最近还有部分任务未完成。"));
-                        data.put("keyword1", new TemplateMessage.Keyword(noticeMsgDto.getNoticeMsg()));
-                        data.put("keyword2", new TemplateMessage.Keyword("hin高"));
-                        data.put("remark", new TemplateMessage.Keyword(noticeMsgDto.getRemark()));
-                        templateMessageService.sendMessage(templateMessage);
+                List<String> openids = noticeMsgDto.getOpenids();
+                openids.stream().forEach(openid -> {
+                    TemplateMessage templateMessage = new TemplateMessage();
+                    templateMessage.setTouser(openid);
+                    templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+                    Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                    templateMessage.setData(data);
+                    if(noticeMsgDto.getFirst()!=null) {
+                        data.put("first", new TemplateMessage.Keyword(noticeMsgDto.getFirst()));
                     }
+                    data.put("keyword1", new TemplateMessage.Keyword(noticeMsgDto.getTask()));
+                    data.put("keyword2", new TemplateMessage.Keyword("hin高"));
+                    if(noticeMsgDto.getRemark()!=null) {
+                        data.put("remark", new TemplateMessage.Keyword(noticeMsgDto.getRemark()));
+                    }
+                    templateMessageService.sendMessage(templateMessage);
+
                 });
             }catch (Exception e){
                 LOGGER.error("发送通知失败", e);
