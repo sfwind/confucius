@@ -15,13 +15,13 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +104,12 @@ public class AccountServiceImpl implements AccountService {
                 Profile profile = profileDao.queryByOpenId(accountNew.getOpenid());
                 if(profile==null){
                     profile = new Profile();
-                    ModelMapper modelMapper = new ModelMapper();
-                    modelMapper.map(accountNew, profile);
-                    profileDao.insertProfile(profile);
+                    try{
+                        BeanUtils.copyProperties(profile,accountNew);
+                        profileDao.insertProfile(profile);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        logger.error("beanUtils copy props error ######",e);
+                    }
                 }
             }else{
                 logger.info("更新用户信息:{}",accountNew);

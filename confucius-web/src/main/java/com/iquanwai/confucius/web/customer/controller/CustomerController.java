@@ -22,7 +22,7 @@ import com.iquanwai.confucius.web.customer.dto.RegionDto;
 import com.iquanwai.confucius.web.customer.dto.RiseDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.modelmapper.ModelMapper;
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,8 +71,13 @@ public class CustomerController {
         operationLogService.log(operationLog);
         ProfileDto profileDto = new ProfileDto();
         Profile account = profileService.getProfile(loginUser.getOpenId());
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.map(account, profileDto);
+
+        try {
+            BeanUtils.copyProperties(profileDto,account);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            logger.error("beanUtils copy props error",e);
+            return WebUtils.error("加载个人信息失败");
+        }
         // 查询id
         Region city = accountService.loadCityByName(account.getCity());
         Region province = accountService.loadProvinceByName(account.getProvince());
@@ -89,13 +95,16 @@ public class CustomerController {
                 .action("提交个人信息");
         operationLogService.log(operationLog);
         Profile profile =  new Profile();
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.map(profileDto, profile);
+        try {
+            BeanUtils.copyProperties(profile,profileDto);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            logger.error("beanUtils copy props error",e);
+            return WebUtils.error("提交个人信息失败");
+        }
         profile.setOpenid(loginUser.getOpenId());
         profileService.submitPersonalCenterProfile(profile);
         return WebUtils.success();
     }
-
 
 
     @RequestMapping("/region")

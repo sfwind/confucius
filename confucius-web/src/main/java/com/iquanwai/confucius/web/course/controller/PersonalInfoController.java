@@ -13,8 +13,8 @@ import com.iquanwai.confucius.web.course.dto.ProvinceDto;
 import com.iquanwai.confucius.web.course.dto.RegionDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,8 +55,12 @@ public class PersonalInfoController {
                 return WebUtils.error("请填写姓名");
             }
             Profile account = new Profile();
-            ModelMapper mapper = new ModelMapper();
-            mapper.map(infoSubmitDto, account);
+            try{
+                BeanUtils.copyProperties(account,infoSubmitDto);
+            }catch (IllegalAccessException | InvocationTargetException e) {
+                LOGGER.error("beanUtils copy props error",e);
+                return WebUtils.error("提交个人信息失败");
+            }
             account.setOpenid(loginUser.getOpenId());
             profileService.submitPersonalInfo(account);
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -76,8 +81,12 @@ public class PersonalInfoController {
         try{
             Assert.notNull(loginUser, "用户不能为空");
             Profile account = profileService.getProfile(loginUser.getOpenId());
-            ModelMapper mapper = new ModelMapper();
-            mapper.map(account, infoSubmitDto);
+            try{
+                BeanUtils.copyProperties(infoSubmitDto,account);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                LOGGER.error("beanUtils copy props error",e);
+                return WebUtils.error("加载个人信息失败");
+            }
             //找到名字匹配的省份,设置省份id
             List<Region> regions = accountService.loadAllProvinces();
             Optional<Region> find = regions.stream().filter(region -> region.getName().
