@@ -100,15 +100,16 @@ public class AccountServiceImpl implements AccountService {
                 logger.info("插入用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null){
                     followUserDao.insert(accountNew);
-                }
-                Profile profile = profileDao.queryByOpenId(accountNew.getOpenid());
-                if(profile==null){
-                    profile = new Profile();
-                    try{
-                        BeanUtils.copyProperties(profile,accountNew);
-                        profileDao.insertProfile(profile);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        logger.error("beanUtils copy props error ######",e);
+                    Profile profile = profileDao.queryByOpenId(accountNew.getOpenid());
+                    if(profile==null){
+                        profile = new Profile();
+                        try{
+                            BeanUtils.copyProperties(profile,accountNew);
+                            logger.info("插入Profile表信息:{}",profile);
+                            profileDao.insertProfile(profile);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            logger.error("beanUtils copy props error ######",e);
+                        }
                     }
                 }
             }else{
