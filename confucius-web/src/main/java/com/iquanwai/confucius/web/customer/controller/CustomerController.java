@@ -184,5 +184,20 @@ public class CustomerController {
         return WebUtils.result(list);
     }
 
+    @RequestMapping(value = "/rise/id", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadRiseId(LoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("用户信息")
+                .action("查询RiseId ");
+        operationLogService.log(operationLog);
+        Profile profile = profileService.getProfile(loginUser.getOpenId());
+        if(profile==null){
+            logger.error("用户:{} 缺少Profile信息，进入个人中心失败",loginUser.getOpenId());
+            return WebUtils.error("数据异常，请联系管理员");
+        }
+        return WebUtils.result(profile.getId());
+    }
 
 }
