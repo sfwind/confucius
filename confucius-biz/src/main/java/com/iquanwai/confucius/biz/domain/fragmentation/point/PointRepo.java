@@ -15,9 +15,14 @@ public interface PointRepo {
     //挑战训练得分
     int CHALLENGE_PRACTICE_SCORE = 500;
 
+    // 点赞得分
     int VOTE_SCORE = 2;
 
+    /**
+     * 给用户信息表加分
+     */
     void riseCustomerPoint(String openId, Integer increment);
 
+    // 重新读取分数配置
     void reloadScore();
 }
