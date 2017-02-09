@@ -87,11 +87,12 @@ public class ApplicationServiceImpl implements ApplicationService {
                     submit.getApplicationId(), PracticePlan.APPLICATION);
             if (practicePlan != null) {
                 practicePlanDao.complete(practicePlan.getId());
+                Integer point = PointRepoImpl.score.get(applicationPracticeDao.load(ApplicationPractice.class, submit.getApplicationId()).getDifficulty());
                 // 查看难度，加分
-                pointRepo.risePoint(submit.getPlanId(),
-                        PointRepoImpl.score.get(applicationPracticeDao.load(ApplicationPractice.class, submit.getApplicationId()).getDifficulty()));
+                pointRepo.risePoint(submit.getPlanId(),point);
                 // 修改status
                 applicationSubmitDao.updatePointStatus(id);
+                pointRepo.riseCustomerPoint(submit.getOpenid(),point);
             }
         }
         return result;

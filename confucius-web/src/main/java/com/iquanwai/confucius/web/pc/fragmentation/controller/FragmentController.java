@@ -13,6 +13,8 @@ import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -179,14 +181,20 @@ public class FragmentController {
             // 点赞加积分
             // 点赞加积分
             Integer planId = null;
+            String submitOpenId = null;
             if(vote.getType()== Constants.VoteType.CHALLENGE){
                 // 挑战任务点赞
-                planId = challengeService.loadSubmit(refer).getPlanId();
+                ChallengeSubmit submit = challengeService.loadSubmit(refer);
+                planId = submit.getPlanId();
+                submitOpenId = submit.getOpenid();
             } else {
                 // 应用任务点赞
-                planId = applicationService.loadSubmit(refer).getPlanId();
+                ApplicationSubmit submit = applicationService.loadSubmit(refer);
+                planId = submit.getPlanId();
+                submitOpenId = submit.getOpenid();
             }
             pointRepo.risePoint(planId,2);
+            pointRepo.riseCustomerPoint(submitOpenId,2);
             operationLog.action("点赞").memo(loginUser.getOpenId() + "点赞" + refer);
         } else {
             // 禁止取消点赞
