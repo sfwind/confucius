@@ -27,18 +27,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public Profile getProfile(String openId) {
-        Profile profile =  profileDao.queryByOpenId(openId);
-//        if(profile==null){
-//            // 查询一下account
-//            Account account = followUserDao.queryByOpenid(openId);
-//            if(account!=null){
-//                profile = new Profile();
-//                ModelMapper modelMapper = new ModelMapper();
-//                modelMapper.map(account, profile);
-//                profileDao.insertProfile(profile);
-//            }
-//        }
-        return profile;
+        return profileDao.queryByOpenId(openId);
     }
 
     @Override
