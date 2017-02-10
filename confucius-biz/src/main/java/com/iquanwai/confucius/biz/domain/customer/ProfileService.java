@@ -19,5 +19,5 @@ public interface ProfileService {
     /**
      * 在报名以及毕业证书前的那个页面提交用户信息
      */
-    void submitPersonalInfo(Profile profile);
+    void submitPersonalInfo(Profile profile,Boolean risePoint);
 }

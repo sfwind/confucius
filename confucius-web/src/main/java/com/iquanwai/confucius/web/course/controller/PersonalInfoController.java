@@ -62,7 +62,7 @@ public class PersonalInfoController {
                 return WebUtils.error("提交个人信息失败");
             }
             account.setOpenid(loginUser.getOpenId());
-            profileService.submitPersonalInfo(account);
+            profileService.submitPersonalInfo(account,true);
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("个人信息")
                     .function("编辑个人信息")

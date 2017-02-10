@@ -45,11 +45,11 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void submitPersonalInfo(Profile profile) {
+    public void submitPersonalInfo(Profile profile,Boolean risePoint) {
         Assert.notNull(profile.getOpenid(), "openID不能为空");
         Profile oldProfile = profileDao.queryByOpenId(profile.getOpenid());
         Boolean result = profileDao.submitPersonalProfile(profile);
-        if(result && oldProfile.getIsFull()==0){
+        if(result && oldProfile.getIsFull()==0 && risePoint){
             logger.info("用户:{} 完成个人信息填写,加{}积分",profile.getOpenid(),ConfigUtils.getProfileFullScore());
             // 第一次提交，加分
             pointRepo.riseCustomerPoint(profile.getOpenid(), ConfigUtils.getProfileFullScore());

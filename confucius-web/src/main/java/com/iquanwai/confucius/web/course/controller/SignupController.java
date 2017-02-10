@@ -168,7 +168,7 @@ public class SignupController {
             return WebUtils.error("提交个人信息失败");
         }
         account.setOpenid(loginUser.getOpenId());
-        profileService.submitPersonalInfo(account);
+        profileService.submitPersonalInfo(account,false);
 
         Chapter chapter = courseStudyService.loadFirstChapter(infoSubmitDto.getCourseId());
         if(chapter!=null) {
