@@ -200,4 +200,7 @@ public class ConfigUtils {
 			return null;
 		}
 	}
+	public static Integer getProfileFullScore(){
+		return config.getInt("profile.full.score");
+	}
 }

@@ -92,8 +92,9 @@ public class ChallengeServiceImpl implements ChallengeService {
                     submit.getChallengeId(), PracticePlan.CHALLENGE);
             if (practicePlan != null) {
                 pointRepo.risePoint(submit.getPlanId(), ConfigUtils.getChallengeScore());
+                challengeSubmitDao.updatePointStatus(id);
+                pointRepo.riseCustomerPoint(submit.getOpenid(),ConfigUtils.getChallengeScore());
             }
-            challengeSubmitDao.updatePointStatus(id);
             return new MutablePair<>(2,ConfigUtils.getChallengeScore());
         } else {
             return new MutablePair<>(1,0);

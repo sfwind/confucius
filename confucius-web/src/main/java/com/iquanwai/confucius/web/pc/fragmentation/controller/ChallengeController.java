@@ -101,7 +101,8 @@ public class ChallengeController {
                     .stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName())
                     .collect(Collectors.toList()));
             // 先写死
-            dto.setDescription("Hi，欢迎来到圈外社区。<br/>请按照手机端挑战任务的页面提示，在这里记录下你学习的小目标、感悟或经历吧！");
+            dto.setDescription("Hi，欢迎来到圈外社区，这里有很多同路人在和你一起进步！<br/>" +
+                    "你的什么目标，可以利用当前学习的专题实现呢？请在这里写下你的小目标，并在接下来的时间，记录你应用所学套路来完成目标的方法吧！" );
             return WebUtils.result(dto);
         } else {
             logger.error("用户:{},没有该训练计划:{}，挑战训练:{}",openId,plan,cid);
@@ -187,13 +188,13 @@ public class ChallengeController {
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("挑战训练")
                 .action("PC提交挑战训练答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
+        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         if (result.getLeft() > 0) {
             if (result.getLeft() == 2) {
                 return WebUtils.result(result.getRight());

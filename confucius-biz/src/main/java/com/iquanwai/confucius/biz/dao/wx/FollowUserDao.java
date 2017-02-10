@@ -114,4 +114,5 @@ public class FollowUserDao extends DBUtil {
 
         return -1;
     }
+
 }

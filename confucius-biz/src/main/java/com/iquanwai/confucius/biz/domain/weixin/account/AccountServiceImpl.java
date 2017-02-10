@@ -2,21 +2,27 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Region;
+import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +38,20 @@ public class AccountServiceImpl implements AccountService {
     private FollowUserDao followUserDao;
     @Autowired
     private RegionDao regionDao;
+    @Autowired
+    private ProfileDao profileDao;
 
     private List<Region> provinceList;
 
     private List<Region> cityList;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    @PostConstruct
+    public void init() {
+        loadAllProvinces();
+        loadCities();
+    }
 
     public Account getAccount(String openid, boolean realTime) {
         //从数据库查询account对象
@@ -87,6 +101,26 @@ public class AccountServiceImpl implements AccountService {
                 logger.info("插入用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null){
                     followUserDao.insert(accountNew);
+
+                    Profile profile = profileDao.queryByOpenId(accountNew.getOpenid());
+                    if(profile==null){
+                        profile = new Profile();
+                        try{
+                            BeanUtils.copyProperties(profile,accountNew);
+                            logger.info("插入Profile表信息:{}",profile);
+                            profile.setRiseId(CommonUtils.randomString(7));
+                            profileDao.insertProfile(profile);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            logger.error("beanUtils copy props error",e);
+                        } catch (SQLException err){
+                            profile.setRiseId(CommonUtils.randomString(7));
+                            try{
+                                profileDao.insertProfile(profile);
+                            } catch (SQLException subErr){
+                                logger.error("插入Profile失败，openId:{},riseId:{}",profile.getOpenid(),profile.getRiseId());
+                            }
+                        }
+                    }
                 }
             }else{
                 logger.info("更新用户信息:{}",accountNew);
@@ -150,4 +184,34 @@ public class AccountServiceImpl implements AccountService {
         }
         return cityList;
     }
+
+    @Override
+    public Region loadProvinceByName(String name) {
+        Region result = null;
+        if (provinceList != null) {
+            for (Region province : provinceList) {
+                if (StringUtils.equals(province.getName(), name)) {
+                        result = province;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Region loadCityByName(String name) {
+        Region result = null;
+        if (cityList != null) {
+            for (Region city : cityList) {
+                if (StringUtils.equals(city.getName(), name)) {
+                    result = city;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+
 }

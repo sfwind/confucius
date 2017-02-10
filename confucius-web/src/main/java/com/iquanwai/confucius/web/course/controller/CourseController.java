@@ -2,15 +2,20 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
+import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.ClassMember;
+import com.iquanwai.confucius.biz.po.Course;
+import com.iquanwai.confucius.biz.po.CourseWeek;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.web.resolver.LoginUser;
-import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.CertificateDto;
 import com.iquanwai.confucius.web.course.dto.CoursePageDto;
 import com.iquanwai.confucius.web.course.dto.WeekIndexDto;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +43,8 @@ public class CourseController {
     private OperationLogService operationLogService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private ProfileService profileService;
 
     private String[] WEEK_INDEXES = {"开营前", "第一周", "第二周", "第三周"};
 
@@ -158,7 +165,7 @@ public class CourseController {
                                                                LoginUser loginUser){
         Assert.notNull(loginUser,"用户不能为空");
         CertificateDto certificateDto = new CertificateDto();
-        Account account = accountService.getAccount(loginUser.getOpenId(), false);
+        Profile account = profileService.getProfile(loginUser.getOpenId());
         if(account!=null){
             certificateDto.setName(account.getRealName());
         }

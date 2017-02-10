@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 /**
  * Created by justin on 16/12/4.
@@ -53,50 +51,11 @@ public class PracticePlanDao extends PracticeDBUtil {
         return null;
     }
 
-    public List<PracticePlan> loadPracticePlans(Integer planId, Integer series, Integer sequence){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<PracticePlan>> h = new BeanListHandler(PracticePlan.class);
-        String sql = "SELECT * FROM PracticePlan where PlanId=? and Series=? and Sequence=?";
-        try {
-            List<PracticePlan> practicePlan = run.query(sql, h,
-                    planId, series, sequence);
-            return practicePlan;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
-    }
-
     public void complete(Integer id){
         QueryRunner runner = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
         String sql = "update PracticePlan set Status=1 where Id=?";
         try {
-            asyncRun.update(sql, id);
-        }catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public void improve(Integer id){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
-        String sql = "update PracticePlan set Status=2 where Id=?";
-        try {
-            asyncRun.update(sql, id);
-        }catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-
-    public void unlock(Integer id){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
-        String sql = "update PracticePlan set UnLocked=1 where Id=?";
-        try {
-            asyncRun.update(sql, id);
+            runner.update(sql, id);
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

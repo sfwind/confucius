@@ -496,6 +496,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         logger.info("noticeWillCloseMember end");
     }
 
+    @Override
+    public List<ClassMember> loadClassMembers(String openId) {
+        return classMemberDao.loadByOpenId(openId);
+    }
+
     //通知未完成任务的学员
     private void noticeMembersWillClose(ClassMember classMember){
         Assert.notNull(classMember, "classMember不能为空");
