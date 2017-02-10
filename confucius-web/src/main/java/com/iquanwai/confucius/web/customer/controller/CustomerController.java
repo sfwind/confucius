@@ -179,7 +179,7 @@ public class CustomerController {
                 .stream().map(item -> {
                     CourseDto dto = new CourseDto();
                     Course course = courseProgressService.loadCourse(item.getCourseId());
-                    if(course.getType()==Course.AUDITION_COURSE){
+                    if(course.getType()==Course.AUDITION_COURSE || !item.getGraduate()){
                         return null;
                     } else {
                         dto.setName(course.getName());
