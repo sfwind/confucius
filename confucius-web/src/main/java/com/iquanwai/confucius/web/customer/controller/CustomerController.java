@@ -193,7 +193,7 @@ public class CustomerController {
         return WebUtils.result(list);
     }
 
-    @RequestMapping(value = "/rise/id", method = RequestMethod.GET)
+    @RequestMapping(value = "/riseid", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadRiseId(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -206,7 +206,7 @@ public class CustomerController {
             logger.error("用户:{} 缺少Profile信息，进入个人中心失败",loginUser.getOpenId());
             return WebUtils.error("数据异常，请联系管理员");
         }
-        return WebUtils.result(profile.getId());
+        return WebUtils.result(profile.getRiseId());
     }
 
 }

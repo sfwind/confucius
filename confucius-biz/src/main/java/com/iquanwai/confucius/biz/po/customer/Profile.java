@@ -7,7 +7,6 @@ import lombok.Data;
  */
 @Data
 public class Profile {
-    private Integer Id;
     private String openid;	//用户的标识，对当前公众号唯一
     private String nickname; //用户的昵称
     private String city;	//用户所在城市
@@ -23,7 +22,4 @@ public class Profile {
     private Integer point;
     private Integer isFull;
     private String riseId;
-
-
-
 }
