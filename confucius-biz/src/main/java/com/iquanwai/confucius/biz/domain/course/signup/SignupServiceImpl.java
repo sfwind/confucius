@@ -257,8 +257,6 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public void giveupSignup(String orderId) {
-        courseOrderDao.closeOrder(orderId);
-
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
         //从待付款中去掉
         payList.remove(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()));
@@ -268,6 +266,8 @@ public class SignupServiceImpl implements SignupService {
             classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId(),
                     courseOrder.getClassId());
         }
+        //关闭订单
+        courseOrderDao.closeOrder(orderId);
     }
 
     public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {
