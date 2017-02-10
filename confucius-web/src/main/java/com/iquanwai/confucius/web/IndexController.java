@@ -77,7 +77,7 @@ public class IndexController {
     }
 
 
-    @RequestMapping(value = "/personal/static",method = RequestMethod.GET)
+    @RequestMapping(value = "/personal/static/**",method = RequestMethod.GET)
     public ModelAndView getPersonalIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
