@@ -218,14 +218,15 @@ public class ApplicationController {
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        ApplicationSubmit submit = applicationService.loadSubmit(submitId);
-        Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用训练")
                 .action("PC提交应用训练答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
+        ApplicationSubmit submit = applicationService.loadSubmit(submitId);
+        Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
+
         if (result) {
             if(submit.getPointStatus()==0){
                 ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());

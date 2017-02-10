@@ -188,13 +188,13 @@ public class ChallengeController {
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("挑战训练")
                 .action("PC提交挑战训练答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
+        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         if (result.getLeft() > 0) {
             if (result.getLeft() == 2) {
                 return WebUtils.result(result.getRight());
