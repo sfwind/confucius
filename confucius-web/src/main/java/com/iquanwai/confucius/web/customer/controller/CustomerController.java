@@ -125,14 +125,9 @@ public class CustomerController {
                 .function("RISE")
                 .action("查询rise信息");
         operationLogService.log(operationLog);
-        List<ImprovementPlan> plans = planService.loadUserPlans(loginUser.getOpenId());
+        Profile profile = profileService.getProfile(loginUser.getOpenId());
         RiseDto riseDto = new RiseDto();
-        riseDto.setPoint(0);
-        plans.forEach(item -> {
-            if (item.getPoint() != null) {
-                riseDto.setPoint(riseDto.getPoint() + item.getPoint());
-            }
-        });
+        riseDto.setPoint(profile.getPoint());
         return WebUtils.result(riseDto);
     }
 
