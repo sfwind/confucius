@@ -1,7 +1,9 @@
 package com.iquanwai.confucius.biz.dao.customer;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.customer.Profile;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -53,19 +55,25 @@ public class ProfileDao extends DBUtil{
         return true;
     }
 
+    public static void main(String[] args){
+        System.out.println(CommonUtils.randomString(7));
+    }
 
-    public int insertProfile(Profile profile) {
+    public int insertProfile(Profile profile) throws SQLException {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Profile(Openid, Nickname, City, Country, Province, Headimgurl, MobileNo, Email, Industry, Function, WorkingLife, RealName)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Profile(Openid, Nickname, City, Country, Province, Headimgurl, MobileNo, Email, Industry, Function, WorkingLife, RealName, RiseId)" +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
                     profile.getOpenid(), profile.getNickname(),profile.getCity(),profile.getCountry(),profile.getProvince(),
                     profile.getHeadimgurl(),profile.getMobileNo(),profile.getEmail(),profile.getIndustry(),
-                    profile.getFunction(),profile.getWorkingLife(),profile.getRealName());
+                    profile.getFunction(),profile.getWorkingLife(),profile.getRealName(),profile.getRiseId());
             return insertRs.intValue();
         } catch (SQLException e) {
+            if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
+                throw e;
+            }
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
@@ -110,4 +118,6 @@ public class ProfileDao extends DBUtil{
         }
         return true;
     }
+
+
 }
