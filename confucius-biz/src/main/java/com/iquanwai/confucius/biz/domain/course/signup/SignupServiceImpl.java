@@ -104,7 +104,7 @@ public class SignupServiceImpl implements SignupService {
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
         if(!ConfigUtils.pressTestSwitch()) {
-            //非待付款和已付款状态
+            //已付款状态
             if (classMemberCountRepo.isEntry(openid, courseId) && !payList.contains(new Payment(openid,courseId))) {
                 return new ImmutablePair(-3, 0);
             }

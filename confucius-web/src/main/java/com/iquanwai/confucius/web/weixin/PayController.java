@@ -50,7 +50,7 @@ public class PayController {
             }
             String prepayId = payService.unifiedOrder(orderCallback.getProduct_id());
             if (StringUtils.isEmpty(prepayId)) {
-                orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "下单失败，请重新扫描二维码", "");
+                orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "下单失败,请联系微信号quanwaizhushou", "");
             } else {
                 orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "下单成功", prepayId);
             }
