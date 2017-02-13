@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -22,14 +23,15 @@ import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.modelmapper.internal.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -188,7 +190,17 @@ public class ApplicationController {
                     Account account = accountService.getAccount(item.getOpenid(), false);
                     dto.setUpName(account.getNickname());
                     dto.setHeadPic(account.getHeadimgurl());
+                    dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.APPLICATION,item.getId()));
                     return dto;
+                }).sorted((left,right)->{
+                    try {
+                        int leftWeight = left.getCommentCount() + left.getVoteCount();
+                        int rightWeight = right.getCommentCount() + right.getVoteCount();
+                        return rightWeight - leftWeight;
+                    } catch (Exception e){
+                        logger.error("应用任务文章排序异常",e);
+                        return 0;
+                    }
                 }).collect(Collectors.toList());
         return WebUtils.result(submits);
     }
@@ -201,20 +213,28 @@ public class ApplicationController {
      * @param submitId           提交人id
      * @param challengeSubmitDto 任务内容
      */
-    @RequestMapping("/submit/{submitId}")
+    @RequestMapping(value = "/submit/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submit(PCLoginUser loginUser,
                                                       @PathVariable Integer submitId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用训练")
                 .action("PC提交应用训练答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
+        ApplicationSubmit submit = applicationService.loadSubmit(submitId);
+        Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
+
         if (result) {
-            return WebUtils.success();
+            if(submit.getPointStatus()==0){
+                ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
+                return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
+            } else {
+                return WebUtils.success();
+            }
+
         } else {
             return WebUtils.error("提交失败");
         }

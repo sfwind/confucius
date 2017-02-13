@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
@@ -9,22 +10,31 @@ import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
+import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.web.resolver.LoginUser;
-import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.SignupDto;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
@@ -42,6 +52,8 @@ public class SignupController {
     private AccountService accountService;
     @Autowired
     private CourseStudyService courseStudyService;
+    @Autowired
+    private ProfileService profileService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
@@ -65,7 +77,7 @@ public class SignupController {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
             }
             if(result.getLeft()==-2){
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.noclass"));
+                return WebUtils.error(ErrorConstants.COURSE_NOT_OPEN,ErrorMessageUtils.getErrmsg("signup.noclass"));
             }
             if(result.getLeft()==-3){
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
@@ -129,9 +141,13 @@ public class SignupController {
                 .function("提交个人信息")
                 .action("加载个人信息");
         operationLogService.log(operationLog);
-        Account account = accountService.getAccount(loginUser.getOpenId(), false);
-        ModelMapper mapper = new ModelMapper();
-        mapper.map(account, infoSubmitDto);
+        Profile account = profileService.getProfile(loginUser.getOpenId());
+        try {
+            BeanUtils.copyProperties(infoSubmitDto, account);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            LOGGER.error("beanUtils copy props error", e);
+            return WebUtils.error("加载个人信息失败");
+        }
         return WebUtils.result(infoSubmitDto);
     }
 
@@ -145,11 +161,15 @@ public class SignupController {
                 .function("提交个人信息")
                 .action("提交个人信息");
         operationLogService.log(operationLog);
-        Account account = new Account();
-        ModelMapper mapper = new ModelMapper();
-        mapper.map(infoSubmitDto, account);
+        Profile account = new Profile();
+        try {
+            BeanUtils.copyProperties(account, infoSubmitDto);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            LOGGER.error("beanUtils copy props error", e);
+            return WebUtils.error("提交个人信息失败");
+        }
         account.setOpenid(loginUser.getOpenId());
-        accountService.submitPersonalInfo(account);
+        profileService.submitPersonalInfo(account,false);
 
         Chapter chapter = courseStudyService.loadFirstChapter(infoSubmitDto.getCourseId());
         if(chapter!=null) {

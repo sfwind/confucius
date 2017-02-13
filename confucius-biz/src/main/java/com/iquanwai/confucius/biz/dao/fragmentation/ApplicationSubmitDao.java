@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -59,7 +58,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> load(Integer applicationId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Content is not null";
+        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Content is not null order by UpdateTime desc";
         try {
             return run.query(sql, h, applicationId);
         } catch (SQLException e) {

@@ -1,13 +1,8 @@
 package com.iquanwai.confucius.biz.domain.permission;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
 import com.iquanwai.confucius.biz.dao.permission.PermissionDao;
 import com.iquanwai.confucius.biz.dao.permission.RoleDao;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.permisson.Permission;
 import com.iquanwai.confucius.biz.po.permisson.Role;
 import org.slf4j.Logger;
@@ -18,8 +13,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;

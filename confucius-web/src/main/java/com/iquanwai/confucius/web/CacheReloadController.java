@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ public class CacheReloadController {
     private PermissionService permissionService;
     @Autowired
     private PointRepo pointRepo;
+    @Autowired
+    private AccountService accountService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -87,5 +90,16 @@ public class CacheReloadController {
             LOGGER.error("reload score error", e);
         }
         return WebUtils.error("reload score");
+    }
+
+    @RequestMapping("/region/reload")
+    public ResponseEntity<Map<String,Object>> reloadRegion(){
+        try{
+            accountService.loadAllProvinces();
+            accountService.loadCities();
+            return WebUtils.success();
+        } catch (Exception e){
+            return WebUtils.error("reload region");
+        }
     }
 }

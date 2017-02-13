@@ -103,7 +103,7 @@ public class SignupServiceImpl implements SignupService {
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
         if(!ConfigUtils.pressTestSwitch()) {
-            //非待付款和已付款状态
+            //已付款状态
             if (classMemberCountRepo.isEntry(openid, courseId) && !payList.contains(new Payment(openid,courseId))) {
                 return new ImmutablePair(-3, 0);
             }
@@ -244,13 +244,15 @@ public class SignupServiceImpl implements SignupService {
 
     private Date getCloseDate(Integer classId, Integer courseId) {
         Date closeDate = null;
-        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7
+        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7,试听课程关闭时间为2999
         if(getCachedCourse(courseId).getType()== Course.LONG_COURSE) {
             Date closeTime = getCachedClass(classId).getCloseTime();
             closeDate = DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS);
         }else if(getCachedCourse(courseId).getType()==Course.SHORT_COURSE){
             int length = getCachedCourse(courseId).getLength();
             closeDate = DateUtils.afterDays(new Date(), length+CourseStudyService.EXTRA_OPEN_DAYS);
+        } else if(getCachedCourse(courseId).getType() == Course.AUDITION_COURSE){
+            closeDate = DateUtils.afterDays(new Date(), CourseStudyService.AUDITION_OPEN_DAYS);
         }
         return closeDate;
     }
@@ -267,9 +269,6 @@ public class SignupServiceImpl implements SignupService {
     }
 
     public void giveupSignup(String orderId) {
-        quanwaiOrderDao.closeOrder(orderId);
-        courseOrderDao.closeOrder(orderId);
-
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
         //从待付款中去掉
         payList.remove(new Payment(courseOrder.getOpenid(), courseOrder.getCourseId()));
@@ -279,6 +278,9 @@ public class SignupServiceImpl implements SignupService {
             classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId(),
                     courseOrder.getClassId());
         }
+        //关闭订单
+        courseOrderDao.closeOrder(orderId);
+        quanwaiOrderDao.closeOrder(orderId);
     }
 
     public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {
@@ -310,6 +312,12 @@ public class SignupServiceImpl implements SignupService {
                     +"。点击查看群二维码。";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
+        } else if(course.getType()==Course.AUDITION_COURSE){
+            data.put("keyword1", new TemplateMessage.Keyword("【一分试听】 "+course.getCourseName()));
+            data.put("keyword2", new TemplateMessage.Keyword("7天"));
+            String remark = "试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍\n有疑问？点击看直播答疑";
+            data.put("remark", new TemplateMessage.Keyword(remark));
+            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
         }
 
         templateMessageService.sendMessage(templateMessage);

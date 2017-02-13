@@ -11,6 +11,7 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
     public List<ChallengeSubmit> loadList(Integer challengeId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ChallengeSubmit>> h = new BeanListHandler<ChallengeSubmit>(ChallengeSubmit.class);
-        String sql = "SELECT * FROM ChallengeSubmit where ChallengeId=? and Content is not null";
+        String sql = "SELECT * FROM ChallengeSubmit where ChallengeId=? and Content is not null order by UpdateTime desc";
         try{
             return run.query(sql,h,challengeId);
         } catch (SQLException e) {

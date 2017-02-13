@@ -25,4 +25,5 @@ public class ClassMember {
     private Date closeDate; //课程关闭时间
 
     private Integer classProgress; //课程进度，章节的id 非db字段
+    private String courseName;
 }

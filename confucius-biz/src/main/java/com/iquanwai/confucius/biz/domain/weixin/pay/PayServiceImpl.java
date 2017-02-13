@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,29 +149,36 @@ public class PayServiceImpl implements PayService{
         List<QuanwaiOrder> underCloseOrders = quanwaiOrderDao.queryUnderCloseOrders(date);
         List<QuanwaiOrder> underCloseOrdersRecent = quanwaiOrderDao.queryUnderCloseOrders(date2);
         //点报名未扫描二维码的直接close
-        underCloseOrders.addAll(underCloseOrdersRecent.stream().filter(courseOrder -> courseOrder.getPrepayId() == null).collect(Collectors.toList()));
 
-        for(QuanwaiOrder order:underCloseOrders){
-            String orderId = order.getOrderId();
-            PayClose payClose = buildPayClose(orderId);
+        for(QuanwaiOrder courseOrder:underCloseOrdersRecent){
+            if(courseOrder.getPrepayId()==null){
+                underCloseOrders.add(courseOrder);
+            }
+        }
+        for(QuanwaiOrder courseOrder:underCloseOrders){
+            String orderId = courseOrder.getOrderId();
             try {
-                String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
-                PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
-                if(payCloseReply!=null){
-                    if(SUCCESS_CODE.equals(payCloseReply.getReturn_code())) {
-                        if (ERROR_CODE.equals(payCloseReply.getErr_code()) && payCloseReply.getErr_code_des()!=null){
-                            logger.error(payCloseReply.getErr_code_des()+", orderId="+orderId);
+                if(courseOrder.getPrepayId()!=null) {
+                    PayClose payClose = buildPayClose(orderId);
+                    String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
+                    PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
+                    if (payCloseReply != null) {
+                        if (SUCCESS_CODE.equals(payCloseReply.getReturn_code())) {
+                            if (ERROR_CODE.equals(payCloseReply.getErr_code()) && payCloseReply.getErr_code_des() != null) {
+                                logger.error(payCloseReply.getErr_code_des() + ", orderId=" + orderId);
+                            }
+                            logger.info("orderId: {} closed automatically", orderId);
                         }
-                        logger.info("orderId: {} closed automatically", orderId);
                     }
-                }
-                closeOrder(orderId);
-                //如果有使用优惠券,还原优惠券状态
-                if(order.getDiscount()!=0.0){
-                    costRepo.updateCoupon(Coupon.UNUSED, orderId);
                 }
             }catch (Exception e){
                 logger.error("orderId: {} close failed", orderId);
+            }
+
+            closeOrder(orderId);
+            //如果有使用优惠券,还原优惠券状态
+            if(courseOrder.getDiscount()!=0.0){
+                costRepo.updateCoupon(Coupon.UNUSED, orderId);
             }
         }
     }

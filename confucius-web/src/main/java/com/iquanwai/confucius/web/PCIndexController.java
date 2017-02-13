@@ -87,7 +87,10 @@ public class PCIndexController {
             userParam.put("headImage",pcLoginUser.getWeixin().getHeadimgUrl());
             mav.addAllObjects(userParam);
         }
+        mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
+        mav.addObject("openFeedBack", ConfigUtils.getValue("function.status.feedback"));
+        mav.addObject("openComment", ConfigUtils.getValue("function.status.comment"));
         return mav;
     }
 

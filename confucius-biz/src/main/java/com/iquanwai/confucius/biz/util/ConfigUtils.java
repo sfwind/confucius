@@ -177,5 +177,30 @@ public class ConfigUtils {
 		return config.getBoolean("pc.server.maintenance");
 	}
 
+	public static String getSurveyUrl(Integer id){
+		try {
+			return config.getString("wjx.survey." + id);
+		} catch (Exception e){
+			return null;
+		}
+	}
 
+	public static Integer getFeedBackId(){
+		return config.getInt("wjx.feedback");
+	}
+
+	public static String willCloseMsgKey(){
+		return config.getString("will.close.task.msg");
+	}
+
+	public static Integer getFormalCourseId(Integer auditionId){
+		try{
+			return config.getInt("audition.formal.course.mapping."+auditionId);
+		} catch (Exception e){
+			return null;
+		}
+	}
+	public static Integer getProfileFullScore(){
+		return config.getInt("profile.full.score");
+	}
 }

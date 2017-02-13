@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.course;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -47,6 +48,24 @@ public class ClassMemberDao extends DBUtil {
 
         try {
             List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where Openid=? and Graduate = 0", h, openid);
+            return classMember;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    /**
+     * 查询还有N天要关闭课程的学员
+     * @param date
+     */
+    public List<ClassMember> willCloseMembers(Date date){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where CloseDate = ?", h, DateUtils.parseDateToString(date));
             return classMember;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -241,5 +260,18 @@ public class ClassMemberDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public List<ClassMember> loadByOpenId(String openId) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            return run.query("SELECT * FROM ClassMember where Openid=?", h, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
     }
 }

@@ -132,6 +132,18 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }else if(m.getType()==21){
             m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
             m.setType(2);
+        } else if(m.getType()==22){
+            // 支付链接，占位符替换，当文字处理
+            // TODO 映射关系暂时放到配置文件中，待处理
+            Integer formalId = ConfigUtils.getFormalCourseId(chapterDao.load(Chapter.class, chapterId).getCourseId());
+            if(formalId==null){
+                logger.error("查询该章节对应的正式课程失败,章节id:{}", chapterId);
+            } else {
+                Map<String,String> payPlaceMap = Maps.newHashMap();
+                payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/pay?courseId=" + formalId);
+                m.setContent(CommonUtils.placeholderReplace(m.getContent(), payPlaceMap));
+                m.setType(1);
+            }
         }
     }
 

@@ -1,7 +1,5 @@
 package com.iquanwai.confucius.biz.domain.permission;
 
-import com.iquanwai.confucius.biz.po.permisson.Permission;
-
 import java.util.List;
 
 /**

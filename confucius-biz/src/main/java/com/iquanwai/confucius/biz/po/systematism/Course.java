@@ -22,4 +22,5 @@ public class Course {
 
     public static final int LONG_COURSE = 1;
     public static final int SHORT_COURSE = 2;
+    public static final int AUDITION_COURSE=3;
 }

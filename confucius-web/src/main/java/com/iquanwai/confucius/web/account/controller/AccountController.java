@@ -5,21 +5,24 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.web.resolver.PCLoginUser;
-import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
-import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.account.dto.AccountDto;
 import com.iquanwai.confucius.web.account.dto.LoginCheckDto;
 import com.iquanwai.confucius.web.account.websocket.SessionSocketHandler;
-import org.modelmapper.internal.util.Assert;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -80,7 +83,7 @@ public class AccountController {
                     accountDto.setRole("stranger");
                     // 没有正在就读的班级
                     this.handlerLoginSocket(sessionId, LoginType.PERMISSION_DENIED, accountDto);
-                    return WebUtils.success();
+                    return WebUtils.error("您还未报名课程，关注圈外了解更多!");
                 } else {
                     // 缓存起来
                     pcLoginUser.setRole("student");
