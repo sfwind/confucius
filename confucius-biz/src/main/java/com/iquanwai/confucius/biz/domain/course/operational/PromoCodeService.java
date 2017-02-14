@@ -15,10 +15,10 @@ public interface PromoCodeService {
     /**
      * 校验优惠码
      * @param promoCode 优惠码
-     * @return -1 优惠码不可用
+     * @return -1.0 优惠码不可用
      *         >0 折扣金额
      * */
-    Integer checkPromoCode(String promoCode);
+    Double discount(String promoCode);
 
     /**
      * 使用优惠码

@@ -9,11 +9,11 @@ import java.util.Date;
  */
 @Data
 public class PromoCode {
-    private int	id; //自增id
-    private String promoCode; //优惠码
+    private int	id;
+    private String code; //优惠码
     private String activityCode; //活动id
     private Integer useCount;	//使用次数
-    private String openid;  //拥有者openid
+    private String owner;  //拥有者openid
     private Date expiredDate; //过期时间
     private Double dscount; //折扣金额
 }
