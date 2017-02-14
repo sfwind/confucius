@@ -78,8 +78,6 @@ public class PromoCodeServiceImpl implements PromoCodeService{
             synchronized (this){
                 promoCode = promoCodeDao.queryPromoCode(code, activity.getName());
                 if(promoCode.getUseCount()<activity.getPromoCodeUsageLimit()){
-                    //优惠码使用次数+1
-                    promoCodeDao.incrementPromoCodeUsage(code, activity.getName());
                     //插入优惠券
                     Coupon coupon = new Coupon();
                     coupon.setOpenid(promoCode.getOwner());
@@ -91,6 +89,8 @@ public class PromoCodeServiceImpl implements PromoCodeService{
                 }
             }
         }
+        //优惠码使用次数+1
+        promoCodeDao.incrementPromoCodeUsage(code, activity.getName());
         PromoCodeUsage promoCodeUsage = new PromoCodeUsage();
         promoCodeUsage.setPromoCodeId(promoCode.getId());
         promoCodeUsage.setUser(openid);
