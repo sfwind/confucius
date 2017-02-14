@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -15,9 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by nethunder on 2017/1/2.
@@ -89,23 +85,15 @@ public class HomeworkVoteDao extends PracticeDBUtil {
      * @param openid 点赞的人
      * @return 插入结果
      */
-    public int vote(Integer type, Integer referencedId, String openid) {
+    public void vote(Integer type, Integer referencedId, String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "INSERT INTO HomeworkVote(Type,ReferencedId,VoteOpenId) " +
                 "VALUES(?, ?, ?)";
         try {
-            Future<Integer> result = asyncRun.update(insertSql,type,referencedId,openid);
-            return result.get();
+            run.insert(insertSql, new ScalarHandler<>(),type, referencedId, openid);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e) {
-            // ignore
-        } catch (ExecutionException e) {
-            logger.error(e.getMessage(), e);
         }
-
-        return -1;
     }
 
     /**
@@ -134,10 +122,9 @@ public class HomeworkVoteDao extends PracticeDBUtil {
      */
     public void reVote(Integer id){
         QueryRunner runner = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
         String sql = "update HomeworkVote set Del=0 where Id=?";
         try {
-            asyncRun.update(sql, id);
+            runner.update(sql, id);
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -149,10 +136,9 @@ public class HomeworkVoteDao extends PracticeDBUtil {
      */
     public void disVote(Integer id){
         QueryRunner runner = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(),runner);
         String sql = "UPDATE HomeworkVote set Del=1 where Id=?";
         try{
-            asyncRun.update(sql,id);
+            runner.update(sql,id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

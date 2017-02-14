@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.wx;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Account;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -14,9 +13,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by justin on 16/8/12.
@@ -72,47 +68,31 @@ public class FollowUserDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public int updateMeta(Account account) {
+    public void updateMeta(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String updateSql = "Update FollowUsers Set Nickname=?, Headimgurl=? where Openid=?";
         try {
-            Future<Integer> result = asyncRun.update(updateSql,
+            run.update(updateSql,
                     account.getNickname(), account.getHeadimgurl(), account.getOpenid());
-            return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e) {
-            // ignore
-        } catch (ExecutionException e) {
-            logger.error(e.getMessage(), e);
         }
-
-        return -1;
     }
 
-    public int updateInfo(Account account) {
+    public void updateInfo(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String updateSql = "Update FollowUsers Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=?, " +
                 "RealName=?, City=?, Province=? where Openid=?";
         try {
-            Future<Integer> result = asyncRun.update(updateSql,
+            run.update(updateSql,
                     account.getMobileNo(), account.getEmail(),
                     account.getIndustry(), account.getFunction(),
                     account.getWorkingLife(), account.getRealName(),
                     account.getCity(), account.getProvince(),
                     account.getOpenid());
-            return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e) {
-            // ignore
-        } catch (ExecutionException e) {
-            logger.error(e.getMessage(), e);
         }
-
-        return -1;
     }
 
 }

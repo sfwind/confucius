@@ -3,10 +3,10 @@ package com.iquanwai.confucius.biz.dao.course;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Coupon;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -14,9 +14,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by justin on 16/9/14.
@@ -57,9 +54,8 @@ public class CouponDao extends DBUtil {
 
     public void updateCoupon(Integer couponId, Integer status, String orderId, Double cost){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         try {
-            asyncRun.update("UPDATE Coupon SET Used =?, OrderId=?, Cost=? " +
+            run.update("UPDATE Coupon SET Used =?, OrderId=?, Cost=? " +
                     "where Id = ?", status, orderId, cost, couponId);
 
         } catch (SQLException e) {
@@ -79,23 +75,15 @@ public class CouponDao extends DBUtil {
         }
     }
 
-    public int insert(Coupon coupon){
+    public void insert(Coupon coupon){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "INSERT INTO Coupon(Openid, Amount, Used, ExpiredDate) " +
                 "VALUES(?, ?, ?, ?)";
         try {
-            Future<Integer> result = asyncRun.update(insertSql,
+            run.insert(insertSql, new ScalarHandler<>(),
                     coupon.getOpenid(), coupon.getAmount(), coupon.getUsed(), coupon.getExpiredDate());
-            return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e) {
-            // ignore
-        } catch (ExecutionException e) {
-            logger.error(e.getMessage(), e);
         }
-        return -1;
-
     }
 }

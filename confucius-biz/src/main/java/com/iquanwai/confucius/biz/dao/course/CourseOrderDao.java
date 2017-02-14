@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.course;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 /**
  * Created by justin on 16/9/10.
@@ -26,11 +24,10 @@ public class CourseOrderDao extends DBUtil{
 
     public void insert(CourseOrder courseOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         String insertSql = "INSERT INTO CourseOrder(OrderId, Openid, CourseId, ClassId, Entry, IsDel) " +
                 "VALUES(?, ?, ?, ?, ?, ?)";
         try {
-            asyncRun.update(insertSql,
+            run.insert(insertSql, new ScalarHandler<>(),
                     courseOrder.getOrderId(), courseOrder.getOpenid(), courseOrder.getCourseId(),
                     courseOrder.getClassId(), courseOrder.getEntry(), courseOrder.getIsDel());
         } catch (SQLException e) {
