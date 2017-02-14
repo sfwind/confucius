@@ -15,5 +15,5 @@ public class PromoCode {
     private Integer useCount;	//使用次数
     private String owner;  //拥有者openid
     private Date expiredDate; //过期时间
-    private Double dscount; //折扣金额
+    private Double discount; //折扣金额
 }

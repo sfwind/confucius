@@ -46,10 +46,9 @@ public class PromoCodeDao extends DBUtil{
 
     public void incrementPromoCodeUsage(String code, String activityCode) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<PromoCode> h = new BeanHandler(PromoCode.class);
-        String sql = "update PromoCode set Usage=Usage+1 where Code=? and ActivityCode=?";
+        String sql = "update PromoCode set UseCount=UseCount+1 where Code=? and ActivityCode=?";
         try {
-            run.update(sql, h, code, activityCode);
+            run.update(sql, code, activityCode);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -32,7 +32,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
     public PromoCode getPromoCode(String openid) {
         //TODO:需要不断切换活动码,目前只支持一个running的活动
         PromoCode promoCode = promoCodeDao.queryPromoCodeByOwner(openid, ActivityFactory.ACTIVITY_CAREER_COURSE_PACKAGE);
-        if (!isValid(promoCode)) {
+        if (isValid(promoCode)) {
             return promoCode;
         }
 
@@ -42,16 +42,16 @@ public class PromoCodeServiceImpl implements PromoCodeService{
     private boolean isValid(PromoCode promoCode) {
         //优惠码存在且没过期
         if(promoCode!=null && promoCode.getExpiredDate()!=null && promoCode.getExpiredDate().after(new Date())){
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
     public Double discount(String code) {
         PromoCode promoCode = promoCodeDao.queryPromoCode(code, ActivityFactory.ACTIVITY_CAREER_COURSE_PACKAGE);
         if (isValid(promoCode)) {
-            return promoCode.getDscount();
+            return promoCode.getDiscount();
         }
         return -1.0;
     }
@@ -78,11 +78,12 @@ public class PromoCodeServiceImpl implements PromoCodeService{
             synchronized (this){
                 promoCode = promoCodeDao.queryPromoCode(code, activity.getName());
                 if(promoCode.getUseCount()<activity.getPromoCodeUsageLimit()){
+                    //优惠码使用次数+1
                     promoCodeDao.incrementPromoCodeUsage(code, activity.getName());
                     //插入优惠券
                     Coupon coupon = new Coupon();
                     coupon.setOpenid(promoCode.getOwner());
-                    coupon.setAmount(promoCode.getDscount());
+                    coupon.setAmount(promoCode.getDiscount());
                     coupon.setUsed(0);
                     //过期日期是结束日期+1
                     coupon.setExpiredDate(DateUtils.afterDays(activity.getEndDate(),1));
