@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
@@ -58,6 +59,8 @@ public class SignupController {
     private ProfileService profileService;
     @Autowired
     private PromoCodeService promoCodeService;
+    @Autowired
+    private PayService payService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
@@ -182,10 +185,24 @@ public class SignupController {
                 .action("点击付费完成")
                 .memo(orderId);
         operationLogService.log(operationLog);
-        if(!courseOrder.getEntry()){
-            LOGGER.error("订单{}未支付", courseOrder.getOrderId());
-            return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+        Double zero = 0d;
+        if (zero.equals(quanwaiOrder.getPrice())) {
+            // 免费，自动报名
+            payService.paySuccess(orderId);
+            // 支付成功,查看该订单是否使用了 TODO 优惠券相关,可能删除
+            if(courseOrder.getPromoCode()!=null){
+                LOGGER.info("用户:{},使用优惠券:{}",courseOrder.getOpenid(),courseOrder.getPromoCode());
+                promoCodeService.usePromoCode(courseOrder.getOpenid(),courseOrder.getPromoCode());
+            }
+        } else {
+            // 非免费，查询是否报名成功
+            if(!courseOrder.getEntry()){
+                LOGGER.error("订单{}未支付", courseOrder.getOrderId());
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+            }
         }
+
 //        signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
         return WebUtils.success();
     }

@@ -98,4 +98,6 @@ public interface SignupService {
     Map<Integer,Integer> getRemindingCount();
 
     void updatePromoCode(String orderId, String promoCode);
+
+    QuanwaiOrder getQuanwaiOrder(String orderId);
 }

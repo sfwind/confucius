@@ -391,8 +391,13 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public void updatePromoCode(String orderId,String promoCode){
+    public void updatePromoCode(String orderId, String promoCode){
         courseOrderDao.updatePromoCode(orderId,promoCode);
+    }
+
+    @Override
+    public QuanwaiOrder getQuanwaiOrder(String orderId) {
+        return quanwaiOrderDao.loadOrder(orderId);
     }
 
 
