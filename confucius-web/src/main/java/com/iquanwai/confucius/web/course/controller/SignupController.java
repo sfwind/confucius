@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -138,9 +137,9 @@ public class SignupController {
             // 先关闭老订单
             CourseOrder order = signupService.getOrder(productId);
             Assert.notNull(order,"订单信息不能为空");
-            // 先关掉所有该课程的老订单
-            List<QuanwaiOrder> activeOrders = signupService.getActiveOrders(loginUser.getOpenId(), order.getCourseId());
-            activeOrders.forEach(item->signupService.giveupSignup(order.getOrderId()));
+            // 先关掉所有该课程的老订单 TODO 记录，先不关闭
+//            List<QuanwaiOrder> activeOrders = signupService.getActiveOrders(loginUser.getOpenId(), order.getCourseId());
+//            activeOrders.forEach(item->signupService.giveupSignup(order.getOrderId()));
             // 优惠券可用，重新插入订单
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), order.getCourseId());
             if(result.getLeft()==-1){

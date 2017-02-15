@@ -58,7 +58,7 @@ public class QuanwaiOrderDao extends DBUtil {
         ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler(QuanwaiOrder.class);
 
         try {
-            return run.query("SELECT * FROM QuanwaiOrder where OrderId=? and Status=0", h, openId);
+            return run.query("SELECT * FROM QuanwaiOrder where Openid=? and Status=0", h, openId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
