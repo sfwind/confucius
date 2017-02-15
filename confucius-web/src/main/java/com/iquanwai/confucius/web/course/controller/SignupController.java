@@ -134,7 +134,6 @@ public class SignupController {
             // 优惠券不可用
             return WebUtils.error(ErrorConstants.PROMO_CODE_INVALID,"该优惠券已过期");
         } else {
-            signupService.updatePromoCode(productId,promoCode);
             CourseOrder order = signupService.getOrder(productId);
             Assert.notNull(order,"订单信息不能为空");
             // 先关掉所有该课程的老订单 TODO 记录，先不关闭
@@ -163,6 +162,7 @@ public class SignupController {
             signupDto.setProductId(newProductId);
             String qrcode = signupService.payQRCode(newProductId);
             signupDto.setQrcode(qrcode);
+            signupService.updatePromoCode(newProductId,promoCode);
             return WebUtils.result(signupDto);
         }
 
