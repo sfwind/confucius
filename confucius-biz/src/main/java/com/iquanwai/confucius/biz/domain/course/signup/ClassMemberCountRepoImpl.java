@@ -87,7 +87,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                     if(course!=null && course.getType()==Course.LONG_COURSE) {
                         remainingCount.put(classId, quanwaiClass.getLimit());
                     }else{
-                        //短课程班级容量无限
+                        //短课程,试听课程班级容量无限
                         remainingCount.put(classId, 1000000);
                     }
                     logger.info("init classId {} has {} quota total", classId, remainingCount.get(classId));
@@ -132,6 +132,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         synchronized (lock) {
             List<Integer> openClass = openClassList.get(courseId);
             if(CollectionUtils.isEmpty(openClass)){
+                // 开课的班级里不包括该课程
                 return new ImmutablePair(-2, 0);
             }
             //报名记录

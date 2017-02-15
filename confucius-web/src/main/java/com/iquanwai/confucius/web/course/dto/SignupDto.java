@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.dto;
 
+import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import lombok.Data;
@@ -18,4 +19,5 @@ public class SignupDto {
     private Double discount; //折扣金额
     private boolean isFree = false;
     private QuanwaiClass quanwaiClass;
+    private PromoCode promoCode;
 }

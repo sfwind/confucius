@@ -53,6 +53,19 @@ public class QuanwaiOrderDao extends DBUtil {
         return null;
     }
 
+    public List<QuanwaiOrder> loadActiveOrders(String openId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler(QuanwaiOrder.class);
+
+        try {
+            return run.query("SELECT * FROM QuanwaiOrder where OrderId=? and Status=0", h, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
     public void updatePrepayId(String prepayId, String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
 
