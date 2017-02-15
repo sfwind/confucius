@@ -46,9 +46,10 @@ public class QuestionSubmitDao extends DBUtil{
         String insertSql = "INSERT INTO QuestionSubmit(SubmitOpenid, ClassId, QuestionId, SubmitAnswer, SubmitTime, Score, `IsRight`) " +
                 "VALUES(?, ?, ?, ?, now(), ?, ?)";
         try {
-            return run.insert(insertSql, new ScalarHandler<>(),
+            Long result = run.insert(insertSql, new ScalarHandler<Long>(),
                     questionSubmit.getSubmitOpenid(), questionSubmit.getClassId(), questionSubmit.getQuestionId(),
                     questionSubmit.getSubmitAnswer(), questionSubmit.getScore(), questionSubmit.getIsRight());
+            return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
