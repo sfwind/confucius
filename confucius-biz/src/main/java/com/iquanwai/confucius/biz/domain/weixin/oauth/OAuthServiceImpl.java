@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by justin on 16/8/13.
@@ -27,11 +29,17 @@ public class OAuthServiceImpl implements OAuthService {
 
     private static final String REDIRECT_PATH = "/wx/oauth/code";
 
+    private static final String IP_REGULAR = "(\\d*\\.){3}\\d*";
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public String redirectUrl(String callbackUrl) {
         String requestUrl = OAUTH_URL;
         Callback callback = new Callback();
+        String ip = getIPFromUrl(callbackUrl);
+        if(ip!=null){
+            callbackUrl = callbackUrl.replace("http://"+ip, ConfigUtils.domainName());
+        }
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
         callback.setState(state);
@@ -112,5 +120,15 @@ public class OAuthServiceImpl implements OAuthService {
 //        String callbackUrl = callback.getCallbackUrl();
 //        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
         return callback;
+    }
+
+    public static String getIPFromUrl(String url){
+        Pattern ipPattern = Pattern.compile(IP_REGULAR);
+        Matcher matcher = ipPattern.matcher(url);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        return null;
     }
 }
