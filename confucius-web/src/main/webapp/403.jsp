@@ -1,25 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
-<body>
+<body bgcolor="#55CBCB">
 <img  src="./image/403.png">
 <style type="text/css">
     img {
-        width: 400px;
-        height: 450px;
+        width: 800px;
         position: absolute;
-        top: 10%;
+        top: 5%;
         left: 50%;
-        margin-left: -200px;
-    }
-
-    span {
-        font-size: 48px;
-        width: 600px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-left: -300px;
-        text-align: center;
+        margin-left: -400px;
     }
 
 </style>
