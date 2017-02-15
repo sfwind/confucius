@@ -186,6 +186,12 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
     }
 
+    @Override
+    public Map<Integer,Integer> getRemainingCount(){
+        return remainingCount;
+    }
+
+
     @Data
     private static class CourseClass{
         private Map<Integer,Integer> classMap = Maps.newHashMap();

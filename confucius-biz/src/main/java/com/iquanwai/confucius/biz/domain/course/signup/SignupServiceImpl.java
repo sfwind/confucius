@@ -385,6 +385,17 @@ public class SignupServiceImpl implements SignupService {
         return quanwaiOrderDao.loadActiveOrders(openId);
     }
 
+    @Override
+    public Map<Integer,Integer> getRemindingCount(){
+        return classMemberCountRepo.getRemainingCount();
+    }
+
+    @Override
+    public void updatePromoCode(String orderId,String promoCode){
+        courseOrderDao.updatePromoCode(orderId,promoCode);
+    }
+
+
     //生成学号 2位课程号2位班级号3位学号
     private String memberId(Integer courseId, Integer classId) {
         Integer classNumber = classDao.load(QuanwaiClass.class, classId).getClassNumber();
@@ -433,5 +444,6 @@ public class SignupServiceImpl implements SignupService {
             this.courseId = courseId;
         }
     }
+
 
 }

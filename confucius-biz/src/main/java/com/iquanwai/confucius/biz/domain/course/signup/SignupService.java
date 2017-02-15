@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 16/8/29.
@@ -93,4 +94,8 @@ public interface SignupService {
     CourseOrder getCourseOrder(String out_trade_no);
 
     List<QuanwaiOrder> getActiveOrders(String openId, Integer courseId);
+
+    Map<Integer,Integer> getRemindingCount();
+
+    void updatePromoCode(String orderId, String promoCode);
 }

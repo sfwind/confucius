@@ -502,6 +502,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return classMemberDao.loadByOpenId(openId);
     }
 
+    @Override
+    public List<ClassMember> loadClassMembers(Integer classId){
+        return classMemberDao.getClassMember(classId);
+    }
+
     //通知未完成任务的学员
     private void noticeMembersWillClose(ClassMember classMember){
         Assert.notNull(classMember, "classMember不能为空");

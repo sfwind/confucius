@@ -80,10 +80,10 @@ public class PromoCodeServiceImpl implements PromoCodeService{
             logger.error("优惠码{}不存在", code);
             return;
         }
-        if(promoCode.getUseCount()<activity.getPromoCodeUsageLimit()){
+        if(promoCode.getUseCount() <= activity.getPromoCodeUsageLimit()){
             synchronized (this){
                 promoCode = promoCodeDao.queryPromoCode(code, activity.getName());
-                if(promoCode.getUseCount()<activity.getPromoCodeUsageLimit()){
+                if(promoCode.getUseCount() <= activity.getPromoCodeUsageLimit()){
                     //插入优惠券
                     Coupon coupon = new Coupon();
                     coupon.setOpenid(promoCode.getOwner());
