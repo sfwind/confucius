@@ -2,7 +2,6 @@
 <html>
 <body>
 <img  src="./image/403.png">
-<span>报错啦</span>
 <style type="text/css">
     img {
         width: 400px;
