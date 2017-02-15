@@ -189,6 +189,7 @@ public class SignupController {
         Double zero = 0d;
         if (zero.equals(quanwaiOrder.getPrice())) {
             // 免费，自动报名
+            payService.handlePayResult(orderId,true);
             payService.paySuccess(orderId);
             // 支付成功,查看该订单是否使用了 TODO 优惠券相关,可能删除
             if(courseOrder.getPromoCode()!=null){
@@ -198,7 +199,7 @@ public class SignupController {
         } else {
             // 非免费，查询是否报名成功
             if(!courseOrder.getEntry()){
-                LOGGER.error("订单{}未支付", courseOrder.getOrderId());
+                LOGGER.error("订单:{},未支付", courseOrder.getOrderId());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
         }
