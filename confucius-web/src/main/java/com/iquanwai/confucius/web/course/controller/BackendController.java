@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
+import com.iquanwai.confucius.biz.domain.course.operational.PromoCodeService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -9,6 +10,7 @@ import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
@@ -43,6 +45,8 @@ public class BackendController {
     private OAuthService oAuthService;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private PromoCodeService promoCodeService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -153,6 +157,28 @@ public class BackendController {
                     if(noticeMsgDto.getRemark()!=null) {
                         data.put("remark", new TemplateMessage.Keyword(noticeMsgDto.getRemark()));
                     }
+                    templateMessageService.sendMessage(templateMessage);
+
+                });
+            }catch (Exception e){
+                LOGGER.error("发送通知失败", e);
+            }
+        }).start();
+        return WebUtils.result("正在运行中");
+    }
+
+    @RequestMapping(value = "/promoCode/{activityCode}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> sendPromoInfo(@PathVariable String activityCode){
+        new Thread(() -> {
+            try {
+                List<PromoCode> promoCodes = promoCodeService.getPromoCodes(activityCode);
+                promoCodes.stream().forEach(promoCode -> {
+                    TemplateMessage templateMessage = new TemplateMessage();
+                    templateMessage.setTouser(promoCode.getOwner());
+                    templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+                    Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                    templateMessage.setData(data);
+
                     templateMessageService.sendMessage(templateMessage);
 
                 });

@@ -1,15 +1,18 @@
 package com.iquanwai.confucius.biz.dao.operational;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.PromoCode;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by justin on 17/2/14.
@@ -42,6 +45,19 @@ public class PromoCodeDao extends DBUtil{
         }
 
         return null;
+    }
+
+    public List<PromoCode> queryPromoCodeByActivityCode(String activityCode) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<PromoCode>> h = new BeanListHandler(PromoCode.class);
+        String sql = "select * from PromoCode where ActivityCode=?";
+        try {
+            return run.query(sql, h, activityCode);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
     }
 
     public void incrementPromoCodeUsage(String code, String activityCode) {

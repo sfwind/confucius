@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.domain.course.operational;
 
 import com.iquanwai.confucius.biz.po.PromoCode;
 
+import java.util.List;
+
 /**
  * Created by justin on 17/2/13.
  */
@@ -26,4 +28,10 @@ public interface PromoCodeService {
      * @param promoCode 优惠码
      * */
     void usePromoCode(String openid, String promoCode);
+
+    /**
+     * 根据活动码获取优惠码
+     * @param activityCode 活动码
+     * */
+    List<PromoCode> getPromoCodes(String activityCode);
 }

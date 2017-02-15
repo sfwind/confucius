@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by justin on 17/2/14.
@@ -66,6 +67,11 @@ public class PromoCodeServiceImpl implements PromoCodeService{
         logger.info("使用优惠券{}", code);
         careerActivity(activity, openid, code);
 
+    }
+
+    @Override
+    public List<PromoCode> getPromoCodes(String activityCode) {
+        return promoCodeDao.queryPromoCodeByActivityCode(activityCode);
     }
 
     private void careerActivity(Activity activity, String openid, String code){
