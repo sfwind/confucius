@@ -111,6 +111,11 @@ public class SignupController {
                 PromoCode promoCode = promoCodeService.getPromoCode(loginUser.getOpenId());
                 signupDto.setPromoCode(promoCode);
             }
+
+            // 统一下单
+            String prepayId = payService.unifiedOrder(productId);
+            Map<String, String> signParams = payService.buildH5PayParam(prepayId);
+            signupDto.setSignParams(signParams);
         }catch (Exception e){
             LOGGER.error("报名失败", e);
             //异常关闭订单

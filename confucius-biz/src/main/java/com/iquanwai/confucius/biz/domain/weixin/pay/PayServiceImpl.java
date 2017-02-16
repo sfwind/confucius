@@ -8,8 +8,11 @@ import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,6 @@ import org.springframework.util.Assert;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/14.
@@ -199,6 +201,20 @@ public class PayServiceImpl implements PayService{
         if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
             signupService.giveupSignup(orderId);
         }
+    }
+
+    @Override
+    public Map<String, String> buildH5PayParam(String prepayId) {
+        Assert.notNull(prepayId);
+        Map<String,String> map = Maps.newHashMap();
+        map.put("appId",ConfigUtils.getAppid());
+        map.put("timeStamp",String.valueOf(DateUtils.currentTimestamp()));
+        map.put("nonceStr",CommonUtils.randomString(32));
+        map.put("package","prepay_id="+prepayId);
+        map.put("signType","MD5");
+        String sign = CommonUtils.sign(map);
+        map.put("paySign",sign);
+        return map;
     }
 
     private PayClose buildPayClose(String orderId) {

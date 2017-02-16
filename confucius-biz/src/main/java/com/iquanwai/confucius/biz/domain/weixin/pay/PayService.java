@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.pay;
 
+import java.util.Map;
+
 /**
  * Created by justin on 16/9/14.
  */
@@ -42,6 +44,12 @@ public interface PayService {
      * @param orderId 订单号
      * */
     void closeOrder(String orderId);
+
+    /**
+     * 校验支付签名
+     * @param prepayId 预付订单号
+     */
+    Map<String,String> buildH5PayParam(String prepayId);
 
 
     String UNIFIED_ORDER_URL ="https://api.mch.weixin.qq.com/pay/unifiedorder";

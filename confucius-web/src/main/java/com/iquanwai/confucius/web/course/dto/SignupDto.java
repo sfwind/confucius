@@ -5,6 +5,8 @@ import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * Created by justin on 16/9/10.
  */
@@ -20,4 +22,6 @@ public class SignupDto {
     private boolean isFree = false;
     private QuanwaiClass quanwaiClass;
     private PromoCode promoCode;
+
+    private Map<String,String> signParams;
 }
