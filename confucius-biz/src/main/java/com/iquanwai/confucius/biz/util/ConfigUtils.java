@@ -193,6 +193,10 @@ public class ConfigUtils {
 		return config.getString("will.close.task.msg");
 	}
 
+	public static String accountChangeMsgKey(){
+		return config.getString("account.change.msg");
+	}
+
 	public static Integer getFormalCourseId(Integer auditionId){
 		try{
 			return config.getInt("audition.formal.course.mapping."+auditionId);

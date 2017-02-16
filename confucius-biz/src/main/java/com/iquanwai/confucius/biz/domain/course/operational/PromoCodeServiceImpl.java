@@ -1,11 +1,15 @@
 package com.iquanwai.confucius.biz.domain.course.operational;
 
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.operational.PromoCodeDao;
 import com.iquanwai.confucius.biz.dao.operational.PromoCodeUsageDao;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.PromoCodeUsage;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 17/2/14.
@@ -26,6 +31,8 @@ public class PromoCodeServiceImpl implements PromoCodeService{
     private PromoCodeUsageDao promoCodeUsageDao;
     @Autowired
     private CouponDao couponDao;
+    @Autowired
+    private TemplateMessageService templateMessageService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -92,6 +99,8 @@ public class PromoCodeServiceImpl implements PromoCodeService{
                     //过期日期是结束日期+1
                     coupon.setExpiredDate(DateUtils.afterDays(activity.getEndDate(),1));
                     couponDao.insert(coupon);
+                    //发送优惠码折扣通知
+                    sendCouponMsg(promoCode);
                 }
             }
         }
@@ -101,5 +110,20 @@ public class PromoCodeServiceImpl implements PromoCodeService{
         promoCodeUsage.setPromoCodeId(promoCode.getId());
         promoCodeUsage.setUser(openid);
         promoCodeUsageDao.insert(promoCodeUsage);
+    }
+
+    private void sendCouponMsg(PromoCode promoCode) {
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(promoCode.getOwner());
+        templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        data.put("first",new TemplateMessage.Keyword(""));
+        data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateTimeToString(new Date())));
+        data.put("keyword2",new TemplateMessage.Keyword("优惠券分享折扣"));
+        data.put("keyword3",new TemplateMessage.Keyword(promoCode.getDiscount()+"元"));
+        data.put("remark",new TemplateMessage.Keyword(""));
+        templateMessage.setData(data);
+
+        templateMessageService.sendMessage(templateMessage);
     }
 }

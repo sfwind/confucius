@@ -175,7 +175,7 @@ public class BackendController {
                 promoCodes.stream().forEach(promoCode -> {
                     TemplateMessage templateMessage = new TemplateMessage();
                     templateMessage.setTouser(promoCode.getOwner());
-                    templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+                    templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
                     Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
                     templateMessage.setData(data);
 
