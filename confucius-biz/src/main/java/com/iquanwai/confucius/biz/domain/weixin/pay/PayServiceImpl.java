@@ -212,7 +212,7 @@ public class PayServiceImpl implements PayService{
         map.put("nonceStr",CommonUtils.randomString(32));
         map.put("package","prepay_id="+prepayId);
         map.put("signType","MD5");
-        String sign = CommonUtils.signH5Pay(map);
+        String sign = CommonUtils.sign(map);
         map.put("paySign",sign);
         return map;
     }
