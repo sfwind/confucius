@@ -105,4 +105,6 @@ public interface CourseProgressService {
     void noticeWillCloseMember();
 
     List<ClassMember> loadClassMembers(String openId);
+
+    List<ClassMember> loadClassMembers(Integer classId);
 }

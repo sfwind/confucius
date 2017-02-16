@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
 import com.iquanwai.confucius.biz.domain.course.operational.PromoCodeService;
@@ -11,8 +12,10 @@ import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.PromoCode;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.course.dto.SignupClassDto;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -188,5 +191,24 @@ public class BackendController {
         }).start();
         return WebUtils.result("正在运行中");
     }
+
+    @RequestMapping(value = "/info/signup", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> getSignUpInfo(){
+        Map<Integer, Integer> remindingCount = signupService.getRemindingCount();
+        // 查询各班已报名人数
+        List<SignupClassDto> list = Lists.newArrayList();
+        remindingCount.keySet().forEach(item->{
+            List<ClassMember> members = courseProgressService.loadClassMembers(item);
+            SignupClassDto dto = new SignupClassDto();
+            dto.setId(item);
+            dto.setRemainingCount(remindingCount.get(item));
+            dto.setEntryCount(members.size());
+            list.add(dto);
+        });
+        return WebUtils.result(list);
+    }
+
+
+
 
 }

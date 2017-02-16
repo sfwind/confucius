@@ -19,6 +19,14 @@ public interface PayService {
     void handlePayResult(PayCallback payCallback);
 
     /**
+     * 非微信支付处理
+     * @param orderId 订单id
+     * @param isFull 是否免费
+     */
+    void handlePayResult(String orderId,Boolean isFull);
+
+
+    /**
      * 订单付款成功
      * @param orderId 订单id
      * */
@@ -35,6 +43,7 @@ public interface PayService {
      * */
     void closeOrder(String orderId);
 
+
     String UNIFIED_ORDER_URL ="https://api.mch.weixin.qq.com/pay/unifiedorder";
 
     String CLOSE_ORDER_URL ="https://api.mch.weixin.qq.com/pay/closeorder";
@@ -47,4 +56,5 @@ public interface PayService {
     String DUP_PAID = "ORDERPAID";
     String ORDER_CLOSE = "ORDERCLOSED";
     String SYSTEM_ERROR = "SYSTEMERROR";
+
 }

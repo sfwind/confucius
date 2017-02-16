@@ -127,6 +127,8 @@ public class IndexController {
             mav.addObject("resource", ConfigUtils.staticResourceUrl());
         }
 
+        mav.addObject("openPromo",ConfigUtils.getValue("function.status.promo"));
+
         return mav;
     }
 

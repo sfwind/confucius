@@ -207,4 +207,5 @@ public class ConfigUtils {
 	public static Integer getProfileFullScore(){
 		return config.getInt("profile.full.score");
 	}
+
 }

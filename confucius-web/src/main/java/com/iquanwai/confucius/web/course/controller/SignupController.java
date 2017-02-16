@@ -1,19 +1,22 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.iquanwai.confucius.biz.domain.course.operational.PromoCodeService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
+import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.PromoCode;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
-import com.iquanwai.confucius.biz.exception.ErrorConstants;
-import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
@@ -54,6 +57,10 @@ public class SignupController {
     private CourseStudyService courseStudyService;
     @Autowired
     private ProfileService profileService;
+    @Autowired
+    private PromoCodeService promoCodeService;
+    @Autowired
+    private PayService payService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
@@ -98,6 +105,12 @@ public class SignupController {
             signupDto.setProductId(productId);
             String qrcode = signupService.payQRCode(productId);
             signupDto.setQrcode(qrcode);
+            //TODO 只有求职课程才使用优惠码
+            if(courseId == 2){
+                signupDto.setNormal(courseOrder.getTotal());
+                PromoCode promoCode = promoCodeService.getPromoCode(loginUser.getOpenId());
+                signupDto.setPromoCode(promoCode);
+            }
         }catch (Exception e){
             LOGGER.error("报名失败", e);
             //异常关闭订单
@@ -107,6 +120,56 @@ public class SignupController {
             return WebUtils.error("报名人数已满");
         }
         return WebUtils.result(signupDto);
+    }
+
+    @RequestMapping(value = "/check/{productId}/{promoCode}")
+    public ResponseEntity<Map<String, Object>> checkCoursePromoCode(LoginUser loginUser,
+                                                                    @PathVariable("productId") String productId,
+                                                                    @PathVariable("promoCode") String promoCode) {
+        // TODO 优惠券相关，可能删除
+        Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(productId, "单号不能为空");
+        Assert.notNull(promoCode, "优惠码不能为空");
+        SignupDto signupDto = new SignupDto();
+
+        // 校验二维码
+        Double discount = promoCodeService.discount(promoCode);
+        if(discount == -1.0){
+            // 优惠券不可用
+            return WebUtils.error(ErrorConstants.PROMO_CODE_INVALID,"该优惠券已过期");
+        } else {
+            CourseOrder order = signupService.getOrder(productId);
+            Assert.notNull(order,"订单信息不能为空");
+            // 先关掉所有该课程的老订单 TODO 记录，先不关闭
+//            List<QuanwaiOrder> activeOrders = signupService.getActiveOrders(loginUser.getOpenId(), order.getCourseId());
+//            activeOrders.forEach(item->signupService.giveupSignup(order.getOrderId()));
+            // 优惠券可用，重新插入订单
+            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), order.getCourseId());
+            if(result.getLeft()==-1){
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
+            }
+            if(result.getLeft()==-2){
+                return WebUtils.error(ErrorConstants.COURSE_NOT_OPEN,ErrorMessageUtils.getErrmsg("signup.noclass"));
+            }
+            if(result.getLeft()==-3){
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
+            }
+            //去掉群二维码
+            //quanwaiClass.setWeixinGroup(null);
+            QuanwaiOrder courseOrder = signupService.signup(loginUser.getOpenId(), order.getCourseId(), result.getRight(),promoCode,discount);
+            String newProductId = courseOrder.getOrderId();
+            if(courseOrder.getDiscount() != 0.0){
+                signupDto.setNormal(courseOrder.getTotal());
+                signupDto.setDiscount(courseOrder.getDiscount());
+            }
+            signupDto.setFee(courseOrder.getPrice());
+            signupDto.setProductId(newProductId);
+            String qrcode = signupService.payQRCode(newProductId);
+            signupDto.setQrcode(qrcode);
+            signupService.updatePromoCode(newProductId,promoCode);
+            return WebUtils.result(signupDto);
+        }
+
     }
 
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
@@ -123,10 +186,25 @@ public class SignupController {
                 .action("点击付费完成")
                 .memo(orderId);
         operationLogService.log(operationLog);
-        if(!courseOrder.getEntry()){
-            LOGGER.error("订单{}未支付", courseOrder.getOrderId());
-            return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+        Double zero = 0d;
+        if (zero.equals(quanwaiOrder.getPrice())) {
+            // 免费，自动报名
+            payService.handlePayResult(orderId,true);
+            payService.paySuccess(orderId);
+            // 支付成功,查看该订单是否使用了 TODO 优惠券相关,可能删除
+            if(courseOrder.getPromoCode()!=null){
+                LOGGER.info("用户:{},使用优惠券:{}",courseOrder.getOpenid(),courseOrder.getPromoCode());
+                promoCodeService.usePromoCode(courseOrder.getOpenid(),courseOrder.getPromoCode());
+            }
+        } else {
+            // 非免费，查询是否报名成功
+            if(!courseOrder.getEntry()){
+                LOGGER.error("订单:{},未支付", courseOrder.getOrderId());
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+            }
         }
+
 //        signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
         return WebUtils.success();
     }

@@ -7,6 +7,9 @@ import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by justin on 16/8/29.
  */
@@ -27,6 +30,12 @@ public interface SignupService {
      * @return 订单
      * */
     QuanwaiOrder signup(String openid, Integer courseId, Integer classId);
+
+    /**
+     * 该重载方法待删除
+     * @return 订单
+     */
+    QuanwaiOrder signup(String openid, Integer courseId, Integer classId, String promoCode,Double discount);
 
     /**
      * 获取学员详情
@@ -81,4 +90,14 @@ public interface SignupService {
     void reloadClass();
 
     String PAY_URL = "weixin://wxpay/bizpayurl?sign={sign}&appid={appid}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
+
+    CourseOrder getCourseOrder(String out_trade_no);
+
+    List<QuanwaiOrder> getActiveOrders(String openId, Integer courseId);
+
+    Map<Integer,Integer> getRemindingCount();
+
+    void updatePromoCode(String orderId, String promoCode);
+
+    QuanwaiOrder getQuanwaiOrder(String orderId);
 }

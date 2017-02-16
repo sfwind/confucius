@@ -13,6 +13,8 @@
         reactMountPoint: "react-app",
         userName: "${userName}",
         headImage:"${headImage}",
+        // TODO 改到配置文件
+        openPromo:${openPromo}
     }
 </script>
 

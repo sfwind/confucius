@@ -258,4 +258,18 @@ public class ClassMemberDao extends DBUtil {
 
         return Lists.newArrayList();
     }
+
+    public List<ClassMember> loadActiveMembers() {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            return run.query("SELECT * FROM ClassMember where CloseDate<?", h, DateUtils.parseDateToString(new Date()));
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
 }

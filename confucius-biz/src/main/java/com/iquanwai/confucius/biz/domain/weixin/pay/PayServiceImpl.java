@@ -123,6 +123,12 @@ public class PayServiceImpl implements PayService{
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
     }
 
+    public void handlePayResult(String orderId, Boolean isFree) {
+        Assert.notNull(orderId, "支付结果不能为空");
+        Date paidTime = new Date();
+        quanwaiOrderDao.paySuccess(paidTime, null, orderId);
+    }
+
     @Override
     public void paySuccess(String orderId) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);

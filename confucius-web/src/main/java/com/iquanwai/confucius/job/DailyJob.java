@@ -30,6 +30,7 @@ public class DailyJob {
     }
 
     private void noticeBeforeMemberClose() {
+        // TODO 时间错了，review!!
         courseProgressService.noticeWillCloseMember();
     }
 

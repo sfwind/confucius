@@ -101,4 +101,15 @@ public class CourseOrderDao extends DBUtil{
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public void updatePromoCode(String orderId, String promoCode) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "Update CourseOrder set PromoCode=? where OrderId=?";
+        try {
+            run.update(sql,promoCode,orderId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+    }
 }
