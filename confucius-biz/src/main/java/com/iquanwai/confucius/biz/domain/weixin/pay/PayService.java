@@ -49,7 +49,7 @@ public interface PayService {
      * 校验支付签名
      * @param prepayId 预付订单号
      */
-    Map<String,String> buildH5PayParam(String prepayId);
+    Map<String,String> buildH5PayParam(String prepayId,String ip,String openId);
 
 
     String UNIFIED_ORDER_URL ="https://api.mch.weixin.qq.com/pay/unifiedorder";

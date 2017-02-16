@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
@@ -63,17 +64,20 @@ public class SignupController {
     private PayService payService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId){
+    public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId, HttpServletRequest request){
         SignupDto signupDto = new SignupDto();
         String productId = "";
         try{
             Assert.notNull(loginUser, "用户不能为空");
+            String remoteIp = request.getHeader("X-Forwarded-For");
+            Assert.notNull(remoteIp,"获取ip失败");
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("课程报名")
                     .action("进入报名页")
                     .memo(courseId+"");
             operationLogService.log(operationLog);
+
             //课程免单用户
             if (signupService.free(courseId, loginUser.getOpenId())) {
                 signupDto.setFree(true);
@@ -113,8 +117,7 @@ public class SignupController {
             }
 
             // 统一下单
-            String prepayId = payService.unifiedOrder(productId);
-            Map<String, String> signParams = payService.buildH5PayParam(prepayId);
+            Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
             signupDto.setSignParams(signParams);
         }catch (Exception e){
             LOGGER.error("报名失败", e);
