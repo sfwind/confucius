@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.domain.course.operational.PromoCodeService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
@@ -132,7 +131,7 @@ public class SignupController {
                     .module("报名")
                     .function("微信支付")
                     .action("下单")
-                    .memo(new Gson().toJson(signupDto));
+                    .memo(signParams.toString());
             operationLogService.log(payParamLog);
         }catch (Exception e){
             LOGGER.error("报名失败", e);
@@ -200,12 +199,18 @@ public class SignupController {
             // 统一下单
             Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
             signupDto.setSignParams(signParams);
+            OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("微信支付")
+                    .action("下单")
+                    .memo(signParams.toString());
+            operationLogService.log(payParamLog);
 
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("推广")
                     .action("验证优惠码")
-                    .memo(new Gson().toJson(signupDto));
+                    .memo(productId+":"+promoCode);
             operationLogService.log(operationLog);
             return WebUtils.result(signupDto);
         }
