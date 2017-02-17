@@ -74,6 +74,7 @@ public class SignupController {
             if(remoteIp==null){
                 remoteIp = ConfigUtils.getExternalIP();
             }
+            remoteIp="14124";
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("课程报名")
