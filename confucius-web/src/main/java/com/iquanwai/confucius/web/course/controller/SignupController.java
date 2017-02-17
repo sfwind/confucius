@@ -73,7 +73,7 @@ public class SignupController {
             Assert.notNull(loginUser, "用户不能为空");
             String remoteIp = request.getHeader("X-Forwarded-For");
             if(remoteIp==null){
-                LOGGER.error("获取用户:{} 获取IP失败:{}", loginUser.getOpenId(), courseId);
+                LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), courseId);
                 remoteIp = ConfigUtils.getExternalIP();
             }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -148,18 +148,23 @@ public class SignupController {
     @RequestMapping(value = "/check/{productId}/{promoCode}")
     public ResponseEntity<Map<String, Object>> checkCoursePromoCode(LoginUser loginUser,
                                                                     @PathVariable("productId") String productId,
-                                                                    @PathVariable("promoCode") String promoCode) {
+                                                                    @PathVariable("promoCode") String promoCode,
+                                                                    HttpServletRequest request) {
         // TODO 优惠券相关，可能删除
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(productId, "单号不能为空");
         Assert.notNull(promoCode, "优惠码不能为空");
         SignupDto signupDto = new SignupDto();
-
+        String remoteIp = request.getHeader("X-Forwarded-For");
+        if(remoteIp==null){
+            LOGGER.error("获取用户:{} 获取IP失败", loginUser.getOpenId());
+            remoteIp = ConfigUtils.getExternalIP();
+        }
         // 校验二维码
         Double discount = promoCodeService.discount(promoCode);
         if(discount == -1.0){
             // 优惠券不可用
-            return WebUtils.error(ErrorConstants.PROMO_CODE_INVALID,"该优惠券已过期");
+            return WebUtils.error(ErrorConstants.PROMO_CODE_INVALID,"该优惠码已过期");
         } else {
             CourseOrder order = signupService.getOrder(productId);
             Assert.notNull(order,"订单信息不能为空");
@@ -179,6 +184,7 @@ public class SignupController {
             }
             //去掉群二维码
             //quanwaiClass.setWeixinGroup(null);
+            // TODO 优惠券信息与优惠码信息
             QuanwaiOrder courseOrder = signupService.signup(loginUser.getOpenId(), order.getCourseId(), result.getRight(),promoCode,discount);
             String newProductId = courseOrder.getOrderId();
             if(courseOrder.getDiscount() != 0.0){
@@ -187,9 +193,14 @@ public class SignupController {
             }
             signupDto.setFee(courseOrder.getPrice());
             signupDto.setProductId(newProductId);
-            String qrcode = signupService.payQRCode(newProductId);
-            signupDto.setQrcode(qrcode);
+//            String qrcode = signupService.payQRCode(newProductId);
+//            signupDto.setQrcode(qrcode);
             signupService.updatePromoCode(newProductId,promoCode);
+
+            // 统一下单
+            Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
+            signupDto.setSignParams(signParams);
+
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("推广")
