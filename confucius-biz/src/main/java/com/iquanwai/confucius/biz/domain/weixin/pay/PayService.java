@@ -23,9 +23,9 @@ public interface PayService {
     /**
      * 非微信支付处理
      * @param orderId 订单id
-     * @param isFull 是否免费
+     * @param isFree 是否免费
      */
-    void handlePayResult(String orderId,Boolean isFull);
+    void handlePayResult(String orderId,Boolean isFree);
 
 
     /**

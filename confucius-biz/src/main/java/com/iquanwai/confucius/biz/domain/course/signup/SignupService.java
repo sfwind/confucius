@@ -91,6 +91,9 @@ public interface SignupService {
 
     String PAY_URL = "weixin://wxpay/bizpayurl?sign={sign}&appid={appid}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
 
+    /**
+     * 获取班级订单
+     */
     CourseOrder getCourseOrder(String out_trade_no);
 
     List<QuanwaiOrder> getActiveOrders(String openId, Integer courseId);
