@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
@@ -70,7 +71,9 @@ public class SignupController {
         try{
             Assert.notNull(loginUser, "用户不能为空");
             String remoteIp = request.getHeader("X-Forwarded-For");
-            Assert.notNull(remoteIp,"获取ip失败");
+            if(remoteIp==null){
+                remoteIp = ConfigUtils.getExternalIP();
+            }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("课程报名")
