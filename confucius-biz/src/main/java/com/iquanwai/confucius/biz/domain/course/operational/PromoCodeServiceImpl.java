@@ -124,8 +124,8 @@ public class PromoCodeServiceImpl implements PromoCodeService{
 
         Account account = accountService.getAccount(openid, true);
         String nickname = account.getNickname();
-        data.put("first",new TemplateMessage.Keyword("恭喜，你的优惠码已被"+nickname+"成功使用！"));
-        data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateTimeToString(new Date())));
+        data.put("first",new TemplateMessage.Keyword("恭喜，你的优惠码已被"+nickname+"成功使用！", "#000000"));
+        data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("keyword2",new TemplateMessage.Keyword("这个春天，一起来重新学习职业发展！"));
         int discount_percent = 20*(promoCode.getUseCount()+1);
         data.put("keyword3",new TemplateMessage.Keyword("已优惠"+discount_percent+"%"));
@@ -133,8 +133,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
             data.put("remark", new TemplateMessage.Keyword("恭喜，你已免费获得一门职业发展课程\n" +
                     "点击下方训练营，可免费报名“求职背后的秘密”或“xx”任意一门"));
         }else{
-            data.put("remark", new TemplateMessage.Keyword("感谢您对优质内容传播做出的贡献\n" +
-                    "您现在的课程优惠价格为"+(45-activity.getDiscount().intValue()*(promoCode.getUseCount()+1))+"元\n" +
+            data.put("remark", new TemplateMessage.Keyword("你现在的课程优惠价格为"+(45-activity.getDiscount().intValue()*(promoCode.getUseCount()+1))+"元\n" +
                     "距离免费听课只剩"+(activity.getPromoCodeUsageLimit()-promoCode.getUseCount()-1)+"次"));
         }
         templateMessage.setData(data);
