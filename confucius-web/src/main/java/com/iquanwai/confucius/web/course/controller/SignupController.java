@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.domain.course.operational.PromoCodeService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
@@ -72,9 +73,9 @@ public class SignupController {
             Assert.notNull(loginUser, "用户不能为空");
             String remoteIp = request.getHeader("X-Forwarded-For");
             if(remoteIp==null){
+                LOGGER.error("获取用户:{} 获取IP失败:{}", loginUser.getOpenId(), courseId);
                 remoteIp = ConfigUtils.getExternalIP();
             }
-            remoteIp="14124";
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("课程报名")
@@ -87,6 +88,7 @@ public class SignupController {
                 signupDto.setFree(true);
                 return WebUtils.result(signupDto);
             }
+            // TODO 检查人数，已加锁。
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
             if(result.getLeft()==-1){
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
@@ -103,6 +105,7 @@ public class SignupController {
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
             signupDto.setCourse(signupService.getCachedCourse(courseId));
+            // TODO 优惠券改为可选，下面这个service放到新接口，增加优惠券参数
             QuanwaiOrder courseOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
             productId = courseOrder.getOrderId();
             if(courseOrder.getDiscount()!=0.0){
@@ -111,8 +114,9 @@ public class SignupController {
             }
             signupDto.setFee(courseOrder.getPrice());
             signupDto.setProductId(productId);
-            String qrcode = signupService.payQRCode(productId);
-            signupDto.setQrcode(qrcode);
+            //TODO 现在只有一种支付方式，当有多种支付方式时，下面微信支付多种方式为多种接口
+//            String qrcode = signupService.payQRCode(productId);
+//            signupDto.setQrcode(qrcode);
             //TODO 只有求职课程才使用优惠码
             if(courseId == 2){
                 signupDto.setNormal(courseOrder.getTotal());
@@ -123,6 +127,13 @@ public class SignupController {
             // 统一下单
             Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
             signupDto.setSignParams(signParams);
+
+            OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("微信支付")
+                    .action("下单")
+                    .memo(new Gson().toJson(signupDto));
+            operationLogService.log(payParamLog);
         }catch (Exception e){
             LOGGER.error("报名失败", e);
             //异常关闭订单
@@ -179,9 +190,14 @@ public class SignupController {
             String qrcode = signupService.payQRCode(newProductId);
             signupDto.setQrcode(qrcode);
             signupService.updatePromoCode(newProductId,promoCode);
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("推广")
+                    .action("验证优惠码")
+                    .memo(new Gson().toJson(signupDto));
+            operationLogService.log(operationLog);
             return WebUtils.result(signupDto);
         }
-
     }
 
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
