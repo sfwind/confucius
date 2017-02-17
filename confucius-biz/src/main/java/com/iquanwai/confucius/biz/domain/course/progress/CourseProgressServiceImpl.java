@@ -199,7 +199,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         List<ClassMember> classMembers = classMemberDao.getClassMember(classId);
 //        List<ClassMember> classMembers = classMemberDao.getPassMember(classId);
         for(ClassMember classMember:classMembers){
-            if(classMember.getPass()){
+            if(classMember.getPass()!=null && classMember.getPass()){
                 //生成毕业证书
                 String certificateNo = generateCertificate(classMember);
                 classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
