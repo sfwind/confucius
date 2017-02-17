@@ -26,6 +26,6 @@ public class PromoCodeServiceTest extends TestBase{
 
     @Test
     public void testUsePromoCode(){
-        promoCodeService.usePromoCode("bbb", "abc");
+        promoCodeService.usePromoCode("o5h6ywsiXYMcLlex2xt7DRAgQX-A", "abc");
     }
 }
