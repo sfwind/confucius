@@ -197,7 +197,7 @@ public class SignupController {
             signupService.updatePromoCode(newProductId,promoCode);
 
             // 统一下单
-            Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
+            Map<String, String> signParams = payService.buildH5PayParam(newProductId,remoteIp,loginUser.getOpenId());
             signupDto.setSignParams(signParams);
             OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
