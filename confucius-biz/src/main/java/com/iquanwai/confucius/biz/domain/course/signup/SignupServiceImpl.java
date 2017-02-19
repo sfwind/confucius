@@ -111,7 +111,7 @@ public class SignupServiceImpl implements SignupService {
             ClassMember classMember = classMemberDao.classMember(openid, courseId);
             if(classMemberCountRepo.isEntry(openid, courseId) && classMember!=null){
                 // 本次报名的班级订单里有这个用户，并且他正在进行的课程里有这门课
-                if (classMember.getCloseDate().before(DateUtils.startDay(new Date()))) {
+                if (DateUtils.startDay(new Date()).before(classMember.getCloseDate())) {
                     return new ImmutablePair(-3, 0);
                 }
             }
