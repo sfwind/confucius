@@ -41,6 +41,11 @@ public class PromoCodeServiceImpl implements PromoCodeService{
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
+    public PromoCode getPromoCode(Integer id) {
+        return promoCodeDao.load(PromoCode.class, id);
+    }
+
+    @Override
     public PromoCode getPromoCode(String openid) {
         //TODO:需要不断切换活动码,目前只支持一个running的活动
         PromoCode promoCode = promoCodeDao.queryPromoCodeByOwner(openid, ActivityFactory.ACTIVITY_CAREER_COURSE_PACKAGE);
