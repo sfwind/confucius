@@ -15,6 +15,7 @@ import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.course.dto.SignupClassDto;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -178,14 +180,20 @@ public class BackendController {
                 promoCodes.stream().forEach(promoCode -> {
                     TemplateMessage templateMessage = new TemplateMessage();
                     templateMessage.setTouser(promoCode.getOwner());
-                    templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
+                    templateMessage.setTemplate_id(ConfigUtils.activityStartMsgKey());
                     Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                    data.put("first", new TemplateMessage.Keyword("老学员福利，错过一次，再等N年！\n" +
+                            "圈圈亲设，两堂受益一生的求职&职业规划课\n"+
+                            "分享优惠码，还可免费听课程！"));
+                    data.put("keyword1", new TemplateMessage.Keyword("这个春天，一起来重新学习职业发展！"));
+                    data.put("keyword2", new TemplateMessage.Keyword("3月1日 ~3月31日"));
+                    data.put("remark", new TemplateMessage.Keyword("您的优惠码为:"+promoCode.getCode(), TemplateMessage.BLACK));
                     templateMessage.setData(data);
+//                    templateMessage.setUrl("");
 
                     templateMessageService.sendMessage(templateMessage);
-
                 });
-            }catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
         }).start();
