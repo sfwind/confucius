@@ -15,7 +15,7 @@ import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.course.dto.SignupClassDto;
+import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import com.iquanwai.confucius.web.util.WebUtils;

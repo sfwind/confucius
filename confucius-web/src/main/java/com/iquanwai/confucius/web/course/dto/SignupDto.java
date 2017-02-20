@@ -23,5 +23,9 @@ public class SignupDto {
     private QuanwaiClass quanwaiClass;
     private PromoCode promoCode;
 
+    private String classOpenTime;
+
+    // 用于调起H5支付的参数
     private Map<String,String> signParams;
 }
+

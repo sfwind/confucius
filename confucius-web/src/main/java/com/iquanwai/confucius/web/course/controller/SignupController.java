@@ -15,9 +15,12 @@ import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.Course;
+import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -99,11 +103,23 @@ public class SignupController {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
             }
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
-            //去掉群二维码
-            //quanwaiClass.setWeixinGroup(null);
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());
-            signupDto.setCourse(signupService.getCachedCourse(courseId));
+            CourseIntroduction courseIntroduction = signupService.getCachedCourse(courseId);
+            signupDto.setCourse(courseIntroduction);
+            // 计算关闭课程的时间
+            if(courseIntroduction.getType() == Course.LONG_COURSE){
+                // 长课程
+                signupDto.setClassOpenTime(DateUtils.parseDateToStringByCommon(quanwaiClass.getOpenTime()) +
+                        " - " + DateUtils.parseDateToStringByCommon(quanwaiClass.getCloseTime()));
+            } else if(courseIntroduction.getType() == Course.SHORT_COURSE){
+                // 短课程
+                signupDto.setClassOpenTime(DateUtils.parseDateToStringByCommon(new Date()) + " - " +
+                        DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), courseIntroduction.getLength()+6)));
+            } else if(courseIntroduction.getType() == Course.AUDITION_COURSE) {
+                signupDto.setClassOpenTime("7天");
+            }
+
             // TODO 优惠券改为可选，下面这个service放到新接口，增加优惠券参数
             QuanwaiOrder courseOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
             productId = courseOrder.getOrderId();
