@@ -15,20 +15,22 @@ import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
+import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
