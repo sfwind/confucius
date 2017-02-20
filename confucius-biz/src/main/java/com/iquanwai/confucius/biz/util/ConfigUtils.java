@@ -208,4 +208,7 @@ public class ConfigUtils {
 		return config.getInt("profile.full.score");
 	}
 
+	public static String activityStartMsgKey(){
+		return config.getString("activity.start.msg");
+	}
 }

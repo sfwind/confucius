@@ -124,7 +124,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
 
         Account account = accountService.getAccount(openid, true);
         String nickname = account.getNickname();
-        data.put("first",new TemplateMessage.Keyword("恭喜，你的优惠码已被"+nickname+"成功使用！", "#000000"));
+        data.put("first",new TemplateMessage.Keyword("恭喜，你的优惠码已被"+nickname+"成功使用！", TemplateMessage.BLACK));
         data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("keyword2",new TemplateMessage.Keyword("这个春天，一起来重新学习职业发展！"));
         int discount_percent = 20*(promoCode.getUseCount()+1);

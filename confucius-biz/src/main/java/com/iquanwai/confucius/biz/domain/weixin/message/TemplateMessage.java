@@ -16,6 +16,8 @@ public class TemplateMessage {
 
     private Map<String, Keyword> data = Maps.newHashMap();
 
+    public static final String BLACK = "#000000";
+
     @Data
     public static class Keyword{
         public Keyword(String value) {
@@ -28,6 +30,6 @@ public class TemplateMessage {
         }
 
         private String value;
-        private String color = "#171952";
+        private String color = "#04136d";
     }
 }
