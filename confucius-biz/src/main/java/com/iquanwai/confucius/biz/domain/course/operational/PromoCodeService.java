@@ -10,6 +10,12 @@ import java.util.List;
 public interface PromoCodeService {
     /**
      * 获取优惠码
+     * @param id 优惠码记录id
+     * */
+    PromoCode getPromoCode(Integer id);
+
+    /**
+     * 获取优惠码
      * @param openid 用户id
      * */
     PromoCode getPromoCode(String openid);
