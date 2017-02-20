@@ -4,8 +4,10 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.operational.PromoCodeDao;
 import com.iquanwai.confucius.biz.dao.operational.PromoCodeUsageDao;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.PromoCodeUsage;
@@ -33,6 +35,8 @@ public class PromoCodeServiceImpl implements PromoCodeService{
     private CouponDao couponDao;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private AccountService accountService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -87,10 +91,10 @@ public class PromoCodeServiceImpl implements PromoCodeService{
             logger.error("优惠码{}不存在", code);
             return;
         }
-        if(promoCode.getUseCount() <= activity.getPromoCodeUsageLimit()){
+        if(promoCode.getUseCount() < activity.getPromoCodeUsageLimit()){
             synchronized (this){
                 promoCode = promoCodeDao.queryPromoCode(code, activity.getName());
-                if(promoCode.getUseCount() <= activity.getPromoCodeUsageLimit()){
+                if(promoCode.getUseCount() < activity.getPromoCodeUsageLimit()){
                     //插入优惠券
                     Coupon coupon = new Coupon();
                     coupon.setOpenid(promoCode.getOwner());
@@ -100,7 +104,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
                     coupon.setExpiredDate(DateUtils.afterDays(activity.getEndDate(),1));
                     couponDao.insert(coupon);
                     //发送优惠码折扣通知
-                    sendCouponMsg(promoCode);
+                    sendCouponMsg(promoCode, activity, openid);
                 }
             }
         }
@@ -112,16 +116,26 @@ public class PromoCodeServiceImpl implements PromoCodeService{
         promoCodeUsageDao.insert(promoCodeUsage);
     }
 
-    private void sendCouponMsg(PromoCode promoCode) {
+    private void sendCouponMsg(PromoCode promoCode, Activity activity, String openid) {
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTouser(promoCode.getOwner());
         templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-        data.put("first",new TemplateMessage.Keyword(""));
-        data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateTimeToString(new Date())));
-        data.put("keyword2",new TemplateMessage.Keyword("优惠券分享折扣"));
-        data.put("keyword3",new TemplateMessage.Keyword(promoCode.getDiscount()+"元"));
-        data.put("remark",new TemplateMessage.Keyword(""));
+
+        Account account = accountService.getAccount(openid, true);
+        String nickname = account.getNickname();
+        data.put("first",new TemplateMessage.Keyword("恭喜，你的优惠码已被"+nickname+"成功使用！", "#000000"));
+        data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+        data.put("keyword2",new TemplateMessage.Keyword("这个春天，一起来重新学习职业发展！"));
+        int discount_percent = 20*(promoCode.getUseCount()+1);
+        data.put("keyword3",new TemplateMessage.Keyword("已优惠"+discount_percent+"%"));
+        if(discount_percent==100) {
+            data.put("remark", new TemplateMessage.Keyword("恭喜，你已免费获得一门职业发展课程\n" +
+                    "点击下方训练营，可免费报名“求职背后的秘密”或“xx”任意一门"));
+        }else{
+            data.put("remark", new TemplateMessage.Keyword("你现在的课程优惠价格为"+(45-activity.getDiscount().intValue()*(promoCode.getUseCount()+1))+"元\n" +
+                    "距离免费听课只剩"+(activity.getPromoCodeUsageLimit()-promoCode.getUseCount()-1)+"次"));
+        }
         templateMessage.setData(data);
 
         templateMessageService.sendMessage(templateMessage);

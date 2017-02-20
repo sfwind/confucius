@@ -22,7 +22,12 @@ public class TemplateMessage {
             this.value = value;
         }
 
+        public Keyword(String value, String color) {
+            this.value = value;
+            this.color = color;
+        }
+
         private String value;
-        private String color = "#44B549";
+        private String color = "#171952";
     }
 }
