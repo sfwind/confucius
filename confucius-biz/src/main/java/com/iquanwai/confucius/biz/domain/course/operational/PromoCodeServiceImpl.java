@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.operational.PromoCodeDao;
 import com.iquanwai.confucius.biz.dao.operational.PromoCodeUsageDao;
+import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
@@ -37,6 +38,8 @@ public class PromoCodeServiceImpl implements PromoCodeService{
     private TemplateMessageService templateMessageService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private CostRepo costRepo;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -110,6 +113,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
                     couponDao.insert(coupon);
                     //发送优惠码折扣通知
                     sendCouponMsg(promoCode, activity, openid);
+                    costRepo.reloadCache();
                 }
             }
         }
