@@ -8,8 +8,11 @@ import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,6 @@ import org.springframework.util.Assert;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/14.
@@ -38,6 +40,7 @@ public class PayServiceImpl implements PayService{
     private RestfulHelper restfulHelper;
 
     private static final String WEIXIN = "NATIVE";
+    private static final String JSAPI = "JSAPI";
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
 
@@ -201,6 +204,56 @@ public class PayServiceImpl implements PayService{
         }
     }
 
+    @Override
+    public Map<String, String> buildH5PayParam(String orderId,String ip,String openId) {
+        String prepayId = unifiedOrder(orderId, ip);
+        Assert.notNull(prepayId,"预付款Id不能为空");
+        Map<String,String> map = Maps.newHashMap();
+        map.put("appId",ConfigUtils.getAppid());
+        map.put("timeStamp",String.valueOf(DateUtils.currentTimestamp()));
+        map.put("nonceStr",CommonUtils.randomString(32));
+        map.put("package","prepay_id="+prepayId);
+        map.put("signType","MD5");
+        String sign = CommonUtils.sign(map);
+        map.put("paySign",sign);
+        logger.info("校验参数：{}",map);
+        return map;
+    }
+
+
+    private String unifiedOrder(String orderId,String ip) {
+        Assert.notNull(orderId, "订单号不能为空");
+        Assert.notNull(ip, "IP不能为空");
+
+        QuanwaiOrder courseOrder = quanwaiOrderDao.loadOrder(orderId);
+        if(courseOrder==null){
+            logger.error("order id {} not existed", orderId);
+            return "";
+        }
+
+        UnifiedOrder unifiedOrder = buildJSApiOrder(courseOrder,ip);
+
+        String response = restfulHelper.postXML(UNIFIED_ORDER_URL, XMLHelper.createXML(unifiedOrder));
+        UnifiedOrderReply reply = XMLHelper.parseXml(UnifiedOrderReply.class, response);
+        if(reply!=null){
+            String prepay_id = reply.getPrepay_id();
+            if(prepay_id!=null){
+                quanwaiOrderDao.updatePrepayId(prepay_id, orderId);
+                return prepay_id;
+            }
+            if(reply.getErr_code_des()!=null){
+                logger.error("response is------\n"+response);
+                logger.error(reply.getErr_code_des()+", orderId="+orderId);
+                if(!ignoreCode(reply.getErr_code())) {
+                    quanwaiOrderDao.payError(reply.getErr_code_des(), orderId);
+                }
+            }
+
+        }
+        return "";
+    }
+
+
     private PayClose buildPayClose(String orderId) {
         PayClose payClose = new PayClose();
         Map<String, String> map = Maps.newHashMap();
@@ -222,6 +275,58 @@ public class PayServiceImpl implements PayService{
         return payClose;
     }
 
+
+    private UnifiedOrder buildJSApiOrder(QuanwaiOrder quanwaiOrder,String ip){
+        UnifiedOrder unifiedOrder = new UnifiedOrder();
+        Map<String, String> map = Maps.newHashMap();
+        String appid = ConfigUtils.getAppid();
+        map.put("appid", appid);
+        String mch_id = ConfigUtils.getMch_id();
+        map.put("mch_id", mch_id);
+        String nonce_str = CommonUtils.randomString(16);
+        map.put("nonce_str", nonce_str);
+        String body = GOODS_BODY;
+        map.put("body", body);
+        String openid = quanwaiOrder.getOpenid();
+        map.put("openid", openid);
+        String notify_url = ConfigUtils.adapterDomainName()+PAY_CALLBACK_PATH;
+        map.put("notify_url", notify_url);
+        String out_trade_no = quanwaiOrder.getOrderId();
+        map.put("out_trade_no", out_trade_no);
+        String trade_type = JSAPI;
+        map.put("trade_type", trade_type);
+        map.put("spbill_create_ip", ip);
+        String time_start = DateUtils.parseDateToString3(new Date());
+        map.put("time_start", time_start);
+        String time_expire = DateUtils.parseDateToString3(
+                DateUtils.afterMinutes(new Date(), ConfigUtils.getBillOpenMinute()));
+        map.put("time_expire", time_expire);
+        Integer total_fee = (int)(quanwaiOrder.getPrice()*100);
+        map.put("total_fee", total_fee.toString());
+
+        String detail = buildOrderDetail(quanwaiOrder, total_fee);
+        map.put("detail", detail);
+
+        String sign = CommonUtils.sign(map);
+
+        unifiedOrder.setAppid(appid);
+        unifiedOrder.setMch_id(mch_id);
+        unifiedOrder.setNonce_str(nonce_str);
+        unifiedOrder.setBody(body);
+        unifiedOrder.setOpenid(openid);
+        unifiedOrder.setNotify_url(notify_url);
+        unifiedOrder.setOut_trade_no(out_trade_no);
+        unifiedOrder.setTrade_type(trade_type);
+        unifiedOrder.setSpbill_create_ip(ip);
+        unifiedOrder.setTime_start(time_start);
+        unifiedOrder.setTime_expire(time_expire);
+        unifiedOrder.setTotal_fee(total_fee);
+        //加CDATA标签
+        unifiedOrder.setDetail(XMLHelper.appendCDATA(detail));
+        unifiedOrder.setSign(sign);
+
+        return unifiedOrder;
+    }
 
     private UnifiedOrder buildOrder(QuanwaiOrder quanwaiOrder){
         UnifiedOrder unifiedOrder = new UnifiedOrder();
@@ -275,6 +380,8 @@ public class PayServiceImpl implements PayService{
 
         return unifiedOrder;
     }
+
+
 
     private String buildOrderDetail(QuanwaiOrder quanwaiOrder, Integer total_fee) {
         OrderDetail orderDetail = new OrderDetail();
