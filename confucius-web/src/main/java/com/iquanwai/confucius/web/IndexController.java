@@ -166,7 +166,7 @@ public class IndexController {
     }
 
     private ModelAndView activityView(HttpServletRequest request, LoginUser loginUser){
-        ModelAndView mav = new ModelAndView("course");
+        ModelAndView mav = new ModelAndView("activity");
 
         if(request.getParameter("debug")!=null){
             if(ConfigUtils.isFrontDebug()){
