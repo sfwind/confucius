@@ -87,6 +87,16 @@ public class IndexController {
         return courseView(request,loginUser);
     }
 
+    @RequestMapping(value = "/operation/static/**",method = RequestMethod.GET)
+    public ModelAndView getOperationIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
+        return courseView(request,loginUser);
+    }
+
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
     public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
         if(!checkAccessToken(request)){
