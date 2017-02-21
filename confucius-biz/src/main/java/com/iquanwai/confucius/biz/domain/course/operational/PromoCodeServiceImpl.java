@@ -144,7 +144,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
         data.put("keyword3",new TemplateMessage.Keyword("已优惠"+discount_percent+"%"));
         if(discount_percent==100) {
             data.put("remark", new TemplateMessage.Keyword("恭喜，你已免费获得一门职业发展课程\n" +
-                    "点击下方训练营，可免费报名“求职背后的秘密”或“xx”任意一门"));
+                    "点击下方训练营，可免费报名“求职背后的秘密”或“战略性职业规划”任意一门"));
         }else{
             data.put("remark", new TemplateMessage.Keyword("你现在的课程优惠价格为"+(45-activity.getDiscount().intValue()*(promoCode.getUseCount()+1))+"元\n" +
                     "距离免费听课只剩"+(activity.getPromoCodeUsageLimit()-promoCode.getUseCount()-1)+"次"));
