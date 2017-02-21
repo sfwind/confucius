@@ -11,7 +11,9 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.resolver.LoginUserResolver;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +87,11 @@ public class PromoCodeController {
         Account account = accountService.getAccount(promoCode.getOwner(), false);
         if(account!=null) {
             promoCodeDto.setName(account.getNickname());
-            promoCodeDto.setAvatar(account.getHeadimgurl());
+            if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
+                promoCodeDto.setAvatar(account.getHeadimgurl());
+            }else{
+                promoCodeDto.setAvatar(LoginUserResolver.DEFAULT_AVATAR);
+            }
         }
         promoCodeDto.setUrl(ConfigUtils.domainName()+SHARE_URL+promoCode.getId());
 
@@ -108,7 +114,11 @@ public class PromoCodeController {
         Account account = accountService.getAccount(promoCode.getOwner(), false);
         if(account!=null) {
             promoCodeDto.setName(account.getNickname());
-            promoCodeDto.setAvatar(account.getHeadimgurl());
+            if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
+                promoCodeDto.setAvatar(account.getHeadimgurl());
+            }else{
+                promoCodeDto.setAvatar(LoginUserResolver.DEFAULT_AVATAR);
+            }
         }
         promoCodeDto.setUrl(ConfigUtils.domainName()+SHARE_URL+promoCode.getId());
         OperationLog operationLog = new OperationLog()

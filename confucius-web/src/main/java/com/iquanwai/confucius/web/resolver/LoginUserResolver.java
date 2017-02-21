@@ -32,7 +32,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final String DEFAULT_AVATAR = "http://www.iquanwai.com/default_avatar.png";
+    public static final String DEFAULT_AVATAR = "http://www.iquanwai.com/images/default_avatar.png";
 
     public boolean supportsParameter(MethodParameter methodParameter) {
         if (LoginUser.class.isAssignableFrom(methodParameter.getParameterType())) {
