@@ -99,6 +99,10 @@ public class PromoCodeServiceImpl implements PromoCodeService{
             logger.error("优惠码{}不存在", code);
             return;
         }
+        if(!isValid(promoCode)){
+            logger.error("优惠码{}已过期", code);
+            return;
+        }
         if(promoCode.getUseCount() < activity.getPromoCodeUsageLimit()){
             synchronized (this){
                 promoCode = promoCodeDao.queryPromoCode(code, activity.getName());
