@@ -82,6 +82,11 @@ public class PromoCodeController {
         PromoCodeDto promoCodeDto = new PromoCodeDto();
         promoCodeDto.setCode(promoCode.getCode());
         promoCodeDto.setId(promoCode.getId());
+        Account account = accountService.getAccount(promoCode.getOwner(), false);
+        if(account!=null) {
+            promoCodeDto.setName(account.getNickname());
+            promoCodeDto.setAvatar(account.getHeadimgurl());
+        }
         promoCodeDto.setUrl(ConfigUtils.domainName()+SHARE_URL+promoCode.getId());
 
         OperationLog operationLog = new OperationLog()
@@ -100,7 +105,7 @@ public class PromoCodeController {
 
         PromoCodeDto promoCodeDto = new PromoCodeDto();
         promoCodeDto.setCode(promoCode.getCode());
-        Account account = accountService.getAccount(promoCode.getOwner(), true);
+        Account account = accountService.getAccount(promoCode.getOwner(), false);
         if(account!=null) {
             promoCodeDto.setName(account.getNickname());
             promoCodeDto.setAvatar(account.getHeadimgurl());
