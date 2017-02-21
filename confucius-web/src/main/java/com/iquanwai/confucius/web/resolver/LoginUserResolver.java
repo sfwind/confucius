@@ -32,6 +32,8 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final String DEFAULT_AVATAR = "http://www.iquanwai.com/default_avatar.png";
+
     public boolean supportsParameter(MethodParameter methodParameter) {
         if (LoginUser.class.isAssignableFrom(methodParameter.getParameterType())) {
             return true;
@@ -84,7 +86,11 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         LoginUser loginUser = new LoginUser();
         loginUser.setOpenId(account.getOpenid());
         loginUser.setWeixinName(account.getNickname());
-        loginUser.setHeadimgUrl(account.getHeadimgurl());
+        if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
+            loginUser.setHeadimgUrl(account.getHeadimgurl());
+        }else{
+            loginUser.setHeadimgUrl(DEFAULT_AVATAR);
+        }
         loginUser.setRealName(account.getRealName());
         return loginUser;
     }
