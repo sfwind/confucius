@@ -110,6 +110,7 @@ public class PromoCodeController {
             promoCodeDto.setName(account.getNickname());
             promoCodeDto.setAvatar(account.getHeadimgurl());
         }
+        promoCodeDto.setUrl(ConfigUtils.domainName()+SHARE_URL+promoCode.getId());
         OperationLog operationLog = new OperationLog()
                 .module("运营活动")
                 .function("求职课程推广活动")
