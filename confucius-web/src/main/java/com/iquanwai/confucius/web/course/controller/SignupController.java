@@ -133,7 +133,7 @@ public class SignupController {
 //            String qrcode = signupService.payQRCode(productId);
 //            signupDto.setQrcode(qrcode);
             //TODO 只有求职课程才使用优惠码
-            if(courseId == 2){
+            if(courseId == 2 || courseId == 5){
                 signupDto.setNormal(courseOrder.getTotal());
                 PromoCode promoCode = promoCodeService.getPromoCode(loginUser.getOpenId());
                 signupDto.setPromoCode(promoCode);
