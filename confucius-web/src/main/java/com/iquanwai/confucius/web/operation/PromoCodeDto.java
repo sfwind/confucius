@@ -11,4 +11,5 @@ public class PromoCodeDto {
     private String code;
     private String name;
     private String avatar;
+    private String url;
 }

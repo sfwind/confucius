@@ -41,6 +41,7 @@ public class PromoCodeController {
     private AccountService accountService;
 
     private static final String PROMOTION_URL = "/operation/static/course/promotion";
+    private static final String SHARE_URL = "/static/course/promotion/share?id=";
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -81,8 +82,10 @@ public class PromoCodeController {
         PromoCodeDto promoCodeDto = new PromoCodeDto();
         promoCodeDto.setCode(promoCode.getCode());
         promoCodeDto.setId(promoCode.getId());
+        promoCodeDto.setUrl(ConfigUtils.domainName()+SHARE_URL+promoCode.getId());
 
-        OperationLog operationLog = new OperationLog().module("运营活动")
+        OperationLog operationLog = new OperationLog()
+                .module("运营活动")
                 .function("求职课程推广活动")
                 .action("老学员打开推荐码活动")
                 .memo(loginUser.getOpenId());
@@ -102,7 +105,8 @@ public class PromoCodeController {
             promoCodeDto.setName(account.getNickname());
             promoCodeDto.setAvatar(account.getHeadimgurl());
         }
-        OperationLog operationLog = new OperationLog().module("运营活动")
+        OperationLog operationLog = new OperationLog()
+                .module("运营活动")
                 .function("求职课程推广活动")
                 .action("新人打开推荐码活动")
                 .memo(promoCodeId.toString());
