@@ -178,6 +178,9 @@ public class SignupServiceImpl implements SignupService {
 //        if(costRepo.hasCoupon(openid)) {
 //            discount = costRepo.discount(course.getFee(), openid, orderId);
 //        }
+        if(course.getFee().equals(discount) || course.getFee() < discount){
+            discount = 0d;
+        }
         quanwaiOrder.setTotal(course.getFee());
         quanwaiOrder.setDiscount(discount);
         quanwaiOrder.setPrice(CommonUtils.substract(course.getFee(), discount));
