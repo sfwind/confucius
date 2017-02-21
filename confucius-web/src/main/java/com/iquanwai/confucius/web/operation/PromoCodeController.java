@@ -111,6 +111,6 @@ public class PromoCodeController {
                 .action("新人打开推荐码活动")
                 .memo(promoCodeId.toString());
         operationLogService.log(operationLog);
-        return WebUtils.result(promoCode.getCode());
+        return WebUtils.result(promoCodeDto);
     }
 }
