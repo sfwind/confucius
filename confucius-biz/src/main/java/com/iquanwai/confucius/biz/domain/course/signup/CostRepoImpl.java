@@ -66,11 +66,11 @@ public class CostRepoImpl implements CostRepo {
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
             //余额为0时,仍然付0.01元
             }else if(remain.equals(amount)){
-                remain = 0.01;
+                remain = 0d;
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
                 break;
             }else{
-                remain = 0.01;
+                remain = 0d;
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
                 break;
             }
