@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.biz.domain.weixin.accessToken;
 
 
+import com.iquanwai.confucius.biz.dao.wx.AccessTokenDao;
+import com.iquanwai.confucius.biz.po.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +15,21 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     protected static Logger logger = LoggerFactory.getLogger(AccessTokenService.class);
     @Autowired
     private WeiXinAccessTokenRepo weiXinAccessTokenRepo;
+    @Autowired
+    private AccessTokenDao accessTokenDao;
 
-    public synchronized String getAccessToken() {
+    public String getAccessToken() {
         if(accessToken!=null){
             return accessToken;
         }
 
-        return _getAccessToken();
+        AccessToken token = accessTokenDao.load(AccessToken.class, 1);
+        if(token==null){
+            logger.info("insert access token");
+            accessTokenDao.insertOrUpdate(_getAccessToken());
+            return accessToken;
+        }
+        return token.getAccessToken();
     }
 
     private String _getAccessToken() {
@@ -31,7 +41,10 @@ public class AccessTokenServiceImpl implements AccessTokenService {
         return accessToken;
     }
 
-    public synchronized String refreshAccessToken() {
-        return _getAccessToken();
+    public String refreshAccessToken() {
+        String accessToken = _getAccessToken();
+        accessTokenDao.insertOrUpdate(accessToken);
+
+        return accessToken;
     }
 }

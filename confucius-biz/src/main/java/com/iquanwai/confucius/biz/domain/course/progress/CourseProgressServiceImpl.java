@@ -194,16 +194,20 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         List<ClassMember> classMembers = classMemberDao.getClassMember(classId);
 //        List<ClassMember> classMembers = classMemberDao.getPassMember(classId);
         for(ClassMember classMember:classMembers){
-            if(classMember.getPass()!=null && classMember.getPass()){
-                //生成毕业证书
-                String certificateNo = generateCertificate(classMember);
-                classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
-                Course course = courseDao.load(Course.class, classMember.getCourseId());
-                classMemberDao.graduate(classMember.getId());
-                graduateMessage(classMember, course);
-            } else {
-                // 单纯只设置毕业
-                classMemberDao.graduate(classMember.getId());
+            try {
+                if (classMember.getPass() != null && classMember.getPass()) {
+                    //生成毕业证书
+                    String certificateNo = generateCertificate(classMember);
+                    classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
+                    Course course = courseDao.load(Course.class, classMember.getCourseId());
+                    classMemberDao.graduate(classMember.getId());
+                    graduateMessage(classMember, course);
+                } else {
+                    // 单纯只设置毕业
+                    classMemberDao.graduate(classMember.getId());
+                }
+            }catch (Exception e){
+                logger.error(e.getLocalizedMessage(), e);
             }
         }
     }
