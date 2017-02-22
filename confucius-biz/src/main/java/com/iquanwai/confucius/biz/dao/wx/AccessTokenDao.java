@@ -21,7 +21,7 @@ public class AccessTokenDao extends DBUtil {
         String insertSql = "INSERT INTO AccessToken (Id,AccessToken) VALUES (1,?) ON DUPLICATE KEY UPDATE AccessToken=?";
 
         try {
-            run.update(insertSql, accessToken);
+            run.update(insertSql, accessToken, accessToken);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
