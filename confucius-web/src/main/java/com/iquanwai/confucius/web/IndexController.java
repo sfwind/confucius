@@ -56,7 +56,7 @@ public class IndexController {
         return courseView(request);
     }
 
-    @RequestMapping(value = "/pay",method = RequestMethod.GET)
+    @RequestMapping(value = "/pay/course",method = RequestMethod.GET)
     public ModelAndView getPayIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);

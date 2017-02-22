@@ -140,7 +140,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
                 logger.error("查询该章节对应的正式课程失败,章节id:{}", chapterId);
             } else {
                 Map<String,String> payPlaceMap = Maps.newHashMap();
-                payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/pay?courseId=" + formalId);
+                payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/pay/course?courseId=" + formalId);
                 m.setContent(CommonUtils.placeholderReplace(m.getContent(), payPlaceMap));
                 m.setType(1);
             }
