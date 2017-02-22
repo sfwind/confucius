@@ -27,9 +27,11 @@ public class AccessTokenServiceImpl implements AccessTokenService {
         if(token==null){
             logger.info("insert access token");
             accessTokenDao.insertOrUpdate(_getAccessToken());
-            return accessToken;
+        }else {
+            accessToken = token.getAccessToken();
         }
-        return token.getAccessToken();
+
+        return accessToken;
     }
 
     private String _getAccessToken() {
@@ -49,13 +51,13 @@ public class AccessTokenServiceImpl implements AccessTokenService {
             if(token==null){
                 logger.info("insert access token");
                 accessTokenDao.insertOrUpdate(_getAccessToken());
-                return accessToken;
             }else{
                 //如果数据库的accessToken未刷新,则强制刷新
                 if(token.getAccessToken().equals(accessToken)){
                     forceUpdateAccessToken();
                 }else{
                     //如果数据库的accessToken已刷新,返回数据库的token
+                    logger.info("reload access token");
                     accessToken = token.getAccessToken();
                 }
             }
