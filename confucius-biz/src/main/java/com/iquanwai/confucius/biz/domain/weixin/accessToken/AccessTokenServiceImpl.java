@@ -41,10 +41,31 @@ public class AccessTokenServiceImpl implements AccessTokenService {
         return accessToken;
     }
 
-    public String refreshAccessToken() {
-        String accessToken = _getAccessToken();
-        accessTokenDao.insertOrUpdate(accessToken);
+    public String refreshAccessToken(boolean force) {
+        if(force) {
+            forceUpdateAccessToken();
+        }else{
+            AccessToken token = accessTokenDao.load(AccessToken.class, 1);
+            if(token==null){
+                logger.info("insert access token");
+                accessTokenDao.insertOrUpdate(_getAccessToken());
+                return accessToken;
+            }else{
+                //如果数据库的accessToken未刷新,则强制刷新
+                if(token.getAccessToken().equals(accessToken)){
+                    forceUpdateAccessToken();
+                }else{
+                    //如果数据库的accessToken已刷新,返回数据库的token
+                    accessToken = token.getAccessToken();
+                }
+            }
+        }
 
         return accessToken;
+    }
+
+    private void forceUpdateAccessToken(){
+        String accessToken = _getAccessToken();
+        accessTokenDao.insertOrUpdate(accessToken);
     }
 }
