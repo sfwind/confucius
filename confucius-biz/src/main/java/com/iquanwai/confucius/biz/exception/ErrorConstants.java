@@ -40,5 +40,7 @@ public class ErrorConstants {
     public static final int NOT_PAY_PROBLEM = 20002;
     // 课程未开放
     public static final int COURSE_NOT_OPEN = 20003;
+    // 优惠券无效
+    public static final int PROMO_CODE_INVALID = 20004;
 
 }

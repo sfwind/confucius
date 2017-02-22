@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.po;
+package com.iquanwai.confucius.biz.po.systematism;
 
 import lombok.Data;
 
@@ -13,6 +13,6 @@ public class Homework {
     private String voice; //语音链接
     private Integer point; //分值
     private String pcurl; //pc端打开url
-    private boolean submitted; //是否提交过
-    private String content; //提交内容
+    private boolean submitted; //是否提交过 非db字段
+    private String content; //提交内容 非db字段
 }

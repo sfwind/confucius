@@ -11,12 +11,7 @@ import com.iquanwai.confucius.biz.dao.course.CurrentChapterPageDao;
 import com.iquanwai.confucius.biz.domain.course.signup.ClassMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.Chapter;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseWeek;
-import com.iquanwai.confucius.biz.po.CurrentChapterPage;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.NumberToHanZi;
@@ -509,6 +504,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     @Override
     public List<ClassMember> loadClassMembers(String openId) {
         return classMemberDao.loadByOpenId(openId);
+    }
+
+    @Override
+    public List<ClassMember> loadClassMembers(Integer classId){
+        return classMemberDao.getClassMember(classId);
     }
 
     //通知未完成任务的学员

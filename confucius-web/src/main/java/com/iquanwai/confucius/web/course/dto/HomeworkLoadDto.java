@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.course.dto;
 
-import com.iquanwai.confucius.biz.po.Homework;
-import com.iquanwai.confucius.biz.po.Picture;
+import com.iquanwai.confucius.biz.po.systematism.Homework;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

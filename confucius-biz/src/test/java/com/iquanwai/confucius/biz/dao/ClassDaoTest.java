@@ -4,14 +4,15 @@ import com.google.gson.GsonBuilder;
 import com.iquanwai.confucius.biz.TestBase;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+
 
 /**
  * Created by justin on 16/8/29.

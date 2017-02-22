@@ -9,7 +9,7 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.HomeworkVote;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;

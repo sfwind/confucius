@@ -4,10 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.CourseDao;
-import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
+import com.iquanwai.confucius.biz.po.systematism.Course;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -87,14 +87,14 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                     if(course!=null && course.getType()==Course.LONG_COURSE) {
                         remainingCount.put(classId, quanwaiClass.getLimit());
                     }else{
-                        //短课程班级容量无限
+                        //短课程,试听课程班级容量无限
                         remainingCount.put(classId, 1000000);
                     }
                     logger.info("init classId {} has {} quota total", classId, remainingCount.get(classId));
                 }
             }
             //统计已付款和待付款的人数
-            List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
+            List<CourseOrder> courseOrders = courseOrderDao.loadNotExpiredClassOrder(openClass);
             for(CourseOrder courseOrder:courseOrders){
                 String openid = courseOrder.getOpenid();
                 Integer courseId = courseOrder.getCourseId();
@@ -132,6 +132,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         synchronized (lock) {
             List<Integer> openClass = openClassList.get(courseId);
             if(CollectionUtils.isEmpty(openClass)){
+                // 开课的班级里不包括该课程
                 return new ImmutablePair(-2, 0);
             }
             //报名记录
@@ -184,6 +185,12 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         }
 
     }
+
+    @Override
+    public Map<Integer,Integer> getRemainingCount(){
+        return remainingCount;
+    }
+
 
     @Data
     private static class CourseClass{

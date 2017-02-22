@@ -3,8 +3,6 @@ package com.iquanwai.confucius.biz.dao.customer;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.customer.Profile;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -14,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.util.concurrent.Executors;
 
 /**
  * Created by nethunder on 2017/2/8.
@@ -55,10 +52,6 @@ public class ProfileDao extends DBUtil{
         return true;
     }
 
-    public static void main(String[] args){
-        System.out.println(CommonUtils.randomString(7));
-    }
-
     public int insertProfile(Profile profile) throws SQLException {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Profile(Openid, Nickname, City, Country, Province, Headimgurl, MobileNo, Email, Industry, Function, WorkingLife, RealName, RiseId)" +
@@ -81,10 +74,9 @@ public class ProfileDao extends DBUtil{
 
     public void updatePoint(String openId, int point) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
         String sql = "UPDATE Profile SET Point = ? where Openid = ?";
         try {
-            asyncRun.update(sql, point, openId);
+            runner.update(sql, point, openId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -92,10 +84,9 @@ public class ProfileDao extends DBUtil{
 
     public void completeProfile(String openId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), runner);
         String sql = "UPDATE Profile SET IsFull = 1 where Openid = ?";
         try {
-            asyncRun.update(sql, openId);
+            runner.update(sql, openId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

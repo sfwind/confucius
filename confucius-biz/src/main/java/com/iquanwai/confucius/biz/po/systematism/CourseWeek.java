@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.po;
+package com.iquanwai.confucius.biz.po.systematism;
 
 import lombok.Data;
 

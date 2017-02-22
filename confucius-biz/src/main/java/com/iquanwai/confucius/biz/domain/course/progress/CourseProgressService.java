@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.progress;
 
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.systematism.*;
 
 import java.util.List;
 
@@ -105,4 +105,6 @@ public interface CourseProgressService {
     void noticeWillCloseMember();
 
     List<ClassMember> loadClassMembers(String openId);
+
+    List<ClassMember> loadClassMembers(Integer classId);
 }

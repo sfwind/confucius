@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -139,7 +140,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
                 logger.error("查询该章节对应的正式课程失败,章节id:{}", chapterId);
             } else {
                 Map<String,String> payPlaceMap = Maps.newHashMap();
-                payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/pay?courseId=" + formalId);
+                payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/pay/course?courseId=" + formalId);
                 m.setContent(CommonUtils.placeholderReplace(m.getContent(), payPlaceMap));
                 m.setType(1);
             }

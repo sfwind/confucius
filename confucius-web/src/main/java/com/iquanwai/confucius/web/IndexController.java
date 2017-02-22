@@ -56,7 +56,7 @@ public class IndexController {
         return courseView(request);
     }
 
-    @RequestMapping(value = "/pay",method = RequestMethod.GET)
+    @RequestMapping(value = "/pay/course",method = RequestMethod.GET)
     public ModelAndView getPayIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
@@ -85,6 +85,16 @@ public class IndexController {
             return null;
         }
         return courseView(request,loginUser);
+    }
+
+    @RequestMapping(value = "/operation/static/**",method = RequestMethod.GET)
+    public ModelAndView getOperationIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
+        return activityView(request, loginUser);
     }
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
@@ -127,6 +137,7 @@ public class IndexController {
             mav.addObject("resource", ConfigUtils.staticResourceUrl());
         }
 
+        mav.addObject("openPromo",ConfigUtils.getValue("function.status.promo"));
         return mav;
     }
 
@@ -148,6 +159,23 @@ public class IndexController {
             userParam.put("userName", loginUser.getWeixinName());
             userParam.put("headImage",loginUser.getHeadimgUrl());
             mav.addAllObjects(userParam);
+        }
+
+        mav.addObject("openPromo",ConfigUtils.getValue("function.status.promo"));
+        return mav;
+    }
+
+    private ModelAndView activityView(HttpServletRequest request, LoginUser loginUser){
+        ModelAndView mav = new ModelAndView("activity");
+
+        if(request.getParameter("debug")!=null){
+            if(ConfigUtils.isFrontDebug()){
+                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
+            }else{
+                mav.addObject("resource", ConfigUtils.staticResourceUrl());
+            }
+        }else{
+            mav.addObject("resource", ConfigUtils.staticResourceUrl());
         }
 
         return mav;
