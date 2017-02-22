@@ -179,7 +179,7 @@ public class SignupController {
         Double discount = promoCodeService.discount(promoCode);
         if(discount == -1.0){
             // 优惠券不可用
-            return WebUtils.error(ErrorConstants.PROMO_CODE_INVALID,"该优惠码已过期");
+            return WebUtils.error(ErrorConstants.PROMO_CODE_INVALID,"该优惠码不存在");
         } else {
             CourseOrder order = signupService.getOrder(productId);
             Assert.notNull(order,"订单信息不能为空");
