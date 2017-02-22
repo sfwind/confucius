@@ -62,7 +62,7 @@ public class PromoCodeController {
                             "分享优惠码，还可免费听课程！"));
                     data.put("keyword1", new TemplateMessage.Keyword("这个春天，一起来重新学习职业发展！"));
                     data.put("keyword2", new TemplateMessage.Keyword("3月1日 ~3月31日"));
-                    data.put("remark", new TemplateMessage.Keyword("您的优惠码为:"+promoCode.getCode(), TemplateMessage.BLACK));
+                    data.put("remark", new TemplateMessage.Keyword("\n您的优惠码为:"+promoCode.getCode()+"\n点击查看活动详情", TemplateMessage.BLACK));
                     templateMessage.setData(data);
                     templateMessage.setUrl(ConfigUtils.domainName()+PROMOTION_URL);
 
