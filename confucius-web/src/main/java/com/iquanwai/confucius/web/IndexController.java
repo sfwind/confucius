@@ -3,7 +3,9 @@ package com.iquanwai.confucius.web;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -30,6 +32,8 @@ public class IndexController {
     private OAuthService oAuthService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private WhiteListService whiteListService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -46,11 +50,20 @@ public class IndexController {
     }
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
-    public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            WebUtils.auth(request, response);
-            return null;
+    public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
+//        if(!checkAccessToken(request)){
+//            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+//            WebUtils.auth(request, response);
+//            return null;
+//        }
+
+        if(ConfigUtils.isDevelopment()){
+            //如果不在白名单中,直接403报错
+            boolean result = whiteListService.isInWhiteList(WhiteList.TEST, loginUser.getOpenId());
+            if(!result){
+                response.sendRedirect("/403.jsp");
+                return null;
+            }
         }
 
         return courseView(request);
