@@ -1,16 +1,12 @@
 package com.iquanwai.confucius.biz.po.permisson;
 
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * Created by nethunder on 2016/12/28.
  */
 @Data
-@ToString
-public class Permission {
-    private Integer id;
+public class UserRole {
     private Integer roleId;
-    private String regExUri;
-    private Integer level;
+    private String openid;
 }
