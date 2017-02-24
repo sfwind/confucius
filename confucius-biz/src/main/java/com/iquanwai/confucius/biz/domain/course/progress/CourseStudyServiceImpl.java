@@ -25,6 +25,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -132,16 +134,23 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }else if(m.getType()==21){
             m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
             m.setType(2);
-        } else if(m.getType()==22){
+        } else if(m.getType()==31){
             // 支付链接，占位符替换，当文字处理
-            // TODO 映射关系暂时放到配置文件中，待处理
-            Integer formalId = ConfigUtils.getFormalCourseId(chapterDao.load(Chapter.class, chapterId).getCourseId());
-            if(formalId==null){
+            Pattern pattern = Pattern.compile("\\{\\d+\\}");
+
+            Matcher matcher = pattern.matcher(m.getContent());
+            String courseId = null;
+            String placeholder = null;
+            if(matcher.find()){
+                placeholder = matcher.group();
+                courseId = placeholder.substring(1, placeholder.length());
+            }
+
+            if(courseId==null){
                 logger.error("查询该章节对应的正式课程失败,章节id:{}", chapterId);
             } else {
-                Map<String,String> payPlaceMap = Maps.newHashMap();
-                payPlaceMap.put("PayLink", ConfigUtils.domainName() + "/pay/course?courseId=" + formalId);
-                m.setContent(CommonUtils.placeholderReplace(m.getContent(), payPlaceMap));
+                m.setContent(m.getContent().replace(placeholder,
+                        ConfigUtils.domainName() + "/static/signup?courseId=" + courseId));
                 m.setType(1);
             }
         }
@@ -544,5 +553,20 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     @Override
     public HomeworkSubmit loadMemberSubmittedHomework(Integer submitId){
         return homeworkSubmitDao.load(HomeworkSubmit.class,submitId);
+    }
+
+
+    public static void main(String[] args) {
+        String i = "3131{2121}1213";
+
+        Pattern pattern = Pattern.compile("\\{\\d+\\}");
+
+        Matcher m = pattern.matcher(i);
+
+        if(m.find()){
+            System.out.println(m.group());
+        }
+
+
     }
 }
