@@ -147,7 +147,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             }
 
             if(courseId==null){
-                logger.error("查询该章节对应的正式课程失败,章节id:{}", chapterId);
+                logger.error("查询该章节对应的正式课程失败,素材id:{}", m.getId());
             } else {
                 m.setContent(m.getContent().replace(placeholder,
                         ConfigUtils.domainName() + "/static/signup?courseId=" + courseId));
