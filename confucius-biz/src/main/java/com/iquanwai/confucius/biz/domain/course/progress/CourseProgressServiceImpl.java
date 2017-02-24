@@ -22,10 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -347,6 +344,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                                        int classProgress) {
         Assert.notNull(chapters, "chapters不能为空");
         List<Chapter> chaptersNew = Lists.newArrayList();
+
+        //章节按sequence排序
+        chapters.sort((o1, o2) -> o1.getSequence()-o2.getSequence());
 
         //前序课程是否完成
         boolean lastCompleted = true;
