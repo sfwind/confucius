@@ -143,7 +143,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             String placeholder = null;
             if(matcher.find()){
                 placeholder = matcher.group();
-                courseId = placeholder.substring(1, placeholder.length());
+                courseId = placeholder.substring(1, placeholder.length()-1);
             }
 
             if(courseId==null){
