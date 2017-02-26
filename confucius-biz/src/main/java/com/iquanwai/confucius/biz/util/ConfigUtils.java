@@ -114,6 +114,10 @@ public class ConfigUtils {
 		return config.getString("resource.domain");
 	}
 
+	public static String streamResourceDomainName(){
+		return config.getString("stream.resource.domain");
+	}
+
 	public static String realDomainName(){
 		return config.getString("app.domainname");
 	}
@@ -197,13 +201,14 @@ public class ConfigUtils {
 		return config.getString("account.change.msg");
 	}
 
-	public static Integer getFormalCourseId(Integer auditionId){
-		try{
-			return config.getInt("audition.formal.course.mapping."+auditionId);
-		} catch (Exception e){
-			return null;
-		}
-	}
+//	public static Integer getFormalCourseId(Integer auditionId){
+//		try{
+//			return config.getInt("audition.formal.course.mapping."+auditionId);
+//		} catch (Exception e){
+//			return null;
+//		}
+//	}
+
 	public static Integer getProfileFullScore(){
 		return config.getInt("profile.full.score");
 	}

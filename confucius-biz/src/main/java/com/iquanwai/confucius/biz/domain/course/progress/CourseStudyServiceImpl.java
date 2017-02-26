@@ -68,7 +68,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private String picUrlPrefix = ConfigUtils.resourceDomainName()+"/images/";
-    private String audioUrlPrefix = ConfigUtils.resourceDomainName()+"/audio/";
+    private String audioUrlPrefix = ConfigUtils.streamResourceDomainName()+"/audio/";
 
     private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
@@ -280,7 +280,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             homework.setSubmitted(true);
         }
         if(homework.getVoice()!=null) {
-            homework.setVoice(ConfigUtils.resourceDomainName() + homework.getVoice());
+            homework.setVoice(ConfigUtils.streamResourceDomainName() + homework.getVoice());
         }
         if(submit==null){
             String url = "/static/h?id="+ CommonUtils.randomString(6);
