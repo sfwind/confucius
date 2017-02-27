@@ -37,9 +37,9 @@ public class PCIndexController {
     /**
      * 前往home页面
      */
-    @RequestMapping(value = "/home", method = RequestMethod.GET)
+    @RequestMapping(value = {"/home","/"}, method = RequestMethod.GET)
     public ModelAndView getHome(HttpServletRequest request,PCLoginUser pcLoginUser) {
-            return pcView(request,pcLoginUser);
+        return ConfigUtils.isDevelopment() ? new ModelAndView("index") : pcView(request, pcLoginUser);
     }
     @RequestMapping(value="/servercode")
     public ModelAndView getServerCodePage(HttpServletRequest request,PCLoginUser pcLoginUser) {
