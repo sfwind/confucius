@@ -2,8 +2,10 @@ package com.iquanwai.confucius.biz.dao;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.TestBase;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
+import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.dao.survey.SurveyQuestionSubmitDao;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
@@ -26,6 +28,8 @@ public class ProblemDaoTest extends TestBase {
     private HomeworkVoteDao homeworkVoteDao;
     @Autowired
     private SurveyQuestionSubmitDao surveyQuestionSubmitDao;
+    @Autowired
+    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     @Test
     public void timeTest(){
@@ -50,5 +54,12 @@ public class ProblemDaoTest extends TestBase {
         surveyQuestionSubmits.add(surveyQuestionSubmit);
         surveyQuestionSubmitDao.batchInsert(surveyQuestionSubmits);
 
+    }
+
+    @Test
+    public void testAnalysisDao(){
+        FragmentDailyData dailyData = fragmentAnalysisDataDao.getDailyData();
+        System.out.println(dailyData);
+        fragmentAnalysisDataDao.insertDailyData(dailyData);
     }
 }
