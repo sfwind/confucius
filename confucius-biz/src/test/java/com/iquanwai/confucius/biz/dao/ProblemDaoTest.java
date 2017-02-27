@@ -60,5 +60,6 @@ public class ProblemDaoTest extends TestBase {
     public void testAnalysisDao(){
         FragmentDailyData dailyData = fragmentAnalysisDataDao.getDailyData();
         System.out.println(dailyData);
+        fragmentAnalysisDataDao.insertDailyData(dailyData);
     }
 }

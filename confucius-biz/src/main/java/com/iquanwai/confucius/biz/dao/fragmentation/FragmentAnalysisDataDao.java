@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,9 +26,9 @@ public class FragmentAnalysisDataDao extends PracticeDBUtil {
             return run.query("select t1.count ProblemCount,t2.rate DailyExpiredWarmCompleteRate,warm.total WarmCompleteCount , " +
                             "warmRight.total/warm.total WarmRightRate, " +
                             "warmComment.count WarmCommentCount,challengeSubmit.count ChallengeSubmitCount, " +
-                            "challengeShow.count ChallengeShowCount,challengeComment.count ChallengeCommentCount,challengeVote.count 专题点赞, " +
-                            "applicationSubmit.count 应用训练提交总数,applicationSubmit.count/appTotal.count 应用累计完成率, " +
-                            "appShow.count 应用训练总浏览量,appComment.count 应用评论总数,appVote.count 应用点赞 " +
+                            "challengeShow.count ChallengeShowCount,challengeComment.count ChallengeCommentCount,challengeVote.count ChallengeVoteCount, " +
+                            "applicationSubmit.count ApplicationSubmitCount,applicationSubmit.count/appTotal.count ApplicationCompleteRate, " +
+                            "appShow.count ApplicationShowCount,appComment.count ApplicationCommentCount,appVote.count ApplicationVoteCount " +
                             "from " +
                             "  (SELECT count(1) count " +
                             "   FROM " +
@@ -125,4 +126,31 @@ public class FragmentAnalysisDataDao extends PracticeDBUtil {
         }
         return null;
     }
+
+    public long insertDailyData(FragmentDailyData data){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO FragmentDailyData(ProblemCount, " +
+                "DailyExpiredWarmCompleteRate, WarmCompleteCount, " +
+                "WarmRightRate, WarmCommentCount, ChallengeSubmitCount, " +
+                "ChallengeShowCount, ChallengeCommentCount, ChallengeVoteCount, " +
+                "ApplicationSubmitCount, ApplicationCompleteRate, ApplicationShowCount, " +
+                "ApplicationCommentCount, ApplicationVoteCount) " +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try {
+            Long insertRs = runner.insert(sql, new ScalarHandler<>(),
+                    data.getProblemCount(), data.getDailyExpiredWarmCompleteRate(),data.getWarmCompleteCount(),
+                    data.getWarmRightRate(),data.getWarmCommentCount(),
+                    data.getChallengeSubmitCount(),data.getChallengeShowCount(),data.getChallengeCommentCount(),data.getChallengeVoteCount(),
+                    data.getApplicationSubmitCount(),data.getApplicationCompleteRate(),data.getApplicationShowCount(),
+                    data.getApplicationCommentCount(),data.getApplicationVoteCount());
+            return insertRs.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1L;
+
+    }
+
+
 }

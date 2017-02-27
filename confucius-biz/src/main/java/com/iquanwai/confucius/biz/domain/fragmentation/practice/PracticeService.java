@@ -73,4 +73,6 @@ public interface PracticeService {
     Integer commentCount(Integer type, Integer referId);
 
     Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content);
+
+    void fragmentDailyPracticeData();
 }

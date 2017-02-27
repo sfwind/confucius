@@ -3,13 +3,15 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
-import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
+import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -38,6 +40,8 @@ public class PracticeServiceImpl implements PracticeService {
     private CommentDao commentDao;
     @Autowired
     private ApplicationSubmitDao applicationSubmitDao;
+    @Autowired
+    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -180,6 +184,13 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setCommentOpenId(openId);
         commentDao.insert(comment);
         return new MutablePair<>(true,"评论成功");
+    }
+
+    @Override
+    public void fragmentDailyPracticeData() {
+        logger.info("search fragment daily practice data");
+        FragmentDailyData dailyData = fragmentAnalysisDataDao.getDailyData();
+        fragmentAnalysisDataDao.insertDailyData(dailyData);
     }
 
 
