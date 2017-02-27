@@ -12,6 +12,7 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.PromoCodeUsage;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import org.slf4j.Logger;
@@ -152,5 +153,17 @@ public class PromoCodeServiceImpl implements PromoCodeService{
         templateMessage.setData(data);
 
         templateMessageService.sendMessage(templateMessage);
+    }
+
+    public static void main(String[] args) {
+
+        for(int i=0;i<2;i++){
+            String code = CommonUtils.randomString(4).toUpperCase();
+            while (code.contains("1")||code.contains("0")
+                    ||code.contains("O")||code.contains("I")){
+                code = CommonUtils.randomString(4).toUpperCase();
+            }
+            System.out.println(code);
+        }
     }
 }

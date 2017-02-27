@@ -368,6 +368,21 @@ public class SignupServiceImpl implements SignupService {
         }
 
         templateMessageService.sendMessage(templateMessage);
+        //发送直播消息
+        if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
+            key = ConfigUtils.activityStartMsgKey();
+            templateMessage = new TemplateMessage();
+            templateMessage.setTouser(openid);
+            templateMessage.setTemplate_id(key);
+            data = Maps.newHashMap();
+            data.put("first", new TemplateMessage.Keyword("你已获得线上答疑活动参与资格，请到时参加。"));
+            data.put("keyword1", new TemplateMessage.Keyword("课程线上答疑"));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(quanwaiClass.getOpenDate())));
+            data.put("remark", new TemplateMessage.Keyword("点击进入直播房间"));
+            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
+            templateMessage.setData(data);
+            templateMessageService.sendMessage(templateMessage);
+        }
     }
 
     public void reloadClass() {

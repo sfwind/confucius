@@ -184,19 +184,4 @@ public class OperationalServiceImpl implements OperationalService {
         }
         return false;
     }
-
-//    public static void main(String[] args) {
-//        ClassMember[] classMembers = new ClassMember[100];
-//        for(int i=0;i<100;i++){
-//            ClassMember classMember = new ClassMember();
-//            classMember.setMemberId(""+i);
-//            classMembers[i]=classMember;
-//        }
-//
-//        List<Pair<ClassMember, ClassMember>> classMemberGroup = assignAngel(classMembers);
-//
-//        for(Pair<ClassMember, ClassMember> pair:classMemberGroup){
-//            System.out.println(pair.getRight().getMemberId() + " is " + pair.getLeft().getMemberId() + " angel");
-//        }
-//    }
 }

@@ -555,18 +555,4 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return homeworkSubmitDao.load(HomeworkSubmit.class,submitId);
     }
 
-
-    public static void main(String[] args) {
-        String i = "3131{2121}1213";
-
-        Pattern pattern = Pattern.compile("\\{\\d+\\}");
-
-        Matcher m = pattern.matcher(i);
-
-        if(m.find()){
-            System.out.println(m.group());
-        }
-
-
-    }
 }
