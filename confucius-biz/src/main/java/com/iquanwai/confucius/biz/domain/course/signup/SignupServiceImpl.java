@@ -360,11 +360,11 @@ public class SignupServiceImpl implements SignupService {
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
         } else if(course.getType()==Course.AUDITION_COURSE){
-            data.put("keyword1", new TemplateMessage.Keyword("【一分试听】 "+course.getCourseName()));
+            data.put("keyword1", new TemplateMessage.Keyword("【免费体验】 "+course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword("7天"));
-            String remark = "试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍\n有疑问？点击看直播答疑";
+            String remark = "试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍";
             data.put("remark", new TemplateMessage.Keyword(remark));
-            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
+//            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
         }
 
         templateMessageService.sendMessage(templateMessage);
