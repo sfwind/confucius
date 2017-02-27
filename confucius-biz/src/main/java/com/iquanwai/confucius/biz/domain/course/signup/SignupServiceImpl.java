@@ -21,7 +21,6 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
 import lombok.Data;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,15 +106,15 @@ public class SignupServiceImpl implements SignupService {
 
 
     public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
-        if(!ConfigUtils.pressTestSwitch()) {
-            ClassMember classMember = classMemberDao.classMember(openid, courseId);
-            if(classMemberCountRepo.isEntry(openid, courseId) && classMember!=null){
-                // 本次报名的班级订单里有这个用户，并且他正在进行的课程里有这门课
-                if (DateUtils.startDay(new Date()).before(classMember.getCloseDate())) {
-                    return new ImmutablePair(-3, 0);
-                }
-            }
-        }
+//        if(!ConfigUtils.pressTestSwitch()) {
+//            ClassMember classMember = classMemberDao.classMember(openid, courseId);
+//            if(classMember!=null){
+//                // 并且他正在进行的课程里有这门课
+//                if (DateUtils.startDay(new Date()).before(classMember.getCloseDate())) {
+//                    return new ImmutablePair(-3, 0);
+//                }
+//            }
+//        }
         // 还没有正式进入班级
         return classMemberCountRepo.prepareSignup(openid, courseId);
     }
@@ -179,7 +178,7 @@ public class SignupServiceImpl implements SignupService {
 //            discount = costRepo.discount(course.getFee(), openid, orderId);
 //        }
         if(course.getFee().equals(discount) || course.getFee() < discount){
-            discount = 0d;
+            discount = course.getFee();
         }
         quanwaiOrder.setTotal(course.getFee());
         quanwaiOrder.setDiscount(discount);
@@ -368,6 +367,21 @@ public class SignupServiceImpl implements SignupService {
         }
 
         templateMessageService.sendMessage(templateMessage);
+        //发送直播消息
+        if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
+            key = ConfigUtils.activityStartMsgKey();
+            templateMessage = new TemplateMessage();
+            templateMessage.setTouser(openid);
+            templateMessage.setTemplate_id(key);
+            data = Maps.newHashMap();
+            data.put("first", new TemplateMessage.Keyword("你已获得线上答疑活动参与资格，请到时参加。"));
+            data.put("keyword1", new TemplateMessage.Keyword("课程线上答疑"));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(quanwaiClass.getOpenDate())));
+            data.put("remark", new TemplateMessage.Keyword("点击进入直播房间"));
+            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
+            templateMessage.setData(data);
+            templateMessageService.sendMessage(templateMessage);
+        }
     }
 
     public void reloadClass() {

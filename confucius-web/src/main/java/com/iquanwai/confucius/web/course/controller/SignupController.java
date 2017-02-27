@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.iquanwai.confucius.biz.domain.course.operational.PromoCodeService;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
@@ -67,6 +68,8 @@ public class SignupController {
     private PromoCodeService promoCodeService;
     @Autowired
     private PayService payService;
+    @Autowired
+    private CourseProgressService courseProgressService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId, HttpServletRequest request){
@@ -92,6 +95,12 @@ public class SignupController {
                 return WebUtils.result(signupDto);
             }
             // TODO 检查人数，已加锁。
+            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+            if(classMember!=null){
+                // 已报名
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
+            }
+
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
             if(result.getLeft()==-1){
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
@@ -99,9 +108,7 @@ public class SignupController {
             if(result.getLeft()==-2){
                 return WebUtils.error(ErrorConstants.COURSE_NOT_OPEN,ErrorMessageUtils.getErrmsg("signup.noclass"));
             }
-            if(result.getLeft()==-3){
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
-            }
+
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
             signupDto.setQuanwaiClass(quanwaiClass);
             signupDto.setRemaining(result.getLeft());

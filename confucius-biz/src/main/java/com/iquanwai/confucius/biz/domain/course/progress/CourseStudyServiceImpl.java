@@ -150,7 +150,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
                 logger.error("查询该章节对应的正式课程失败,素材id:{}", m.getId());
             } else {
                 m.setContent(m.getContent().replace(placeholder,
-                        ConfigUtils.domainName() + "/static/signup?courseId=" + courseId));
+                        ConfigUtils.domainName() + "/pay/signup?courseId=" + courseId));
                 m.setType(1);
             }
         }
@@ -555,18 +555,4 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return homeworkSubmitDao.load(HomeworkSubmit.class,submitId);
     }
 
-
-    public static void main(String[] args) {
-        String i = "3131{2121}1213";
-
-        Pattern pattern = Pattern.compile("\\{\\d+\\}");
-
-        Matcher m = pattern.matcher(i);
-
-        if(m.find()){
-            System.out.println(m.group());
-        }
-
-
-    }
 }
