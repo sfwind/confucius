@@ -64,6 +64,7 @@
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**" />
+            <mvc:mapping path="/static/signup"/>
             <mvc:exclude-mapping path="/"/>
             <mvc:exclude-mapping path="/wx/**" />
             <mvc:exclude-mapping path="/b/**" />
