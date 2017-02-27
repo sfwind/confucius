@@ -3,8 +3,11 @@ package com.iquanwai.confucius.biz.domain.permission;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.permission.PermissionDao;
 import com.iquanwai.confucius.biz.dao.permission.RoleDao;
+import com.iquanwai.confucius.biz.dao.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.po.permisson.Permission;
 import com.iquanwai.confucius.biz.po.permisson.Role;
+import com.iquanwai.confucius.biz.po.permisson.UserRole;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +29,12 @@ public class PermissionServiceImpl implements PermissionService {
     private RoleDao roleDao;
     @Autowired
     private PermissionDao permissionDao;
+    @Autowired
+    private UserRoleDao userRoleDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Map<String,List<Authority>> rolePermissions = Maps.newConcurrentMap();
+    private Map<Integer, List<Authority>> rolePermissions = Maps.newConcurrentMap();
 
     @PostConstruct
     @Override
@@ -37,9 +42,9 @@ public class PermissionServiceImpl implements PermissionService {
         List<Role> roles = roleDao.loadAll(Role.class);
         logger.info("roles:{}",roles);
         roles.forEach(role->{
-            List<Permission> permissions = permissionDao.loadPermissions(role.getId());
-            logger.info("perrmission:{}",permissions);
-            rolePermissions.put(role.getName(), permissions.stream().map(permission -> {
+            List<Permission> permissions = permissionDao.loadPermissions(role.getLevel());
+            logger.info("perrmission:{} for role {}",permissions, role.getName());
+            rolePermissions.put(role.getLevel(), permissions.stream().map(permission -> {
                 Authority authority = new Authority();
                 authority.setRoleId(role.getId());
                 authority.setPermission(permission);
@@ -56,13 +61,13 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public List<Authority> loadPermissions(String roleName) {
-        return rolePermissions.get(roleName);
+    public List<Authority> loadPermissions(Integer roleLevel) {
+        return rolePermissions.get(roleLevel);
     }
 
     @Override
-    public Boolean checkPermission(String role, String uri) {
-        List<Authority> permissions = this.loadPermissions(role);
+    public Boolean checkPermission(Integer roleLevel, String uri) {
+        List<Authority> permissions = this.loadPermissions(roleLevel);
         if(permissions==null){
             return false;
         } else {
@@ -79,6 +84,17 @@ public class PermissionServiceImpl implements PermissionService {
     public void reloadPermission(){
         rolePermissions.clear();
         initPermission();
+    }
+
+    @Override
+    public Role getRole(String openid){
+        List<UserRole> userRoles = userRoleDao.getRoles(openid);
+        if(CollectionUtils.isEmpty(userRoles)){
+            return null;
+        }else{
+            Integer roleId = userRoles.get(0).getRoleId();
+            return roleDao.load(Role.class, roleId);
+        }
     }
 
 }

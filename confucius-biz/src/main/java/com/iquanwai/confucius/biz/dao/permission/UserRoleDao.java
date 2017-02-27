@@ -1,8 +1,9 @@
 package com.iquanwai.confucius.biz.dao.permission;
 
+
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.permisson.Permission;
+import com.iquanwai.confucius.biz.po.permisson.UserRole;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -14,23 +15,23 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Created by nethunder on 2016/12/28.
+ * Created by nethunder on 2016/12/29.
  */
 @Repository
-public class PermissionDao extends DBUtil{
+public class UserRoleDao extends DBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<Permission> loadPermissions(Integer roleLevel){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Permission WHERE Level <= ?";
-        ResultSetHandler<List<Permission>> h = new BeanListHandler(Permission.class);
+    public List<UserRole> getRoles(String openid){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<UserRole>> h = new BeanListHandler(UserRole.class);
+        String sql = "SELECT * FROM UserRole where Openid=? and Del=0";
         try {
-            return runner.query(sql, h, roleLevel);
-
+            return run.query(sql, h, openid);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+
         return Lists.newArrayList();
     }
 

@@ -40,7 +40,7 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
 
             // 查看权限
             PCLoginUser pcLoginUser = PCLoginUserResolver.getLoginUser(value);
-            String role = pcLoginUser.getRole();
+            Integer role = pcLoginUser.getRole();
             // 根据role查询所有权限列表
             if (!permissionService.checkPermission(role, request.getRequestURI())) {
                 WebUtils.reject(request,response);

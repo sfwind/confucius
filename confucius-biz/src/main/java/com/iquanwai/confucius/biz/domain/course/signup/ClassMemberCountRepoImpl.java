@@ -198,7 +198,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
         //添加课程报名记录
         public static void addCourseEntry(CourseClass classes, Integer courseId, Integer classId) {
-            classes.getClassMap().put(courseId, classId);
+            if(classes!=null && classes.getClassMap()!=null) {
+                classes.getClassMap().put(courseId, classId);
+            }
         }
 
         //获取课程班级id
@@ -211,7 +213,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
         //删除报名的课程
         public static void removeCourse(CourseClass classes, Integer courseId) {
-            classes.getClassMap().remove(courseId);
+            if(classes!=null && classes.getClassMap()!=null) {
+                classes.getClassMap().remove(courseId);
+            }
         }
 
     }
