@@ -130,14 +130,4 @@ public class PromoCodeController {
         return WebUtils.result(promoCodeDto);
     }
 
-
-    @RequestMapping(value = "/mark")
-    public ResponseEntity<Map<String, Object>> mark(){
-        OperationLog operationLog = new OperationLog()
-                .module("运营活动")
-                .function("求职课程推广活动")
-                .action("新学员打开推荐码活动");
-        operationLogService.log(operationLog);
-        return WebUtils.success();
-    }
 }
