@@ -157,7 +157,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
 
     public static void main(String[] args) {
 
-        for(int i=0;i<2;i++){
+        for(int i=0;i<2000;i++){
             String code = CommonUtils.randomString(4).toUpperCase();
             while (code.contains("1")||code.contains("0")
                     ||code.contains("O")||code.contains("I")){
