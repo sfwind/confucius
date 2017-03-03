@@ -37,9 +37,9 @@ public class CommentDao extends PracticeDBUtil {
     public List<Comment> loadComments(Integer moduleId, Integer referId, Page page) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<Comment>(Comment.class);
-        String sql = "SELECT * FROM Comment where ModuleId = ? and ReferencedId = ? and Del = 0 order by Type desc, AddTime desc limit " + page.getOffset() + "," + page.getLimit();
+        String sql = "SELECT * FROM Comment where ReferencedId = ? and ModuleId = ? and Del = 0 order by Type desc, AddTime desc limit " + page.getOffset() + "," + page.getLimit();
         try {
-            return run.query(sql, h, moduleId, referId);
+            return run.query(sql, h, referId, moduleId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -51,8 +51,8 @@ public class CommentDao extends PracticeDBUtil {
         ScalarHandler<Long> h = new ScalarHandler<Long>();
 
         try {
-            Long count = run.query("SELECT count(*) FROM Comment where ModuleId=? and ReferencedId=? and Del=0",
-                    h, moduleId, referId);
+            Long count = run.query("SELECT count(*) FROM Comment where ReferencedId=? and ModuleId=? and Del=0",
+                    h, referId, moduleId);
             return count.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

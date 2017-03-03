@@ -94,7 +94,7 @@ public class SignupController {
                 signupDto.setFree(true);
                 return WebUtils.result(signupDto);
             }
-            // TODO 检查人数，已加锁。
+            // 检查人数，已加锁。
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
             if(classMember!=null){
                 // 已报名
@@ -126,36 +126,36 @@ public class SignupController {
             } else if(courseIntroduction.getType() == Course.AUDITION_COURSE) {
                 signupDto.setClassOpenTime("7天");
             }
-
             // TODO 优惠券改为可选，下面这个service放到新接口，增加优惠券参数
-            QuanwaiOrder courseOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
-            productId = courseOrder.getOrderId();
-            if(courseOrder.getDiscount()!=0.0){
-                signupDto.setNormal(courseOrder.getTotal());
-                signupDto.setDiscount(courseOrder.getDiscount());
+            QuanwaiOrder quanwaiOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            productId = quanwaiOrder.getOrderId();
+            if(quanwaiOrder.getDiscount()!=0.0){
+                signupDto.setNormal(quanwaiOrder.getTotal());
+                signupDto.setDiscount(quanwaiOrder.getDiscount());
             }
-            signupDto.setFee(courseOrder.getPrice());
+            signupDto.setFee(quanwaiOrder.getPrice());
             signupDto.setProductId(productId);
             //TODO 现在只有一种支付方式，当有多种支付方式时，下面微信支付多种方式为多种接口
 //            String qrcode = signupService.payQRCode(productId);
 //            signupDto.setQrcode(qrcode);
             //TODO 只有求职课程才使用优惠码
             if(courseId == 2 || courseId == 5){
-                signupDto.setNormal(courseOrder.getTotal());
+                signupDto.setNormal(quanwaiOrder.getTotal());
                 PromoCode promoCode = promoCodeService.getPromoCode(loginUser.getOpenId());
                 signupDto.setPromoCode(promoCode);
             }
 
             // 统一下单
-            Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
-            signupDto.setSignParams(signParams);
-
-            OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("报名")
-                    .function("微信支付")
-                    .action("下单")
-                    .memo(signParams.toString());
-            operationLogService.log(payParamLog);
+            if(quanwaiOrder.getPrice()!=null && quanwaiOrder.getPrice()!=0){
+                Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
+                signupDto.setSignParams(signParams);
+                OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
+                        .module("报名")
+                        .function("微信支付")
+                        .action("下单")
+                        .memo(signParams.toString());
+                operationLogService.log(payParamLog);
+            }
         }catch (Exception e){
             LOGGER.error("报名失败", e);
             //异常关闭订单
@@ -190,9 +190,6 @@ public class SignupController {
         } else {
             CourseOrder order = signupService.getOrder(productId);
             Assert.notNull(order,"订单信息不能为空");
-            // 先关掉所有该课程的老订单 TODO 记录，先不关闭
-//            List<QuanwaiOrder> activeOrders = signupService.getActiveOrders(loginUser.getOpenId(), order.getCourseId());
-//            activeOrders.forEach(item->signupService.giveupSignup(order.getOrderId()));
             // 优惠券可用，重新插入订单
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), order.getCourseId());
             if(result.getLeft()==-1){
@@ -204,31 +201,27 @@ public class SignupController {
             if(result.getLeft()==-3){
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
             }
-            //去掉群二维码
-            //quanwaiClass.setWeixinGroup(null);
-            // TODO 优惠券信息与优惠码信息
-            QuanwaiOrder courseOrder = signupService.signup(loginUser.getOpenId(), order.getCourseId(), result.getRight(),promoCode,discount);
-            String newProductId = courseOrder.getOrderId();
-            if(courseOrder.getDiscount() != 0.0){
-                signupDto.setNormal(courseOrder.getTotal());
-                signupDto.setDiscount(courseOrder.getDiscount());
+            QuanwaiOrder quanwaiOrder = signupService.signup(loginUser.getOpenId(), order.getCourseId(), result.getRight(),promoCode,discount);
+            String newProductId = quanwaiOrder.getOrderId();
+            if(quanwaiOrder.getDiscount() != 0.0){
+                signupDto.setNormal(quanwaiOrder.getTotal());
+                signupDto.setDiscount(quanwaiOrder.getDiscount());
             }
-            signupDto.setFee(courseOrder.getPrice());
+            signupDto.setFee(quanwaiOrder.getPrice());
             signupDto.setProductId(newProductId);
-//            String qrcode = signupService.payQRCode(newProductId);
-//            signupDto.setQrcode(qrcode);
             signupService.updatePromoCode(newProductId,promoCode);
 
-            // 统一下单
-            Map<String, String> signParams = payService.buildH5PayParam(newProductId,remoteIp,loginUser.getOpenId());
-            signupDto.setSignParams(signParams);
-            OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
-                    .module("报名")
-                    .function("微信支付")
-                    .action("下单")
-                    .memo(signParams.toString());
-            operationLogService.log(payParamLog);
-
+            // 免费课程不用统一下单
+            if (quanwaiOrder.getPrice()!=null && quanwaiOrder.getPrice()!= 0D) {
+                Map<String, String> signParams = payService.buildH5PayParam(newProductId,remoteIp,loginUser.getOpenId());
+                signupDto.setSignParams(signParams);
+                OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
+                        .module("报名")
+                        .function("微信支付")
+                        .action("下单")
+                        .memo(signParams.toString());
+                operationLogService.log(payParamLog);
+            }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
                     .function("推广")
@@ -238,6 +231,7 @@ public class SignupController {
             return WebUtils.result(signupDto);
         }
     }
+
 
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
