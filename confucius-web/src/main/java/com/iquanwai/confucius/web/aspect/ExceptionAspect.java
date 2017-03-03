@@ -33,7 +33,11 @@ public class ExceptionAspect {
                 cookie += item.getName()+":"+item.getValue()+"; ";
             }
         }
-        logger.error("openid:"+openid+",uri:"+ req.getRequestURI()+ ",queryString:"+req.getQueryString()+",cookie:"+cookie, e);
+        logger.error("openid:"+openid+",uri:"+ req.getRequestURI()+
+                ",queryString:"+req.getQueryString()+
+                ",userAgent:" + req.getHeader("user-agent") +
+                ",ip:" + req.getHeader("X-Forwarded-For") +
+                ",cookie:"+cookie, e);
         return WebUtils.error("服务器伐开心,我们正在想办法");
     }
 }
