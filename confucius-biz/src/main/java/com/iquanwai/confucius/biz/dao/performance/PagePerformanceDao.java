@@ -51,12 +51,12 @@ public class PagePerformanceDao extends DBUtil {
         }
     }
 
-    public List<PagePerformance> queryAboutAddTime(String startTimeStr, String endTimeStr){
+    public List<PagePerformance> queryAboutAddTime(String app,String startTimeStr, String endTimeStr){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<PagePerformance>> h = new BeanListHandler<>(PagePerformance.class);
-        String sql = "SELECT * FROM PagePerformance where AddTime >= ? and AddTime <= ? order by AddTime";
+        String sql = "SELECT * FROM PagePerformance where App = ? and AddTime >= ? and AddTime <= ? order by AddTime";
         try {
-            return run.query(sql, h, startTimeStr, endTimeStr);
+            return run.query(sql, h, app, startTimeStr, endTimeStr);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

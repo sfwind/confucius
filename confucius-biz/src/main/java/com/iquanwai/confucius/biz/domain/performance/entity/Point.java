@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.po.performance;
+package com.iquanwai.confucius.biz.domain.performance.entity;
 
 import lombok.Data;
 

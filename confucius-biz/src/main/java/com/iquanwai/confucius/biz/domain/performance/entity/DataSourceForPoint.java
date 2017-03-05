@@ -1,5 +1,6 @@
-package com.iquanwai.confucius.biz.po.performance;
+package com.iquanwai.confucius.biz.domain.performance.entity;
 
+import com.iquanwai.confucius.biz.po.performance.PagePerformance;
 import lombok.Data;
 
 import java.time.LocalDateTime;
