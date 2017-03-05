@@ -14,4 +14,5 @@ public class PageAnalyticsDto {
     private List<Point> loadList;
     private List<Point> interactiveList;
     private List<Point> ttfbList;
+    private List<Point> paintList;
 }

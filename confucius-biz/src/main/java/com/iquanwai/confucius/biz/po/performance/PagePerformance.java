@@ -34,5 +34,6 @@ public class PagePerformance {
     private int ttdns;
     private int ttconnect;
     private int ttfb;
+    private int firstPaint;
     private Date addTime;
 }

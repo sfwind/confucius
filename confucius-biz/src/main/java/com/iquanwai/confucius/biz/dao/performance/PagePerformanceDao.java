@@ -28,10 +28,10 @@ public class PagePerformanceDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO PagePerformance(App, Url, Screen, Viewport, Uuid," +
                 " CookieSize, Redirect, Dns, Connect, Network, Send, Receive, Backend, Render, " +
-                "Dom, Frontend, `Load`, DomReady, Interactive, Ttf, Ttr, Ttdns, Ttconnect, Ttfb, " +
+                "Dom, Frontend, `Load`, DomReady, Interactive, Ttf, Ttr, Ttdns, Ttconnect, Ttfb, FirstPaint, " +
                 "Status) " +
                 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
-                "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)";
+                "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
                     pagePerformance.getApp(), pagePerformance.getUrl(),
@@ -45,7 +45,7 @@ public class PagePerformanceDao extends DBUtil {
                     pagePerformance.getLoad(), pagePerformance.getDomReady(),
                     pagePerformance.getInteractive(), pagePerformance.getTtf(),
                     pagePerformance.getTtr(), pagePerformance.getTtdns(),
-                    pagePerformance.getTtconnect(), pagePerformance.getTtfb());
+                    pagePerformance.getTtconnect(), pagePerformance.getTtfb(), pagePerformance.getFirstPaint());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

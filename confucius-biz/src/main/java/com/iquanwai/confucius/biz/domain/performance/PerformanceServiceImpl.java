@@ -67,6 +67,7 @@ public class PerformanceServiceImpl implements PerformanceService {
         List<Point> loadList = Lists.newArrayList();
         List<Point> interactiveList = Lists.newArrayList();
         List<Point> ttfbList = Lists.newArrayList();
+        List<Point> paintList = Lists.newArrayList();
         for (int i = 0; i < dataSourceForPoints.size(); i++) {
             DataSourceForPoint dataPo = dataSourceForPoints.get(i);
             long xTime = dataPo.getTime().atZone(currentZone).toEpochSecond() * 1000;
@@ -93,11 +94,19 @@ public class PerformanceServiceImpl implements PerformanceService {
             ttfb.setY(averagingTtfb.longValue());
             ttfb.setX(xTime);
             ttfbList.add(ttfb);
+
+            //获取白屏时间
+            Point paint = new Point();
+            Double averagingPaint = dataPo.getPagePerformances().stream().collect(Collectors.averagingInt(PagePerformance::getFirstPaint));
+            paint.setY(averagingPaint.longValue());
+            paint.setX(xTime);
+            paintList.add(paint);
         }
         pageAnalyticsDto.setPvList(pvList);
         pageAnalyticsDto.setInteractiveList(interactiveList);
         pageAnalyticsDto.setLoadList(loadList);
         pageAnalyticsDto.setTtfbList(ttfbList);
+        pageAnalyticsDto.setPaintList(paintList);
         return pageAnalyticsDto;
     }
 }
