@@ -103,6 +103,8 @@ public class ChallengeController {
             // 先写死
             dto.setDescription("Hi，欢迎来到圈外社区，这里有很多同路人在和你一起进步！<br/>" +
                     "你的什么目标，可以利用当前学习的专题实现呢？请在这里写下你的小目标，并在接下来的时间，记录你应用所学套路来完成目标的方法吧！" );
+            // 生成浏览记录
+
             return WebUtils.result(dto);
         } else {
             logger.error("用户:{},没有该训练计划:{}，挑战训练:{}",openId,plan,cid);
@@ -171,7 +173,8 @@ public class ChallengeController {
             show.setPicList(pictureService.loadPicture(Constants.PictureType.CHALLENGE, submit.getId())
                     .stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName())
                     .collect(Collectors.toList()));
-            // 查询评论
+            // 增加浏览量
+            practiceService.riseArticleViewCount(Constants.ViewInfoType.CHALLENGE, submitId);
             return WebUtils.result(show);
         }
     }

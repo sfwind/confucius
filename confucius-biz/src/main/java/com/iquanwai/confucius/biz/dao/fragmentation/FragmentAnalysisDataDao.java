@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -152,5 +153,26 @@ public class FragmentAnalysisDataDao extends PracticeDBUtil {
 
     }
 
+    public long insertArticleViewInfo(ArticleViewInfo info){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO ArticleViewInfo(ArticleType,ArticleId) VALUE(?,?)";
+        try{
+            Long insertRs = runner.insert(sql, new ScalarHandler<>(), info.getArticleType(), info.getArticleId());
+            return insertRs.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1L;
+    }
 
+    public int riseArticleViewCount(Integer articleType, Integer articleId) {
+        QueryRunner runner = new QueryRunner((getDataSource()));
+        String sql = "UPDATE ArticleViewInfo SET Count = Count + 1 where ArticleId = ? and ArticleType = ?";
+        try{
+            return runner.update(sql, articleId, articleType);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
 }

@@ -34,4 +34,9 @@ public interface Constants {
     interface CommentType{
         int STUDENT  = 1;
     }
+
+    interface ViewInfoType {
+        int CHALLENGE = 1;
+        int APPLICATION = 2;
+    }
 }

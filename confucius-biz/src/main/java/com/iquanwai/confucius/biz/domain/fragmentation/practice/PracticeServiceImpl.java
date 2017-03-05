@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
@@ -88,6 +89,8 @@ public class PracticeServiceImpl implements PracticeService {
             submitId = challengeSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
+            // 生成浏览记录
+            fragmentAnalysisDataDao.insertArticleViewInfo(new ArticleViewInfo(Constants.ViewInfoType.CHALLENGE, submitId));
         }
         challengePractice.setContent(submit.getContent());
         challengePractice.setSubmitId(submit.getId());
@@ -191,6 +194,11 @@ public class PracticeServiceImpl implements PracticeService {
         logger.info("search fragment daily practice data");
         FragmentDailyData dailyData = fragmentAnalysisDataDao.getDailyData();
         fragmentAnalysisDataDao.insertDailyData(dailyData);
+    }
+
+    @Override
+    public Integer riseArticleViewCount(Integer type, Integer id) {
+        return fragmentAnalysisDataDao.riseArticleViewCount(type, id);
     }
 
 

@@ -299,6 +299,8 @@ public class ApplicationController {
             // 查询照片
             List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
             show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
+            // 提升浏览量
+            practiceService.riseArticleViewCount(Constants.ViewInfoType.APPLICATION, submitId);
             return WebUtils.result(show);
         }
     }

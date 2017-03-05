@@ -70,9 +70,23 @@ public interface PracticeService {
      */
     List<Comment> loadComments(Integer type,Integer referId,Page page);
 
+    /**
+     * 获取评论数
+     */
     Integer commentCount(Integer type, Integer referId);
 
+    /**
+     * 评论
+     */
     Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content);
 
+    /**
+     * 碎片化每日数据
+     */
     void fragmentDailyPracticeData();
+
+    /**
+     * 增加浏览量
+     */
+    Integer riseArticleViewCount(Integer type,Integer id);
 }
