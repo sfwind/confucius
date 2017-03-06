@@ -32,6 +32,34 @@
     ga('send', 'pageview');
 
 </script>
-
+<script>
+    (function(window, mta) {
+        window.MeituanAnalyticsObject = mta;
+        window[mta] = window[mta] || function() {
+            (window[mta].q = window[mta].q || []).push(arguments);
+        };
+    }(window, 'mta'));
+    window.onload = function () {
+        //页面名称
+        mta('create', 'appPageName');
+        //上报接口
+        mta('config', 'beaconImage', '/performance/report');
+        (function sendTime(){
+            var timing = performance.timing;
+            var loadTime = timing.loadEventEnd - timing.navigationStart;//过早获取时,loadEventEnd有时会是0
+            if(loadTime <= 0) {
+                // 未加载完，延迟200ms后继续times方法，直到成功
+                console.warn('200 ms')
+                setTimeout(function(){
+                    sendTime();
+                }, 200);
+                return;
+            } else {
+                mta('send', 'page');
+            }
+        })()
+    };
+</script>
+<script src="//www.iqycamp.com/script/mta.min.js"></script>
 </body>
 </html>

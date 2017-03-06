@@ -2,10 +2,13 @@ package com.iquanwai.confucius.biz.domain.performance;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.performance.PagePerformanceDao;
+import com.iquanwai.confucius.biz.dao.performance.PageUrlDao;
 import com.iquanwai.confucius.biz.domain.performance.entity.DataSourceForPoint;
 import com.iquanwai.confucius.biz.domain.performance.entity.PageAnalyticsDto;
 import com.iquanwai.confucius.biz.domain.performance.entity.Point;
 import com.iquanwai.confucius.biz.po.performance.PagePerformance;
+import com.iquanwai.confucius.biz.po.performance.PageUrl;
+import com.iquanwai.confucius.biz.po.systematism.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +26,25 @@ public class PerformanceServiceImpl implements PerformanceService {
     @Autowired
     private PagePerformanceDao pagePerformanceDao;
 
+    @Autowired
+    private PageUrlDao pageUrlDao;
+
     @Override
     public void add(PagePerformance po) {
         pagePerformanceDao.entry(po);
+        PageUrl pageUrl = pageUrlDao.getByUrl(po.getUrl());
+        if(pageUrl == null || pageUrl.getUrl() == null || "".equals(pageUrl.getUrl())){
+            pageUrl = new PageUrl();
+            pageUrl.setUrl(po.getUrl());
+            pageUrlDao.entry(pageUrl);
+        }
     }
 
     @Override
-    public PageAnalyticsDto queryLineChartData(String app, String startTimeStr, String endTimeStr, int unitTimeAboutMinutes) {
+    public PageAnalyticsDto queryLineChartData(int urlId, String startTimeStr, String endTimeStr, int unitTimeAboutMinutes) {
         PageAnalyticsDto pageAnalyticsDto = new PageAnalyticsDto();
-        List<PagePerformance> pagePerformanceList = pagePerformanceDao.queryAboutAddTime(app, startTimeStr, endTimeStr);
+        PageUrl pageUrl = pageUrlDao.getById(urlId);
+        List<PagePerformance> pagePerformanceList = pagePerformanceDao.queryAboutAddTime(pageUrl.getUrl(), startTimeStr, endTimeStr);
         //按照时间把数据分段
         List<DataSourceForPoint> dataSourceForPoints = Lists.newArrayList();
         LocalDateTime pointStartTime = null;
@@ -108,5 +121,10 @@ public class PerformanceServiceImpl implements PerformanceService {
         pageAnalyticsDto.setTtfbList(ttfbList);
         pageAnalyticsDto.setPaintList(paintList);
         return pageAnalyticsDto;
+    }
+
+    @Override
+    public List<PageUrl> queryUrlList() {
+        return pageUrlDao.queryAll();
     }
 }
