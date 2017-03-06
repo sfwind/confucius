@@ -53,7 +53,7 @@ public interface PracticeService {
      * @param referencedId 被依赖的id
      * @param openId 点赞的人
      */
-    void vote(Integer type, Integer referencedId, String openId);
+    void vote(Integer type, Integer referencedId, String openId,String votedOpenId);
 
     /**
      * 取消点赞

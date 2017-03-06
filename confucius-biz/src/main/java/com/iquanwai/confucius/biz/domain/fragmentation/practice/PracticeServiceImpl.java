@@ -127,11 +127,11 @@ public class PracticeServiceImpl implements PracticeService {
 
 
     @Override
-    public void vote(Integer type, Integer referencedId, String openId) {
+    public void vote(Integer type, Integer referencedId, String openId, String votedOpenId) {
         HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openId);
         Pair<Integer, String> pair = new MutablePair<>();
         if (vote == null) {
-            homeworkVoteDao.vote(type, referencedId, openId, Constants.Device.PC);
+            homeworkVoteDao.vote(type, referencedId, openId,votedOpenId , Constants.Device.PC);
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
