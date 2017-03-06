@@ -174,11 +174,8 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("碎片化")
                 .function("挑战任务");
+        // TODO 业务逻辑下沉
         if (status == 1) {
-            // 点赞
-            practiceService.vote(vote.getType(), refer, openId);
-//            voteResult = new MutablePair(1, "success");
-            // 点赞加积分
             // 点赞加积分
             Integer planId = null;
             String submitOpenId = null;
@@ -193,6 +190,8 @@ public class FragmentController {
                 planId = submit.getPlanId();
                 submitOpenId = submit.getOpenid();
             }
+            // 点赞
+            practiceService.vote(vote.getType(), refer, openId, submitOpenId);
             pointRepo.risePoint(planId,2);
             pointRepo.riseCustomerPoint(submitOpenId,2);
             operationLog.action("点赞").memo(loginUser.getOpenId() + "点赞" + refer);

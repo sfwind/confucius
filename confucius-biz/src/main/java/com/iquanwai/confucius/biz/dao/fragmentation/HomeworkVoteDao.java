@@ -52,8 +52,8 @@ public class HomeworkVoteDao extends PracticeDBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<HomeworkVote>> h = new BeanListHandler<HomeworkVote>(HomeworkVote.class);
         try {
-            List<HomeworkVote> list = run.query("select * from HomeworkVote where Type=? and referencedId=? and Del=0"
-                    , h, type, referencedId);
+            List<HomeworkVote> list = run.query("select * from HomeworkVote where referencedId=? and  Type=? and Del=0"
+                    , h, referencedId, type);
             return list;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -61,16 +61,14 @@ public class HomeworkVoteDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    ScalarHandler<Long> h = new ScalarHandler<Long>();
-
-
     /**
      * 被点赞的次数
      */
-        public int votedCount(Integer type,Integer referencedId){
+    public int votedCount(Integer type, Integer referencedId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        try{
-            Long number = run.query("select count(1) from HomeworkVote where Type=? and referencedId=? and Del=0",h,type,referencedId);
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+        try {
+            Long number = run.query("select count(1) from HomeworkVote where referencedId=? and Type=? and Del=0", h, referencedId, type);
             return number.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -80,17 +78,18 @@ public class HomeworkVoteDao extends PracticeDBUtil {
 
     /**
      * 进行点赞
-     * @param type 1:挑战任务，2：体系化大作业
+     *
+     * @param type         1:挑战任务，2：体系化大作业
      * @param referencedId 被依赖的id
-     * @param openid 点赞的人
+     * @param openid       点赞的人
      * @return 插入结果
      */
-    public void vote(Integer type, Integer referencedId, String openid) {
+    public void vote(Integer type, Integer referencedId, String openid,String votedOpenId, Integer device) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO HomeworkVote(Type,ReferencedId,VoteOpenId) " +
-                "VALUES(?, ?, ?)";
+        String insertSql = "INSERT INTO HomeworkVote(Type,ReferencedId,VoteOpenId,VotedOpenId,Device) " +
+                "VALUES(?, ?, ?, ?, ?)";
         try {
-            run.insert(insertSql, new ScalarHandler<>(),type, referencedId, openid);
+            run.insert(insertSql, new ScalarHandler<>(), type, referencedId, openid,votedOpenId, device);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -107,8 +106,8 @@ public class HomeworkVoteDao extends PracticeDBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<HomeworkVote> h = new BeanHandler(HomeworkVote.class);
         try {
-            HomeworkVote vote = run.query("SELECT * FROM HomeworkVote where Type=? and ReferencedId=? and VoteOpenId=?",
-                    h, type, referencedId, voteOpenId);
+            HomeworkVote vote = run.query("SELECT * FROM HomeworkVote where VoteOpenId=? and ReferencedId=? and Type=?",
+                    h,voteOpenId, referencedId, type);
             return vote;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

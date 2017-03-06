@@ -228,6 +228,8 @@ public class ApplicationController {
         Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
 
         if (result) {
+            // 提升提交数
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
             if(submit.getPointStatus()==0){
                 ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
                 return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
@@ -299,6 +301,8 @@ public class ApplicationController {
             // 查询照片
             List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
             show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
+            // 提升浏览量
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId,Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);
         }
     }

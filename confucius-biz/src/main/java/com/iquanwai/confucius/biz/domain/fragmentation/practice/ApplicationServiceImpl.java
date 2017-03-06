@@ -2,11 +2,13 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private PointRepo pointRepo;
+    @Autowired
+    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     @Override
     public ApplicationPractice loadApplicationPractice(Integer id) {
@@ -53,6 +57,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             submitId = applicationSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
+            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));
         }
         applicationPractice.setSubmitUpdateTime(submit.getUpdateTime());
         applicationPractice.setPlanId(submit.getPlanId());

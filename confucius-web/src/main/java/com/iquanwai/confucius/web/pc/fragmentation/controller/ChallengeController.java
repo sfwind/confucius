@@ -171,7 +171,8 @@ public class ChallengeController {
             show.setPicList(pictureService.loadPicture(Constants.PictureType.CHALLENGE, submit.getId())
                     .stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName())
                     .collect(Collectors.toList()));
-            // 查询评论
+            // 增加浏览量
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.CHALLENGE, submitId, Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);
         }
     }
@@ -196,6 +197,8 @@ public class ChallengeController {
         operationLogService.log(operationLog);
         Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         if (result.getLeft() > 0) {
+            // 提升提交数
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.CHALLENGE, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
             if (result.getLeft() == 2) {
                 return WebUtils.result(result.getRight());
             } else {

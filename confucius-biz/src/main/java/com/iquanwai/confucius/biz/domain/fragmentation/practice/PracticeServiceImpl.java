@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
@@ -88,6 +89,8 @@ public class PracticeServiceImpl implements PracticeService {
             submitId = challengeSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
+            // 生成浏览记录
+            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.CHALLENGE, submitId));
         }
         challengePractice.setContent(submit.getContent());
         challengePractice.setSubmitId(submit.getId());
@@ -124,11 +127,11 @@ public class PracticeServiceImpl implements PracticeService {
 
 
     @Override
-    public void vote(Integer type, Integer referencedId, String openId) {
+    public void vote(Integer type, Integer referencedId, String openId, String votedOpenId) {
         HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openId);
         Pair<Integer, String> pair = new MutablePair<>();
         if (vote == null) {
-            homeworkVoteDao.vote(type, referencedId, openId);
+            homeworkVoteDao.vote(type, referencedId, openId,votedOpenId , Constants.Device.PC);
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
@@ -182,6 +185,7 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
+        comment.setDevice(Constants.Device.PC);
         commentDao.insert(comment);
         return new MutablePair<>(true,"评论成功");
     }
@@ -191,6 +195,11 @@ public class PracticeServiceImpl implements PracticeService {
         logger.info("search fragment daily practice data");
         FragmentDailyData dailyData = fragmentAnalysisDataDao.getDailyData();
         fragmentAnalysisDataDao.insertDailyData(dailyData);
+    }
+
+    @Override
+    public Integer riseArticleViewCount(Integer module, Integer id, Integer type) {
+        return fragmentAnalysisDataDao.riseArticleViewCount(module, id, type);
     }
 
 
