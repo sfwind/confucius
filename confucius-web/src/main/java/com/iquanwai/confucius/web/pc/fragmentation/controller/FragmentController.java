@@ -174,6 +174,7 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("碎片化")
                 .function("挑战任务");
+        // TODO 业务逻辑下沉
         if (status == 1) {
             // 点赞加积分
             Integer planId = null;
