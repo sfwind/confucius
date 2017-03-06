@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
@@ -77,6 +78,12 @@ public class PerformanceController {
             return new ResponseEntity<List<PageUrl>>(result, headers, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<List<PageUrl>>(result, headers, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "")
+    public ModelAndView goPerformancePage(){
+        ModelAndView mav = new ModelAndView("performance");
+        return mav;
     }
 
 }

@@ -32,6 +32,9 @@
     ga('send', 'pageview');
 
 </script>
+
+
+<%--性能数据收集脚本--%>
 <script>
     (function(window, mta) {
         window.MeituanAnalyticsObject = mta;
@@ -49,7 +52,6 @@
             var loadTime = timing.loadEventEnd - timing.navigationStart;//过早获取时,loadEventEnd有时会是0
             if(loadTime <= 0) {
                 // 未加载完，延迟200ms后继续times方法，直到成功
-                console.warn('200 ms')
                 setTimeout(function(){
                     sendTime();
                 }, 200);
@@ -60,6 +62,7 @@
         })()
     };
 </script>
+<%--性能数据js资源--%>
 <script src="//www.iqycamp.com/script/mta.min.js"></script>
 </body>
 </html>
