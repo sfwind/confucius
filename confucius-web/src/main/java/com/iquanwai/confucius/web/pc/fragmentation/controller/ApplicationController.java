@@ -300,7 +300,7 @@ public class ApplicationController {
             List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
             show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
             // 提升浏览量
-            practiceService.riseArticleViewCount(Constants.ViewInfoType.APPLICATION, submitId);
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId,Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);
         }
     }

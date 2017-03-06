@@ -10,12 +10,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ArticleViewInfo {
     private Integer id;
-    private Integer articleType;
+    private Integer articleModule;
+    private Integer viewEventType;
     private Integer articleId;
     private Integer count;
 
-    public ArticleViewInfo(Integer articleType,Integer articleId){
-        this.articleType = articleType;
+    public ArticleViewInfo(Integer articleModule,Integer articleId,Integer viewEventType){
+        this.articleModule = articleModule;
+        this.viewEventType = viewEventType;
         this.articleId = articleId;
     }
 }

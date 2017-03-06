@@ -7,7 +7,6 @@ import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
@@ -90,7 +89,7 @@ public class PracticeServiceImpl implements PracticeService {
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
             // 生成浏览记录
-            fragmentAnalysisDataDao.insertArticleViewInfo(new ArticleViewInfo(Constants.ViewInfoType.CHALLENGE, submitId));
+            fragmentAnalysisDataDao.insertArticleViewInfo(Constants.ViewInfo.Module.CHALLENGE, submitId);
         }
         challengePractice.setContent(submit.getContent());
         challengePractice.setSubmitId(submit.getId());
@@ -131,7 +130,7 @@ public class PracticeServiceImpl implements PracticeService {
         HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openId);
         Pair<Integer, String> pair = new MutablePair<>();
         if (vote == null) {
-            homeworkVoteDao.vote(type, referencedId, openId);
+            homeworkVoteDao.vote(type, referencedId, openId, Constants.Device.PC);
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
@@ -185,6 +184,7 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
+        comment.setDevice(Constants.Device.PC);
         commentDao.insert(comment);
         return new MutablePair<>(true,"评论成功");
     }
@@ -197,8 +197,8 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Integer riseArticleViewCount(Integer type, Integer id) {
-        return fragmentAnalysisDataDao.riseArticleViewCount(type, id);
+    public Integer riseArticleViewCount(Integer module, Integer id, Integer type) {
+        return fragmentAnalysisDataDao.riseArticleViewCount(module, id, type);
     }
 
 

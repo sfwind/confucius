@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
@@ -70,6 +71,8 @@ public class FragmentController {
     private PointRepo pointRepo;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     public static String challengeListUrl = "/fragment/c/list?cid={cid}";
     public static String doChallengeUrl = "/fragment/c?cid={cid}&planId={planId}";
@@ -177,8 +180,6 @@ public class FragmentController {
         if (status == 1) {
             // 点赞
             practiceService.vote(vote.getType(), refer, openId);
-//            voteResult = new MutablePair(1, "success");
-            // 点赞加积分
             // 点赞加积分
             Integer planId = null;
             String submitOpenId = null;

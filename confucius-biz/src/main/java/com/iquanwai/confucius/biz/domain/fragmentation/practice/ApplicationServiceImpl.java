@@ -57,7 +57,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             submitId = applicationSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
-            fragmentAnalysisDataDao.insertArticleViewInfo(new ArticleViewInfo(Constants.ViewInfoType.APPLICATION, submitId));
+            fragmentAnalysisDataDao.insertArticleViewInfo(Constants.ViewInfo.Module.APPLICATION, submitId);
         }
         applicationPractice.setSubmitUpdateTime(submit.getUpdateTime());
         applicationPractice.setPlanId(submit.getPlanId());

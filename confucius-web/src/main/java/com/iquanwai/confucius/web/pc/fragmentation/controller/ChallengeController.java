@@ -174,7 +174,7 @@ public class ChallengeController {
                     .stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName())
                     .collect(Collectors.toList()));
             // 增加浏览量
-            practiceService.riseArticleViewCount(Constants.ViewInfoType.CHALLENGE, submitId);
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.CHALLENGE, submitId, Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);
         }
     }

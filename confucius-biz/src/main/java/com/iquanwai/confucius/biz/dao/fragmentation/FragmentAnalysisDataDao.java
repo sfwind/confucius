@@ -1,8 +1,8 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
+import com.iquanwai.confucius.biz.util.Constants;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -153,23 +153,31 @@ public class FragmentAnalysisDataDao extends PracticeDBUtil {
 
     }
 
-    public long insertArticleViewInfo(ArticleViewInfo info){
+    public void insertArticleViewInfo(Integer module,Integer articleId){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO ArticleViewInfo(ArticleType,ArticleId) VALUE(?,?)";
-        try{
-            Long insertRs = runner.insert(sql, new ScalarHandler<>(), info.getArticleType(), info.getArticleId());
-            return insertRs.intValue();
+        String sql = "INSERT INTO ArticleViewInfo(ArticleModule,ArticleId,ViewEventType) VALUES(?,?,?) ";
+        try {
+            Object[][] param = new Object[6][];
+            for (Object[] objects : param) {
+                objects = new Object[3];
+                objects[0] = module;
+                objects[1] = articleId;
+            }
+            param[0][2] = Constants.ViewInfo.EventType.PC_SUBMIT;
+            param[1][2] = Constants.ViewInfo.EventType.MOBILE_SUBMIT;
+            param[2][2] = Constants.ViewInfo.EventType.PC_SHOW;
+            param[3][2] = Constants.ViewInfo.EventType.MOBILE_SHOW;
+            runner.batch(sql, param);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        return -1L;
     }
 
-    public int riseArticleViewCount(Integer articleType, Integer articleId) {
+    public int riseArticleViewCount(Integer articleModule, Integer articleId, Integer viewEventType) {
         QueryRunner runner = new QueryRunner((getDataSource()));
-        String sql = "UPDATE ArticleViewInfo SET Count = Count + 1 where ArticleId = ? and ArticleType = ?";
+        String sql = "UPDATE ArticleViewInfo SET Count = Count + 1 where ArticleId = ? and ArticleModule = ? and ViewEventType = ?";
         try{
-            return runner.update(sql, articleId, articleType);
+            return runner.update(sql, articleId, articleModule,viewEventType);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

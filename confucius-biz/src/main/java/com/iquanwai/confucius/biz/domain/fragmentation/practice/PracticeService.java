@@ -88,5 +88,5 @@ public interface PracticeService {
     /**
      * 增加浏览量
      */
-    Integer riseArticleViewCount(Integer type,Integer id);
+    Integer riseArticleViewCount(Integer module,Integer id, Integer type);
 }
