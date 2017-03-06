@@ -199,6 +199,8 @@ public class ChallengeController {
         operationLogService.log(operationLog);
         Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         if (result.getLeft() > 0) {
+            // 提升提交数
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.CHALLENGE, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
             if (result.getLeft() == 2) {
                 return WebUtils.result(result.getRight());
             } else {

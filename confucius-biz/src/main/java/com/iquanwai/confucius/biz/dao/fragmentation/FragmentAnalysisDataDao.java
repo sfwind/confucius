@@ -157,11 +157,11 @@ public class FragmentAnalysisDataDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO ArticleViewInfo(ArticleModule,ArticleId,ViewEventType) VALUES(?,?,?) ";
         try {
-            Object[][] param = new Object[6][];
-            for (Object[] objects : param) {
-                objects = new Object[3];
-                objects[0] = module;
-                objects[1] = articleId;
+            Object[][] param = new Object[4][];
+            for (int i = 0; i < param.length; i++) {
+                param[i] = new Object[3];
+                param[i][0] = module;
+                param[i][1] = articleId;
             }
             param[0][2] = Constants.ViewInfo.EventType.PC_SUBMIT;
             param[1][2] = Constants.ViewInfo.EventType.MOBILE_SUBMIT;

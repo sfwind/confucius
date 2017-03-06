@@ -228,6 +228,8 @@ public class ApplicationController {
         Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
 
         if (result) {
+            // 提升提交数
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
             if(submit.getPointStatus()==0){
                 ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
                 return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
