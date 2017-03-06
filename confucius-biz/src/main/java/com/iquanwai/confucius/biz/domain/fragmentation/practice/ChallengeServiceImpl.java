@@ -70,7 +70,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             return new MutablePair<>(-1,0);
         }
         boolean result = challengeSubmitDao.answer(id, content);
-        ;
+
         if (result) {
             // 修改挑战任务记录
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(), submit.getChallengeId(), Constants.PracticeType.CHALLENGE);

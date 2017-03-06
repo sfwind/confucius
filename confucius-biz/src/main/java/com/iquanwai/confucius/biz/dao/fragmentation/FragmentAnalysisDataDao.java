@@ -1,8 +1,8 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
-import com.iquanwai.confucius.biz.util.Constants;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/2/27.
@@ -153,20 +154,18 @@ public class FragmentAnalysisDataDao extends PracticeDBUtil {
 
     }
 
-    public void insertArticleViewInfo(Integer module,Integer articleId){
+    public void insertArticleViewInfo(List<ArticleViewInfo> list) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO ArticleViewInfo(ArticleModule,ArticleId,ViewEventType) VALUES(?,?,?) ";
         try {
-            Object[][] param = new Object[4][];
-            for (int i = 0; i < param.length; i++) {
+            Object[][] param = new Object[list.size()][];
+            for (int i = 0; i < list.size(); i++) {
+                ArticleViewInfo info = list.get(i);
                 param[i] = new Object[3];
-                param[i][0] = module;
-                param[i][1] = articleId;
+                param[i][0] = info.getArticleModule();
+                param[i][1] = info.getArticleId();
+                param[i][2] = info.getViewEventType();
             }
-            param[0][2] = Constants.ViewInfo.EventType.PC_SUBMIT;
-            param[1][2] = Constants.ViewInfo.EventType.MOBILE_SUBMIT;
-            param[2][2] = Constants.ViewInfo.EventType.PC_SHOW;
-            param[3][2] = Constants.ViewInfo.EventType.MOBILE_SHOW;
             runner.batch(sql, param);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
