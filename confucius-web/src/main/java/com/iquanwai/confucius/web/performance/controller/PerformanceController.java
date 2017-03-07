@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.performance;
+package com.iquanwai.confucius.web.performance.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.performance.PerformanceService;
