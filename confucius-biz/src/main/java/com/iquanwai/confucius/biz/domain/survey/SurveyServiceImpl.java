@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.biz.domain.survey;
 
-import com.iquanwai.confucius.biz.dao.survey.SurveyQuestionSubmitDao;
-import com.iquanwai.confucius.biz.dao.survey.SurveySubmitDao;
-import com.iquanwai.confucius.biz.po.survey.SurveyQuestionSubmit;
-import com.iquanwai.confucius.biz.po.survey.SurveySubmit;
+import com.iquanwai.confucius.biz.dao.common.survey.SurveyQuestionSubmitDao;
+import com.iquanwai.confucius.biz.dao.common.survey.SurveySubmitDao;
+import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
+import com.iquanwai.confucius.biz.po.common.survey.SurveySubmit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,12 +2,12 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.iquanwai.confucius.biz.dao.customer.ProfileDao;
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Region;
-import com.iquanwai.confucius.biz.po.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;

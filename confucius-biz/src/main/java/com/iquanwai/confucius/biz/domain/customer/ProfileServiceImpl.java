@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.biz.domain.customer;
 
-import com.iquanwai.confucius.biz.dao.customer.ProfileDao;
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
-import com.iquanwai.confucius.biz.po.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

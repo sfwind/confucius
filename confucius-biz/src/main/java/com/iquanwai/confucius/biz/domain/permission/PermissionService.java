@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.permission;
 
-import com.iquanwai.confucius.biz.po.permisson.Role;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
 
 import java.util.List;
 

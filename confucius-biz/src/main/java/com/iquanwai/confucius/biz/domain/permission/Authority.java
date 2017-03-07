@@ -1,9 +1,8 @@
 package com.iquanwai.confucius.biz.domain.permission;
 
-import com.iquanwai.confucius.biz.po.permisson.Permission;
+import com.iquanwai.confucius.biz.po.common.permisson.Permission;
 import lombok.Data;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**

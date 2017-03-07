@@ -2,7 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.file;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.file.PictureDao;
+import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
 import com.iquanwai.confucius.biz.util.CommonUtils;

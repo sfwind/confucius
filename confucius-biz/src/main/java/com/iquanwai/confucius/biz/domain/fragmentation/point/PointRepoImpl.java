@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.point;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.customer.ProfileDao;
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
-import com.iquanwai.confucius.biz.po.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.survey;
 
-import com.iquanwai.confucius.biz.po.survey.SurveyQuestionSubmit;
-import com.iquanwai.confucius.biz.po.survey.SurveySubmit;
+import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
+import com.iquanwai.confucius.biz.po.common.survey.SurveySubmit;
 
 import java.util.List;
 

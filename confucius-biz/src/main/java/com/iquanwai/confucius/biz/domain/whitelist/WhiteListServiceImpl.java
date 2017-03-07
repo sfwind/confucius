@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.whitelist;
 
-import com.iquanwai.confucius.biz.dao.WhiteListDao;
+import com.iquanwai.confucius.biz.dao.common.permission.WhiteListDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

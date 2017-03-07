@@ -1,12 +1,12 @@
 package com.iquanwai.confucius.biz.domain.permission;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.permission.PermissionDao;
-import com.iquanwai.confucius.biz.dao.permission.RoleDao;
-import com.iquanwai.confucius.biz.dao.permission.UserRoleDao;
-import com.iquanwai.confucius.biz.po.permisson.Permission;
-import com.iquanwai.confucius.biz.po.permisson.Role;
-import com.iquanwai.confucius.biz.po.permisson.UserRole;
+import com.iquanwai.confucius.biz.dao.common.permission.PermissionDao;
+import com.iquanwai.confucius.biz.dao.common.permission.RoleDao;
+import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
+import com.iquanwai.confucius.biz.po.common.permisson.Permission;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
+import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
