@@ -9,9 +9,9 @@ import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.PromoCode;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
-import com.iquanwai.confucius.web.resolver.LoginUserResolver;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -90,7 +90,7 @@ public class PromoCodeController {
             if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
                 promoCodeDto.setAvatar(account.getHeadimgurl());
             }else{
-                promoCodeDto.setAvatar(LoginUserResolver.DEFAULT_AVATAR);
+                promoCodeDto.setAvatar(Profile.DEFAULT_AVATAR);
             }
         }
         promoCodeDto.setUrl(ConfigUtils.domainName()+SHARE_URL+promoCode.getId());
@@ -117,7 +117,7 @@ public class PromoCodeController {
             if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
                 promoCodeDto.setAvatar(account.getHeadimgurl());
             }else{
-                promoCodeDto.setAvatar(LoginUserResolver.DEFAULT_AVATAR);
+                promoCodeDto.setAvatar(Profile.DEFAULT_AVATAR);
             }
         }
         promoCodeDto.setUrl(ConfigUtils.domainName()+SHARE_URL+promoCode.getId());
