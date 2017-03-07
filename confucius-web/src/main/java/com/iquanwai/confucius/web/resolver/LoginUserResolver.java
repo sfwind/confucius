@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +32,6 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     private static Map<String, LoginUser> loginUserMap = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    public static final String DEFAULT_AVATAR = "http://www.iquanwai.com/images/default_avatar.png";
 
     public boolean supportsParameter(MethodParameter methodParameter) {
         if (LoginUser.class.isAssignableFrom(methodParameter.getParameterType())) {
@@ -89,7 +88,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
             loginUser.setHeadimgUrl(account.getHeadimgurl());
         }else{
-            loginUser.setHeadimgUrl(DEFAULT_AVATAR);
+            loginUser.setHeadimgUrl(Profile.DEFAULT_AVATAR);
         }
         loginUser.setRealName(account.getRealName());
         return loginUser;

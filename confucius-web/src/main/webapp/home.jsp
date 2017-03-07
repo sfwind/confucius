@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>圈外</title>
-    <link href="http://www.iquanwai.com/images/logo.png" rel="shortcut icon">
+    <link href="http://www.iqycamp.com/images/logo.png" rel="shortcut icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 </head>
 <body>
