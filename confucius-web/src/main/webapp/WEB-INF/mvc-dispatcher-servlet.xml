@@ -85,6 +85,7 @@
             <mvc:exclude-mapping path="/community"/>
             <mvc:exclude-mapping path="/rise"/>
             <mvc:exclude-mapping path="/operation/promoCode/**"/>
+            <mvc:exclude-mapping path="/performance/**"/>
             <bean class="com.iquanwai.confucius.web.interceptor.CourseHandlerInterceptor"></bean>
         </mvc:interceptor>
         <mvc:interceptor>
