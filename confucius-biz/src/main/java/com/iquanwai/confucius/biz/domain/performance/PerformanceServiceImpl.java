@@ -67,6 +67,9 @@ public class PerformanceServiceImpl implements PerformanceService {
         PageAnalyticsDto pageAnalyticsDto = new PageAnalyticsDto();
         PageUrl pageUrl = pageUrlDao.getById(urlId);
         List<PagePerformance> pagePerformanceList = pagePerformanceDao.queryAboutAddTime(pageUrl.getUrl(), startTimeStr, endTimeStr);
+        if(pagePerformanceList == null || pagePerformanceList.size() < 1) {
+            return pageAnalyticsDto;
+        }
         //按照时间把数据分段
         List<DataSourceForPoint> dataSourceForPoints = Lists.newArrayList();
         LocalDateTime pointStartTime = null;
@@ -160,6 +163,9 @@ public class PerformanceServiceImpl implements PerformanceService {
         PersonalAnalyticsDto personalAnalyticsDto = new PersonalAnalyticsDto();
         PersonalPerfKey personalPerfKey = personalPerfKeyDao.getById(keyId);
         List<PersonalPerformance> personalPerformancesList = personalPerformanceDao.queryAboutAddTime(personalPerfKey.getKey(), startTimeStr, endTimeStr);
+        if(personalPerformancesList == null || personalPerformancesList.size() < 1) {
+            return personalAnalyticsDto;
+        }
         //按照时间把数据分段
         List<DataSourceForPoint> dataSourceForPoints = Lists.newArrayList();
         LocalDateTime pointStartTime = null;
