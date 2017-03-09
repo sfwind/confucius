@@ -1,20 +1,10 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.Comment;
-import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -106,7 +96,6 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
 
-
     @Override
     public List<ChallengeSubmit> getChallengeSubmitList(Integer challengeId) {
         return challengeSubmitDao.loadList(challengeId);
@@ -116,8 +105,6 @@ public class PracticeServiceImpl implements PracticeService {
     public ChallengePractice getChallenge(Integer id) {
         return challengePracticeDao.load(ChallengePractice.class, id);
     }
-
-
 
 
     @Override
@@ -136,7 +123,7 @@ public class PracticeServiceImpl implements PracticeService {
     public void vote(Integer type, Integer referencedId, String openId, String votedOpenId) {
         HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openId);
         if (vote == null) {
-            homeworkVoteDao.vote(type, referencedId, openId,votedOpenId , Constants.Device.PC);
+            homeworkVoteDao.vote(type, referencedId, openId, votedOpenId, Constants.Device.PC);
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
@@ -161,16 +148,16 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public List<Comment> loadComments(Integer type, Integer referId, Page page) {
-        return commentDao.loadComments(type,referId,page);
+        return commentDao.loadComments(type, referId, page);
     }
 
     @Override
-    public Integer commentCount(Integer moduleId,Integer referId){
-        return commentDao.commentCount(moduleId,referId);
+    public Integer commentCount(Integer moduleId, Integer referId) {
+        return commentDao.commentCount(moduleId, referId);
     }
 
     @Override
-    public Pair<Boolean,String> comment(Integer moduleId, Integer referId, String openId, String content){
+    public Pair<Boolean, String> comment(Integer moduleId, Integer referId, String openId, String content) {
         if (moduleId == Constants.CommentModule.CHALLENGE) {
             ChallengeSubmit load = challengeSubmitDao.load(ChallengeSubmit.class, referId);
             if (load == null) {
@@ -178,7 +165,7 @@ public class PracticeServiceImpl implements PracticeService {
                 return new MutablePair<>(false, "没有该文章");
             }
             //自己给自己评论不提醒
-            if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
+            if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 Profile profile = accountService.getProfile(openId, false);
                 if (profile != null) {
                     String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
@@ -192,7 +179,7 @@ public class PracticeServiceImpl implements PracticeService {
                 return new MutablePair<>(false, "没有该文章");
             }
             //自己给自己评论不提醒
-            if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
+            if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 Profile profile = accountService.getProfile(openId, false);
                 if (profile != null) {
                     String url = "/rise/static/practice/application?id=" + load.getApplicationId();
@@ -208,7 +195,7 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setCommentOpenId(openId);
         comment.setDevice(Constants.Device.PC);
         commentDao.insert(comment);
-        return new MutablePair<>(true,"评论成功");
+        return new MutablePair<>(true, "评论成功");
     }
 
     @Override
