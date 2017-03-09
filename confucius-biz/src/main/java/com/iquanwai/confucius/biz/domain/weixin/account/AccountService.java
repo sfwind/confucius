@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Region;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 
 import java.util.List;
 
@@ -54,4 +55,8 @@ public interface AccountService {
 
     String GET_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}";
 
+    /**
+     * 根据openid获取用户详情
+     */
+    Profile getProfile(String openid, boolean realTime);
 }

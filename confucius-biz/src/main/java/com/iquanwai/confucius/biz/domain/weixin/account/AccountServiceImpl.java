@@ -213,5 +213,21 @@ public class AccountServiceImpl implements AccountService {
         return result;
     }
 
+    @Override
+    public Profile getProfile(String openid, boolean realTime){
+        Profile profile = profileDao.queryByOpenId(openid);
+        if(!realTime && profile != null){
+            return profile;
+        }
+        synchronized (this){
+            Profile profileTemp = profileDao.queryByOpenId(openid);
+            if(!realTime && profileTemp != null){
+                return profileTemp;
+            }
+            Account account = followUserDao.queryByOpenid(openid);
+            getAccountFromWeixin(openid,account);
+            return profileDao.queryByOpenId(openid);
+        }
+    }
 
 }
