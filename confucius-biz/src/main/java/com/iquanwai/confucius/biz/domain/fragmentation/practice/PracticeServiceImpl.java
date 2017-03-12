@@ -2,8 +2,6 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
-import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -36,8 +34,6 @@ public class PracticeServiceImpl implements PracticeService {
     private ApplicationSubmitDao applicationSubmitDao;
     @Autowired
     private FragmentAnalysisDataDao fragmentAnalysisDataDao;
-    @Autowired
-    private AccountService accountService;
     @Autowired
     private MessageService messageService;
 
@@ -166,11 +162,8 @@ public class PracticeServiceImpl implements PracticeService {
             }
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
-                Profile profile = accountService.getProfile(openId, false);
-                if (profile != null) {
-                    String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
-                    messageService.sendMessage("评论了我的小目标", load.getOpenid(), openId, url);
-                }
+                String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
+                messageService.sendMessage("评论了我的小目标", load.getOpenid(), openId, url);
             }
         } else {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
@@ -180,11 +173,8 @@ public class PracticeServiceImpl implements PracticeService {
             }
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
-                Profile profile = accountService.getProfile(openId, false);
-                if (profile != null) {
-                    String url = "/rise/static/practice/application?id=" + load.getApplicationId();
-                    messageService.sendMessage("评论了我的应用训练", load.getOpenid(), openId, url);
-                }
+                String url = "/rise/static/practice/application?id=" + load.getApplicationId();
+                messageService.sendMessage("评论了我的应用训练", load.getOpenid(), openId, url);
             }
         }
         Comment comment = new Comment();

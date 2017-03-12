@@ -44,7 +44,7 @@
     }(window, 'mta'));
     window.onload = function () {
         //页面名称
-        mta('create', 'appPageName');
+        mta('create', 'coursePage');
         //上报接口
         mta('config', 'beaconImage', '/performance/report');
         (function sendTime(){
