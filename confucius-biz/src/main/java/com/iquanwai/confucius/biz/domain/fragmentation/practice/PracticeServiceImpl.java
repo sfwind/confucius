@@ -254,6 +254,16 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
+    public List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page) {
+        page.setTotal(subjectArticleDao.count(problemId));
+        return subjectArticleDao.loadArticles(problemId,page).stream().map(item->{
+            item.setVoteCount(homeworkVoteDao.votedCount(Constants.VoteType.SUBJECT, item.getId()));
+            item.setCommentCount(commentDao.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
+            return item;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId) {
         return subjectArticleDao.loadArticles(problemId,openId);
     }

@@ -31,6 +31,7 @@ import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.pc.dto.HomeworkVoteDto;
+import com.iquanwai.confucius.web.pc.dto.RefreshListDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentListDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
@@ -274,26 +275,18 @@ public class FragmentController {
     }
 
     @RequestMapping(value = "/pc/fragment/subject/list",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> loadSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId){
+    public ResponseEntity<Map<String,Object>> loadSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId,@ModelAttribute Page page){
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(problemId, "专题id不能为空");
-        List<RiseWorkInfoDto> list = practiceService.loadSubjectArticles(problemId)
+        page.setPageSize(2);
+        List<RiseWorkInfoDto> list = practiceService.loadSubjectArticles(problemId,page)
                 .stream().map(item -> {
-                    RiseWorkInfoDto dto = new RiseWorkInfoDto();
-                    dto.setSubmitId(item.getId());
-                    dto.setType(Constants.PracticeType.SUBJECT);
-                    dto.setContent(item.getContent());
-                    dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.SUBJECT, item.getId()));
+                    RiseWorkInfoDto dto = new RiseWorkInfoDto(item);
                     Profile account = accountService.getProfile(item.getOpenid(), false);
                     dto.setUpName(account.getNickname());
                     dto.setHeadPic(account.getHeadimgurl());
-                    dto.setUpTime(DateUtils.parseDateToString(item.getUpdateTime()));
-                    dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
                     // 查询我对它的点赞状态
-                    dto.setPerfect(item.getSequence() != null && item.getSequence() > 0);
-                    dto.setAuthorType(item.getAuthorType());
                     dto.setIsMine(item.getOpenid().equals(loginUser.getOpenId()));
-                    dto.setTitle(item.getTitle());
                     return dto;
                 }).collect(Collectors.toList());
         list.forEach(item -> practiceService.riseArticleViewCount(Constants.ViewInfo.Module.SUBJECT, item.getSubmitId(), Constants.ViewInfo.EventType.MOBILE_SHOW));
@@ -303,8 +296,10 @@ public class FragmentController {
                 .action("PC端加载专题输出区")
                 .memo(problemId + "");
         operationLogService.log(operationLog);
-        return WebUtils.result(list);
-
+        RefreshListDto<RiseWorkInfoDto> result = new RefreshListDto<>();
+        result.setList(list);
+        result.setEnd(page.isLastPage());
+        return WebUtils.result(result);
     }
 
     @RequestMapping(value = "/pc/fragment/subject/list/mine",method = RequestMethod.GET)

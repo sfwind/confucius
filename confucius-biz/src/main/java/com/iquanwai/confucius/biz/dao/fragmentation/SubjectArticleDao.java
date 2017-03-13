@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -64,6 +65,18 @@ public class SubjectArticleDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<SubjectArticle>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? order by Sequence desc,UpdateTime desc";
+        try{
+            return runner.query(sql,h,problemId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<SubjectArticle> loadArticles(Integer problemId,Page page){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<SubjectArticle>(SubjectArticle.class);
+        String sql = "select * from SubjectArticle where ProblemId = ? order by Sequence desc,UpdateTime desc limit " + page.getOffset() + "," + page.getLimit();
         try{
             return runner.query(sql,h,problemId);
         } catch (SQLException e) {

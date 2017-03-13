@@ -93,6 +93,8 @@ public interface PracticeService {
 
     List<SubjectArticle> loadSubjectArticles(Integer problemId);
 
+    List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page);
+
     List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId);
 
     List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId);

@@ -21,6 +21,10 @@ public class SubjectArticle {
     private Integer pointStatus; //是否已加分（0-否，1-是）
     private Date updateTime; //最后更新时间
 
+    private Integer voteCount; // 点赞数，非db字段
+    private Integer commentCount; // 评论数，非db字段
+
+
     public SubjectArticle(Integer id, String openid, Integer problemId, Integer authorType, Integer sequence, String title, String content){
         this.id = id;
         this.openid = openid;
