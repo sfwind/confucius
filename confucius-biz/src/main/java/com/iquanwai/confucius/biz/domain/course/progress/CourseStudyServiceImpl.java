@@ -67,9 +67,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String picUrlPrefix = ConfigUtils.resourceDomainName()+"/images/";
-    private String audioUrlPrefix = ConfigUtils.streamResourceDomainName()+"/audio/";
-
     private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
     @PostConstruct
@@ -84,7 +81,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             questionMap.put(question.getId(), question);
             //语音分析，拼接完整url
             if(question.getVoice()!=null){
-                question.setVoice(audioUrlPrefix+question.getVoice());
+                question.setVoice(ConfigUtils.streamResourceDomainName()+"/audio/"+question.getVoice());
             }
         }
 
@@ -117,9 +114,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         Assert.notNull(m, "material不能为空");
         //图片，语音加前缀
         if(m.getType()==2){
-            m.setContent(picUrlPrefix+m.getContent());
+            m.setContent(ConfigUtils.resourceDomainName()+"/images/"+m.getContent());
         }else if(m.getType()==3){
-            m.setContent(audioUrlPrefix+m.getContent());
+            m.setContent(ConfigUtils.streamResourceDomainName()+"/audio/"+m.getContent());
         //占位符替换，当文字处理
         }else if(m.getType()==11){
             m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
