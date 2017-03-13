@@ -1,6 +1,9 @@
 package com.iquanwai.confucius.web.pc.fragmentation.dto;
 
+import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/1/14.
@@ -16,4 +19,9 @@ public class RiseWorkInfoDto {
     private Integer commentCount;
     private Integer submitId;
     private Integer type;
+
+    private Boolean perfect;
+    private Integer authorType;
+    private Boolean isMine;
+    private List<LabelConfig> labelList;
 }
