@@ -37,7 +37,6 @@ import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkItemDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkListDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
-import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -416,7 +415,7 @@ public class FragmentController {
 
 
     @RequestMapping(value = "/pc/fragment/subject/submit/{problemId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> submitSubjectArticle(LoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> submitSubjectArticle(PCLoginUser loginUser,
                                                                     @PathVariable("problemId") Integer problemId,
                                                                     @RequestBody RiseWorkInfoDto workInfoDto) {
         Assert.notNull(loginUser, "用户不能为空");
