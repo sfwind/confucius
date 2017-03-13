@@ -400,7 +400,7 @@ public class FragmentController {
             labelConfigs.forEach(item->{
                 boolean flag = false;
                 for (ArticleLabel label:articleLabels){
-                    if (label.getArticleId().equals(item.getId())) {
+                    if (label.getLabelId().equals(item.getId())) {
                         flag = true;
                         break;
                     }
