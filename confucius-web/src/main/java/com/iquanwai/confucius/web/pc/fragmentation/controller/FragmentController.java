@@ -449,7 +449,7 @@ public class FragmentController {
     }
 
     @RequestMapping(value = "/pc/fragment/subject/label/{problemId}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadLabels(LoginUser loginUser, @PathVariable Integer problemId) {
+    public ResponseEntity<Map<String, Object>> loadLabels(PCLoginUser loginUser, @PathVariable Integer problemId) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(problemId, "专题不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
