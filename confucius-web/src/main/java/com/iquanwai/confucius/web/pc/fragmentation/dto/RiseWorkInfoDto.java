@@ -29,6 +29,7 @@ public class RiseWorkInfoDto {
     private Integer authorType;
     private Boolean isMine;
     private List<LabelConfig> labelList;
+    private List<String> picList;
 
     public RiseWorkInfoDto(SubjectArticle origin){
         this.title = origin.getTitle();

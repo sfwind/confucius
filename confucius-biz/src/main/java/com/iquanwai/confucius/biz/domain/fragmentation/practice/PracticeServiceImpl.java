@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ArticleLabelDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
@@ -22,7 +23,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
 import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -65,6 +65,8 @@ public class PracticeServiceImpl implements PracticeService {
     private ArticleLabelDao articleLabelDao;
     @Autowired
     private LabelConfigDao labelConfigDao;
+    @Autowired
+    private PictureDao pictureDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -316,4 +318,10 @@ public class PracticeServiceImpl implements PracticeService {
         return labelConfigDao.loadLabelConfigs(problemId);
     }
 
+    @Override
+    public void updatePicReference(List<String> picList, Integer submitId){
+        picList.forEach(item->{
+           pictureDao.updateReference(item, submitId);
+        });
+    }
 }

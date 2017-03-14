@@ -106,4 +106,6 @@ public interface PracticeService {
     List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels);
 
     List<LabelConfig> loadProblemLabels(Integer problemId);
+
+    void updatePicReference(List<String> picList, Integer submitId);
 }

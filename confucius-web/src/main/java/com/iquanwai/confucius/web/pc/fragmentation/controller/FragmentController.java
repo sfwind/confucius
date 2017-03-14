@@ -278,7 +278,7 @@ public class FragmentController {
     public ResponseEntity<Map<String,Object>> loadSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId,@ModelAttribute Page page){
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(problemId, "专题id不能为空");
-        page.setPageSize(2);
+        page.setPageSize(20);
         List<RiseWorkInfoDto> list = practiceService.loadSubjectArticles(problemId,page)
                 .stream().map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto(item);
@@ -435,6 +435,11 @@ public class FragmentController {
                 workInfoDto.getTitle(),
                 workInfoDto.getContent()
         ));
+        List<String> picList = workInfoDto.getPicList();
+        if(picList!=null && picList.size() != 0){
+            practiceService.updatePicReference(picList,submitId);
+        }
+
         OperationLog operationLog = OperationLog.create()
                 .module("训练")
                 .function("碎片化")
