@@ -58,9 +58,8 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
      * @param pcLoginUser 用户
      */
     public static void login(String sessionId, PCLoginUser pcLoginUser) {
-        String[] list = sessionId.split("\\.\\.\\.");
         SoftReference<PCLoginUser> temp = new SoftReference<PCLoginUser>(pcLoginUser);
-        pcLoginUserMap.put(list[0], temp);
+        pcLoginUserMap.put(sessionId, temp);
     }
 
     /**
