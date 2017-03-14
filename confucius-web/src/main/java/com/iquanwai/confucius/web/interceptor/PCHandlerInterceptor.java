@@ -33,7 +33,7 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!ConfigUtils.isDebug()) {
             // 获取sessionId
-            String value = request.getRequestedSessionId();
+            String value = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
             // 没有session信息
             if (StringUtils.isEmpty(value)) {
                 WebUtils.login(request, response);
