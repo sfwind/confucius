@@ -2,6 +2,8 @@ package com.iquanwai.confucius.web.resolver;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
+import com.iquanwai.confucius.web.util.CookieUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -44,7 +46,7 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
             return PCLoginUser.defaultUser();
         }
-        String pcToken = request.getRequestedSessionId();
+        String pcToken = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
         if (pcLoginUserMap.containsKey(pcToken)) {
             return pcLoginUserMap.get(pcToken).get();
         }
