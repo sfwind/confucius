@@ -217,7 +217,7 @@ public class ConfigUtils {
 		return config.getString("activity.start.msg");
 	}
 
-	public static String getQRCodeImgDomain(){
-		return config.getString("qr.code.image.domain");
+	public static String getUploadDomain(){
+		return config.getString("upload.image.domain");
 	}
 }
