@@ -287,6 +287,10 @@ public class FragmentController {
                     dto.setHeadPic(account.getHeadimgurl());
                     // 查询我对它的点赞状态
                     dto.setIsMine(item.getOpenid().equals(loginUser.getOpenId()));
+                    dto.setContent(
+                            item.getContent().length() > 180 ?
+                                    item.getContent().substring(0, 180) + "......" :
+                                    item.getContent());
                     return dto;
                 }).collect(Collectors.toList());
         list.forEach(item -> practiceService.riseArticleViewCount(Constants.ViewInfo.Module.SUBJECT, item.getSubmitId(), Constants.ViewInfo.EventType.MOBILE_SHOW));
@@ -311,7 +315,10 @@ public class FragmentController {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto();
                     dto.setSubmitId(item.getId());
                     dto.setType(Constants.PracticeType.SUBJECT);
-                    dto.setContent(item.getContent());
+                    dto.setContent(
+                            item.getContent().length() > 180 ?
+                                    item.getContent().substring(0, 180) + "......" :
+                                    item.getContent());
                     dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.SUBJECT, item.getId()));
                     Profile account = accountService.getProfile(item.getOpenid(), false);
                     dto.setUpName(account.getNickname());
