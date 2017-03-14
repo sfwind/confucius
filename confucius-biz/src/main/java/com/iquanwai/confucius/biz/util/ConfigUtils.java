@@ -216,4 +216,8 @@ public class ConfigUtils {
 	public static String activityStartMsgKey(){
 		return config.getString("activity.start.msg");
 	}
+
+	public static String getQRCodeImgDomain(){
+		return config.getString("qr.code.image.domain");
+	}
 }
