@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -477,7 +478,9 @@ public class FragmentController {
         RiseWorkListDto riseWorkListDto = new RiseWorkListDto();
         riseWorkListDto.setApplicationWorkList(Lists.newArrayList());
         riseWorkListDto.setChallengeWorkList(Lists.newArrayList());
-        plans.forEach(plan -> {
+        Optional<ImprovementPlan> first = plans.stream().findFirst();
+        if (first.isPresent()) {
+            ImprovementPlan plan = first.get();
             // 查询该plan的任务列表
             List<PracticePlan> practicePlans = planService.loadWorkPlanList(plan.getId());
             practicePlans.forEach(item -> {
@@ -505,7 +508,7 @@ public class FragmentController {
                     riseWorkListDto.getChallengeWorkList().add(dto);
                 }
             });
-        });
+        }
         return riseWorkListDto;
     }
 

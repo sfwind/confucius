@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         // 查询该应用训练
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交
-        ApplicationSubmit submit = applicationSubmitDao.load(applicationId, planId, openId);
-        if (submit == null) {
+        List<ApplicationSubmit> submits = applicationSubmitDao.load(applicationId, openId);
+        ApplicationSubmit submit;
+        if (CollectionUtils.isEmpty(submits)) {
             // 没有提交，生成
             submit = new ApplicationSubmit();
             submit.setOpenid(openId);
@@ -58,6 +60,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
             fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));
+        } else {
+            submit = submits.get(0);
         }
         applicationPractice.setSubmitUpdateTime(submit.getUpdateTime());
         applicationPractice.setPlanId(submit.getPlanId());
