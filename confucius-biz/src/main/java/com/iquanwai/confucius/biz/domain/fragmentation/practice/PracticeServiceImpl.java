@@ -22,6 +22,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
 import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -55,9 +56,9 @@ public class PracticeServiceImpl implements PracticeService {
     @Autowired
     private FragmentAnalysisDataDao fragmentAnalysisDataDao;
     @Autowired
-    private AccountService accountService;
-    @Autowired
     private MessageService messageService;
+    @Autowired
+    private AccountService accountService;
     @Autowired
     private SubjectArticleDao subjectArticleDao;
     @Autowired
@@ -190,11 +191,8 @@ public class PracticeServiceImpl implements PracticeService {
             }
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
-                Profile profile = accountService.getProfile(openId, false);
-                if (profile != null) {
-                    String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
-                    messageService.sendMessage("评论了我的小目标", load.getOpenid(), openId, url);
-                }
+                String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
+                messageService.sendMessage("评论了我的小目标", load.getOpenid(), openId, url);
             }
         } else if(moduleId == Constants.CommentModule.APPLICATION) {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
@@ -204,11 +202,8 @@ public class PracticeServiceImpl implements PracticeService {
             }
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
-                Profile profile = accountService.getProfile(openId, false);
-                if (profile != null) {
-                    String url = "/rise/static/practice/application?id=" + load.getApplicationId();
-                    messageService.sendMessage("评论了我的应用训练", load.getOpenid(), openId, url);
-                }
+                String url = "/rise/static/practice/application?id=" + load.getApplicationId();
+                messageService.sendMessage("评论了我的应用训练", load.getOpenid(), openId, url);
             }
         } else {
             SubjectArticle load = subjectArticleDao.load(SubjectArticle.class,referId);

@@ -51,11 +51,11 @@ public class IndexController {
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
     public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-//        if(!checkAccessToken(request)){
-//            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-//            WebUtils.auth(request, response);
-//            return null;
-//        }
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
 
         if(ConfigUtils.isDevelopment()){
             //如果不在白名单中,直接403报错
