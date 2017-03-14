@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Created by nethunder on 2017/3/5.
  */
-@ServerEndpoint("/session/login")
+@ServerEndpoint("/session")
 public class LoginEndpoint {
     private static Map<String, Session> sessionMap = Maps.newConcurrentMap();
     private static Logger logger = LoggerFactory.getLogger(LoginEndpoint.class);
