@@ -35,14 +35,17 @@
 
     <%--ga('create', '<%=ConfigUtils.gaId()%>', 'auto');--%>
     <%--ga('send', 'pageview');--%>
+    var display = '<%=ConfigUtils.domainName()%>'
+    if(display === 'http://www.iquanwai.com') {
+        var _hmt = _hmt || [];
+        (function () {
 
-    var _hmt = _hmt || [];
-    (function() {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?64c8a6d40ec075c726072cd243d008a3";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-    })();
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?64c8a6d40ec075c726072cd243d008a3";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }
 
 </script>
 
