@@ -9,9 +9,22 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>服务器维护中</title>
+    <title>系统升级中</title>
 </head>
-<body>
-    ......服务器维护中,请稍后......
+<body bgcolor="#5ECCCB">
+<img  src="https://www.iqycamp.com/images/maintain.jpg">
+<style type="text/css">
+    img {
+        width: 400px;
+        position: absolute;
+        top: 5%;
+        left: 50%;
+        margin-left: -200px;
+    }
+
+
+</style>
 </body>
 </html>
+
+
