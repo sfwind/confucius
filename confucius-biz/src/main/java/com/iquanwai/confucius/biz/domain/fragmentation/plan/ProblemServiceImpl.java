@@ -1,9 +1,11 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.plan;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.fragmentation.ProblemCatalogDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemListDao;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemList;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,12 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemListDao problemListDao;
     @Autowired
     private ProblemDao problemDao;
+    @Autowired
+    private ProblemCatalogDao problemCatalogDao;
+
     //缓存问题
     private List<Problem> problems = Lists.newArrayList();
+    private List<ProblemCatalog> problemCatalogs = Lists.newArrayList();
 
     @Override
     public List<Problem> loadProblems() {
@@ -29,6 +35,14 @@ public class ProblemServiceImpl implements ProblemService {
             problems = problemDao.loadAll(Problem.class);
         }
         return problems;
+    }
+
+    @Override
+    public List<ProblemCatalog> loadAllCatalog(){
+        if(CollectionUtils.isEmpty(problemCatalogs)) {
+            problemCatalogs = problemCatalogDao.loadAll(ProblemCatalog.class);
+        }
+        return problemCatalogs;
     }
 
     @Override
