@@ -2,8 +2,6 @@ package com.iquanwai.confucius.biz.po.fragmentation;
 
 import lombok.Data;
 
-import java.util.Date;
-
 
 /**
  * Created by justin on 16/12/4.
@@ -18,4 +16,7 @@ public class Problem {
     private Integer applicationCount; //应用训练次数
     private Integer challengeCount; //挑战训练次数
     private String description; //富文本描述
+    private String subjectDesc; //专题输出介绍
+    private Integer catalogId; //目录id
+
 }

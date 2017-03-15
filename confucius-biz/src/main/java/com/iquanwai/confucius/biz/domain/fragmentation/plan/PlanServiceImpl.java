@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2016/12/29.
@@ -35,6 +36,11 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
+    public List<ImprovementPlan> loadUserPlans(String openId, Integer problemId){
+        return improvementPlanDao.loadUserPlans(openId).stream().filter(item -> item.getProblemId().equals(problemId)).collect(Collectors.toList());
+    }
+
+    @Override
     public List<PracticePlan> loadWorkPlanList(Integer planId) {
         List<PracticePlan> result = Lists.newArrayList();
         List<PracticePlan> temp = practicePlanDao.loadPracticePlan(planId);
@@ -45,5 +51,13 @@ public class PlanServiceImpl implements PlanService {
         });
         return result;
     }
+
+    @Override
+    public boolean hasProblemPlan(String openId, Integer problemId) {
+        List<ImprovementPlan> improvementPlans = improvementPlanDao.loadUserPlans(openId);
+        long count = improvementPlans.stream().filter(item -> item.getProblemId().equals(problemId)).count();
+        return count > 0;
+    }
+
 
 }

@@ -20,4 +20,5 @@ public class ApplicationPractice {
     private Integer submitId; // 提交id，非db字段;
     private Date submitUpdateTime;// 非db字段
     private Integer planId; // 计划id
+
 }

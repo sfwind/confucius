@@ -55,6 +55,21 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return null;
     }
 
+    public List<ApplicationSubmit> load(Integer applicationId, String openid){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler(ApplicationSubmit.class);
+        String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=?";
+        try {
+            return run.query(sql, h, openid, applicationId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+
+
     public List<ApplicationSubmit> load(Integer applicationId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);

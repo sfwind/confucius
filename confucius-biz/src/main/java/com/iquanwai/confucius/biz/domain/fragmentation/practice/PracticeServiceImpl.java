@@ -1,8 +1,28 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ArticleLabelDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.LabelConfigDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.SubjectArticleDao;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleLabel;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
+import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Comment;
+import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
+import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -16,6 +36,7 @@ import org.springframework.util.Assert;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/12/11.
@@ -36,6 +57,16 @@ public class PracticeServiceImpl implements PracticeService {
     private FragmentAnalysisDataDao fragmentAnalysisDataDao;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private SubjectArticleDao subjectArticleDao;
+    @Autowired
+    private ArticleLabelDao articleLabelDao;
+    @Autowired
+    private LabelConfigDao labelConfigDao;
+    @Autowired
+    private PictureDao pictureDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -165,7 +196,7 @@ public class PracticeServiceImpl implements PracticeService {
                 String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
                 messageService.sendMessage("评论了我的小目标", load.getOpenid(), openId, url);
             }
-        } else {
+        } else if(moduleId == Constants.CommentModule.APPLICATION) {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
@@ -175,6 +206,20 @@ public class PracticeServiceImpl implements PracticeService {
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/application?id=" + load.getApplicationId();
                 messageService.sendMessage("评论了我的应用训练", load.getOpenid(), openId, url);
+            }
+        } else {
+            SubjectArticle load = subjectArticleDao.load(SubjectArticle.class,referId);
+            if(load == null){
+                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
+                return new MutablePair<>(false, "没有该文章");
+            }
+            //自己给自己评论不提醒
+            if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
+                Profile profile = accountService.getProfile(openId, false);
+                if (profile != null) {
+                    String url = "/rise/static/message/subject/reply?submitId=" + referId;
+                    messageService.sendMessage("评论了我的精华分享", load.getOpenid(), openId, url);
+                }
             }
         }
         Comment comment = new Comment();
@@ -200,5 +245,83 @@ public class PracticeServiceImpl implements PracticeService {
         return fragmentAnalysisDataDao.riseArticleViewCount(module, id, type);
     }
 
+    @Override
+    public List<SubjectArticle> loadSubjectArticles(Integer problemId) {
+        return subjectArticleDao.loadArticles(problemId);
+    }
 
+    @Override
+    public List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page) {
+        page.setTotal(subjectArticleDao.count(problemId));
+        return subjectArticleDao.loadArticles(problemId,page).stream().map(item->{
+            item.setVoteCount(homeworkVoteDao.votedCount(Constants.VoteType.SUBJECT, item.getId()));
+            item.setCommentCount(commentDao.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
+            return item;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId) {
+        return subjectArticleDao.loadArticles(problemId,openId);
+    }
+
+    @Override
+    public List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId){
+        return articleLabelDao.loadArticleActiveLabels(moduleId, articleId);
+    }
+
+    @Override
+    public SubjectArticle loadSubjectArticle(Integer submitId){
+        return subjectArticleDao.load(SubjectArticle.class, submitId);
+    }
+
+    @Override
+    public Integer submitSubjectArticle(SubjectArticle subjectArticle){
+        Integer submitId = subjectArticle.getId();
+        if (subjectArticle.getId()==null){
+            // 第一次提交
+            submitId = subjectArticleDao.insert(subjectArticle);
+            // 生成记录表
+            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.SUBJECT, submitId));
+        } else {
+            // 更新之前的
+            subjectArticleDao.update(subjectArticle);
+        }
+        return submitId;
+    }
+
+    @Override
+    public List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels){
+        List<ArticleLabel> oldLabels = articleLabelDao.loadArticleLabels(module, articleId);
+        List<ArticleLabel> shouldDels = Lists.newArrayList();
+        List<ArticleLabel> shouldReAdds = Lists.newArrayList();
+        labels = labels==null?Lists.newArrayList():labels;
+        List<Integer> userChoose = labels.stream().map(LabelConfig::getId).collect(Collectors.toList());
+        oldLabels.forEach(item->{
+            if(userChoose.contains(item.getLabelId())){
+                if(item.getDel()){
+                    shouldReAdds.add(item);
+                }
+            } else {
+                shouldDels.add(item);
+            }
+            userChoose.remove(item.getLabelId());
+        });
+        userChoose.forEach(item -> articleLabelDao.insertArticleLabel(module, articleId, item));
+        shouldDels.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 1));
+        shouldReAdds.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 0));
+        return articleLabelDao.loadArticleActiveLabels(module,articleId);
+    }
+
+    @Override
+    public List<LabelConfig> loadProblemLabels(Integer problemId){
+        return labelConfigDao.loadLabelConfigs(problemId);
+    }
+
+    @Override
+    public void updatePicReference(List<String> picList, Integer submitId){
+        picList.forEach(item->{
+           pictureDao.updateReference(item, submitId);
+        });
+    }
 }

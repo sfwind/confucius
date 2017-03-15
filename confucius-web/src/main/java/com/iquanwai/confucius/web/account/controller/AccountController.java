@@ -4,31 +4,34 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
-import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.web.account.dto.AccountDto;
 import com.iquanwai.confucius.web.account.dto.LoginCheckDto;
-import com.iquanwai.confucius.web.account.websocket.SessionSocketHandler;
+import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
+import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +43,7 @@ import java.util.Map;
 @RequestMapping("/account")
 public class AccountController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     @Autowired
     private CourseProgressService courseProgressService;
@@ -68,7 +72,7 @@ public class AccountController {
             // 移动端回传check结果
             Assert.notNull(status, "校验状态不能为空");
             Assert.notNull(sessionId, "SessionId不能为空");
-            Assert.isTrue(SessionSocketHandler.isValidSession(sessionId), "该SessionId无效");
+            Assert.isTrue(LoginEndpoint.isValidSession(sessionId), "该SessionId无效");
             // 判断sessionId是否有效
             if (status.equals(Constants.Status.OK)) {
                 LoginUser loginUser = loginCheckDto.getLoginUser();
@@ -80,6 +84,7 @@ public class AccountController {
 
                 Role role = getRole(loginUser.getOpenId());
                 accountDto.setRole(role.getLevel());
+                accountDto.setKey(sessionId);
                 if (role.getLevel().equals(Role.STRANGE)) {
                     // 没有正在就读的班级
                     this.handlerLoginSocket(sessionId, LoginType.PERMISSION_DENIED, accountDto);
@@ -103,11 +108,11 @@ public class AccountController {
                 if (ErrorConstants.SESSION_TIME_OUT == error) {
                     // 扫二维码超时，通知socket更新
                     logger.error("刷新二维码,异常码:{}", error);
-                    SessionSocketHandler.refreshQRCode(sessionId);
+                    LoginEndpoint.refreshQRCode(sessionId);
                     return WebUtils.success();
                 } else if (ErrorConstants.NOT_FOLLOW == error) {
                     logger.error("未关注公众号,异常码:{}",error);
-                    SessionSocketHandler.jumpServerCode(sessionId);
+                    LoginEndpoint.jumpServerCode(sessionId);
                     return WebUtils.success();
                 } else {
                     // 非超时，单纯校验失败,不做处理
@@ -119,6 +124,24 @@ public class AccountController {
             logger.error("pc登陆结果处理error", e);
             return WebUtils.error(e.getLocalizedMessage());
         }
+    }
+
+    @RequestMapping( value = "/login",method = RequestMethod.GET)
+    public void login(HttpServletRequest request, HttpServletResponse response,@ModelAttribute AccountDto accountDto){
+        Assert.notNull(accountDto);
+        String key = accountDto.getKey();
+        if (key != null) {
+            if (PCLoginUserResolver.isLogin(key)) {
+                CookieUtils.addCookie(LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME,
+                        key, OAuthService.SEVEN_DAYS, response);
+            }
+        }
+        try {
+            response.sendRedirect(accountDto.getCallbackUrl());
+        } catch (IOException e) {
+            logger.error("重定向失败,{}",accountDto);
+        }
+
     }
 
     private Role getRole(String openid) {
@@ -163,11 +186,10 @@ public class AccountController {
      * @throws IOException IO异常信息
      */
     private void handlerLoginSocket(String sessionId, String type, Object data) throws IOException {
-        WebSocketSession session = SessionSocketHandler.getLoginSocket(sessionId);
         Map<String, Object> map = Maps.newHashMap();
         map.put("type", type);
         map.put("data", data);
-        session.sendMessage(new TextMessage(CommonUtils.mapToJson(map)));
+        LoginEndpoint.sendMessage(sessionId,CommonUtils.mapToJson(map));
     }
 
     /**

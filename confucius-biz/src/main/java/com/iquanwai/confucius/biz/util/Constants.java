@@ -14,21 +14,25 @@ public interface Constants {
     interface PracticeType{
         int CHALLENGE = 21;
         int APPLICATION = 11;
+        int SUBJECT = 3;
     }
     interface VoteType{
         int CHALLENGE = 1;
         int APPLICATION = 2;
+        int SUBJECT = 3;
     }
 
     interface PictureType {
         int HOMEWORK = 1;
         int CHALLENGE = 2;
         int APPLICATION = 3;
+        int SUBJECT = 4;
     }
 
     interface CommentModule {
         int CHALLENGE = 1;
         int APPLICATION = 2;
+        int SUBJECT = 3;
     }
 
     interface CommentType{
@@ -39,6 +43,7 @@ public interface Constants {
         interface Module {
             int CHALLENGE = 1;
             int APPLICATION = 2;
+            int SUBJECT = 3;
         }
         interface EventType {
             int PC_SUBMIT = 1;
@@ -50,5 +55,10 @@ public interface Constants {
     interface Device{
         int PC = 1;
         int MOBILE = 2;
+    }
+    interface LabelArticleModule{
+        int CHALLENGE = 1;
+        int APPLICATION = 2;
+        int SUBJECT = 3;
     }
 }

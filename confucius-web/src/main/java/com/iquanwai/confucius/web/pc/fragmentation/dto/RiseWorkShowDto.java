@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.fragmentation.dto;
 
+import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
 import lombok.Data;
 
 import java.util.List;
@@ -22,4 +23,8 @@ public class RiseWorkShowDto {
     private Integer planId;
     private Integer workId;
     private List<String> picList;
+
+    private String desc; // 描述
+    private List<LabelConfig> labelList;
+
 }

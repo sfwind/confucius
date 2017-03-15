@@ -4,7 +4,9 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
+import com.iquanwai.confucius.web.util.CookieUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -32,7 +34,7 @@ public class PCAjaxHandlerInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!ConfigUtils.isDebug()) {
             // 获取sessionId
-            String value = request.getRequestedSessionId();
+            String value = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
             // 没有session信息
             if (StringUtils.isEmpty(value) || !PCLoginUserResolver.isLogin(value)) {
                 Map<String, Object> map = Maps.newHashMap();

@@ -102,7 +102,7 @@ public class ChallengeController {
                     .collect(Collectors.toList()));
             // 先写死
             dto.setDescription("Hi，欢迎来到圈外社区，这里有很多同路人在和你一起进步！<br/>" +
-                    "你的什么目标，可以利用当前学习的专题实现呢？请在这里写下你的小目标，并在接下来的时间，记录你应用所学套路来完成目标的方法吧！" );
+                    "你有什么目标，可以利用本专题的训练实现呢？请在这里记录你的小目标吧！制定目标帮你更积极地学习，也带给你更多成就感！" );
             return WebUtils.result(dto);
         } else {
             logger.error("用户:{},没有该训练计划:{}，挑战训练:{}",openId,plan,cid);
