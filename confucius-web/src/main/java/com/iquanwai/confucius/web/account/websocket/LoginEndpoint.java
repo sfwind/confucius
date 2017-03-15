@@ -64,9 +64,9 @@ public class LoginEndpoint {
             // 生成二维码
             String picUrl = createLoginCode(key);
             sessionMap.put(key, session);
-            sendMessage(session,new Gson().toJson(LoginMessage.create("QR_CREATE",picUrl)));
+            sendMessage(session,LoginMessage.create("QR_CREATE",picUrl).toJson());
         } catch (Exception e){
-            sendMessage(session, new Gson().toJson(LoginMessage.create("ERROR", "请刷新页面")));
+            sendMessage(session, LoginMessage.create("ERROR", "请刷新页面").toJson());
             logger.error("login socket error after handshake", e);
         }
     }
@@ -116,12 +116,11 @@ public class LoginEndpoint {
     }
 
     public static void sendMessage(Session session, String message) {
-        RemoteEndpoint.Basic remote = null;
-        remote = session.getBasicRemote();
         try {
+            RemoteEndpoint.Basic remote = session.getBasicRemote();
             remote.sendText(message);
-        } catch (IOException e) {
-            logger.error("send异常:{}", e);
+        } catch (Exception e) {
+            logger.error("send异常", e);
         }
     }
 
