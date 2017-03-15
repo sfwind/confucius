@@ -19,7 +19,6 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ArticleLabel;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
@@ -60,7 +59,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -478,38 +476,43 @@ public class FragmentController {
         RiseWorkListDto riseWorkListDto = new RiseWorkListDto();
         riseWorkListDto.setApplicationWorkList(Lists.newArrayList());
         riseWorkListDto.setChallengeWorkList(Lists.newArrayList());
-        Optional<ImprovementPlan> first = plans.stream().findFirst();
-        if (first.isPresent()) {
-            ImprovementPlan plan = first.get();
+        ImprovementPlan plan = null;
+        for (ImprovementPlan item:plans){
+            if (item.getStatus() == 1) {
+                plan = item;
+                break;
+            }
+        }
+        if (plan == null  && plans.size() > 0) {
+            plan = plans.get(plans.size() - 1);
+        }
+        if (plan != null) {
             // 查询该plan的任务列表
             List<PracticePlan> practicePlans = planService.loadWorkPlanList(plan.getId());
-            practicePlans.forEach(item -> {
-                RiseWorkItemDto dto =  new RiseWorkItemDto();
+            for (PracticePlan item : practicePlans) {
+                RiseWorkItemDto dto = new RiseWorkItemDto();
                 dto.setPlanId(plan.getId());
                 dto.setType(item.getType());
                 dto.setUnlocked(item.getUnlocked());
                 dto.setWorkId(Integer.parseInt(item.getPracticeId()));
                 dto.setStatus(item.getStatus());
                 if (item.getType() == Constants.PracticeType.APPLICATION) {
-                    ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(item.getPlanId(),Integer.parseInt(item.getPracticeId()),openId);
+                    ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(Integer.parseInt(item.getPracticeId()));
                     if (applicationPractice == null) {
                         logger.error("查询应用训练失败,训练计划:{}", item);
                     } else {
                         dto.setTitle(applicationPractice.getTopic());
                         dto.setScore(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
-                        dto.setSubmitId(applicationPractice.getSubmitId());
                         riseWorkListDto.getApplicationWorkList().add(dto);
                     }
-                } else if(item.getType() == Constants.PracticeType.CHALLENGE) {
-                    ChallengePractice challengePractice = challengeService.loadMineChallengePractice(item.getPlanId(), Integer.parseInt(item.getPracticeId()), openId);
+                } else if (item.getType() == Constants.PracticeType.CHALLENGE) {
+//                    ChallengePractice challengePractice = challengeService.loadChallengePractice(Integer.parseInt(item.getPracticeId()));
                     dto.setTitle("设定目标、记录进展、总结心得");
                     dto.setScore(ConfigUtils.getChallengeScore());
-                    dto.setSubmitId(challengePractice.getSubmitId());
                     riseWorkListDto.getChallengeWorkList().add(dto);
                 }
-            });
+            };
         }
         return riseWorkListDto;
     }
-
 }

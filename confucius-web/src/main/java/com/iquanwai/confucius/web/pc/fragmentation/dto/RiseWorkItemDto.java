@@ -15,5 +15,4 @@ public class RiseWorkItemDto {
 
     private Integer planId;
     private Integer workId;
-    private Integer submitId;
 }

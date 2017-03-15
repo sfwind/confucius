@@ -9,7 +9,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by nethunder on 2017/1/13.
@@ -44,9 +42,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId){
         ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class,challengeId);
         // 查询该用户是否提交
-        List<ChallengeSubmit> submits = challengeSubmitDao.load(challengeId, openId);
-        ChallengeSubmit submit;
-        if (CollectionUtils.isEmpty(submits)) {
+        ChallengeSubmit submit = challengeSubmitDao.load(challengeId, planId, openId);
+        if(submit==null){
             // 没有提交，生成
             submit = new ChallengeSubmit();
             submit.setOpenid(openId);
@@ -56,8 +53,6 @@ public class ChallengeServiceImpl implements ChallengeService {
             submitId = challengeSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
-        } else {
-            submit = submits.get(0);
         }
         challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
         challengePractice.setPlanId(submit.getPlanId());
