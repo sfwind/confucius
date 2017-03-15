@@ -53,9 +53,9 @@ public class LoginEndpoint {
     @OnOpen
     public void onOpen(Session session) {
         logger.info("建立socket:{}", session.getId());
-        String key = CommonUtils.randomString(20);
+        String key = CommonUtils.randomString(99);
         if(sessionMap.containsKey(key)){
-            key = CommonUtils.randomString(20);
+            key = CommonUtils.randomString(99);
         }
         this.key = key;
 
