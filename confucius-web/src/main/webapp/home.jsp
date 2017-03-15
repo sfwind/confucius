@@ -28,13 +28,24 @@
 <script src="${resource}"></script>
 
 <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    <%--(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){--%>
+            <%--(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),--%>
+        <%--m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)--%>
+    <%--})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');--%>
 
-    ga('create', '<%=ConfigUtils.gaId()%>', 'auto');
-    ga('send', 'pageview');
+    <%--ga('create', '<%=ConfigUtils.gaId()%>', 'auto');--%>
+    <%--ga('send', 'pageview');--%>
+    var display = '<%=ConfigUtils.domainName()%>'
+    if(display === 'http://www.iquanwai.com') {
+        var _hmt = _hmt || [];
+        (function () {
+
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?64c8a6d40ec075c726072cd243d008a3";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }
 
 </script>
 
