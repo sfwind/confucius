@@ -408,6 +408,8 @@ public class FragmentController {
             });
 
             show.setLabelList(labelConfigs);
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.SUBJECT, submitId,Constants.ViewInfo.EventType.PC_SHOW);
+
             return WebUtils.result(show);
         }
     }
