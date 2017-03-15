@@ -292,7 +292,6 @@ public class FragmentController {
                                     item.getContent());
                     return dto;
                 }).collect(Collectors.toList());
-        list.forEach(item -> practiceService.riseArticleViewCount(Constants.ViewInfo.Module.SUBJECT, item.getSubmitId(), Constants.ViewInfo.EventType.MOBILE_SHOW));
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
@@ -330,7 +329,6 @@ public class FragmentController {
                     dto.setTitle(item.getTitle());
                     return dto;
                 }).collect(Collectors.toList());
-        list.forEach(item -> practiceService.riseArticleViewCount(Constants.ViewInfo.Module.SUBJECT, item.getSubmitId(), Constants.ViewInfo.EventType.MOBILE_SHOW));
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
@@ -449,7 +447,7 @@ public class FragmentController {
             return WebUtils.error("提交失败,请保存提交内容，并联系管理员");
         }
         practiceService.updateLabels(Constants.LabelArticleModule.SUBJECT, submitId, workInfoDto.getLabelList());
-        practiceService.riseArticleViewCount(Constants.ViewInfo.Module.SUBJECT, submitId, Constants.ViewInfo.EventType.MOBILE_SUBMIT);
+        practiceService.riseArticleViewCount(Constants.ViewInfo.Module.SUBJECT, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
         return WebUtils.success();
     }
 
