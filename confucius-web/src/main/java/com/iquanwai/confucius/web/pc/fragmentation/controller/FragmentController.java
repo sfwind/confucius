@@ -21,7 +21,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.pc.dto.HomeworkVoteDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.HomeworkVoteDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentListDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkItemDto;

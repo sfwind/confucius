@@ -1,7 +1,6 @@
-package com.iquanwai.confucius.web.pc.dto;
+package com.iquanwai.confucius.web.pc.fragmentation.dto;
 
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.web.course.dto.PictureDto;
 import lombok.Data;
 

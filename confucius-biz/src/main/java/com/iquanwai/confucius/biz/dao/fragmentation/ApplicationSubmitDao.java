@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -91,6 +92,20 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
             return false;
         }
         return true;
+    }
+
+
+    public List<ApplicationSubmit> getPracticeSubmit(Integer practiceId, Page page){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from ApplicationSubmit where ApplicationId=? order by UpdateTime desc limit "
+                + page.getOffset() + "," + page.getLimit();
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        try {
+            return runner.query(sql, h, practiceId);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 
 }
