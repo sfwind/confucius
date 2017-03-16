@@ -81,17 +81,17 @@ public class BackendController {
     @RequestMapping(value = "/log", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> log(@RequestBody ErrorLogDto errorLogDto){
         String data = errorLogDto.getResult();
-        if(data.length()>1024){
-            data = data.substring(0, 1024);
+        if(data.length()>900){
+            data = data.substring(0, 900);
         }
         String cookieStr= errorLogDto.getCookie();
 
         String openid = oAuthService.openId(getAccessTokenFromCookie(cookieStr));
         OperationLog operationLog = OperationLog.create().openid(openid)
-                .module("bug")
+                .module("记录前端bug")
                 .function("bug")
-                .action("记录前端bug")
-                .memo(data);
+                .action("bug")
+                .memo("url:"+errorLogDto.getUrl()+";data:"+data);
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
