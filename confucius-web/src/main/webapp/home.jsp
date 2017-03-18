@@ -31,8 +31,8 @@
         }
         document.addEventListener('mousedown', addRippleEffect, false);
         function openUrl(){
-            // RISE跳转地址
-            location.href="//www.iquanwai.com/fragment/rise"
+            // RISE地址
+            location.href="/fragment/rise"
         }
     </script>
     <style>
@@ -41,7 +41,7 @@
             display: block;
             border: none;
             outline: none;
-            /*letter-spacing: .2em;*/
+            letter-spacing: .2em;
             font-weight: bold;
             cursor: pointer;
             overflow: hidden;
@@ -81,16 +81,17 @@
             margin: 0px auto;
             height: 80px;
             display: block;
+            position: relative;
         }
         .imgL {
+            position: absolute;
+            top:21px;
+            left: 0px;
             width: 36px;
-            margin-top: 17px;
-            margin-bottom: 25px;
-            vertical-align: middle;
         }
         .textL {
-            margin-left: 5px;
-            margin-right: 55px;
+            position: absolute;
+            left: 41px;
             line-height: 80px;
             font-size: 40px;
             vertical-align: middle;
@@ -98,11 +99,14 @@
             font-family: "\601D\6E90\9ED1\4F53 cn", "Helvetica Neue" !important;
         }
         .menu {
-            margin: 21px 24px;
+            position: absolute;
             display: inline-block;
-            padding: 0px 16px;
-            line-height: 36px;
+            top:21px;
+            padding: 8px 16px 8px 16px;
+            width: 88px;
+            left: 200px;
             text-transform: uppercase;
+            letter-spacing: 0px;
             font-weight: 300;
             font-size: 20px;
             font-family: 思源黑体cn, "Helvetica Neue";
@@ -113,6 +117,8 @@
             text-decoration: none;
         }
         .init {
+            left: 336px;
+            top:21px;
             color: rgba(0, 0, 0, 0.870588);
         }
         .menu:hover {
@@ -149,7 +155,7 @@
             width: 100px;
             height: 110px;
             vertical-align: middle;
-            left: 34px;
+            left: 44px;
         }
         .text::after {
             display: inline-block;
@@ -160,7 +166,7 @@
             width: 100px;
             height: 110px;
             vertical-align: middle;
-            right: 34px;
+            right: 44px;
         }
         .intro-card-list {
             margin-top: 60px;
@@ -332,10 +338,12 @@
         </div>
         <div
                 style="font-size: 12px; position: absolute; width: 280px; top: 76px; right: -69px; color: rgb(204, 204, 204);">
-            <a rel="nofollow" href="//www.miitbeian.gov.cn/"
+            <a rel="nofollow" href="http://www.miitbeian.gov.cn/"
                style="text-decoration: none; color: rgb(204, 204, 204);">ICP备15006409号</a></div>
     </div>
 </div>
+</body>
+</html>
 
 <script>
     window.ENV = {
@@ -356,13 +364,6 @@
 <script src="${resource}"></script>
 
 <script>
-    <%--(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){--%>
-            <%--(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),--%>
-        <%--m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)--%>
-    <%--})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');--%>
-
-    <%--ga('create', '<%=ConfigUtils.gaId()%>', 'auto');--%>
-    <%--ga('send', 'pageview');--%>
     var display = '<%=ConfigUtils.domainName()%>'
     if(display === 'http://www.iquanwai.com') {
         var _hmt = _hmt || [];
