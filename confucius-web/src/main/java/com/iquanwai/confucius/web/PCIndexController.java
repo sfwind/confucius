@@ -39,7 +39,7 @@ public class PCIndexController {
      */
     @RequestMapping(value = {"/home","/"}, method = RequestMethod.GET)
     public ModelAndView getHome(HttpServletRequest request,PCLoginUser pcLoginUser) {
-        return ConfigUtils.isDevelopment() ? new ModelAndView("index") : pcView(request, pcLoginUser);
+        return ConfigUtils.isDevelopment() ? new ModelAndView("index") : new ModelAndView("home");
     }
     @RequestMapping(value="/servercode")
     public ModelAndView getServerCodePage(HttpServletRequest request,PCLoginUser pcLoginUser) {
@@ -51,7 +51,6 @@ public class PCIndexController {
         return pcView(request,pcLoginUser);
     }
 
-
     /**
      * 前往登录页面
      */
@@ -61,10 +60,8 @@ public class PCIndexController {
     }
 
 
-
-
     private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser) {
-        ModelAndView mav = new ModelAndView("home");
+        ModelAndView mav = new ModelAndView("site");
         if(ConfigUtils.isPcMaintenance()){
             // 正在维护
             mav = new ModelAndView("maintenance");
