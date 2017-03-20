@@ -23,9 +23,9 @@ public interface OperationManagementService {
     List<WarmupPractice> getLastTwoDayActivePractice();
 
     /**
-     * 获取热身训练的讨论区内容
+     * 获取理解训练
      * */
-    List<WarmupPracticeDiscuss> getWarmupDiscuss(Integer practiceId, Page page);
+    WarmupPractice getWarmupPractice(Integer practiceId);
 
     /**
      * 内容运营回复某个理解训练
@@ -35,4 +35,9 @@ public interface OperationManagementService {
      * @param repliedId 回复的讨论id
      * */
     void discuss(String openid, Integer warmupPracticeId, String comment, Integer repliedId);
+
+    /**
+     * 回复加精
+     */
+    void highlight(Integer discussId);
 }

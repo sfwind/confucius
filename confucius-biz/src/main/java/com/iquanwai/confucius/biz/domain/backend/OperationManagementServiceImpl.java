@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ChoiceDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDiscussDao;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -27,6 +28,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private WarmupPracticeDiscussDao warmupPracticeDiscussDao;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private ChoiceDao choiceDao;
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
@@ -40,8 +43,11 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public List<WarmupPracticeDiscuss> getWarmupDiscuss(Integer practiceId, Page page) {
-        return warmupPracticeDiscussDao.loadDiscuss(practiceId, page);
+    public WarmupPractice getWarmupPractice(Integer practiceId){
+        WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
+        warmupPractice.setDiscussList(warmupPracticeDiscussDao.loadDiscuss(practiceId));
+        warmupPractice.setChoiceList(choiceDao.loadChoices(practiceId));
+        return warmupPractice;
     }
 
     @Override
@@ -59,7 +65,6 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 warmupPracticeDiscuss.setRepliedOpenid(repliedDiscuss.getOpenid());
             }
         }
-        warmupPracticeDiscuss.setPriority(1);
         int id = warmupPracticeDiscussDao.insert(warmupPracticeDiscuss);
 
         //发送回复通知
@@ -70,5 +75,10 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             messageService.sendMessage(message, warmupPracticeDiscuss.getRepliedOpenid(),
                     openid, url);
         }
+    }
+
+    @Override
+    public void highlight(Integer discussId) {
+        warmupPracticeDiscussDao.highlight(discussId);
     }
 }

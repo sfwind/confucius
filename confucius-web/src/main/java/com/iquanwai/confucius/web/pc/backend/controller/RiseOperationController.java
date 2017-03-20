@@ -51,26 +51,23 @@ public class RiseOperationController {
     }
 
 
-    @RequestMapping("/hot/warmup/{practiceId}")
-    public ResponseEntity<Map<String, Object>> getHotPracticeDiscuss(PCLoginUser loginUser,
-                                                                     @PathVariable Integer practiceId) {
+    @RequestMapping("/hot/warmup")
+    public ResponseEntity<Map<String, Object>> getHotPracticeDiscuss(PCLoginUser loginUser) {
         List<WarmupPractice> warmupPractices = operationManagementService.getLastTwoDayActivePractice();
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("理解训练讨论区")
-                .action("加载最热的理解训练")
-                .memo(practiceId.toString());
+                .action("加载最热的理解训练");
         operationLogService.log(operationLog);
 
         return WebUtils.result(warmupPractices);
     }
 
-    @RequestMapping("/warmup/discuss/{practiceId}")
+    @RequestMapping("/warmup/{practiceId}")
     public ResponseEntity<Map<String, Object>> getPracticeDiscuss(PCLoginUser loginUser,
-                                                                    @PathVariable Integer practiceId,
-                                                                    @ModelAttribute Page page) {
-        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = operationManagementService.getWarmupDiscuss(practiceId, page);
+                                                                    @PathVariable Integer practiceId) {
+        WarmupPractice warmupPractice = operationManagementService.getWarmupPractice(practiceId);
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
@@ -79,11 +76,11 @@ public class RiseOperationController {
                 .memo(practiceId.toString());
         operationLogService.log(operationLog);
 
-        return WebUtils.result(warmupPracticeDiscusses);
+        return WebUtils.result(warmupPractice);
     }
 
 
-    @RequestMapping("/reply/discuss/{discussId}")
+    @RequestMapping(value = "/reply/discuss", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> replyDiscuss(PCLoginUser loginUser,
                                                                   @RequestBody DiscussDto discussDto) {
         if(discussDto.getComment()==null || discussDto.getComment().length()>300){
@@ -95,10 +92,24 @@ public class RiseOperationController {
                 discussDto.getComment(), discussDto.getRepliedId());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("训练")
+                .module("内容运营")
                 .function("理解训练")
-                .action("讨论")
+                .action("回复讨论")
                 .memo(discussDto.getWarmupPracticeId().toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> highlight(PCLoginUser loginUser,
+                                                         @PathVariable Integer discussId) {
+
+        operationManagementService.highlight(discussId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("理解训练")
+                .action("加精讨论")
+                .memo(discussId.toString());
         operationLogService.log(operationLog);
         return WebUtils.success();
     }

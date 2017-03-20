@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
 import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -43,11 +42,11 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
         return -1;
     }
 
-    public List<WarmupPracticeDiscuss> loadDiscuss(Integer practiceId, Page page) {
+    public List<WarmupPracticeDiscuss> loadDiscuss(Integer practiceId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler(WarmupPracticeDiscuss.class);
         String sql = "SELECT * FROM WarmupPracticeDiscuss where WarmupPracticeId = ? and Del = 0 " +
-                "order by Priority desc, AddTime desc limit " + page.getOffset() + "," + page.getLimit();
+                "order by Priority desc, AddTime desc";
         try {
             return run.query(sql, h, practiceId);
         } catch (SQLException e) {
@@ -71,6 +70,16 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public void highlight(int id){
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "Update WarmupPracticeDiscuss set Priority=1 where Id = ?";
+        try {
+            run.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
     }
 
 
