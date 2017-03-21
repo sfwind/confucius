@@ -1,11 +1,6 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleLabel;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.Comment;
-import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.Pair;
@@ -108,4 +103,10 @@ public interface PracticeService {
     List<LabelConfig> loadProblemLabels(Integer problemId);
 
     void updatePicReference(List<String> picList, Integer submitId);
+
+    /**
+     * 根据应用id,获取应用训练
+     * @param practiceId 练习id
+     */
+    ApplicationPractice loadApplication(Integer practiceId);
 }

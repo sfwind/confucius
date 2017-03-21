@@ -123,4 +123,39 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+
+    public List<ApplicationSubmit> getHighlightSubmit(Integer practiceId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from ApplicationSubmit where ApplicationId=? and Priority=1 ";
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        try {
+            return runner.query(sql, h, practiceId);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public void highlight(Integer submitId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update ApplicationSubmit set Priority=1 where Id=?";
+        try {
+
+            runner.update(sql, submitId);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void unHighlight(Integer submitId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update ApplicationSubmit set Priority=0 where Id=?";
+        try {
+
+            runner.update(sql, submitId);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
 }

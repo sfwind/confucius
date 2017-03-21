@@ -307,4 +307,19 @@ public class ApplicationController {
         }
     }
 
+    @RequestMapping("/load/{applicationId}")
+    public ResponseEntity<Map<String, Object>> loadApplication(PCLoginUser loginUser,
+                                                               @PathVariable Integer applicationId) {
+        ApplicationPractice applicationPractice = practiceService.loadApplication(applicationId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("应用训练提交")
+                .action("加载应用训练")
+                .memo(applicationId.toString());
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(applicationPractice);
+    }
+
 }

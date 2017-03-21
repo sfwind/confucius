@@ -2,27 +2,11 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ArticleLabelDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.LabelConfigDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.SubjectArticleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleLabel;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.Comment;
-import com.iquanwai.confucius.biz.po.fragmentation.FragmentDailyData;
-import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -67,6 +51,8 @@ public class PracticeServiceImpl implements PracticeService {
     private LabelConfigDao labelConfigDao;
     @Autowired
     private PictureDao pictureDao;
+    @Autowired
+    private ApplicationPracticeDao applicationPracticeDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -323,5 +309,10 @@ public class PracticeServiceImpl implements PracticeService {
         picList.forEach(item->{
            pictureDao.updateReference(item, submitId);
         });
+    }
+
+    @Override
+    public ApplicationPractice loadApplication(Integer practiceId) {
+        return applicationPracticeDao.load(ApplicationPractice.class, practiceId);
     }
 }

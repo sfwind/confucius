@@ -32,10 +32,13 @@ public class RiseOperationController {
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
+    private static final int APPLICATION_SUBMIT_SIZE = 20;
+
     @RequestMapping("/application/submit/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser loginUser,
                                                                     @PathVariable Integer applicationId,
                                                                     @ModelAttribute Page page) {
+        page.setPageSize(APPLICATION_SUBMIT_SIZE);
         List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page);
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -99,15 +102,30 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> highlight(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> highlightDiscuss(PCLoginUser loginUser,
                                                          @PathVariable Integer discussId) {
 
-        operationManagementService.highlight(discussId);
+        operationManagementService.highlightDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("理解训练")
                 .action("加精讨论")
                 .memo(discussId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/highlight/applicationSubmit/{practiceId}/{submitId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> highlightApplicationSubmit(PCLoginUser loginUser,
+                                                         @PathVariable Integer practiceId,
+                                                         @PathVariable Integer submitId) {
+
+        operationManagementService.highlightApplicationSubmit(practiceId, submitId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("应用训练")
+                .action("加精优秀的作业")
+                .memo(submitId.toString());
         operationLogService.log(operationLog);
         return WebUtils.success();
     }

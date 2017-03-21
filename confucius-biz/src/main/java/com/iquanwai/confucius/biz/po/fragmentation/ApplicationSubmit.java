@@ -14,6 +14,11 @@ public class ApplicationSubmit {
     private Integer applicationId; // 应用训练Id
     private Integer planId; // 提升计划id
     private String content; // 提交内容
-    private Integer pointStatus;
-    private Date updateTime;
+    private Integer pointStatus; //加分状态
+    private Integer priority; // 排序优先级
+    private Date highlightTime; //加精时间
+    private Date updateTime; // 最后更新时间
+    private String upTime; //非db字段 提交时间
+    private String headPic; //非db字段 提交人头像
+    private String upName; //非db字段 提交人昵称
 }

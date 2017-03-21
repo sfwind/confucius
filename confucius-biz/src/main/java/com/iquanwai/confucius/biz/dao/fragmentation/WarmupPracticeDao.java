@@ -22,6 +22,9 @@ public class WarmupPracticeDao extends PracticeDBUtil {
 
 
     public List<WarmupPractice> loadPractices(List<Integer> practiceIds){
+        if(practiceIds.size()==0){
+            return Lists.newArrayList();
+        }
         QueryRunner run = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(practiceIds.size());
         ResultSetHandler<List<WarmupPractice>> h = new BeanListHandler(WarmupPractice.class);
