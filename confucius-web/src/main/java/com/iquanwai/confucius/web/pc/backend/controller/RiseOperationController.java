@@ -1,22 +1,28 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
+import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.pc.backend.dto.DiscussDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 17/3/16.
@@ -29,6 +35,10 @@ public class RiseOperationController {
     private OperationLogService operationLogService;
     @Autowired
     private OperationManagementService operationManagementService;
+    @Autowired
+    private ProblemService problemService;
+    @Autowired
+    private PracticeService practiceService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -130,4 +140,49 @@ public class RiseOperationController {
         return WebUtils.success();
     }
 
+
+    @RequestMapping("/problem/list")
+    public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
+                .module("内容运营")
+                .function("应用训练")
+                .action("获取问题列表");
+        operationLogService.log(operationLog);
+
+        List<Problem> problems = problemService.loadProblems();
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
+            ProblemCatalogDto dto = new ProblemCatalogDto();
+            List<ProblemListDto> collect = problems.stream().filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
+                ProblemListDto problemList = new ProblemListDto();
+                problemList.setId(problem.getId());
+                problemList.setProblem(problem.getProblem());
+                return problemList;
+            }).collect(Collectors.toList());
+            dto.setProblems(collect);
+            dto.setName(item.getName());
+            return dto;
+        }).collect(Collectors.toList());
+        return WebUtils.result(result);
+    }
+
+
+    /**
+     * 碎片化总任务列表加载
+     * @param problemId 问题id
+     * @param pcLoginUser 登陆人
+     */
+    @RequestMapping("/homework/{problemId}")
+    public ResponseEntity<Map<String, Object>> getProblemHomeworkList(@PathVariable Integer problemId, PCLoginUser pcLoginUser) {
+        Assert.notNull(pcLoginUser, "用户信息能不能为空");
+        List<ApplicationPractice> applicationPractices = practiceService.loadApplicationByProblemId(problemId);
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                .module("训练")
+                .function("碎片化")
+                .action("总任务列表加载")
+                .memo(problemId+"");
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(applicationPractices);
+    }
 }

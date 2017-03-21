@@ -315,4 +315,9 @@ public class PracticeServiceImpl implements PracticeService {
     public ApplicationPractice loadApplication(Integer practiceId) {
         return applicationPracticeDao.load(ApplicationPractice.class, practiceId);
     }
+
+    @Override
+    public List<ApplicationPractice> loadApplicationByProblemId(Integer problemId) {
+        return applicationPracticeDao.getPracticeByProblemId(problemId);
+    }
 }

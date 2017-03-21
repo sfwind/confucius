@@ -109,4 +109,10 @@ public interface PracticeService {
      * @param practiceId 练习id
      */
     ApplicationPractice loadApplication(Integer practiceId);
+
+    /**
+     * 根据专题id,获取应用训练
+     * @param problemId 专题id
+     */
+    List<ApplicationPractice> loadApplicationByProblemId(Integer problemId);
 }
