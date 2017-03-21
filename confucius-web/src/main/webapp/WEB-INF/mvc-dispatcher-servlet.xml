@@ -83,6 +83,7 @@
             <mvc:exclude-mapping path="/fragment/**"/>
             <mvc:exclude-mapping path="/servercode"/>
             <mvc:exclude-mapping path="/community"/>
+            <mvc:exclude-mapping path="/backend/**"/>
             <mvc:exclude-mapping path="/rise"/>
             <mvc:exclude-mapping path="/operation/promoCode/**"/>
             <mvc:exclude-mapping path="/performance/**"/>
