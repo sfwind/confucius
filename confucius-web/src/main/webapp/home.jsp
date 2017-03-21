@@ -18,8 +18,7 @@
         isDevelopment:${isDevelopment},
         feedBack:${feedBack},
         openFeedBack:${openFeedBack},
-        openComment:${openComment}
-
+        openComment:${openComment},
     }
 </script>
 

@@ -131,7 +131,7 @@ public class CustomerController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("RISE")
-                .action("查询专题信息 ");
+                .action("查询专题信息");
         operationLogService.log(operationLog);
         List<ImprovementPlan> plans = planService.loadUserPlans(loginUser.getOpenId());
         PlanListDto list = new PlanListDto();

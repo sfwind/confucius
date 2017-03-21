@@ -21,34 +21,37 @@ public class PCIndexController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping(value = "/pc/static/**")
-    public ModelAndView getStatic(HttpServletRequest request,PCLoginUser pcLoginUser){
-        return pcView(request,pcLoginUser);
+    public ModelAndView getStatic(HttpServletRequest request, PCLoginUser pcLoginUser) {
+        return pcView(request, pcLoginUser);
     }
 
     /**
      * 前往碎片化页面
+     *
      * @param request
      * @return
      */
     @RequestMapping(value = "/fragment/**")
-    public ModelAndView getFragmentPage(HttpServletRequest request,PCLoginUser pcLoginUser) {
-        return pcView(request,pcLoginUser);
+    public ModelAndView getFragmentPage(HttpServletRequest request, PCLoginUser pcLoginUser) {
+        return pcView(request, pcLoginUser);
     }
+
     /**
      * 前往home页面
      */
-    @RequestMapping(value = {"/home","/"}, method = RequestMethod.GET)
-    public ModelAndView getHome(HttpServletRequest request,PCLoginUser pcLoginUser) {
+    @RequestMapping(value = {"/home", "/"}, method = RequestMethod.GET)
+    public ModelAndView getHome(HttpServletRequest request, PCLoginUser pcLoginUser) {
         return ConfigUtils.isDevelopment() ? new ModelAndView("index") : pcView(request, pcLoginUser);
     }
-    @RequestMapping(value="/servercode")
-    public ModelAndView getServerCodePage(HttpServletRequest request,PCLoginUser pcLoginUser) {
-        return pcView(request,pcLoginUser);
+
+    @RequestMapping(value = "/servercode")
+    public ModelAndView getServerCodePage(HttpServletRequest request, PCLoginUser pcLoginUser) {
+        return pcView(request, pcLoginUser);
     }
 
-    @RequestMapping(value="/rise")
-    public ModelAndView getRise(HttpServletRequest request,PCLoginUser pcLoginUser){
-        return pcView(request,pcLoginUser);
+    @RequestMapping(value = "/rise")
+    public ModelAndView getRise(HttpServletRequest request, PCLoginUser pcLoginUser) {
+        return pcView(request, pcLoginUser);
     }
 
 
@@ -56,35 +59,32 @@ public class PCIndexController {
      * 前往登录页面
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView getLoginPage(HttpServletRequest request,PCLoginUser pcLoginUser) {
-        return pcView(request,pcLoginUser);
+    public ModelAndView getLoginPage(HttpServletRequest request, PCLoginUser pcLoginUser) {
+        return pcView(request, pcLoginUser);
     }
 
-
-
-
-    private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser) {
+    private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser) {
         ModelAndView mav = new ModelAndView("home");
-        if(ConfigUtils.isPcMaintenance()){
+        if (ConfigUtils.isPcMaintenance()) {
             // 正在维护
             mav = new ModelAndView("maintenance");
         }
-        if(request.getParameter("debug")!=null){
-            if(ConfigUtils.isFrontDebug()){
+        if (request.getParameter("debug") != null) {
+            if (ConfigUtils.isFrontDebug()) {
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
-                mav.addObject("loginSocketUrl","127.0.0.1:8080/session");
-            }else{
+                mav.addObject("loginSocketUrl", "127.0.0.1:8080/session");
+            } else {
                 mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
-                mav.addObject("loginSocketUrl",ConfigUtils.getLoginSocketUrl());
+                mav.addObject("loginSocketUrl", ConfigUtils.getLoginSocketUrl());
             }
-        }else{
+        } else {
             mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
-            mav.addObject("loginSocketUrl",ConfigUtils.getLoginSocketUrl());
+            mav.addObject("loginSocketUrl", ConfigUtils.getLoginSocketUrl());
         }
         if (pcLoginUser != null && pcLoginUser.getWeixin() != null) {
             Map<String, String> userParam = Maps.newHashMap();
             userParam.put("userName", pcLoginUser.getWeixin().getWeixinName());
-            userParam.put("headImage",pcLoginUser.getWeixin().getHeadimgUrl());
+            userParam.put("headImage", pcLoginUser.getWeixin().getHeadimgUrl());
             mav.addAllObjects(userParam);
         }
         mav.addObject("feedBack", ConfigUtils.getFeedBackId());
