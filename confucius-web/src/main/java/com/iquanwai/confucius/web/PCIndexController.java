@@ -37,6 +37,17 @@ public class PCIndexController {
     }
 
     /**
+     * 前往碎片化页面
+     *
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/backend/**")
+    public ModelAndView getBackendPage(HttpServletRequest request, PCLoginUser pcLoginUser) {
+        return pcView(request, pcLoginUser);
+    }
+
+    /**
      * 前往home页面
      */
     @RequestMapping(value = {"/home", "/"}, method = RequestMethod.GET)
