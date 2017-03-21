@@ -10,4 +10,6 @@ public class AccountDto {
     private Integer role;
     private String weixinName;
     private String headimgUrl;
+    private String key;
+    private String callbackUrl;
 }

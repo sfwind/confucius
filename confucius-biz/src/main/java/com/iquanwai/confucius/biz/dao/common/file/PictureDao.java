@@ -54,4 +54,15 @@ public class PictureDao extends DBUtil {
         }
         return -1;
     }
+
+    public int updateReference(String name,Integer referencedId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "update Picture set ReferencedId = ? where RealName=?";
+        try{
+            return run.update(sql, referencedId, name);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
 }

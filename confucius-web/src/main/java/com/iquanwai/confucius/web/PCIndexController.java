@@ -54,7 +54,6 @@ public class PCIndexController {
         return pcView(request, pcLoginUser);
     }
 
-
     /**
      * 前往登录页面
      */
@@ -63,9 +62,9 @@ public class PCIndexController {
         return pcView(request, pcLoginUser);
     }
 
-    private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser) {
-        ModelAndView mav = new ModelAndView("home");
-        if (ConfigUtils.isPcMaintenance()) {
+    private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser) {
+        ModelAndView mav = new ModelAndView("site");
+        if(ConfigUtils.isPcMaintenance()){
             // 正在维护
             mav = new ModelAndView("maintenance");
         }

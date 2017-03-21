@@ -12,7 +12,7 @@
     <title>系统升级中</title>
 </head>
 <body bgcolor="#5ECCCB">
-<img  src="https://www.iqycamp.com/images/maintain.jpg">
+<img  src="//www.iqycamp.com/images/maintain.jpg">
 <style type="text/css">
     img {
         width: 400px;

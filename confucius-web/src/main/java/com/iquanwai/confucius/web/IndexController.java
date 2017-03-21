@@ -107,7 +107,7 @@ public class IndexController {
             WebUtils.auth(request, response);
             return null;
         }
-        return activityView(request, loginUser);
+        return courseView(request, loginUser);
     }
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
@@ -175,22 +175,6 @@ public class IndexController {
         }
 
         mav.addObject("openPromo",ConfigUtils.getValue("function.status.promo"));
-        return mav;
-    }
-
-    private ModelAndView activityView(HttpServletRequest request, LoginUser loginUser){
-        ModelAndView mav = new ModelAndView("activity");
-
-        if(request.getParameter("debug")!=null){
-            if(ConfigUtils.isFrontDebug()){
-                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
-            }else{
-                mav.addObject("resource", ConfigUtils.staticResourceUrl());
-            }
-        }else{
-            mav.addObject("resource", ConfigUtils.staticResourceUrl());
-        }
-
         return mav;
     }
 }

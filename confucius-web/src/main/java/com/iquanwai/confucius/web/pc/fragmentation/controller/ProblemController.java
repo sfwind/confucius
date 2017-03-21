@@ -9,6 +9,8 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2016/12/29.
@@ -81,20 +85,26 @@ public class ProblemController {
 
         List<ImprovementPlan> plans = pcLoginUser == null ? Lists.newArrayList() : planService.loadUserPlans(pcLoginUser.getOpenId());
         List<Problem> problems = problemService.loadProblems();
-        List<ProblemListDto> result = Lists.newArrayList();
-        problems.forEach(item -> {
-            ProblemListDto dto = new ProblemListDto();
-            dto.setId(item.getId());
-            dto.setProblem(item.getProblem());
-            // 查询用户该专题的计划
-            plans.forEach(plan -> {
-                if (plan.getProblemId() == item.getId()) {
-                    dto.setStatus(plan.getStatus());
-                }
-            });
-            dto.setStatus(dto.getStatus() == null ? -1 : dto.getStatus());
-            result.add(dto);
-        });
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalogDto> result = catalogs.stream().map(item->{
+            ProblemCatalogDto dto = new ProblemCatalogDto();
+            List<ProblemListDto> collect = problems.stream().filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
+                ProblemListDto problemList = new ProblemListDto();
+                problemList.setId(problem.getId());
+                problemList.setProblem(problem.getProblem());
+                // 查询用户该专题的计划
+                plans.forEach(plan -> {
+                    if (plan.getProblemId() == problem.getId()) {
+                        problemList.setStatus(plan.getStatus());
+                    }
+                });
+                problemList.setStatus(problemList.getStatus() == null ? -1 : problemList.getStatus());
+                return problemList;
+            }).collect(Collectors.toList());
+            dto.setProblems(collect);
+            dto.setName(item.getName());
+            return dto;
+        }).collect(Collectors.toList());
         return WebUtils.result(result);
     }
 }

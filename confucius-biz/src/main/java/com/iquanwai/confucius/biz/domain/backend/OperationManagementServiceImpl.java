@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ChoiceDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.WarmupChoiceDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDiscussDao;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -29,7 +29,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Autowired
     private MessageService messageService;
     @Autowired
-    private ChoiceDao choiceDao;
+    private WarmupChoiceDao warmupChoiceDao;
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
@@ -46,7 +46,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public WarmupPractice getWarmupPractice(Integer practiceId){
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
         warmupPractice.setDiscussList(warmupPracticeDiscussDao.loadDiscuss(practiceId));
-        warmupPractice.setChoiceList(choiceDao.loadChoices(practiceId));
+        warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
         return warmupPractice;
     }
 
