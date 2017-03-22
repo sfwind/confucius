@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.util.DateUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
         //上限100个问题
         int limit = 100;
         Date date = DateUtils.beforeDays(new Date(), day);
-        ResultSetHandler<List<Integer>> h = new BeanListHandler(Integer.class);
+        ResultSetHandler<List<Integer>> h = new ColumnListHandler<>("WarmupPracticeId");
         String sql = "SELECT WarmupPracticeId FROM WarmupPracticeDiscuss where AddTime > ? group by WarmupPracticeId " +
                 "order by Count(*) desc limit "+ limit;
         try {
