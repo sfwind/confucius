@@ -24,8 +24,6 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Autowired
     private ApplicationSubmitDao applicationSubmitDao;
     @Autowired
-    private ApplicationPracticeDao applicationPracticeDao;
-    @Autowired
     private WarmupPracticeDao warmupPracticeDao;
     @Autowired
     private WarmupPracticeDiscussDao warmupPracticeDiscussDao;
@@ -63,7 +61,16 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Override
     public WarmupPractice getWarmupPractice(Integer practiceId) {
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
-        warmupPractice.setDiscussList(warmupPracticeDiscussDao.loadDiscuss(practiceId));
+        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadDiscuss(practiceId);
+        warmupPracticeDiscusses.stream().forEach(discuss ->{
+            String openid = discuss.getOpenid();
+            Profile profile = profileDao.queryByOpenId(openid);
+            if(profile!=null){
+                discuss.setAvatar(profile.getHeadimgurl());
+                discuss.setName(profile.getNickname());
+            }
+        });
+        warmupPractice.setDiscussList(warmupPracticeDiscusses);
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
         return warmupPractice;
     }
