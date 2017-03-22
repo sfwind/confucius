@@ -442,7 +442,7 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create()
                 .module("训练")
                 .function("碎片化")
-                .action("移动专题输出区提交")
+                .action("PC专题输出区提交")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if(submitId==-1){
