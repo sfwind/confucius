@@ -1,10 +1,13 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.WarmupChoiceDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDiscussDao;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
@@ -35,6 +38,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private ProfileDao profileDao;
     //每个练习的精华上限
     private static final int HIGHLIGHT_LIMIT = 3;
+
+    private static final String SYSTEM_MESSAGE = "AUTO";
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
@@ -90,12 +95,12 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 warmupPracticeDiscuss.setRepliedOpenid(repliedDiscuss.getOpenid());
             }
         }
-        int id = warmupPracticeDiscussDao.insert(warmupPracticeDiscuss);
+        Integer id = warmupPracticeDiscussDao.insert(warmupPracticeDiscuss);
 
         //发送回复通知
         if (repliedId != null && !openid.equals(warmupPracticeDiscuss.getRepliedOpenid())) {
             String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
-            url = MessageFormat.format(url, id, warmupPracticeId);
+            url = MessageFormat.format(url, id.toString(), warmupPracticeId.toString());
             String message = "回复了我的理解训练问题";
             messageService.sendMessage(message, warmupPracticeDiscuss.getRepliedOpenid(),
                     openid, url);
@@ -105,6 +110,39 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Override
     public void highlightDiscuss(Integer discussId) {
         warmupPracticeDiscussDao.highlight(discussId);
+
+        WarmupPracticeDiscuss warmupPracticeDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, discussId);
+
+        if(warmupPracticeDiscuss!=null){
+            Integer practiceId = warmupPracticeDiscuss.getWarmupPracticeId();
+
+            //通知被认证者
+            String highlightOne = warmupPracticeDiscuss.getOpenid();
+
+            String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
+            url = MessageFormat.format(url, discussId.toString(), practiceId.toString());
+            String message = "你对一个理解训练题的解答很棒，并得到了官方的认证，点击看看吧";
+            messageService.sendMessage(message, highlightOne,
+                    SYSTEM_MESSAGE, url);
+
+            //通知所有参与过讨论的用户
+            List<WarmupPracticeDiscuss> warmupPracticeDiscussList = warmupPracticeDiscussDao.loadDiscuss(practiceId);
+
+            List<String> participants = Lists.newArrayList();
+            warmupPracticeDiscussList.stream().forEach(discuss -> {
+                if(!participants.contains(discuss.getOpenid())){
+                    participants.add(discuss.getOpenid());
+                }
+            });
+
+            participants.stream().filter(participant -> !participant.equals(highlightOne)).forEach(participant -> {
+                String url2 = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
+                url2 = MessageFormat.format(url2, discussId.toString(), practiceId.toString());
+                String message2 = "你关注的理解训练题，有一个解答被官方认证了，点击看看吧";
+                messageService.sendMessage(message2, participant,
+                        SYSTEM_MESSAGE, url2);
+            });
+        }
     }
 
     @Override
