@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.Pair;
  * Created by nethunder on 2017/1/13.
  */
 public interface ChallengeService {
-    ChallengePractice loadChallengePractice(Integer id);
 
     ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId);
 

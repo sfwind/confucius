@@ -204,7 +204,7 @@ public class PracticeServiceImpl implements PracticeService {
                 Profile profile = accountService.getProfile(openId, false);
                 if (profile != null) {
                     String url = "/rise/static/message/subject/reply?submitId=" + referId;
-                    messageService.sendMessage("评论了我的精华分享", load.getOpenid(), openId, url);
+                    messageService.sendMessage("评论了我的专题分享", load.getOpenid(), openId, url);
                 }
             }
         }
@@ -229,11 +229,6 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Integer riseArticleViewCount(Integer module, Integer id, Integer type) {
         return fragmentAnalysisDataDao.riseArticleViewCount(module, id, type);
-    }
-
-    @Override
-    public List<SubjectArticle> loadSubjectArticles(Integer problemId) {
-        return subjectArticleDao.loadArticles(problemId);
     }
 
     @Override

@@ -53,8 +53,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             submit.setOpenid(openId);
             submit.setPlanId(planId);
             submit.setApplicationId(applicationId);
-            int submitId = -1;
-            submitId = applicationSubmitDao.insert(submit);
+            int submitId = applicationSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
             fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));

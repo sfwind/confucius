@@ -86,8 +86,6 @@ public interface PracticeService {
      */
     Integer riseArticleViewCount(Integer module,Integer id, Integer type);
 
-    List<SubjectArticle> loadSubjectArticles(Integer problemId);
-
     List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page);
 
     List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId);

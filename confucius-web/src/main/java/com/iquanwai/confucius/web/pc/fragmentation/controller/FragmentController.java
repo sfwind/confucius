@@ -347,7 +347,7 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
-                .action("PC查看精华分享内容")
+                .action("PC查看专题分享内容")
                 .memo(loginUser.getOpenId() + " look " + submitId);
         operationLogService.log(operationLog);
         SubjectArticle submit = practiceService.loadSubjectArticle(submitId);
