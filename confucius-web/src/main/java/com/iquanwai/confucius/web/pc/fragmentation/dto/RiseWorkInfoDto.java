@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.util.DateUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +31,8 @@ public class RiseWorkInfoDto {
     private Boolean isMine;
     private List<LabelConfig> labelList;
     private List<String> picList;
+    private Date publishTime;
+    private Integer priority;
 
     public RiseWorkInfoDto(SubjectArticle origin){
         this.title = origin.getTitle();

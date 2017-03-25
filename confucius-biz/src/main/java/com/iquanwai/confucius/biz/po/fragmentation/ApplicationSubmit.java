@@ -18,6 +18,7 @@ public class ApplicationSubmit {
     private Integer priority; // 排序优先级
     private Date highlightTime; //加精时间
     private Date updateTime; // 最后更新时间
+    private Date publishTime; //发布时间
     private String upTime; //非db字段 提交时间
     private String headPic; //非db字段 提交人头像
     private String upName; //非db字段 提交人昵称
