@@ -86,6 +86,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         warmupPracticeDiscuss.setWarmupPracticeId(warmupPracticeId);
         warmupPracticeDiscuss.setComment(comment);
         warmupPracticeDiscuss.setDel(0);
+        warmupPracticeDiscuss.setPriority(0);
         warmupPracticeDiscuss.setOpenid(openid);
         if (repliedId != null) {
             WarmupPracticeDiscuss repliedDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, repliedId);
