@@ -12,4 +12,5 @@ public class CourseDto {
     private Boolean hasCertificateNo;
     private Boolean hasRealName;
     private Boolean noCertificate;
+    private Boolean graduate;
 }

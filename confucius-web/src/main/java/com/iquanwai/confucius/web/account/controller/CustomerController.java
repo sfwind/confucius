@@ -11,9 +11,17 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
-import com.iquanwai.confucius.web.account.dto.*;
+import com.iquanwai.confucius.web.account.dto.AreaDto;
+import com.iquanwai.confucius.web.account.dto.CourseDto;
+import com.iquanwai.confucius.web.account.dto.PlanDto;
+import com.iquanwai.confucius.web.account.dto.PlanListDto;
+import com.iquanwai.confucius.web.account.dto.ProfileDto;
+import com.iquanwai.confucius.web.account.dto.RegionDto;
+import com.iquanwai.confucius.web.account.dto.RiseDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -22,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -141,6 +150,8 @@ public class CustomerController {
             PlanDto planDto = new PlanDto();
             planDto.setName(problemService.getProblem(item.getProblemId()).getProblem());
             planDto.setPoint(item.getPoint());
+            planDto.setProblemId(item.getProblemId());
+            planDto.setPlanId(item.getId());
             if (item.getStatus() == 1 || item.getStatus() == 2) {
                 runningPlans.add(planDto);
             } else if (item.getStatus() == 3) {
@@ -149,6 +160,9 @@ public class CustomerController {
         });
         list.setRunningPlans(runningPlans);
         list.setDonePlans(donePlans);
+        // 查询riseId
+        Profile profile = accountService.getProfile(loginUser.getOpenId(), false);
+        list.setRiseId(profile.getRiseId());
         return WebUtils.result(list);
     }
 
@@ -168,7 +182,7 @@ public class CustomerController {
                 .stream().map(item -> {
                     CourseDto dto = new CourseDto();
                     Course course = courseProgressService.loadCourse(item.getCourseId());
-                    if(course.getType()==Course.AUDITION_COURSE || !item.getGraduate()){
+                    if(course.getType()==Course.AUDITION_COURSE){
                         return null;
                     } else {
                         dto.setName(course.getName());
@@ -176,6 +190,7 @@ public class CustomerController {
                         dto.setHasCertificateNo(item.getCertificateNo() != null);
                         dto.setHasRealName(profile.getRealName() != null);
                         dto.setNoCertificate(course.getType()==Course.SHORT_COURSE);
+                        dto.setGraduate(item.getGraduate());
                         return dto;
                     }
                 }).filter(Objects::nonNull).collect(Collectors.toList());
@@ -198,4 +213,62 @@ public class CustomerController {
         return WebUtils.result(profile.getRiseId());
     }
 
+    @RequestMapping("/rise/knowledge/{problemId}")
+    public ResponseEntity<Map<String,Object>> loadKnowledgeList(LoginUser loginUser,@PathVariable Integer problemId){
+        List<Knowledge> problemKnowledgeList = planService.getProblemKnowledgeList(problemId);
+        // 查看该用户是否对该问题评分
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("RISE")
+                .action("打开专题信息")
+                .module(problemId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.result(problemKnowledgeList);
+    }
+
+
+    @RequestMapping("/rise/get/{problemId}")
+    public ResponseEntity<Map<String, Object>> loadProblem(LoginUser loginUser, @PathVariable Integer problemId){
+        Assert.notNull(loginUser, "用户不能为空");
+        Problem problem = problemService.getProblem(problemId);
+        // 查看该用户是否对该问题评分
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("RISE")
+                .action("打开专题详情页")
+                .module(problemId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.result(problem);
+    }
+
+    @RequestMapping("/rise/knowledge/load/{knowledgeId}")
+    public ResponseEntity<Map<String, Object>> loadKnowledge(LoginUser loginUser,
+                                                             @PathVariable Integer knowledgeId){
+        Assert.notNull(loginUser, "用户不能为空");
+//        ImprovementPlan improvementPlan = planService.getRunningPlan(loginUser.getOpenId());
+//        if(improvementPlan==null){
+//            logger.error("{} has no improvement plan", loginUser.getOpenId());
+//            return WebUtils.result("您还没有制定训练计划哦");
+//        }
+        Knowledge knowledge = planService.getKnowledge(knowledgeId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("RISE")
+                .action("打开知识点回顾页")
+                .memo(knowledgeId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.result(knowledge);
+    }
+
+    @RequestMapping("/rise/feedback/open")
+    public ResponseEntity<Map<String,Object>> openFeedBack(LoginUser loginUser){
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("帮助")
+                .action("打开帮助页面")
+                .memo("");
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
 }
