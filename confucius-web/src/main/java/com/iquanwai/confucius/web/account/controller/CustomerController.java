@@ -245,11 +245,11 @@ public class CustomerController {
     public ResponseEntity<Map<String, Object>> loadKnowledge(LoginUser loginUser,
                                                              @PathVariable Integer knowledgeId){
         Assert.notNull(loginUser, "用户不能为空");
-        ImprovementPlan improvementPlan = planService.getRunningPlan(loginUser.getOpenId());
-        if(improvementPlan==null){
-            logger.error("{} has no improvement plan", loginUser.getOpenId());
-            return WebUtils.result("您还没有制定训练计划哦");
-        }
+//        ImprovementPlan improvementPlan = planService.getRunningPlan(loginUser.getOpenId());
+//        if(improvementPlan==null){
+//            logger.error("{} has no improvement plan", loginUser.getOpenId());
+//            return WebUtils.result("您还没有制定训练计划哦");
+//        }
         Knowledge knowledge = planService.getKnowledge(knowledgeId);
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
