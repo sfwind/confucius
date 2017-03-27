@@ -149,6 +149,9 @@ public class CustomerController {
         });
         list.setRunningPlans(runningPlans);
         list.setDonePlans(donePlans);
+        // 查询riseId
+        Profile profile = accountService.getProfile(loginUser.getOpenId(), false);
+        list.setRiseId(profile.getRiseId());
         return WebUtils.result(list);
     }
 
