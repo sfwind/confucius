@@ -9,4 +9,6 @@ import lombok.Data;
 public class PlanDto {
     private String name;
     private Integer point;
+    private Integer problemId;
+    private Integer planId;
 }
