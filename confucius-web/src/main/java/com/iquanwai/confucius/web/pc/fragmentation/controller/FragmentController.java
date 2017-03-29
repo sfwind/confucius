@@ -308,6 +308,7 @@ public class FragmentController {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto();
                     dto.setSubmitId(item.getId());
                     dto.setType(Constants.PracticeType.SUBJECT);
+                    item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
                     dto.setContent(
                             item.getContent().length() > 180 ?
                                     item.getContent().substring(0, 180) + "......" :
