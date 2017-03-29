@@ -28,6 +28,7 @@ import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -279,6 +280,7 @@ public class FragmentController {
                     dto.setHeadPic(account.getHeadimgurl());
                     // 查询我对它的点赞状态
                     dto.setIsMine(item.getOpenid().equals(loginUser.getOpenId()));
+                    item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
                     dto.setContent(
                             item.getContent().length() > 180 ?
                                     item.getContent().substring(0, 180) + "......" :

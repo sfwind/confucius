@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -139,10 +140,10 @@ public class ApplicationController {
                 .memo(applicationId + "");
         operationLogService.log(operationLog);
         ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId());
-
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(applicationPractice.getSubmitId());
         info.setTitle(applicationPractice.getTopic());
+        applicationPractice.setContent(HtmlRegexpUtil.filterHtml(applicationPractice.getContent()));
         info.setContent(applicationPractice.getContent().length() > 180 ?
                 applicationPractice.getContent().substring(0, 180) + "......" :
                 applicationPractice.getContent());
@@ -177,6 +178,7 @@ public class ApplicationController {
         List<RiseWorkInfoDto> submits = applicationService.loadApplicationSubmitList(applicationId).stream()
                 .filter(item -> !item.getOpenid().equals(loginUser.getOpenId())).map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto();
+                    item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
                     dto.setContent(item.getContent().length() > 180 ?
                             item.getContent().substring(0, 180) + "......" :
                             item.getContent());
