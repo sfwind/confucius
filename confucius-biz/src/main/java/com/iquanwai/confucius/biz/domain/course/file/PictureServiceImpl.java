@@ -8,7 +8,9 @@ import com.iquanwai.confucius.biz.po.PictureModule;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.QiNiuUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,18 +119,18 @@ public class PictureServiceImpl implements PictureService {
         return picture;
     }
     @Override
-    public String uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception {
-        String path = pictureModule.getPath();
+    public Pair<Boolean,String> uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception {
         String suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
         Date today = new Date();
         String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + suffix;
-        File targetFile = new File(path, realName);
+        boolean result = false;
         try {
-            file.transferTo(targetFile);
-        } catch (Exception e) {logger.error(e.getLocalizedMessage(), e);
+            result = QiNiuUtils.uploadFile(realName, file.getInputStream());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
             throw e;
         }
-        return realName;
+        return new MutablePair<Boolean,String>(result,realName);
     }
     @Override
     public String getModulePrefix(Integer moduleId) {

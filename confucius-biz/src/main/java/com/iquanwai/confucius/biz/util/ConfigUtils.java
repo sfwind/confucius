@@ -220,4 +220,8 @@ public class ConfigUtils {
 	public static String getUploadDomain(){
 		return config.getString("upload.image.domain");
 	}
+
+	public static String getPicturePrefix(){
+		return config.getString("qiniu.picture.prefix");
+	}
 }
