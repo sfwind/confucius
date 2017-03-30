@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -128,11 +129,15 @@ public class FileController {
                                 .action("PC上传图片")
                                 .memo(moduleId + "");
                         operationLogService.log(operationLog);
-                        String realName = pictureService.uploadPic(pictureModule, fileName, file);
-                        String url = pictureService.getModulePrefix(moduleId) + realName;
-                        Map<String, Object> map = Maps.newHashMap();
-                        map.put("picUrl", url);
-                        return WebUtils.result(map);
+                        Pair<Boolean,String> upload = pictureService.uploadPic(pictureModule, fileName, file);
+                        if (upload.getLeft()) {
+                            String url = ConfigUtils.getPicturePrefix() + upload.getRight();
+                            Map<String, Object> map = Maps.newHashMap();
+                            map.put("picUrl", url);
+                            return WebUtils.result(map);
+                        } else {
+                            return WebUtils.error("上传失败");
+                        }
                     } catch (FileNotFoundException e) {
                         LOGGER.error("upload image error:上传图片失败，模块目录:" + pictureModule.getModuleName() + "未创建!", e);
                         return WebUtils.error("该模块目录未创建");

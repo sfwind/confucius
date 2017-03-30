@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ChallengeSubmitDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkEditDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
@@ -230,6 +231,7 @@ public class ChallengeController {
         // 查询
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(challengePractice.getSubmitId());
+        challengePractice.setContent(HtmlRegexpUtil.filterHtml(challengePractice.getContent()));
         info.setContent(challengePractice.getContent().length() > 180 ?
                 challengePractice.getContent().substring(0, 180) + "......" :
                 challengePractice.getContent());

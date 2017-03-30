@@ -48,7 +48,7 @@ public interface PictureService {
      * @return  图片
      * */
     Picture uploadPicture(PictureModule pictureModule, Integer referId, String remoteIp, String fileName, Long fileSize, String contentType, MultipartFile file) throws Exception;
-    String uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception;
+    Pair<Boolean,String> uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception;
     /**
      * 获得模块的url前缀
      * @param moduleId 模块id
