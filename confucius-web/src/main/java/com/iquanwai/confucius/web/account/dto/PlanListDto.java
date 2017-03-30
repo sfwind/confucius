@@ -9,6 +9,7 @@ import java.util.List;
  */
 @Data
 public class PlanListDto {
+    private String riseId;
     private List<PlanDto> runningPlans;
     private List<PlanDto> donePlans;
 }

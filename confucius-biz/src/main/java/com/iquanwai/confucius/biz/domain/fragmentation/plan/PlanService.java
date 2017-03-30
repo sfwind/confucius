@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.plan;
 
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
 
 import java.util.List;
@@ -37,4 +38,8 @@ public interface PlanService {
 
 
     boolean hasProblemPlan(String openId, Integer problemId);
+
+    Knowledge getKnowledge(Integer knowledgeId);
+
+    List<Knowledge> getProblemKnowledgeList(Integer problemId);
 }

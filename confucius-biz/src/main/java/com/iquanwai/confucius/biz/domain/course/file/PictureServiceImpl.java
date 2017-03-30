@@ -28,19 +28,19 @@ import java.util.Map;
 @Service
 public class PictureServiceImpl implements PictureService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Map<Integer,PictureModule> moduleMap = Maps.newConcurrentMap();
-    private Map<Integer,String> prefixMap = Maps.newConcurrentMap();
+    private Map<Integer, PictureModule> moduleMap = Maps.newConcurrentMap();
+    private Map<Integer, String> prefixMap = Maps.newConcurrentMap();
 
     @Autowired
     private PictureDao pictureDao;
 
     @PostConstruct
-    public void initPictureModule(){
+    public void initPictureModule() {
         List<PictureModule> moduleList = pictureDao.loadAll(PictureModule.class);
-        if(moduleList!=null){
+        if (moduleList != null) {
             moduleList.forEach(item -> {
                 moduleMap.put(item.getId(), item);
-                prefixMap.put(item.getId(), ConfigUtils.getUploadDomain()+"/images/"+item.getModuleName()+"/");
+                prefixMap.put(item.getId(), ConfigUtils.getUploadDomain() + "/images/" + item.getModuleName() + "/");
             });
 
         }
@@ -50,8 +50,8 @@ public class PictureServiceImpl implements PictureService {
     @Override
     public PictureModule getPictureModule(Integer id) {
         PictureModule pictureModule = moduleMap.get(id);
-        if(pictureModule==null){
-            logger.error("moduleId: {} is invalid!",id);
+        if (pictureModule == null) {
+            logger.error("moduleId: {} is invalid!", id);
             return null;
         } else {
             return pictureModule;
@@ -64,26 +64,26 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    public Pair<Integer,String> checkAvaliable(PictureModule pictureModule, Picture picture) {
+    public Pair<Integer, String> checkAvaliable(PictureModule pictureModule, Picture picture) {
         Map<String, String> map = Maps.newHashMap();
         Integer sizeLimit = pictureModule.getSizeLimit();
-        if(picture.getLength()==null){
-            return new ImmutablePair<Integer,String>(0,"该图片大小未知，无法上传");
+        if (picture.getLength() == null) {
+            return new ImmutablePair<Integer, String>(0, "该图片大小未知，无法上传");
         }
-        if(picture.getType()==null){
+        if (picture.getType() == null) {
             return new ImmutablePair<Integer, String>(0, "该图片类型未知，无法上传");
         }
 
-        if(sizeLimit!=null && picture.getLength()>sizeLimit){
+        if (sizeLimit != null && picture.getLength() > sizeLimit) {
             return new ImmutablePair<Integer, String>(0, "该图片过大，请压缩后上传");
         }
-        List<String> typeList = pictureModule.getTypeLimit()==null? Lists.newArrayList():Lists.newArrayList(pictureModule.getTypeLimit().split(","));
+        List<String> typeList = pictureModule.getTypeLimit() == null ? Lists.newArrayList() : Lists.newArrayList(pictureModule.getTypeLimit().split(","));
         long matchTypeCount = typeList.stream().filter(contentType -> contentType.equals(picture.getType())).count();
-        if(matchTypeCount==0){
+        if (matchTypeCount == 0) {
             return new ImmutablePair<Integer, String>(0, pictureModule.getModuleName() + "模块不支持该图片类型");
         }
         // 通过校验开始上传
-        return new ImmutablePair<Integer,String>(1,null);
+        return new ImmutablePair<Integer, String>(1, null);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class PictureServiceImpl implements PictureService {
         String suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
         // 命名规则 {module}-{date}-{rand(8)}-{referId}.{filename的后缀}
         Date today = new Date();
-        String realName = pictureModule.getModuleName()+"-"+ DateUtils.parseDateToString3(today)+"-"+CommonUtils.randomString(9)+"-"+referId+suffix;
+        String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + "-" + referId + suffix;
         //获取该文件的文件名
         File targetFile = new File(path, realName);
         // 保存
@@ -116,12 +116,25 @@ public class PictureServiceImpl implements PictureService {
         pictureDao.upload(picture);
         return picture;
     }
-
+    @Override
+    public String uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception {
+        String path = pictureModule.getPath();
+        String suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
+        Date today = new Date();
+        String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + suffix;
+        File targetFile = new File(path, realName);
+        try {
+            file.transferTo(targetFile);
+        } catch (Exception e) {logger.error(e.getLocalizedMessage(), e);
+            throw e;
+        }
+        return realName;
+    }
     @Override
     public String getModulePrefix(Integer moduleId) {
         String prefix = prefixMap.get(moduleId);
-        if(prefix==null){
-            logger.error("moduleId: {} is invalid",moduleId);
+        if (prefix == null) {
+            logger.error("moduleId: {} is invalid", moduleId);
         }
         return prefix;
     }

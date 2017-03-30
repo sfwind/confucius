@@ -34,11 +34,6 @@ public class ChallengeServiceImpl implements ChallengeService {
     private PointRepo pointRepo;
 
     @Override
-    public ChallengePractice loadChallengePractice(Integer id) {
-        return challengePracticeDao.load(ChallengePractice.class, id);
-    }
-
-    @Override
     public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId){
         ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class,challengeId);
         // 查询该用户是否提交
@@ -49,8 +44,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             submit.setOpenid(openId);
             submit.setPlanId(planId);
             submit.setChallengeId(challengeId);
-            int submitId = -1;
-            submitId = challengeSubmitDao.insert(submit);
+            int submitId = challengeSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
         }

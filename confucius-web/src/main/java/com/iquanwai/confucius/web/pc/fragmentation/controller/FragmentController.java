@@ -29,14 +29,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.HomeworkVoteDto;
-import com.iquanwai.confucius.web.pc.dto.RefreshListDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentListDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkItemDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkListDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -347,7 +340,7 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
-                .action("PC查看精华分享内容")
+                .action("PC查看专题分享内容")
                 .memo(loginUser.getOpenId() + " look " + submitId);
         operationLogService.log(operationLog);
         SubjectArticle submit = practiceService.loadSubjectArticle(submitId);

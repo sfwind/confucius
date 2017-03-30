@@ -17,10 +17,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.ChallengeSubmitDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkEditDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
+import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -28,11 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -167,15 +161,18 @@ public class ApplicationController {
      * @param applicationId 应用任务Id
      */
     @RequestMapping("/list/other/{applicationId}")
-    public ResponseEntity<Map<String, Object>> loadOtherApplicationList(PCLoginUser loginUser, @PathVariable Integer applicationId) {
+    public ResponseEntity<Map<String, Object>> loadOtherApplicationList(PCLoginUser loginUser,
+                                                                        @PathVariable Integer applicationId,
+                                                                        @ModelAttribute Page page) {
         Assert.notNull(loginUser, "用户信息不能为空");
         Assert.notNull(applicationId, "应用训练不能为空");
+        page.setPageSize(20);
         // 该计划的应用训练是否提交
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
                 .action("应用任务列表加载他人的应用任务")
-                .memo(applicationId + "");
+                .memo(applicationId.toString());
         operationLogService.log(operationLog);
         List<RiseWorkInfoDto> submits = applicationService.loadApplicationSubmitList(applicationId).stream()
                 .filter(item -> !item.getOpenid().equals(loginUser.getOpenId())).map(item -> {
@@ -184,25 +181,41 @@ public class ApplicationController {
                             item.getContent().substring(0, 180) + "......" :
                             item.getContent());
                     dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, item.getId()));
-                    dto.setUpTime(DateUtils.parseDateToFormat5(item.getUpdateTime()));
+                    dto.setUpTime(DateUtils.parseDateToFormat5(item.getPublishTime()));
                     dto.setType(Constants.PracticeType.APPLICATION);
+                    dto.setPublishTime(item.getPublishTime());
                     dto.setSubmitId(item.getId());
+                    dto.setPriority(item.getPriority());
                     Account account = accountService.getAccount(item.getOpenid(), false);
-                    dto.setUpName(account.getNickname());
-                    dto.setHeadPic(account.getHeadimgurl());
-                    dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.APPLICATION,item.getId()));
+                    if(account!=null) {
+                        dto.setUpName(account.getNickname());
+                        dto.setHeadPic(account.getHeadimgurl());
+                    }
+                    dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.APPLICATION, item.getId()));
                     return dto;
-                }).sorted((left,right)->{
+                }).sorted((left, right) -> {
+                    //按发布时间排序
                     try {
-                        int leftWeight = left.getCommentCount() + left.getVoteCount();
-                        int rightWeight = right.getCommentCount() + right.getVoteCount();
-                        return rightWeight - leftWeight;
-                    } catch (Exception e){
-                        logger.error("应用任务文章排序异常",e);
+                        return (int) ((right.getPublishTime().getTime() - left.getPublishTime().getTime()) / 1000);
+                    } catch (Exception e) {
+                        logger.error("应用任务文章排序异常", e);
                         return 0;
                     }
                 }).collect(Collectors.toList());
-        return WebUtils.result(submits);
+
+        RefreshListDto<RiseWorkInfoDto> refreshListDto = new RefreshListDto<>();
+        //区分精华和普通文章
+        List<RiseWorkInfoDto> superbSubmit = submits.stream().filter(submit -> submit.getPriority() == 1)
+                .collect(Collectors.toList());
+        //普通文章分页
+        List<RiseWorkInfoDto> normalSubmit = submits.stream().filter(submit -> submit.getPriority() == 0).collect(Collectors.toList());
+        page.setTotal(normalSubmit.size());
+        normalSubmit = normalSubmit.stream().skip(page.getOffset()).limit(page.getPageSize()).collect(Collectors.toList());
+
+        refreshListDto.setHighlightList(superbSubmit);
+        refreshListDto.setList(normalSubmit);
+        refreshListDto.setEnd(page.isLastPage());
+        return WebUtils.result(refreshListDto);
     }
 
 

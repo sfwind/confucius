@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.performance.dto;
 
 import com.iquanwai.confucius.biz.po.performance.PagePerformance;
+import com.iquanwai.confucius.biz.po.performance.PersonalPerformance;
 import lombok.Data;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -16,22 +17,25 @@ public class PerformanceSourceInfoDto {
     private Integer csz;
     private String uuid;
     private String data;
-
-    public PagePerformance toPo() {
+    private PagePerformance pagePerformance;
+    private PersonalPerformance personalPerformance;
+    public void mapPo() {
         PagePerformance po;
         ObjectMapper mapper = new ObjectMapper();
         try {
             PagePerformanceDto pageDto = mapper.readValue(this.data, PagePerformanceDto.class);
             po = pageDto.getPage();
-            po.setApp(this.app);
-            po.setUrl(this.url);
-            po.setScreen(this.sr);
-            po.setViewport(this.vp);
-            po.setCookieSize(this.csz);
-            po.setUuid(this.uuid);
-            return po;
+            if(po!=null){
+                po.setApp(this.app);
+                po.setUrl(this.url);
+                po.setScreen(this.sr);
+                po.setViewport(this.vp);
+                po.setCookieSize(this.csz);
+                po.setUuid(this.uuid);
+            }
+            this.setPagePerformance(po);
+            this.setPersonalPerformance(pageDto.getPersonal());
         } catch (Exception e) {
-            return new PagePerformance();
         }
     }
 }
