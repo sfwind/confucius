@@ -63,7 +63,13 @@ public class ChallengeServiceImpl implements ChallengeService {
             logger.error("submitId {} is not existed", id);
             return new MutablePair<>(-1,0);
         }
-        boolean result = challengeSubmitDao.answer(id, content);
+        boolean result = false;
+
+        if (submit.getContent() == null) {
+            result = challengeSubmitDao.firstAnswer(id, content);
+        } else {
+            result = challengeSubmitDao.answer(id, content);
+        }
 
         if (result) {
             // 修改挑战任务记录
