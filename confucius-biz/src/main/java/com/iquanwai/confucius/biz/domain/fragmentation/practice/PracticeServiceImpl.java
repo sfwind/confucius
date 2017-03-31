@@ -56,30 +56,8 @@ public class PracticeServiceImpl implements PracticeService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-
     @Override
-    public ChallengePractice getChallengePracticeNoCreate(Integer challengeId, String openId, Integer planId) {
-        Assert.notNull(openId, "openId不能为空");
-        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, challengeId);
-
-        ChallengeSubmit submit = challengeSubmitDao.load(challengeId, planId, openId);
-        if (submit == null || submit.getContent() == null) {
-            challengePractice.setSubmitted(false);
-        } else {
-            challengePractice.setSubmitted(true);
-        }
-        if (submit != null) {
-            challengePractice.setContent(submit.getContent());
-            challengePractice.setSubmitId(submit.getId());
-            challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
-        }
-        challengePractice.setPlanId(planId);
-        return challengePractice;
-    }
-
-
-    @Override
-    public ChallengePractice getChallengePractice(Integer id, String openid, Integer planId) {
+    public ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create) {
         Assert.notNull(openid, "openid不能为空");
         ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, id);
 
@@ -90,7 +68,7 @@ public class PracticeServiceImpl implements PracticeService {
             challengePractice.setSubmitted(true);
         }
         //生成挑战训练提交记录
-        if (submit == null) {
+        if (submit == null && create) {
             submit = new ChallengeSubmit();
             submit.setOpenid(openid);
             submit.setPlanId(planId);
@@ -101,9 +79,9 @@ public class PracticeServiceImpl implements PracticeService {
             // 生成浏览记录
             fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.CHALLENGE, submitId));
         }
-        challengePractice.setContent(submit.getContent());
-        challengePractice.setSubmitId(submit.getId());
-        challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
+        challengePractice.setContent(submit==null?null:submit.getContent());
+        challengePractice.setSubmitId(submit==null?null:submit.getId());
+        challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
         challengePractice.setPlanId(planId);
         return challengePractice;
     }

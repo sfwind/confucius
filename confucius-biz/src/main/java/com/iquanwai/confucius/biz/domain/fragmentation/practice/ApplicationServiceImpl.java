@@ -7,7 +7,11 @@ import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
 import com.iquanwai.confucius.biz.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +46,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public ApplicationPractice loadMineApplicationPractice(Integer planId, Integer applicationId, String openId) {
+    public ApplicationPractice loadMineApplicationPractice(Integer planId, Integer applicationId, String openId,boolean create) {
         // 查询该应用训练
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交
         ApplicationSubmit submit = applicationSubmitDao.load(applicationId, planId, openId);
-        if (submit == null) {
+        if (submit == null && create) {
             // 没有提交，生成
             submit = new ApplicationSubmit();
             submit.setOpenid(openId);
@@ -58,10 +62,10 @@ public class ApplicationServiceImpl implements ApplicationService {
             submit.setUpdateTime(new Date());
             fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));
         }
-        applicationPractice.setSubmitUpdateTime(submit.getUpdateTime());
-        applicationPractice.setPlanId(submit.getPlanId());
-        applicationPractice.setContent(submit.getContent());
-        applicationPractice.setSubmitId(submit.getId());
+        applicationPractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
+        applicationPractice.setPlanId(planId);
+        applicationPractice.setContent(submit==null?null:submit.getContent());
+        applicationPractice.setSubmitId(submit==null?null:submit.getId());
         return applicationPractice;
     }
 
@@ -113,4 +117,5 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationSubmit loadSubmit(Integer id){
         return applicationSubmitDao.load(ApplicationSubmit.class,id);
     }
+
 }

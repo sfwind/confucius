@@ -13,7 +13,6 @@ import java.util.List;
 public interface PracticeService {
 
 
-    ChallengePractice getChallengePracticeNoCreate(Integer challengeId, String openId, Integer planId);
 
     /**
      * 获取挑战训练
@@ -21,7 +20,7 @@ public interface PracticeService {
      * @param openid 学员id
      * @param planId 训练计划id
      * */
-    ChallengePractice getChallengePractice(Integer id, String openid, Integer planId);
+    ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create);
 
 
 

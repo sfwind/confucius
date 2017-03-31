@@ -9,7 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public interface ChallengeService {
 
-    ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId);
+    ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId,boolean create);
 
     Pair<Integer,Integer> submit(Integer id, String content);
 

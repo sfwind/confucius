@@ -34,11 +34,11 @@ public class ChallengeServiceImpl implements ChallengeService {
     private PointRepo pointRepo;
 
     @Override
-    public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId){
+    public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId,boolean create){
         ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class,challengeId);
         // 查询该用户是否提交
         ChallengeSubmit submit = challengeSubmitDao.load(challengeId, planId, openId);
-        if(submit==null){
+        if(submit==null && create){
             // 没有提交，生成
             submit = new ChallengeSubmit();
             submit.setOpenid(openId);
@@ -48,10 +48,10 @@ public class ChallengeServiceImpl implements ChallengeService {
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
         }
-        challengePractice.setSubmitUpdateTime(submit.getUpdateTime());
-        challengePractice.setPlanId(submit.getPlanId());
-        challengePractice.setContent(submit.getContent());
-        challengePractice.setSubmitId(submit.getId());
+        challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
+        challengePractice.setPlanId(planId);
+        challengePractice.setContent(submit==null?null:submit.getContent());
+        challengePractice.setSubmitId(submit==null?null:submit.getId());
         return challengePractice;
     }
 
