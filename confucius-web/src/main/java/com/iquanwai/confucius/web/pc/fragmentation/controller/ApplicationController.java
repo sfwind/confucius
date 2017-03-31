@@ -238,7 +238,7 @@ public class ApplicationController {
         // 根据应用训练id获取提交记录
         ApplicationSubmit submit = applicationService.loadSubmit(practice.getSubmitId());
         // 继续之前的逻辑
-        Integer submitId = practice.getId();
+        Integer submitId = practice.getSubmitId();
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用训练")
