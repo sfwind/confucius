@@ -92,7 +92,7 @@ public class ChallengeController {
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
             ImprovementPlan improvementPlan = plan.get();
-            ChallengePractice challengePractice = practiceService.getChallengePractice(cid, openId, improvementPlan.getId());
+            ChallengePractice challengePractice = practiceService.getChallengePractice(cid, openId, improvementPlan.getId(),false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
 //             result.setPic(param.getPic());
             dto.setSubmitId(challengePractice.getSubmitId());
@@ -182,21 +182,23 @@ public class ChallengeController {
     /**
      * 提交挑战任务
      * @param loginUser 登陆人
-     * @param submitId 提交id
      * @param challengeSubmitDto 内容
      */
-    @RequestMapping(value = "/submit/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/submit/{planId}/{cid}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submit(PCLoginUser loginUser,
-                                                      @PathVariable Integer submitId,
+                                                      @PathVariable("planId") Integer planId,
+                                                      @PathVariable("cid") Integer cid,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
+        ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, cid, loginUser.getOpenId(), true);
+        Integer submitId = challengePractice.getSubmitId();
+        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("挑战训练")
                 .action("PC提交挑战训练答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
-        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         if (result.getLeft() > 0) {
             // 提升提交数
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.CHALLENGE, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
@@ -227,7 +229,7 @@ public class ChallengeController {
                 .action("挑战训练列表加载自己的")
                 .memo(planId + ":" + challengeId);
         operationLogService.log(operationLog);
-        ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, challengeId, loginUser.getOpenId());
+        ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, challengeId, loginUser.getOpenId(),false);
         // 查询
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(challengePractice.getSubmitId());

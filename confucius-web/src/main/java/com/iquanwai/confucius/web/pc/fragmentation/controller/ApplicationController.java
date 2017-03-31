@@ -101,7 +101,7 @@ public class ApplicationController {
         // 看看这个id在不在
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
-            ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId());
+            ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(),false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
             dto.setSubmitId(applicationPractice.getSubmitId());
             dto.setTitle(applicationPractice.getTopic());
@@ -139,7 +139,7 @@ public class ApplicationController {
                 .action("应用任务列表加载自己的应用任务")
                 .memo(applicationId + "");
         operationLogService.log(operationLog);
-        ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId());
+        ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(),false);
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(applicationPractice.getSubmitId());
         info.setTitle(applicationPractice.getTopic());
@@ -225,23 +225,27 @@ public class ApplicationController {
      * 提交应用任务
      *
      * @param loginUser          登陆人
-     * @param submitId           提交人id
      * @param challengeSubmitDto 任务内容
      */
-    @RequestMapping(value = "/submit/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/submit/{planId}/{applicationId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> submit(PCLoginUser loginUser,
-                                                      @PathVariable Integer submitId,
+                                                      @PathVariable("planId") Integer planId,
+                                                      @PathVariable("applicationId") Integer applicationId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
+        // 获取应用训练，没有则创建
+        ApplicationPractice practice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(), true);
+        // 根据应用训练id获取提交记录
+        ApplicationSubmit submit = applicationService.loadSubmit(practice.getSubmitId());
+        // 继续之前的逻辑
+        Integer submitId = practice.getId();
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用训练")
                 .action("PC提交应用训练答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
-        ApplicationSubmit submit = applicationService.loadSubmit(submitId);
         Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
-
         if (result) {
             // 提升提交数
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
