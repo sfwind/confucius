@@ -77,7 +77,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             logger.error("submitId {} is not existed", id);
             return false;
         }
-        boolean result = applicationSubmitDao.answer(id, content);
+        boolean result = false;
+
+        if(submit.getContent() == null){
+            result = applicationSubmitDao.firstAnswer(id, content);
+        } else {
+            result = applicationSubmitDao.answer(id, content);
+        }
+
         if (result && submit.getPointStatus() == 0) {
             // 修改应用任务记录
             ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, submit.getPlanId());
