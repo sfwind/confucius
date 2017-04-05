@@ -265,6 +265,8 @@ public class SignupServiceImpl implements SignupService {
             if(classMember.getGraduate() || classMember.getCloseDate().before(DateUtils.startDay(new Date()))){
                 classMemberDao.reEntry(classMember.getId(), closeDate);
             }
+            //发送录取消息
+            sendWelcomeMsg(courseId, openid, classId);
             return classMember.getMemberId();
         }
         classMember = new ClassMember();
@@ -343,10 +345,10 @@ public class SignupServiceImpl implements SignupService {
         CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
 
         if(course.getType()==Course.LONG_COURSE) {
-            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。"));
+            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。\n"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(quanwaiClass.getOpenTime()) + "-" + DateUtils.parseDateToStringByCommon(quanwaiClass.getCloseTime())));
-            String remark = "到期后自动关闭\n你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
+            String remark = "\n到期后自动关闭\n\n你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
         }else if(course.getType()==Course.SHORT_COURSE){
@@ -354,30 +356,30 @@ public class SignupServiceImpl implements SignupService {
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
                     DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
-            String remark = "到期后自动关闭\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
+            String remark = "\n到期后自动关闭\n\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
                     +"。点击查看群二维码。";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getQqGroup());
         } else if(course.getType()==Course.AUDITION_COURSE){
             data.put("keyword1", new TemplateMessage.Keyword("【免费体验】 "+course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword("7天"));
-            String remark = "试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍";
-            data.put("remark", new TemplateMessage.Keyword(remark));
+            data.put("remark", new TemplateMessage.Keyword("\n试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍"));
 //            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
         }
 
         templateMessageService.sendMessage(templateMessage);
         //发送直播消息
         if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
-            key = ConfigUtils.activityStartMsgKey();
             templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
-            templateMessage.setTemplate_id(key);
+            templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
             data = Maps.newHashMap();
-            data.put("first", new TemplateMessage.Keyword("你已获得线上答疑活动参与资格，请到时参加。"));
-            data.put("keyword1", new TemplateMessage.Keyword("课程线上答疑"));
-            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(quanwaiClass.getOpenDate())));
-            data.put("remark", new TemplateMessage.Keyword("点击进入直播房间"));
+            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\n"));
+            data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
+            data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
+            data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
+            data.put("keyword4", new TemplateMessage.Keyword("14天"));
+            data.put("remark", new TemplateMessage.Keyword("\n如有新问题，在课程QQ群中和同学讨论哦（群号见上条报名成功消息）"));
             templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
             templateMessage.setData(data);
             templateMessageService.sendMessage(templateMessage);

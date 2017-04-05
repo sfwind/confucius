@@ -143,10 +143,13 @@
             <artifactId>happy-dns-java</artifactId>
             <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>com.qiniu</groupId>
             <artifactId>qiniu-java-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
         </dependency>
     </dependencies>
 

@@ -1,12 +1,9 @@
 package com.iquanwai.confucius.web.weixin;
 
-import com.iquanwai.confucius.biz.domain.course.operational.PromoCodeService;
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +25,6 @@ import java.io.IOException;
 public class PayController {
     @Autowired
     private PayService payService;
-    @Autowired
-    private PromoCodeService promoCodeService;
-    @Autowired
-    private SignupService signupService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -74,12 +67,6 @@ public class PayController {
             payService.handlePayResult(payCallback);
             if(payCallback.getResult_code().equals("SUCCESS")) {
                 payService.paySuccess(payCallback.getOut_trade_no());
-                // 支付成功,查看该订单是否使用了 TODO 优惠券相关,可能删除
-                CourseOrder courseOrder = signupService.getCourseOrder(payCallback.getOut_trade_no());
-                if(courseOrder.getPromoCode()!=null){
-                    LOGGER.info("用户:{},使用优惠券:{}",courseOrder.getOpenid(),courseOrder.getPromoCode());
-                    promoCodeService.usePromoCode(courseOrder.getOpenid(),courseOrder.getPromoCode());
-                }
             }else{
                 LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
             }

@@ -217,6 +217,10 @@ public class ConfigUtils {
 		return config.getString("activity.start.msg");
 	}
 
+	public static String qaMsgKey(){
+		return config.getString("qa.msg");
+	}
+
 	public static String getUploadDomain(){
 		return config.getString("upload.image.domain");
 	}

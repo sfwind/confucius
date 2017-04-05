@@ -46,8 +46,8 @@ public class RiseOperationController {
 
     @RequestMapping("/application/submit/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser loginUser,
-                                                                    @PathVariable Integer applicationId,
-                                                                    @ModelAttribute Page page) {
+                                                                     @PathVariable Integer applicationId,
+                                                                     @ModelAttribute Page page) {
         page.setPageSize(APPLICATION_SUBMIT_SIZE);
         List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page);
 
@@ -77,7 +77,7 @@ public class RiseOperationController {
 
     @RequestMapping("/warmup/{practiceId}")
     public ResponseEntity<Map<String, Object>> getPracticeDiscuss(PCLoginUser loginUser,
-                                                                    @PathVariable Integer practiceId) {
+                                                                  @PathVariable Integer practiceId) {
         WarmupPractice warmupPractice = operationManagementService.getWarmupPractice(practiceId);
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -93,8 +93,8 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/reply/discuss", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> replyDiscuss(PCLoginUser loginUser,
-                                                                  @RequestBody DiscussDto discussDto) {
-        if(discussDto.getComment()==null || discussDto.getComment().length()>300){
+                                                            @RequestBody DiscussDto discussDto) {
+        if (discussDto.getComment() == null || discussDto.getComment().length() > 300) {
             LOGGER.error("{} 理解训练讨论字数过长", loginUser.getOpenId());
             return WebUtils.result("您提交的讨论字数过长");
         }
@@ -113,7 +113,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> highlightDiscuss(PCLoginUser loginUser,
-                                                         @PathVariable Integer discussId) {
+                                                                @PathVariable Integer discussId) {
 
         operationManagementService.highlightDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -127,8 +127,8 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/applicationSubmit/{practiceId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> highlightApplicationSubmit(PCLoginUser loginUser,
-                                                         @PathVariable Integer practiceId,
-                                                         @PathVariable Integer submitId) {
+                                                                          @PathVariable Integer practiceId,
+                                                                          @PathVariable Integer submitId) {
 
         operationManagementService.highlightApplicationSubmit(practiceId, submitId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -143,11 +143,6 @@ public class RiseOperationController {
 
     @RequestMapping("/problem/list")
     public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
-                .module("内容运营")
-                .function("应用训练")
-                .action("获取问题列表");
-        operationLogService.log(operationLog);
 
         List<Problem> problems = problemService.loadProblems();
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
@@ -163,13 +158,20 @@ public class RiseOperationController {
             dto.setName(item.getName());
             return dto;
         }).collect(Collectors.toList());
+
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
+                .module("内容运营")
+                .function("应用训练")
+                .action("获取问题列表");
+        operationLogService.log(operationLog);
         return WebUtils.result(result);
     }
 
 
     /**
      * 碎片化总任务列表加载
-     * @param problemId 问题id
+     *
+     * @param problemId   问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
@@ -180,7 +182,7 @@ public class RiseOperationController {
                 .module("训练")
                 .function("碎片化")
                 .action("总任务列表加载")
-                .memo(problemId+"");
+                .memo(problemId + "");
         operationLogService.log(operationLog);
 
         return WebUtils.result(applicationPractices);

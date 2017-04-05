@@ -302,6 +302,12 @@
                 <artifactId>qiniu-java-sdk</artifactId>
                 <version>7.2.4</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>3.4.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
