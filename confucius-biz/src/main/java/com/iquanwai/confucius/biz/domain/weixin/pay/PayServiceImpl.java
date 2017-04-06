@@ -142,6 +142,10 @@ public class PayServiceImpl implements PayService{
         if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
             signupService.entry(quanwaiOrder.getOrderId());
         }
+        if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+            // 商品是rise会员
+            signupService.riseMemberEntry(quanwaiOrder.getOrderId());
+        }
 
         //使用优惠券
         if(quanwaiOrder.getDiscount()!=0.0){
@@ -201,6 +205,9 @@ public class PayServiceImpl implements PayService{
         //TODO:改成消息中间件
         if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
             signupService.giveupSignup(orderId);
+        }
+        if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+            signupService.giveupRiseSignup(orderId);
         }
     }
 

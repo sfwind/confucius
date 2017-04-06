@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
@@ -30,6 +31,8 @@ public interface SignupService {
      * @return 订单
      * */
     QuanwaiOrder signup(String openid, Integer courseId, Integer classId);
+
+    QuanwaiOrder signupRiseMember(String openid, Integer memberType);
 
     /**
      * 该重载方法待删除
@@ -69,6 +72,8 @@ public interface SignupService {
      * */
     String entry(String orderId);
 
+    void riseMemberEntry(String orderId);
+
     /**
      * 是否免费
      * */
@@ -78,6 +83,8 @@ public interface SignupService {
      * 未及时付款，去掉预报名抢占的名额
      * */
     void giveupSignup(String orderId);
+
+    void giveupRiseSignup(String orderId);
 
     /**
      * 发送课程报名成功消息
@@ -103,4 +110,11 @@ public interface SignupService {
     void updatePromoCode(String orderId, String promoCode);
 
     QuanwaiOrder getQuanwaiOrder(String orderId);
+
+    /**
+     * 获取会员类型
+     * @param memberType 会员类型Id
+     * @return 会员类型
+     */
+    MemberType getMemberType(Integer memberType);
 }

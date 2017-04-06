@@ -2,15 +2,20 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
@@ -26,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.awt.*;
@@ -55,6 +61,12 @@ public class SignupServiceImpl implements SignupService {
     private CostRepo costRepo;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private ProfileDao profileDao;
+    @Autowired
+    private RiseMemberTypeRepo riseMemberTypeRepo;
+    @Autowired
+    private RiseOrderDao riseOrderDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -156,6 +168,40 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setOrderId(orderId);
         courseOrderDao.insert(courseOrder);
 
+        return quanwaiOrder;
+    }
+
+    @Override
+    public QuanwaiOrder signupRiseMember(String openid, Integer memberTypeId){
+        // 查询该openid是否是我们的用户
+        Profile profile = profileDao.queryByOpenId(openid);
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        Assert.notNull(profile, "用户信息错误");
+        Assert.notNull(memberType, "会员类型错误");
+        // 创建订单
+        QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
+        quanwaiOrder.setCreateTime(new Date());
+        quanwaiOrder.setOpenid(openid);
+        //orderId 16位随机字符
+        String orderId = CommonUtils.randomString(16);
+        quanwaiOrder.setOrderId(orderId);
+        quanwaiOrder.setTotal(memberType.getFee());
+        quanwaiOrder.setDiscount(0.0);
+        quanwaiOrder.setPrice(memberType.getFee());
+        quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY);
+        quanwaiOrder.setGoodsId(memberTypeId + "");
+        quanwaiOrder.setGoodsName(memberType.getName());
+        quanwaiOrder.setGoodsType(QuanwaiOrder.FRAGMENT_MEMBER);
+        quanwaiOrderDao.insert(quanwaiOrder);
+
+        // rise的报名数据
+        RiseOrder riseOrder = new RiseOrder();
+        riseOrder.setOpenid(openid);
+        riseOrder.setEntry(false);
+        riseOrder.setIsDel(false);
+        riseOrder.setMemberType(memberTypeId);
+        riseOrder.setOrderId(orderId);
+        riseOrderDao.insert(riseOrder);
         return quanwaiOrder;
     }
 
@@ -292,6 +338,31 @@ public class SignupServiceImpl implements SignupService {
         return memberId;
     }
 
+    @Override
+    public void riseMemberEntry(String orderId){
+        RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
+        riseOrderDao.entry(orderId);
+        String openId = riseOrder.getOpenid();
+
+        MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
+        switch (memberType.getId()) {
+            case 1: {
+                profileDao.becomeRiseMember(openId, DateUtils.afterMonths(new Date(), 6));
+                break;
+            }
+            case 2: {
+                profileDao.becomeRiseMember(openId, DateUtils.afterYears(new Date(), 1));
+                break;
+            }
+            case 3: {
+                profileDao.becomeRiseMember(openId, DateUtils.afterYears(new Date(), 1));
+                break;
+            }
+            default:
+                logger.error("该会员ID异常{}", memberType);
+        }
+    }
+
     private Date getCloseDate(Integer classId, Integer courseId) {
         Date closeDate = null;
         //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7,试听课程关闭时间为2999
@@ -328,6 +399,13 @@ public class SignupServiceImpl implements SignupService {
         }
         //关闭订单
         courseOrderDao.closeOrder(orderId);
+        quanwaiOrderDao.closeOrder(orderId);
+    }
+
+    @Override
+    public void giveupRiseSignup(String orderId){
+        //关闭订单
+        riseOrderDao.closeOrder(orderId);
         quanwaiOrderDao.closeOrder(orderId);
     }
 
@@ -419,6 +497,10 @@ public class SignupServiceImpl implements SignupService {
         return quanwaiOrderDao.loadOrder(orderId);
     }
 
+    @Override
+    public MemberType getMemberType(Integer memberType){
+        return riseMemberTypeRepo.memberType(memberType);
+    }
 
     //生成学号 2位课程号2位班级号3位学号
     private String memberId(Integer courseId, Integer classId) {

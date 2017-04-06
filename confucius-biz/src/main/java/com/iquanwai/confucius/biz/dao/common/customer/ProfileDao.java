@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * Created by nethunder on 2017/2/8.
@@ -108,6 +109,16 @@ public class ProfileDao extends DBUtil{
             return false;
         }
         return true;
+    }
+
+    public void becomeRiseMember(String openId,Date expireDate){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update Profile SET RiseMember = 1,ExpireDate = ? WHERE OpenId = ?";
+        try{
+            runner.update(sql, expireDate, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
     }
 
 

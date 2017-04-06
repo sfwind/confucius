@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.course.dto;
 
 import com.iquanwai.confucius.biz.po.PromoCode;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import lombok.Data;
@@ -27,5 +28,9 @@ public class SignupDto {
 
     // 用于调起H5支付的参数
     private Map<String,String> signParams;
+    private String goodsType; // 商品类型
+    private MemberType memberType; // rise会员信息
+
+
 }
 

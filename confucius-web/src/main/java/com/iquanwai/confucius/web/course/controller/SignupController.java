@@ -12,12 +12,19 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.systematism.*;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.systematism.Chapter;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.Course;
+import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.EntryDto;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
+import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
 import com.iquanwai.confucius.web.course.dto.SignupDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -29,7 +36,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
@@ -147,6 +158,77 @@ public class SignupController {
         }
         return WebUtils.result(signupDto);
     }
+
+    /**
+     * Rise创建订单，并未下单
+     * @param riseMemberDto
+     * @return
+     */
+    @RequestMapping(value = "/rise/signup")
+    public ResponseEntity<Map<String,Object>>  riseMemberSignup(@RequestBody RiseMemberDto riseMemberDto){
+        Assert.notNull(riseMemberDto, "请求参数不能为空");
+        String openId = riseMemberDto.getOpenId();
+        Integer memberType = riseMemberDto.getMemberType();
+        OperationLog operationLog = OperationLog.create().openid(openId)
+                .module("RISE")
+                .function("会员报名")
+                .action("创建订单")
+                .memo(memberType+"");
+        operationLogService.log(operationLog);
+        // 创建订单
+        QuanwaiOrder quanwaiOrder = null;
+        try {
+            quanwaiOrder = signupService.signupRiseMember(openId, memberType);
+        } catch (Exception e){
+            return WebUtils.error(e.getLocalizedMessage());
+        }
+
+        return WebUtils.result(quanwaiOrder);
+    }
+
+    @RequestMapping(value = "/info/{productId}")
+    public ResponseEntity<Map<String, Object>> queryProductInfo(LoginUser loginUser, @PathVariable("productId") String productId,HttpServletRequest request) {
+        Assert.notNull(loginUser, "用户不能为空");
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(productId);
+        Assert.notNull(quanwaiOrder, "订单信息不能为空");
+        Assert.notNull(quanwaiOrder.getPrice(),"订单金额不能为空");
+        String remoteIp = request.getHeader("X-Forwarded-For");
+        if(remoteIp==null){
+            LOGGER.error("获取用户:{} 获取IP失败:quanwaiOrder:{}", loginUser.getOpenId(),quanwaiOrder);
+            remoteIp = ConfigUtils.getExternalIP();
+        }
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("RISE")
+                .function("会员报名")
+                .action("进入付费页")
+                .memo(productId);
+        operationLogService.log(operationLog);
+        SignupDto signupDto = new SignupDto();
+        // 统一下单
+        if(quanwaiOrder.getPrice()!=0){
+            Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
+            signupDto.setSignParams(signParams);
+            OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("报名")
+                    .function("微信支付")
+                    .action("下单")
+                    .memo(signParams.toString());
+            operationLogService.log(payParamLog);
+        } else {
+            signupDto.setFree(true);
+        }
+        if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+            // 碎片化订单
+            MemberType memberType = signupService.getMemberType(Integer.parseInt(quanwaiOrder.getGoodsId()));
+            signupDto.setMemberType(memberType);
+        } else {
+            // TODO  体系化
+        }
+        signupDto.setGoodsType(quanwaiOrder.getGoodsType());
+        signupDto.setProductId(productId);
+        return WebUtils.result(signupDto);
+    }
+
 
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
