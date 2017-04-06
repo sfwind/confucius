@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
@@ -110,6 +111,8 @@ public interface SignupService {
     void updatePromoCode(String orderId, String promoCode);
 
     QuanwaiOrder getQuanwaiOrder(String orderId);
+
+    RiseOrder getRiseOrder(String orderId);
 
     /**
      * 获取会员类型

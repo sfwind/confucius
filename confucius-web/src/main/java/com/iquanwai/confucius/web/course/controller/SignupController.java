@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
@@ -170,8 +171,8 @@ public class SignupController {
         String openId = riseMemberDto.getOpenId();
         Integer memberType = riseMemberDto.getMemberType();
         OperationLog operationLog = OperationLog.create().openid(openId)
-                .module("RISE")
-                .function("会员报名")
+                .module("训练营")
+                .function("RISE报名")
                 .action("创建订单")
                 .memo(memberType+"");
         operationLogService.log(operationLog);
@@ -233,18 +234,28 @@ public class SignupController {
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
         Assert.notNull(loginUser, "用户不能为空");
-        CourseOrder courseOrder = signupService.getOrder(orderId);
-        if(courseOrder==null){
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+        if(quanwaiOrder==null){
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
+        Boolean isEntry = false;
+        if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
+            // 体系化
+            RiseOrder riseOrder = signupService.getRiseOrder(orderId);
+            isEntry = riseOrder!=null && riseOrder.getEntry();
+        } else if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+            // 碎片化
+            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
+            isEntry = courseOrder.getEntry();
+        }
+
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("付费完成")
                 .action("点击付费完成")
                 .memo(orderId);
         operationLogService.log(operationLog);
-        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
         Double zero = 0d;
         if (zero.equals(quanwaiOrder.getPrice())) {
             // 免费，自动报名
@@ -252,8 +263,8 @@ public class SignupController {
             payService.paySuccess(orderId);
         } else {
             // 非免费，查询是否报名成功
-            if(!courseOrder.getEntry()){
-                LOGGER.error("订单:{},未支付", courseOrder.getOrderId());
+            if(!isEntry){
+                LOGGER.error("订单:{},未支付", orderId);
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
         }

@@ -498,6 +498,11 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public RiseOrder getRiseOrder(String orderId){
+        return riseOrderDao.loadOrder(orderId);
+    }
+
+    @Override
     public MemberType getMemberType(Integer memberType){
         return riseMemberTypeRepo.memberType(memberType);
     }
