@@ -227,6 +227,12 @@ public class SignupController {
         }
         signupDto.setGoodsType(quanwaiOrder.getGoodsType());
         signupDto.setProductId(productId);
+        if(quanwaiOrder.getDiscount()!=0.0){
+            signupDto.setNormal(quanwaiOrder.getTotal());
+            signupDto.setDiscount(quanwaiOrder.getDiscount());
+        }
+        signupDto.setFee(quanwaiOrder.getPrice());
+        signupDto.setProductId(productId);
         return WebUtils.result(signupDto);
     }
 
