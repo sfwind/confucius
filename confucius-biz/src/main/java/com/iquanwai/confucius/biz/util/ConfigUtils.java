@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.util;
 
+import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -234,5 +235,13 @@ public class ConfigUtils {
 	}
 	public static long riseMemberPrice(Integer id){
         return config.getConfig("singup.rise.memberType").getLong(id + "");
+    }
+
+    public static List<Double> getRiseMemberPrice(){
+        if (config.hasPath("rise.member.price") && ConfigUtils.isDevelopment()) {
+            return config.getDoubleList("rise.member.price");
+        } else {
+            return Lists.newArrayList();
+        }
     }
 }
