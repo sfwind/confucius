@@ -12,6 +12,7 @@ import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
+import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
@@ -505,6 +506,14 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public MemberType getMemberType(Integer memberType){
         return riseMemberTypeRepo.memberType(memberType);
+    }
+
+    @Override
+    public List<Coupon> getCoupons(String openId){
+        if (costRepo.hasCoupon(openId)) {
+            return costRepo.getCoupons(openId);
+        }
+        return Lists.newArrayList();
     }
 
     //生成学号 2位课程号2位班级号3位学号

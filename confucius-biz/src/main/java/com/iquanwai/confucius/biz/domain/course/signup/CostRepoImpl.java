@@ -93,6 +93,12 @@ public class CostRepoImpl implements CostRepo {
         reloadCoupon();
     }
 
+    @Override
+    public List<Coupon> getCoupons(String openId) {
+        return couponDao.getCoupon(openId);
+    }
+
+
     private void reloadCoupon(){
         List<Coupon> coupons  = couponDao.getUnusedCoupon();
         couponList.clear();

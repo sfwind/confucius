@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -41,11 +42,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -177,6 +180,8 @@ public class SignupController {
                 .action("创建订单")
                 .memo(memberType + "");
         operationLogService.log(operationLog);
+        // 在这里加锁
+
         // 创建订单
         QuanwaiOrder quanwaiOrder = null;
         try {
@@ -216,10 +221,10 @@ public class SignupController {
                     .action("下单")
                     .memo(signParams.toString());
             operationLogService.log(payParamLog);
-        if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
-            // 碎片化订单
-            MemberType memberType = signupService.getMemberType(Integer.parseInt(quanwaiOrder.getGoodsId()));
-            signupDto.setMemberType(memberType);
+            if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+                // 碎片化订单
+                MemberType memberType = signupService.getMemberType(Integer.parseInt(quanwaiOrder.getGoodsId()));
+                signupDto.setMemberType(memberType);
             } else {
                 signupDto.setFree(true);
             }
@@ -239,10 +244,10 @@ public class SignupController {
 
 
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
+    public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
         CourseOrder courseOrder = signupService.getOrder(orderId);
-        if(courseOrder==null){
+        if (courseOrder == null) {
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
@@ -256,11 +261,11 @@ public class SignupController {
         Double zero = 0d;
         if (zero.equals(quanwaiOrder.getPrice())) {
             // 免费，自动报名
-            payService.handlePayResult(orderId,true);
+            payService.handlePayResult(orderId, true);
             payService.paySuccess(orderId);
         } else {
             // 非免费，查询是否报名成功
-            if(!courseOrder.getEntry()){
+            if (!courseOrder.getEntry()) {
                 LOGGER.error("订单:{},未支付", courseOrder.getOrderId());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
@@ -271,10 +276,10 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/paid/risemember/{orderId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId){
+    public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
         RiseOrder riseOrder = signupService.getRiseOrder(orderId);
-        if(riseOrder==null){
+        if (riseOrder == null) {
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
@@ -288,11 +293,11 @@ public class SignupController {
         Double zero = 0d;
         if (zero.equals(quanwaiOrder.getPrice())) {
             // 免费，自动报名
-            payService.handlePayResult(orderId,true);
+            payService.handlePayResult(orderId, true);
             payService.riseMemberPaySuccess(orderId);
         } else {
             // 非免费，查询是否报名成功
-            if(!riseOrder.getEntry()){
+            if (!riseOrder.getEntry()) {
                 LOGGER.error("订单:{},未支付", riseOrder.getOrderId());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
@@ -386,4 +391,33 @@ public class SignupController {
         }
         return WebUtils.result(entryDto);
     }
+
+    @RequestMapping(value = "/coupon/list", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> listCoupon(LoginUser loginUser, @RequestParam("orderId") String orderId) {
+        Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(orderId, "订单不能为空");
+        List<Coupon> coupons = signupService.getCoupons(loginUser.getOpenId());
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("加载优惠券")
+                .memo(orderId);
+        operationLogService.log(operationLog);
+        return WebUtils.result(coupons);
+    }
+
+    @RequestMapping(value = "/coupon/calculate", method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> usrCoupon(LoginUser loginUser, @RequestParam String code){
+        Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(code, "优惠券不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("计算优惠券减免")
+                .memo(code);
+//        signupService.calculateCoupon(loginUser.getOpenId(),,code);
+        operationLogService.log(operationLog);
+        return null;
+    }
+
 }
