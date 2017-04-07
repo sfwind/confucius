@@ -62,7 +62,7 @@ public class PayController {
 
     @RequestMapping(value="/result/callback")
     public void payCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
-        LOGGER.info(payCallback.toString());
+        LOGGER.info("体系化微信支付回调:{}",payCallback.toString());
         try {
             payService.handlePayResult(payCallback);
             if(payCallback.getResult_code().equals("SUCCESS")) {
@@ -78,4 +78,26 @@ public class PayController {
         response.getWriter().print(SUCCESS_RETURN);
         response.flushBuffer();
     }
+
+    @RequestMapping(value = "/result/risemember/callback")
+    public void riseMemberPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
+        LOGGER.info("rise会员微信支付回调:{}",payCallback.toString());
+        try {
+            payService.handlePayResult(payCallback);
+            if(payCallback.getResult_code().equals("SUCCESS")) {
+                payService.riseMemberPaySuccess(payCallback.getOut_trade_no());
+            }else{
+                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+            }
+        }catch (Exception e){
+            LOGGER.error("支付结果回调处理失败", e);
+        }
+
+        response.setHeader("Content-Type", "application/xml");
+        response.getWriter().print(SUCCESS_RETURN);
+        response.flushBuffer();
+    }
+
+
+
 }

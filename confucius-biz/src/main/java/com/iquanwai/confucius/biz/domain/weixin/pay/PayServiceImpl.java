@@ -43,6 +43,7 @@ public class PayServiceImpl implements PayService{
     private static final String JSAPI = "JSAPI";
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
+    private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
 
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
@@ -137,16 +138,31 @@ public class PayServiceImpl implements PayService{
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         if(quanwaiOrder==null){
             logger.error("订单 {} 不存在", orderId);
+            return;
         }
         //TODO:改成消息中间件
         if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
             signupService.entry(quanwaiOrder.getOrderId());
         }
+
+        //使用优惠券
+        if(quanwaiOrder.getDiscount()!=0.0){
+            logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
+            costRepo.updateCoupon(Coupon.USED, orderId);
+        }
+    }
+
+    @Override
+    public void riseMemberPaySuccess(String orderId){
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        if(quanwaiOrder==null){
+            logger.error("订单 {} 不存在", orderId);
+            return;
+        }
         if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
             signupService.riseMemberEntry(quanwaiOrder.getOrderId());
         }
-
         //使用优惠券
         if(quanwaiOrder.getDiscount()!=0.0){
             logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
@@ -232,13 +248,13 @@ public class PayServiceImpl implements PayService{
         Assert.notNull(orderId, "订单号不能为空");
         Assert.notNull(ip, "IP不能为空");
 
-        QuanwaiOrder courseOrder = quanwaiOrderDao.loadOrder(orderId);
-        if(courseOrder==null){
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        if(quanwaiOrder==null){
             logger.error("order id {} not existed", orderId);
             return "";
         }
 
-        UnifiedOrder unifiedOrder = buildJSApiOrder(courseOrder,ip);
+        UnifiedOrder unifiedOrder = buildJSApiOrder(quanwaiOrder,ip);
 
         String response = restfulHelper.postXML(UNIFIED_ORDER_URL, XMLHelper.createXML(unifiedOrder));
         UnifiedOrderReply reply = XMLHelper.parseXml(UnifiedOrderReply.class, response);
@@ -296,7 +312,14 @@ public class PayServiceImpl implements PayService{
         map.put("body", body);
         String openid = quanwaiOrder.getOpenid();
         map.put("openid", openid);
-        String notify_url = ConfigUtils.adapterDomainName()+PAY_CALLBACK_PATH;
+
+        String notify_url = null;
+        if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
+            notify_url = ConfigUtils.adapterDomainName() + PAY_CALLBACK_PATH;
+        } else if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+            notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
+        }
+        Assert.notNull(notify_url, "回调地址不能为空");
         map.put("notify_url", notify_url);
         String out_trade_no = quanwaiOrder.getOrderId();
         map.put("out_trade_no", out_trade_no);

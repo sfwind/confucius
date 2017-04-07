@@ -71,13 +71,13 @@ public class SignupController {
     private CourseProgressService courseProgressService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId, HttpServletRequest request){
+    public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId, HttpServletRequest request) {
         SignupDto signupDto = new SignupDto();
         String productId = "";
-        try{
+        try {
             Assert.notNull(loginUser, "用户不能为空");
             String remoteIp = request.getHeader("X-Forwarded-For");
-            if(remoteIp==null){
+            if (remoteIp == null) {
                 LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), courseId);
                 remoteIp = ConfigUtils.getExternalIP();
             }
@@ -85,7 +85,7 @@ public class SignupController {
                     .module("报名")
                     .function("课程报名")
                     .action("进入报名页")
-                    .memo(courseId+"");
+                    .memo(courseId + "");
             operationLogService.log(operationLog);
 
             //课程免单用户
@@ -95,17 +95,17 @@ public class SignupController {
             }
             // 检查人数，已加锁。
             ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
-            if(classMember!=null){
+            if (classMember != null) {
                 // 已报名
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
             }
 
             Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
-            if(result.getLeft()==-1){
+            if (result.getLeft() == -1) {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
             }
-            if(result.getLeft()==-2){
-                return WebUtils.error(ErrorConstants.COURSE_NOT_OPEN,ErrorMessageUtils.getErrmsg("signup.noclass"));
+            if (result.getLeft() == -2) {
+                return WebUtils.error(ErrorConstants.COURSE_NOT_OPEN, ErrorMessageUtils.getErrmsg("signup.noclass"));
             }
 
             QuanwaiClass quanwaiClass = signupService.getCachedClass(result.getRight());
@@ -114,21 +114,21 @@ public class SignupController {
             CourseIntroduction courseIntroduction = signupService.getCachedCourse(courseId);
             signupDto.setCourse(courseIntroduction);
             // 计算关闭课程的时间
-            if(courseIntroduction.getType() == Course.LONG_COURSE){
+            if (courseIntroduction.getType() == Course.LONG_COURSE) {
                 // 长课程
                 signupDto.setClassOpenTime(DateUtils.parseDateToStringByCommon(quanwaiClass.getOpenTime()) +
                         " - " + DateUtils.parseDateToStringByCommon(quanwaiClass.getCloseTime()));
-            } else if(courseIntroduction.getType() == Course.SHORT_COURSE){
+            } else if (courseIntroduction.getType() == Course.SHORT_COURSE) {
                 // 短课程
                 signupDto.setClassOpenTime(DateUtils.parseDateToStringByCommon(new Date()) + " - " +
-                        DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), courseIntroduction.getLength()+6)));
-            } else if(courseIntroduction.getType() == Course.AUDITION_COURSE) {
+                        DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), courseIntroduction.getLength() + 6)));
+            } else if (courseIntroduction.getType() == Course.AUDITION_COURSE) {
                 signupDto.setClassOpenTime("7天");
             }
             // TODO 优惠券改为可选，下面这个service放到新接口，增加优惠券参数
             QuanwaiOrder quanwaiOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
             productId = quanwaiOrder.getOrderId();
-            if(quanwaiOrder.getDiscount()!=0.0){
+            if (quanwaiOrder.getDiscount() != 0.0) {
                 signupDto.setNormal(quanwaiOrder.getTotal());
                 signupDto.setDiscount(quanwaiOrder.getDiscount());
             }
@@ -139,8 +139,8 @@ public class SignupController {
 //            signupDto.setQrcode(qrcode);
 
             // 统一下单
-            if(quanwaiOrder.getPrice()!=null && quanwaiOrder.getPrice()!=0){
-                Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
+            if (quanwaiOrder.getPrice() != null && quanwaiOrder.getPrice() != 0) {
+                Map<String, String> signParams = payService.buildH5PayParam(productId, remoteIp, loginUser.getOpenId());
                 signupDto.setSignParams(signParams);
                 OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
                         .module("报名")
@@ -149,10 +149,10 @@ public class SignupController {
                         .memo(signParams.toString());
                 operationLogService.log(payParamLog);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("报名失败", e);
             //异常关闭订单
-            if(StringUtils.isNotEmpty(productId)) {
+            if (StringUtils.isNotEmpty(productId)) {
                 signupService.giveupSignup(productId);
             }
             return WebUtils.error("报名人数已满");
@@ -162,11 +162,12 @@ public class SignupController {
 
     /**
      * Rise创建订单，并未下单
+     *
      * @param riseMemberDto
      * @return
      */
     @RequestMapping(value = "/rise/signup")
-    public ResponseEntity<Map<String,Object>>  riseMemberSignup(@RequestBody RiseMemberDto riseMemberDto){
+    public ResponseEntity<Map<String, Object>> riseMemberSignup(@RequestBody RiseMemberDto riseMemberDto) {
         Assert.notNull(riseMemberDto, "请求参数不能为空");
         String openId = riseMemberDto.getOpenId();
         Integer memberType = riseMemberDto.getMemberType();
@@ -174,13 +175,13 @@ public class SignupController {
                 .module("训练营")
                 .function("RISE报名")
                 .action("创建订单")
-                .memo(memberType+"");
+                .memo(memberType + "");
         operationLogService.log(operationLog);
         // 创建订单
         QuanwaiOrder quanwaiOrder = null;
         try {
             quanwaiOrder = signupService.signupRiseMember(openId, memberType);
-        } catch (Exception e){
+        } catch (Exception e) {
             return WebUtils.error(e.getLocalizedMessage());
         }
 
@@ -188,14 +189,14 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/info/{productId}")
-    public ResponseEntity<Map<String, Object>> queryProductInfo(LoginUser loginUser, @PathVariable("productId") String productId,HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> queryProductInfo(LoginUser loginUser, @PathVariable("productId") String productId, HttpServletRequest request) {
         Assert.notNull(loginUser, "用户不能为空");
         QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(productId);
         Assert.notNull(quanwaiOrder, "订单信息不能为空");
-        Assert.notNull(quanwaiOrder.getPrice(),"订单金额不能为空");
+        Assert.notNull(quanwaiOrder.getPrice(), "订单金额不能为空");
         String remoteIp = request.getHeader("X-Forwarded-For");
-        if(remoteIp==null){
-            LOGGER.error("获取用户:{} 获取IP失败:quanwaiOrder:{}", loginUser.getOpenId(),quanwaiOrder);
+        if (remoteIp == null) {
+            LOGGER.error("获取用户:{} 获取IP失败:quanwaiOrder:{}", loginUser.getOpenId(), quanwaiOrder);
             remoteIp = ConfigUtils.getExternalIP();
         }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -205,9 +206,9 @@ public class SignupController {
                 .memo(productId);
         operationLogService.log(operationLog);
         SignupDto signupDto = new SignupDto();
-        // 统一下单
-        if(quanwaiOrder.getPrice()!=0){
-            Map<String, String> signParams = payService.buildH5PayParam(productId,remoteIp,loginUser.getOpenId());
+        if (quanwaiOrder.getPrice() != 0) {
+            // 碎片化统一下单
+            Map<String, String> signParams = payService.buildH5PayParam(productId, remoteIp, loginUser.getOpenId());
             signupDto.setSignParams(signParams);
             OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("报名")
@@ -215,19 +216,19 @@ public class SignupController {
                     .action("下单")
                     .memo(signParams.toString());
             operationLogService.log(payParamLog);
-        } else {
-            signupDto.setFree(true);
-        }
         if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 碎片化订单
             MemberType memberType = signupService.getMemberType(Integer.parseInt(quanwaiOrder.getGoodsId()));
             signupDto.setMemberType(memberType);
+            } else {
+                signupDto.setFree(true);
+            }
         } else {
             // TODO  体系化
         }
         signupDto.setGoodsType(quanwaiOrder.getGoodsType());
         signupDto.setProductId(productId);
-        if(quanwaiOrder.getDiscount()!=0.0){
+        if (quanwaiOrder.getDiscount() != 0.0) {
             signupDto.setNormal(quanwaiOrder.getTotal());
             signupDto.setDiscount(quanwaiOrder.getDiscount());
         }
@@ -240,28 +241,18 @@ public class SignupController {
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId){
         Assert.notNull(loginUser, "用户不能为空");
-        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
-        if(quanwaiOrder==null){
+        CourseOrder courseOrder = signupService.getOrder(orderId);
+        if(courseOrder==null){
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
-        Boolean isEntry = false;
-        if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
-            // 体系化
-            RiseOrder riseOrder = signupService.getRiseOrder(orderId);
-            isEntry = riseOrder!=null && riseOrder.getEntry();
-        } else if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
-            // 碎片化
-            CourseOrder courseOrder = signupService.getCourseOrder(orderId);
-            isEntry = courseOrder.getEntry();
-        }
-
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("付费完成")
                 .action("点击付费完成")
                 .memo(orderId);
         operationLogService.log(operationLog);
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
         Double zero = 0d;
         if (zero.equals(quanwaiOrder.getPrice())) {
             // 免费，自动报名
@@ -269,8 +260,40 @@ public class SignupController {
             payService.paySuccess(orderId);
         } else {
             // 非免费，查询是否报名成功
-            if(!isEntry){
-                LOGGER.error("订单:{},未支付", orderId);
+            if(!courseOrder.getEntry()){
+                LOGGER.error("订单:{},未支付", courseOrder.getOrderId());
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+            }
+        }
+
+//        signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/paid/risemember/{orderId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId){
+        Assert.notNull(loginUser, "用户不能为空");
+        RiseOrder riseOrder = signupService.getRiseOrder(orderId);
+        if(riseOrder==null){
+            LOGGER.error("{} 订单不存在", orderId);
+            return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+        }
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("付费完成")
+                .action("点击付费完成")
+                .memo(orderId);
+        operationLogService.log(operationLog);
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+        Double zero = 0d;
+        if (zero.equals(quanwaiOrder.getPrice())) {
+            // 免费，自动报名
+            payService.handlePayResult(orderId,true);
+            payService.riseMemberPaySuccess(orderId);
+        } else {
+            // 非免费，查询是否报名成功
+            if(!riseOrder.getEntry()){
+                LOGGER.error("订单:{},未支付", riseOrder.getOrderId());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
         }
@@ -281,7 +304,7 @@ public class SignupController {
 
     @RequestMapping(value = "/info/load", method = RequestMethod.GET)
     @Deprecated
-    public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser){
+    public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser) {
         InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -301,7 +324,7 @@ public class SignupController {
 
     @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> infoSubmit(@RequestBody InfoSubmitDto infoSubmitDto,
-                                                          LoginUser loginUser){
+                                                          LoginUser loginUser) {
         Integer chapterId = null;
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -317,17 +340,17 @@ public class SignupController {
             return WebUtils.error("提交个人信息失败");
         }
         account.setOpenid(loginUser.getOpenId());
-        profileService.submitPersonalInfo(account,false);
+        profileService.submitPersonalInfo(account, false);
 
         Chapter chapter = courseStudyService.loadFirstChapter(infoSubmitDto.getCourseId());
-        if(chapter!=null) {
+        if (chapter != null) {
             chapterId = chapter.getId();
         }
         return WebUtils.result(chapterId);
     }
 
     @RequestMapping("/welcome/{orderId}")
-    public ResponseEntity<Map<String, Object>> welcome(LoginUser loginUser, @PathVariable String orderId){
+    public ResponseEntity<Map<String, Object>> welcome(LoginUser loginUser, @PathVariable String orderId) {
         EntryDto entryDto = new EntryDto();
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -337,16 +360,16 @@ public class SignupController {
                 .memo(orderId);
         operationLogService.log(operationLog);
         CourseOrder courseOrder = signupService.getOrder(orderId);
-        if(courseOrder==null){
+        if (courseOrder == null) {
             LOGGER.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
-        if(courseOrder.getEntry()){
+        if (courseOrder.getEntry()) {
             LOGGER.error("订单{}未支付", courseOrder.getOrderId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
         }
         ClassMember classMember = signupService.classMember(orderId);
-        if(classMember==null || classMember.getMemberId()==null){
+        if (classMember == null || classMember.getMemberId() == null) {
             LOGGER.error("{} 尚未报班", loginUser.getOpenId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
@@ -354,10 +377,10 @@ public class SignupController {
         entryDto.setQuanwaiClass(signupService.getCachedClass(classMember.getClassId()));
         entryDto.setCourse(signupService.getCachedCourse(classMember.getCourseId()));
         Account account = accountService.getAccount(loginUser.getOpenId(), true);
-        if(account!=null) {
+        if (account != null) {
             entryDto.setUsername(account.getNickname());
             entryDto.setHeadUrl(account.getHeadimgurl());
-        }else{
+        } else {
             entryDto.setUsername(loginUser.getWeixinName());
             entryDto.setHeadUrl(loginUser.getHeadimgUrl());
         }

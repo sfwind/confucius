@@ -34,6 +34,8 @@ public interface PayService {
      * */
     void paySuccess(String orderId);
 
+    void riseMemberPaySuccess(String orderId);
+
     /**
      * 定期关闭过期订单
      * */
