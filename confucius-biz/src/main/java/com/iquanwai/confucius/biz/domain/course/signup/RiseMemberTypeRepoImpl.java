@@ -4,6 +4,8 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +18,8 @@ import java.util.Map;
 @Service
 public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
     private static Map<Integer, MemberType> memberTypes = Maps.newConcurrentMap();
+    private static Logger logger = LoggerFactory.getLogger(RiseMemberTypeRepoImpl.class);
+
     @PostConstruct
     public void init(){
         List<Double> riseMemberPrice = ConfigUtils.getRiseMemberPrice();
@@ -28,6 +32,7 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
             memberTypes.put(2, new MemberType(2, 898D, "线上一年898"));
             memberTypes.put(3, new MemberType(3, 1980D, "线上一年+线下+学习报告1980"));
         }
+        logger.info("RISE会员价格:{}", memberTypes);
     }
 
     @Override
