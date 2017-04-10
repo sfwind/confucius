@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.util;
 
-import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -230,18 +229,4 @@ public class ConfigUtils {
 		return config.getString("qiniu.picture.prefix");
 	}
 
-	public static boolean riseMemberCheck(Integer id){
-		return config.getObject("singup.rise.memberType").containsKey(id);
-	}
-	public static long riseMemberPrice(Integer id){
-        return config.getConfig("singup.rise.memberType").getLong(id + "");
-    }
-
-    public static List<Double> getRiseMemberPrice(){
-        if (config.hasPath("rise.member.price") && ConfigUtils.isDevelopment()) {
-            return config.getDoubleList("rise.member.price");
-        } else {
-            return Lists.newArrayList();
-        }
-    }
 }

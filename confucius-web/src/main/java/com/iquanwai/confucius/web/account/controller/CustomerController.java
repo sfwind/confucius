@@ -163,6 +163,7 @@ public class CustomerController {
         // 查询riseId
         Profile profile = accountService.getProfile(loginUser.getOpenId(), false);
         list.setRiseId(profile.getRiseId());
+        list.setRiseMember(profile.getRiseMember());
         return WebUtils.result(list);
     }
 
