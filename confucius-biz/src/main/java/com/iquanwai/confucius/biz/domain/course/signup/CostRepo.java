@@ -17,6 +17,8 @@ public interface CostRepo {
      * */
     double discount(Double price, String openid, String orderId);
 
+    double discount(Double price, String openid, String orderId, Coupon coupon);
+
     /**
      * 是否有优惠券
      * */
@@ -34,4 +36,5 @@ public interface CostRepo {
 
     List<Coupon> getCoupons(String openId);
 
+    Coupon getCoupon(Integer id);
 }

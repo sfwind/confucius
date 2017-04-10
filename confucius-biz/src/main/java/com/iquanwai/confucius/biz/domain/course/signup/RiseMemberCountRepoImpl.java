@@ -21,7 +21,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     // 剩余的人数
     private AtomicInteger remainCount;
-
+    public static final Object lock = new Object();
 
 
     @Autowired
@@ -30,7 +30,6 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     private ProfileDao profileDao;
 
 
-//    private Map<String,List<Integer>>
 
     @PostConstruct
     @Override
@@ -49,16 +48,32 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     @Override
     public Pair<Integer, String> prepareSignup(String openId) {
         Profile profile = profileDao.queryByOpenId(openId);
-        if(profile.getRiseMeber()){
+        if(profile.getRiseMember()){
             // 已经报名
-            return new MutablePair<>(-1,"您已是RISER");
+            return new MutablePair<>(-3,"您已是RISER");
+        } else {
+            // 未报名,查看是否有未关闭的订单
+            Integer counts = riseOrderDao.userNotCloseOrder(openId);
+            if(counts>0){
+                return new MutablePair<>(1,"ok");
+            }
         }
-        return null;
+        synchronized (lock){
+            if(remainCount.get() <= 0){
+                return new MutablePair<>(-1,"报名人数已满");
+            } else {
+                remainCount.decrementAndGet();
+                return new MutablePair<>(1,"ok");
+            }
+        }
     }
 
     @Override
     public void quitSignup(String openId, Integer memberTypeId) {
-
+        synchronized (lock){
+            // 退还名额
+            remainCount.incrementAndGet();
+        }
     }
 
 

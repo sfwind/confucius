@@ -26,7 +26,7 @@ public class Profile {
     private String riseId;
     private String unionid;	//只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段。详见：获取用户个人信息（UnionID机制）
 
-    private Boolean RiseMeber; // 是否圈外会员
+    private Boolean RiseMember; // 是否圈外会员
     private Date ExpireDate; // 过期时间
 
     //默认头像

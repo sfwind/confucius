@@ -217,9 +217,10 @@ public class PayServiceImpl implements PayService{
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         if(quanwaiOrder==null){
             logger.error("订单 {} 不存在", orderId);
+            return;
         }
         //TODO:改成消息中间件
-        if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
+        if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupSignup(orderId);
         }
         if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {

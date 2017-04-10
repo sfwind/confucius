@@ -27,6 +27,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
 import lombok.Data;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,8 @@ public class SignupServiceImpl implements SignupService {
     private RiseMemberTypeRepo riseMemberTypeRepo;
     @Autowired
     private RiseOrderDao riseOrderDao;
+    @Autowired
+    private RiseMemberCountRepo riseMemberCountRepo;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -130,6 +133,11 @@ public class SignupServiceImpl implements SignupService {
 //        }
         // 还没有正式进入班级
         return classMemberCountRepo.prepareSignup(openid, courseId);
+    }
+
+    @Override
+    public Pair<Integer, String> riseMemberSignupCheck(String openId,Integer memberTypeId){
+        return riseMemberCountRepo.prepareSignup(openId);
     }
 
     public QuanwaiOrder signup(String openid, Integer courseId, Integer classId) {
@@ -204,6 +212,54 @@ public class SignupServiceImpl implements SignupService {
         riseOrder.setOrderId(orderId);
         riseOrderDao.insert(riseOrder);
         return quanwaiOrder;
+    }
+
+    @Override
+    public Pair<Integer,QuanwaiOrder> signupRiseMember(String openid, Integer memberTypeId,Integer couponId){
+        // 查询该openid是否是我们的用户
+        Profile profile = profileDao.queryByOpenId(openid);
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        Assert.notNull(profile, "用户信息错误");
+        Assert.notNull(memberType, "会员类型错误");
+
+        // 创建订单
+        QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
+        quanwaiOrder.setCreateTime(new Date());
+        quanwaiOrder.setOpenid(openid);
+        //orderId 16位随机字符
+        String orderId = CommonUtils.randomString(16);
+        double discount = 0d;
+        if (couponId != null) {
+            // 计算优惠
+            Coupon coupon = costRepo.getCoupon(couponId);
+            if (coupon == null || coupon.getUsed() == Coupon.USED || coupon.getExpiredDate().before(new Date())) {
+                // 优惠券无效
+                return new MutablePair<>(-1, null);
+            }
+            discount = costRepo.discount(memberType.getFee(), openid, orderId, coupon);
+        }
+
+
+
+        quanwaiOrder.setOrderId(orderId);
+        quanwaiOrder.setTotal(memberType.getFee());
+        quanwaiOrder.setDiscount(discount);
+        quanwaiOrder.setPrice(CommonUtils.substract(memberType.getFee(), discount));
+        quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY);
+        quanwaiOrder.setGoodsId(memberTypeId + "");
+        quanwaiOrder.setGoodsName(memberType.getName());
+        quanwaiOrder.setGoodsType(QuanwaiOrder.FRAGMENT_MEMBER);
+        quanwaiOrderDao.insert(quanwaiOrder);
+
+        // rise的报名数据
+        RiseOrder riseOrder = new RiseOrder();
+        riseOrder.setOpenid(openid);
+        riseOrder.setEntry(false);
+        riseOrder.setIsDel(false);
+        riseOrder.setMemberType(memberTypeId);
+        riseOrder.setOrderId(orderId);
+        riseOrderDao.insert(riseOrder);
+        return new MutablePair<>(1, quanwaiOrder);
     }
 
     @Override
@@ -405,6 +461,14 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public void giveupRiseSignup(String orderId){
+        RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
+        Profile profile = profileDao.queryByOpenId(riseOrder.getOpenid());
+        Integer count = riseOrderDao.userNotCloseOrder(riseOrder.getOpenid());
+        if (!profile.getRiseMember() && count == 1) {
+            // 未成功报名，并且是最后一个单子,退还名额
+            riseMemberCountRepo.quitSignup(riseOrder.getOrderId(), riseOrder.getMemberType());
+        }
+
         //关闭订单
         riseOrderDao.closeOrder(orderId);
         quanwaiOrderDao.closeOrder(orderId);
@@ -511,9 +575,31 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public List<Coupon> getCoupons(String openId){
         if (costRepo.hasCoupon(openId)) {
-            return costRepo.getCoupons(openId);
+            List<Coupon> coupons = costRepo.getCoupons(openId);
+            coupons.forEach(item->{
+                item.setExpired(DateUtils.parseDateToStringByCommon(item.getExpiredDate()));
+            });
+            return coupons;
         }
         return Lists.newArrayList();
+    }
+
+    @Override
+    public List<MemberType> getMemberTypesPayInfo() {
+
+        return riseMemberTypeRepo.memberTypes();
+    }
+
+    @Override
+    public Double calculateCoupon(Integer memberTypeId, Integer couponId){
+        Coupon coupon = costRepo.getCoupon(couponId);
+        Double amount = coupon.getAmount();
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        if (memberType.getFee() >= amount) {
+            return CommonUtils.substract(memberType.getFee(), amount);
+        } else {
+            return 0D;
+        }
     }
 
     //生成学号 2位课程号2位班级号3位学号

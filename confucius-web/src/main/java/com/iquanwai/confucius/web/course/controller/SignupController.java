@@ -407,17 +407,84 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/coupon/calculate", method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> usrCoupon(LoginUser loginUser, @RequestParam String code){
+    public ResponseEntity<Map<String,Object>> usrCoupon(LoginUser loginUser, @RequestBody RiseMemberDto memberDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(code, "优惠券不能为空");
+        Assert.notNull(memberDto.getCouponId(), "优惠券不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
                 .action("计算优惠券减免")
-                .memo(code);
+                .memo(memberDto.getCouponId() + "");
+        Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getOpenId(), memberDto.getMemberType());
+        if(check.getLeft()!=1){
+            return WebUtils.error(check.getRight());
+        }
+        Double price = signupService.calculateCoupon(memberDto.getMemberType(), memberDto.getCouponId());
 //        signupService.calculateCoupon(loginUser.getOpenId(),,code);
         operationLogService.log(operationLog);
-        return null;
+        return WebUtils.result(price);
     }
+
+    @RequestMapping(value = "/rise/member/pay")
+    public ResponseEntity<Map<String, Object>> riseMemberPay(LoginUser loginUser, HttpServletRequest request, @RequestBody RiseMemberDto memberDto) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("点击支付")
+                .memo(memberDto.getMemberType() + "");
+        operationLogService.log(operationLog);
+        String remoteIp = request.getHeader("X-Forwarded-For");
+        if (remoteIp == null) {
+            LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), memberDto);
+            remoteIp = ConfigUtils.getExternalIP();
+        }
+        Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getOpenId(), memberDto.getMemberType());
+        if(check.getLeft()!=1){
+            return WebUtils.error(check.getRight());
+        }
+        Pair<Integer, QuanwaiOrder> quanwaiOrderPair = signupService.signupRiseMember(loginUser.getOpenId(), memberDto.getMemberType(), memberDto.getCouponId());
+
+        if (quanwaiOrderPair.getLeft() == -1) {
+            return WebUtils.error("该优惠券无效");
+        } else {
+            // 下单
+            SignupDto signupDto = new SignupDto();
+            QuanwaiOrder quanwaiOrder = quanwaiOrderPair.getRight();
+            signupDto.setFee(quanwaiOrder.getPrice());
+            signupDto.setFree(Double.valueOf(0d).equals(quanwaiOrder.getPrice()));
+            signupDto.setProductId(quanwaiOrder.getOrderId());
+            if (!Double.valueOf(0).equals(quanwaiOrder.getPrice())) {
+                // 碎片化统一下单
+                Map<String, String> signParams = payService.buildH5PayParam(quanwaiOrder.getOrderId(), remoteIp, loginUser.getOpenId());
+                signupDto.setSignParams(signParams);
+                OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
+                        .module("报名")
+                        .function("微信支付")
+                        .action("下单")
+                        .memo(signParams.toString());
+                operationLogService.log(payParamLog);
+            }
+            return WebUtils.result(signupDto);
+        }
+    }
+
+    @RequestMapping(value="/rise/member",method = RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> getRiseMemberPayInfo(LoginUser loginUser){
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("加载Rise会员信息");
+        operationLogService.log(operationLog);
+        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
+        // 查看优惠券信息
+        List<Coupon> coupons = signupService.getCoupons(loginUser.getOpenId());
+        RiseMemberDto dto = new RiseMemberDto();
+        dto.setMemberTypes(memberTypesPayInfo);
+        dto.setCoupons(coupons);
+        return WebUtils.result(dto);
+    }
+
 
 }

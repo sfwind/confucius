@@ -82,4 +82,16 @@ public class RiseOrderDao extends DBUtil {
         return -1;
     }
 
+    public Integer userNotCloseOrder(String openId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+        String sql = "select count(1) from RiseOrder where OpenId = ? and Entry = 0 and IsDel = 0";
+        try{
+            return run.query(sql,h,openId).intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
 }

@@ -34,10 +34,15 @@ public interface SignupService {
      * */
     QuanwaiOrder signup(String openid, Integer courseId, Integer classId);
 
+    Pair<Integer, String> riseMemberSignupCheck(String openId,Integer memberTypeId);
+
     /**
      * 报名rise, 不生成预付订单
      */
     QuanwaiOrder signupRiseMember(String openid, Integer memberType);
+
+    Pair<Integer,QuanwaiOrder> signupRiseMember(String openid, Integer memberType,Integer couponId);
+
 
     /**
      * 该重载方法待删除
@@ -137,4 +142,11 @@ public interface SignupService {
     MemberType getMemberType(Integer memberType);
 
     List<Coupon> getCoupons(String openId);
+
+    /**
+     * 查询会员类型的支付信息
+     */
+    List<MemberType> getMemberTypesPayInfo();
+
+    Double calculateCoupon(Integer memberTypeId, Integer couponId);
 }
