@@ -623,7 +623,7 @@ public class SignupServiceImpl implements SignupService {
         RiseMember riseMember = riseMemberDao.validRiseMember(openId);
         if (riseMember != null) {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getAddTime()));
-            riseMember.setEndTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
+            riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
         }
         return riseMember;
     }
