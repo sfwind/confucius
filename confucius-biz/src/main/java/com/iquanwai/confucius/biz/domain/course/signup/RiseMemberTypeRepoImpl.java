@@ -47,4 +47,9 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
         });
         return collect;
     }
+
+    @Override
+    public void reload(){
+        this.init();
+    }
 }

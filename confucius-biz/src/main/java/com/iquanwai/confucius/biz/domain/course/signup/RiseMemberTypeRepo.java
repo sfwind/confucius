@@ -18,4 +18,5 @@ public interface RiseMemberTypeRepo {
 
     List<MemberType> memberTypes();
 
+    void reload();
 }
