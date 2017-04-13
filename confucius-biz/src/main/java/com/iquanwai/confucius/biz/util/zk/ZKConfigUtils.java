@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.util.zk;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import org.apache.zookeeper.CreateMode;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 17/3/25.
@@ -137,9 +139,9 @@ public class ZKConfigUtils {
         }
     }
 
-    public Map<String, String> getAllValue(String projectId){
-        Map<String, String> maps = Maps.newHashMap();
+    public List<ConfigNode> getAllValue(String projectId){
         Map<ConfigNode, String> temp = Maps.newHashMap();
+        List<ConfigNode> list = Lists.newArrayList();
         try {
             List<String> paths  = zk.getChildren(CONFIG_PATH.concat(projectId), null);
 
@@ -155,13 +157,14 @@ public class ZKConfigUtils {
                 }
             );
             //按创建时间排序
-            temp.keySet().stream().sorted((o1, o2) -> (int)((o1.getC_time()-o2.getC_time())/1000));
+            list = temp.keySet().stream().collect(Collectors.toList());
+            list.stream().sorted((o1, o2) -> (int) ((o1.getC_time() - o2.getC_time()) / 1000));
             //组装结果map
-            temp.keySet().stream().forEach(configNode -> maps.put(temp.get(configNode), configNode.getValue()));
+            list.stream().forEach(configNode -> configNode.setKey(temp.get(configNode)));
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " get path {} children failed", projectId);
         }
 
-        return maps;
+        return list;
     }
 }
