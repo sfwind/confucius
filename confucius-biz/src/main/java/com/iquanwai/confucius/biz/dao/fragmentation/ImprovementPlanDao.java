@@ -70,4 +70,14 @@ public class ImprovementPlanDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public void becomeRiseMember(Integer planId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE ImprovementPlan SET RiseMember = 1 where Id=?";
+        try {
+            runner.update(sql, planId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
 }

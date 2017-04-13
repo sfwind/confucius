@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
@@ -16,6 +17,7 @@ import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
@@ -75,6 +77,8 @@ public class SignupServiceImpl implements SignupService {
     private RiseMemberCountRepo riseMemberCountRepo;
     @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private ImprovementPlanDao improvementPlanDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -434,6 +438,15 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setMemberTypeId(memberType.getId());
         riseMember.setExpireDate(expireDate);
         riseMemberDao.insert(riseMember);
+
+        // 所有计划设置为会员
+        List<ImprovementPlan> plans = improvementPlanDao.loadUserPlans(riseOrder.getOpenid());
+        for (ImprovementPlan plan : plans) {
+            if(!plan.getRiseMember()){
+                // 不是会员的计划，设置一下
+                improvementPlanDao.becomeRiseMember(plan.getId());
+            }
+        }
     }
 
     private Date getCloseDate(Integer classId, Integer courseId) {
