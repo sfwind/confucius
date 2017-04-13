@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
@@ -141,6 +142,9 @@ public interface SignupService {
      */
     MemberType getMemberType(Integer memberType);
 
+    /**
+     * 获取用户可以使用的优惠券
+     */
     List<Coupon> getCoupons(String openId);
 
     /**
@@ -148,5 +152,13 @@ public interface SignupService {
      */
     List<MemberType> getMemberTypesPayInfo();
 
+    /**
+     * 计算优惠券
+     * @param memberTypeId 会员id
+     * @param couponId 优惠券id
+     * @return 打的折扣是多少
+     */
     Double calculateCoupon(Integer memberTypeId, Integer couponId);
+
+    RiseMember currentRiseMember(String openId);
 }

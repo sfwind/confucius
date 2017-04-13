@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
+import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
@@ -16,6 +17,7 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
@@ -71,6 +73,8 @@ public class SignupServiceImpl implements SignupService {
     private RiseOrderDao riseOrderDao;
     @Autowired
     private RiseMemberCountRepo riseMemberCountRepo;
+    @Autowired
+    private RiseMemberDao riseMemberDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -402,22 +406,34 @@ public class SignupServiceImpl implements SignupService {
         String openId = riseOrder.getOpenid();
 
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
+        Date expireDate = null;
         switch (memberType.getId()) {
             case 1: {
-                profileDao.becomeRiseMember(openId, DateUtils.afterMonths(new Date(), 6));
+                expireDate = DateUtils.afterMonths(new Date(), 6);
+                profileDao.becomeRiseMember(openId);
                 break;
             }
             case 2: {
-                profileDao.becomeRiseMember(openId, DateUtils.afterYears(new Date(), 1));
+                expireDate = DateUtils.afterYears(new Date(), 1);
+                profileDao.becomeRiseMember(openId);
                 break;
             }
             case 3: {
-                profileDao.becomeRiseMember(openId, DateUtils.afterYears(new Date(), 1));
+                expireDate = DateUtils.afterYears(new Date(), 1);
+                profileDao.becomeRiseMember(openId);
                 break;
             }
             default:
                 logger.error("该会员ID异常{}", memberType);
+                return;
         }
+        // 添加会员表
+        RiseMember riseMember = new RiseMember();
+        riseMember.setOpenId(riseOrder.getOpenid());
+        riseMember.setOrderId(riseOrder.getOrderId());
+        riseMember.setMemberTypeId(memberType.getId());
+        riseMember.setExpireDate(expireDate);
+        riseMemberDao.insert(riseMember);
     }
 
     private Date getCloseDate(Integer classId, Integer courseId) {
@@ -600,6 +616,16 @@ public class SignupServiceImpl implements SignupService {
         } else {
             return 0D;
         }
+    }
+
+    @Override
+    public RiseMember currentRiseMember(String openId){
+        RiseMember riseMember = riseMemberDao.validRiseMember(openId);
+        if (riseMember != null) {
+            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getAddTime()));
+            riseMember.setEndTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
+        }
+        return riseMember;
     }
 
     //生成学号 2位课程号2位班级号3位学号
