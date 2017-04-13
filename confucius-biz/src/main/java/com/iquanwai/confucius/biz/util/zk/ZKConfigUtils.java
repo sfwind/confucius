@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.biz.util.zk;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 17/3/25.
@@ -72,7 +75,9 @@ public class ZKConfigUtils {
 
     public String getValue(String projectId, String key){
         try {
-            return new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");
+            String json = new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");
+            ConfigNode configNode = new Gson().fromJson(json, ConfigNode.class);
+            return configNode.getValue();
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " get value", e);
         }
@@ -101,7 +106,12 @@ public class ZKConfigUtils {
 
     public void updateValue(String projectId, String key, String value){
         try {
-            zk.setData(CONFIG_PATH.concat(projectId+"/").concat(key), value.getBytes("utf-8"), -1);
+            String json = new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");
+            ConfigNode configNode = new Gson().fromJson(json, ConfigNode.class);
+            configNode.setValue(value);
+            configNode.setM_time(System.currentTimeMillis());
+            json = new Gson().toJson(configNode);
+            zk.setData(CONFIG_PATH.concat(projectId+"/").concat(key), json.getBytes("utf-8"), -1);
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " set key {} value {} failed", key, value);
         }
@@ -117,23 +127,44 @@ public class ZKConfigUtils {
 
     public void createValue(String projectId, String key, String value){
         try {
-            zk.create(CONFIG_PATH.concat(projectId+"/").concat(key), value.getBytes("utf-8"),
+            ConfigNode configNode = new ConfigNode();
+            configNode.setValue(value);
+            configNode.setC_time(System.currentTimeMillis());
+            configNode.setM_time(System.currentTimeMillis());
+            String json = new Gson().toJson(configNode);
+            zk.create(CONFIG_PATH.concat(projectId+"/").concat(key), json.getBytes("utf-8"),
                     ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " create key {} value {} failed", key, value);
         }
     }
 
-    public Map<String, String> getAllValue(String projectId){
-        Map<String, String> maps = Maps.newHashMap();
+    public List<ConfigNode> getAllValue(String projectId){
+        Map<ConfigNode, String> temp = Maps.newHashMap();
+        List<ConfigNode> list = Lists.newArrayList();
         try {
             List<String> paths  = zk.getChildren(CONFIG_PATH.concat(projectId), null);
 
-            paths.stream().forEach(path-> maps.put(path, getValue(projectId, path)));
+            paths.stream().forEach(path-> {
+                    String json = "";
+                    try {
+                        json = new String(zk.getData(CONFIG_PATH.concat(projectId + "/").concat(path), false, null), "utf-8");
+                    } catch (Exception e) {
+                        logger.error("zk " + zkAddress + " get value", e);
+                    }
+                    ConfigNode configNode = new Gson().fromJson(json, ConfigNode.class);
+                    temp.put(configNode, path);
+                }
+            );
+            //按创建时间排序
+            list = temp.keySet().stream().collect(Collectors.toList());
+            list.stream().sorted((o1, o2) -> (int) ((o1.getC_time() - o2.getC_time()) / 1000));
+            //组装结果map
+            list.stream().forEach(configNode -> configNode.setKey(temp.get(configNode)));
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " get path {} children failed", projectId);
         }
 
-        return maps;
+        return list;
     }
 }

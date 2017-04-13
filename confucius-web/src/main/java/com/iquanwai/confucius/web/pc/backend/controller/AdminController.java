@@ -3,6 +3,7 @@ package com.iquanwai.confucius.web.pc.backend.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.util.zk.ConfigNode;
 import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import com.iquanwai.confucius.web.pc.backend.dto.ConfigDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -31,13 +32,13 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> loadConfig(PCLoginUser loginUser,
                                                           @PathVariable String projectId) {
 
-        Map<String, String> kv = zkConfigUtils.getAllValue(projectId);
+        List<ConfigNode> configNodeList = zkConfigUtils.getAllValue(projectId);
         List<ConfigDto> configDtoList = Lists.newArrayList();
-        kv.keySet().stream().forEach(key -> {
+        configNodeList.stream().forEach(configNode -> {
             ConfigDto configDto = new ConfigDto();
             configDto.setProjectId(projectId);
-            configDto.setKey(key);
-            configDto.setValue(kv.get(key));
+            configDto.setKey(configNode.getKey());
+            configDto.setValue(configNode.getValue());
             configDtoList.add(configDto);
         });
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
