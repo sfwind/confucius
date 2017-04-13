@@ -11,4 +11,6 @@ public class ConfigNode{
     private long c_time;
     private long m_time;
 
+    private String key;
+
 }
