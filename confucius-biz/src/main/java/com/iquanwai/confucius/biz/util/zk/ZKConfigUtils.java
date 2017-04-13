@@ -12,6 +12,7 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -139,10 +140,19 @@ public class ZKConfigUtils {
 
     public Map<String, String> getAllValue(String projectId){
         Map<String, String> maps = Maps.newHashMap();
+        Map<ConfigNode, String> temp = Maps.newHashMap();
         try {
             List<String> paths  = zk.getChildren(CONFIG_PATH.concat(projectId), null);
 
-            paths.stream().forEach(path-> maps.put(path, getValue(projectId, path)));
+            paths.stream().forEach(path-> {
+                    ConfigNode configNode = new Gson().fromJson(getValue(projectId, path), ConfigNode.class);
+                    temp.put(configNode, path);
+                }
+            );
+            //按创建时间排序
+            temp.keySet().stream().sorted((o1, o2) -> (int)((o1.getC_time()-o2.getC_time())/1000));
+            //组装结果map
+            temp.keySet().stream().forEach(configNode -> maps.put(temp.get(configNode), configNode.getValue()));
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " get path {} children failed", projectId);
         }
