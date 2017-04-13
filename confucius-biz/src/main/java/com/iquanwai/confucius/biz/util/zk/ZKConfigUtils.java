@@ -12,7 +12,6 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -145,7 +144,13 @@ public class ZKConfigUtils {
             List<String> paths  = zk.getChildren(CONFIG_PATH.concat(projectId), null);
 
             paths.stream().forEach(path-> {
-                    ConfigNode configNode = new Gson().fromJson(getValue(projectId, path), ConfigNode.class);
+                    String json = "";
+                    try {
+                        json = new String(zk.getData(CONFIG_PATH.concat(projectId + "/").concat(path), false, null), "utf-8");
+                    } catch (Exception e) {
+                        logger.error("zk " + zkAddress + " get value", e);
+                    }
+                    ConfigNode configNode = new Gson().fromJson(json, ConfigNode.class);
                     temp.put(configNode, path);
                 }
             );
