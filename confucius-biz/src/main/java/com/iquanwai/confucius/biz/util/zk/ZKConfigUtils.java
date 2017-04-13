@@ -30,7 +30,7 @@ public class ZKConfigUtils {
     /* 每个项目的path不同 */
     private static final String CONFIG_PATH = "/quanwai/config/";
 
-    private static final String ZK_CONFIG_PATH = "/data/static/config/zk";
+    private static final String ZK_CONFIG_PATH = "/data/config/zk";
     private static final String ZK_ADDRESS_KEY = "zk.address";
 
     public ZKConfigUtils(){
