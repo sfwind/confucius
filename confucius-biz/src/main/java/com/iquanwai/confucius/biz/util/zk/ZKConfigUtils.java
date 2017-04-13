@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.util.zk;
 
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
@@ -72,7 +73,9 @@ public class ZKConfigUtils {
 
     public String getValue(String projectId, String key){
         try {
-            return new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");
+            String json = new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");
+            ConfigNode configNode = new Gson().fromJson(json, ConfigNode.class);
+            return configNode.getValue();
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " get value", e);
         }
@@ -101,7 +104,12 @@ public class ZKConfigUtils {
 
     public void updateValue(String projectId, String key, String value){
         try {
-            zk.setData(CONFIG_PATH.concat(projectId+"/").concat(key), value.getBytes("utf-8"), -1);
+            String json = new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");
+            ConfigNode configNode = new Gson().fromJson(json, ConfigNode.class);
+            configNode.setValue(value);
+            configNode.setM_time(System.currentTimeMillis());
+            json = new Gson().toJson(configNode);
+            zk.setData(CONFIG_PATH.concat(projectId+"/").concat(key), json.getBytes("utf-8"), -1);
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " set key {} value {} failed", key, value);
         }
@@ -117,7 +125,12 @@ public class ZKConfigUtils {
 
     public void createValue(String projectId, String key, String value){
         try {
-            zk.create(CONFIG_PATH.concat(projectId+"/").concat(key), value.getBytes("utf-8"),
+            ConfigNode configNode = new ConfigNode();
+            configNode.setValue(value);
+            configNode.setC_time(System.currentTimeMillis());
+            configNode.setM_time(System.currentTimeMillis());
+            String json = new Gson().toJson(configNode);
+            zk.create(CONFIG_PATH.concat(projectId+"/").concat(key), json.getBytes("utf-8"),
                     ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         } catch (Exception e) {
             logger.error("zk " + zkAddress + " create key {} value {} failed", key, value);
