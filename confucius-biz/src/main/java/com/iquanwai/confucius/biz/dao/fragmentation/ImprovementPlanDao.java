@@ -71,11 +71,11 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         }
     }
 
-    public void becomeRiseMember(Integer planId){
+    public void becomeRiseMember(ImprovementPlan plan){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE ImprovementPlan SET RiseMember = 1 where Id=?";
+        String sql = "UPDATE ImprovementPlan SET RiseMember = 1,CloseDate = ? where Id=?";
         try {
-            runner.update(sql, planId);
+            runner.update(sql, plan.getCloseDate(),plan.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

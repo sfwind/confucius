@@ -80,6 +80,8 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
 
+    int PROBLEM_MAX_LENGTH = 30; //专题最长开放时间
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
@@ -444,7 +446,8 @@ public class SignupServiceImpl implements SignupService {
         for (ImprovementPlan plan : plans) {
             if(!plan.getRiseMember()){
                 // 不是会员的计划，设置一下
-                improvementPlanDao.becomeRiseMember(plan.getId());
+                plan.setCloseDate(DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+                improvementPlanDao.becomeRiseMember(plan);
             }
         }
     }
