@@ -602,8 +602,12 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public List<MemberType> getMemberTypesPayInfo() {
-
-        return riseMemberTypeRepo.memberTypes();
+        List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
+        memberTypes.forEach(item->{
+            item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), item.getOpenMonth()), 1)));
+        });
+        return memberTypes;
     }
 
     @Override
