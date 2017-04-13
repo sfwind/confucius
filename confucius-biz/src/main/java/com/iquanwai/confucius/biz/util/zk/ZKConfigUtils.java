@@ -158,7 +158,7 @@ public class ZKConfigUtils {
             );
             //按创建时间排序
             list = temp.keySet().stream().collect(Collectors.toList());
-            list.stream().sorted((o1, o2) -> (int) ((o1.getC_time() - o2.getC_time()) / 1000));
+            list.sort((o1, o2) -> (int) ((o1.getC_time() - o2.getC_time()) / 1000L));
             //组装结果map
             list.stream().forEach(configNode -> configNode.setKey(temp.get(configNode)));
         } catch (Exception e) {
