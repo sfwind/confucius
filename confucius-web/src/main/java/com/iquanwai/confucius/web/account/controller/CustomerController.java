@@ -290,6 +290,9 @@ public class CustomerController {
                 .action("查询rise会员信息")
                 .memo(riseMember!=null?new Gson().toJson(riseMember):"none");
         operationLogService.log(operationLog);
+        if (riseMember != null) {
+            riseMember.setName(signupService.getMemberType(riseMember.getMemberTypeId()).getName());
+        }
         return WebUtils.result(riseMember);
     }
 }
