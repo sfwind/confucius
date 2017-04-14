@@ -29,6 +29,8 @@ public interface SignupService {
      * */
     Pair<Integer, Integer> signupCheck(String openid, Integer courseId);
 
+    Pair<Integer, String> riseMemberSignupCheckNoHold(String openId, Integer memberTypeId);
+
     /**
      * 课程报名，生成预付订单
      * @return 订单

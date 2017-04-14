@@ -49,6 +49,11 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
 
     @Override
     public Pair<Integer, String> prepareSignup(String openId) {
+        return this.prepareSignup(openId, true);
+    }
+
+    @Override
+    public Pair<Integer,String> prepareSignup(String openId, Boolean hold){
         Profile profile = profileDao.queryByOpenId(openId);
         if(profile.getRiseMember()){
             // 已经报名
@@ -70,7 +75,10 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
             if(remainCount.get() <= 0){
                 return new MutablePair<>(-1,"报名人数已满");
             } else {
-                remainCount.decrementAndGet();
+                // 是否要占
+                if(hold){
+                    remainCount.decrementAndGet();
+                }
                 return new MutablePair<>(1,"ok");
             }
         }

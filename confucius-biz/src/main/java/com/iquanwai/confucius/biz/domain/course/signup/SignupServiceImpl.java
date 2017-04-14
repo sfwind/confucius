@@ -150,6 +150,11 @@ public class SignupServiceImpl implements SignupService {
         return riseMemberCountRepo.prepareSignup(openId);
     }
 
+    @Override
+    public Pair<Integer, String> riseMemberSignupCheckNoHold(String openId,Integer memberTypeId){
+        return riseMemberCountRepo.prepareSignup(openId,false);
+    }
+
     public QuanwaiOrder signup(String openid, Integer courseId, Integer classId) {
         //生成订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();

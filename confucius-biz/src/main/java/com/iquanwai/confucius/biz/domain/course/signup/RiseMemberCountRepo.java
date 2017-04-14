@@ -10,6 +10,9 @@ public interface RiseMemberCountRepo {
     void init();
     // 预报名
     Pair<Integer,String> prepareSignup(String openId);
+
+    Pair<Integer,String> prepareSignup(String openId, Boolean hold);
+
     // 退出预报名
     void quitSignup(String openId,Integer memberTypeId);
 

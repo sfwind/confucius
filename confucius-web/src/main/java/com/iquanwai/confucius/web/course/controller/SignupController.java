@@ -407,7 +407,7 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/coupon/calculate", method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> usrCoupon(LoginUser loginUser, @RequestBody RiseMemberDto memberDto) {
+    public ResponseEntity<Map<String,Object>> useCoupon(LoginUser loginUser, @RequestBody RiseMemberDto memberDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(memberDto.getCouponId(), "优惠券不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -486,5 +486,18 @@ public class SignupController {
         return WebUtils.result(dto);
     }
 
-
+    @RequestMapping(value = "/rise/member/check/{memberTypeId}",method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser,@PathVariable Integer memberTypeId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("点击RISE会员选择按钮");
+        operationLogService.log(operationLog);
+        Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getOpenId(), memberTypeId);
+        if(result.getLeft()!=1){
+            return WebUtils.error(result.getRight());
+        } else {
+            return WebUtils.success();
+        }
+    }
 }
