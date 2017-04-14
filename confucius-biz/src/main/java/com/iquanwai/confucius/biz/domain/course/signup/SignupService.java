@@ -121,6 +121,8 @@ public interface SignupService {
 
     Map<Integer,Integer> getRemindingCount();
 
+    Integer getRiseRemindingCount();
+
     void updatePromoCode(String orderId, String promoCode);
 
     /**

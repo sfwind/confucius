@@ -84,6 +84,11 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
         }
     }
 
+    @Override
+    public Integer getRemindingCount(){
+        return remainCount.get();
+    }
+
 
 }
 

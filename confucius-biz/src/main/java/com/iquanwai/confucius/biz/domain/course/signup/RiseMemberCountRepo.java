@@ -12,4 +12,6 @@ public interface RiseMemberCountRepo {
     Pair<Integer,String> prepareSignup(String openId);
     // 退出预报名
     void quitSignup(String openId,Integer memberTypeId);
+
+    Integer getRemindingCount();
 }

@@ -585,6 +585,11 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public Integer getRiseRemindingCount(){
+        return riseMemberCountRepo.getRemindingCount();
+    }
+
+    @Override
     public void updatePromoCode(String orderId, String promoCode){
         courseOrderDao.updatePromoCode(orderId,promoCode);
     }
