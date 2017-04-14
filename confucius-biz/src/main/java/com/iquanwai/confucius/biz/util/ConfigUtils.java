@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -229,4 +230,11 @@ public class ConfigUtils {
 		return config.getString("qiniu.picture.prefix");
 	}
 
+	public static Date getRisePayStopTime(){
+		return DateUtils.parseStringToDateTime(config.getString("rise.member.pay.stop.time"));
+	}
+
+	public static Integer riseMemberTotal(){
+		return config.getInt("rise.member.total.count");
+	}
 }
