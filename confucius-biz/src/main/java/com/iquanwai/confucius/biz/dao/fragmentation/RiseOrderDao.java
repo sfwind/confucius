@@ -88,7 +88,7 @@ public class RiseOrderDao extends DBUtil {
     public List<RiseOrder> loadActiveOrder(){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<RiseOrder>> h = new BeanListHandler<RiseOrder>(RiseOrder.class);
-        String sql = "Select * from RiseOrder where where Entry = 0 and IsDel = 0";
+        String sql = "Select * from RiseOrder  where Entry = 0 and IsDel = 0";
         try{
             return run.query(sql,h);
         }catch (SQLException e) {
