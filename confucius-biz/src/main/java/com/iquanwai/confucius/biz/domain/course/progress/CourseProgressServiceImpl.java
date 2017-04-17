@@ -261,7 +261,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 .filter(chapter -> chapter.getType() == CourseType.CHALLENGE || chapter.getType() == CourseType.HOMEWORK)
                 .map(Chapter::getSequence).collect(Collectors.toList()));
 
-        List<ClassMember> classMembers = classMemberDao.getClassMember(quanwaiClass.getId());
+        List<ClassMember> classMembers = classMemberDao.getClassMember(quanwaiClass.getId(), new Date());
         List<ClassMember> incompleteMembers = Lists.newArrayList();
         for(ClassMember classMember:classMembers){
             String complete = classMember.getComplete();

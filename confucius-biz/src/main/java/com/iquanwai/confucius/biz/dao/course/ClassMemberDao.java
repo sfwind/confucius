@@ -139,6 +139,23 @@ public class ClassMemberDao extends DBUtil {
 
         return Lists.newArrayList();
     }
+
+    public List<ClassMember> getClassMember(Integer classId,Date closeDate){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ClassId=? and CloseDate > ?",
+                    h, classId, closeDate);
+            return classMember;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+
     public void entry(ClassMember classMember) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO ClassMember(ClassId, CourseId, Openid, MemberId, Graduate, CloseDate) " +
