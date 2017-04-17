@@ -70,13 +70,13 @@ public class IndexController {
     }
 
     @RequestMapping(value = "/pay/**",method = RequestMethod.GET)
-    public ModelAndView getPayIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
+    public ModelAndView getPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
         }
-        return courseView(request);
+        return courseView(request, loginUser);
     }
 
     @RequestMapping(value = "/personal/edit",method = RequestMethod.GET)
