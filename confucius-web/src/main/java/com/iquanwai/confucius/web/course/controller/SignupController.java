@@ -495,7 +495,11 @@ public class SignupController {
         operationLogService.log(operationLog);
         Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getOpenId(), memberTypeId);
         if(result.getLeft()!=1){
-            return WebUtils.error(result.getRight());
+            if(result.getLeft() == -4){
+                return WebUtils.error(214, result.getRight());
+            } else {
+                return WebUtils.error(result.getRight());
+            }
         } else {
             return WebUtils.success();
         }
