@@ -73,7 +73,7 @@ public class RiseOrderDao extends DBUtil {
     public Integer loadHolderCount(){
         QueryRunner run = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();
-        String sql = "Select count(distinct OpenId) from RiseOrder where IsDel = 0";
+        String sql = "Select count(distinct OpenId) from RiseOrder where Entry = 0 and IsDel = 0";
         try{
             return run.query(sql,h).intValue();
         } catch (SQLException e) {

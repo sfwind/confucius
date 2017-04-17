@@ -39,8 +39,14 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
         logger.info("初始化rise会员报名参数");
         // 查询当前已报名的人数和待付款的人数
         remainCount = new AtomicInteger(ConfigUtils.riseMemberTotal());
-        Integer integer = riseOrderDao.loadHolderCount();
-        Integer remain = remainCount.addAndGet(-integer);
+        // 未付款+未过期=所占名额
+        // 未付款
+        Integer holderCount = riseOrderDao.loadHolderCount();
+        // 未过期
+        Integer nowCount = profileDao.riseMemberCount();
+        Integer total = nowCount+holderCount;
+        logger.info("当前RISE会员:{},待付费人数:{},总名额:{},剩余名额:{}", nowCount, holderCount, total, remainCount.get() - total);
+        Integer remain = remainCount.addAndGet(-total);
         // 剩余人数
         if (remain < 0) {
             remainCount.set(0);
