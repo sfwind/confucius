@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web;
 
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
@@ -37,6 +38,8 @@ public class CacheReloadController {
     private AccountService accountService;
     @Autowired
     private RiseMemberTypeRepo riseMemberTypeRepo;
+    @Autowired
+    private RiseMemberCountRepo riseMemberCountRepo;
 
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -114,6 +117,16 @@ public class CacheReloadController {
             return WebUtils.success();
         } catch (Exception e){
             return WebUtils.error("reload region");
+        }
+    }
+
+    @RequestMapping("/rise/member/reload")
+    public ResponseEntity<Map<String,Object>> riseMemberReload(){
+        try{
+            riseMemberCountRepo.reload();
+            return WebUtils.success();
+        } catch (Exception e){
+            return WebUtils.error("reload riseMember error");
         }
     }
 }

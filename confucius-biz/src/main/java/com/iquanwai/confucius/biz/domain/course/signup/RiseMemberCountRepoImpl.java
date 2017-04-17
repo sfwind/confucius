@@ -54,6 +54,11 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     }
 
     @Override
+    public void reload(){
+        this.init();
+    }
+
+    @Override
     public Pair<Integer, String> prepareSignup(String openId) {
         return this.prepareSignup(openId, true);
     }

@@ -8,6 +8,9 @@ import org.apache.commons.lang3.tuple.Pair;
 public interface RiseMemberCountRepo {
     // 初始化报名参数
     void init();
+
+    void reload();
+
     // 预报名
     Pair<Integer,String> prepareSignup(String openId);
 
