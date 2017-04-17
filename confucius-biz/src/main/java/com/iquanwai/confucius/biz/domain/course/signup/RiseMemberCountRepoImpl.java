@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -41,12 +43,18 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
         remainCount = new AtomicInteger(ConfigUtils.riseMemberTotal());
         // 未付款+未过期=所占名额
         // 未付款
-        Integer holderCount = riseOrderDao.loadHolderCount();
+//        Integer holderCount = riseOrderDao.loadHolderCount();
+        // 未关闭的订单中，如果用户已经是rise会员，则这个未关闭订单不要再占据一个名额
+        List<RiseOrder> holderList = riseOrderDao.loadActiveOrder();
+        long holderCount = holderList.stream().filter(item -> {
+            Profile profile = profileDao.queryByOpenId(item.getOpenid());
+            return !profile.getRiseMember();
+        }).count();
         // 未过期
         Integer nowCount = profileDao.riseMemberCount();
-        Integer total = nowCount+holderCount;
+        Long total = nowCount+holderCount;
         logger.info("当前RISE会员:{},待付费人数:{},总名额:{},剩余名额:{}", nowCount, holderCount, total, remainCount.get() - total);
-        Integer remain = remainCount.addAndGet(-total);
+        Integer remain = remainCount.addAndGet(-total.intValue());
         // 剩余人数
         if (remain < 0) {
             remainCount.set(0);
@@ -73,7 +81,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
             // 未报名,查看是否有未关闭的订单
             Integer counts = riseOrderDao.userNotCloseOrder(openId);
             if(counts>0){
-                // 如果有为关闭的订单，则即使未再报名期间之内应该也可以报名
+                // 如果有未关闭的订单，则即使未再报名期间之内应该也可以报名
                 return new MutablePair<>(1,"ok");
             } else {
                 // 如果不是在报名时间内，则禁止报名

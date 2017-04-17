@@ -1,16 +1,19 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/4/6.
@@ -80,6 +83,18 @@ public class RiseOrderDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    public List<RiseOrder> loadActiveOrder(){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<RiseOrder>> h = new BeanListHandler<RiseOrder>(RiseOrder.class);
+        String sql = "Select * from RiseOrder where where Entry = 0 and IsDel = 0";
+        try{
+            return run.query(sql,h);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 
     public Integer userNotCloseOrder(String openId){
