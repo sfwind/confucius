@@ -474,8 +474,7 @@ public class SignupServiceImpl implements SignupService {
         data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
         data.put("remark", new TemplateMessage.Keyword("想认识更多和你一样的RISER？点击详情，加入你的所在地的分舵吧↓↓↓"));
-        // TODO 点击跳转到
-        templateMessage.setUrl(ConfigUtils.domainName());
+        templateMessage.setUrl(ConfigUtils.domainName() + "/static/quanwai/wx/group");
         templateMessageService.sendMessage(templateMessage);
     }
 
