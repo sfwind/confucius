@@ -467,7 +467,8 @@ public class SignupServiceImpl implements SignupService {
         templateMessage.setData(data);
         templateMessage.setTemplate_id(ConfigUtils.productPaidMsg());
         String first = "Hi，" + profile.getNickname() + "，欢迎使用RISE正式版！\n";
-        first += "所有的小课都已开放。了解更多会员权益，进入下方个人中心。有疑问请在下方留言给小Q哦";
+        first += "所有RISE小课已为你开放，开始学习吧！\n" +
+                "查看更多会员权益，请点击圈外学习号下方个人中心";
         data.put("first", new TemplateMessage.Keyword(first));
         data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
         data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
