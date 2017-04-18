@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Data
 public class ChallengeDto {
-    private Integer id; // 挑战任务id
+    private Integer id; // 应用练习id
     private String description;// "图文混排内容", //html
     private String pic;// "http://someurl",  //图片url
     private Integer problemId;//问题id

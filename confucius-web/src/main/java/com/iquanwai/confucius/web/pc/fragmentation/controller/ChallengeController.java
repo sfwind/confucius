@@ -67,10 +67,10 @@ public class ChallengeController {
 
 
     /**
-     * 加载挑战训练内容
+     * 加载小目标内容
      * @param pcLoginUser 登陆人
      * @param planId 计划id
-     * @param cid 挑战任务id
+     * @param cid 小目标id
      */
     @RequestMapping("/mine/{planId}/{cid}")
     public ResponseEntity<Map<String, Object>> loadMineChallenge(PCLoginUser pcLoginUser,
@@ -78,11 +78,11 @@ public class ChallengeController {
                                                                  @PathVariable("cid") Integer cid) {
         Assert.notNull(pcLoginUser,"用户信息不能为空");
         Assert.notNull(planId, "计划id不能为空");
-        Assert.notNull(cid,"挑战训练id不能为空");
+        Assert.notNull(cid,"小目标id不能为空");
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("训练")
-                .function("挑战训练")
-                .action("PC加载挑战训练")
+                .function("小目标")
+                .action("PC加载小目标")
                 .memo(planId+":"+cid);
         operationLogService.log(operationLog);
         String openId = pcLoginUser.getOpenId();
@@ -103,16 +103,16 @@ public class ChallengeController {
                     .collect(Collectors.toList()));
             // 先写死
             dto.setDescription("Hi，欢迎来到圈外社区，这里有很多同路人在和你一起进步！<br/>" +
-                    "你有什么目标，可以利用本专题的训练实现呢？请在这里记录你的小目标吧！制定目标帮你更积极地学习，也带给你更多成就感！" );
+                    "你有什么目标，可以利用本小课的训练实现呢？请在这里记录你的小目标吧！制定目标帮你更积极地学习，也带给你更多成就感！" );
             return WebUtils.result(dto);
         } else {
-            logger.error("用户:{},没有该训练计划:{}，挑战训练:{}",openId,plan,cid);
+            logger.error("用户:{},没有该训练计划:{}，小目标:{}",openId,plan,cid);
             return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
     }
 
     /**
-     * 展示挑战任务提交内容
+     * 展示小目标提交内容
      * @param pcLoginUser 登陆人
      * @param submitId 提交id
      */
@@ -120,9 +120,9 @@ public class ChallengeController {
     public ResponseEntity<Map<String, Object>> showChallenge(PCLoginUser pcLoginUser, @PathVariable("submitId") Integer submitId) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                .module("挑战")
-                .function("挑战任务")
-                .action("PC查看挑战任务")
+                .module("训练")
+                .function("小目标")
+                .action("PC查看小目标")
                 .memo(pcLoginUser.getOpenId() + " look " + submitId);
         operationLogService.log(operationLog);
         ChallengeSubmit submit = practiceService.loadChallengeSubmit(submitId);
@@ -180,7 +180,7 @@ public class ChallengeController {
 
 
     /**
-     * 提交挑战任务
+     * 提交小目标
      * @param loginUser 登陆人
      * @param challengeSubmitDto 内容
      */
@@ -195,8 +195,8 @@ public class ChallengeController {
         Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
-                .function("挑战训练")
-                .action("PC提交挑战训练答案")
+                .function("小目标")
+                .action("PC提交小目标答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if (result.getLeft() > 0) {
@@ -214,10 +214,10 @@ public class ChallengeController {
 
 
     /**
-     * 挑战任务列表展示自己的
+     * 小目标列表展示自己的
      * @param loginUser 登陆人
      * @param planId 计划id
-     * @param challengeId 挑战任务id
+     * @param challengeId 小目标id
      */
     @RequestMapping("/list/mine/{planId}/{challengeId}")
     public ResponseEntity<Map<String, Object>> loadMineChallengeList(PCLoginUser loginUser, @PathVariable("planId") Integer planId, @PathVariable("challengeId") Integer challengeId) {
@@ -225,8 +225,8 @@ public class ChallengeController {
         Assert.notNull(challengeId, "challengeId不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
-                .function("挑战训练")
-                .action("挑战训练列表加载自己的")
+                .function("小目标")
+                .action("小目标列表加载自己的")
                 .memo(planId + ":" + challengeId);
         operationLogService.log(operationLog);
         ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, challengeId, loginUser.getOpenId(),false);
@@ -251,8 +251,8 @@ public class ChallengeController {
         Assert.notNull(challengeId, "challengeId不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
-                .function("挑战训练")
-                .action("挑战训练列表加载他人的")
+                .function("小目标")
+                .action("小目标列表加载他人的")
                 .memo(challengeId + "");
         operationLogService.log(operationLog);
         List<RiseWorkInfoDto> submits = practiceService.getChallengeSubmitList(challengeId)
@@ -278,7 +278,7 @@ public class ChallengeController {
                         int rightWeight = right.getCommentCount() + right.getVoteCount();
                         return rightWeight - leftWeight;
                     } catch (Exception e){
-                        logger.error("挑战任务文章排序异常",e);
+                        logger.error("小目标文章排序异常",e);
                         return 0;
                     }
                 }).collect(Collectors.toList());

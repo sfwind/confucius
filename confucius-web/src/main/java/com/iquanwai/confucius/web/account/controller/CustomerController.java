@@ -145,7 +145,7 @@ public class CustomerController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("RISE")
-                .action("查询专题信息");
+                .action("查询小课信息");
         operationLogService.log(operationLog);
         List<ImprovementPlan> plans = planService.loadUserPlans(loginUser.getOpenId());
         PlanListDto list = new PlanListDto();
@@ -229,7 +229,7 @@ public class CustomerController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("RISE")
-                .action("打开专题信息")
+                .action("打开小课信息")
                 .module(problemId.toString());
         operationLogService.log(operationLog);
         return WebUtils.result(problemKnowledgeList);
@@ -244,7 +244,7 @@ public class CustomerController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("RISE")
-                .action("打开专题详情页")
+                .action("打开小课介绍页")
                 .module(problemId.toString());
         operationLogService.log(operationLog);
         return WebUtils.result(problem);

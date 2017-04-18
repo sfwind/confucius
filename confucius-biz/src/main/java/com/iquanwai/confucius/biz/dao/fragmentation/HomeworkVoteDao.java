@@ -25,7 +25,7 @@ public class HomeworkVoteDao extends PracticeDBUtil {
     /**
      * 根据类型和依赖id查询被点赞的次数
      *
-     * @param type         1:挑战任务,2：体系化大作业
+     * @param type         1:小目标,2：体系化大作业
      * @param referencedId 被依赖的id
      */
     public List<HomeworkVote> allVoteList(Integer type, Integer referencedId) {
@@ -45,7 +45,7 @@ public class HomeworkVoteDao extends PracticeDBUtil {
     /**
      * 根据类型和依赖id查询有效的被点赞的次数
      *
-     * @param type         1:挑战任务,2：体系化大作业
+     * @param type         1:小目标,2：体系化大作业
      * @param referencedId 被依赖的id
      */
     public List<HomeworkVote> voteAbleList(Integer type, Integer referencedId) {
@@ -79,7 +79,7 @@ public class HomeworkVoteDao extends PracticeDBUtil {
     /**
      * 进行点赞
      *
-     * @param type         1:挑战任务，2：体系化大作业
+     * @param type         1:小目标，2：体系化大作业
      * @param referencedId 被依赖的id
      * @param openid       点赞的人
      * @return 插入结果
@@ -97,7 +97,7 @@ public class HomeworkVoteDao extends PracticeDBUtil {
 
     /**
      * voteOpenid对某条记录的点赞记录
-     * @param type 1:挑战任务，2：体系化大作业
+     * @param type 1:小目标，2：体系化大作业
      * @param referencedId 被依赖的id
      * @param voteOpenId 点赞的人
      * @return

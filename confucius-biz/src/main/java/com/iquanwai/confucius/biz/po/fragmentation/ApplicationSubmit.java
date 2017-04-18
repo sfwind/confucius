@@ -11,7 +11,7 @@ import java.util.Date;
 public class ApplicationSubmit {
     private int id;
     private String openid; // 提交人openid
-    private Integer applicationId; // 应用训练Id
+    private Integer applicationId; // 应用练习Id
     private Integer planId; // 提升计划id
     private String content; // 提交内容
     private Integer pointStatus; //加分状态

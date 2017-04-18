@@ -47,7 +47,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public ApplicationPractice loadMineApplicationPractice(Integer planId, Integer applicationId, String openId,boolean create) {
-        // 查询该应用训练
+        // 查询该应用练习
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交
         ApplicationSubmit submit = applicationSubmitDao.load(applicationId, planId, openId);
@@ -97,7 +97,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             } else {
                 logger.error("ImprovementPlan is not existed,planId:{}", submit.getPlanId());
             }
-            logger.info("应用训练加分:{}", id);
+            logger.info("应用练习加分:{}", id);
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
                     submit.getApplicationId(), PracticePlan.APPLICATION);
             if (practicePlan != null) {

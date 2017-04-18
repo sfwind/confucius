@@ -15,8 +15,8 @@ public interface PracticeService {
 
 
     /**
-     * 获取挑战训练
-     * @param id 挑战训练id
+     * 获取小目标
+     * @param id 小目标id
      * @param openid 学员id
      * @param planId 训练计划id
      * */
@@ -36,7 +36,7 @@ public interface PracticeService {
 
     /**
      * 查询点赞数
-     * @param type 1：挑战任务，2：体系化大作业
+     * @param type 1：小目标，2：体系化大作业
      * @param referencedId 被依赖的id
      * @return 点赞数
      */
@@ -44,7 +44,7 @@ public interface PracticeService {
 
     /**
      * 点赞
-     * @param type 1：挑战任务，2：体系化大作业
+     * @param type 1：小目标，2：体系化大作业
      * @param referencedId 被依赖的id
      * @param openId 点赞的人
      */
@@ -102,14 +102,14 @@ public interface PracticeService {
     void updatePicReference(List<String> picList, Integer submitId);
 
     /**
-     * 根据应用id,获取应用训练
+     * 根据应用id,获取练习训练
      * @param practiceId 练习id
      */
     ApplicationPractice loadApplication(Integer practiceId);
 
     /**
-     * 根据专题id,获取应用训练
-     * @param problemId 专题id
+     * 根据小课id,获取应用练习
+     * @param problemId 小课id
      */
     List<ApplicationPractice> loadApplicationByProblemId(Integer problemId);
 }

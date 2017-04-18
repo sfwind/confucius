@@ -11,7 +11,7 @@ import java.util.Date;
 public class ChallengeSubmit {
     private int id;
     private String openid; // 提交人openid 
-    private Integer challengeId; // 挑战训练id 
+    private Integer challengeId; // 小目标id
     private Integer planId; // 提升计划id 
     private String content; // 提交内容
     private Integer pointStatus;

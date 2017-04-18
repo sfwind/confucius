@@ -80,7 +80,7 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
 
-    int PROBLEM_MAX_LENGTH = 30; //专题最长开放时间
+    int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -253,8 +253,6 @@ public class SignupServiceImpl implements SignupService {
             }
             discount = costRepo.discount(memberType.getFee(), openid, orderId, coupon);
         }
-
-
 
         quanwaiOrder.setOrderId(orderId);
         quanwaiOrder.setTotal(memberType.getFee());

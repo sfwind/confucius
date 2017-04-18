@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 public class ApplicationDto {
-    private Integer id; // 应用训练id
+    private Integer id; // 应用练习id
     private String topic; //任务标题
     private String description; // 题干
     private Integer knowledgeId; //知识点id

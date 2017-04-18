@@ -67,7 +67,7 @@ public class PracticeServiceImpl implements PracticeService {
         } else {
             challengePractice.setSubmitted(true);
         }
-        //生成挑战训练提交记录
+        //生成小目标提交记录
         if (submit == null && create) {
             submit = new ChallengeSubmit();
             submit.setOpenid(openid);
@@ -169,7 +169,7 @@ public class PracticeServiceImpl implements PracticeService {
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/application?id=" + load.getApplicationId();
-                messageService.sendMessage("评论了我的应用训练", load.getOpenid(), openId, url);
+                messageService.sendMessage("评论了我的应用练习", load.getOpenid(), openId, url);
             }
         } else {
             SubjectArticle load = subjectArticleDao.load(SubjectArticle.class,referId);
@@ -182,7 +182,7 @@ public class PracticeServiceImpl implements PracticeService {
                 Profile profile = accountService.getProfile(openId, false);
                 if (profile != null) {
                     String url = "/rise/static/message/subject/reply?submitId=" + referId;
-                    messageService.sendMessage("评论了我的专题分享", load.getOpenid(), openId, url);
+                    messageService.sendMessage("评论了我的小课分享", load.getOpenid(), openId, url);
                 }
             }
         }

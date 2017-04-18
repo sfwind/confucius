@@ -9,7 +9,7 @@ import lombok.Data;
 public class PracticePlan {
     private int id;
     private Integer planId; //碎片化训练id
-    private Integer type; //题目类型（1-单选题，2-多选题，11-应用题，21-挑战题）
+    private Integer type; //题目类型（1-单选题，2-多选题，11-应用题，21-小目标）
     private String practiceId; //练习id
     private Boolean unlocked; // 是否解锁
     private Integer series; // 组号

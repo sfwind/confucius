@@ -72,7 +72,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         if (result) {
-            // 修改挑战任务记录
+            // 修改小目标记录
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(), submit.getChallengeId(), Constants.PracticeType.CHALLENGE);
             if (practicePlan != null) {
                 practicePlanDao.complete(practicePlan.getId());
@@ -86,7 +86,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
         // 这里都是提交成功的
         if (submit.getPointStatus() == 0 && content.length() > 50) {
-            logger.info("挑战训练加分:{}", id);
+            logger.info("小目标加分:{}", id);
             // 未加分并且字数大于50(字母)
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
                     submit.getChallengeId(), PracticePlan.CHALLENGE);
