@@ -49,7 +49,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
         long holderCount = holderList.stream().filter(item -> {
             Profile profile = profileDao.queryByOpenId(item.getOpenid());
             return !profile.getRiseMember();
-        }).count();
+        }).map(RiseOrder::getOpenid).distinct().count();
         // 未过期
         Integer nowCount = profileDao.riseMemberCount();
         Long total = nowCount+holderCount;
