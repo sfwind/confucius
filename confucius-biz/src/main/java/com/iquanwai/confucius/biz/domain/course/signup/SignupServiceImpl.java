@@ -453,6 +453,29 @@ public class SignupServiceImpl implements SignupService {
                 improvementPlanDao.becomeRiseMember(plan);
             }
         }
+        Profile profile = profileDao.queryByOpenId(openId);
+        // 发送模板消息
+        sendRiseMemberMsg(profile, memberType, riseMember);
+    }
+
+
+    private void sendRiseMemberMsg(Profile profile,MemberType memberType,RiseMember riseMember) {
+        Assert.notNull(profile, "openid不能为空");
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(profile.getOpenid());
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setData(data);
+        templateMessage.setTemplate_id(ConfigUtils.productPaidMsg());
+        String first = "Hi，" + profile.getNickname() + "，欢迎使用RISE正式版！\n";
+        first += "所有的小课都已开放。了解更多会员权益，进入下方个人中心。有疑问请在下方留言给小Q哦";
+        data.put("first", new TemplateMessage.Keyword(first));
+        data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
+        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+        data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
+        data.put("remark", new TemplateMessage.Keyword("想认识更多和你一样的RISER？点击详情，加入你的所在地的分舵吧↓↓↓"));
+        // TODO 点击跳转到
+        templateMessage.setUrl(ConfigUtils.domainName());
+        templateMessageService.sendMessage(templateMessage);
     }
 
     private Date getCloseDate(Integer classId, Integer courseId) {

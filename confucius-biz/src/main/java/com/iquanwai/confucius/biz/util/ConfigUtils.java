@@ -237,4 +237,8 @@ public class ConfigUtils {
 	public static Integer riseMemberTotal(){
 		return config.getInt("rise.member.total.count");
 	}
+
+	public static String productPaidMsg(){
+		return config.getString("product.paid.msg");
+	}
 }
