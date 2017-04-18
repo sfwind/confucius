@@ -466,14 +466,14 @@ public class SignupServiceImpl implements SignupService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setTemplate_id(ConfigUtils.productPaidMsg());
-        String first = "Hi，" + profile.getNickname() + "，欢迎使用RISE正式版！\n";
-        first += "所有RISE小课已为你开放，开始学习吧！\n" +
-                "查看更多会员权益，请点击圈外学习号下方个人中心";
+        String first = "Hi，" + profile.getNickname() + "，欢迎使用RISE正式版！\n\n";
+        first += "所有RISE小课已为你开放，开始学习吧！\n\n" +
+                "查看更多会员权益，请点击圈外学习号下方个人中心\n";
         data.put("first", new TemplateMessage.Keyword(first));
         data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
         data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
-        data.put("remark", new TemplateMessage.Keyword("想认识更多和你一样的RISER？点击详情，加入你的所在地的分舵吧↓↓↓"));
+        data.put("remark", new TemplateMessage.Keyword("\n想认识更多和你一样的RISER？点击详情，加入你的所在地的分舵吧↓↓↓"));
         templateMessage.setUrl(ConfigUtils.domainName() + "/static/quanwai/wx/group");
         templateMessageService.sendMessage(templateMessage);
     }
