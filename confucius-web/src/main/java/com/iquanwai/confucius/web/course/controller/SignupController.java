@@ -509,7 +509,7 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> markNormalQuestion(LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
-                .function("报名页面")
+                .function("打点")
                 .action("打开常见问题");
         operationLogService.log(operationLog);
         return WebUtils.success();
@@ -519,8 +519,8 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser,@PathVariable String type) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
-                .function("报名页面")
-                .action("支付数据打点")
+                .function("打点")
+                .action("支付")
                 .memo(type);
         operationLogService.log(operationLog);
         return WebUtils.success();
