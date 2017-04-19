@@ -26,7 +26,8 @@ public class RestfulHelper {
 
     public String post(String requestUrl, String json) {
         if(StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(json)) {
-            String accessToken = "tmYw_S8a-Q_iQEwt_VSoLpJO8cEmgs8o--X6vQO7IG9y9L_ur0upGaCn2OAB9nsGUdtSdY-cNv3Xyho8SG8rni7fTKrfDesvkpNDNR4Y9__q4P2ZpZUfmNBYbuJmNHXAKVIgAJAPAN";
+
+            String accessToken = accessTokenService.getAccessToken();
             String url = requestUrl.replace("{access_token}", accessToken);
             Request request = new Request.Builder()
                     .url(url)
