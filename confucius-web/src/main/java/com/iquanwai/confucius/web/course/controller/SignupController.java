@@ -504,4 +504,25 @@ public class SignupController {
             return WebUtils.success();
         }
     }
+
+    @RequestMapping(value = "/mark/normal/question")
+    public ResponseEntity<Map<String, Object>> markNormalQuestion(LoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("打开常见问题");
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/mark/pay/{type}")
+    public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser,@PathVariable String type) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("支付数据打点")
+                .memo(type);
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
 }

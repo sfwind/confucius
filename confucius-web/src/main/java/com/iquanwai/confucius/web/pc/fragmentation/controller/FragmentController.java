@@ -435,7 +435,7 @@ public class FragmentController {
             practiceService.updatePicReference(picList,submitId);
         }
 
-        OperationLog operationLog = OperationLog.create()
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
                 .action("PC小课论坛提交")
