@@ -102,7 +102,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         if (repliedId != null && !openid.equals(warmupPracticeDiscuss.getRepliedOpenid())) {
             String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
             url = MessageFormat.format(url, id.toString(), warmupPracticeId.toString());
-            String message = "回复了我的理解训练问题";
+            String message = "回复了我的巩固练习问题";
             messageService.sendMessage(message, warmupPracticeDiscuss.getRepliedOpenid(),
                     openid, url);
         }
@@ -122,7 +122,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
             String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
             url = MessageFormat.format(url, discussId.toString(), practiceId.toString());
-            String message = "你对一个理解训练题的解答很棒，并得到了官方的认证，点击看看吧";
+            String message = "你对一个巩固练习的解答很棒，并得到了官方的认证，点击看看吧";
             messageService.sendMessage(message, highlightOne,
                     SYSTEM_MESSAGE, url);
 
@@ -139,7 +139,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             participants.stream().filter(participant -> !participant.equals(highlightOne)).forEach(participant -> {
                 String url2 = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
                 url2 = MessageFormat.format(url2, discussId.toString(), practiceId.toString());
-                String message2 = "你关注的理解训练题，有一个解答被官方认证了，点击看看吧";
+                String message2 = "你关注的巩固练习，有一个解答被官方认证了，点击看看吧";
                 messageService.sendMessage(message2, participant,
                         SYSTEM_MESSAGE, url2);
             });

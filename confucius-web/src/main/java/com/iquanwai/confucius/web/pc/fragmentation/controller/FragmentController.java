@@ -123,10 +123,10 @@ public class FragmentController {
         // 查询该用户有没有购买过这个问题的计划
         List<ImprovementPlan> matchPlans = planService.loadUserPlans(pcLoginUser.getOpenId(),problemId);
         if (matchPlans.isEmpty()) {
-            logger.error("用户:{} 未购买专题:{}", pcLoginUser.getOpenId(), problemId);
+            logger.error("用户:{} 未购买小课:{}", pcLoginUser.getOpenId(), problemId);
             return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT, "没找到进行中的RISE训练");
         } else {
-            // 购买过专题
+            // 购买过小课
             RiseWorkListDto riseHomework = loadUserRiseWork(matchPlans, pcLoginUser.getOpenId());
             return WebUtils.result(riseHomework);
         }
@@ -147,14 +147,14 @@ public class FragmentController {
         Pair<Integer, String> voteResult;
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("碎片化")
-                .function("挑战任务");
+                .function("小目标");
         // TODO 业务逻辑下沉
         if (status == 1) {
             // 点赞加积分
             Integer planId = null;
             String submitOpenId = null;
             if(vote.getType()== Constants.VoteType.CHALLENGE){
-                // 挑战任务点赞
+                // 小目标点赞
                 ChallengeSubmit submit = challengeService.loadSubmit(refer);
                 planId = submit.getPlanId();
                 submitOpenId = submit.getOpenid();
@@ -164,7 +164,7 @@ public class FragmentController {
                 planId = submit.getPlanId();
                 submitOpenId = submit.getOpenid();
             } else if(vote.getType() == Constants.VoteType.SUBJECT){
-                // 专题区点赞
+                // 小课论坛点赞
                 SubjectArticle submit = practiceService.loadSubjectArticle(refer);
                 submitOpenId = submit.getOpenid();
                 List<ImprovementPlan> improvementPlans = planService.loadUserPlans(submitOpenId);
@@ -270,7 +270,7 @@ public class FragmentController {
     @RequestMapping(value = "/pc/fragment/subject/list",method = RequestMethod.GET)
     public ResponseEntity<Map<String,Object>> loadSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId,@ModelAttribute Page page){
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(problemId, "专题id不能为空");
+        Assert.notNull(problemId, "小课id不能为空");
         page.setPageSize(20);
         List<RiseWorkInfoDto> list = practiceService.loadSubjectArticles(problemId,page)
                 .stream().map(item -> {
@@ -290,7 +290,7 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("PC端加载专题输出区")
+                .action("PC端加载小课论坛")
                 .memo(problemId + "");
         operationLogService.log(operationLog);
         RefreshListDto<RiseWorkInfoDto> result = new RefreshListDto<>();
@@ -302,7 +302,7 @@ public class FragmentController {
     @RequestMapping(value = "/pc/fragment/subject/list/mine",method = RequestMethod.GET)
     public ResponseEntity<Map<String,Object>> loadMineSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId){
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(problemId, "专题id不能为空");
+        Assert.notNull(problemId, "小课id不能为空");
         List<RiseWorkInfoDto> list = practiceService.loadUserSubjectArticles(problemId,loginUser.getOpenId())
                 .stream().map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto();
@@ -328,7 +328,7 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("PC端加载专题输出区")
+                .action("PC端加载小课论坛")
                 .memo(problemId + "");
         operationLogService.log(operationLog);
         return WebUtils.result(list);
@@ -343,7 +343,7 @@ public class FragmentController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
-                .action("PC查看专题分享内容")
+                .action("PC查看小课论坛内容")
                 .memo(loginUser.getOpenId() + " look " + submitId);
         operationLogService.log(operationLog);
         SubjectArticle submit = practiceService.loadSubjectArticle(submitId);
@@ -419,7 +419,7 @@ public class FragmentController {
         Assert.notNull(problemId, "难题不能为空");
         boolean b = planService.hasProblemPlan(loginUser.getOpenId(), problemId);
         if(!b){
-            return WebUtils.error("您并没有该专题，无法提交");
+            return WebUtils.error("您并没有该小课，无法提交");
         }
         Integer submitId = practiceService.submitSubjectArticle(new SubjectArticle(
                 workInfoDto.getSubmitId(),
@@ -435,10 +435,10 @@ public class FragmentController {
             practiceService.updatePicReference(picList,submitId);
         }
 
-        OperationLog operationLog = OperationLog.create()
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("PC专题输出区提交")
+                .action("PC小课论坛提交")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if(submitId==-1){
@@ -452,11 +452,11 @@ public class FragmentController {
     @RequestMapping(value = "/pc/fragment/subject/label/{problemId}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadLabels(PCLoginUser loginUser, @PathVariable Integer problemId) {
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(problemId, "专题不能为空");
+        Assert.notNull(problemId, "小课不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("标签")
-                .action("加载专题标签")
+                .action("加载小课标签")
                 .memo(problemId.toString());
         operationLogService.log(operationLog);
         RiseWorkShowDto dto = new RiseWorkShowDto();
@@ -495,7 +495,7 @@ public class FragmentController {
                 if (item.getType() == Constants.PracticeType.APPLICATION) {
                     ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(Integer.parseInt(item.getPracticeId()));
                     if (applicationPractice == null) {
-                        logger.error("查询应用训练失败,训练计划:{}", item);
+                        logger.error("查询应用练习失败,训练计划:{}", item);
                     } else {
                         dto.setTitle(applicationPractice.getTopic());
                         dto.setScore(PointRepoImpl.score.get(applicationPractice.getDifficulty()));

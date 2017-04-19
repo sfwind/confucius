@@ -186,7 +186,8 @@ public class BackendController {
         return WebUtils.result(list);
     }
 
-
-
-
+    @RequestMapping(value = "/info/signup",method=RequestMethod.GET,params = "rise")
+    public ResponseEntity<Map<String,Object>> getRiseInfo(){
+        return WebUtils.result(signupService.getRiseRemindingCount());
+    }
 }

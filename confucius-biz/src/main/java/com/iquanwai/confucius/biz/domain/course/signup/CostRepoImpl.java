@@ -79,6 +79,21 @@ public class CostRepoImpl implements CostRepo {
         return CommonUtils.substract(price,remain);
     }
 
+    @Override
+    public double discount(Double price, String openid, String orderId, Coupon coupon) {
+        Double remain = price;
+        Double amount = coupon.getAmount();
+        if (remain > amount) {
+            remain = CommonUtils.substract(remain, amount);
+            couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
+        } else {
+            remain = 0D;
+            couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
+        }
+        reloadCoupon();
+        return CommonUtils.substract(price, remain);
+    }
+
     public boolean hasCoupon(String openid) {
         return couponList.contains(openid);
     }
@@ -92,6 +107,17 @@ public class CostRepoImpl implements CostRepo {
         couponDao.updateCouponByOrderId(status, orderId);
         reloadCoupon();
     }
+
+    @Override
+    public List<Coupon> getCoupons(String openId) {
+        return couponDao.getCoupon(openId);
+    }
+
+    @Override
+    public Coupon getCoupon(Integer id){
+        return couponDao.load(Coupon.class,id);
+    }
+
 
     private void reloadCoupon(){
         List<Coupon> coupons  = couponDao.getUnusedCoupon();

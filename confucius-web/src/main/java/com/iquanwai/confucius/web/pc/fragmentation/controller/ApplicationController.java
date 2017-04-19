@@ -56,14 +56,14 @@ public class ApplicationController {
     private PlanService planService;
 
     /**
-     * 获取应用训练标题
+     * 获取应用练习标题
      *
      * @param loginUser     登陆人
-     * @param applicationId 应用训练Id
+     * @param applicationId 应用练习Id
      */
     @RequestMapping("/title/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadApplicationTitle(PCLoginUser loginUser, @PathVariable Integer applicationId) {
-        Assert.notNull(applicationId, "应用训练id不能为空");
+        Assert.notNull(applicationId, "应用练习id不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
@@ -75,11 +75,11 @@ public class ApplicationController {
     }
 
     /**
-     * 获取应用训练
+     * 获取应用练习
      *
      * @param loginUser     登陆人
      * @param planId        计划ID
-     * @param applicationId 应用训练ID
+     * @param applicationId 应用练习ID
      * @return
      */
     @RequestMapping("/mine/{planId}/{applicationId}")
@@ -88,7 +88,7 @@ public class ApplicationController {
                                                                    @PathVariable("applicationId") Integer applicationId) {
         Assert.notNull(loginUser,"用户信息不能为空");
         Assert.notNull(planId, "计划id不能为空");
-        Assert.notNull(applicationId, "应用训练id不能为空");
+        Assert.notNull(applicationId, "应用练习id不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
@@ -115,7 +115,7 @@ public class ApplicationController {
                     .collect(Collectors.toList()));
             return WebUtils.result(dto);
         } else {
-            logger.error("用户:{},没有该训练计划:{}，应用训练:{}",openId,plan,applicationId);
+            logger.error("用户:{},没有该训练计划:{}，应用练习:{}",openId,plan,applicationId);
             return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
 
@@ -126,13 +126,13 @@ public class ApplicationController {
      *
      * @param loginUser     登陆人
      * @param planId        计划Id
-     * @param applicationId 挑战任务ID
+     * @param applicationId 应用练习ID
      */
     @RequestMapping("/list/mine/{planId}/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadMineApplicationList(PCLoginUser loginUser, @PathVariable("planId") Integer planId, @PathVariable("applicationId") Integer applicationId) {
         Assert.notNull(loginUser, "用户信息不能为空");
         Assert.notNull(planId, "计划不能为空");
-        Assert.notNull(applicationId, "应用训练不能为空");
+        Assert.notNull(applicationId, "应用练习不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
@@ -166,9 +166,9 @@ public class ApplicationController {
                                                                         @PathVariable Integer applicationId,
                                                                         @ModelAttribute Page page) {
         Assert.notNull(loginUser, "用户信息不能为空");
-        Assert.notNull(applicationId, "应用训练不能为空");
+        Assert.notNull(applicationId, "应用练习不能为空");
         page.setPageSize(20);
-        // 该计划的应用训练是否提交
+        // 该计划的应用练习是否提交
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
@@ -233,16 +233,16 @@ public class ApplicationController {
                                                       @PathVariable("applicationId") Integer applicationId,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        // 获取应用训练，没有则创建
+        // 获取应用练习，没有则创建
         ApplicationPractice practice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(), true);
-        // 根据应用训练id获取提交记录
+        // 根据应用练习id获取提交记录
         ApplicationSubmit submit = applicationService.loadSubmit(practice.getSubmitId());
         // 继续之前的逻辑
         Integer submitId = practice.getSubmitId();
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
-                .function("应用训练")
-                .action("PC提交应用训练答案")
+                .function("应用练习")
+                .action("PC提交应用练习答案")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
@@ -333,8 +333,8 @@ public class ApplicationController {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("应用训练提交")
-                .action("加载应用训练")
+                .function("应用练习提交")
+                .action("加载应用练习")
                 .memo(applicationId.toString());
         operationLogService.log(operationLog);
 

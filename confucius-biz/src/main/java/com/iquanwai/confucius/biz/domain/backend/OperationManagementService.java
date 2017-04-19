@@ -13,7 +13,7 @@ import java.util.List;
 public interface OperationManagementService {
 
     /**
-     * 根据应用id,获取应用训练提交记录
+     * 根据应用id,获取应用练习提交记录
      * @param practiceId 练习id
      * @param page 分页对象
      */
@@ -25,16 +25,16 @@ public interface OperationManagementService {
     List<WarmupPractice> getLastTwoDayActivePractice();
 
     /**
-     * 获取理解训练
+     * 获取巩固练习
      * @param practiceId 练习id
      */
     WarmupPractice getWarmupPractice(Integer practiceId);
 
     /**
-     * 内容运营回复某个理解训练
+     * 内容运营回复某个巩固练习
      *
      * @param openid           发表讨论的用户openid
-     * @param warmupPracticeId 理解训练id
+     * @param warmupPracticeId 巩固练习id
      * @param comment          讨论内容
      * @param repliedId        回复的讨论id
      */

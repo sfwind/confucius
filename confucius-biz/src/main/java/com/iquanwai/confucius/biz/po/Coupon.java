@@ -17,6 +17,7 @@ public class Coupon {
     private String orderId; //用于订单的id，当Used=2时有值
     private Date expiredDate; //过期日期
 
+    private String expired; // 过期时间 非DB字段
     //已使用
     public static final int USED = 1;
     //未使用

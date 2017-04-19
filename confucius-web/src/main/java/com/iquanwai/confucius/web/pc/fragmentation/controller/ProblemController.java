@@ -92,7 +92,7 @@ public class ProblemController {
                 ProblemListDto problemList = new ProblemListDto();
                 problemList.setId(problem.getId());
                 problemList.setProblem(problem.getProblem());
-                // 查询用户该专题的计划
+                // 查询用户该小课的计划
                 plans.forEach(plan -> {
                     if (plan.getProblemId() == problem.getId()) {
                         problemList.setStatus(plan.getStatus());

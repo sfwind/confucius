@@ -1,6 +1,10 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
@@ -25,11 +29,23 @@ public interface SignupService {
      * */
     Pair<Integer, Integer> signupCheck(String openid, Integer courseId);
 
+    Pair<Integer, String> riseMemberSignupCheckNoHold(String openId, Integer memberTypeId);
+
     /**
      * 课程报名，生成预付订单
      * @return 订单
      * */
     QuanwaiOrder signup(String openid, Integer courseId, Integer classId);
+
+    Pair<Integer, String> riseMemberSignupCheck(String openId,Integer memberTypeId);
+
+    /**
+     * 报名rise, 不生成预付订单
+     */
+    QuanwaiOrder signupRiseMember(String openid, Integer memberType);
+
+    Pair<Integer,QuanwaiOrder> signupRiseMember(String openid, Integer memberType,Integer couponId);
+
 
     /**
      * 该重载方法待删除
@@ -69,6 +85,8 @@ public interface SignupService {
      * */
     String entry(String orderId);
 
+    void riseMemberEntry(String orderId);
+
     /**
      * 是否免费
      * */
@@ -78,6 +96,11 @@ public interface SignupService {
      * 未及时付款，去掉预报名抢占的名额
      * */
     void giveupSignup(String orderId);
+
+    /**
+     * 放弃rise的报名
+     */
+    void giveupRiseSignup(String orderId);
 
     /**
      * 发送课程报名成功消息
@@ -100,7 +123,46 @@ public interface SignupService {
 
     Map<Integer,Integer> getRemindingCount();
 
+    Integer getRiseRemindingCount();
+
     void updatePromoCode(String orderId, String promoCode);
 
+    /**
+     * 获得圈外订单
+     * @param orderId 订单id
+     */
     QuanwaiOrder getQuanwaiOrder(String orderId);
+
+    /**
+     * 获得rise订单
+     * @param orderId 订单id
+     */
+    RiseOrder getRiseOrder(String orderId);
+
+    /**
+     * 获取会员类型
+     * @param memberType 会员类型Id
+     * @return 会员类型
+     */
+    MemberType getMemberType(Integer memberType);
+
+    /**
+     * 获取用户可以使用的优惠券
+     */
+    List<Coupon> getCoupons(String openId);
+
+    /**
+     * 查询会员类型的支付信息
+     */
+    List<MemberType> getMemberTypesPayInfo();
+
+    /**
+     * 计算优惠券
+     * @param memberTypeId 会员id
+     * @param couponId 优惠券id
+     * @return 打的折扣是多少
+     */
+    Double calculateCoupon(Integer memberTypeId, Integer couponId);
+
+    RiseMember currentRiseMember(String openId);
 }

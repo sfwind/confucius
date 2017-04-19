@@ -110,5 +110,27 @@ public class ProfileDao extends DBUtil{
         return true;
     }
 
+    public void becomeRiseMember(String openId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update Profile SET RiseMember = 1 WHERE OpenId = ?";
+        try{
+            runner.update(sql, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public Integer riseMemberCount(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ScalarHandler<Long> h = new ScalarHandler<Long>();
+        String sql = "Select Count(1) from Profile where RiseMember = 1";
+        try{
+            return runner.query(sql,h).intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
 
 }

@@ -53,8 +53,8 @@ public class RiseOperationController {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("应用训练提交")
-                .action("加载应用训练提交")
+                .function("应用练习提交")
+                .action("加载应用练习提交")
                 .memo(applicationId.toString());
         operationLogService.log(operationLog);
 
@@ -68,8 +68,8 @@ public class RiseOperationController {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("理解训练讨论区")
-                .action("加载最热的理解训练");
+                .function("巩固练习讨论区")
+                .action("加载最热的巩固练习");
         operationLogService.log(operationLog);
 
         return WebUtils.result(warmupPractices);
@@ -82,8 +82,8 @@ public class RiseOperationController {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("理解训练讨论区")
-                .action("加载理解训练讨论")
+                .function("巩固练习讨论区")
+                .action("加载巩固练习讨论")
                 .memo(practiceId.toString());
         operationLogService.log(operationLog);
 
@@ -95,7 +95,7 @@ public class RiseOperationController {
     public ResponseEntity<Map<String, Object>> replyDiscuss(PCLoginUser loginUser,
                                                             @RequestBody DiscussDto discussDto) {
         if (discussDto.getComment() == null || discussDto.getComment().length() > 300) {
-            LOGGER.error("{} 理解训练讨论字数过长", loginUser.getOpenId());
+            LOGGER.error("{} 巩固练习讨论字数过长", loginUser.getOpenId());
             return WebUtils.result("您提交的讨论字数过长");
         }
 
@@ -104,7 +104,7 @@ public class RiseOperationController {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("理解训练")
+                .function("巩固练习")
                 .action("回复讨论")
                 .memo(discussDto.getWarmupPracticeId().toString());
         operationLogService.log(operationLog);
@@ -118,7 +118,7 @@ public class RiseOperationController {
         operationManagementService.highlightDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("理解训练")
+                .function("巩固练习")
                 .action("加精讨论")
                 .memo(discussId.toString());
         operationLogService.log(operationLog);
@@ -133,7 +133,7 @@ public class RiseOperationController {
         operationManagementService.highlightApplicationSubmit(practiceId, submitId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("应用训练")
+                .function("应用练习")
                 .action("加精优秀的作业")
                 .memo(submitId.toString());
         operationLogService.log(operationLog);
@@ -161,7 +161,7 @@ public class RiseOperationController {
 
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
                 .module("内容运营")
-                .function("应用训练")
+                .function("应用练习")
                 .action("获取问题列表");
         operationLogService.log(operationLog);
         return WebUtils.result(result);

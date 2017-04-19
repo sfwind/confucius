@@ -1,7 +1,9 @@
 package com.iquanwai.confucius.web.account.controller;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
@@ -13,6 +15,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
 import com.iquanwai.confucius.web.account.dto.AreaDto;
@@ -63,6 +66,8 @@ public class CustomerController {
     private CourseProgressService courseProgressService;
     @Autowired
     private ProfileService profileService;
+    @Autowired
+    private SignupService signupService;
 
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadProfile(LoginUser loginUser) {
@@ -140,7 +145,7 @@ public class CustomerController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("RISE")
-                .action("查询专题信息");
+                .action("查询小课信息");
         operationLogService.log(operationLog);
         List<ImprovementPlan> plans = planService.loadUserPlans(loginUser.getOpenId());
         PlanListDto list = new PlanListDto();
@@ -163,6 +168,10 @@ public class CustomerController {
         // 查询riseId
         Profile profile = accountService.getProfile(loginUser.getOpenId(), false);
         list.setRiseId(profile.getRiseId());
+        list.setRiseMember(profile.getRiseMember());
+        if (profile.getRiseMember()) {
+
+        }
         return WebUtils.result(list);
     }
 
@@ -220,7 +229,7 @@ public class CustomerController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("RISE")
-                .action("打开专题信息")
+                .action("打开小课信息")
                 .module(problemId.toString());
         operationLogService.log(operationLog);
         return WebUtils.result(problemKnowledgeList);
@@ -235,7 +244,7 @@ public class CustomerController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("RISE")
-                .action("打开专题详情页")
+                .action("打开小课介绍页")
                 .module(problemId.toString());
         operationLogService.log(operationLog);
         return WebUtils.result(problem);
@@ -270,5 +279,20 @@ public class CustomerController {
                 .memo("");
         operationLogService.log(operationLog);
         return WebUtils.success();
+    }
+
+    @RequestMapping("/rise/member")
+    public ResponseEntity<Map<String,Object>> riseMember(LoginUser loginUser){
+        RiseMember riseMember = signupService.currentRiseMember(loginUser.getOpenId());
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("用户信息")
+                .function("RISE")
+                .action("查询rise会员信息")
+                .memo(riseMember!=null?new Gson().toJson(riseMember):"none");
+        operationLogService.log(operationLog);
+        if (riseMember != null) {
+            riseMember.setName(signupService.getMemberType(riseMember.getMemberTypeId()).getName());
+        }
+        return WebUtils.result(riseMember);
     }
 }

@@ -27,6 +27,8 @@ public class QuanwaiOrder {
 
     //体系化课程
     public static final String SYSTEMATISM = "systematism";
+    //碎片化课程
+    public static final String FRAGMENT_MEMBER = "fragment_member";
 
     public static final int UNDER_PAY = 0;
     public static final int PAID = 1;

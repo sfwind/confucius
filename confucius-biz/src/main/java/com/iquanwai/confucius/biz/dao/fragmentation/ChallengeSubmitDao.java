@@ -39,7 +39,7 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
 
     /**
      * 查询用户提交记录
-     * @param challengeId 挑战id
+     * @param challengeId 小目标id
      * @param planId 计划id
      * @param openid  openid
      */
