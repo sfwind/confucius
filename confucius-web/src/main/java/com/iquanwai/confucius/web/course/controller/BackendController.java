@@ -91,7 +91,7 @@ public class BackendController {
                 .module("记录前端bug")
                 .function("bug")
                 .action("bug")
-                .memo("url:"+errorLogDto.getUrl()+";data:"+data);
+                .memo("url:" + errorLogDto.getUrl() + ";data:" + data + ";cookie:" + cookieStr);
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
