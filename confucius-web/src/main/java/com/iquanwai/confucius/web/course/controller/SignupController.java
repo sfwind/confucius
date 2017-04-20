@@ -491,7 +491,8 @@ public class SignupController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
-                .action("点击RISE会员选择按钮");
+                .action("点击RISE会员选择按钮")
+                .memo(memberTypeId + "");
         operationLogService.log(operationLog);
         Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getOpenId(), memberTypeId);
         if(result.getLeft()!=1){
