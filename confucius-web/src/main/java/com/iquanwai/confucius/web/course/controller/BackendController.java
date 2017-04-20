@@ -80,19 +80,22 @@ public class BackendController {
     }
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> log(LoginUser loginUser,@RequestBody ErrorLogDto errorLogDto){
+    public ResponseEntity<Map<String, Object>> log(HttpServletRequest request,LoginUser loginUser,@RequestBody ErrorLogDto errorLogDto){
         String data = errorLogDto.getResult();
         if(data.length()>900){
             data = data.substring(0, 900);
         }
         String cookieStr= errorLogDto.getCookie();
+        String browser = errorLogDto.getBrowser();
+        String remoteIp = request.getHeader("X-Forwarded-For");
+
 
         String openid = oAuthService.openId(getAccessTokenFromCookie(cookieStr));
         OperationLog operationLog = OperationLog.create().openid(openid == null ? loginUser == null ? null : loginUser.getOpenId() : openid)
                 .module("记录前端bug")
                 .function("bug")
                 .action("bug")
-                .memo("url:" + errorLogDto.getUrl() + ";data:" + data + ";cookie:" + cookieStr);
+                .memo("url:" + errorLogDto.getUrl() + ";ip:" + remoteIp + ";data:" + data + ";browser:" + browser + ";cookie:" + cookieStr);
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
