@@ -16,6 +16,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
+import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,19 +80,22 @@ public class BackendController {
     }
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> log(@RequestBody ErrorLogDto errorLogDto){
+    public ResponseEntity<Map<String, Object>> log(HttpServletRequest request,LoginUser loginUser,@RequestBody ErrorLogDto errorLogDto){
         String data = errorLogDto.getResult();
         if(data.length()>900){
             data = data.substring(0, 900);
         }
         String cookieStr= errorLogDto.getCookie();
+        String browser = errorLogDto.getBrowser();
+        String remoteIp = request.getHeader("X-Forwarded-For");
+
 
         String openid = oAuthService.openId(getAccessTokenFromCookie(cookieStr));
-        OperationLog operationLog = OperationLog.create().openid(openid)
+        OperationLog operationLog = OperationLog.create().openid(openid == null ? loginUser == null ? null : loginUser.getOpenId() : openid)
                 .module("记录前端bug")
                 .function("bug")
                 .action("bug")
-                .memo("url:"+errorLogDto.getUrl()+";data:"+data);
+                .memo("url:" + errorLogDto.getUrl() + ";ip:" + remoteIp + ";data:" + data + ";browser:" + browser + ";cookie:" + cookieStr);
         operationLogService.log(operationLog);
         return WebUtils.success();
     }

@@ -1,7 +1,8 @@
 package com.iquanwai.confucius.web.weixin;
 
-import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
@@ -30,15 +32,14 @@ public class OAuthController {
 
     @RequestMapping("/auth")
     public void oauthCode(@RequestParam("callbackUrl") String callbackUrl,
+                          HttpServletRequest request,
                           HttpServletResponse response) {
         try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("callbackUrl is " + callbackUrl);
-            }
-            String requestUrl = oAuthService.redirectUrl(callbackUrl);
+            String remoteIp = request.getHeader("X-Forwarded-For");
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("requestUrl is " + requestUrl);
+            String requestUrl = oAuthService.redirectUrl(callbackUrl);
+            if(ConfigUtils.logDetail()){
+                LOGGER.info("ip is {},callbackUrl is {},requestUrl is {}", remoteIp, callbackUrl, requestUrl);
             }
             response.sendRedirect(requestUrl);
 
@@ -59,6 +60,7 @@ public class OAuthController {
         try {
             if (code == null) {
                 //用户不同意授权,跳转报错页面
+                LOGGER.error("code interface error , code  is null,state is {}",state);
                 return;
             }
 
