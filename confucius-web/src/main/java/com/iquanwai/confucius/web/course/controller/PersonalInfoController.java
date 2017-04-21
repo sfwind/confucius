@@ -18,6 +18,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -140,6 +141,16 @@ public class PersonalInfoController {
             return WebUtils.error("加载个人信息失败");
         }
         return WebUtils.result(provinceDto);
+    }
+
+    @RequestMapping(value = "/mark/rise/up")
+    public ResponseEntity<Map<String, Object>> clickUpButton(LoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("打点")
+                .action("点击升级按钮");
+        operationLogService.log(operationLog);
+        return WebUtils.error(2, "fsdf", HttpStatus.BAD_REQUEST);
     }
 
 }
