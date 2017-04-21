@@ -3,17 +3,11 @@ package com.iquanwai.confucius.biz.domain.performance;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.performance.PagePerformanceDao;
 import com.iquanwai.confucius.biz.dao.performance.PageUrlDao;
-import com.iquanwai.confucius.biz.dao.performance.PersonalPerfKeyDao;
-import com.iquanwai.confucius.biz.dao.performance.PersonalPerformanceDao;
 import com.iquanwai.confucius.biz.domain.performance.entity.DataSourceForPoint;
 import com.iquanwai.confucius.biz.domain.performance.entity.PageAnalyticsDto;
-import com.iquanwai.confucius.biz.domain.performance.entity.PersonalAnalyticsDto;
 import com.iquanwai.confucius.biz.domain.performance.entity.Point;
 import com.iquanwai.confucius.biz.po.performance.PagePerformance;
 import com.iquanwai.confucius.biz.po.performance.PageUrl;
-import com.iquanwai.confucius.biz.po.performance.PersonalPerfKey;
-import com.iquanwai.confucius.biz.po.performance.PersonalPerformance;
-import com.iquanwai.confucius.biz.po.systematism.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,12 +28,6 @@ public class PerformanceServiceImpl implements PerformanceService {
     @Autowired
     private PageUrlDao pageUrlDao;
 
-    @Autowired
-    private PersonalPerformanceDao personalPerformanceDao;
-
-    @Autowired
-    private PersonalPerfKeyDao personalPerfKeyDao;
-
     @Override
     public void add(PagePerformance po) {
         pagePerformanceDao.entry(po);
@@ -48,17 +36,6 @@ public class PerformanceServiceImpl implements PerformanceService {
             pageUrl = new PageUrl();
             pageUrl.setUrl(po.getUrl());
             pageUrlDao.entry(pageUrl);
-        }
-    }
-
-    @Override
-    public void addPersonalPerf(PersonalPerformance po) {
-        personalPerformanceDao.entry(po);
-        PersonalPerfKey personalPerfKey = personalPerfKeyDao.getByKey(po.getKey());
-        if(personalPerfKey == null || personalPerfKey.getKey() == null || "".equals(personalPerfKey.getKey())){
-            personalPerfKey = new PersonalPerfKey();
-            personalPerfKey.setKey(po.getKey());
-            personalPerfKeyDao.entry(personalPerfKey);
         }
     }
 
@@ -156,69 +133,5 @@ public class PerformanceServiceImpl implements PerformanceService {
     @Override
     public List<PageUrl> queryUrlList() {
         return pageUrlDao.queryAll();
-    }
-
-    @Override
-    public PersonalAnalyticsDto queryPersonalLineChartData(int keyId, String startTimeStr, String endTimeStr, int unitTimeAboutMinutes) {
-        PersonalAnalyticsDto personalAnalyticsDto = new PersonalAnalyticsDto();
-        PersonalPerfKey personalPerfKey = personalPerfKeyDao.getById(keyId);
-        List<PersonalPerformance> personalPerformancesList = personalPerformanceDao.queryAboutAddTime(personalPerfKey.getKey(), startTimeStr, endTimeStr);
-        if(personalPerformancesList == null || personalPerformancesList.size() < 1) {
-            return personalAnalyticsDto;
-        }
-        //按照时间把数据分段
-        List<DataSourceForPoint> dataSourceForPoints = Lists.newArrayList();
-        LocalDateTime pointStartTime = null;
-        LocalDateTime pointEndTime = null;
-        List<PersonalPerformance> personalPerformances = null;
-        ZoneId currentZone = ZoneId.systemDefault();
-        for (int i = 0; i < personalPerformancesList.size(); i++) {
-            PersonalPerformance po = personalPerformancesList.get(i);
-            Instant addTimeInstall = po.getAddTime().toInstant();
-            LocalDateTime addTime = LocalDateTime.ofInstant(addTimeInstall, currentZone);
-            if (pointStartTime == null) {
-                pointStartTime = LocalDateTime.of(addTime.getYear(), addTime.getMonth(), addTime.getDayOfMonth(), addTime.getHour(), addTime.getMinute());
-                pointEndTime = pointStartTime.plusMinutes(unitTimeAboutMinutes);
-                personalPerformances = Lists.newArrayList(po);
-            } else if (addTime.isBefore(pointEndTime)) {
-                personalPerformances.add(po);
-            } else {
-                DataSourceForPoint dataSourceForPoint = new DataSourceForPoint();
-                dataSourceForPoint.setPersonalPerformances(personalPerformances);
-                dataSourceForPoint.setTime(pointStartTime);
-                dataSourceForPoints.add(dataSourceForPoint);
-                if (addTime.isAfter(pointEndTime.plusMinutes(unitTimeAboutMinutes))) {
-                    pointStartTime = LocalDateTime.of(addTime.getYear(), addTime.getMonth(), addTime.getDayOfMonth(), addTime.getHour(), addTime.getMinute());
-                    pointEndTime = pointStartTime.plusMinutes(unitTimeAboutMinutes);
-                } else {
-                    pointStartTime = pointEndTime;
-                    pointEndTime = pointStartTime.plusMinutes(unitTimeAboutMinutes);
-                }
-                personalPerformances = Lists.newArrayList(po);
-            }
-        }
-        DataSourceForPoint dataSourceForPoint = new DataSourceForPoint();
-        dataSourceForPoint.setPersonalPerformances(personalPerformances);
-        dataSourceForPoint.setTime(pointStartTime);
-        dataSourceForPoints.add(dataSourceForPoint);
-        //数据转化
-        List<Point> timeList = Lists.newArrayList();
-        for (int i = 0; i < dataSourceForPoints.size(); i++) {
-            DataSourceForPoint dataPo = dataSourceForPoints.get(i);
-            long xTime = dataPo.getTime().atZone(currentZone).toEpochSecond() * 1000;
-            Point time = new Point();
-            Double averagingTime = dataPo.getPersonalPerformances().stream().collect(Collectors.averagingInt(PersonalPerformance::getTime));
-            time.setY(averagingTime.longValue());
-            time.setX(xTime);
-            timeList.add(time);
-
-        }
-        personalAnalyticsDto.setTimeList(timeList);
-        return personalAnalyticsDto;
-    }
-
-    @Override
-    public List<PersonalPerfKey> queryKeyList() {
-        return personalPerfKeyDao.queryAll();
     }
 }
