@@ -34,6 +34,17 @@ public class ProfileDao extends DBUtil{
         return null;
     }
 
+    public void updateMeta(Profile profile) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        String updateSql = "Update Profile Set Nickname=?, Headimgurl=?, UnionId = ? where Openid=?";
+        try {
+            run.update(updateSql,
+                    profile.getNickname(), profile.getHeadimgurl(), profile.getUnionid(), profile.getOpenid());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public boolean submitPersonalCenterProfile(Profile profile) {
         QueryRunner run = new QueryRunner(getDataSource());
         String updateSql = "Update Profile Set Industry=?, Function=?, WorkingLife=?, City=?, Province=? where Openid=?";

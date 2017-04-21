@@ -120,6 +120,10 @@ public class AccountServiceImpl implements AccountService {
                                 logger.error("插入Profile失败，openId:{},riseId:{}",profile.getOpenid(),profile.getRiseId());
                             }
                         }
+                    }else{
+                        //更新原数据
+                        BeanUtils.copyProperties(profile,accountNew);
+                        profileDao.updateMeta(profile);
                     }
                 }
             }else{
