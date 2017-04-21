@@ -18,7 +18,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -150,7 +149,7 @@ public class PersonalInfoController {
                 .function("打点")
                 .action("点击升级按钮");
         operationLogService.log(operationLog);
-        return WebUtils.error(2, "fsdf", HttpStatus.BAD_REQUEST);
+        return WebUtils.success();
     }
 
 }
