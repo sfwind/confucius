@@ -13,6 +13,7 @@ public interface Constants {
     }
     interface PracticeType{
         int CHALLENGE = 21;
+        int APPLICATION_REVIEW = 12;
         int APPLICATION = 11;
         int SUBJECT = 3;
     }

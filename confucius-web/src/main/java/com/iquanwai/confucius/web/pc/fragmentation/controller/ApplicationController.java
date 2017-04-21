@@ -143,10 +143,12 @@ public class ApplicationController {
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(applicationPractice.getSubmitId());
         info.setTitle(applicationPractice.getTopic());
-        applicationPractice.setContent(HtmlRegexpUtil.filterHtml(applicationPractice.getContent()));
-        info.setContent(applicationPractice.getContent().length() > 180 ?
-                applicationPractice.getContent().substring(0, 180) + "......" :
-                applicationPractice.getContent());
+        if(applicationPractice.getContent()!=null) {
+            applicationPractice.setContent(HtmlRegexpUtil.filterHtml(applicationPractice.getContent()));
+            info.setContent(applicationPractice.getContent().length() > 180 ?
+                    applicationPractice.getContent().substring(0, 180) + "......" :
+                    applicationPractice.getContent());
+        }
         info.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
         info.setType(Constants.PracticeType.APPLICATION);
         info.setUpName(loginUser.getWeixin().getWeixinName());

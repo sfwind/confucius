@@ -492,7 +492,8 @@ public class FragmentController {
                 dto.setUnlocked(item.getUnlocked());
                 dto.setWorkId(Integer.parseInt(item.getPracticeId()));
                 dto.setStatus(item.getStatus());
-                if (item.getType() == Constants.PracticeType.APPLICATION) {
+                if (item.getType() == Constants.PracticeType.APPLICATION ||
+                        item.getType() == Constants.PracticeType.APPLICATION_REVIEW) {
                     ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(Integer.parseInt(item.getPracticeId()));
                     if (applicationPractice == null) {
                         logger.error("查询应用练习失败,训练计划:{}", item);

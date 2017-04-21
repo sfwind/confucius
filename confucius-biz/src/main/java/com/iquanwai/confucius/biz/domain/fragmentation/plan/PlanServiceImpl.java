@@ -55,7 +55,9 @@ public class PlanServiceImpl implements PlanService {
         List<PracticePlan> result = Lists.newArrayList();
         List<PracticePlan> temp = practicePlanDao.loadPracticePlan(planId);
         temp.forEach(item->{
-            if (item.getType() == Constants.PracticeType.APPLICATION || item.getType() == Constants.PracticeType.CHALLENGE) {
+            if (item.getType() == Constants.PracticeType.APPLICATION ||
+                    item.getType() == Constants.PracticeType.APPLICATION_REVIEW ||
+                    item.getType() == Constants.PracticeType.CHALLENGE) {
                 result.add(item);
             }
         });
