@@ -142,4 +142,14 @@ public class PersonalInfoController {
         return WebUtils.result(provinceDto);
     }
 
+    @RequestMapping(value = "/mark/rise/up")
+    public ResponseEntity<Map<String, Object>> clickUpButton(LoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("打点")
+                .action("点击升级按钮");
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
+
 }
