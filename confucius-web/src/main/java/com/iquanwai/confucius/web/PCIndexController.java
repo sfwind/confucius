@@ -74,7 +74,7 @@ public class PCIndexController {
     }
 
     private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser) {
-        ModelAndView mav = new ModelAndView("site");
+        ModelAndView mav = new ModelAndView("home");
         if(ConfigUtils.isPcMaintenance()){
             // 正在维护
             mav = new ModelAndView("maintenance");

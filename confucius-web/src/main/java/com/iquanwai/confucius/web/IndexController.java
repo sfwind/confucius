@@ -149,8 +149,6 @@ public class IndexController {
         }else{
             mav.addObject("resource", ConfigUtils.staticResourceUrl());
         }
-
-        mav.addObject("openPromo",ConfigUtils.getValue("function.status.promo"));
         return mav;
     }
 
@@ -174,7 +172,6 @@ public class IndexController {
             mav.addAllObjects(userParam);
         }
 
-        mav.addObject("openPromo",ConfigUtils.getValue("function.status.promo"));
         return mav;
     }
 }
