@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.po.fragmentation;
 
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import lombok.Data;
 
 /**
@@ -17,4 +18,19 @@ public class Knowledge {
     private String audio; //语音链接
     private Integer appear; //非db字段,是否出现过
 
+    private static String REVIEW_KNOWLEDGE = ConfigUtils.getIntegratedPracticeIndex();
+
+    public static boolean isReview(Integer knowledgeId){
+        if(knowledgeId==null){
+            return false;
+        }
+        String[] ids = REVIEW_KNOWLEDGE.split(",");
+        for(String id:ids){
+            if(id.equals(knowledgeId.toString())){
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

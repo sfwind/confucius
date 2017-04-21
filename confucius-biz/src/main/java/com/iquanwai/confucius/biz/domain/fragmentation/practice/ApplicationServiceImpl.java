@@ -7,11 +7,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +77,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             logger.error("submitId {} is not existed", id);
             return false;
         }
-        boolean result = false;
+        boolean result;
 
         if(submit.getContent() == null){
             result = applicationSubmitDao.firstAnswer(id, content);
@@ -98,8 +94,18 @@ public class ApplicationServiceImpl implements ApplicationService {
                 logger.error("ImprovementPlan is not existed,planId:{}", submit.getPlanId());
             }
             logger.info("应用练习加分:{}", id);
+            int applicationId = submit.getApplicationId();
+            ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
+
+            Integer type;
+            if(Knowledge.isReview(applicationPractice.getKnowledgeId())){
+                type = PracticePlan.APPLICATION_REVIEW;
+            }else{
+                type = PracticePlan.APPLICATION;
+            }
+
             PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
-                    submit.getApplicationId(), PracticePlan.APPLICATION);
+                    submit.getApplicationId(), type);
             if (practicePlan != null) {
                 practicePlanDao.complete(practicePlan.getId());
                 Integer point = PointRepoImpl.score.get(applicationPracticeDao.load(ApplicationPractice.class, submit.getApplicationId()).getDifficulty());

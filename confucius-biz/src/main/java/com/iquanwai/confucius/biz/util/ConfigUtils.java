@@ -238,7 +238,11 @@ public class ConfigUtils {
 		return config.getInt("rise.member.total.count");
 	}
 
-	public static String productPaidMsg(){
+	public static String productPaidMsg() {
 		return config.getString("product.paid.msg");
+	}
+
+	public static String getIntegratedPracticeIndex(){
+		return getValue("integrated.practice.index");
 	}
 }

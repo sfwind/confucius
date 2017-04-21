@@ -415,7 +415,7 @@ public class SignupServiceImpl implements SignupService {
         String openId = riseOrder.getOpenid();
 
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
-        Date expireDate = null;
+        Date expireDate;
         switch (memberType.getId()) {
             case 1: {
                 expireDate = DateUtils.afterMonths(new Date(), 6);
@@ -474,6 +474,28 @@ public class SignupServiceImpl implements SignupService {
         data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
         data.put("remark", new TemplateMessage.Keyword("\n想认识更多和你一样的RISER？点击详情，加入你的所在地的分舵吧↓↓↓"));
         templateMessage.setUrl(ConfigUtils.domainName() + "/static/quanwai/wx/group");
+
+        if(memberType.getId()==3){
+            //暂停功能
+//            sendEliteWelcomeMsg(openId);
+        }
+    }
+
+    private void sendEliteWelcomeMsg(String openid) {
+        logger.info("发送欢迎消息给{}", openid);
+        String key = ConfigUtils.incompleteTaskMsgKey();
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(openid);
+        templateMessage.setTemplate_id(key);
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setData(data);
+
+        data.put("first", new TemplateMessage.Keyword("Hi，"+profileDao.queryByOpenId(openid).getNickname()+"，你已经选择了RISE精英版，现在来加入专属群，和其他精英以及圈圈认识一下吧！\n"));
+        data.put("keyword1", new TemplateMessage.Keyword("加入RISE精英会员群"));
+        data.put("keyword2", new TemplateMessage.Keyword("高"));
+        data.put("remark", new TemplateMessage.Keyword("\n点击详情，查看群二维码↓↓↓"));
+        templateMessage.setUrl("http://www.iquanwai.com/images/wxgroup/WechatIMG2.jpeg");
+
         templateMessageService.sendMessage(templateMessage);
     }
 
