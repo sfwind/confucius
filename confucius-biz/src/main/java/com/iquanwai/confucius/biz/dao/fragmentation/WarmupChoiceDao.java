@@ -34,7 +34,7 @@ public class WarmupChoiceDao extends PracticeDBUtil {
 
     public void updateChoice(WarmupChoice choice) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update Choice set Updated=1, Question=?, Analysis=? where Id=?";
+        String sql = "update Choice set Updated=1, Subject=?, IsRight=? where Id=?";
         try {
             runner.update(sql, choice.getSubject(), choice.getIsRight(), choice.getId());
         }catch (SQLException e) {

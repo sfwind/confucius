@@ -197,9 +197,11 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             List<WarmupChoice> originChoices = warmupChoiceDao.loadChoices(origin.getId());
             warmupPractice.getChoiceList().forEach(warmupChoice -> {
                 originChoices.stream().forEach(originChoice ->{
-                    if(!originChoice.getIsRight().equals(warmupChoice.getIsRight())||
-                            !originChoice.getSubject().equals(warmupChoice.getSubject())){
-                        warmupChoiceDao.updateChoice(warmupChoice);
+                    if(originChoice.getId()==warmupChoice.getId()) {
+                        if (!originChoice.getIsRight().equals(warmupChoice.getIsRight()) ||
+                                !originChoice.getSubject().equals(warmupChoice.getSubject())) {
+                            warmupChoiceDao.updateChoice(warmupChoice);
+                        }
                     }
                 });
             });
