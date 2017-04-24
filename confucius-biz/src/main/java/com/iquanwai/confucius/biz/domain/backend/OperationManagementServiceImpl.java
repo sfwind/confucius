@@ -208,4 +208,14 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
         }
     }
+
+    @Override
+    public WarmupPractice getNextPractice(Integer problemId, Integer prePracticeId) {
+        WarmupPractice warmupPractice = warmupPracticeDao.loadNextPractice(problemId, prePracticeId);
+        if(warmupPractice!=null) {
+            List<WarmupChoice> choices = warmupChoiceDao.loadChoices(warmupPractice.getId());
+            warmupPractice.setChoiceList(choices);
+        }
+        return warmupPractice;
+    }
 }

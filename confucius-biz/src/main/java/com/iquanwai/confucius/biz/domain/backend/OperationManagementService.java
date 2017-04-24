@@ -71,4 +71,11 @@ public interface OperationManagementService {
      * @param warmupPractice 巩固练习
      */
     void save(WarmupPractice warmupPractice);
+
+    /**
+     * 获取下一个巩固练习
+     * @param problemId 小课id
+     * @param prePracticeId 练习id
+     */
+    WarmupPractice getNextPractice(Integer problemId, Integer prePracticeId);
 }

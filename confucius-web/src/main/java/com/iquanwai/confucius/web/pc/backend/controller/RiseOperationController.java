@@ -209,7 +209,7 @@ public class RiseOperationController {
     }
 
 
-    @RequestMapping("/warmup/save")
+    @RequestMapping(value="/warmup/save", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> savePractice(PCLoginUser loginUser,
                                                                   @RequestBody WarmupPractice warmupPractice) {
 
@@ -219,6 +219,21 @@ public class RiseOperationController {
                 .function("巩固练习编辑")
                 .action("保存巩固练习")
                 .memo(warmupPractice.getId()+"");
+        operationLogService.log(operationLog);
+
+        return WebUtils.success();
+    }
+
+    @RequestMapping("/warmup/next/{problemId}/{practiceId}")
+    public ResponseEntity<Map<String, Object>> getNextPractice(PCLoginUser loginUser,
+                                                               @PathVariable Integer problemId,
+                                                               @PathVariable Integer practiceId) {
+
+        WarmupPractice warmupPractice = operationManagementService.getNextPractice(problemId, practiceId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习编辑")
+                .action("加载下一巩固练习");
         operationLogService.log(operationLog);
 
         return WebUtils.result(warmupPractice);

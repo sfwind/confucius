@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,5 +61,18 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public WarmupPractice loadNextPractice(Integer problemId, Integer practiceId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<WarmupPractice> h = new BeanHandler(WarmupPractice.class);
+        String sql = "SELECT * FROM WarmupPractice where ProblemId=? and Del=0 and Id>?";
+        try {
+            return run.query(sql, h, problemId, practiceId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
     }
 }
