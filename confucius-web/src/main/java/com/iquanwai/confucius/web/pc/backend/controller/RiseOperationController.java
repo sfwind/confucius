@@ -153,7 +153,8 @@ public class RiseOperationController {
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
-            List<ProblemListDto> collect = problems.stream().filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
+            List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
+                    .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                 ProblemListDto problemList = new ProblemListDto();
                 problemList.setId(problem.getId());
                 problemList.setProblem(problem.getProblem());

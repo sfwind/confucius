@@ -149,7 +149,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public void highlight(Integer submitId){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ApplicationSubmit set Priority=1 where Id=?";
+        String sql = "update ApplicationSubmit set Priority=1, HighlightTime = now() where Id=?";
         try {
 
             runner.update(sql, submitId);
