@@ -51,6 +51,11 @@ public class RiseOperationController {
         page.setPageSize(APPLICATION_SUBMIT_SIZE);
         List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page);
 
+        applicationSubmitList.stream().forEach(applicationSubmit -> {
+            Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), loginUser.getOpenId());
+            applicationSubmit.setComment(isComment?1:0);
+        });
+
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习提交")

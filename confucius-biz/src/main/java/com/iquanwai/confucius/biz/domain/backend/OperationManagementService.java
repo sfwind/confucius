@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -52,4 +51,12 @@ public interface OperationManagementService {
      * @param submitId 提交id
      */
     void highlightApplicationSubmit(Integer practiceId, Integer submitId);
+
+
+    /**
+     * 作业是否已评论
+     * @param submitId 提交id
+     * @param commentOpenid 评论者openid
+     */
+    boolean isComment(Integer submitId, String commentOpenid);
 }

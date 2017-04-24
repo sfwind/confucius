@@ -22,4 +22,5 @@ public class ApplicationSubmit {
     private String upTime; //非db字段 提交时间
     private String headPic; //非db字段 提交人头像
     private String upName; //非db字段 提交人昵称
+    private int comment; //非db字段 是否已被当前用户评论
 }

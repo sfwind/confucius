@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -58,5 +59,17 @@ public class CommentDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return 0;
+    }
+
+    public Comment loadComment(Integer moduleId, Integer referId, String commentOpenId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<Comment> h = new BeanHandler<>(Comment.class);
+        String sql = "SELECT * FROM Comment where ReferencedId = ? and ModuleId = ? and commentOpenId=? and Del = 0";
+        try {
+            return run.query(sql, h, referId, moduleId, commentOpenId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 }

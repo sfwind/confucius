@@ -2,15 +2,14 @@ package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.WarmupChoiceDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.WarmupPracticeDiscussDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private WarmupChoiceDao warmupChoiceDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private CommentDao commentDao;
     //每个练习的精华上限
     private static final int HIGHLIGHT_LIMIT = 3;
 
@@ -169,5 +170,12 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         }
 
         applicationSubmitDao.highlight(submitId);
+    }
+
+    @Override
+    public boolean isComment(Integer submitId, String commentOpenid) {
+        Comment comment = commentDao.loadComment(Constants.CommentModule.APPLICATION, submitId, commentOpenid);
+
+        return comment!=null;
     }
 }
