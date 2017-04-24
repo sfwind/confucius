@@ -31,4 +31,14 @@ public class WarmupChoiceDao extends PracticeDBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public void updateChoice(WarmupChoice choice) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update Choice set Updated=1, Question=?, Analysis=? where Id=?";
+        try {
+            runner.update(sql, choice.getSubject(), choice.getIsRight(), choice.getId());
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
 }

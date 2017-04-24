@@ -80,7 +80,21 @@ public class RiseOperationController {
         return WebUtils.result(warmupPractices);
     }
 
-    @RequestMapping("/warmup/{practiceId}")
+    @RequestMapping("/warmup/list/{problemId}")
+    public ResponseEntity<Map<String, Object>> getProblemWarmupPractice(PCLoginUser loginUser,
+                                                                        @PathVariable Integer problemId) {
+        List<WarmupPractice> warmupPractices = operationManagementService.getPracticeByProblemId(problemId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习编辑")
+                .action("加载小课的巩固练习");
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(warmupPractices);
+    }
+
+    @RequestMapping("/warmup/load/{practiceId}")
     public ResponseEntity<Map<String, Object>> getPracticeDiscuss(PCLoginUser loginUser,
                                                                   @PathVariable Integer practiceId) {
         WarmupPractice warmupPractice = operationManagementService.getWarmupPractice(practiceId);
@@ -155,11 +169,11 @@ public class RiseOperationController {
             ProblemCatalogDto dto = new ProblemCatalogDto();
             List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
                     .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
-                ProblemListDto problemList = new ProblemListDto();
-                problemList.setId(problem.getId());
-                problemList.setProblem(problem.getProblem());
-                return problemList;
-            }).collect(Collectors.toList());
+                        ProblemListDto problemList = new ProblemListDto();
+                        problemList.setId(problem.getId());
+                        problemList.setProblem(problem.getProblem());
+                        return problemList;
+                    }).collect(Collectors.toList());
             dto.setProblems(collect);
             dto.setName(item.getName());
             return dto;
@@ -192,5 +206,21 @@ public class RiseOperationController {
         operationLogService.log(operationLog);
 
         return WebUtils.result(applicationPractices);
+    }
+
+
+    @RequestMapping("/warmup/save")
+    public ResponseEntity<Map<String, Object>> savePractice(PCLoginUser loginUser,
+                                                                  @RequestBody WarmupPractice warmupPractice) {
+
+        operationManagementService.save(warmupPractice);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习编辑")
+                .action("保存巩固练习")
+                .memo(warmupPractice.getId()+"");
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(warmupPractice);
     }
 }

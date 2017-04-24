@@ -59,4 +59,16 @@ public interface OperationManagementService {
      * @param commentOpenid 评论者openid
      */
     boolean isComment(Integer submitId, String commentOpenid);
+
+    /**
+     * 获取小课的所有巩固练习
+     * @param problemId 小课id
+     */
+    List<WarmupPractice> getPracticeByProblemId(Integer problemId);
+
+    /**
+     * 保存巩固练习
+     * @param warmupPractice 巩固练习
+     */
+    void save(WarmupPractice warmupPractice);
 }

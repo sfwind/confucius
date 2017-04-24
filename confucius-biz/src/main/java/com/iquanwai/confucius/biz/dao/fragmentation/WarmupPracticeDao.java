@@ -37,4 +37,28 @@ public class WarmupPracticeDao extends PracticeDBUtil {
 
         return Lists.newArrayList();
     }
+
+
+    public List<WarmupPractice> loadPracticesByProblemId(Integer problemId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<WarmupPractice>> h = new BeanListHandler(WarmupPractice.class);
+        String sql = "SELECT * FROM WarmupPractice where ProblemId=? and Del=0";
+        try {
+            return run.query(sql, h, problemId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public void updateWarmupPractice(WarmupPractice warmupPractice) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update WarmupPractice set Updated=1, Question=?, Analysis=? where Id=?";
+        try {
+            runner.update(sql, warmupPractice.getQuestion(), warmupPractice.getAnalysis(), warmupPractice.getId());
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
 }

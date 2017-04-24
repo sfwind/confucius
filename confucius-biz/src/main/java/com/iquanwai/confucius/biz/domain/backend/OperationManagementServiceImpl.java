@@ -5,15 +5,13 @@ import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.Comment;
-import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -177,5 +175,35 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         Comment comment = commentDao.loadComment(Constants.CommentModule.APPLICATION, submitId, commentOpenid);
 
         return comment!=null;
+    }
+
+    @Override
+    public List<WarmupPractice> getPracticeByProblemId(Integer problemId) {
+        return warmupPracticeDao.loadPracticesByProblemId(problemId);
+    }
+
+    @Override
+    public void save(WarmupPractice warmupPractice) {
+        Assert.notNull(warmupPractice, "待保存的练习不能为空");
+        WarmupPractice origin = warmupPracticeDao.load(WarmupPractice.class, warmupPractice.getId());
+        if(origin!=null){
+            //解析或者题干有修改时,更新题目
+            if(!warmupPractice.getAnalysis().equals(origin.getAnalysis())||
+                    !warmupPractice.getQuestion().equals(origin.getQuestion())){
+                warmupPracticeDao.updateWarmupPractice(warmupPractice);
+            }
+
+            //选项或者正确性有修改时,更新选项
+            List<WarmupChoice> originChoices = warmupChoiceDao.loadChoices(origin.getId());
+            warmupPractice.getChoiceList().forEach(warmupChoice -> {
+                originChoices.stream().forEach(originChoice ->{
+                    if(!originChoice.getIsRight().equals(warmupChoice.getIsRight())||
+                            !originChoice.getSubject().equals(warmupChoice.getSubject())){
+                        warmupChoiceDao.updateChoice(warmupChoice);
+                    }
+                });
+            });
+
+        }
     }
 }
