@@ -1,7 +1,8 @@
 package com.iquanwai.confucius.biz.util.rabbitmq;
 
-import com.rabbitmq.client.*;
-import org.springframework.stereotype.Service;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import org.springframework.util.Assert;
 
 import javax.annotation.PreDestroy;
@@ -11,7 +12,6 @@ import java.net.ConnectException;
 /**
  * Created by justin on 17/1/19.
  */
-@Service
 public class RabbitMQPublisher {
     private String topic;
     private Connection connection;
@@ -36,7 +36,7 @@ public class RabbitMQPublisher {
         try {
             connection = factory.newConnection();
             channel = connection.createChannel();
-            //队列声明,广播形式
+            //交换机声明,广播形式
             channel.exchangeDeclare(topic, "fanout");
         }catch (IOException e) {
             //ignore

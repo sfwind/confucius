@@ -239,10 +239,18 @@ public class ConfigUtils {
 	}
 
 	public static String productPaidMsg() {
-		return config.getString("product.paid.msg");
+		return getValue("product.paid.msg");
 	}
 
 	public static String getIntegratedPracticeIndex(){
 		return getValue("integrated.practice.index");
+	}
+
+	public static String getRabbitMQIp(){
+		return getValue("rabbitmq.ip");
+	}
+
+	public static int getRabbitMQPort(){
+		return config.getInt("rabbitmq.port");
 	}
 }
