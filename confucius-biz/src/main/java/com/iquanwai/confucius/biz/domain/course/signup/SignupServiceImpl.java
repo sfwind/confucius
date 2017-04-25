@@ -575,14 +575,16 @@ public class SignupServiceImpl implements SignupService {
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
         }else if(course.getType()==Course.SHORT_COURSE){
-//            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
+            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
                     DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength()+6))));
-            String remark = "\n到期后自动关闭\n\n想和更多求职的同伴一起学习？\n加入QQ群："+quanwaiClass.getQqGroupNo()
-                    +"。点击查看群二维码。";
-            data.put("remark", new TemplateMessage.Keyword(remark));
-            templateMessage.setUrl(quanwaiClass.getQqGroup());
+            if(quanwaiClass.getBroadcastUrl()!=null){
+                String remark = "\n这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总";
+                data.put("remark", new TemplateMessage.Keyword(remark));
+                templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
+            }
+
         } else if(course.getType()==Course.AUDITION_COURSE){
             data.put("keyword1", new TemplateMessage.Keyword("【免费体验】 "+course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword("7天"));
@@ -592,21 +594,21 @@ public class SignupServiceImpl implements SignupService {
 
         templateMessageService.sendMessage(templateMessage);
         //发送直播消息
-        if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
-            templateMessage = new TemplateMessage();
-            templateMessage.setTouser(openid);
-            templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
-            data = Maps.newHashMap();
-            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\n"));
-            data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
-            data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
-            data.put("keyword4", new TemplateMessage.Keyword("14天"));
-            data.put("remark", new TemplateMessage.Keyword("\n如有新问题，在课程QQ群中和同学讨论哦（群号见上条报名成功消息）"));
-            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
-            templateMessage.setData(data);
-            templateMessageService.sendMessage(templateMessage);
-        }
+//        if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
+//            templateMessage = new TemplateMessage();
+//            templateMessage.setTouser(openid);
+//            templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
+//            data = Maps.newHashMap();
+//            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\n"));
+//            data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
+//            data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
+//            data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
+//            data.put("keyword4", new TemplateMessage.Keyword("14天"));
+//            data.put("remark", new TemplateMessage.Keyword("\n如有新问题，在课程QQ群中和同学讨论哦（群号见上条报名成功消息）"));
+//            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
+//            templateMessage.setData(data);
+//            templateMessageService.sendMessage(templateMessage);
+//        }
     }
 
     public void reloadClass() {
