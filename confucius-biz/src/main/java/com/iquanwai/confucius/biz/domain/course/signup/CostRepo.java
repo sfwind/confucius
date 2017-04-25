@@ -1,5 +1,9 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.iquanwai.confucius.biz.po.Coupon;
+
+import java.util.List;
+
 /**
  * Created by justin on 16/10/13.
  */
@@ -12,6 +16,8 @@ public interface CostRepo {
      * 用户使用折扣后的实际金额
      * */
     double discount(Double price, String openid, String orderId);
+
+    double discount(Double price, String openid, String orderId, Coupon coupon);
 
     /**
      * 是否有优惠券
@@ -27,4 +33,8 @@ public interface CostRepo {
      * 更新优惠券状态
      * */
     void updateCoupon(Integer status, String orderId);
+
+    List<Coupon> getCoupons(String openId);
+
+    Coupon getCoupon(Integer id);
 }

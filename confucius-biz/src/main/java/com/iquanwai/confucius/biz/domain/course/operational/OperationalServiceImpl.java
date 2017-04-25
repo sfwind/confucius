@@ -8,10 +8,10 @@ import com.iquanwai.confucius.biz.dao.course.CourseDao;
 import com.iquanwai.confucius.biz.dao.operational.AngelDao;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.Angel;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.systematism.Angel;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.Course;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -184,19 +184,4 @@ public class OperationalServiceImpl implements OperationalService {
         }
         return false;
     }
-
-//    public static void main(String[] args) {
-//        ClassMember[] classMembers = new ClassMember[100];
-//        for(int i=0;i<100;i++){
-//            ClassMember classMember = new ClassMember();
-//            classMember.setMemberId(""+i);
-//            classMembers[i]=classMember;
-//        }
-//
-//        List<Pair<ClassMember, ClassMember>> classMemberGroup = assignAngel(classMembers);
-//
-//        for(Pair<ClassMember, ClassMember> pair:classMemberGroup){
-//            System.out.println(pair.getRight().getMemberId() + " is " + pair.getLeft().getMemberId() + " angel");
-//        }
-//    }
 }

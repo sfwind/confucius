@@ -8,7 +8,9 @@ import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.web.pc.dto.ProblemListDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2016/12/29.
@@ -39,7 +43,7 @@ public class ProblemController {
 
 
     @RequestMapping("/curId")
-    public ResponseEntity<Map<String,Object>> loadCurProblemId(PCLoginUser pcLoginUser){
+    public ResponseEntity<Map<String, Object>> loadCurProblemId(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("训练")
@@ -48,16 +52,16 @@ public class ProblemController {
                 .memo("");
         operationLogService.log(operationLog);
         ImprovementPlan runningPlan = planService.getRunningPlan(pcLoginUser.getOpenId());
-        if(runningPlan == null){
+        if (runningPlan == null) {
             // 没有正在进行的主题，选一个之前做过的
             List<ImprovementPlan> plans = planService.loadUserPlans(pcLoginUser.getOpenId());
-            if(plans.isEmpty()){
+            if (plans.isEmpty()) {
                 // 没有买过难题
                 logger.error("{} has no active plan", pcLoginUser.getOpenId());
-                return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT,"没找到进行中的RISE训练");
+                return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT, "没找到进行中的RISE训练");
             } else {
                 // 购买过直接选最后一个
-                ImprovementPlan plan = plans.get(plans.size()-1);
+                ImprovementPlan plan = plans.get(plans.size() - 1);
                 return WebUtils.result(plan.getProblemId());
             }
         } else {
@@ -67,26 +71,40 @@ public class ProblemController {
     }
 
 
-
     /**
      * 加载问题列表
      */
     @RequestMapping(value = "/list")
     public ResponseEntity<Map<String, Object>> loadProblemList(PCLoginUser pcLoginUser) {
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser==null?null:pcLoginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
                 .action("获取问题列表")
                 .memo("");
         operationLogService.log(operationLog);
+
+        List<ImprovementPlan> plans = pcLoginUser == null ? Lists.newArrayList() : planService.loadUserPlans(pcLoginUser.getOpenId());
         List<Problem> problems = problemService.loadProblems();
-        List<ProblemListDto> result = Lists.newArrayList();
-        problems.forEach(item -> {
-            ProblemListDto dto = new ProblemListDto();
-            dto.setId(item.getId());
-            dto.setProblem(item.getProblem());
-            result.add(dto);
-        });
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalogDto> result = catalogs.stream().map(item->{
+            ProblemCatalogDto dto = new ProblemCatalogDto();
+            List<ProblemListDto> collect = problems.stream().filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
+                ProblemListDto problemList = new ProblemListDto();
+                problemList.setId(problem.getId());
+                problemList.setProblem(problem.getProblem());
+                // 查询用户该小课的计划
+                plans.forEach(plan -> {
+                    if (plan.getProblemId() == problem.getId()) {
+                        problemList.setStatus(plan.getStatus());
+                    }
+                });
+                problemList.setStatus(problemList.getStatus() == null ? -1 : problemList.getStatus());
+                return problemList;
+            }).collect(Collectors.toList());
+            dto.setProblems(collect);
+            dto.setName(item.getName());
+            return dto;
+        }).collect(Collectors.toList());
         return WebUtils.result(result);
     }
 }

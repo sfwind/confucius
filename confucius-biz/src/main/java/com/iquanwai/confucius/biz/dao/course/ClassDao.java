@@ -2,12 +2,10 @@ package com.iquanwai.confucius.biz.dao.course;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.DateUtils;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 /**
  * Created by justin on 16/8/29.
@@ -89,10 +86,9 @@ public class ClassDao extends DBUtil {
 
     public void progress(int classId, int progress){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE QuanwaiClass SET Progress =?, Open=0 " +
+            run.update("UPDATE QuanwaiClass SET Progress =?, Open=0 " +
                     "where Id=?", progress, classId);
 
         } catch (SQLException e) {
@@ -102,10 +98,9 @@ public class ClassDao extends DBUtil {
 
     public void closeEntry(int classId){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE QuanwaiClass SET Open=0 " +
+            run.update("UPDATE QuanwaiClass SET Open=0 " +
                     "where Id=?", classId);
 
         } catch (SQLException e) {

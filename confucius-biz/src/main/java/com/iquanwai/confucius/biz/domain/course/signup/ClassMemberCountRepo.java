@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Map;
+
 /**
  * Created by justin on 16/9/30.
  */
@@ -34,4 +36,7 @@ public interface ClassMemberCountRepo {
      * @return
      */
     void quitClass(String openid, Integer courseId, Integer orderClassId);
+
+    // 获取某班级剩余名额
+    Map<Integer,Integer> getRemainingCount();
 }

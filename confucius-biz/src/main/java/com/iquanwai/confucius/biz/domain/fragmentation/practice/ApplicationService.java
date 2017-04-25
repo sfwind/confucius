@@ -12,13 +12,13 @@ public interface ApplicationService {
     ApplicationPractice loadApplicationPractice(Integer id);
 
     /**
-     * 加载自己的应用训练任务
+     * 加载自己的应用练习任务
      * @param planId 计划id
-     * @param applicationId 应用训练id
+     * @param applicationId 应用练习id
      * @param OpenId openId
-     * @return 应用训练
+     * @return 应用练习
      */
-    ApplicationPractice loadMineApplicationPractice(Integer planId, Integer applicationId, String OpenId);
+    ApplicationPractice loadMineApplicationPractice(Integer planId, Integer applicationId, String OpenId,boolean create);
 
 
     List<ApplicationSubmit> loadApplicationSubmitList(Integer applicationId);

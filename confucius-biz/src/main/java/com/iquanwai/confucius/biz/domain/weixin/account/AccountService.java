@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Region;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 
 import java.util.List;
 
@@ -40,7 +41,22 @@ public interface AccountService {
      * */
     List<Region> loadCities();
 
+    /**
+     * 根据名字获取省
+     */
+    Region loadProvinceByName(String name);
+
+    /**
+     * 根据名字获取城市
+     */
+    Region loadCityByName(String name);
+
     String USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN";
 
     String GET_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}";
+
+    /**
+     * 根据openid获取用户详情
+     */
+    Profile getProfile(String openid, boolean realTime);
 }

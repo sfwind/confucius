@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -114,6 +115,10 @@ public class ConfigUtils {
 		return config.getString("resource.domain");
 	}
 
+	public static String streamResourceDomainName(){
+		return config.getString("stream.resource.domain");
+	}
+
 	public static String realDomainName(){
 		return config.getString("app.domainname");
 	}
@@ -177,5 +182,67 @@ public class ConfigUtils {
 		return config.getBoolean("pc.server.maintenance");
 	}
 
+	public static String getSurveyUrl(Integer id){
+		try {
+			return config.getString("wjx.survey." + id);
+		} catch (Exception e){
+			return null;
+		}
+	}
 
+	public static Integer getFeedBackId(){
+		return config.getInt("wjx.feedback");
+	}
+
+	public static String willCloseMsgKey(){
+		return config.getString("will.close.task.msg");
+	}
+
+	public static String accountChangeMsgKey(){
+		return config.getString("account.change.msg");
+	}
+
+//	public static Integer getFormalCourseId(Integer auditionId){
+//		try{
+//			return config.getInt("audition.formal.course.mapping."+auditionId);
+//		} catch (Exception e){
+//			return null;
+//		}
+//	}
+
+	public static Integer getProfileFullScore(){
+		return config.getInt("profile.full.score");
+	}
+
+	public static String activityStartMsgKey(){
+		return config.getString("activity.start.msg");
+	}
+
+	public static String qaMsgKey(){
+		return config.getString("qa.msg");
+	}
+
+	public static String getUploadDomain(){
+		return config.getString("upload.image.domain");
+	}
+
+	public static String getPicturePrefix(){
+		return config.getString("qiniu.picture.prefix");
+	}
+
+	public static Date getRisePayStopTime(){
+		return DateUtils.parseStringToDateTime(config.getString("rise.member.pay.stop.time"));
+	}
+
+	public static Integer riseMemberTotal(){
+		return config.getInt("rise.member.total.count");
+	}
+
+	public static String productPaidMsg() {
+		return config.getString("product.paid.msg");
+	}
+
+	public static String getIntegratedPracticeIndex(){
+		return getValue("integrated.practice.index");
+	}
 }

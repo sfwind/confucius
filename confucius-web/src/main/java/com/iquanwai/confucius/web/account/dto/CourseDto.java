@@ -3,9 +3,14 @@ package com.iquanwai.confucius.web.account.dto;
 import lombok.Data;
 
 /**
- * Created by nethunder on 2016/12/28.
+ * Created by nethunder on 2017/2/8.
  */
 @Data
 public class CourseDto {
-    private FragmentDto fragment;
+    private Integer id;
+    private String name;
+    private Boolean hasCertificateNo;
+    private Boolean hasRealName;
+    private Boolean noCertificate;
+    private Boolean graduate;
 }

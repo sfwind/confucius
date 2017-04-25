@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.job;
 
-import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
 import com.iquanwai.confucius.biz.domain.weixin.accessToken.AccessTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,7 @@ public class AccessTokenJob {
     @Scheduled(cron="${accessTokenJob.cron}")
     public void work(){
         logger.info("AccessTokenJob start");
-        accessTokenService.refreshAccessToken();
+        accessTokenService.refreshAccessToken(true);
         logger.info("AccessTokenJob end");
     }
 }

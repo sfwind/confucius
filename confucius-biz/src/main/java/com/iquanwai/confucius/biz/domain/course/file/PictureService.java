@@ -6,7 +6,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by nethunder on 2016/12/15.
@@ -49,7 +48,7 @@ public interface PictureService {
      * @return  图片
      * */
     Picture uploadPicture(PictureModule pictureModule, Integer referId, String remoteIp, String fileName, Long fileSize, String contentType, MultipartFile file) throws Exception;
-
+    Pair<Boolean,String> uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception;
     /**
      * 获得模块的url前缀
      * @param moduleId 模块id

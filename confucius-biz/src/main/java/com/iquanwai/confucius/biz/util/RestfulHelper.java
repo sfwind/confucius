@@ -26,6 +26,7 @@ public class RestfulHelper {
 
     public String post(String requestUrl, String json) {
         if(StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(json)) {
+
             String accessToken = accessTokenService.getAccessToken();
             String url = requestUrl.replace("{access_token}", accessToken);
             Request request = new Request.Builder()
@@ -42,7 +43,7 @@ public class RestfulHelper {
                     }
                 }catch (WeixinException e){
                     //refresh token and try again
-                    accessToken = accessTokenService.refreshAccessToken();
+                    accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
                     request = new Request.Builder()
                             .url(url)
@@ -104,7 +105,7 @@ public class RestfulHelper {
                     }
                 }catch (WeixinException e){
                     //refresh token and try again
-                    accessToken = accessTokenService.refreshAccessToken();
+                    accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
                     request = new Request.Builder()
                             .url(url)

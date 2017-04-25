@@ -7,7 +7,9 @@ import lombok.Data;
  **/
 @Data
 public class AccountDto {
-    private String role;
+    private Integer role;
     private String weixinName;
     private String headimgUrl;
+    private String key;
+    private String callbackUrl;
 }

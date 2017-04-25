@@ -1,9 +1,13 @@
 package com.iquanwai.confucius.web;
 
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * Created by justin on 16/9/9.
@@ -27,6 +32,8 @@ public class IndexController {
     private OAuthService oAuthService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private WhiteListService whiteListService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -43,24 +50,33 @@ public class IndexController {
     }
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
-    public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
+    public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
+        }
+
+        if(ConfigUtils.isDevelopment()){
+            //如果不在白名单中,直接403报错
+            boolean result = whiteListService.isInWhiteList(WhiteList.TEST, loginUser.getOpenId());
+            if(!result){
+                response.sendRedirect("/403.jsp");
+                return null;
+            }
         }
 
         return courseView(request);
     }
 
-    @RequestMapping(value = "/pay",method = RequestMethod.GET)
-    public ModelAndView getPayIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
+    @RequestMapping(value = "/pay/**",method = RequestMethod.GET)
+    public ModelAndView getPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
             return null;
         }
-        return courseView(request);
+        return courseView(request, loginUser);
     }
 
     @RequestMapping(value = "/personal/edit",method = RequestMethod.GET)
@@ -71,6 +87,27 @@ public class IndexController {
             return null;
         }
         return courseView(request);
+    }
+
+
+    @RequestMapping(value = "/personal/static/**",method = RequestMethod.GET)
+    public ModelAndView getPersonalIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
+        return courseView(request,loginUser);
+    }
+
+    @RequestMapping(value = "/operation/static/**",method = RequestMethod.GET)
+    public ModelAndView getOperationIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
+        return courseView(request, loginUser);
     }
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
@@ -111,6 +148,28 @@ public class IndexController {
             }
         }else{
             mav.addObject("resource", ConfigUtils.staticResourceUrl());
+        }
+        return mav;
+    }
+
+    private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser){
+        ModelAndView mav = new ModelAndView("course");
+
+        if(request.getParameter("debug")!=null){
+            if(ConfigUtils.isFrontDebug()){
+                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
+            }else{
+                mav.addObject("resource", ConfigUtils.staticResourceUrl());
+            }
+        }else{
+            mav.addObject("resource", ConfigUtils.staticResourceUrl());
+        }
+
+        if (loginUser != null) {
+            Map<String, String> userParam = Maps.newHashMap();
+            userParam.put("userName", loginUser.getWeixinName());
+            userParam.put("headImage",loginUser.getHeadimgUrl());
+            mav.addAllObjects(userParam);
         }
 
         return mav;

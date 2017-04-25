@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.job;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

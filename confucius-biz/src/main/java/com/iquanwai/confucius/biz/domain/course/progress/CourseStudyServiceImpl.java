@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -24,6 +25,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -64,9 +67,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String picUrlPrefix = ConfigUtils.resourceDomainName()+"/images/";
-    private String audioUrlPrefix = ConfigUtils.resourceDomainName()+"/audio/";
-
     private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
     @PostConstruct
@@ -81,7 +81,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             questionMap.put(question.getId(), question);
             //语音分析，拼接完整url
             if(question.getVoice()!=null){
-                question.setVoice(audioUrlPrefix+question.getVoice());
+                question.setVoice(ConfigUtils.streamResourceDomainName()+"/audio/"+question.getVoice());
             }
         }
 
@@ -114,9 +114,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         Assert.notNull(m, "material不能为空");
         //图片，语音加前缀
         if(m.getType()==2){
-            m.setContent(picUrlPrefix+m.getContent());
+            m.setContent(ConfigUtils.resourceDomainName()+"/images/"+m.getContent());
         }else if(m.getType()==3){
-            m.setContent(audioUrlPrefix+m.getContent());
+            m.setContent(ConfigUtils.streamResourceDomainName()+"/audio/"+m.getContent());
         //占位符替换，当文字处理
         }else if(m.getType()==11){
             m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
@@ -131,6 +131,25 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }else if(m.getType()==21){
             m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
             m.setType(2);
+        } else if(m.getType()==31){
+            // 支付链接，占位符替换，当文字处理
+            Pattern pattern = Pattern.compile("\\{\\d+\\}");
+
+            Matcher matcher = pattern.matcher(m.getContent());
+            String courseId = null;
+            String placeholder = null;
+            if(matcher.find()){
+                placeholder = matcher.group();
+                courseId = placeholder.substring(1, placeholder.length()-1);
+            }
+
+            if(courseId==null){
+                logger.error("查询该章节对应的正式课程失败,素材id:{}", m.getId());
+            } else {
+                m.setContent(m.getContent().replace(placeholder,
+                        ConfigUtils.domainName() + "/pay/signup?courseId=" + courseId));
+                m.setType(1);
+            }
         }
     }
 
@@ -258,7 +277,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             homework.setSubmitted(true);
         }
         if(homework.getVoice()!=null) {
-            homework.setVoice(ConfigUtils.resourceDomainName() + homework.getVoice());
+            homework.setVoice(ConfigUtils.streamResourceDomainName() + homework.getVoice());
         }
         if(submit==null){
             String url = "/static/h?id="+ CommonUtils.randomString(6);
@@ -532,4 +551,5 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     public HomeworkSubmit loadMemberSubmittedHomework(Integer submitId){
         return homeworkSubmitDao.load(HomeworkSubmit.class,submitId);
     }
+
 }

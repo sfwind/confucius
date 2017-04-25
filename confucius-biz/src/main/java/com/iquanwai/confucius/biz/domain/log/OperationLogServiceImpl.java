@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.biz.domain.log;
 
-import com.iquanwai.confucius.biz.dao.OperationLogDao;
+import com.iquanwai.confucius.biz.dao.common.log.OperationLogDao;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.springframework.beans.factory.annotation.Autowired;

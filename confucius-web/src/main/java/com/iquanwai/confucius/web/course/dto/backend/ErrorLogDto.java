@@ -9,4 +9,6 @@ import lombok.Data;
 public class ErrorLogDto {
     private String cookie;
     private String result;
+    private String url;
+    private String browser;
 }

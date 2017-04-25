@@ -1,11 +1,9 @@
 package com.iquanwai.confucius.web.weixin;
 
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
-import com.iquanwai.confucius.biz.po.CourseOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +25,6 @@ import java.io.IOException;
 public class PayController {
     @Autowired
     private PayService payService;
-    @Autowired
-    private SignupService signupService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -50,7 +46,7 @@ public class PayController {
             }
             String prepayId = payService.unifiedOrder(orderCallback.getProduct_id());
             if (StringUtils.isEmpty(prepayId)) {
-                orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "下单失败，请重新扫描二维码", "");
+                orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "下单失败,请联系微信号quanwaizhushou", "");
             } else {
                 orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "下单成功", prepayId);
             }
@@ -66,14 +62,13 @@ public class PayController {
 
     @RequestMapping(value="/result/callback")
     public void payCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
-        LOGGER.info(payCallback.toString());
+        LOGGER.info("体系化微信支付回调:{}",payCallback.toString());
         try {
             payService.handlePayResult(payCallback);
-            CourseOrder courseOrder = signupService.getCourseOrder(payCallback.getOut_trade_no());
             if(payCallback.getResult_code().equals("SUCCESS")) {
-                signupService.entry(courseOrder);
+                payService.paySuccess(payCallback.getOut_trade_no());
             }else{
-                LOGGER.error("{}付费失败", courseOrder.getOrderId());
+                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
             }
         }catch (Exception e){
             LOGGER.error("支付结果回调处理失败", e);
@@ -83,4 +78,26 @@ public class PayController {
         response.getWriter().print(SUCCESS_RETURN);
         response.flushBuffer();
     }
+
+    @RequestMapping(value = "/result/risemember/callback")
+    public void riseMemberPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
+        LOGGER.info("rise会员微信支付回调:{}",payCallback.toString());
+        try {
+            payService.handlePayResult(payCallback);
+            if(payCallback.getResult_code().equals("SUCCESS")) {
+                payService.riseMemberPaySuccess(payCallback.getOut_trade_no());
+            }else{
+                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+            }
+        }catch (Exception e){
+            LOGGER.error("支付结果回调处理失败", e);
+        }
+
+        response.setHeader("Content-Type", "application/xml");
+        response.getWriter().print(SUCCESS_RETURN);
+        response.flushBuffer();
+    }
+
+
+
 }

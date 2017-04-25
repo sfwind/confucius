@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.service;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.TestBase;
+import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -16,21 +17,37 @@ import java.util.Map;
 public class TemplateMessageServiceTest extends TestBase {
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private CourseProgressService progressService;
 
     @Test
     public void testSend(){
-        TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser("o5h6ywlXxHLmoGrLzH9Nt7uyoHbM");
 
-        templateMessage.setTemplate_id(ConfigUtils.angelMsgKey());
-        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-        templateMessage.setData(data);
-        String first = "记住这个号码：{number}；你是这个号码学员的天使哦！";
-        String remark = "对了，课程结束前，不要互相交流号码信息~\n还没加群？点击查看群二维码。";
-        data.put("first", new TemplateMessage.Keyword(first.replace("{number}", "0100111")));
-        data.put("keyword1", new TemplateMessage.Keyword("结构化思维明天开始"));
-        data.put("keyword2", new TemplateMessage.Keyword("明天凌晨"));
-        data.put("remark", new TemplateMessage.Keyword(remark));
-        templateMessageService.sendMessage(templateMessage);
+        String[] arrs = {
+                "o5h6ywlXxHLmoGrLzH9Nt7uyoHbM",
+        };
+
+        for(String openid:arrs) {
+            try {
+                TemplateMessage templateMessage = new TemplateMessage();
+                templateMessage.setTouser(openid);
+
+                templateMessage.setTemplate_id(ConfigUtils.willCloseMsgKey());
+                Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                templateMessage.setData(data);
+                data.put("first", new TemplateMessage.Keyword("RISE试用期即将结束。"));
+                data.put("keyword1", new TemplateMessage.Keyword("RISE"));
+                data.put("keyword2", new TemplateMessage.Keyword("2017-02-28"));
+                data.put("remark", new TemplateMessage.Keyword("试用期截止日当天积分前100名的用户，RISE继续开放，其余用户到期后关闭。当前排名详见管理员通知。"));
+                templateMessageService.sendMessage(templateMessage);
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+    }
+
+    @Test
+    public void closeTest(){
+        progressService.noticeWillCloseMember();
     }
 }

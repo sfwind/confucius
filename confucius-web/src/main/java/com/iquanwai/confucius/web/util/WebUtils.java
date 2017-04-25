@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,5 +102,12 @@ public class WebUtils {
      */
     public static void redirect(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
         response.sendRedirect(ConfigUtils.adapterDomainName() + uri);
+    }
+
+    /**
+     * 跳转至问卷星
+     */
+    public static void wjx(HttpServletRequest request,HttpServletResponse response,String url) throws IOException {
+        response.sendRedirect(url);
     }
 }

@@ -10,8 +10,11 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by justin on 16/8/7.
@@ -105,6 +108,18 @@ public class CommonUtils {
                 .concat(ConfigUtils.getAPIKey());
 
         return MessageDigestHelper.getMD5String(digest);
+    }
+
+    public static String signH5Pay(final Map<String,String> params){
+        List<String> list = new ArrayList(params.keySet());
+        Collections.sort(list);
+
+        List<String> kvList = Lists.transform(list, input -> input+"="+params.get(input));
+
+        String digest = StringUtils.join(kvList.iterator(), "&");
+
+        return MessageDigestHelper.getMD5String(digest);
+
     }
 
     //保留两位小数

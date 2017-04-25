@@ -2,8 +2,8 @@ package com.iquanwai.confucius.biz.dao.course;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.ClassMember;
-import org.apache.commons.dbutils.AsyncQueryRunner;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -16,9 +16,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by justin on 16/8/29.
@@ -55,6 +52,24 @@ public class ClassMemberDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    /**
+     * 查询还有N天要关闭课程的学员
+     * @param date
+     */
+    public List<ClassMember> willCloseMembers(Date date){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where CloseDate = ?", h, DateUtils.parseDateToString(date));
+            return classMember;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
     public List<ClassMember> graduateInfo(String openid, Integer courseId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
@@ -73,10 +88,9 @@ public class ClassMemberDao extends DBUtil {
 
     public void progress(String openid, Integer classId, String progress){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE ClassMember SET Progress =? " +
+            run.update("UPDATE ClassMember SET Progress =? " +
                     "where Openid=? and ClassId=?", progress, openid, classId);
 
         } catch (SQLException e) {
@@ -125,26 +139,35 @@ public class ClassMemberDao extends DBUtil {
 
         return Lists.newArrayList();
     }
-    public int entry(ClassMember classMember) {
+
+    public List<ClassMember> getClassMember(Integer classId,Date closeDate){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ClassId=? and CloseDate > ?",
+                    h, classId, closeDate);
+            return classMember;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+
+    public void entry(ClassMember classMember) {
+        QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO ClassMember(ClassId, CourseId, Openid, MemberId, Graduate, CloseDate) " +
                 "VALUES(?, ?, ?, ?, 0, ?)";
         try {
-            Future<Integer> result = asyncRun.update(insertSql,
+            run.insert(insertSql, new ScalarHandler<>(),
                     classMember.getClassId(), classMember.getCourseId(),
                     classMember.getOpenId(), classMember.getMemberId(),
                     classMember.getCloseDate());
-            return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e) {
-            // ignore
-        } catch (ExecutionException e) {
-            logger.error(e.getMessage(), e);
         }
-
-        return -1;
     }
 
     public Integer classMemberNumber(Integer classId){
@@ -178,10 +201,9 @@ public class ClassMemberDao extends DBUtil {
 
     public void graduate(Integer id){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE ClassMember SET Graduate =1 " +
+            run.update("UPDATE ClassMember SET Graduate =1 " +
                     "where id=?", id);
 
         } catch (SQLException e) {
@@ -191,10 +213,9 @@ public class ClassMemberDao extends DBUtil {
 
     public void updateCertificateNo(Integer classId, String openid, String certificateNo){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE ClassMember SET CertificateNo=? " +
+            run.update("UPDATE ClassMember SET CertificateNo=? " +
                     "where Openid=? and ClassId=? ", certificateNo, openid, classId);
 
         } catch (SQLException e) {
@@ -232,14 +253,40 @@ public class ClassMemberDao extends DBUtil {
 
     public void reEntry(Integer classMemberId, Date closeDate){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
 
         try {
-            asyncRun.update("UPDATE ClassMember SET Graduate =0, closeDate=? " +
+            run.update("UPDATE ClassMember SET Graduate =0, closeDate=? " +
                     "where Id=?", closeDate, classMemberId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public List<ClassMember> loadByOpenId(String openId) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            return run.query("SELECT * FROM ClassMember where Openid=?", h, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public List<ClassMember> loadActiveMembers() {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+
+        try {
+            return run.query("SELECT * FROM ClassMember where CloseDate<?", h, DateUtils.parseDateToString(new Date()));
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
 }

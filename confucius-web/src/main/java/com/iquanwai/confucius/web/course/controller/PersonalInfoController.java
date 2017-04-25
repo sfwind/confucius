@@ -2,18 +2,19 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Region;
-import com.iquanwai.confucius.web.resolver.LoginUser;
-import com.iquanwai.confucius.web.util.WebUtils;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.ProvinceDto;
 import com.iquanwai.confucius.web.course.dto.RegionDto;
+import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +41,8 @@ public class PersonalInfoController {
     private AccountService accountService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private ProfileService profileService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -50,11 +54,15 @@ public class PersonalInfoController {
             if(infoSubmitDto.getRealName()==null){
                 return WebUtils.error("请填写姓名");
             }
-            Account account = new Account();
-            ModelMapper mapper = new ModelMapper();
-            mapper.map(infoSubmitDto, account);
+            Profile account = new Profile();
+            try{
+                BeanUtils.copyProperties(account,infoSubmitDto);
+            }catch (IllegalAccessException | InvocationTargetException e) {
+                LOGGER.error("beanUtils copy props error",e);
+                return WebUtils.error("提交个人信息失败");
+            }
             account.setOpenid(loginUser.getOpenId());
-            accountService.submitPersonalInfo(account);
+            profileService.submitPersonalInfo(account,true);
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("个人信息")
                     .function("编辑个人信息")
@@ -72,9 +80,13 @@ public class PersonalInfoController {
         InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            Account account = accountService.getAccount(loginUser.getOpenId(), false);
-            ModelMapper mapper = new ModelMapper();
-            mapper.map(account, infoSubmitDto);
+            Profile account = profileService.getProfile(loginUser.getOpenId());
+            try{
+                BeanUtils.copyProperties(infoSubmitDto,account);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                LOGGER.error("beanUtils copy props error",e);
+                return WebUtils.error("加载个人信息失败");
+            }
             //找到名字匹配的省份,设置省份id
             List<Region> regions = accountService.loadAllProvinces();
             Optional<Region> find = regions.stream().filter(region -> region.getName().
@@ -128,6 +140,16 @@ public class PersonalInfoController {
             return WebUtils.error("加载个人信息失败");
         }
         return WebUtils.result(provinceDto);
+    }
+
+    @RequestMapping(value = "/mark/rise/up")
+    public ResponseEntity<Map<String, Object>> clickUpButton(LoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("个人中心")
+                .function("打点")
+                .action("点击升级按钮");
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 
 }

@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -145,6 +146,7 @@ public class ChapterController {
     public ResponseEntity<Map<String, Object>> submitQuestion(LoginUser loginUser,
                                                               @PathVariable("questionId") Integer questionId,
                                                               @RequestBody AnswerDto answerDto){
+        Assert.notNull(loginUser, "用户不能为空");
         boolean right = courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())

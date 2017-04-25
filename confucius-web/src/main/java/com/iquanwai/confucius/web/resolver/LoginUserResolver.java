@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -84,7 +85,11 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         LoginUser loginUser = new LoginUser();
         loginUser.setOpenId(account.getOpenid());
         loginUser.setWeixinName(account.getNickname());
-        loginUser.setHeadimgUrl(account.getHeadimgurl());
+        if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
+            loginUser.setHeadimgUrl(account.getHeadimgurl());
+        }else{
+            loginUser.setHeadimgUrl(Profile.DEFAULT_AVATAR);
+        }
         loginUser.setRealName(account.getRealName());
         return loginUser;
     }

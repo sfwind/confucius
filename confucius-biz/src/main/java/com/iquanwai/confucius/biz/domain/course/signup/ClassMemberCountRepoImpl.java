@@ -4,10 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.CourseDao;
-import com.iquanwai.confucius.biz.dao.wx.CourseOrderDao;
-import com.iquanwai.confucius.biz.po.Course;
-import com.iquanwai.confucius.biz.po.CourseOrder;
-import com.iquanwai.confucius.biz.po.QuanwaiClass;
+import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
+import com.iquanwai.confucius.biz.po.systematism.Course;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -48,10 +48,6 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     private Map<Integer, Integer> remainingCount = Maps.newConcurrentMap();
 
     /**
-     * 每个人的退名额记录
-     * */
-    private Map<String, List<Integer>> returnCountMap = Maps.newConcurrentMap();
-    /**
      * 每个人的报名班级
      * */
     private Map<String, CourseClass> signupMap = Maps.newConcurrentMap();
@@ -91,14 +87,14 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
                     if(course!=null && course.getType()==Course.LONG_COURSE) {
                         remainingCount.put(classId, quanwaiClass.getLimit());
                     }else{
-                        //短课程班级容量无限
+                        //短课程,试听课程班级容量无限
                         remainingCount.put(classId, 1000000);
                     }
                     logger.info("init classId {} has {} quota total", classId, remainingCount.get(classId));
                 }
             }
             //统计已付款和待付款的人数
-            List<CourseOrder> courseOrders = courseOrderDao.loadClassOrder(openClass);
+            List<CourseOrder> courseOrders = courseOrderDao.loadNotExpiredClassOrder(openClass);
             for(CourseOrder courseOrder:courseOrders){
                 String openid = courseOrder.getOpenid();
                 Integer courseId = courseOrder.getCourseId();
@@ -136,6 +132,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         synchronized (lock) {
             List<Integer> openClass = openClassList.get(courseId);
             if(CollectionUtils.isEmpty(openClass)){
+                // 开课的班级里不包括该课程
                 return new ImmutablePair(-2, 0);
             }
             //报名记录
@@ -178,29 +175,22 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
         //如果是用户最后一个退单,释放名额
         int underPaidCount = courseOrderDao.underPaidCount(openid, orderClassId);
-        if (underPaidCount == 0) {
+        if (underPaidCount == 1) {
             synchronized (lock) {
-                //名额每人每班只退一次
-                if (returnCountMap.get(openid) != null) {
-                    returnCountMap.get(openid).contains(orderClassId);
-                    return;
-                }
-
                 Integer remaining = remainingCount.get(orderClassId);
                 remainingCount.put(orderClassId, remaining + 1);
                 logger.info("init classId {} has {} quota left", orderClassId, remaining + 1);
                 CourseClass.removeCourse(classes, courseId);
-                //增加退班记录
-                List<Integer> returnClasses = returnCountMap.get(openid);
-                if(returnClasses==null){
-                    returnClasses = Lists.newArrayList();
-                    returnCountMap.put(openid, returnClasses);
-                }
-                returnClasses.add(orderClassId);
             }
         }
 
     }
+
+    @Override
+    public Map<Integer,Integer> getRemainingCount(){
+        return remainingCount;
+    }
+
 
     @Data
     private static class CourseClass{
@@ -208,7 +198,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
         //添加课程报名记录
         public static void addCourseEntry(CourseClass classes, Integer courseId, Integer classId) {
-            classes.getClassMap().put(courseId, classId);
+            if(classes!=null && classes.getClassMap()!=null) {
+                classes.getClassMap().put(courseId, classId);
+            }
         }
 
         //获取课程班级id
@@ -221,7 +213,9 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
 
         //删除报名的课程
         public static void removeCourse(CourseClass classes, Integer courseId) {
-            classes.getClassMap().remove(courseId);
+            if(classes!=null && classes.getClassMap()!=null) {
+                classes.getClassMap().remove(courseId);
+            }
         }
 
     }
