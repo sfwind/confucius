@@ -210,7 +210,7 @@ public class FragmentController {
                 .memo(type+":"+submitId);
         operationLogService.log(operationLog);
         List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId,page).stream().map(item->{
-            Account account = accountService.getAccount(item.getCommentOpenId(), false);
+            Profile account = accountService.getProfile(item.getCommentOpenId(), false);
             if(account!=null){
                 RiseWorkCommentDto dto = new RiseWorkCommentDto();
                 dto.setId(item.getId());
@@ -276,8 +276,11 @@ public class FragmentController {
                 .stream().map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto(item);
                     Profile account = accountService.getProfile(item.getOpenid(), false);
-                    dto.setUpName(account.getNickname());
-                    dto.setHeadPic(account.getHeadimgurl());
+                    if(account!=null) {
+                        dto.setUpName(account.getNickname());
+                        dto.setHeadPic(account.getHeadimgurl());
+                        dto.setRole(account.getRole());
+                    }
                     // 查询我对它的点赞状态
                     dto.setIsMine(item.getOpenid().equals(loginUser.getOpenId()));
                     item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
@@ -315,8 +318,11 @@ public class FragmentController {
                                     item.getContent());
                     dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.SUBJECT, item.getId()));
                     Profile account = accountService.getProfile(item.getOpenid(), false);
-                    dto.setUpName(account.getNickname());
-                    dto.setHeadPic(account.getHeadimgurl());
+                    if(account!=null) {
+                        dto.setUpName(account.getNickname());
+                        dto.setHeadPic(account.getHeadimgurl());
+                        dto.setRole(account.getRole());
+                    }
                     dto.setUpTime(DateUtils.parseDateToString(item.getUpdateTime()));
                     dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
                     dto.setPerfect(item.getSequence() != null && item.getSequence() > 0);
@@ -366,7 +372,7 @@ public class FragmentController {
                 show.setHeadImg(loginUser.getWeixin().getHeadimgUrl());
                 show.setWorkId(submit.getProblemId());
             } else {
-                Account account = accountService.getAccount(openId, false);
+                Profile account = accountService.getProfile(openId, false);
                 if (account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());

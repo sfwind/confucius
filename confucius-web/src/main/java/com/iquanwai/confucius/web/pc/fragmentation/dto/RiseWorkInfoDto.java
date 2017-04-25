@@ -33,6 +33,7 @@ public class RiseWorkInfoDto {
     private List<String> picList;
     private Date publishTime;
     private Integer priority;
+    private Integer role;
 
     public RiseWorkInfoDto(SubjectArticle origin){
         this.title = origin.getTitle();

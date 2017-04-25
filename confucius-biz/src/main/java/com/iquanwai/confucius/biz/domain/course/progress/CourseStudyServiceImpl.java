@@ -8,7 +8,9 @@ import com.google.gson.reflect.TypeToken;
 import com.iquanwai.confucius.biz.dao.course.*;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.Material;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -155,7 +157,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
     private String accountPlaceholder(String content, String openid) {
         Assert.notNull(openid, "openid不能为空");
-        Account account = accountService.getAccount(openid, false);
+        Profile account = accountService.getProfile(openid, false);
         if(account==null){
             logger.error("openid {} is invalid", openid);
             return content;

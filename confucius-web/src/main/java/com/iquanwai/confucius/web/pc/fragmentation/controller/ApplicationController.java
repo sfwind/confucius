@@ -8,13 +8,13 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
-import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
@@ -190,10 +190,11 @@ public class ApplicationController {
                     dto.setPublishTime(item.getPublishTime());
                     dto.setSubmitId(item.getId());
                     dto.setPriority(item.getPriority());
-                    Account account = accountService.getAccount(item.getOpenid(), false);
-                    if(account!=null) {
-                        dto.setUpName(account.getNickname());
-                        dto.setHeadPic(account.getHeadimgurl());
+                    Profile profile = accountService.getProfile(item.getOpenid(), false);
+                    if(profile!=null) {
+                        dto.setUpName(profile.getNickname());
+                        dto.setHeadPic(profile.getHeadimgurl());
+                        dto.setRole(profile.getRole());
                     }
                     dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.APPLICATION, item.getId()));
                     return dto;
@@ -299,7 +300,7 @@ public class ApplicationController {
                 show.setPlanId(submit.getPlanId());
                 show.setWorkId(submit.getApplicationId());
             } else {
-                Account account = accountService.getAccount(openId, false);
+                Profile account = accountService.getProfile(openId, false);
                 if (account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());

@@ -3,12 +3,12 @@ package com.iquanwai.confucius.web.course.controller;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.course.dto.CertificateDto;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,7 @@ public class ShareController {
             }
             certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
             //获取真名
-            Account account = accountService.getAccount(classMember.getOpenId(), false);
+            Profile account = accountService.getProfile(classMember.getOpenId(), false);
             if(account!=null){
                 certificateDto.setName(account.getRealName());
             }

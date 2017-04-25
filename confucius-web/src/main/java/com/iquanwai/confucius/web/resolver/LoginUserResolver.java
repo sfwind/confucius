@@ -3,7 +3,6 @@ package com.iquanwai.confucius.web.resolver;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -75,7 +74,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     }
 
     private LoginUser getLoginUser(String openId) {
-        Account account = accountService.getAccount(openId, false);
+        Profile account = accountService.getProfile(openId, false);
 
         if(account==null || account.getNickname()==null){
             logger.error("openId {} is not found in db", openId);
