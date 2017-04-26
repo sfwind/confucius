@@ -270,11 +270,13 @@ public class FragmentController {
                     }
                     // 查询我对它的点赞状态
                     dto.setIsMine(item.getOpenid().equals(loginUser.getOpenId()));
-                    item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
-                    dto.setContent(
-                            item.getContent().length() > 180 ?
-                                    item.getContent().substring(0, 180) + "......" :
-                                    item.getContent());
+                    if(item.getContent()!=null) {
+                        item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
+                        dto.setContent(
+                                item.getContent().length() > 180 ?
+                                        item.getContent().substring(0, 180) + "......" :
+                                        item.getContent());
+                    }
                     return dto;
                 }).collect(Collectors.toList());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -299,10 +301,12 @@ public class FragmentController {
                     dto.setSubmitId(item.getId());
                     dto.setType(Constants.PracticeType.SUBJECT);
                     item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
-                    dto.setContent(
-                            item.getContent().length() > 180 ?
-                                    item.getContent().substring(0, 180) + "......" :
-                                    item.getContent());
+                    if(item.getContent()!=null) {
+                        dto.setContent(
+                                item.getContent().length() > 180 ?
+                                        item.getContent().substring(0, 180) + "......" :
+                                        item.getContent());
+                    }
                     dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.SUBJECT, item.getId()));
                     Profile account = accountService.getProfile(item.getOpenid(), false);
                     if(account!=null) {
@@ -364,6 +368,7 @@ public class FragmentController {
                 if (account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
+                    show.setSignature(account.getSignature());
                 }
                 show.setIsMine(false);
             }

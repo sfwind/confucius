@@ -228,10 +228,12 @@ public class ChallengeController {
         // 查询
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(challengePractice.getSubmitId());
-        challengePractice.setContent(HtmlRegexpUtil.filterHtml(challengePractice.getContent()));
-        info.setContent(challengePractice.getContent().length() > 180 ?
-                challengePractice.getContent().substring(0, 180) + "......" :
-                challengePractice.getContent());
+        if(challengePractice.getContent()!=null) {
+            challengePractice.setContent(HtmlRegexpUtil.filterHtml(challengePractice.getContent()));
+            info.setContent(challengePractice.getContent().length() > 180 ?
+                    challengePractice.getContent().substring(0, 180) + "......" :
+                    challengePractice.getContent());
+        }
         info.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
         info.setType(Constants.PracticeType.CHALLENGE);
         info.setUpName(loginUser.getWeixin().getWeixinName());

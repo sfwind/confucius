@@ -305,6 +305,7 @@ public class ApplicationController {
                 if (account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
+                    show.setSignature(account.getSignature());
                 }
                 show.setIsMine(false);
             }

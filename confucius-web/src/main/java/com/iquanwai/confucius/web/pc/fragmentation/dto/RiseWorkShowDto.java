@@ -23,6 +23,7 @@ public class RiseWorkShowDto {
     private Integer planId;
     private Integer workId;
     private List<String> picList;
+    private String signature;
 
     private String desc; // 描述
     private List<LabelConfig> labelList;
