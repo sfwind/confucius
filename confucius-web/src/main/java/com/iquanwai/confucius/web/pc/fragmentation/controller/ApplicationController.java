@@ -195,6 +195,7 @@ public class ApplicationController {
                         dto.setUpName(profile.getNickname());
                         dto.setHeadPic(profile.getHeadimgurl());
                         dto.setRole(profile.getRole());
+                        dto.setSignature(profile.getSignature());
                     }
                     dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.APPLICATION, item.getId()));
                     return dto;

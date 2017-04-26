@@ -12,18 +12,10 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleLabel;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
-import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -39,13 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -280,6 +266,7 @@ public class FragmentController {
                         dto.setUpName(account.getNickname());
                         dto.setHeadPic(account.getHeadimgurl());
                         dto.setRole(account.getRole());
+                        dto.setSignature(account.getSignature());
                     }
                     // 查询我对它的点赞状态
                     dto.setIsMine(item.getOpenid().equals(loginUser.getOpenId()));
@@ -322,6 +309,7 @@ public class FragmentController {
                         dto.setUpName(account.getNickname());
                         dto.setHeadPic(account.getHeadimgurl());
                         dto.setRole(account.getRole());
+                        dto.setSignature(account.getSignature());
                     }
                     dto.setUpTime(DateUtils.parseDateToString(item.getUpdateTime()));
                     dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.SUBJECT, item.getId()));

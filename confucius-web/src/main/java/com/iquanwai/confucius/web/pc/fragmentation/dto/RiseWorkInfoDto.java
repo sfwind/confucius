@@ -34,6 +34,7 @@ public class RiseWorkInfoDto {
     private Date publishTime;
     private Integer priority;
     private Integer role;
+    private String signature;
 
     public RiseWorkInfoDto(SubjectArticle origin){
         this.title = origin.getTitle();
