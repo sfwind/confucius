@@ -306,6 +306,7 @@ public class ApplicationController {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
                     show.setSignature(account.getSignature());
+                    show.setRole(account.getRole());
                 }
                 show.setIsMine(false);
             }
