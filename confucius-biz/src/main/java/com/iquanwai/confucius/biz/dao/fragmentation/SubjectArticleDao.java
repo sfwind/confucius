@@ -24,13 +24,13 @@ public class SubjectArticleDao extends PracticeDBUtil {
 
     public int insert(SubjectArticle subjectArticle){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into SubjectArticle(Openid, ProblemId, AuthorType, Sequence,Title, Content) " +
-                "values(?,?,?,?,?,?)";
+        String sql = "insert into SubjectArticle(Openid, ProblemId, AuthorType, Sequence,Title, Content, Length) " +
+                "values(?,?,?,?,?,?,?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
                     subjectArticle.getOpenid(), subjectArticle.getProblemId(),
                     subjectArticle.getAuthorType(), subjectArticle.getSequence(), subjectArticle.getTitle(),
-                    subjectArticle.getContent());
+                    subjectArticle.getContent(), subjectArticle.getLength());
             return insertRs.intValue();
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -40,9 +40,10 @@ public class SubjectArticleDao extends PracticeDBUtil {
 
     public boolean update(SubjectArticle subjectArticle) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update SubjectArticle set Title = ?,Content = ? where Id = ?";
+        String sql = "update SubjectArticle set Title = ?,Content = ?, Length = ? where Id = ?";
         try{
-            runner.update(sql, subjectArticle.getTitle(), subjectArticle.getContent(), subjectArticle.getId());
+            runner.update(sql, subjectArticle.getTitle(), subjectArticle.getContent(),
+                    subjectArticle.getLength(), subjectArticle.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
             return false;
@@ -63,7 +64,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
 
     public List<SubjectArticle> loadArticles(Integer problemId){
         QueryRunner runner = new QueryRunner(getDataSource());
-        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<SubjectArticle>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? order by Sequence desc,UpdateTime desc";
         try{
             return runner.query(sql,h,problemId);
@@ -75,21 +76,8 @@ public class SubjectArticleDao extends PracticeDBUtil {
 
     public List<SubjectArticle> loadArticles(Integer problemId,Page page){
         QueryRunner runner = new QueryRunner(getDataSource());
-        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<SubjectArticle>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? order by Sequence desc,UpdateTime desc limit " + page.getOffset() + "," + page.getLimit();
-        try{
-            return runner.query(sql,h,problemId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public List<SubjectArticle> loadUnderCommentArticles(Integer problemId, int size){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
-        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
-                "order by RequestFeedback desc, length desc limit " + size;
         try{
             return runner.query(sql,h,problemId);
         } catch (SQLException e) {
@@ -104,6 +92,19 @@ public class SubjectArticleDao extends PracticeDBUtil {
         String sql = "select * from SubjectArticle where ProblemId = ? and openid = ? order by Sequence desc,UpdateTime desc";
         try{
             return runner.query(sql,h,problemId,openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<SubjectArticle> loadUnderCommentArticles(Integer problemId, int size){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
+                "order by RequestFeedback desc, length desc limit " + size;
+        try{
+            return runner.query(sql,h,problemId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

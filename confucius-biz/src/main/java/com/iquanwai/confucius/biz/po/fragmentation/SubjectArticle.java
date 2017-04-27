@@ -22,6 +22,7 @@ public class SubjectArticle {
     private Date updateTime; //最后更新时间
     private Boolean feedback; //助教是否反馈（0-否，1-是）
     private Boolean requestFeedback; //求反馈（0-否，1-是）
+    private Integer length; //字数
 
     private Integer voteCount; // 点赞数，非db字段
     private Integer commentCount; // 评论数，非db字段

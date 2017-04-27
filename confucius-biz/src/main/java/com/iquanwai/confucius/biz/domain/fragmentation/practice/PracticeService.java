@@ -23,13 +23,7 @@ public interface PracticeService {
     ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create);
 
 
-
-
-    List<ChallengeSubmit> getChallengeSubmitList(Integer challengeId);
-
     ChallengePractice getChallenge(Integer id);
-
-
 
 
     ChallengeSubmit loadChallengeSubmit(Integer challengeId);

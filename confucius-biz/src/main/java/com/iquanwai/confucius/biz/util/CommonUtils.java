@@ -131,4 +131,11 @@ public class CommonUtils {
         return new BigDecimal(a).subtract(new BigDecimal(b)).
                 setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
+
+    public static String removeHTMLTag(String html){
+        if(html==null){
+            return "";
+        }
+        return StringUtils.removePattern(html, "<[^>]*>");
+    }
 }

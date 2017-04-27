@@ -8,8 +8,10 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -84,12 +86,6 @@ public class PracticeServiceImpl implements PracticeService {
         challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
         challengePractice.setPlanId(planId);
         return challengePractice;
-    }
-
-
-    @Override
-    public List<ChallengeSubmit> getChallengeSubmitList(Integer challengeId) {
-        return challengeSubmitDao.loadList(challengeId);
     }
 
     @Override
@@ -236,7 +232,9 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public Integer submitSubjectArticle(SubjectArticle subjectArticle){
+        String content = CommonUtils.removeHTMLTag(subjectArticle.getContent());
         Integer submitId = subjectArticle.getId();
+        subjectArticle.setLength(content.length());
         if (subjectArticle.getId()==null){
             // 第一次提交
             submitId = subjectArticleDao.insert(subjectArticle);
