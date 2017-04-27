@@ -134,6 +134,20 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<ApplicationSubmit> getSubmitByApplicationIds(List<Integer> applicationIds, int size){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(applicationIds.size());
+        String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark+
+                ") and Content is not null and Feedback = 0 order by RequestFeedback desc, length desc limit "+size;
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        try {
+            return runner.query(sql, h, applicationIds);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 
     public List<ApplicationSubmit> getHighlightSubmit(Integer practiceId){
         QueryRunner runner = new QueryRunner(getDataSource());

@@ -63,7 +63,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
 
     public List<SubjectArticle> loadArticles(Integer problemId){
         QueryRunner runner = new QueryRunner(getDataSource());
-        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<SubjectArticle>(SubjectArticle.class);
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? order by Sequence desc,UpdateTime desc";
         try{
             return runner.query(sql,h,problemId);
@@ -75,8 +75,21 @@ public class SubjectArticleDao extends PracticeDBUtil {
 
     public List<SubjectArticle> loadArticles(Integer problemId,Page page){
         QueryRunner runner = new QueryRunner(getDataSource());
-        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<SubjectArticle>(SubjectArticle.class);
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? order by Sequence desc,UpdateTime desc limit " + page.getOffset() + "," + page.getLimit();
+        try{
+            return runner.query(sql,h,problemId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<SubjectArticle> loadUnderCommentArticles(Integer problemId, int size){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
+                "order by RequestFeedback desc, length desc limit " + size;
         try{
             return runner.query(sql,h,problemId);
         } catch (SQLException e) {
