@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.domain.course.operational.OperationalService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -40,8 +39,6 @@ import java.util.Map;
 @RequestMapping("/b")
 public class BackendController {
     @Autowired
-    private OperationalService operationalService;
-    @Autowired
     private SignupService signupService;
     @Autowired
     private OperationLogService operationLogService;
@@ -54,12 +51,6 @@ public class BackendController {
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    @RequestMapping("/assign/angel/{classId}")
-    public ResponseEntity<Map<String, Object>> submit(@PathVariable("classId") Integer classId){
-        boolean result = operationalService.angelAssign(classId);
-
-        return WebUtils.result(result);
-    }
 
     @RequestMapping("/entry/{orderId}")
     public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId){
