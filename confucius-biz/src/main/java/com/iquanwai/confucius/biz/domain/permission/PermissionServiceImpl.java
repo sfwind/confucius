@@ -69,6 +69,7 @@ public class PermissionServiceImpl implements PermissionService {
     public Boolean checkPermission(Integer roleLevel, String uri) {
         List<Authority> permissions = this.loadPermissions(roleLevel);
         if(permissions==null){
+            logger.error("roleLevel:{} don't have permissions: {}", roleLevel, uri);
             return false;
         } else {
             for(Authority permission:permissions){
@@ -77,6 +78,7 @@ public class PermissionServiceImpl implements PermissionService {
                 }
             }
         }
+        logger.error("roleLevel:{} don't have permissions: {} , permission size:{}", roleLevel, uri, permissions.size());
         return false;
     }
 

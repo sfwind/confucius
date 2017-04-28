@@ -98,7 +98,7 @@ public class AccountController {
                     pcLoginUser.setPermissionList(permissionService.loadPermissions(role.getLevel()));
 
                     PCLoginUserResolver.login(sessionId, pcLoginUser);
-                    logger.info("{}登录成功",loginUser.getWeixinName());
+                    logger.info("{}登录成功,roleId:{},roleLevel:{},key:{}", loginUser.getWeixinName(), role.getId(), role.getLevel(), sessionId);
                     this.handlerLoginSocket(sessionId, LoginType.LOGIN_SUCCESS, accountDto);
                     return WebUtils.success();
                 }
