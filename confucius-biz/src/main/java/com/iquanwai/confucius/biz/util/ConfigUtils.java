@@ -154,6 +154,9 @@ public class ConfigUtils {
 		return getValue("default.openid");
 	}
 
+	/**
+	 * 业务配置获取
+	 */
 	public static String getValue(String key){
 		String value = null;
 		if (config.hasPath(key)) {

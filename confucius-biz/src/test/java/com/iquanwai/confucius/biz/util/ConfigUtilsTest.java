@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.util;
 
 import com.iquanwai.confucius.biz.TestBase;
+import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import org.junit.Test;
 
 import java.util.Date;
@@ -25,5 +26,13 @@ public class ConfigUtilsTest extends TestBase {
     public void testTime(){
         System.out.println(ConfigUtils.getRisePayStopTime());
         System.out.println(ConfigUtils.getRisePayStopTime().after(new Date()));
+    }
+
+    @Test
+    public void setConfig(){
+        ZKConfigUtils zkConfigUtils = new ZKConfigUtils();
+        zkConfigUtils.updateValue("course","static.resource.url","http://www.confucius.mobi/bundle.js?");
+        zkConfigUtils.updateValue("course","static.pc.resource.url","http://www.confucius.mobi/bundle.js?");
+
     }
 }
