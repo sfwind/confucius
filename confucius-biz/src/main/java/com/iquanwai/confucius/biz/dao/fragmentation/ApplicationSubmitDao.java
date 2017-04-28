@@ -141,7 +141,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
                 ") and Content is not null and Feedback = 0 order by RequestFeedback desc, length desc limit "+size;
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
-            return runner.query(sql, h, applicationIds);
+            return runner.query(sql, h, applicationIds.toArray());
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
