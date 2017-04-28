@@ -165,15 +165,20 @@ public class ConfigUtils {
 	}
 
 	public static String getValue(String key){
+		String value = null;
 		if (config.hasPath(key)) {
-			return config.getString(key);
+			value = config.getString(key);
 		} else {
-			String value = zkConfigUtils.getValue(key);
+			value = zkConfigUtils.getValue(key);
 			if (value == null) {
 				value = zkConfigUtils.getArchValue(key);
 			}
-			return value;
 		}
+		if (value != null) {
+			// 去掉换行符
+			value = value.replaceAll("\r|\n", "");
+		}
+		return value;
 	}
 
 	public static Boolean getBooleanValue(String key){
@@ -238,11 +243,6 @@ public class ConfigUtils {
         } else {
             return null;
         }
-    }
-
-    public static void main(String[] args){
-        String surveyUrl = ConfigUtils.getSurveyUrl(11868582);
-        System.out.println(surveyUrl);
     }
 
 	public static Integer getFeedBackId(){
