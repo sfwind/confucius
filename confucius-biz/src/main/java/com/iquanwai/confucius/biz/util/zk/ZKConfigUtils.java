@@ -37,9 +37,10 @@ public class ZKConfigUtils {
 
     private static Cache<String, String> CONFIG_CACHE;
 
-
     /* 每个项目的path不同 */
-    private static final String CONFIG_PATH = "/quanwai/config/course/";
+    private static final String CONFIG_PATH = "/quanwai/config/";
+    /* 体喜欢path */
+    private static final String COURSE_CONFIG_PATH = "/quanwai/config/course/";
     /* 架构类型的path */
     private static final String ARCH_PATH = "/quanwai/config/arch/";
     /* zk本地配置文件路径 */
@@ -95,7 +96,7 @@ public class ZKConfigUtils {
     }
 
     public String getValue(String key){
-        return getValue(key, CONFIG_PATH);
+        return getValue(key, COURSE_CONFIG_PATH);
     }
 
     public String getValue(String key,String prePath){
