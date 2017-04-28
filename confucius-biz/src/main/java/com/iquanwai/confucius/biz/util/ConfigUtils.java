@@ -38,19 +38,9 @@ public class ConfigUtils {
 	}
 
 	private static void loadConfig() {
-//		localconfig = ConfigFactory.load("localconfig");
-//		config = ConfigFactory.load("confucius");
-//		fileconfig = ConfigFactory.parseFile(new File("/data/config/localconfig"));
-//		config = localconfig.withFallback(config);
-//		config = fileconfig.withFallback(config);
-
 		config = ConfigFactory.load("localconfig");
-//		localconfig = ConfigFactory.load("localconfig");
-//		config = ConfigFactory.load("platon");
 		fileconfig = ConfigFactory.parseFile(new File("/data/config/localconfig"));
-//		config = localconfig.withFallback(config);
 		config = fileconfig.withFallback(config);
-//		zk_switch = config.getBoolean("zk.open");
 	}
 
 	public static String getAppid() {
