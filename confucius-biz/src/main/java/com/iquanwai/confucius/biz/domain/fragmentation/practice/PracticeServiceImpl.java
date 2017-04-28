@@ -233,8 +233,8 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Integer submitSubjectArticle(SubjectArticle subjectArticle){
         String content = CommonUtils.removeHTMLTag(subjectArticle.getContent());
-        Integer submitId = subjectArticle.getId();
         subjectArticle.setLength(content.length());
+        Integer submitId = subjectArticle.getId();
         if (subjectArticle.getId()==null){
             // 第一次提交
             submitId = subjectArticleDao.insert(subjectArticle);
