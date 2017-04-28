@@ -19,7 +19,7 @@
         feedBack:${feedBack},
         openFeedBack:${openFeedBack},
         openComment:${openComment},
-        backend:false,
+        backend:true,
 
     }
 </script>

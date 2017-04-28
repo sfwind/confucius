@@ -69,36 +69,11 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public ChallengeSubmit load(String submitUrl){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ChallengeSubmit> h = new BeanHandler(ChallengeSubmit.class);
-        String sql = "SELECT * FROM ChallengeSubmit where SubmitUrl=?";
-        try {
-            return run.query(sql, h, submitUrl);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return null;
-    }
-
-    public List<ChallengeSubmit> loadList(Integer challengeId){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ChallengeSubmit>> h = new BeanListHandler<ChallengeSubmit>(ChallengeSubmit.class);
-        String sql = "SELECT * FROM ChallengeSubmit where ChallengeId=? and Content is not null order by UpdateTime desc";
-        try{
-            return run.query(sql,h,challengeId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public boolean firstAnswer(Integer id, String content){
+    public boolean firstAnswer(Integer id, String content, int length){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ChallengeSubmit set Content=?,PublishTime=CURRENT_TIMESTAMP where Id=?";
+        String sql = "update ChallengeSubmit set Content=?,Length=?,PublishTime=CURRENT_TIMESTAMP where Id=?";
         try {
-            runner.update(sql, content, id);
+            runner.update(sql, content, length, id);
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
             return false;
@@ -107,12 +82,12 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
     }
 
 
-    public boolean answer(Integer id, String content){
+    public boolean answer(Integer id, String content, int length){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ChallengeSubmit set Content=? where Id=?";
+        String sql = "update ChallengeSubmit set Content=?, Length=? where Id=?";
         try {
 
-            runner.update(sql, content, id);
+            runner.update(sql, content, length, id);
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
             return false;

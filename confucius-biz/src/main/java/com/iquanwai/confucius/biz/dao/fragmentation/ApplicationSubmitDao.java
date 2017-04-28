@@ -83,11 +83,11 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public boolean firstAnswer(Integer id, String content){
+    public boolean firstAnswer(Integer id, String content, int length){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ApplicationSubmit set Content=?,PublishTime = CURRENT_TIMESTAMP where Id=?";
+        String sql = "update ApplicationSubmit set Content=?, Length=?, PublishTime = CURRENT_TIMESTAMP where Id=?";
         try {
-            runner.update(sql, content, id);
+            runner.update(sql, content, length, id);
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
             return false;
@@ -95,11 +95,11 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return true;
     }
 
-    public boolean answer(Integer id, String content){
+    public boolean answer(Integer id, String content, int length){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ApplicationSubmit set Content=? where Id=?";
+        String sql = "update ApplicationSubmit set Content=?, Length=? where Id=?";
         try {
-            runner.update(sql, content, id);
+            runner.update(sql, content, length, id);
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
             return false;
@@ -128,6 +128,20 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
             return runner.query(sql, h, practiceId);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<ApplicationSubmit> getSubmitByApplicationIds(List<Integer> applicationIds, int size){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(applicationIds.size());
+        String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark+
+                ") and Content is not null and Feedback = 0 order by RequestFeedback desc, length desc limit "+size;
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        try {
+            return runner.query(sql, h, applicationIds.toArray());
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

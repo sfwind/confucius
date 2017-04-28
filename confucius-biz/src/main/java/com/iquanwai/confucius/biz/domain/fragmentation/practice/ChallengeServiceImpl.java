@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -63,12 +64,12 @@ public class ChallengeServiceImpl implements ChallengeService {
             logger.error("submitId {} is not existed", id);
             return new MutablePair<>(-1,0);
         }
-        boolean result = false;
-
+        boolean result;
+        int length = CommonUtils.removeHTMLTag(content).length();
         if (submit.getContent() == null) {
-            result = challengeSubmitDao.firstAnswer(id, content);
+            result = challengeSubmitDao.firstAnswer(id, content, length);
         } else {
-            result = challengeSubmitDao.answer(id, content);
+            result = challengeSubmitDao.answer(id, content, length);
         }
 
         if (result) {

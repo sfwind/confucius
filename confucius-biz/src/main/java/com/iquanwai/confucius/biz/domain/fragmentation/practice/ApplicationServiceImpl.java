@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,11 +79,11 @@ public class ApplicationServiceImpl implements ApplicationService {
             return false;
         }
         boolean result;
-
+        int length = CommonUtils.removeHTMLTag(content).length();
         if(submit.getContent() == null){
-            result = applicationSubmitDao.firstAnswer(id, content);
+            result = applicationSubmitDao.firstAnswer(id, content, length);
         } else {
-            result = applicationSubmitDao.answer(id, content);
+            result = applicationSubmitDao.answer(id, content, length);
         }
 
         if (result && submit.getPointStatus() == 0) {

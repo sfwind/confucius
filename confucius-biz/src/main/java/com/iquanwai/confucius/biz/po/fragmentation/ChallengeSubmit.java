@@ -14,6 +14,7 @@ public class ChallengeSubmit {
     private Integer challengeId; // 小目标id
     private Integer planId; // 提升计划id 
     private String content; // 提交内容
+    private Integer length; //字数
     private Integer pointStatus;
     private Date updateTime;
 }
