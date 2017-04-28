@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
@@ -42,6 +43,8 @@ public class AccountServiceImpl implements AccountService {
     private RegionDao regionDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private RedisUtil redisUtil;
 
     private List<Region> provinceList;
 
@@ -115,11 +118,22 @@ public class AccountServiceImpl implements AccountService {
 
             BeanUtils.populate(accountNew, result);
             if(account==null) {
-                logger.info("插入用户信息:{}",accountNew);
-                if(accountNew.getNickname()!=null){
-                    followUserDao.insert(accountNew);
-                    updateProfile(accountNew);
-                }
+                redisUtil.lock("lock:wx:user:insert",(lock)->{
+                    if(accountNew.getNickname()!=null){
+                        Account finalQuery = followUserDao.queryByOpenid(openid);
+                        if (finalQuery != null) {
+                            // 已经插入了
+                            return;
+                        }
+                        logger.info("插入用户信息:{}",accountNew);
+                        followUserDao.insert(accountNew);
+                        try {
+                            updateProfile(accountNew);
+                        } catch (Exception e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                        }
+                    }
+                });
             }else{
                 logger.info("更新用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null) {

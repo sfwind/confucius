@@ -27,7 +27,8 @@ public class AdminController {
     @Autowired
     private OperationLogService operationLogService;
 
-    private ZKConfigUtils zkConfigUtils = new ZKConfigUtils();
+    @Autowired
+    private ZKConfigUtils zkConfigUtils;
 
     @RequestMapping("/config/{projectId}")
     public ResponseEntity<Map<String, Object>> loadConfig(PCLoginUser pcLoginUser,
