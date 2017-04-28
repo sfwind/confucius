@@ -168,8 +168,8 @@ public class ConfigUtils {
 			}
 		}
 		if (value != null) {
-			// 去掉换行符
-			value = value.replaceAll("\r|\n", "");
+			// 去掉回车，换行，tab键
+			value = value.replaceAll("\r|\n|\t", "");
 		}
 		return value;
 	}
