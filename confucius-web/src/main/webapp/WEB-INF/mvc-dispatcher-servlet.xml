@@ -105,7 +105,6 @@
         <mvc:interceptor>
             <mvc:mapping path="/fragment/**"/>
             <mvc:mapping path="/community"/>
-            <mvc:mapping path="/rise"/>
             <mvc:mapping path="/pc/survey/wjx"/>
             <bean class="com.iquanwai.confucius.web.interceptor.PCHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>

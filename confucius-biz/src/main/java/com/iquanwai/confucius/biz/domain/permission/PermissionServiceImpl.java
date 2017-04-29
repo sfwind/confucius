@@ -43,8 +43,8 @@ public class PermissionServiceImpl implements PermissionService {
         logger.info("roles:{}",roles);
         roles.forEach(role->{
             List<Permission> permissions = permissionDao.loadPermissions(role.getLevel());
-            logger.info("perrmission:{} for role {}",permissions, role.getName());
-            rolePermissions.put(role.getLevel(), permissions.stream().map(permission -> {
+            logger.info("permission:{} for role {}",permissions, role.getName());
+            rolePermissions.put(role.getId(), permissions.stream().map(permission -> {
                 Authority authority = new Authority();
                 authority.setRoleId(role.getId());
                 authority.setPermission(permission);
@@ -66,10 +66,10 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public Boolean checkPermission(Integer roleLevel, String uri) {
-        List<Authority> permissions = this.loadPermissions(roleLevel);
+    public Boolean checkPermission(Integer roleId, String uri) {
+        List<Authority> permissions = this.loadPermissions(roleId);
         if(permissions==null){
-            logger.error("roleLevel:{} don't have permissions: {}", roleLevel, uri);
+            logger.error("roleId:{} don't have permissions: {}", roleId, uri);
             return false;
         } else {
             for(Authority permission:permissions){
@@ -78,7 +78,7 @@ public class PermissionServiceImpl implements PermissionService {
                 }
             }
         }
-        logger.error("roleLevel:{} don't have permissions: {} , permission size:{}", roleLevel, uri, permissions.size());
+        logger.error("roleId:{} don't have permissions: {} , permission size:{}", roleId, uri, permissions.size());
         return false;
     }
 
