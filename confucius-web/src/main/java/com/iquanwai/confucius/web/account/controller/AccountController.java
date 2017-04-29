@@ -83,9 +83,9 @@ public class AccountController {
                 accountDto.setWeixinName(loginUser.getWeixinName());
 
                 Role role = getRole(loginUser.getOpenId());
-                accountDto.setRole(role.getLevel());
+                accountDto.setRole(role.getId());
                 accountDto.setKey(sessionId);
-                if (role.getLevel().equals(Role.STRANGE)) {
+                if (role.getId().equals(Role.STRANGE)) {
                     // 没有正在就读的班级
                     this.handlerLoginSocket(sessionId, LoginType.PERMISSION_DENIED, accountDto);
                     return WebUtils.error("您还未报名课程，关注圈外了解更多!");
@@ -94,7 +94,7 @@ public class AccountController {
                     PCLoginUser pcLoginUser = new PCLoginUser();
                     pcLoginUser.setWeixin(loginUser);
                     pcLoginUser.setOpenId(loginUser.getOpenId());
-                    pcLoginUser.setRole(role.getLevel());
+                    pcLoginUser.setRole(role.getId());
                     pcLoginUser.setPermissionList(permissionService.loadPermissions(role.getLevel()));
 
                     PCLoginUserResolver.login(sessionId, pcLoginUser);

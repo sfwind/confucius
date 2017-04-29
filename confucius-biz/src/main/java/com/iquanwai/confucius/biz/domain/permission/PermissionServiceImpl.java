@@ -61,8 +61,8 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public List<Authority> loadPermissions(Integer roleLevel) {
-        return rolePermissions.get(roleLevel);
+    public List<Authority> loadPermissions(Integer roleId) {
+        return rolePermissions.get(roleId);
     }
 
     @Override

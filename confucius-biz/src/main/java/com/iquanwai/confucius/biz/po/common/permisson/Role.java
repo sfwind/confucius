@@ -33,6 +33,7 @@ public class Role {
 
     public static Role stranger(){
         Role stranger = new Role();
+        stranger.setId(STRANGE);
         stranger.setName("陌生人");
         stranger.setLevel(STRANGE);
         return stranger;
@@ -40,6 +41,7 @@ public class Role {
 
     public static Role student(){
         Role stranger = new Role();
+        stranger.setId(STUDENT);
         stranger.setName("学生");
         stranger.setLevel(STUDENT);
         return stranger;
