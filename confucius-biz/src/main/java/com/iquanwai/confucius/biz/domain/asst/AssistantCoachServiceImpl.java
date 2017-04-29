@@ -18,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
     private static final int SIZE = 50;
 
+    //最近30天
+    private static final int PREVIOUS_DAY = 30;
+
     @Override
     public Pair<Integer, Integer> getCommentCount(String openid) {
         List<Comment> commentList = commentDao.loadCommentsByOpenid(openid);
@@ -50,7 +54,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public List<RiseWorkInfoDto> getUnderCommentArticles(Integer problemId) {
         List<RiseWorkInfoDto> underCommentArticles = Lists.newArrayList();
-        List<SubjectArticle> subjectArticles = subjectArticleDao.loadUnderCommentArticles(problemId, SIZE);
+        //只评论30天内的文章
+        Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);
+        List<SubjectArticle> subjectArticles = subjectArticleDao.loadUnderCommentArticles(problemId, SIZE, date);
         subjectArticles.stream().forEach(subjectArticle ->{
             RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(subjectArticle);
             //设置用户信息
@@ -66,8 +72,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         //找出小课的所有应用练习
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getPracticeByProblemId(problemId);
         List<Integer> applicationPracticeIds = applicationPractices.stream().map(ApplicationPractice::getId).collect(Collectors.toList());
+        //只评论30天内的文章
+        Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);
 
-        List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.getSubmitByApplicationIds(applicationPracticeIds, SIZE);
+        List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.getSubmitByApplicationIds(applicationPracticeIds, SIZE, date);
         applicationSubmitList.stream().forEach(applicationSubmit ->{
             RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(applicationSubmit);
             //设置应用练习题目
