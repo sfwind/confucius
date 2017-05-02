@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<SubjectArticle> subjectArticles = subjectArticleDao.loadUnderCommentArticles(problemId, SIZE, date);
         subjectArticles.stream().forEach(subjectArticle ->{
             RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(subjectArticle);
+            if(riseWorkInfoDto.getContent()!=null) {
+                riseWorkInfoDto.setContent(HtmlRegexpUtil.filterHtml(riseWorkInfoDto.getContent()));
+                riseWorkInfoDto.setContent(riseWorkInfoDto.getContent().length() > 180 ?
+                        riseWorkInfoDto.getContent().substring(0, 180) + "......" :
+                        riseWorkInfoDto.getContent());
+            }
             //设置用户信息
             buildRiseWorkInfo(riseWorkInfoDto, subjectArticle.getOpenid());
             underCommentArticles.add(riseWorkInfoDto);
@@ -78,6 +85,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.getSubmitByApplicationIds(applicationPracticeIds, SIZE, date);
         applicationSubmitList.stream().forEach(applicationSubmit ->{
             RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(applicationSubmit);
+            if(riseWorkInfoDto.getContent()!=null) {
+                riseWorkInfoDto.setContent(HtmlRegexpUtil.filterHtml(riseWorkInfoDto.getContent()));
+                riseWorkInfoDto.setContent(riseWorkInfoDto.getContent().length() > 180 ?
+                        riseWorkInfoDto.getContent().substring(0, 180) + "......" :
+                        riseWorkInfoDto.getContent());
+            }
             //设置应用练习题目
             applicationPractices.stream().forEach(applicationPractice -> {
                 if(applicationSubmit.getApplicationId().equals(applicationPractice.getId())){
@@ -94,10 +107,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
     private void buildRiseWorkInfo(RiseWorkInfoDto riseWorkInfoDto, String openid){
         Profile profile = accountService.getProfile(openid, false);
-        riseWorkInfoDto.setHeadPic(profile.getHeadimgurl());
-        riseWorkInfoDto.setRole(profile.getRole());
-        riseWorkInfoDto.setUpName(profile.getNickname());
-        riseWorkInfoDto.setSignature(profile.getSignature());
+        if(profile!=null){
+            riseWorkInfoDto.setHeadPic(profile.getHeadimgurl());
+            riseWorkInfoDto.setRole(profile.getRole());
+            riseWorkInfoDto.setUpName(profile.getNickname());
+            riseWorkInfoDto.setSignature(profile.getSignature());
+        }
     }
 
 }

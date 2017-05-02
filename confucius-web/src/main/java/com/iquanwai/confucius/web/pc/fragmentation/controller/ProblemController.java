@@ -1,16 +1,16 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -41,6 +41,11 @@ public class ProblemController {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Autowired
+    private WhiteListService whiteListService;
+
+    private static final String TRIAL = "RISE_PROBLEM_TRIAL";
+
 
     @RequestMapping("/curId")
     public ResponseEntity<Map<String, Object>> loadCurProblemId(PCLoginUser pcLoginUser) {
@@ -48,8 +53,7 @@ public class ProblemController {
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("获取用户当前在解决的问题Id")
-                .memo("");
+                .action("获取用户当前在解决的问题Id");
         operationLogService.log(operationLog);
         ImprovementPlan runningPlan = planService.getRunningPlan(pcLoginUser.getOpenId());
         if (runningPlan == null) {
@@ -76,34 +80,45 @@ public class ProblemController {
      */
     @RequestMapping(value = "/list")
     public ResponseEntity<Map<String, Object>> loadProblemList(PCLoginUser pcLoginUser) {
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
+        Assert.notNull(pcLoginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("获取问题列表")
-                .memo("");
+                .action("获取问题列表");
         operationLogService.log(operationLog);
 
-        List<ImprovementPlan> plans = pcLoginUser == null ? Lists.newArrayList() : planService.loadUserPlans(pcLoginUser.getOpenId());
+        List<ImprovementPlan> plans = planService.loadUserPlans(pcLoginUser.getOpenId());
         List<Problem> problems = problemService.loadProblems();
+
+        boolean trialUser = whiteListService.isInWhiteList(TRIAL, pcLoginUser.getOpenId());
+
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
             List<ProblemListDto> collect = problems.stream().filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
-                ProblemListDto problemList = new ProblemListDto();
-                problemList.setId(problem.getId());
-                problemList.setProblem(problem.getProblem());
-                problemList.setDel(problem.getDel());
+                ProblemListDto problemListDto = new ProblemListDto();
+                problemListDto.setId(problem.getId());
+                problemListDto.setProblem(problem.getProblem());
+                problemListDto.setDel(problem.getDel());
+                problemListDto.setTrial(problem.getTrial());
                 // 查询用户该小课的计划
                 plans.forEach(plan -> {
                     if (plan.getProblemId() == problem.getId()) {
-                        problemList.setStatus(plan.getStatus());
+                        problemListDto.setStatus(plan.getStatus());
                     }
                 });
-                problemList.setStatus(problemList.getStatus() == null ? -1 : problemList.getStatus());
-                return problemList;
+                problemListDto.setStatus(problemListDto.getStatus() == null ? -1 : problemListDto.getStatus());
+                return problemListDto;
             }).filter(problemListDto -> {
                 //未选且已下架的小课从列表中删除
                 return !(problemListDto.getDel() && problemListDto.getStatus() == -1);
+            }).filter(problemListDto -> {
+                if (trialUser) {
+                    return true;
+                } else {
+                    //非天使用户,把未选且试用的小课从列表中删除
+                    return !(problemListDto.getTrial() && problemListDto.getStatus() == -1);
+                }
             }).collect(Collectors.toList());
             dto.setProblems(collect);
             dto.setName(item.getName());
