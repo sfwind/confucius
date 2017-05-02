@@ -52,8 +52,9 @@ public class IndexController {
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
     public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-
-        checkSubscribe(request, response);
+        if(!checkSubscribe(request, response)){
+            return null;
+        }
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
@@ -74,7 +75,9 @@ public class IndexController {
 
     @RequestMapping(value = "/pay/**",method = RequestMethod.GET)
     public ModelAndView getPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
-        checkSubscribe(request, response);
+        if(!checkSubscribe(request, response)){
+            return null;
+        }
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
@@ -85,8 +88,9 @@ public class IndexController {
 
     @RequestMapping(value = "/personal/edit",method = RequestMethod.GET)
     public ModelAndView getPersonalEditIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-
-        checkSubscribe(request, response);
+        if(!checkSubscribe(request, response)){
+            return null;
+        }
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
@@ -98,7 +102,9 @@ public class IndexController {
 
     @RequestMapping(value = "/personal/static/**",method = RequestMethod.GET)
     public ModelAndView getPersonalIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        checkSubscribe(request, response);
+        if(!checkSubscribe(request, response)){
+            return null;
+        }
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
@@ -109,7 +115,9 @@ public class IndexController {
 
     @RequestMapping(value = "/operation/static/**",method = RequestMethod.GET)
     public ModelAndView getOperationIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        checkSubscribe(request, response);
+        if(!checkSubscribe(request, response)){
+            return null;
+        }
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
@@ -120,7 +128,9 @@ public class IndexController {
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
     public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        checkSubscribe(request, response);
+        if(!checkSubscribe(request, response)){
+            return null;
+        }
         if(!checkAccessToken(request)){
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             WebUtils.auth(request, response);
