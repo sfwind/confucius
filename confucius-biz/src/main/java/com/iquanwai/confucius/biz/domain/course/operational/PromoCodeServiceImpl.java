@@ -12,6 +12,7 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.PromoCode;
 import com.iquanwai.confucius.biz.po.PromoCodeUsage;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -136,7 +137,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
         templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
 
-        Account account = accountService.getAccount(openid, true);
+        Profile account = accountService.getProfile(openid, true);
         String nickname = account.getNickname();
         data.put("first",new TemplateMessage.Keyword("恭喜，你的优惠码已被"+nickname+"成功使用！", TemplateMessage.BLACK));
         data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));

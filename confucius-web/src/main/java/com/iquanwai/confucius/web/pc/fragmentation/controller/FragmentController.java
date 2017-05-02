@@ -9,21 +9,14 @@ import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
+import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ArticleLabel;
-import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
-import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -39,13 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -210,7 +197,7 @@ public class FragmentController {
                 .memo(type+":"+submitId);
         operationLogService.log(operationLog);
         List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId,page).stream().map(item->{
-            Account account = accountService.getAccount(item.getCommentOpenId(), false);
+            Profile account = accountService.getProfile(item.getCommentOpenId(), false);
             if(account!=null){
                 RiseWorkCommentDto dto = new RiseWorkCommentDto();
                 dto.setId(item.getId());
@@ -276,15 +263,21 @@ public class FragmentController {
                 .stream().map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto(item);
                     Profile account = accountService.getProfile(item.getOpenid(), false);
-                    dto.setUpName(account.getNickname());
-                    dto.setHeadPic(account.getHeadimgurl());
+                    if(account!=null) {
+                        dto.setUpName(account.getNickname());
+                        dto.setHeadPic(account.getHeadimgurl());
+                        dto.setRole(account.getRole());
+                        dto.setSignature(account.getSignature());
+                    }
                     // 查询我对它的点赞状态
                     dto.setIsMine(item.getOpenid().equals(loginUser.getOpenId()));
-                    item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
-                    dto.setContent(
-                            item.getContent().length() > 180 ?
-                                    item.getContent().substring(0, 180) + "......" :
-                                    item.getContent());
+                    if(item.getContent()!=null) {
+                        item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
+                        dto.setContent(
+                                item.getContent().length() > 180 ?
+                                        item.getContent().substring(0, 180) + "......" :
+                                        item.getContent());
+                    }
                     return dto;
                 }).collect(Collectors.toList());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -309,14 +302,20 @@ public class FragmentController {
                     dto.setSubmitId(item.getId());
                     dto.setType(Constants.PracticeType.SUBJECT);
                     item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
-                    dto.setContent(
-                            item.getContent().length() > 180 ?
-                                    item.getContent().substring(0, 180) + "......" :
-                                    item.getContent());
+                    if(item.getContent()!=null) {
+                        dto.setContent(
+                                item.getContent().length() > 180 ?
+                                        item.getContent().substring(0, 180) + "......" :
+                                        item.getContent());
+                    }
                     dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.SUBJECT, item.getId()));
                     Profile account = accountService.getProfile(item.getOpenid(), false);
-                    dto.setUpName(account.getNickname());
-                    dto.setHeadPic(account.getHeadimgurl());
+                    if(account!=null) {
+                        dto.setUpName(account.getNickname());
+                        dto.setHeadPic(account.getHeadimgurl());
+                        dto.setRole(account.getRole());
+                        dto.setSignature(account.getSignature());
+                    }
                     dto.setUpTime(DateUtils.parseDateToString(item.getUpdateTime()));
                     dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
                     dto.setPerfect(item.getSequence() != null && item.getSequence() > 0);
@@ -366,10 +365,12 @@ public class FragmentController {
                 show.setHeadImg(loginUser.getWeixin().getHeadimgUrl());
                 show.setWorkId(submit.getProblemId());
             } else {
-                Account account = accountService.getAccount(openId, false);
+                Profile account = accountService.getProfile(openId, false);
                 if (account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
+                    show.setSignature(account.getSignature());
+                    show.setRole(account.getRole());
                 }
                 show.setIsMine(false);
             }

@@ -10,6 +10,7 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PreDestroy;
@@ -26,12 +27,14 @@ public class AdminController {
     @Autowired
     private OperationLogService operationLogService;
 
-    private ZKConfigUtils zkConfigUtils = new ZKConfigUtils();
+    @Autowired
+    private ZKConfigUtils zkConfigUtils;
 
     @RequestMapping("/config/{projectId}")
-    public ResponseEntity<Map<String, Object>> loadConfig(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> loadConfig(PCLoginUser pcLoginUser,
                                                           @PathVariable String projectId) {
 
+        Assert.notNull(pcLoginUser, "用户不能为空");
         List<ConfigNode> configNodeList = zkConfigUtils.getAllValue(projectId);
         List<ConfigDto> configDtoList = Lists.newArrayList();
         configNodeList.stream().forEach(configNode -> {
@@ -41,7 +44,7 @@ public class AdminController {
             configDto.setValue(configNode.getValue());
             configDtoList.add(configDto);
         });
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("管理员")
                 .function("后台配置")
                 .action("查询配置项")
@@ -52,12 +55,13 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/config/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> updateConfig(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> updateConfig(PCLoginUser pcLoginUser,
                                                             @RequestBody ConfigDto configDto) {
 
+        Assert.notNull(pcLoginUser, "用户不能为空");
         zkConfigUtils.updateValue(configDto.getProjectId(), configDto.getKey(), configDto.getValue());
 
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("管理员")
                 .function("后台配置")
                 .action("更新配置项")
@@ -68,12 +72,13 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/config/add", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> addConfig(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> addConfig(PCLoginUser pcLoginUser,
                                                          @RequestBody ConfigDto configDto) {
 
+        Assert.notNull(pcLoginUser, "用户不能为空");
         zkConfigUtils.createValue(configDto.getProjectId(), configDto.getKey(), configDto.getValue());
 
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("管理员")
                 .function("后台配置")
                 .action("增加配置项")
@@ -84,12 +89,13 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/config/delete", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> deleteConfig(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> deleteConfig(PCLoginUser pcLoginUser,
                                                             @RequestBody ConfigDto configDto) {
 
+        Assert.notNull(pcLoginUser, "用户不能为空");
         zkConfigUtils.deleteValue(configDto.getProjectId(), configDto.getKey());
 
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("管理员")
                 .function("后台配置")
                 .action("删除配置项")

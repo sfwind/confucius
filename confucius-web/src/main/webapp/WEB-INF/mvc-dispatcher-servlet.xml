@@ -85,7 +85,7 @@
             <mvc:exclude-mapping path="/servercode"/>
             <mvc:exclude-mapping path="/community"/>
             <mvc:exclude-mapping path="/backend/**"/>
-            <mvc:exclude-mapping path="/rise"/>
+            <mvc:exclude-mapping path="/asst/**"/>
             <mvc:exclude-mapping path="/operation/promoCode/**"/>
             <mvc:exclude-mapping path="/performance/**"/>
             <bean class="com.iquanwai.confucius.web.interceptor.CourseHandlerInterceptor"></bean>
@@ -105,7 +105,6 @@
         <mvc:interceptor>
             <mvc:mapping path="/fragment/**"/>
             <mvc:mapping path="/community"/>
-            <mvc:mapping path="/rise"/>
             <mvc:mapping path="/pc/survey/wjx"/>
             <bean class="com.iquanwai.confucius.web.interceptor.PCHandlerInterceptor">
                 <constructor-arg ref="permissionServiceImpl"/>

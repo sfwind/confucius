@@ -1,5 +1,6 @@
-package com.iquanwai.confucius.web.pc.fragmentation.dto;
+package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -33,6 +34,8 @@ public class RiseWorkInfoDto {
     private List<String> picList;
     private Date publishTime;
     private Integer priority;
+    private Integer role;
+    private String signature;
 
     public RiseWorkInfoDto(SubjectArticle origin){
         this.title = origin.getTitle();
@@ -44,6 +47,12 @@ public class RiseWorkInfoDto {
         this.commentCount = origin.getCommentCount();
         this.perfect = origin.getSequence() != null && origin.getSequence() > 0;
         this.authorType = origin.getAuthorType();
-        this.title = origin.getTitle();
+    }
+
+    public RiseWorkInfoDto(ApplicationSubmit origin){
+        this.submitId = origin.getId();
+        this.type = Constants.PracticeType.APPLICATION;
+        this.content = origin.getContent();
+        this.upTime = DateUtils.parseDateToString(origin.getUpdateTime());
     }
 }

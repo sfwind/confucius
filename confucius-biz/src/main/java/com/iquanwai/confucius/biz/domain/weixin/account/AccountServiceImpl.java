@@ -2,12 +2,15 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
+import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
@@ -40,10 +43,16 @@ public class AccountServiceImpl implements AccountService {
     private RegionDao regionDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private RedisUtil redisUtil;
 
     private List<Region> provinceList;
 
     private List<Region> cityList;
+    @Autowired
+    private UserRoleDao userRoleDao;
+
+    private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -51,6 +60,17 @@ public class AccountServiceImpl implements AccountService {
     public void init() {
         loadAllProvinces();
         loadCities();
+        loadUserRole();
+    }
+
+    private void loadUserRole(){
+        List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
+
+        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole -> {
+            userRoleMap.put(userRole.getOpenid(), userRole.getRoleId());
+        });
+
+        logger.info("role init complete");
     }
 
     public Account getAccount(String openid, boolean realTime) {
@@ -98,11 +118,22 @@ public class AccountServiceImpl implements AccountService {
 
             BeanUtils.populate(accountNew, result);
             if(account==null) {
-                logger.info("插入用户信息:{}",accountNew);
-                if(accountNew.getNickname()!=null){
-                    followUserDao.insert(accountNew);
-                    updateProfile(accountNew);
-                }
+                redisUtil.lock("lock:wx:user:insert",(lock)->{
+                    if(accountNew.getNickname()!=null){
+                        Account finalQuery = followUserDao.queryByOpenid(openid);
+                        if (finalQuery != null) {
+                            // 已经插入了
+                            return;
+                        }
+                        logger.info("插入用户信息:{}",accountNew);
+                        followUserDao.insert(accountNew);
+                        try {
+                            updateProfile(accountNew);
+                        } catch (Exception e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                        }
+                    }
+                });
             }else{
                 logger.info("更新用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null) {
@@ -117,7 +148,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void updateProfile(Account accountNew) throws IllegalAccessException, InvocationTargetException {
-        Profile profile = profileDao.queryByOpenId(accountNew.getOpenid());
+        Profile profile = getProfileFromDB(accountNew.getOpenid());
         if(profile==null){
             profile = new Profile();
             try{
@@ -223,19 +254,34 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Profile getProfile(String openid, boolean realTime){
-        Profile profile = profileDao.queryByOpenId(openid);
+        Profile profile = getProfileFromDB(openid);
         if(!realTime && profile != null){
             return profile;
         }
         synchronized (this){
-            Profile profileTemp = profileDao.queryByOpenId(openid);
+            Profile profileTemp = getProfileFromDB(openid);
             if(!realTime && profileTemp != null){
                 return profileTemp;
             }
             Account account = followUserDao.queryByOpenid(openid);
             getAccountFromWeixin(openid,account);
-            return profileDao.queryByOpenId(openid);
+            return getProfileFromDB(openid);
         }
+    }
+
+    private Profile getProfileFromDB(String openid) {
+        Profile profile = profileDao.queryByOpenId(openid);
+
+        if(profile!=null) {
+            Integer role = userRoleMap.get(profile.getOpenid());
+            if (role == null) {
+                profile.setRole(0);
+            } else {
+                profile.setRole(role);
+            }
+        }
+
+        return profile;
     }
 
 }

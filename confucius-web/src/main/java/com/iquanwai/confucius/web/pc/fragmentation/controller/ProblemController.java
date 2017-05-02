@@ -86,12 +86,13 @@ public class ProblemController {
         List<ImprovementPlan> plans = pcLoginUser == null ? Lists.newArrayList() : planService.loadUserPlans(pcLoginUser.getOpenId());
         List<Problem> problems = problemService.loadProblems();
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
-        List<ProblemCatalogDto> result = catalogs.stream().map(item->{
+        List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
             List<ProblemListDto> collect = problems.stream().filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                 ProblemListDto problemList = new ProblemListDto();
                 problemList.setId(problem.getId());
                 problemList.setProblem(problem.getProblem());
+                problemList.setDel(problem.getDel());
                 // 查询用户该小课的计划
                 plans.forEach(plan -> {
                     if (plan.getProblemId() == problem.getId()) {
@@ -100,6 +101,9 @@ public class ProblemController {
                 });
                 problemList.setStatus(problemList.getStatus() == null ? -1 : problemList.getStatus());
                 return problemList;
+            }).filter(problemListDto -> {
+                //未选且已下架的小课从列表中删除
+                return !(problemListDto.getDel() && problemListDto.getStatus() == -1);
             }).collect(Collectors.toList());
             dto.setProblems(collect);
             dto.setName(item.getName());

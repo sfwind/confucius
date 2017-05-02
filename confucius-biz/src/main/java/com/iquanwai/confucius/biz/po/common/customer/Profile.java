@@ -19,12 +19,14 @@ public class Profile {
     private String function; //职业
     private String workingLife; //工作年限
     private String realName; //真名
+    private String signature; //签名
     private Integer point;
     private Integer isFull;
     private String riseId;
     private String unionid;	//只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段。详见：获取用户个人信息（UnionID机制）
 
     private Boolean RiseMember; // 是否圈外会员
+    private Integer role;//非db字段 用户角色
 //    private Date ExpireDate; // 过期时间
 
     //默认头像

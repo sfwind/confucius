@@ -37,14 +37,14 @@ public class PCIndexController {
     }
 
     /**
-     * 前往碎片化页面
+     * 前往后台页面
      *
      * @param request
      * @return
      */
-    @RequestMapping(value = "/backend/**")
+    @RequestMapping(value = {"/backend/**", "/asst/**"})
     public ModelAndView getBackendPage(HttpServletRequest request, PCLoginUser pcLoginUser) {
-        return pcView(request, pcLoginUser);
+        return pcView(request, pcLoginUser, "backend");
     }
 
     /**
@@ -60,11 +60,6 @@ public class PCIndexController {
         return pcView(request, pcLoginUser);
     }
 
-    @RequestMapping(value = "/rise")
-    public ModelAndView getRise(HttpServletRequest request, PCLoginUser pcLoginUser) {
-        return pcView(request, pcLoginUser);
-    }
-
     /**
      * 前往登录页面
      */
@@ -73,8 +68,12 @@ public class PCIndexController {
         return pcView(request, pcLoginUser);
     }
 
-    private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser) {
-        ModelAndView mav = new ModelAndView("site");
+    private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser){
+        return pcView(request, pcLoginUser, "site");
+    }
+
+    private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser, String view) {
+        ModelAndView mav = new ModelAndView(view);
         if(ConfigUtils.isPcMaintenance()){
             // 正在维护
             mav = new ModelAndView("maintenance");

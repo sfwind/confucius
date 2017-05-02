@@ -5,22 +5,22 @@ import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
+import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
-import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ChallengeSubmitDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkEditDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkInfoDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -30,11 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -143,10 +139,9 @@ public class ChallengeController {
                 show.setUpName(pcLoginUser.getWeixin().getWeixinName());
                 show.setHeadImg(pcLoginUser.getWeixin().getHeadimgUrl());
                 show.setPlanId(submit.getPlanId());
-                // TODO challengeid
                 show.setWorkId(submit.getChallengeId());
             } else {
-                Account account = accountService.getAccount(openId, false);
+                Profile account = accountService.getProfile(openId, false);
                 if (account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
@@ -233,10 +228,12 @@ public class ChallengeController {
         // 查询
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(challengePractice.getSubmitId());
-        challengePractice.setContent(HtmlRegexpUtil.filterHtml(challengePractice.getContent()));
-        info.setContent(challengePractice.getContent().length() > 180 ?
-                challengePractice.getContent().substring(0, 180) + "......" :
-                challengePractice.getContent());
+        if(challengePractice.getContent()!=null) {
+            challengePractice.setContent(HtmlRegexpUtil.filterHtml(challengePractice.getContent()));
+            info.setContent(challengePractice.getContent().length() > 180 ?
+                    challengePractice.getContent().substring(0, 180) + "......" :
+                    challengePractice.getContent());
+        }
         info.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
         info.setType(Constants.PracticeType.CHALLENGE);
         info.setUpName(loginUser.getWeixin().getWeixinName());
@@ -245,43 +242,4 @@ public class ChallengeController {
         return WebUtils.result(info);
     }
 
-
-    @RequestMapping("/list/other/{challengeId}")
-    public ResponseEntity<Map<String, Object>> showOtherList(PCLoginUser loginUser, @PathVariable("challengeId") Integer challengeId) {
-        Assert.notNull(challengeId, "challengeId不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("训练")
-                .function("小目标")
-                .action("小目标列表加载他人的")
-                .memo(challengeId + "");
-        operationLogService.log(operationLog);
-        List<RiseWorkInfoDto> submits = practiceService.getChallengeSubmitList(challengeId)
-                .stream()
-                .filter(item -> !item.getOpenid().equals(loginUser.getOpenId()))
-                .map(item -> {
-                    RiseWorkInfoDto dto = new RiseWorkInfoDto();
-                    dto.setSubmitId(item.getId());
-                    dto.setType(Constants.PracticeType.CHALLENGE);
-                    dto.setContent(item.getContent().length() > 180 ?
-                            item.getContent().substring(0, 180) + "......" :
-                            item.getContent());
-                    dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.CHALLENGE, item.getId()));
-                    Account account = accountService.getAccount(item.getOpenid(), false);
-                    dto.setUpName(account.getNickname());
-                    dto.setHeadPic(account.getHeadimgurl());
-                    dto.setUpTime(DateUtils.parseDateToFormat5(item.getUpdateTime()));
-                    dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.CHALLENGE,item.getId()));
-                    return dto;
-                }).sorted((left,right)->{
-                    try {
-                        int leftWeight = left.getCommentCount() + left.getVoteCount();
-                        int rightWeight = right.getCommentCount() + right.getVoteCount();
-                        return rightWeight - leftWeight;
-                    } catch (Exception e){
-                        logger.error("小目标文章排序异常",e);
-                        return 0;
-                    }
-                }).collect(Collectors.toList());
-        return WebUtils.result(submits);
-    }
 }

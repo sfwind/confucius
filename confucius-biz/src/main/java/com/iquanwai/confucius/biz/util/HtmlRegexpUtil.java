@@ -112,6 +112,9 @@ public class HtmlRegexpUtil {
      * @return String
      */
     public static String filterHtml(String str) {
+        if(str==null){
+            return null;
+        }
         Pattern pattern = Pattern.compile(regxpForHtml);
         Matcher matcher = pattern.matcher(str);
         StringBuffer sb = new StringBuffer();

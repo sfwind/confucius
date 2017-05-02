@@ -14,14 +14,14 @@ public interface PermissionService {
     void initPermission();
 
     /**
-     * 获取用户的所有权限
+     * 获取角色的所有权限
      * */
     List<Authority> loadPermissions(Integer roleLevel);
 
     /**
-     * 根据角色等级,校验权限
+     * 根据角色id,校验权限
      * */
-    Boolean checkPermission(Integer roleLevel, String regExUri);
+    Boolean checkPermission(Integer roleId, String regExUri);
 
     /**
      * 重新加载权限

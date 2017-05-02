@@ -7,6 +7,8 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -23,6 +25,9 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
     public PCHandlerInterceptor() {
 
     }
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     public PCHandlerInterceptor(PermissionService permissionService) {
         this.permissionService = permissionService;
@@ -50,6 +55,7 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
             Integer role = pcLoginUser.getRole();
             // 根据role查询所有权限列表
             if (!permissionService.checkPermission(role, request.getRequestURI())) {
+                logger.error("document handler 权限检查失败,用户:{},role:{},url:{}", pcLoginUser.getOpenId(), role, request.getRequestURI());
                 WebUtils.reject(request,response);
                 return false;
             }
