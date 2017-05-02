@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -40,23 +41,17 @@ public class IndexController {
 
     @RequestMapping(value = "/static/**",method = RequestMethod.GET)
     public ModelAndView getIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//        if(!checkAccessToken(request)){
-//            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-//            WebUtils.auth(request, response);
+//        if(!checkAccessToken(request,response)){
 //            return null;
 //        }
-
         return courseView(request);
     }
 
     @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
     public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        if(!checkAccessToken(request)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            WebUtils.auth(request, response);
+        if(!checkAccessToken(request,response)){
             return null;
         }
-
         if(ConfigUtils.isDevelopment()){
             //如果不在白名单中,直接403报错
             boolean result = whiteListService.isInWhiteList(WhiteList.TEST, loginUser.getOpenId());
@@ -71,9 +66,7 @@ public class IndexController {
 
     @RequestMapping(value = "/pay/**",method = RequestMethod.GET)
     public ModelAndView getPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            WebUtils.auth(request, response);
+        if(!checkAccessToken(request,response)){
             return null;
         }
         return courseView(request, loginUser);
@@ -81,9 +74,7 @@ public class IndexController {
 
     @RequestMapping(value = "/personal/edit",method = RequestMethod.GET)
     public ModelAndView getPersonalEditIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            WebUtils.auth(request, response);
+        if(!checkAccessToken(request,response)){
             return null;
         }
         return courseView(request);
@@ -92,9 +83,7 @@ public class IndexController {
 
     @RequestMapping(value = "/personal/static/**",method = RequestMethod.GET)
     public ModelAndView getPersonalIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        if(!checkAccessToken(request)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            WebUtils.auth(request, response);
+        if(!checkAccessToken(request,response)){
             return null;
         }
         return courseView(request,loginUser);
@@ -102,9 +91,7 @@ public class IndexController {
 
     @RequestMapping(value = "/operation/static/**",method = RequestMethod.GET)
     public ModelAndView getOperationIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        if(!checkAccessToken(request)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            WebUtils.auth(request, response);
+        if(!checkAccessToken(request,response)){
             return null;
         }
         return courseView(request, loginUser);
@@ -112,15 +99,13 @@ public class IndexController {
 
     @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
     public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            WebUtils.auth(request, response);
+        if(!checkAccessToken(request,response)){
             return null;
         }
         return courseView(request);
     }
 
-    private boolean checkAccessToken(HttpServletRequest request){
+    private boolean checkAccessToken(HttpServletRequest request,HttpServletResponse response){
         if(request.getParameter("debug")!=null && ConfigUtils.isFrontDebug()){
             return true;
         }
@@ -129,12 +114,36 @@ public class IndexController {
         String openId = oAuthService.openId(accessToken);
 
         if(StringUtils.isEmpty(openId)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            try {
+                WebUtils.auth(request, response);
+            } catch (Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
             return false;
         }
 
         Account account = accountService.getAccount(openId, false);
-
-        return account!=null;
+        if (account != null) {
+            if (account.getSubscribe() != null && account.getSubscribe() == 0) {
+                // 未关注
+                try {
+                    response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/subscribe");
+                } catch (IOException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+                return false;
+            }
+            return true;
+        } else {
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            try {
+                WebUtils.auth(request, response);
+            } catch (Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            return false;
+        }
     }
 
 

@@ -291,6 +291,6 @@ public class ConfigUtils {
 	}
 
 	public static int getRabbitMQPort(){
-		return config.getInt("rabbitmq.port");
+		return getIntValue("rabbitmq.port");
 	}
 }

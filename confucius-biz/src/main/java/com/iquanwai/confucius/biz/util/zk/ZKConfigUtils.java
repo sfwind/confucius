@@ -96,7 +96,17 @@ public class ZKConfigUtils {
     }
 
     public String getValue(String key){
-        return getValue(key, COURSE_CONFIG_PATH);
+        String fullPath = COURSE_CONFIG_PATH.concat(key);
+        try {
+            if (zk.exists(fullPath, false) != null) {
+                return getValue(key, COURSE_CONFIG_PATH);
+            } else {
+                return getArchValue(key);
+            }
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return null;
+        }
     }
 
     public String getValue(String key,String prePath){
