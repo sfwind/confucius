@@ -285,4 +285,12 @@ public class ConfigUtils {
 	public static String getIntegratedPracticeIndex(){
 		return getValue("integrated.practice.index");
 	}
+
+	public static String getRabbitMQIp(){
+		return getValue("rabbitmq.ip");
+	}
+
+	public static int getRabbitMQPort(){
+		return config.getInt("rabbitmq.port");
+	}
 }

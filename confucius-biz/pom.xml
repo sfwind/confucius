@@ -147,6 +147,10 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.qiniu</groupId>
             <artifactId>happy-dns-java</artifactId>
             <scope>compile</scope>
