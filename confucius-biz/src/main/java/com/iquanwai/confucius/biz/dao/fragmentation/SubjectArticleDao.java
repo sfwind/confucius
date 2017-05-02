@@ -75,7 +75,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<SubjectArticle> loadArticles(Integer problemId,String openId){
+    public List<SubjectArticle> loadArticles(Integer problemId, String openId){
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? and openid = ? order by Sequence desc,UpdateTime desc";
@@ -87,13 +87,54 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<SubjectArticle> loadUnderCommentArticles(Integer problemId, int size, Date date){
+    public List<SubjectArticle> loadRequestCommentArticles(Integer problemId, int size, Date date){
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
-        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 and AddTime>? " +
-                "order by RequestFeedback desc, length desc limit " + size;
+        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
+                "and RequestFeedback =1 and AddTime>? " +
+                "order by length desc limit " + size;
         try{
             return runner.query(sql, h, problemId, date);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<SubjectArticle> loadUnderCommentArticlesIncludeSomeone(Integer problemId, int size, Date date, List<String> openids){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(openids.size());
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
+                "and AddTime>? and Openid in ("+questionMark+") " +
+                "order by length desc limit " + size;
+        List<Object> param = Lists.newArrayList();
+        param.add(problemId);
+        param.add(date);
+        param.addAll(openids);
+
+        try{
+            return runner.query(sql, h, param);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<SubjectArticle> loadUnderCommentArticlesExcludeSomeone(Integer problemId, int size, Date date, List<String> openids){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(openids.size());
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
+                "and AddTime>? and Openid not in ("+questionMark+") " +
+                "order by length desc limit " + size;
+        List<Object> param = Lists.newArrayList();
+        param.add(problemId);
+        param.add(date);
+        param.addAll(openids);
+
+        try{
+            return runner.query(sql, h, param);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

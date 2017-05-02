@@ -1,10 +1,7 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.SubjectArticleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -38,6 +35,8 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private ApplicationPracticeDao applicationPracticeDao;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private AsstCoachCommentDao asstCoachCommentDao;
 
     private static final int SIZE = 50;
 
