@@ -8,7 +8,6 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
-import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -44,15 +43,6 @@ public class AssistantCoachController {
                                                                      @PathVariable Integer problemId) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<RiseWorkInfoDto> applicationSubmit = assistantCoachService.getUnderCommentApplications(problemId);
-
-        applicationSubmit.stream().forEach(applicationPractice->{
-            if(applicationPractice.getContent()!=null) {
-                applicationPractice.setContent(HtmlRegexpUtil.filterHtml(applicationPractice.getContent()));
-                applicationPractice.setContent(applicationPractice.getContent().length() > 180 ?
-                        applicationPractice.getContent().substring(0, 180) + "......" :
-                        applicationPractice.getContent());
-            }
-        });
 
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("助教后台")
