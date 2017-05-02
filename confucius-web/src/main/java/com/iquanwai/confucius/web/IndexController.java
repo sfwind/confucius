@@ -41,11 +41,11 @@ public class IndexController {
 
     @RequestMapping(value = "/static/**",method = RequestMethod.GET)
     public ModelAndView getIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//        if(!checkAccessToken(request)){
-//            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-//            WebUtils.auth(request, response);
-//            return null;
-//        }
+        if(!checkAccessToken(request)){
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            WebUtils.auth(request, response);
+            return null;
+        }
 
         return courseView(request);
     }
