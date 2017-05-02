@@ -21,7 +21,7 @@ public class QuestionSubmitDao extends DBUtil{
 
     public boolean submitted(String openid, int classId, int questionId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<QuestionSubmit> h = new BeanHandler(QuestionSubmit.class);
+        ResultSetHandler<QuestionSubmit> h = new BeanHandler<>(QuestionSubmit.class);
 
         try {
             QuestionSubmit submit = run.query("SELECT * FROM QuestionSubmit where SubmitOpenid=? " +

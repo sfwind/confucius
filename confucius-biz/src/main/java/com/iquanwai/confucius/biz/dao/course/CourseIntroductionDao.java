@@ -20,7 +20,7 @@ public class CourseIntroductionDao extends DBUtil {
 
     public CourseIntroduction getByCourseId(Integer courseId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<CourseIntroduction> h = new BeanHandler(CourseIntroduction.class);
+        ResultSetHandler<CourseIntroduction> h = new BeanHandler<>(CourseIntroduction.class);
 
 
         try {

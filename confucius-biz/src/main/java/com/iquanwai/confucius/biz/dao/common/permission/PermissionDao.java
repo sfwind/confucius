@@ -24,7 +24,7 @@ public class PermissionDao extends DBUtil{
     public List<Permission> loadPermissions(Integer roleLevel){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM Permission WHERE Level <= ?";
-        ResultSetHandler<List<Permission>> h = new BeanListHandler(Permission.class);
+        ResultSetHandler<List<Permission>> h = new BeanListHandler<>(Permission.class);
         try {
             return runner.query(sql, h, roleLevel);
 

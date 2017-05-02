@@ -22,7 +22,7 @@ public class MaterialDao extends DBUtil {
 
     public List<Material> loadPageMaterials(int pageId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Material>> h = new BeanListHandler(Material.class);
+        ResultSetHandler<List<Material>> h = new BeanListHandler<>(Material.class);
 
         try {
             List<Material> materialList = run.query("SELECT * FROM Material where PageId=? AND DEL = 0 order by Sequence",
@@ -37,7 +37,7 @@ public class MaterialDao extends DBUtil {
 
     public List<Material> loadPageMaterials(List<Integer> pageIdList){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Material>> h = new BeanListHandler(Material.class);
+        ResultSetHandler<List<Material>> h = new BeanListHandler<>(Material.class);
 
         String questionMark = produceQuestionMark(pageIdList.size());
         try {

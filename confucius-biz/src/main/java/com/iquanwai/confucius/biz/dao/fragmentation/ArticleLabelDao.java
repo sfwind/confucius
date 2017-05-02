@@ -25,7 +25,7 @@ public class ArticleLabelDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from ArticleLabel where ArticleId = ? and ArticleModule = ?";
         try{
-            ResultSetHandler<List<ArticleLabel>> h = new BeanListHandler<ArticleLabel>(ArticleLabel.class);
+            ResultSetHandler<List<ArticleLabel>> h = new BeanListHandler<>(ArticleLabel.class);
             return runner.query(sql, h, articleId, moduleId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -37,7 +37,7 @@ public class ArticleLabelDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from ArticleLabel where ArticleId = ? and ArticleModule = ? and Del = 0";
         try{
-            ResultSetHandler<List<ArticleLabel>> h = new BeanListHandler<ArticleLabel>(ArticleLabel.class);
+            ResultSetHandler<List<ArticleLabel>> h = new BeanListHandler<>(ArticleLabel.class);
             return runner.query(sql, h, articleId, moduleId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

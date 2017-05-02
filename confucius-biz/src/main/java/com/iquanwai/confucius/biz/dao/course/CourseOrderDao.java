@@ -38,7 +38,7 @@ public class CourseOrderDao extends DBUtil{
 
     public CourseOrder loadOrder(String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<CourseOrder> h = new BeanHandler(CourseOrder.class);
+        ResultSetHandler<CourseOrder> h = new BeanHandler<>(CourseOrder.class);
 
         try {
             CourseOrder order = run.query("SELECT * FROM CourseOrder where OrderId=? ", h, orderId);
@@ -52,7 +52,7 @@ public class CourseOrderDao extends DBUtil{
 
     public List<CourseOrder> loadNotExpiredClassOrder(List<Integer> classId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<CourseOrder>> h = new BeanListHandler(CourseOrder.class);
+        ResultSetHandler<List<CourseOrder>> h = new BeanListHandler<>(CourseOrder.class);
         if(classId.isEmpty()){
             return Lists.newArrayList();
         }

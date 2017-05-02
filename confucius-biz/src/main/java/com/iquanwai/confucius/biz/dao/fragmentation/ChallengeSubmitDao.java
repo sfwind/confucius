@@ -45,7 +45,7 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
      */
     public ChallengeSubmit load(Integer challengeId, Integer planId, String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ChallengeSubmit> h = new BeanHandler(ChallengeSubmit.class);
+        ResultSetHandler<ChallengeSubmit> h = new BeanHandler<>(ChallengeSubmit.class);
         String sql = "SELECT * FROM ChallengeSubmit where Openid=? and ChallengeId=? and PlanId=?";
         try {
             return run.query(sql, h, openid, challengeId, planId);
@@ -58,7 +58,7 @@ public class ChallengeSubmitDao extends PracticeDBUtil {
 
     public List<ChallengeSubmit> load(Integer challengeId, String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ChallengeSubmit>> h = new BeanListHandler(ChallengeSubmit.class);
+        ResultSetHandler<List<ChallengeSubmit>> h = new BeanListHandler<>(ChallengeSubmit.class);
         String sql = "SELECT * FROM ChallengeSubmit where Openid=? and ChallengeId=?";
         try {
             return run.query(sql, h, openid, challengeId);

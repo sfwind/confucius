@@ -24,7 +24,7 @@ public class PageDao extends DBUtil {
 
     public Page loadPage(int chapterId, int pageSequence){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Page> h = new BeanHandler(Page.class);
+        ResultSetHandler<Page> h = new BeanHandler<>(Page.class);
 
         try {
             Page page = run.query("SELECT * FROM Page where ChapterId=? and Sequence=?", h,
@@ -39,7 +39,7 @@ public class PageDao extends DBUtil {
 
     public List<Page> loadPages(List<Integer> chapterIdList){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Page>> h = new BeanListHandler(Page.class);
+        ResultSetHandler<List<Page>> h = new BeanListHandler<>(Page.class);
 
         String questionMark = produceQuestionMark(chapterIdList.size());
 

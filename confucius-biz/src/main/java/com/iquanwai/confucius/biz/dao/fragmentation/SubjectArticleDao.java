@@ -106,7 +106,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
         String questionMark = produceQuestionMark(openids.size());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
-                "and AddTime>? and Openid in ("+questionMark+") " +
+                "and RequestFeedback =0 and AddTime>? and Openid in ("+questionMark+") " +
                 "order by length desc limit " + size;
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
@@ -114,7 +114,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
         param.addAll(openids);
 
         try{
-            return runner.query(sql, h, param);
+            return runner.query(sql, h, param.toArray());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -126,7 +126,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
         String questionMark = produceQuestionMark(openids.size());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
-                "and AddTime>? and Openid not in ("+questionMark+") " +
+                "and RequestFeedback =0 and AddTime>? and Openid not in ("+questionMark+") " +
                 "order by length desc limit " + size;
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
@@ -134,7 +134,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
         param.addAll(openids);
 
         try{
-            return runner.query(sql, h, param);
+            return runner.query(sql, h, param.toArray());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -24,7 +24,7 @@ public class HomeworkSubmitDao extends DBUtil{
 
     public HomeworkSubmit loadByUrl(String url){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<HomeworkSubmit> h = new BeanHandler(HomeworkSubmit.class);
+        ResultSetHandler<HomeworkSubmit> h = new BeanHandler<>(HomeworkSubmit.class);
 
         try {
             HomeworkSubmit submit = run.query("SELECT * FROM HomeworkSubmit where submitUrl=? ", h, url);
@@ -38,7 +38,7 @@ public class HomeworkSubmitDao extends DBUtil{
 
     public List<HomeworkSubmit> submittedHomework(Integer homeworkId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<HomeworkSubmit>> h = new BeanListHandler(HomeworkSubmit.class);
+        ResultSetHandler<List<HomeworkSubmit>> h = new BeanListHandler<>(HomeworkSubmit.class);
 
         try {
             List<HomeworkSubmit> submit = run.query("SELECT * FROM HomeworkSubmit where HomeworkId=? ", h, homeworkId);
@@ -52,7 +52,7 @@ public class HomeworkSubmitDao extends DBUtil{
 
     private boolean submitted(String openid, int classId, int homeworkId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<HomeworkSubmit> h = new BeanHandler(HomeworkSubmit.class);
+        ResultSetHandler<HomeworkSubmit> h = new BeanHandler<>(HomeworkSubmit.class);
 
         try {
             HomeworkSubmit submit = run.query("SELECT * FROM HomeworkSubmit where SubmitOpenid=? " +
@@ -74,7 +74,7 @@ public class HomeworkSubmitDao extends DBUtil{
 
     public HomeworkSubmit loadHomeworkSubmit(String openid, int classId, int homeworkId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<HomeworkSubmit> h = new BeanHandler(HomeworkSubmit.class);
+        ResultSetHandler<HomeworkSubmit> h = new BeanHandler<>(HomeworkSubmit.class);
 
         try {
             HomeworkSubmit submit = run.query("SELECT * FROM HomeworkSubmit where SubmitOpenid=? " +

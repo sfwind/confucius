@@ -61,7 +61,7 @@ public class CallbackDao extends DBUtil {
 
     public Callback queryByState(String state) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Callback> h = new BeanHandler(Callback.class);
+        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
 
         try {
             Callback callback = run.query("SELECT * FROM Callback where State=?", h, state);
@@ -75,7 +75,7 @@ public class CallbackDao extends DBUtil {
 
     public Callback queryByAccessToken(String accessToken) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Callback> h = new BeanHandler(Callback.class);
+        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
 
         try {
             Callback callback = run.query("SELECT * FROM Callback where AccessToken=?", h, accessToken);

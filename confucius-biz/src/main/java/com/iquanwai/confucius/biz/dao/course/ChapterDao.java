@@ -23,7 +23,7 @@ public class ChapterDao extends DBUtil {
 
     public List<Chapter> loadChapters(int courseId, int week){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Chapter>> h = new BeanListHandler(Chapter.class);
+        ResultSetHandler<List<Chapter>> h = new BeanListHandler<>(Chapter.class);
 
         try {
             List<Chapter> chapterList = run.query("SELECT * FROM Chapter where CourseId=? and Week=?", h, courseId, week);
@@ -37,7 +37,7 @@ public class ChapterDao extends DBUtil {
 
     public List<Chapter> loadChapters(int courseId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Chapter>> h = new BeanListHandler(Chapter.class);
+        ResultSetHandler<List<Chapter>> h = new BeanListHandler<>(Chapter.class);
 
         try {
             List<Chapter> chapterList = run.query("SELECT * FROM Chapter where CourseId=?", h, courseId);
@@ -51,7 +51,7 @@ public class ChapterDao extends DBUtil {
 
     public Chapter getChapterByStartDay(Integer courseId, int startDay){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Chapter> h = new BeanHandler(Chapter.class);
+        ResultSetHandler<Chapter> h = new BeanHandler<>(Chapter.class);
 
         try {
             Chapter chapter = run.query("SELECT * FROM Chapter where CourseId=? and StartDay<=? and EndDay>=?",
