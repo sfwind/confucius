@@ -3,15 +3,18 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.common.customer.EventWallDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.EventWall;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
@@ -51,6 +54,9 @@ public class AccountServiceImpl implements AccountService {
     private List<Region> cityList;
     @Autowired
     private UserRoleDao userRoleDao;
+
+    @Autowired
+    private EventWallDao eventWallDao;
 
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
@@ -267,6 +273,24 @@ public class AccountServiceImpl implements AccountService {
             getAccountFromWeixin(openid,account);
             return getProfileFromDB(openid);
         }
+    }
+
+
+    @Override
+    public List<EventWall> getEventWall() {
+        List<EventWall> eventWalls = eventWallDao.loadAll(EventWall.class);
+        eventWalls.forEach(item->{
+            Date startTime = item.getStartTime();
+            Date endTime = item.getEndTime();
+            item.setStartStr(DateUtils.parseDateToFormat6(startTime));
+
+            if (DateUtils.isSameDate(startTime, endTime)) {
+                item.setEndStr(DateUtils.parseDateToTimeFormat(endTime));
+            } else {
+                item.setEndStr(DateUtils.parseDateToFormat6(endTime));
+            }
+        });
+        return eventWalls;
     }
 
     private Profile getProfileFromDB(String openid) {
