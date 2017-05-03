@@ -22,7 +22,7 @@ public class ProblemListDao extends PracticeDBUtil {
 
     public List<ProblemList> loadProblems(String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ProblemList>> h = new BeanListHandler(ProblemList.class);
+        ResultSetHandler<List<ProblemList>> h = new BeanListHandler<>(ProblemList.class);
         String sql = "SELECT * FROM ProblemPlan where Openid=? and Status=0";
         try {
             return run.query(sql, h, openid);

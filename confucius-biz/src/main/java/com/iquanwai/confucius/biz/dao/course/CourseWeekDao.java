@@ -20,7 +20,7 @@ public class CourseWeekDao extends DBUtil{
 
     public CourseWeek getCourseWeek(Integer courseId, int week){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<CourseWeek> h = new BeanHandler(CourseWeek.class);
+        ResultSetHandler<CourseWeek> h = new BeanHandler<>(CourseWeek.class);
 
         try {
             CourseWeek courseWeek = run.query("SELECT * FROM CourseWeek where CourseId=? and Sequence=?",

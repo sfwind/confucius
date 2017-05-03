@@ -27,7 +27,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
     public List<ImprovementPlan> loadUserPlans(String openId){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ImprovementPlan WHERE Openid = ?";
-        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler(ImprovementPlan.class);
+        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
         try {
             List<ImprovementPlan> improvementPlans = runner.query(sql, h, openId);
             return improvementPlans;
@@ -40,7 +40,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
     public ImprovementPlan loadRunningPlan(String openid){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ImprovementPlan WHERE Openid=? and CloseDate>=? and Status = 1";
-        ResultSetHandler<ImprovementPlan> h = new BeanHandler(ImprovementPlan.class);
+        ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
         try {
             ImprovementPlan improvementPlan =runner.query(sql, h, openid, DateUtils.parseDateTimeToString(new Date()));
             return improvementPlan;

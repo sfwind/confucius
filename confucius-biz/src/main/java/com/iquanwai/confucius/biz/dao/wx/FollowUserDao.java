@@ -41,7 +41,7 @@ public class FollowUserDao extends DBUtil {
 
     public Account queryByOpenid(String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Account> h = new BeanHandler(Account.class);
+        ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
 
         try {
             Account account = run.query("SELECT * FROM FollowUsers where Openid=?", h, openid);

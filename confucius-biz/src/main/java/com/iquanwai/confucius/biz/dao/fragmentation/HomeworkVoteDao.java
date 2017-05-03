@@ -104,7 +104,7 @@ public class HomeworkVoteDao extends PracticeDBUtil {
      */
     public HomeworkVote loadVoteRecord(Integer type,Integer referencedId, String voteOpenId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<HomeworkVote> h = new BeanHandler(HomeworkVote.class);
+        ResultSetHandler<HomeworkVote> h = new BeanHandler<>(HomeworkVote.class);
         try {
             HomeworkVote vote = run.query("SELECT * FROM HomeworkVote where VoteOpenId=? and ReferencedId=? and Type=?",
                     h,voteOpenId, referencedId, type);

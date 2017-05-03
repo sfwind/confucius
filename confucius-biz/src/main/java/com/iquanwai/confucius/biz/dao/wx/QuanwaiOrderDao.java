@@ -41,7 +41,7 @@ public class QuanwaiOrderDao extends DBUtil {
 
     public QuanwaiOrder loadOrder(String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<QuanwaiOrder> h = new BeanHandler(QuanwaiOrder.class);
+        ResultSetHandler<QuanwaiOrder> h = new BeanHandler<>(QuanwaiOrder.class);
 
         try {
             QuanwaiOrder order = run.query("SELECT * FROM QuanwaiOrder where OrderId=? ", h, orderId);
@@ -55,7 +55,7 @@ public class QuanwaiOrderDao extends DBUtil {
 
     public List<QuanwaiOrder> loadActiveOrders(String openId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler(QuanwaiOrder.class);
+        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler<>(QuanwaiOrder.class);
 
         try {
             return run.query("SELECT * FROM QuanwaiOrder where Openid=? and Status=0", h, openId);
@@ -104,7 +104,7 @@ public class QuanwaiOrderDao extends DBUtil {
 
     public List<QuanwaiOrder> queryUnderCloseOrders(Date openTime) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler(QuanwaiOrder.class);
+        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler<>(QuanwaiOrder.class);
 
         try {
             List<QuanwaiOrder> orderList = run.query("SELECT * FROM QuanwaiOrder where Status=0 and createTime<=? ",

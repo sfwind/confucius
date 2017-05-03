@@ -23,7 +23,7 @@ public class PromoCodeDao extends DBUtil{
 
     public PromoCode queryPromoCode(String code, String activityCode) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<PromoCode> h = new BeanHandler(PromoCode.class);
+        ResultSetHandler<PromoCode> h = new BeanHandler<>(PromoCode.class);
         String sql = "select * from PromoCode where Code=? and ActivityCode=?";
         try {
             return run.query(sql, h, code, activityCode);
@@ -36,7 +36,7 @@ public class PromoCodeDao extends DBUtil{
 
     public PromoCode queryPromoCodeByOwner(String owner, String activityCode) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<PromoCode> h = new BeanHandler(PromoCode.class);
+        ResultSetHandler<PromoCode> h = new BeanHandler<>(PromoCode.class);
         String sql = "select * from PromoCode where Owner=? and ActivityCode=?";
         try {
             return run.query(sql, h, owner, activityCode);
@@ -49,7 +49,7 @@ public class PromoCodeDao extends DBUtil{
 
     public List<PromoCode> queryPromoCodeByActivityCode(String activityCode) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<PromoCode>> h = new BeanListHandler(PromoCode.class);
+        ResultSetHandler<List<PromoCode>> h = new BeanListHandler<>(PromoCode.class);
         String sql = "select * from PromoCode where ActivityCode=?";
         try {
             return run.query(sql, h, activityCode);

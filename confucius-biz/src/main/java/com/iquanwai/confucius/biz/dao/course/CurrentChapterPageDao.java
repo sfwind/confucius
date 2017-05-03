@@ -23,7 +23,7 @@ public class CurrentChapterPageDao extends DBUtil {
 
     public Integer currentPage(String openid, int chapterId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<CurrentChapterPage> h = new BeanHandler(CurrentChapterPage.class);
+        ResultSetHandler<CurrentChapterPage> h = new BeanHandler<>(CurrentChapterPage.class);
 
         try {
             CurrentChapterPage page = run.query("SELECT * FROM CurrentChapterPage where Openid=? and ChapterId=?",
@@ -73,7 +73,7 @@ public class CurrentChapterPageDao extends DBUtil {
 
     public List<CurrentChapterPage> currentPages(String openid, List<Integer> chapterIds){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<CurrentChapterPage>> h = new BeanListHandler(CurrentChapterPage.class);
+        ResultSetHandler<List<CurrentChapterPage>> h = new BeanListHandler<>(CurrentChapterPage.class);
 
         String questionMark = produceQuestionMark(chapterIds.size());
         List<Object> objects = Lists.newArrayList();

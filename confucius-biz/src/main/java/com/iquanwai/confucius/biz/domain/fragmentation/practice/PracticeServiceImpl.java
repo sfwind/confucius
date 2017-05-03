@@ -12,7 +12,6 @@ import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -56,6 +55,10 @@ public class PracticeServiceImpl implements PracticeService {
     private PictureDao pictureDao;
     @Autowired
     private ApplicationPracticeDao applicationPracticeDao;
+    @Autowired
+    private AsstCoachCommentDao asstCoachCommentDao;
+    @Autowired
+    private ImprovementPlanDao improvementPlanDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -173,6 +176,11 @@ public class PracticeServiceImpl implements PracticeService {
             //更新助教评论状态
             if(isAsst){
                 applicationSubmitDao.asstFeedback(load.getId());
+                Integer planId = load.getPlanId();
+                ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
+                if(plan!=null){
+                    asstCoachComment(load.getOpenid(), plan.getProblemId());
+                }
             }
             //自己给自己评论不提醒
             if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
@@ -188,6 +196,7 @@ public class PracticeServiceImpl implements PracticeService {
             //更新助教评论状态
             if(isAsst){
                 subjectArticleDao.asstFeedback(load.getId());
+                asstCoachComment(load.getOpenid(), load.getProblemId());
             }
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
@@ -204,6 +213,20 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setDevice(Constants.Device.MOBILE);
         commentDao.insert(comment);
         return new MutablePair<>(true,"评论成功");
+    }
+
+    private void asstCoachComment(String openId, Integer problemId) {
+        AsstCoachComment asstCoachComment =asstCoachCommentDao.loadAsstCoachComment(problemId, openId);
+        if(asstCoachComment==null){
+            asstCoachComment = new AsstCoachComment();
+            asstCoachComment.setCount(1);
+            asstCoachComment.setOpenid(openId);
+            asstCoachComment.setProblemId(problemId);
+            asstCoachCommentDao.insert(asstCoachComment);
+        }else{
+            asstCoachComment.setCount(asstCoachComment.getCount()+1);
+            asstCoachCommentDao.updateCount(asstCoachComment);
+        }
     }
 
     @Override

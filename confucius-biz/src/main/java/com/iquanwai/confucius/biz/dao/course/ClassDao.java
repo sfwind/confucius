@@ -24,7 +24,7 @@ public class ClassDao extends DBUtil {
 
     public List<QuanwaiClass> openClass(int courseId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
+        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler<>(QuanwaiClass.class);
 
         try {
             List<QuanwaiClass> quanwaiClass = run.query("SELECT * FROM QuanwaiClass where CourseId=? and Open = 1",
@@ -39,7 +39,7 @@ public class ClassDao extends DBUtil {
 
     public List<QuanwaiClass> openClass(){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
+        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler<>(QuanwaiClass.class);
 
         try {
             List<QuanwaiClass> quanwaiClass = run.query("SELECT * FROM QuanwaiClass where Open = 1",
@@ -54,7 +54,7 @@ public class ClassDao extends DBUtil {
 
     public List<QuanwaiClass> loadClassByOpenDate(Date date){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
+        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler<>(QuanwaiClass.class);
 
         String dateStr = DateUtils.parseDateToString(date);
         try {
@@ -70,7 +70,7 @@ public class ClassDao extends DBUtil {
 
     public List<QuanwaiClass> loadRunningClass(){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler(QuanwaiClass.class);
+        ResultSetHandler<List<QuanwaiClass>> h = new BeanListHandler<>(QuanwaiClass.class);
 
         String now = DateUtils.parseDateToString(new Date());
         try {

@@ -24,7 +24,7 @@ public class CouponDao extends DBUtil {
 
     public List<Coupon> getCoupon(String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Coupon>> h = new BeanListHandler(Coupon.class);
+        ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
 
         try {
             List<Coupon> coupon = run.query("SELECT * FROM Coupon where Openid=? and Used in (0,2) and ExpiredDate>?",
@@ -39,7 +39,7 @@ public class CouponDao extends DBUtil {
 
     public List<Coupon> getUnusedCoupon(){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Coupon>> h = new BeanListHandler(Coupon.class);
+        ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
 
         try {
             List<Coupon> coupon = run.query("SELECT * FROM Coupon where Used in (0,2) and ExpiredDate>?",
