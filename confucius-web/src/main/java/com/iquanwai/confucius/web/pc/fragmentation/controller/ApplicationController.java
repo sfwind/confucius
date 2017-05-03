@@ -109,11 +109,12 @@ public class ApplicationController {
             dto.setContent(applicationPractice.getContent());
             dto.setDescription(applicationPractice.getDescription());
             dto.setModuleId(Constants.PictureType.APPLICATION);
-            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, dto.getSubmitId());
-            dto.setPicList(pictureList
-                    .stream()
-                    .map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName())
-                    .collect(Collectors.toList()));
+//            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, dto.getSubmitId());
+//            dto.setPicList(pictureList
+//                    .stream()
+//                    .map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName())
+//                    .collect(Collectors.toList()));
+            dto.setRequestComment(practiceService.hasRequestComment(planId));
             return WebUtils.result(dto);
         } else {
             logger.error("用户:{},没有该训练计划:{}，应用练习:{}",openId,plan,applicationId);
@@ -155,6 +156,7 @@ public class ApplicationController {
         info.setUpName(loginUser.getWeixin().getWeixinName());
         info.setUpTime(DateUtils.parseDateToFormat5(applicationPractice.getSubmitUpdateTime()));
         info.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, applicationPractice.getSubmitId()));
+        info.setRequestComment(practiceService.hasRequestComment(planId));
         return WebUtils.result(info);
     }
 
@@ -301,6 +303,7 @@ public class ApplicationController {
                 show.setHeadImg(loginUser.getWeixin().getHeadimgUrl());
                 show.setPlanId(submit.getPlanId());
                 show.setWorkId(submit.getApplicationId());
+                show.setRequestComment(practiceService.hasRequestComment(submit.getPlanId()));
             } else {
                 Profile account = accountService.getProfile(openId, false);
                 if (account != null) {
@@ -325,8 +328,8 @@ public class ApplicationController {
             // 根据challengeId查询problemId
             show.setTitle(applicationService.loadApplicationPractice(submit.getApplicationId()).getTopic());
             // 查询照片
-            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
-            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
+//            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
+//            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
             // 提升浏览量
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId,Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);

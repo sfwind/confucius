@@ -327,4 +327,48 @@ public class PracticeServiceImpl implements PracticeService {
     public List<ApplicationPractice> loadApplicationByProblemId(Integer problemId) {
         return applicationPracticeDao.getPracticeByProblemId(problemId);
     }
+
+    @Override
+    public boolean hasRequestComment(Integer planId) {
+        ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
+        return improvementPlan!=null && improvementPlan.getRequestCommentCount()>0;
+    }
+
+    @Override
+    public boolean requestComment(Integer submitId, Integer moduleId) {
+        if(moduleId.equals(Constants.Module.APPLICATION)){
+            ApplicationSubmit applicationSubmit = applicationSubmitDao.load(ApplicationSubmit.class, submitId);
+            if(applicationSubmit.getRequestFeedback()){
+                logger.warn("{} 已经是求点评状态", submitId);
+                return true;
+            }
+            Integer planId = applicationSubmit.getPlanId();
+            ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
+            if(improvementPlan!=null && improvementPlan.getRequestCommentCount()>0){
+                //更新求点评次数
+                improvementPlanDao.updateRequestComment(planId, improvementPlan.getRequestCommentCount()-1);
+                //求点评
+                applicationSubmitDao.requestComment(applicationSubmit.getId());
+                return true;
+            }
+        }else if(moduleId.equals(Constants.Module.SUBJECT)){
+            SubjectArticle subjectArticle = subjectArticleDao.load(SubjectArticle.class, submitId);
+            if(subjectArticle.getRequestFeedback()){
+                logger.warn("{} 已经是求点评状态", submitId);
+                return true;
+            }
+
+            Integer problemId = subjectArticle.getProblemId();
+            String openid = subjectArticle.getOpenid();
+            ImprovementPlan improvementPlan = improvementPlanDao.loadPlanByProblemId(openid, problemId);
+            if(improvementPlan!=null && improvementPlan.getRequestCommentCount()>0){
+                //更新求点评次数
+                improvementPlanDao.updateRequestComment(improvementPlan.getId(), improvementPlan.getRequestCommentCount()-1);
+                //求点评
+                subjectArticleDao.requestComment(subjectArticle.getId());
+                return true;
+            }
+        }
+        return false;
+    }
 }

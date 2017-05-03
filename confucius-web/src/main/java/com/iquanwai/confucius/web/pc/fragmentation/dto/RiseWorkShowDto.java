@@ -25,6 +25,7 @@ public class RiseWorkShowDto {
     private List<String> picList;
     private String signature;
     private Integer role;
+    private Boolean requestComment;
 
     private String desc; // 描述
     private List<LabelConfig> labelList;

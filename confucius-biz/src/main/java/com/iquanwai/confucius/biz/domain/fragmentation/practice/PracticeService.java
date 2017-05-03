@@ -106,4 +106,17 @@ public interface PracticeService {
      * @param problemId 小课id
      */
     List<ApplicationPractice> loadApplicationByProblemId(Integer problemId);
+
+    /**
+     * 是否可以求点评
+     * @param planId 计划id
+     */
+    boolean hasRequestComment(Integer planId);
+
+    /**
+     * 求点评
+     * @param submitId 文章提交id
+     * @param moduleId 模块id（2-应用练习,3-小课分享）
+     */
+    boolean requestComment(Integer submitId, Integer moduleId);
 }

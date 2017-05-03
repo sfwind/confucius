@@ -36,6 +36,7 @@ public class RiseWorkInfoDto {
     private Integer priority;
     private Integer role;
     private String signature;
+    private Boolean requestComment;
 
     public RiseWorkInfoDto(SubjectArticle origin){
         this.title = origin.getTitle();

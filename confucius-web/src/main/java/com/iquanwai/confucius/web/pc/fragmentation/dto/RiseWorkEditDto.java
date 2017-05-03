@@ -16,5 +16,6 @@ public class RiseWorkEditDto {
     private List<String> picList;
     private Integer submitId;
     private Integer moduleId;
+    private Boolean requestComment;
 
 }

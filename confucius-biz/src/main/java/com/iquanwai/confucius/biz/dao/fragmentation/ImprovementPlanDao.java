@@ -8,10 +8,12 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +52,19 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         return null;
     }
 
+    public ImprovementPlan loadPlanByProblemId(String openid, Integer problemId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ImprovementPlan WHERE Openid=? and ProblemId=?";
+        ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
+        try {
+            ImprovementPlan improvementPlan =runner.query(sql, h, openid, problemId);
+            return improvementPlan;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
 
     public void updatePoint(Integer planId, Integer point){
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -79,5 +94,16 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public void updateRequestComment(Integer planId, Integer count){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE ImprovementPlan SET RequestCommentCount = ? where Id=?";
+        try {
+            runner.update(sql, count, planId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
     }
 }

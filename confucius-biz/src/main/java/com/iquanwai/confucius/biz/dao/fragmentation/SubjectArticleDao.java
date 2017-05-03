@@ -150,4 +150,14 @@ public class SubjectArticleDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public void requestComment(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update SubjectArticle set RequestFeedback=1 where Id=?";
+        try {
+            runner.update(sql, id);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
 }
