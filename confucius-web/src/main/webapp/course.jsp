@@ -61,17 +61,13 @@
     };
 </script>
 
-<script type="text/javascript" src="//www.iqycamp.com/script/scrollable.js"></script>
-<script type="text/javascript" src="//www.iqycamp.com/script/demoUtils.js"></script>
+<script type="text/javascript" src="//www.iqycamp.com/script/iscroll-lite.js"></script>
 <script type="text/javascript">
     var myScroll;
     function loaded () {
         myScroll = new IScroll('#react-app', { scrollX: true, freeScroll: true });
     }
-    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, isPassive() ? {
-        capture: false,
-        passive: false
-    } : false);
+    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
 </script>
 <%--性能数据js资源--%>
 <script src="//www.iqycamp.com/script/mta.min.js"></script>
