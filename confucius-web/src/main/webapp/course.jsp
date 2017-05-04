@@ -37,8 +37,8 @@
     (function(window, mta) {
         window.MeituanAnalyticsObject = mta;
         window[mta] = window[mta] || function() {
-            (window[mta].q = window[mta].q || []).push(arguments);
-        };
+                    (window[mta].q = window[mta].q || []).push(arguments);
+                };
     }(window, 'mta'));
     window.onload = function () {
         //页面名称
@@ -59,15 +59,6 @@
             }
         })()
     };
-</script>
-
-<script type="text/javascript" src="//www.iqycamp.com/script/iscroll-lite.js"></script>
-<script type="text/javascript">
-    var myScroll;
-    function loaded () {
-        myScroll = new IScroll('#react-app', { scrollX: true, freeScroll: true });
-    }
-    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
 </script>
 <%--性能数据js资源--%>
 <script src="//www.iqycamp.com/script/mta.min.js"></script>
