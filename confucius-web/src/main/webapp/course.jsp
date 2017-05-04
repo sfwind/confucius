@@ -61,8 +61,8 @@
     };
 </script>
 
-<script type="text/javascript" src="js/scrollable.js"></script>
-<script type="text/javascript" src="js/demoUtils.js"></script>
+<script type="text/javascript" src="//www.iqycamp.com/script/scrollable.js"></script>
+<script type="text/javascript" src="//www.iqycamp.com/script/demoUtils.js"></script>
 <script type="text/javascript">
     var myScroll;
     function loaded () {
