@@ -16,4 +16,5 @@ public class NoticeMsgDto {
     private String keyword3;
     private String messageId;
     private List<String> openids;
+    private String url;
 }

@@ -182,6 +182,9 @@ public class BackendController {
                         }
                         data.put("remark", new TemplateMessage.Keyword(remark));
                     }
+                    if(noticeMsgDto.getUrl()!=null){
+                        templateMessage.setUrl(noticeMsgDto.getUrl());
+                    }
                     templateMessageService.sendMessage(templateMessage);
 
                 });
