@@ -193,6 +193,9 @@ public class FragmentController {
                 dto.setUpTime(DateUtils.parseDateToFormat5(item.getAddTime()));
                 dto.setUpName(account.getNickname());
                 dto.setHeadPic(account.getHeadimgurl());
+                dto.setRole(account.getRole());
+//                dto.setSignature(account.getSignature());
+                dto.setIsMine(item.getCommentOpenId().equals(loginUser.getOpenId()));
                 return dto;
             } else {
                 logger.error("未找到该评论用户:{}",item);
@@ -222,8 +225,8 @@ public class FragmentController {
         Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
-        Pair<Boolean, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent());
-        if(result.getLeft()){
+        Pair<Integer, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent());
+        if(result.getLeft()>0){
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
                     .function("碎片化")
@@ -231,10 +234,14 @@ public class FragmentController {
                     .memo(moduleId+":"+submitId);
             operationLogService.log(operationLog);
             RiseWorkCommentDto resultDto = new RiseWorkCommentDto();
+            resultDto.setId(result.getLeft());
             resultDto.setContent(dto.getContent());
             resultDto.setUpName(loginUser.getWeixin().getWeixinName());
             resultDto.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
             resultDto.setUpTime(DateUtils.parseDateToFormat5(new Date()));
+            resultDto.setRole(loginUser.getRole());
+//            resultDto.setSignature(loginUser.getSignature());
+            resultDto.setIsMine(true);
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");
@@ -281,7 +288,7 @@ public class FragmentController {
     @RequestMapping(value = "/pc/fragment/request/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> requestComment(PCLoginUser loginUser,
                                                               @PathVariable Integer moduleId,
-                                                              @PathVariable Integer submitId){
+                                                              @PathVariable Integer submitId) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
@@ -291,13 +298,29 @@ public class FragmentController {
                 .module("训练")
                 .function("写文章")
                 .action("求点评")
-                .memo(moduleId+":"+submitId);
+                .memo(moduleId + ":" + submitId);
         operationLogService.log(operationLog);
-        if(result){
+        if (result) {
             return WebUtils.success();
-        }else{
+        } else {
             return WebUtils.error("本小课求点评次数已用完");
         }
+    }
 
+    @RequestMapping("/pc/fragment/delete/comment/{commentId}")
+    public ResponseEntity<Map<String, Object>> deleteComment(PCLoginUser loginUser,
+                                                             @PathVariable Integer commentId){
+
+        Assert.notNull(loginUser, "用户不能为空");
+
+        practiceService.deleteComment(commentId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("训练")
+                .function("评论")
+                .action("删除评论")
+                .memo(commentId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 }

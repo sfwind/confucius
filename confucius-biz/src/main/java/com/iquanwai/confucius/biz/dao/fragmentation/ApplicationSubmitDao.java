@@ -199,6 +199,9 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     }
 
     public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(List<Integer> applicationIds, int size, Date date, List<String> openids){
+        if(openids.size()==0){
+            return Lists.newArrayList();
+        }
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark1 = produceQuestionMark(applicationIds.size());
         String questionMark2 = produceQuestionMark(openids.size());
@@ -223,20 +226,39 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark1 = produceQuestionMark(applicationIds.size());
         String questionMark2 = produceQuestionMark(openids.size());
-        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
-                "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid not in ("+questionMark2+") " +
-                "order by length desc limit " + size;
-        List<Object> param = Lists.newArrayList();
-        param.addAll(applicationIds);
-        param.add(date);
-        param.addAll(openids);
+        if(openids.size()!=0){
+            String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid not in ("+questionMark2+") " +
+                    "order by length desc limit " + size;
+            ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
-        try{
-            return runner.query(sql, h, param.toArray());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
+            List<Object> param = Lists.newArrayList();
+            param.addAll(applicationIds);
+            param.add(date);
+            param.addAll(openids);
+
+            try{
+                return runner.query(sql, h, param.toArray());
+            } catch (SQLException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        }else{
+            String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? " +
+                    "order by length desc limit " + size;
+            ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+
+            List<Object> param = Lists.newArrayList();
+            param.addAll(applicationIds);
+            param.add(date);
+
+            try{
+                return runner.query(sql, h, param.toArray());
+            } catch (SQLException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
         }
+
         return Lists.newArrayList();
     }
 

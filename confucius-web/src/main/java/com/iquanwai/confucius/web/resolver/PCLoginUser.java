@@ -20,11 +20,12 @@ public class PCLoginUser {
     private String openId;
     private LoginUser weixin;
     private Integer role;
+    private String signature;
     private List<Authority> permissionList;
 
     public static PCLoginUser defaultUser(){
         return new PCLoginUser(ConfigUtils.getDefaultOpenid(),
-                LoginUser.defaultUser(), Role.ADMIN, Lists.newArrayList());
+                LoginUser.defaultUser(), Role.ADMIN, null, Lists.newArrayList());
     }
 
 }

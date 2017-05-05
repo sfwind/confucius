@@ -56,7 +56,8 @@ public class SubjectArticleDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select count(1) from SubjectArticle where ProblemId = ?";
         try{
-            return runner.query(sql, new ScalarHandler<Long>(), problemId).intValue();
+            Long id= runner.query(sql, new ScalarHandler<>(), problemId);
+            return id.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -102,6 +103,9 @@ public class SubjectArticleDao extends PracticeDBUtil {
     }
 
     public List<SubjectArticle> loadUnderCommentArticlesIncludeSomeone(Integer problemId, int size, Date date, List<String> openids){
+        if(openids.size()==0){
+            return Lists.newArrayList();
+        }
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(openids.size());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
@@ -124,19 +128,35 @@ public class SubjectArticleDao extends PracticeDBUtil {
     public List<SubjectArticle> loadUnderCommentArticlesExcludeSomeone(Integer problemId, int size, Date date, List<String> openids){
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(openids.size());
-        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
-        String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
-                "and RequestFeedback =0 and AddTime>? and Openid not in ("+questionMark+") " +
-                "order by length desc limit " + size;
-        List<Object> param = Lists.newArrayList();
-        param.add(problemId);
-        param.add(date);
-        param.addAll(openids);
+        if(openids.size()!=0) {
+            ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+            String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
+                    "and RequestFeedback =0 and AddTime>? and Openid not in (" + questionMark + ") " +
+                    "order by length desc limit " + size;
+            List<Object> param = Lists.newArrayList();
+            param.add(problemId);
+            param.add(date);
+            param.addAll(openids);
 
-        try{
-            return runner.query(sql, h, param.toArray());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
+            try {
+                return runner.query(sql, h, param.toArray());
+            } catch (SQLException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        }else{
+            ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+            String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
+                    "and RequestFeedback =0 and AddTime>? " +
+                    "order by length desc limit " + size;
+            List<Object> param = Lists.newArrayList();
+            param.add(problemId);
+            param.add(date);
+
+            try {
+                return runner.query(sql, h, param.toArray());
+            } catch (SQLException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
         }
         return Lists.newArrayList();
     }

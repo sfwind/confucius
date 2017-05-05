@@ -12,4 +12,7 @@ public class RiseWorkCommentDto {
     private String upName;
     private String upTime;
     private String headPic;
+    private String signature;
+    private Integer role;
+    private Boolean isMine;
 }
