@@ -45,7 +45,7 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
 
     public List<WarmupPracticeDiscuss> loadDiscuss(Integer practiceId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler(WarmupPracticeDiscuss.class);
+        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
         String sql = "SELECT * FROM WarmupPracticeDiscuss where WarmupPracticeId = ? and Del = 0 " +
                 "order by Priority desc, AddTime desc";
         try {

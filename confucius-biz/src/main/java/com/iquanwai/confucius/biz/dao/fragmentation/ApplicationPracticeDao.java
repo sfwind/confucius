@@ -22,7 +22,7 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
 
     public List<ApplicationPractice> getPracticeByProblemId(Integer problemId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ApplicationPractice>> h = new BeanListHandler(ApplicationPractice.class);
+        ResultSetHandler<List<ApplicationPractice>> h = new BeanListHandler<>(ApplicationPractice.class);
         String sql = "SELECT * FROM ApplicationPractice where ProblemId=? and Del=0";
         try {
             return run.query(sql, h, problemId);

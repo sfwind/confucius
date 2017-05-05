@@ -47,7 +47,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
      */
     public ApplicationSubmit load(Integer applicationId, Integer planId, String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ApplicationSubmit> h = new BeanHandler(ApplicationSubmit.class);
+        ResultSetHandler<ApplicationSubmit> h = new BeanHandler<>(ApplicationSubmit.class);
         String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=? and PlanId=?";
         try {
             return run.query(sql, h, openid, applicationId, planId);
@@ -59,7 +59,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public List<ApplicationSubmit> load(Integer applicationId, String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler(ApplicationSubmit.class);
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=?";
         try {
             return run.query(sql, h, openid, applicationId);
@@ -75,7 +75,8 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> load(Integer applicationId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Content is not null order by UpdateTime desc";
+        // TODO: 写死了大小
+        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Length>=15 order by UpdateTime desc limit 50";
         try {
             return run.query(sql, h, applicationId);
         } catch (SQLException e) {
@@ -135,11 +136,12 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ApplicationSubmit> getSubmitByApplicationIds(List<Integer> applicationIds, int size, Date date){
+    public List<ApplicationSubmit> loadRequestCommentApplications(List<Integer> applicationIds, int size, Date date){
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(applicationIds.size());
         String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark+
-                ") and Content is not null and Feedback = 0 and AddTime>? order by RequestFeedback desc, length desc limit "+size;
+                ") and Content is not null and Feedback = 0 and AddTime>? and RequestFeedback =1 " +
+                "order by length desc limit "+size;
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         List<Object> paramList = Lists.newArrayList(applicationIds);
         paramList.add(date);
@@ -194,6 +196,70 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(List<Integer> applicationIds, int size, Date date, List<String> openids){
+        if(openids.size()==0){
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark1 = produceQuestionMark(applicationIds.size());
+        String questionMark2 = produceQuestionMark(openids.size());
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
+                "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid in ("+questionMark2+") " +
+                "order by length desc limit " + size;
+        List<Object> param = Lists.newArrayList();
+        param.addAll(applicationIds);
+        param.add(date);
+        param.addAll(openids);
+
+        try{
+            return runner.query(sql, h, param.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<ApplicationSubmit> loadUnderCommentApplicationsExcludeSomeone(List<Integer> applicationIds, int size, Date date, List<String> openids){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark1 = produceQuestionMark(applicationIds.size());
+        String questionMark2 = produceQuestionMark(openids.size());
+        if(openids.size()!=0){
+            String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid not in ("+questionMark2+") " +
+                    "order by length desc limit " + size;
+            ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+
+            List<Object> param = Lists.newArrayList();
+            param.addAll(applicationIds);
+            param.add(date);
+            param.addAll(openids);
+
+            try{
+                return runner.query(sql, h, param.toArray());
+            } catch (SQLException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        }else{
+            String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? " +
+                    "order by length desc limit " + size;
+            ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+
+            List<Object> param = Lists.newArrayList();
+            param.addAll(applicationIds);
+            param.add(date);
+
+            try{
+                return runner.query(sql, h, param.toArray());
+            } catch (SQLException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        }
+
+        return Lists.newArrayList();
     }
 
 }

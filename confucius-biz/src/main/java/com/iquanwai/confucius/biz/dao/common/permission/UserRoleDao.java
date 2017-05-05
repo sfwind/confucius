@@ -24,7 +24,7 @@ public class UserRoleDao extends DBUtil {
 
     public List<UserRole> getRoles(String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<UserRole>> h = new BeanListHandler(UserRole.class);
+        ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
         String sql = "SELECT * FROM UserRole where Openid=? and Del=0";
         try {
             return run.query(sql, h, openid);

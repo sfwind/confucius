@@ -22,7 +22,7 @@ public class ChoiceDao extends DBUtil {
 
     public List<Choice> loadChoices(int questionId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Choice>> h = new BeanListHandler(Choice.class);
+        ResultSetHandler<List<Choice>> h = new BeanListHandler<>(Choice.class);
 
         try {
             List<Choice> choices = run.query("SELECT * FROM Choice where QuestionId=?", h,
@@ -37,7 +37,7 @@ public class ChoiceDao extends DBUtil {
 
     public List<Choice> loadRightChoices(int questionId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Choice>> h = new BeanListHandler(Choice.class);
+        ResultSetHandler<List<Choice>> h = new BeanListHandler<>(Choice.class);
 
         try {
             List<Choice> choices = run.query("SELECT * FROM Choice where QuestionId=? AND `Right`=1", h,

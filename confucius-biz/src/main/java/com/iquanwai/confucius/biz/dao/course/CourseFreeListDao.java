@@ -20,7 +20,7 @@ public class CourseFreeListDao extends DBUtil{
 
     public boolean isFree(String openid, Integer courseId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<CourseFreeList> h = new BeanHandler(CourseFreeList.class);
+        ResultSetHandler<CourseFreeList> h = new BeanHandler<>(CourseFreeList.class);
 
         try {
             CourseFreeList freeList = run.query("SELECT * FROM CourseFreeList where Openid=? and CourseId=?",

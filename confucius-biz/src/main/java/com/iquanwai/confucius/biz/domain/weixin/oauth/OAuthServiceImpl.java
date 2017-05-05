@@ -114,6 +114,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setOpenid(openid);
         callback.setRefreshToken(refreshToken);
         callback.setAccessToken(accessToken);
+        logger.info("update callback, state:{},accessToken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
 
         // callbackUrl增加参数access_token

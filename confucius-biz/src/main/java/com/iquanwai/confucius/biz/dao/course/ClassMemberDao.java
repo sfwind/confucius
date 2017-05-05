@@ -26,7 +26,7 @@ public class ClassMemberDao extends DBUtil {
 
     public ClassMember classMember(String openid, Integer courseId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+        ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
         try {
             ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? and Graduate=0",
                     h, openid, courseId);
@@ -40,7 +40,7 @@ public class ClassMemberDao extends DBUtil {
 
     public List<ClassMember> classMember(String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where Openid=? and Graduate = 0", h, openid);
@@ -58,7 +58,7 @@ public class ClassMemberDao extends DBUtil {
      */
     public List<ClassMember> willCloseMembers(Date date){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where CloseDate = ?", h, DateUtils.parseDateToString(date));
@@ -72,7 +72,7 @@ public class ClassMemberDao extends DBUtil {
 
     public List<ClassMember> graduateInfo(String openid, Integer courseId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? and Graduate = 1 " +
@@ -112,7 +112,7 @@ public class ClassMemberDao extends DBUtil {
 
     public ClassMember getClassMember(Integer classId, String openid){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+        ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
 
         try {
             ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and ClassId=? ",
@@ -127,7 +127,7 @@ public class ClassMemberDao extends DBUtil {
 
     public List<ClassMember> getClassMember(Integer classId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ClassId=? ",
@@ -142,7 +142,7 @@ public class ClassMemberDao extends DBUtil {
 
     public List<ClassMember> getClassMember(Integer classId,Date closeDate){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ClassId=? and CloseDate > ?",
@@ -186,7 +186,7 @@ public class ClassMemberDao extends DBUtil {
 
     public List<ClassMember> getPassMember(Integer classId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ClassId=? and Pass = 1 and Graduate = 0",
@@ -225,7 +225,7 @@ public class ClassMemberDao extends DBUtil {
 
     public ClassMember loadByCertificateNo(String certificateNo){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+        ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
         try {
             ClassMember classMember = run.query("SELECT * FROM ClassMember where CertificateNo=?",
                     h, certificateNo);
@@ -239,7 +239,7 @@ public class ClassMemberDao extends DBUtil {
 
     public ClassMember loadByMemberId(String memberId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ClassMember> h = new BeanHandler(ClassMember.class);
+        ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
         try {
             ClassMember classMember = run.query("SELECT * FROM ClassMember where MemberId=?",
                     h, memberId);
@@ -265,7 +265,7 @@ public class ClassMemberDao extends DBUtil {
 
     public List<ClassMember> loadByOpenId(String openId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             return run.query("SELECT * FROM ClassMember where Openid=?", h, openId);
@@ -278,7 +278,7 @@ public class ClassMemberDao extends DBUtil {
 
     public List<ClassMember> loadActiveMembers() {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
             return run.query("SELECT * FROM ClassMember where CloseDate<?", h, DateUtils.parseDateToString(new Date()));

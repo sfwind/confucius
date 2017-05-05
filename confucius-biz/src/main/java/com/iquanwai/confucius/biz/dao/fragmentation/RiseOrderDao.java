@@ -51,7 +51,7 @@ public class RiseOrderDao extends DBUtil {
 
     public RiseOrder loadOrder(String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<RiseOrder> h = new BeanHandler(RiseOrder.class);
+        ResultSetHandler<RiseOrder> h = new BeanHandler<>(RiseOrder.class);
 
         try {
             RiseOrder order = run.query("SELECT * FROM RiseOrder where OrderId=? ", h, orderId);

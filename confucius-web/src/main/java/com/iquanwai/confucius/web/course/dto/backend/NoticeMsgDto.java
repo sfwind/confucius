@@ -9,8 +9,12 @@ import java.util.List;
  */
 @Data
 public class NoticeMsgDto {
-    private String task;
     private String first;
     private String remark;
+    private String keyword1;
+    private String keyword2;
+    private String keyword3;
+    private String messageId;
     private List<String> openids;
+    private String url;
 }
