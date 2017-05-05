@@ -210,7 +210,7 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
-        comment.setDevice(Constants.Device.MOBILE);
+        comment.setDevice(Constants.Device.PC);
         commentDao.insert(comment);
         return new MutablePair<>(true,"评论成功");
     }
