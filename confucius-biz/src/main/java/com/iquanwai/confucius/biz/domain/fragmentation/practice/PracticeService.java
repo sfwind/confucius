@@ -106,4 +106,10 @@ public interface PracticeService {
      * @param problemId 小课id
      */
     List<ApplicationPractice> loadApplicationByProblemId(Integer problemId);
+
+    /**
+     * 删除评论
+     * @param commentId 评论id
+     */
+    void deleteComment(Integer commentId);
 }

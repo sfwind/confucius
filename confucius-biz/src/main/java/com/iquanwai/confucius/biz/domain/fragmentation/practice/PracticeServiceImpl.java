@@ -327,4 +327,9 @@ public class PracticeServiceImpl implements PracticeService {
     public List<ApplicationPractice> loadApplicationByProblemId(Integer problemId) {
         return applicationPracticeDao.getPracticeByProblemId(problemId);
     }
+
+    @Override
+    public void deleteComment(Integer commentId) {
+        commentDao.deleteComment(commentId);
+    }
 }

@@ -205,6 +205,9 @@ public class FragmentController {
                 dto.setUpTime(DateUtils.parseDateToFormat5(item.getAddTime()));
                 dto.setUpName(account.getNickname());
                 dto.setHeadPic(account.getHeadimgurl());
+                dto.setRole(account.getRole());
+//                dto.setSignature(account.getSignature());
+                dto.setIsMine(item.getCommentOpenId().equals(loginUser.getOpenId()));
                 return dto;
             } else {
                 logger.error("未找到该评论用户:{}",item);
@@ -247,6 +250,9 @@ public class FragmentController {
             resultDto.setUpName(loginUser.getWeixin().getWeixinName());
             resultDto.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
             resultDto.setUpTime(DateUtils.parseDateToFormat5(new Date()));
+            resultDto.setRole(loginUser.getRole());
+//            resultDto.setSignature(loginUser.getSignature());
+            resultDto.setIsMine(true);
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");
@@ -284,7 +290,7 @@ public class FragmentController {
                 .module("训练")
                 .function("碎片化")
                 .action("PC端加载小课论坛")
-                .memo(problemId + "");
+                .memo(problemId.toString());
         operationLogService.log(operationLog);
         RefreshListDto<RiseWorkInfoDto> result = new RefreshListDto<>();
         result.setList(list);
@@ -512,5 +518,22 @@ public class FragmentController {
             };
         }
         return riseWorkListDto;
+    }
+
+    @RequestMapping("/pc/fragment/delete/comment/{commentId}")
+    public ResponseEntity<Map<String, Object>> deleteComment(PCLoginUser loginUser,
+                                                             @PathVariable Integer commentId){
+
+        Assert.notNull(loginUser, "用户不能为空");
+
+        practiceService.deleteComment(commentId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("训练")
+                .function("评论")
+                .action("删除评论")
+                .memo(commentId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 }
