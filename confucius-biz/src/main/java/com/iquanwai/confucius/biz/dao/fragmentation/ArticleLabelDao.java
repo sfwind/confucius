@@ -49,7 +49,8 @@ public class ArticleLabelDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO ArticleLabel(LabelId, ArticleModule, ArticleId) VALUES (?,?,?)";
         try{
-            return runner.insert(sql, new ScalarHandler<Long>(), labelId, moduleId, articleId).intValue();
+            Long id = runner.insert(sql, new ScalarHandler<>(), labelId, moduleId, articleId);
+            return id.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);
         }

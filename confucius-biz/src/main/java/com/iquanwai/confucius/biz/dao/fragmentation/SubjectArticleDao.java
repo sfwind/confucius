@@ -56,7 +56,8 @@ public class SubjectArticleDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select count(1) from SubjectArticle where ProblemId = ?";
         try{
-            return runner.query(sql, new ScalarHandler<Long>(), problemId).intValue();
+            Long id= runner.query(sql, new ScalarHandler<>(), problemId);
+            return id.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

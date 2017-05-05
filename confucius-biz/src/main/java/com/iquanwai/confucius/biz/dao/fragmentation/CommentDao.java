@@ -28,7 +28,7 @@ public class CommentDao extends PracticeDBUtil {
         String insertSql = "insert into Comment(ModuleId, Type, ReferencedId, CommentOpenId, Content, Device) " +
                 "VALUES (?,?,?,?,?,?)";
         try {
-            Long id = run.insert(insertSql, new ScalarHandler<Long>(),
+            Long id = run.insert(insertSql, new ScalarHandler<>(),
                     comment.getModuleId(), comment.getType(), comment.getReferencedId(),
                     comment.getCommentOpenId(), comment.getContent(), comment.getDevice());
 
@@ -54,7 +54,7 @@ public class CommentDao extends PracticeDBUtil {
 
     public Integer commentCount(Integer moduleId,Integer referId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ScalarHandler<Long> h = new ScalarHandler<Long>();
+        ScalarHandler<Long> h = new ScalarHandler<>();
 
         try {
             Long count = run.query("SELECT count(*) FROM Comment where ReferencedId=? and ModuleId=? and Del=0",

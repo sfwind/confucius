@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.dao.fragmentation;
+package com.iquanwai.confucius.biz.po.fragmentation;
 
 import lombok.Data;
 
