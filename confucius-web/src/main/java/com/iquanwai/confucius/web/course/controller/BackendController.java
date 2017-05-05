@@ -5,13 +5,14 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
@@ -21,11 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +45,8 @@ public class BackendController {
     private OAuthService oAuthService;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private AccountService accountService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -161,7 +160,11 @@ public class BackendController {
                     Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
                     templateMessage.setData(data);
                     if(noticeMsgDto.getFirst()!=null) {
-                        data.put("first", new TemplateMessage.Keyword(noticeMsgDto.getFirst()));
+                        String first = noticeMsgDto.getFirst();
+                        if(first.contains("{username}")){
+                            first = replaceNickname(openid, first);
+                        }
+                        data.put("first", new TemplateMessage.Keyword(first));
                     }
                     if(noticeMsgDto.getKeyword1()!=null){
                         data.put("keyword1", new TemplateMessage.Keyword(noticeMsgDto.getKeyword1()));
@@ -173,7 +176,11 @@ public class BackendController {
                         data.put("keyword3", new TemplateMessage.Keyword(noticeMsgDto.getKeyword3()));
                     }
                     if(noticeMsgDto.getRemark()!=null) {
-                        data.put("remark", new TemplateMessage.Keyword(noticeMsgDto.getRemark()));
+                        String remark = noticeMsgDto.getRemark();
+                        if(remark.contains("{username}")){
+                            remark = replaceNickname(openid, remark);
+                        }
+                        data.put("remark", new TemplateMessage.Keyword(remark));
                     }
                     templateMessageService.sendMessage(templateMessage);
 
@@ -183,6 +190,12 @@ public class BackendController {
             }
         }).start();
         return WebUtils.result("正在运行中");
+    }
+
+    private String replaceNickname(String openid, String message) {
+        Profile profile = accountService.getProfile(openid, false);
+        String name = profile!=null?profile.getNickname():"";
+        return message.replace("{username}", name);
     }
 
     @RequestMapping(value = "/info/signup", method = RequestMethod.GET)
