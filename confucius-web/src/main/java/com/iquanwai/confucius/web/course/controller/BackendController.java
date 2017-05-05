@@ -157,14 +157,21 @@ public class BackendController {
                 openids.stream().forEach(openid -> {
                     TemplateMessage templateMessage = new TemplateMessage();
                     templateMessage.setTouser(openid);
-                    templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+                    templateMessage.setTemplate_id(noticeMsgDto.getMessageId());
                     Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
                     templateMessage.setData(data);
                     if(noticeMsgDto.getFirst()!=null) {
                         data.put("first", new TemplateMessage.Keyword(noticeMsgDto.getFirst()));
                     }
-                    data.put("keyword1", new TemplateMessage.Keyword(noticeMsgDto.getTask()));
-                    data.put("keyword2", new TemplateMessage.Keyword("hin高"));
+                    if(noticeMsgDto.getKeyword1()!=null){
+                        data.put("keyword1", new TemplateMessage.Keyword(noticeMsgDto.getKeyword1()));
+                    }
+                    if(noticeMsgDto.getKeyword2()!=null) {
+                        data.put("keyword2", new TemplateMessage.Keyword(noticeMsgDto.getKeyword2()));
+                    }
+                    if(noticeMsgDto.getKeyword3()!=null) {
+                        data.put("keyword3", new TemplateMessage.Keyword(noticeMsgDto.getKeyword3()));
+                    }
                     if(noticeMsgDto.getRemark()!=null) {
                         data.put("remark", new TemplateMessage.Keyword(noticeMsgDto.getRemark()));
                     }
