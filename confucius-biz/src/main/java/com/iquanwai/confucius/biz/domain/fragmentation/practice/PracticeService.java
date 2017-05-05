@@ -67,7 +67,7 @@ public interface PracticeService {
     /**
      * 评论
      */
-    Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content);
+    Pair<Integer,String> comment(Integer type, Integer referId, String openId, String content);
 
     /**
      * 碎片化每日数据
