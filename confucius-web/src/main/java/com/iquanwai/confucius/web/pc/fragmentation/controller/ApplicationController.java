@@ -322,8 +322,9 @@ public class ApplicationController {
                 show.setVoteStatus(0);
             }
             show.setVoteCount(votesCount);
-            // 根据challengeId查询problemId
-            show.setTitle(applicationService.loadApplicationPractice(submit.getApplicationId()).getTopic());
+            ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
+            show.setTitle(applicationPractice.getTopic());
+            show.setDesc(applicationPractice.getDescription());
             // 查询照片
             List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
             show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
