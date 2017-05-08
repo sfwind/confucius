@@ -25,6 +25,7 @@
 </script>
 
 <div id="react-app"></div>
+<script src="http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js"></script>
 <!-- 业务代码-->
 <script src="${resource}"></script>
 
