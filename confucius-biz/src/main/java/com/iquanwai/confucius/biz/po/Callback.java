@@ -15,4 +15,5 @@ public class Callback {
     private String refreshToken;
     private String openid;
     private String pcAccessToken;
+    private String pcOpenid;
 }

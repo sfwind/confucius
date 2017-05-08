@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.oauth;
 
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import java.util.Map;
  */
 public interface OAuthService {
     String ACCESS_TOKEN_COOKIE_NAME = "_act";
+    String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
 
     int SEVEN_DAYS = 60*60*24*7;
 
@@ -17,6 +19,9 @@ public interface OAuthService {
      * 组装微信授权页的url，记录回调url
      * */
     String redirectUrl(String callbackUrl);
+
+    Callback accessToken(String code, String state, Boolean pcLogin);
+
     /**
      * 根据code，获取accessToken，返回Callcack
      * */
@@ -45,4 +50,6 @@ public interface OAuthService {
     String RISE_PC_OAUTH_URL = ConfigUtils.domainName()+"/wx/oauth/pc/code";
 
     Map<String,String> pcRedirectUrl(String callbackUrl);
+
+    Pair<Integer, Callback> initOpenId(Callback callback);
 }

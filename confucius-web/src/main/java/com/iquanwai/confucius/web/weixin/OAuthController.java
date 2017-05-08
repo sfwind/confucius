@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +40,12 @@ public class OAuthController {
             String remoteIp = request.getHeader("X-Forwarded-For");
 
             String requestUrl = oAuthService.redirectUrl(callbackUrl);
-            if(ConfigUtils.logDetail()){
+            if (ConfigUtils.logDetail()) {
                 LOGGER.info("ip is {},callbackUrl is {},requestUrl is {}", remoteIp, callbackUrl, requestUrl);
             }
             response.sendRedirect(requestUrl);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("auth failed", e);
             try {
                 response.sendRedirect("/403.jsp");
@@ -55,28 +56,28 @@ public class OAuthController {
     }
 
     @RequestMapping("/code")
-    public void oauthCode(@RequestParam(required=false) String code,
-                            @RequestParam String state,
-                            HttpServletResponse response) {
+    public void oauthCode(@RequestParam(required = false) String code,
+                          @RequestParam String state,
+                          HttpServletResponse response) {
         try {
             if (code == null) {
                 //用户不同意授权,跳转报错页面
-                LOGGER.error("code interface error , code  is null,state is {}",state);
+                LOGGER.error("code interface error , code  is null,state is {}", state);
                 return;
             }
 
             // 返回带accessToken的url
             Callback callback = oAuthService.accessToken(code, state);
-            if(callback==null){
+            if (callback == null) {
                 response.sendRedirect("/403.jsp");
-            }else {
+            } else {
                 LOGGER.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
                 CookieUtils.addCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME,
                         callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
                 response.sendRedirect(callback.getCallbackUrl());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("code failed", e);
             try {
                 response.sendRedirect("/403.jsp");
@@ -92,7 +93,7 @@ public class OAuthController {
             String openid = oAuthService.openId(accessToken);
             LOGGER.info("openId {}, accessToken {}", openid, accessToken);
             return WebUtils.result(openid);
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("openid failed", e);
         }
         return WebUtils.error("accessToken is expired");
@@ -103,7 +104,7 @@ public class OAuthController {
         try {
             String newAccessToken = oAuthService.refresh(accessToken);
             return WebUtils.result(newAccessToken);
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("refresh failed", e);
         }
         return WebUtils.error("refresh failed");
@@ -112,9 +113,9 @@ public class OAuthController {
 
     @RequestMapping("/pc/auth")
     @ResponseBody
-    public ResponseEntity<Map<String,Object>> pcOAuthCode(@RequestParam("callbackUrl") String callbackUrl,
-                                                          HttpServletRequest request,
-                                                          HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> pcOAuthCode(@RequestParam("callbackUrl") String callbackUrl,
+                                                           HttpServletRequest request,
+                                                           HttpServletResponse response) {
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
 
@@ -132,6 +133,40 @@ public class OAuthController {
             }
         }
         return null;
+    }
+
+    @RequestMapping("/pc/code")
+    public void pcOAuthCode(@RequestParam(required = false) String code,
+                            @RequestParam String state, HttpServletRequest request, HttpServletResponse response) {
+
+        try {
+            String remoteIp = request.getHeader("X-Forwarded-For");
+            Callback callback = oAuthService.accessToken(code, state, true);
+            if (callback == null) {
+                response.sendRedirect("/403.jsp");
+                return;
+            }
+            // 根据openid，accessToken换取unionid，根据unionid来获取
+            Pair<Integer, Callback> pair = oAuthService.initOpenId(callback);
+            if (pair.getLeft() == -1) {
+                // 提示关注并选择小课
+            } else {
+                // 进行跳转
+                // 返回带accessToken的url
+                LOGGER.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
+                //在cookie中写入access_token
+                CookieUtils.addCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
+                        callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
+                response.sendRedirect(callback.getCallbackUrl());
+            }
+        } catch (Exception e) {
+            LOGGER.error("auth failed", e);
+            try {
+                response.sendRedirect("/403.jsp");
+            } catch (IOException e1) {
+                // ignore
+            }
+        }
     }
 
 }

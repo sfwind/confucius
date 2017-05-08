@@ -47,6 +47,19 @@ public class CallbackDao extends DBUtil {
         }
     }
 
+    public void updatePcUserInfo(String state,
+                               String accessToken,
+                               String refreshToken,
+                               String openid) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        try {
+            run.update("UPDATE Callback Set PcAccessToken=?,RefreshToken=?,PcOpenid=? where State=?",
+                    accessToken, refreshToken, openid, state);
+
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
     public void refreshToken(String state,
                                String newAccessToken) {
         QueryRunner run = new QueryRunner(getDataSource());
@@ -99,5 +112,15 @@ public class CallbackDao extends DBUtil {
         }
 
         return null;
+    }
+
+    public void updateOpenId(String state,String openId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        try{
+            String sql = "update Callback set openid = ? where State = ?";
+            run.update(sql, openId, state);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
     }
 }

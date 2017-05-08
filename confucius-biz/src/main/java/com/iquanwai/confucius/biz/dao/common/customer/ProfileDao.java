@@ -21,6 +21,17 @@ public class ProfileDao extends DBUtil{
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    public Profile queryByUnionId(String unionId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<Profile> h = new BeanHandler<Profile>(Profile.class);
+        try{
+            return run.query("SELECT * FROM Profile where UnionId=?", h, unionId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public Profile queryByOpenId(String openId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);

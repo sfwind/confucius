@@ -1,11 +1,18 @@
 package com.iquanwai.confucius.biz.domain.weixin.oauth;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +33,8 @@ public class OAuthServiceImpl implements OAuthService {
     private RestfulHelper restfulHelper;
     @Autowired
     private CallbackDao callbackDao;
+    @Autowired
+    private ProfileDao profileDao;
 
     private static final String REDIRECT_PATH = "/wx/oauth/code";
 
@@ -104,7 +113,12 @@ public class OAuthServiceImpl implements OAuthService {
         return newAccessToken;
     }
 
-    public Callback accessToken(String code, String state) {
+
+    /**
+     * 通过指定的appid和secret获取accessToken
+     */
+    @Override
+    public Callback accessToken(String code, String state, Boolean pcLogin) {
         Callback callback = callbackDao.queryByState(state);
         if(callback==null){
             logger.error("state {} is not found", state);
@@ -113,8 +127,8 @@ public class OAuthServiceImpl implements OAuthService {
         String requestUrl = ACCESS_TOKEN_URL;
 
         Map<String,String> params = Maps.newHashMap();
-        params.put("appid", ConfigUtils.getAppid());
-        params.put("secret", ConfigUtils.getSecret());
+        params.put("appid", pcLogin ? ConfigUtils.getRisePcAppid() : ConfigUtils.getAppid());
+        params.put("secret", pcLogin ? ConfigUtils.getRisePcSecret() : ConfigUtils.getSecret());
         params.put("code", code);
         requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
         String body = restfulHelper.get(requestUrl);
@@ -124,16 +138,28 @@ public class OAuthServiceImpl implements OAuthService {
         String openid = (String)result.get("openid");
         String refreshToken = (String)result.get("refresh_token");
         //更新accessToken，refreshToken，openid
-        callback.setOpenid(openid);
-        callback.setRefreshToken(refreshToken);
-        callback.setAccessToken(accessToken);
         logger.info("update callback, state:{},accessToken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
-        callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
+        if(pcLogin){
+            // pc登录，先将用户的openid存下来
+            callback.setPcOpenid(openid);
+            callback.setRefreshToken(refreshToken);
+            callback.setPcAccessToken(accessToken);
+            callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid);
+        } else {
+            callback.setOpenid(openid);
+            callback.setRefreshToken(refreshToken);
+            callback.setAccessToken(accessToken);
+            callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
+        }
 
         // callbackUrl增加参数access_token
 //        String callbackUrl = callback.getCallbackUrl();
 //        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
         return callback;
+    }
+
+    public Callback accessToken(String code, String state) {
+        return accessToken(code, state, false);
     }
 
     public static String getIPFromUrl(String url){
@@ -167,4 +193,40 @@ public class OAuthServiceImpl implements OAuthService {
         param.put("href","");
         return param;
     }
+
+    @Override
+    public Pair<Integer, Callback> initOpenId(Callback callback) {
+        String openid = callback.getPcOpenid();
+        String accessToken = callback.getPcAccessToken();
+        String url = AccountService.PC_USER_INFO_URL;
+        Map<String, String> map = Maps.newHashMap();
+        map.put("openid", openid);
+        map.put("access_token", accessToken);
+        logger.info("请求用户信息,pcOpenid:{}", openid);
+        url = CommonUtils.placeholderReplace(url, map);
+
+        String body = restfulHelper.get(url);
+        logger.info("请求用户信息结果:{}", body);
+        Map<String, Object> result = CommonUtils.jsonToMap(body);
+        Account account = new Account();
+        try {
+            BeanUtils.populate(account, result);
+        } catch (Exception e) {
+            logger.info("获取用户信息失败 {}", e);
+            return null;
+        }
+        //根据unionId查询
+        Profile profile = profileDao.queryByUnionId(account.getUnionid());
+        if (profile == null) {
+            // 提示关注并选择rise
+            return new MutablePair<>(-1, null);
+        } else {
+            // 查到了
+            // 更新数据库
+            callback.setOpenid(account.getOpenid());
+            callbackDao.updateOpenId(callback.getState(), account.getOpenid());
+            return new MutablePair<>(1, callback);
+        }
+    }
+
 }

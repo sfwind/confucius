@@ -55,6 +55,7 @@ public interface AccountService {
 
     String GET_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}";
 
+    String PC_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN";
     /**
      * 根据openid获取用户详情
      */
