@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.interceptor;
 
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -47,10 +48,20 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
             }
             if (!loginUserService.isLogin(value)) {
                 // 有cookie，但是没有登录
-                logger.error("clean _qt cookie:{}", value);
-                CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
-                WebUtils.login(request, response);
-                return false;
+
+                Pair<Integer, Callback> pair = loginUserService.refreshLogin(value);
+                if (pair.getLeft() == -1) {
+                    logger.error("clean _qt cookie:{}", value);
+                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
+                    WebUtils.login(request, response);
+                    return false;
+                } else if(pair.getLeft() == -2){
+                    response.sendRedirect(ConfigUtils.adapterDomainName() + "/pc/static/error?err=请先关注服务号并开始一节小课");
+                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
+                    WebUtils.login(request, response);
+                    return false;
+                }
+                // 否则通过
             }
 
             // 查看权限

@@ -79,23 +79,32 @@ public class LoginUserService {
                 return true;
             }
         }
+       return false;
+    }
+
+    /**
+     * -1 key查不到callback，清除掉
+     * -2 key查到了，但是获取不到user，应该是没点服务号
+     * 1 成功
+     */
+    public Pair<Integer,Callback> refreshLogin(String sessionId){
         // 有key但是没有value，重新查一遍
         // 先检查这个cookie是否合法
         Callback callback = callbackDao.queryByPcAccessToken(sessionId);
         if (callback == null) {
             // 不合法
-            return false;
+            return new MutablePair<>(-1, null);
         } else {
             // 合法，再查一遍
             Pair<Integer, PCLoginUser> result = getLoginUser(sessionId);
             if (result.getLeft() < 0) {
                 logger.info("key:{} is lost , remove cookie", sessionId);
                 pcLoginUserMap.remove(sessionId);
-                return false;
+                return new MutablePair<>(-2, callback);
             } else {
                 logger.info("key:{} is lost , search again: {}", result.getRight());
                 login(sessionId, result.getRight());
-                return true;
+                return new MutablePair<>(1, callback);
             }
         }
     }
@@ -124,8 +133,9 @@ public class LoginUserService {
      * 获取PCLoginUser
      *
      * @return -1:没有cookie <br/>
-     * -2:accessToken无效<br/>
-     * -3:没有关注<br/>
+     * -2:accessToken无效,没有点页面<br/>
+     * -3:没有关注，一般不会走到这个<br/>
+     * -4:一般是没有关注服务号
      * 1:PCLoginUser
      */
     public Pair<Integer, PCLoginUser> getLoginUser(String accessToken) {
