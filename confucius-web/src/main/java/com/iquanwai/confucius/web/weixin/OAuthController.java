@@ -154,7 +154,7 @@ public class OAuthController {
             } else {
                 // 进行跳转
                 // 返回带accessToken的url
-                LOGGER.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
+                LOGGER.info("set _act {} for {} ", callback.getPcAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
                 CookieUtils.addCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
                         callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);

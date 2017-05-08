@@ -224,7 +224,7 @@ public class OAuthServiceImpl implements OAuthService {
         } else {
             // 查到了
             // 更新数据库
-            logger.info("更新数据库,account:{}", account);
+            logger.info("更新数据库,account:{}", profile);
             callback.setOpenid(profile.getOpenid());
             callbackDao.updateOpenId(callback.getState(), profile.getOpenid());
             return new MutablePair<>(1, callback);
