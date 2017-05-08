@@ -157,7 +157,7 @@ public class OAuthController {
                 LOGGER.info("set _act {} for {} ", callback.getPcAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
                 CookieUtils.addCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
-                        callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
+                        callback.getPcAccessToken(), OAuthService.SEVEN_DAYS, response);
                 response.sendRedirect(callback.getCallbackUrl());
             }
         } catch (Exception e) {
