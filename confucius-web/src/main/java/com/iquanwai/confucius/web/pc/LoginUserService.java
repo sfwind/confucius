@@ -1,12 +1,14 @@
 package com.iquanwai.confucius.web.pc;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -49,6 +51,8 @@ public class LoginUserService {
     private CourseProgressService courseProgressService;
     @Autowired
     private PlanService planService;
+    @Autowired
+    private CallbackDao callbackDao;
 
     /**
      * 登录，就是缓存起来
@@ -73,21 +77,26 @@ public class LoginUserService {
             if (pcLoginUser != null) {
                 logger.info("act:{},已登录,user:{}", sessionId, pcLoginUser);
                 return true;
-            } else {
-                // 有key但是没有value，重新查一遍
-                Pair<Integer, PCLoginUser> result = getLoginUser(sessionId);
-                if (result.getLeft() < 0) {
-                    logger.info("key:{} is lost , remove cookie", sessionId);
-                    pcLoginUserMap.remove(sessionId);
-                    return false;
-                } else {
-                    logger.info("key:{} is lost , search again: {}", result.getRight());
-                    login(sessionId, result.getRight());
-                    return true;
-                }
             }
-        } else {
+        }
+        // 有key但是没有value，重新查一遍
+        // 先检查这个cookie是否合法
+        Callback callback = callbackDao.queryByPcAccessToken(sessionId);
+        if (callback == null) {
+            // 不合法
             return false;
+        } else {
+            // 合法，再查一遍
+            Pair<Integer, PCLoginUser> result = getLoginUser(sessionId);
+            if (result.getLeft() < 0) {
+                logger.info("key:{} is lost , remove cookie", sessionId);
+                pcLoginUserMap.remove(sessionId);
+                return false;
+            } else {
+                logger.info("key:{} is lost , search again: {}", result.getRight());
+                login(sessionId, result.getRight());
+                return true;
+            }
         }
     }
     public Boolean checkPermission(Integer roleId, String uri) {

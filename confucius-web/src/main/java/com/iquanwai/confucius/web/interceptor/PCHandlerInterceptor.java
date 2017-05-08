@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.web.interceptor;
 
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -38,17 +38,17 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!ConfigUtils.isDebug()) {
             // 获取sessionId
-            String value = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
+            String value = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
             if (StringUtils.isEmpty(value)) {
                 // 没有session信息,跳转到登录页面
                 logger.error("no cookie,go to login page");
                 WebUtils.login(request, response);
                 return false;
             }
-            if(!loginUserService.isLogin(value)){
+            if (!loginUserService.isLogin(value)) {
                 // 有cookie，但是没有登录
-                logger.error("clean _qt cookie", value);
-                CookieUtils.removeCookie(LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME, response);
+                logger.error("clean _qt cookie:{}", value);
+                CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
                 WebUtils.login(request, response);
                 return false;
             }
