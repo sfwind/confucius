@@ -2,15 +2,17 @@ package com.iquanwai.confucius.web.aspect;
 
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.LoginUserResolver;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
-import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
+import org.apache.commons.lang3.tuple.Pair;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -31,6 +33,8 @@ import java.util.Map;
 @Component
 public class LogAspect {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    private LoginUserService loginUserService;
   
     /** 
      *  
@@ -63,7 +67,11 @@ public class LogAspect {
             Gson gson = new Gson();
             String optTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTimeMillis);
             LoginUser loginUser = LoginUserResolver.getLoginUser(request);
-            PCLoginUser pcLoginUser = PCLoginUserResolver.getLoginUser(request);
+            Pair<Integer, PCLoginUser> pair = loginUserService.getLoginUser(request);
+            PCLoginUser pcLoginUser = null;
+            if (pair.getLeft() == 1) {
+                pcLoginUser = pair.getRight();
+            }
             if (loginUser != null) {
                 userName = loginUser.getWeixinName();
             } else if (pcLoginUser != null) {

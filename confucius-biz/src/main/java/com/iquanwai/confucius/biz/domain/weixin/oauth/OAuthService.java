@@ -22,6 +22,12 @@ public interface OAuthService {
      * 根据accessToken，获取授权用户的openid
      * */
     String openId(String accessToken);
+
+    /**
+     * 根据accessToken，查询授权用户的openid
+     */
+    String pcOpenId(String accessToken);
+
     /**
      * 刷新accessToken
      * */

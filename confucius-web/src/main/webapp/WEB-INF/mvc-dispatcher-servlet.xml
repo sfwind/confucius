@@ -44,7 +44,9 @@
         </mvc:message-converters>
         <mvc:argument-resolvers>
             <bean class="com.iquanwai.confucius.web.resolver.LoginUserResolver"/>
-            <bean class="com.iquanwai.confucius.web.resolver.PCLoginUserResolver"/>
+            <bean class="com.iquanwai.confucius.web.resolver.PCLoginUserResolver">
+                <constructor-arg ref="loginUserService"/>
+            </bean>
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
@@ -99,7 +101,7 @@
             <mvc:exclude-mapping path="/pc/survey/wjx"/>
             <mvc:exclude-mapping path="/pc/survey/wjx/submit"/>
             <bean class="com.iquanwai.confucius.web.interceptor.PCAjaxHandlerInterceptor">
-                <constructor-arg ref="permissionServiceImpl"/>
+                <constructor-arg ref="loginUserService"/>
             </bean>
         </mvc:interceptor>
         <mvc:interceptor>
@@ -107,7 +109,7 @@
             <mvc:mapping path="/community"/>
             <mvc:mapping path="/pc/survey/wjx"/>
             <bean class="com.iquanwai.confucius.web.interceptor.PCHandlerInterceptor">
-                <constructor-arg ref="permissionServiceImpl"/>
+                <constructor-arg ref="loginUserService"/>
             </bean>
         </mvc:interceptor>
     </mvc:interceptors>

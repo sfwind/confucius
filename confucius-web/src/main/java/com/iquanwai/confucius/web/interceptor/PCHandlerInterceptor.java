@@ -1,12 +1,12 @@
 package com.iquanwai.confucius.web.interceptor;
 
-import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
+import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
-import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
 
-    private PermissionService permissionService;
+    private LoginUserService loginUserService;
 
     public PCHandlerInterceptor() {
 
@@ -29,8 +29,8 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-    public PCHandlerInterceptor(PermissionService permissionService) {
-        this.permissionService = permissionService;
+    public PCHandlerInterceptor(LoginUserService loginUserService) {
+        this.loginUserService = loginUserService;
     }
 
 
@@ -39,25 +39,35 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
         if (!ConfigUtils.isDebug()) {
             // 获取sessionId
             String value = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
-            // 没有session信息
             if (StringUtils.isEmpty(value)) {
+                // 没有session信息,跳转到登录页面
+                logger.error("no cookie,go to login page");
                 WebUtils.login(request, response);
                 return false;
             }
-            if(!PCLoginUserResolver.isLogin(value)){
+            if(!loginUserService.isLogin(value)){
+                // 有cookie，但是没有登录
+                logger.error("clean _qt cookie", value);
                 CookieUtils.removeCookie(LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME, response);
                 WebUtils.login(request, response);
                 return false;
             }
 
             // 查看权限
-            PCLoginUser pcLoginUser = PCLoginUserResolver.getLoginUser(value);
-            Integer role = pcLoginUser.getRole();
-            // 根据role查询所有权限列表
-            if (!permissionService.checkPermission(role, request.getRequestURI())) {
-                logger.error("document handler 权限检查失败,用户:{},role:{},url:{}", pcLoginUser.getOpenId(), role, request.getRequestURI());
-                WebUtils.reject(request,response);
+            Pair<Integer,PCLoginUser> pair = loginUserService.getLoginUser(value);
+            if (pair.getLeft() < 1) {
+                logger.error("登录信息异常：_qt:{},result:{}", value, pair);
+                WebUtils.login(request, response);
                 return false;
+            } else {
+                PCLoginUser pcLoginUser = pair.getRight();
+                Integer role = pcLoginUser.getRole();
+                // 根据role查询所有权限列表
+                if (!loginUserService.checkPermission(role, request.getRequestURI())) {
+                    logger.error("document handler 权限检查失败,用户:{},role:{},url:{}", pcLoginUser.getOpenId(), role, request.getRequestURI());
+                    WebUtils.reject(request,response);
+                    return false;
+                }
             }
         }
         return true;

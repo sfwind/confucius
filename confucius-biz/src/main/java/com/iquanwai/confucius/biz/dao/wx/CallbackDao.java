@@ -87,4 +87,17 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
+    public Callback queryByPcAccessToken(String accessToken) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
+
+        try {
+            Callback callback = run.query("SELECT * FROM Callback where PcAccessToken=?", h, accessToken);
+            return callback;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
+    }
 }
