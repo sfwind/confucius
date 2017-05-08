@@ -1,9 +1,10 @@
 package com.iquanwai.confucius.web.interceptor;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -41,9 +42,23 @@ public class PCAjaxHandlerInterceptor extends HandlerInterceptorAdapter {
         if (!ConfigUtils.isDebug()) {
 
             // 获取sessionId
-            String value = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
+            String value = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
+            boolean cookieInvalid = false;
             // 没有session信息
-            if (StringUtils.isEmpty(value) || !loginUserService.isLogin(value)) {
+            if (StringUtils.isEmpty(value)) {
+                cookieInvalid = true;
+            } else {
+                // cookie 不为空
+                if (!loginUserService.isLogin(value)) {
+                    // 有cookie，但是没有登录
+                    Pair<Integer, Callback> pair = loginUserService.refreshLogin(value);
+                    if (pair.getLeft() < 1) {
+                        cookieInvalid = true;
+                    }
+                    // 否则通过
+                }
+            }
+            if(cookieInvalid){
                 Map<String, Object> map = Maps.newHashMap();
                 PrintWriter out = response.getWriter();
                 map.put("code", 401);
