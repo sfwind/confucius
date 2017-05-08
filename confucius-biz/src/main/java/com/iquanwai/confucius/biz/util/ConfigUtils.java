@@ -293,4 +293,12 @@ public class ConfigUtils {
 	public static int getRabbitMQPort(){
 		return getIntValue("rabbitmq.port");
 	}
+
+	public static String getRisePcAppid(){
+		return getValue("rise.web.appid");
+	}
+
+	public static String getRisePcSecret() {
+		return getValue("rise.web.secret");
+	}
 }

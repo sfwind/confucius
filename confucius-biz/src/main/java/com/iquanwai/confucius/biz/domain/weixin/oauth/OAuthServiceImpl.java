@@ -145,4 +145,26 @@ public class OAuthServiceImpl implements OAuthService {
 
         return null;
     }
+
+    @Override
+    public Map<String,String> pcRedirectUrl(String callbackUrl){
+        Callback callback = new Callback();
+        String ip = getIPFromUrl(callbackUrl);
+        if(ip!=null){
+            callbackUrl = callbackUrl.replace("http://"+ip, ConfigUtils.domainName());
+        }
+        callback.setCallbackUrl(callbackUrl);
+        String state = CommonUtils.randomString(32);
+        callback.setState(state);
+        logger.info("state is {}", state);
+        callbackDao.insert(callback);
+        Map<String,String> param = Maps.newHashMap();
+        param.put("appid",ConfigUtils.getRisePcAppid());
+        param.put("scope", "snsapi_login");
+        param.put("redirect_uri",RISE_PC_OAUTH_URL);
+        param.put("state",state);
+        param.put("style", "");
+        param.put("href","");
+        return param;
+    }
 }

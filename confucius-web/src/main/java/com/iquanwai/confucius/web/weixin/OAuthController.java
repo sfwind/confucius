@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -108,5 +109,29 @@ public class OAuthController {
         return WebUtils.error("refresh failed");
     }
 
+
+    @RequestMapping("/pc/auth")
+    @ResponseBody
+    public ResponseEntity<Map<String,Object>> pcOAuthCode(@RequestParam("callbackUrl") String callbackUrl,
+                                                          HttpServletRequest request,
+                                                          HttpServletResponse response) {
+        try {
+            String remoteIp = request.getHeader("X-Forwarded-For");
+
+            Map<String, String> authParam = oAuthService.pcRedirectUrl(callbackUrl);
+            if (ConfigUtils.logDetail()) {
+                LOGGER.info("ip is {},callbackUrl is {},param is {}", remoteIp, callbackUrl, authParam);
+            }
+            return WebUtils.result(authParam);
+        } catch (Exception e) {
+            LOGGER.error("auth failed", e);
+            try {
+                response.sendRedirect("/403.jsp");
+            } catch (IOException e1) {
+                // ignore
+            }
+        }
+        return null;
+    }
 
 }

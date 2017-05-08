@@ -1,6 +1,9 @@
 package com.iquanwai.confucius.biz.domain.weixin.oauth;
 
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+
+import java.util.Map;
 
 /**
  * Created by justin on 14-7-28.
@@ -38,4 +41,8 @@ public interface OAuthService {
     String REFRESH_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid={appid}&grant_type=refresh_token&refresh_token={refresh_token}";
 
     String ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code";
+
+    String RISE_PC_OAUTH_URL = ConfigUtils.domainName()+"/wx/oauth/pc/code";
+
+    Map<String,String> pcRedirectUrl(String callbackUrl);
 }
