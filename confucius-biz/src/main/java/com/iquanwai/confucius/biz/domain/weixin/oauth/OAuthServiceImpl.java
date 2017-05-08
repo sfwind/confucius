@@ -219,10 +219,12 @@ public class OAuthServiceImpl implements OAuthService {
         Profile profile = profileDao.queryByUnionId(account.getUnionid());
         if (profile == null) {
             // 提示关注并选择rise
+            logger.info("未关注，请先关注并选择小课,callback:{}", callback);
             return new MutablePair<>(-1, null);
         } else {
             // 查到了
             // 更新数据库
+            logger.info("更新数据库,account:{}", account);
             callback.setOpenid(account.getOpenid());
             callbackDao.updateOpenId(callback.getState(), account.getOpenid());
             return new MutablePair<>(1, callback);
