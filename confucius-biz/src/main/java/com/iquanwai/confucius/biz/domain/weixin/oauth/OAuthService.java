@@ -20,7 +20,7 @@ public interface OAuthService {
      * */
     String redirectUrl(String callbackUrl);
 
-    Callback accessToken(String code, String state, Boolean pcLogin);
+    Callback pcAccessToken(String code, String state);
 
     /**
      * 根据code，获取accessToken，返回Callcack

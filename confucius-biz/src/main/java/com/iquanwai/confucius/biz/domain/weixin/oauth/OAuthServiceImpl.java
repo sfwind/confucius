@@ -82,7 +82,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public String pcOpenId(String act){
         if (act == null) {
-            logger.info("error，pc act is null");
+            logger.info("error，pc _qt is null");
             return null;
         }
         Callback callback = callbackDao.queryByPcAccessToken(act);
@@ -116,10 +116,43 @@ public class OAuthServiceImpl implements OAuthService {
 
 
     /**
-     * 通过指定的appid和secret获取accessToken
+     * 新增pc获取accessToken
      */
     @Override
-    public Callback accessToken(String code, String state, Boolean pcLogin) {
+    public Callback pcAccessToken(String code, String state) {
+        Callback callback = callbackDao.queryByState(state);
+        if (callback == null) {
+            logger.error("state {} is not found", state);
+            return null;
+        }
+        String requestUrl = ACCESS_TOKEN_URL;
+
+        Map<String, String> params = Maps.newHashMap();
+        params.put("appid", ConfigUtils.getRisePcAppid());
+        params.put("secret", ConfigUtils.getRisePcSecret());
+        params.put("code", code);
+        requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
+        String body = restfulHelper.get(requestUrl);
+        Map<String, Object> result = CommonUtils.jsonToMap(body);
+
+        String accessToken = (String) result.get("access_token");
+        String openid = (String) result.get("openid");
+        String refreshToken = (String) result.get("refresh_token");
+        //更新accessToken，refreshToken，openid
+        logger.info("update callback, state:{},pcAccessToken:{},refreshToken:{},pcOpenId:{},code:{}", state, accessToken, refreshToken, openid, code);
+        // pc登录，先将用户的openid存下来
+        callback.setPcOpenid(openid);
+        callback.setRefreshToken(refreshToken);
+        callback.setPcAccessToken(accessToken);
+        callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid);
+
+        // callbackUrl增加参数access_token
+//        String callbackUrl = callback.getCallbackUrl();
+//        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
+        return callback;
+    }
+
+    public Callback accessToken(String code, String state) {
         Callback callback = callbackDao.queryByState(state);
         if(callback==null){
             logger.error("state {} is not found", state);
@@ -128,8 +161,8 @@ public class OAuthServiceImpl implements OAuthService {
         String requestUrl = ACCESS_TOKEN_URL;
 
         Map<String,String> params = Maps.newHashMap();
-        params.put("appid", pcLogin ? ConfigUtils.getRisePcAppid() : ConfigUtils.getAppid());
-        params.put("secret", pcLogin ? ConfigUtils.getRisePcSecret() : ConfigUtils.getSecret());
+        params.put("appid", ConfigUtils.getAppid());
+        params.put("secret", ConfigUtils.getSecret());
         params.put("code", code);
         requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
         String body = restfulHelper.get(requestUrl);
@@ -139,28 +172,16 @@ public class OAuthServiceImpl implements OAuthService {
         String openid = (String)result.get("openid");
         String refreshToken = (String)result.get("refresh_token");
         //更新accessToken，refreshToken，openid
+        callback.setOpenid(openid);
+        callback.setRefreshToken(refreshToken);
+        callback.setAccessToken(accessToken);
         logger.info("update callback, state:{},accessToken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
-        if(pcLogin){
-            // pc登录，先将用户的openid存下来
-            callback.setPcOpenid(openid);
-            callback.setRefreshToken(refreshToken);
-            callback.setPcAccessToken(accessToken);
-            callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid);
-        } else {
-            callback.setOpenid(openid);
-            callback.setRefreshToken(refreshToken);
-            callback.setAccessToken(accessToken);
-            callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
-        }
+        callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
 
         // callbackUrl增加参数access_token
 //        String callbackUrl = callback.getCallbackUrl();
 //        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
         return callback;
-    }
-
-    public Callback accessToken(String code, String state) {
-        return accessToken(code, state, false);
     }
 
     public static String getIPFromUrl(String url){

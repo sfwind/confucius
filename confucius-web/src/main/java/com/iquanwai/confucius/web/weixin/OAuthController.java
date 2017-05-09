@@ -141,7 +141,7 @@ public class OAuthController {
 
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
-            Callback callback = oAuthService.accessToken(code, state, true);
+            Callback callback = oAuthService.pcAccessToken(code, state);
             if (callback == null) {
                 response.sendRedirect("/403.jsp");
                 return;
