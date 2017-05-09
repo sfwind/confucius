@@ -16,6 +16,8 @@ public class EventWall {
     private String destUrl; // 千聊链接
     private Date startTime; // 开始时间
     private Date endTime; // 结束时间
+    private Date addTime;
+    private Date updateTime;
 
     private String startStr;
     private String endStr;
