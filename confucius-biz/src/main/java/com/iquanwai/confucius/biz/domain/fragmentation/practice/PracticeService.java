@@ -111,7 +111,7 @@ public interface PracticeService {
      * 是否可以求点评
      * @param planId 计划id
      */
-    boolean hasRequestComment(Integer planId);
+    Integer hasRequestComment(Integer planId);
 
     /**
      * 求点评

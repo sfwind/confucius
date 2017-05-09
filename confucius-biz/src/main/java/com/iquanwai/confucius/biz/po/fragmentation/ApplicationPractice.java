@@ -15,10 +15,11 @@ public class ApplicationPractice {
     private Integer knowledgeId; //知识点id
     private Integer sceneId; //子场景id
     private Integer difficulty; //难易度（1-容易，2-普通，3-困难）
+    private Integer problemId; //小课id
     private Boolean submitted; //是否提交过 非db字段
     private String content; //提交内容 非db字段
     private Integer submitId; // 提交id，非db字段;
     private Date submitUpdateTime;// 非db字段
-    private Integer planId; // 计划id
+    private Integer planId; // 计划id 非db字段
 
 }

@@ -21,8 +21,11 @@ public class ApplicationSubmit {
     private Date publishTime; //发布时间
     private Boolean feedback; //助教是否反馈（0-否，1-是）
     private Boolean requestFeedback; //求反馈（0-否，1-是）
+    private Integer problemId; //小课id
     private String upTime; //非db字段 提交时间
     private String headPic; //非db字段 提交人头像
     private String upName; //非db字段 提交人昵称
     private int comment; //非db字段 是否已被当前用户评论
+    private String topic; //非db字段 应用练习标题
+    private String description; //非db字段 应用练习说明
 }

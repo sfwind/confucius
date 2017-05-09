@@ -8,7 +8,6 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ArticleLabel;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
@@ -76,7 +75,7 @@ public class SubjectArticleController {
                         dto.setIsMine(true);
                         ImprovementPlan improvementPlan = planService.loadUserPlan(item.getOpenid(), item.getProblemId());
                         if(improvementPlan!=null){
-                            dto.setRequestComment(practiceService.hasRequestComment(improvementPlan.getId()));
+                            dto.setRequestCommentCount(practiceService.hasRequestComment(improvementPlan.getId()));
                         }
                     }else{
                         dto.setIsMine(false);
@@ -109,9 +108,7 @@ public class SubjectArticleController {
         Assert.notNull(problemId, "小课id不能为空");
         List<RiseWorkInfoDto> list = practiceService.loadUserSubjectArticles(problemId,loginUser.getOpenId())
                 .stream().map(item -> {
-                    RiseWorkInfoDto dto = new RiseWorkInfoDto();
-                    dto.setSubmitId(item.getId());
-                    dto.setType(Constants.PracticeType.SUBJECT);
+                    RiseWorkInfoDto dto = new RiseWorkInfoDto(item);
                     item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
                     if(item.getContent()!=null) {
                         dto.setContent(
@@ -127,15 +124,11 @@ public class SubjectArticleController {
                         dto.setRole(account.getRole());
                         dto.setSignature(account.getSignature());
                     }
-                    dto.setUpTime(DateUtils.parseDateToString(item.getUpdateTime()));
                     dto.setCommentCount(practiceService.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
-                    dto.setPerfect(item.getSequence() != null && item.getSequence() > 0);
-                    dto.setAuthorType(item.getAuthorType());
                     dto.setIsMine(true);
-                    dto.setTitle(item.getTitle());
                     ImprovementPlan improvementPlan = planService.loadUserPlan(item.getOpenid(), item.getProblemId());
                     if(improvementPlan!=null){
-                        dto.setRequestComment(practiceService.hasRequestComment(improvementPlan.getId()));
+                        dto.setRequestCommentCount(practiceService.hasRequestComment(improvementPlan.getId()));
                     }
                     return dto;
                 }).collect(Collectors.toList());
@@ -172,6 +165,7 @@ public class SubjectArticleController {
             show.setUpTime(DateUtils.parseDateToFormat5(submit.getUpdateTime()));
             show.setContent(submit.getContent());
             show.setType("subject");
+            show.setRequest(submit.getRequestFeedback());
             // 查询这个openid的数据
             if (loginUser.getOpenId().equals(openId)) {
                 // 是自己的
@@ -181,7 +175,7 @@ public class SubjectArticleController {
                 show.setWorkId(submit.getProblemId());
                 ImprovementPlan improvementPlan = planService.loadUserPlan(openId, submit.getProblemId());
                 if(improvementPlan!=null){
-                    show.setRequestComment(practiceService.hasRequestComment(improvementPlan.getId()));
+                    show.setRequestCommentCount(practiceService.hasRequestComment(improvementPlan.getId()));
                 }
             } else {
                 Profile account = accountService.getProfile(openId, false);

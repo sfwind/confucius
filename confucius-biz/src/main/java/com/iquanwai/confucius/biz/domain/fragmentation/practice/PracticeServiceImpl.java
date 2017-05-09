@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -59,6 +60,8 @@ public class PracticeServiceImpl implements PracticeService {
     private AsstCoachCommentDao asstCoachCommentDao;
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
+    @Autowired
+    private RiseMemberDao riseMemberDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -329,9 +332,21 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public boolean hasRequestComment(Integer planId) {
+    public Integer hasRequestComment(Integer planId) {
         ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
-        return improvementPlan!=null && improvementPlan.getRequestCommentCount()>0;
+        if(improvementPlan==null){
+            return null;
+        }
+        if(improvementPlan.getRequestCommentCount()>0){
+            return improvementPlan.getRequestCommentCount();
+        }else{
+            RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getOpenid());
+            if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
+                return 0;
+            }
+        }
+        //非精英用户返回null
+        return null;
     }
 
     @Override

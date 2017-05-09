@@ -36,7 +36,8 @@ public class RiseWorkInfoDto {
     private Integer priority;
     private Integer role;
     private String signature;
-    private Boolean requestComment;
+    private Integer requestCommentCount;
+    private Boolean request;
 
     public RiseWorkInfoDto(SubjectArticle origin){
         this.title = origin.getTitle();
@@ -46,6 +47,7 @@ public class RiseWorkInfoDto {
         this.voteCount = origin.getVoteCount();
         this.upTime = DateUtils.parseDateToString(origin.getUpdateTime());
         this.commentCount = origin.getCommentCount();
+        this.request = origin.getRequestFeedback();
         this.perfect = origin.getSequence() != null && origin.getSequence() > 0;
         this.authorType = origin.getAuthorType();
     }
@@ -54,6 +56,7 @@ public class RiseWorkInfoDto {
         this.submitId = origin.getId();
         this.type = Constants.PracticeType.APPLICATION;
         this.content = origin.getContent();
+        this.request = origin.getRequestFeedback();
         this.upTime = DateUtils.parseDateToString(origin.getUpdateTime());
     }
 }

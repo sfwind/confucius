@@ -43,7 +43,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public ApplicationPractice loadMineApplicationPractice(Integer planId, Integer applicationId, String openId,boolean create) {
+    public ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, String openId,boolean create) {
         // 查询该应用练习
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交
@@ -54,16 +54,20 @@ public class ApplicationServiceImpl implements ApplicationService {
             submit.setOpenid(openId);
             submit.setPlanId(planId);
             submit.setApplicationId(applicationId);
+            submit.setProblemId(applicationPractice.getProblemId());
             int submitId = applicationSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
             fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));
+        }else{
+            if(submit==null) {
+                submit = new ApplicationSubmit();
+            }
         }
-        applicationPractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
-        applicationPractice.setPlanId(planId);
-        applicationPractice.setContent(submit==null?null:submit.getContent());
-        applicationPractice.setSubmitId(submit==null?null:submit.getId());
-        return applicationPractice;
+        submit.setTopic(applicationPractice.getTopic());
+        submit.setDescription(applicationPractice.getDescription());
+        submit.setApplicationId(applicationPractice.getId());
+        return submit;
     }
 
     @Override

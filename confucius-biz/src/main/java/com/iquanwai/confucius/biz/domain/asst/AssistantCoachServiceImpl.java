@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -122,14 +124,13 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<RiseWorkInfoDto> underCommentArticles = Lists.newArrayList();
         //找出小课的所有应用练习
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getPracticeByProblemId(problemId);
-        List<Integer> applicationPracticeIds = applicationPractices.stream().map(ApplicationPractice::getId).collect(Collectors.toList());
         //只评论30天内的文章
         Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);
 
         int size = SIZE;
         //获取求点评的文章
         List<ApplicationSubmit> applicationSubmitList = Lists.newArrayList();
-        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(applicationPracticeIds, size, date);
+        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, size, date);
         applicationSubmitList.addAll(list);
         size = size - list.size();
 
@@ -144,28 +145,28 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             //未点评精英=精英-已点评用户
             List<String> unCommentedElite = Lists.newArrayList(elites);
             unCommentedElite.removeAll(openIds);
-            list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(applicationPracticeIds, size, date, unCommentedElite);
+            list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, unCommentedElite);
             applicationSubmitList.addAll(list);
             size = size - list.size();
             if(size>0){
                 //未点评普通=所有-（精英+已点评用户)
                 List<String> unCommentedNormal = Lists.newArrayList(elites);
                 unCommentedNormal.addAll(openIds);
-                list = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(applicationPracticeIds, size, date, unCommentedNormal);
+                list = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, size, date, unCommentedNormal);
                 applicationSubmitList.addAll(list);
                 size = size - list.size();
                 if(size>0){
                     //已点评精英=精英&已点评用户
                     List<String> commentedElite = Lists.newArrayList(elites);
                     commentedElite.retainAll(openIds);
-                    list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(applicationPracticeIds, size, date, commentedElite);
+                    list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedElite);
                     applicationSubmitList.addAll(list);
                     size = size - list.size();
                     if(size>0){
                         //已点评精英=已点评用户-精英
                         List<String> commentedNormal = Lists.newArrayList(openIds);
                         commentedNormal.removeAll(elites);
-                        list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(applicationPracticeIds, size, date, commentedNormal);
+                        list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedNormal);
                         applicationSubmitList.addAll(list);
                     }
                 }
@@ -192,6 +193,26 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         });
 
         return underCommentArticles;
+    }
+
+    @Override
+    public Map<Integer, Integer> getUnderCommentApplicationCount() {
+        List<UnderCommentCount> underCommentCounts = applicationSubmitDao.getUnderCommentCount();
+        Map<Integer, Integer> countMap = Maps.newHashMap();
+        underCommentCounts.stream().forEach(underCommentCount -> {
+            countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount());
+        });
+        return countMap;
+    }
+
+    @Override
+    public Map<Integer, Integer> getUnderCommentSubjectArticleCount() {
+        List<UnderCommentCount> underCommentCounts = subjectArticleDao.getUnderCommentCount();
+        Map<Integer, Integer> countMap = Maps.newHashMap();
+        underCommentCounts.stream().forEach(underCommentCount -> {
+            countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount());
+        });
+        return countMap;
     }
 
     private void buildRiseWorkInfo(RiseWorkInfoDto riseWorkInfoDto, String openid){

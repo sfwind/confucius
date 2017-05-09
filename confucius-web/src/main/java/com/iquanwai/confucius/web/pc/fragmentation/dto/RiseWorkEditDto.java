@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.fragmentation.dto;
 
-import com.iquanwai.confucius.web.course.dto.PictureDto;
 import lombok.Data;
 
 import java.util.List;
@@ -16,6 +15,7 @@ public class RiseWorkEditDto {
     private List<String> picList;
     private Integer submitId;
     private Integer moduleId;
-    private Boolean requestComment;
+    private Integer requestCommentCount;
+    private Boolean request; //是否已求点评
 
 }

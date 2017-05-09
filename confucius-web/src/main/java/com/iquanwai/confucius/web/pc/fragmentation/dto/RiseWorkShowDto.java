@@ -25,7 +25,8 @@ public class RiseWorkShowDto {
     private List<String> picList;
     private String signature;
     private Integer role;
-    private Boolean requestComment;
+    private Integer requestCommentCount; //求点评次数
+    private Boolean request; //是否已求点评
 
     private String desc; // 描述
     private List<LabelConfig> labelList;
