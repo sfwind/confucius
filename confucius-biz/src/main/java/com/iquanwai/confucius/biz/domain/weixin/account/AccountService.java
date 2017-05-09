@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.EventWall;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 
@@ -60,4 +61,6 @@ public interface AccountService {
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);
+
+    List<EventWall> getEventWall();
 }
