@@ -150,7 +150,9 @@ public class OAuthController {
             Pair<Integer, Callback> pair = oAuthService.initOpenId(callback);
             if (pair.getLeft() == -1) {
                 // 提示关注并选择小课
-
+                CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
+                        response);
+                response.sendRedirect("/servercode");
             } else {
                 // 进行跳转
                 // 返回带accessToken的url
