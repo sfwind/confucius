@@ -18,6 +18,7 @@ public class EventWall {
     private Date endTime; // 结束时间
     private Date addTime;
     private Date updateTime;
+    private Boolean del;
 
     private String startStr;
     private String endStr;

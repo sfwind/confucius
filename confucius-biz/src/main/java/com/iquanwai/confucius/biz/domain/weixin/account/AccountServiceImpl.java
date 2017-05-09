@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/10.
@@ -278,7 +279,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<EventWall> getEventWall() {
-        List<EventWall> eventWalls = eventWallDao.loadAll(EventWall.class);
+        List<EventWall> eventWalls = eventWallDao.loadAll(EventWall.class).stream().filter(item -> !item.getDel()).collect(Collectors.toList());
         eventWalls.forEach(item->{
             Date startTime = item.getStartTime();
             Date endTime = item.getEndTime();
