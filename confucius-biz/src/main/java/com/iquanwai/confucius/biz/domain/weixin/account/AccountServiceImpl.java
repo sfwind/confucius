@@ -292,11 +292,11 @@ public class AccountServiceImpl implements AccountService {
         });
         eventWalls.sort((o1, o2) -> {
             if (o1.getAddTime() == null) {
-                return -1;
-            } else if (o2.getAddTime() == null) {
                 return 1;
+            } else if (o2.getAddTime() == null) {
+                return -1;
             }
-            return o2.getAddTime().after(o1.getAddTime()) ? 1 : -1;
+            return o2.getAddTime().before(o1.getAddTime()) ? 1 : -1;
         });
         return eventWalls;
     }
