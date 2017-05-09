@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -175,6 +176,11 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public Map<String,String> pcRedirectUrl(String callbackUrl){
         Callback callback = new Callback();
+        try {
+            callbackUrl = URLDecoder.decode(callbackUrl, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
         String ip = getIPFromUrl(callbackUrl);
         if(ip!=null){
             callbackUrl = callbackUrl.replace("http://"+ip, ConfigUtils.domainName());
