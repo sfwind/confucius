@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
+import com.iquanwai.confucius.web.course.dto.backend.MarkDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -22,7 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -220,5 +225,16 @@ public class BackendController {
     @RequestMapping(value = "/info/signup",method=RequestMethod.GET,params = "rise")
     public ResponseEntity<Map<String,Object>> getRiseInfo(){
         return WebUtils.result(signupService.getRiseRemindingCount());
+    }
+
+    @RequestMapping(value = "/mark", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> mark(LoginUser loginUser,@RequestBody MarkDto markDto) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser == null ? null : loginUser.getOpenId())
+                .module(markDto.getModule())
+                .function(markDto.getFunction())
+                .action(markDto.getAction())
+                .memo(markDto.getMemo());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 }
