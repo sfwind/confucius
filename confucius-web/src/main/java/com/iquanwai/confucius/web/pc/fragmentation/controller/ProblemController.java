@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -80,17 +81,18 @@ public class ProblemController {
      */
     @RequestMapping(value = "/list")
     public ResponseEntity<Map<String, Object>> loadProblemList(PCLoginUser pcLoginUser) {
-        Assert.notNull(pcLoginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+//        Assert.notNull(pcLoginUser, "用户不能为空");
+        // 兼容修改：不需要用户信息，用没登录时也可以查看问题列表
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser != null ? pcLoginUser.getOpenId() : null)
                 .module("训练")
                 .function("碎片化")
                 .action("获取问题列表");
         operationLogService.log(operationLog);
 
-        List<ImprovementPlan> plans = planService.loadUserPlans(pcLoginUser.getOpenId());
+        List<ImprovementPlan> plans = pcLoginUser != null ? planService.loadUserPlans(pcLoginUser.getOpenId()) : Lists.newArrayList();
         List<Problem> problems = problemService.loadProblems();
 
-        boolean trialUser = whiteListService.isInWhiteList(TRIAL, pcLoginUser.getOpenId());
+        boolean trialUser = pcLoginUser != null && whiteListService.isInWhiteList(TRIAL, pcLoginUser.getOpenId());
 
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {

@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.web.account.dto.AccountDto;
 import com.iquanwai.confucius.web.account.dto.LoginCheckDto;
 import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
+import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
@@ -51,6 +52,8 @@ public class AccountController {
     private PlanService planService;
     @Autowired
     private PermissionService permissionService;
+    @Autowired
+    private LoginUserService loginUserService;
 
     /**
      * mobile扫描二维码结果
@@ -97,7 +100,7 @@ public class AccountController {
                     pcLoginUser.setRole(role.getId());
                     pcLoginUser.setPermissionList(permissionService.loadPermissions(role.getLevel()));
 
-                    PCLoginUserResolver.login(sessionId, pcLoginUser);
+                    loginUserService.login(sessionId, pcLoginUser);
                     logger.info("{}登录成功,roleId:{},roleLevel:{},key:{}", loginUser.getWeixinName(), role.getId(), role.getLevel(), sessionId);
                     this.handlerLoginSocket(sessionId, LoginType.LOGIN_SUCCESS, accountDto);
                     return WebUtils.success();
@@ -131,7 +134,7 @@ public class AccountController {
         Assert.notNull(accountDto);
         String key = accountDto.getKey();
         if (key != null) {
-            if (PCLoginUserResolver.isLogin(key)) {
+            if (loginUserService.isLogin(key)) {
                 CookieUtils.addCookie(LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME,
                         key, OAuthService.SEVEN_DAYS, response);
             }

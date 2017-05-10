@@ -1,9 +1,12 @@
 package com.iquanwai.confucius.web.resolver;
 
-import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
+import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.util.CookieUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -11,17 +14,22 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.ref.SoftReference;
-import java.util.Map;
 
 /**
  * Created by nethunder on 2016/12/23.
  */
 public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
-    /**
-     * 缓存已经登录的用户
-     */
-    private static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private LoginUserService loginUserService;
+
+    public PCLoginUserResolver(){
+    }
+
+    public PCLoginUserResolver(LoginUserService loginUserService) {
+        this.loginUserService = loginUserService;
+    }
+
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -29,10 +37,6 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
             return true;
         }
         return false;
-    }
-
-    public static int count(){
-        return pcLoginUserMap.size();
     }
 
     @Override
@@ -46,59 +50,13 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
             return PCLoginUser.defaultUser();
         }
-        String pcToken = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
-        if (pcLoginUserMap.containsKey(pcToken)) {
-            return pcLoginUserMap.get(pcToken).get();
+        Pair<Integer, PCLoginUser> loginUser = loginUserService.getLoginUser(request);
+        if (loginUser.getLeft() < 1) {
+            String remoteIp = request.getHeader("X-Forwarded-For");
+            String value = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
+            logger.error("没有找到用户,ip:{},_qt:{}", remoteIp, value);
         }
-        // 只能从缓存中获得用户信息，只有一个登录入口
-        return null;
+        return loginUser.getRight();
     }
 
-    /**
-     * 登录，就是缓存起来
-     * @param sessionId sessionId,这个sessionIds是三个点拼起来的
-     * @param pcLoginUser 用户
-     */
-    public static void login(String sessionId, PCLoginUser pcLoginUser) {
-        SoftReference<PCLoginUser> temp = new SoftReference<PCLoginUser>(pcLoginUser);
-        pcLoginUserMap.put(sessionId, temp);
-    }
-
-    /**
-     * 根据sessionId判断用户是否登录
-     * @param sessionId SessionId
-     * @return  是否登录
-     */
-    public static boolean isLogin(String sessionId){
-        SoftReference<PCLoginUser> softReference = pcLoginUserMap.get(sessionId);
-        if(softReference!=null){
-            PCLoginUser pcLoginUser = softReference.get();
-            if(pcLoginUser!=null){
-                return true;
-            } else {
-                // 清理
-                pcLoginUserMap.remove(sessionId);
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * 获得登录的用户信息
-     * @param sessionId sessionId
-     * @return 登录的用户
-     */
-    public static PCLoginUser getLoginUser(String sessionId){
-        return pcLoginUserMap.get(sessionId).get();
-    }
-
-    public static PCLoginUser getLoginUser(HttpServletRequest request){
-        String sessionId = request.getRequestedSessionId();
-        if(pcLoginUserMap.containsKey(sessionId)){
-            return pcLoginUserMap.get(sessionId).get();
-        }
-        return null;
-    }
 }
