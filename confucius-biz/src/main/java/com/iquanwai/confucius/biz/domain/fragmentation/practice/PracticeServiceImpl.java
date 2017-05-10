@@ -341,6 +341,10 @@ public class PracticeServiceImpl implements PracticeService {
             return improvementPlan.getRequestCommentCount();
         }else{
             RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getOpenid());
+            if (riseMember == null) {
+                // 已经不是会员了就返回null
+                return null;
+            }
             if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
                 return 0;
             }
