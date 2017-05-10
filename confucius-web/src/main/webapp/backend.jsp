@@ -21,7 +21,7 @@
         openComment:${openComment},
         backend:true,
         roleId:${roleId},
-        signature:${signature},
+        signature:"${signature}",
     }
 </script>
 

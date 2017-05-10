@@ -95,8 +95,8 @@ public class PCIndexController {
             userParam.put("userName", pcLoginUser.getWeixin().getWeixinName());
             userParam.put("headImage", pcLoginUser.getWeixin().getHeadimgUrl());
             mav.addAllObjects(userParam);
-            mav.addObject("roleId", pcLoginUser.getRole());
-            mav.addObject("signature", pcLoginUser.getSignature());
+            mav.addObject("roleId", pcLoginUser.getRole() == null ? 0 : pcLoginUser.getRole());
+            mav.addObject("signature", pcLoginUser.getSignature() == null ? "" : pcLoginUser.getSignature());
         }
         mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
