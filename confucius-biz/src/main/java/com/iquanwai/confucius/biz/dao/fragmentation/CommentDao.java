@@ -23,16 +23,21 @@ import java.util.List;
 public class CommentDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void insert(Comment comment) {
+    public int insert(Comment comment) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "insert into Comment(ModuleId, Type, ReferencedId, CommentOpenId, Content, Device) " +
                 "VALUES (?,?,?,?,?,?)";
         try {
-            run.insert(insertSql, new ScalarHandler<>(),
-                    comment.getModuleId(), comment.getType(), comment.getReferencedId(), comment.getCommentOpenId(), comment.getContent(), comment.getDevice());
+            Long id = run.insert(insertSql, new ScalarHandler<>(),
+                    comment.getModuleId(), comment.getType(), comment.getReferencedId(),
+                    comment.getCommentOpenId(), comment.getContent(), comment.getDevice());
+
+            return id.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+
+        return -1;
     }
 
     public List<Comment> loadComments(Integer moduleId, Integer referId, Page page) {
@@ -49,7 +54,7 @@ public class CommentDao extends PracticeDBUtil {
 
     public Integer commentCount(Integer moduleId,Integer referId){
         QueryRunner run = new QueryRunner(getDataSource());
-        ScalarHandler<Long> h = new ScalarHandler<Long>();
+        ScalarHandler<Long> h = new ScalarHandler<>();
 
         try {
             Long count = run.query("SELECT count(*) FROM Comment where ReferencedId=? and ModuleId=? and Del=0",
@@ -83,5 +88,16 @@ public class CommentDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public void deleteComment(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update Comment set Del=1 where Id=?";
+        try {
+
+            runner.update(sql, id);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
     }
 }

@@ -67,7 +67,7 @@ public interface PracticeService {
     /**
      * 评论
      */
-    Pair<Boolean,String> comment(Integer type, Integer referId, String openId, String content);
+    Pair<Integer,String> comment(Integer type, Integer referId, String openId, String content);
 
     /**
      * 碎片化每日数据
@@ -106,4 +106,24 @@ public interface PracticeService {
      * @param problemId 小课id
      */
     List<ApplicationPractice> loadApplicationByProblemId(Integer problemId);
+
+    /**
+     * 是否可以求点评
+     * @param planId 计划id
+     */
+    Integer hasRequestComment(Integer planId);
+
+    /**
+     * 求点评
+     * @param submitId 文章提交id
+     * @param moduleId 模块id（2-应用练习,3-小课分享）
+     */
+    boolean requestComment(Integer submitId, Integer moduleId);
+
+    /**
+     * 删除评论
+     * @param commentId 评论id
+     */
+    void deleteComment(Integer commentId);
+
 }

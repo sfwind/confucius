@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -59,6 +60,8 @@ public class PracticeServiceImpl implements PracticeService {
     private AsstCoachCommentDao asstCoachCommentDao;
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
+    @Autowired
+    private RiseMemberDao riseMemberDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -148,7 +151,7 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Pair<Boolean, String> comment(Integer moduleId, Integer referId, String openId, String content) {
+    public Pair<Integer, String> comment(Integer moduleId, Integer referId, String openId, String content) {
         boolean isAsst = false;
         Profile profile = accountService.getProfile(openId, false);
         //是否是助教评论
@@ -160,7 +163,7 @@ public class PracticeServiceImpl implements PracticeService {
             ChallengeSubmit load = challengeSubmitDao.load(ChallengeSubmit.class, referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
-                return new MutablePair<>(false, "没有该文章");
+                return new MutablePair<>(-1, "没有该文章");
             }
             //自己给自己评论不提醒
             if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
@@ -171,7 +174,7 @@ public class PracticeServiceImpl implements PracticeService {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
-                return new MutablePair<>(false, "没有该文章");
+                return new MutablePair<>(-1, "没有该文章");
             }
             //更新助教评论状态
             if(isAsst){
@@ -191,7 +194,7 @@ public class PracticeServiceImpl implements PracticeService {
             SubjectArticle load = subjectArticleDao.load(SubjectArticle.class,referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
-                return new MutablePair<>(false, "没有该文章");
+                return new MutablePair<>(-1, "没有该文章");
             }
             //更新助教评论状态
             if(isAsst){
@@ -210,9 +213,9 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
-        comment.setDevice(Constants.Device.MOBILE);
-        commentDao.insert(comment);
-        return new MutablePair<>(true,"评论成功");
+        comment.setDevice(Constants.Device.PC);
+        int id = commentDao.insert(comment);
+        return new MutablePair<>(id,"评论成功");
     }
 
     private void asstCoachComment(String openId, Integer problemId) {
@@ -326,5 +329,65 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public List<ApplicationPractice> loadApplicationByProblemId(Integer problemId) {
         return applicationPracticeDao.getPracticeByProblemId(problemId);
+    }
+
+    @Override
+    public Integer hasRequestComment(Integer planId) {
+        ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
+        if(improvementPlan==null){
+            return null;
+        }
+        if(improvementPlan.getRequestCommentCount()>0){
+            return improvementPlan.getRequestCommentCount();
+        }else{
+            RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getOpenid());
+            if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
+                return 0;
+            }
+        }
+        //非精英用户返回null
+        return null;
+    }
+
+    @Override
+    public boolean requestComment(Integer submitId, Integer moduleId) {
+        if (moduleId.equals(Constants.Module.APPLICATION)) {
+            ApplicationSubmit applicationSubmit = applicationSubmitDao.load(ApplicationSubmit.class, submitId);
+            if (applicationSubmit.getRequestFeedback()) {
+                logger.warn("{} 已经是求点评状态", submitId);
+                return true;
+            }
+            Integer planId = applicationSubmit.getPlanId();
+            ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
+            if (improvementPlan != null && improvementPlan.getRequestCommentCount() > 0) {
+                //更新求点评次数
+                improvementPlanDao.updateRequestComment(planId, improvementPlan.getRequestCommentCount() - 1);
+                //求点评
+                applicationSubmitDao.requestComment(applicationSubmit.getId());
+                return true;
+            }
+        } else if (moduleId.equals(Constants.Module.SUBJECT)) {
+            SubjectArticle subjectArticle = subjectArticleDao.load(SubjectArticle.class, submitId);
+            if (subjectArticle.getRequestFeedback()) {
+                logger.warn("{} 已经是求点评状态", submitId);
+                return true;
+            }
+
+            Integer problemId = subjectArticle.getProblemId();
+            String openid = subjectArticle.getOpenid();
+            ImprovementPlan improvementPlan = improvementPlanDao.loadPlanByProblemId(openid, problemId);
+            if (improvementPlan != null && improvementPlan.getRequestCommentCount() > 0) {
+                //更新求点评次数
+                improvementPlanDao.updateRequestComment(improvementPlan.getId(), improvementPlan.getRequestCommentCount() - 1);
+                //求点评
+                subjectArticleDao.requestComment(subjectArticle.getId());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void deleteComment(Integer commentId) {
+        commentDao.deleteComment(commentId);
     }
 }

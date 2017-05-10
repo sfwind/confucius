@@ -428,8 +428,9 @@ public class SignupServiceImpl implements SignupService {
                 break;
             }
             case 3: {
+                //精英会员
                 expireDate = DateUtils.afterYears(new Date(), 1);
-                profileDao.becomeRiseMember(openId);
+                profileDao.becomeRiseEliteMember(openId);
                 break;
             }
             default:

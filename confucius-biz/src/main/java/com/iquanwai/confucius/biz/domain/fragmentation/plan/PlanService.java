@@ -27,7 +27,7 @@ public interface PlanService {
      * @param openId 用户id
      * @param problemId 难题id
      */
-    List<ImprovementPlan> loadUserPlans(String openId, Integer problemId);
+    ImprovementPlan loadUserPlan(String openId, Integer problemId);
 
     /**
      * 获取该计划的作业
