@@ -1,8 +1,6 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -10,6 +8,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ProblemCatalogDao extends PracticeDBUtil {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 }

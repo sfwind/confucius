@@ -142,6 +142,16 @@ public class ProfileDao extends DBUtil{
         }
     }
 
+    public void becomeRiseEliteMember(String openId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update Profile SET RiseMember = 1, RequestCommentCount=1 WHERE OpenId = ?";
+        try{
+            runner.update(sql, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public Integer riseMemberCount(){
         QueryRunner runner = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();

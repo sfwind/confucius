@@ -10,7 +10,6 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
@@ -20,7 +19,10 @@ import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.*;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.ChallengeSubmitDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RefreshListDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkEditDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -102,18 +104,20 @@ public class ApplicationController {
         // 看看这个id在不在
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
-            ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(),false);
+            ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(),false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
-            dto.setSubmitId(applicationPractice.getSubmitId());
-            dto.setTitle(applicationPractice.getTopic());
-            dto.setContent(applicationPractice.getContent());
-            dto.setDescription(applicationPractice.getDescription());
+            dto.setSubmitId(applicationSubmit.getId());
+            dto.setTitle(applicationSubmit.getTopic());
+            dto.setContent(applicationSubmit.getContent());
+            dto.setDescription(applicationSubmit.getDescription());
             dto.setModuleId(Constants.PictureType.APPLICATION);
-            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, dto.getSubmitId());
-            dto.setPicList(pictureList
-                    .stream()
-                    .map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName())
-                    .collect(Collectors.toList()));
+//            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, dto.getSubmitId());
+//            dto.setPicList(pictureList
+//                    .stream()
+//                    .map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName())
+//                    .collect(Collectors.toList()));
+            dto.setRequestCommentCount(practiceService.hasRequestComment(planId));
+            dto.setRequest(applicationSubmit.getRequestFeedback());
             return WebUtils.result(dto);
         } else {
             logger.error("用户:{},没有该训练计划:{}，应用练习:{}",openId,plan,applicationId);
@@ -140,22 +144,24 @@ public class ApplicationController {
                 .action("应用任务列表加载自己的应用任务")
                 .memo(applicationId + "");
         operationLogService.log(operationLog);
-        ApplicationPractice applicationPractice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(),false);
-        RiseWorkInfoDto info = new RiseWorkInfoDto();
-        info.setSubmitId(applicationPractice.getSubmitId());
-        info.setTitle(applicationPractice.getTopic());
-        if(applicationPractice.getContent()!=null) {
-            applicationPractice.setContent(HtmlRegexpUtil.filterHtml(applicationPractice.getContent()));
-            info.setContent(applicationPractice.getContent().length() > 180 ?
-                    applicationPractice.getContent().substring(0, 180) + "......" :
-                    applicationPractice.getContent());
+        ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(),false);
+        RiseWorkInfoDto dto = new RiseWorkInfoDto();
+        dto.setSubmitId(applicationSubmit.getId());
+        dto.setTitle(applicationSubmit.getTopic());
+        if(applicationSubmit.getContent()!=null) {
+            applicationSubmit.setContent(HtmlRegexpUtil.filterHtml(applicationSubmit.getContent()));
+            dto.setContent(applicationSubmit.getContent().length() > 180 ?
+                    applicationSubmit.getContent().substring(0, 180) + "......" :
+                    applicationSubmit.getContent());
         }
-        info.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
-        info.setType(Constants.PracticeType.APPLICATION);
-        info.setUpName(loginUser.getWeixin().getWeixinName());
-        info.setUpTime(DateUtils.parseDateToFormat5(applicationPractice.getSubmitUpdateTime()));
-        info.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, applicationPractice.getSubmitId()));
-        return WebUtils.result(info);
+        dto.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
+        dto.setType(Constants.PracticeType.APPLICATION);
+        dto.setUpName(loginUser.getWeixin().getWeixinName());
+        dto.setUpTime(DateUtils.parseDateToFormat5(applicationSubmit.getUpdateTime()));
+        dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, applicationSubmit.getId()));
+        dto.setRequestCommentCount(practiceService.hasRequestComment(planId));
+        dto.setRequest(applicationSubmit.getRequestFeedback());
+        return WebUtils.result(dto);
     }
 
     /**
@@ -239,23 +245,22 @@ public class ApplicationController {
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
         // 获取应用练习，没有则创建
-        ApplicationPractice practice = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(), true);
+        ApplicationSubmit submit  = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(), true);
         // 根据应用练习id获取提交记录
-        ApplicationSubmit submit = applicationService.loadSubmit(practice.getSubmitId());
         // 继续之前的逻辑
-        Integer submitId = practice.getSubmitId();
+        Integer submitId = submit.getId();
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用练习")
                 .action("PC提交应用练习答案")
-                .memo(submitId + "");
+                .memo(submitId.toString());
         operationLogService.log(operationLog);
         Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
         if (result) {
             // 提升提交数
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
-            if(submit.getPointStatus()==0){
-                ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
+            if(submit.getPointStatus()!=null && submit.getPointStatus()==0){
+                ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(applicationId);
                 return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
             } else {
                 return WebUtils.success();
@@ -293,6 +298,7 @@ public class ApplicationController {
             show.setUpTime(DateUtils.parseDateToFormat5(submit.getUpdateTime()));
             show.setContent(submit.getContent());
             show.setType("application");
+            show.setRequest(submit.getRequestFeedback());
             // 查询这个openid的数据
             if (loginUser.getOpenId().equals(openId)) {
                 // 是自己的
@@ -301,6 +307,7 @@ public class ApplicationController {
                 show.setHeadImg(loginUser.getWeixin().getHeadimgUrl());
                 show.setPlanId(submit.getPlanId());
                 show.setWorkId(submit.getApplicationId());
+                show.setRequestCommentCount(practiceService.hasRequestComment(submit.getPlanId()));
             } else {
                 Profile account = accountService.getProfile(openId, false);
                 if (account != null) {
@@ -326,8 +333,8 @@ public class ApplicationController {
             show.setTitle(applicationPractice.getTopic());
             show.setDesc(applicationPractice.getDescription());
             // 查询照片
-            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
-            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
+//            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
+//            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
             // 提升浏览量
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId,Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);

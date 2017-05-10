@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.domain.asst.UnderCommentCount;
 import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
@@ -56,7 +57,8 @@ public class SubjectArticleDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select count(1) from SubjectArticle where ProblemId = ?";
         try{
-            return runner.query(sql, new ScalarHandler<Long>(), problemId).intValue();
+            Long id= runner.query(sql, new ScalarHandler<>(), problemId);
+            return id.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -168,5 +170,27 @@ public class SubjectArticleDao extends PracticeDBUtil {
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public void requestComment(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update SubjectArticle set RequestFeedback=1 where Id=?";
+        try {
+            runner.update(sql, id);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public List<UnderCommentCount> getUnderCommentCount(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<UnderCommentCount>> h = new BeanListHandler<>(UnderCommentCount.class);
+        String sql = "select ProblemId,count(*) as count from SubjectArticle where RequestFeedback=1 and Feedback=0 group by ProblemId";
+        try{
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }

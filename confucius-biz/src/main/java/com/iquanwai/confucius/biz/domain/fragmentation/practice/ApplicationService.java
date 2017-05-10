@@ -18,7 +18,7 @@ public interface ApplicationService {
      * @param OpenId openId
      * @return 应用练习
      */
-    ApplicationPractice loadMineApplicationPractice(Integer planId, Integer applicationId, String OpenId,boolean create);
+    ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, String OpenId,boolean create);
 
 
     List<ApplicationSubmit> loadApplicationSubmitList(Integer applicationId);

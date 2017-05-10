@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.domain.asst.UnderCommentCount;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
@@ -26,12 +27,12 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public int insert(ApplicationSubmit applicationSubmit){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into ApplicationSubmit(Openid, ApplicationId, PlanId) " +
-                "values(?,?,?)";
+        String sql = "insert into ApplicationSubmit(Openid, ApplicationId, PlanId, ProblemId) " +
+                "values(?,?,?,?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
                     applicationSubmit.getOpenid(), applicationSubmit.getApplicationId(),
-                    applicationSubmit.getPlanId());
+                    applicationSubmit.getPlanId(), applicationSubmit.getProblemId());
             return insertRs.intValue();
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -136,17 +137,13 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ApplicationSubmit> loadRequestCommentApplications(List<Integer> applicationIds, int size, Date date){
+    public List<ApplicationSubmit> loadRequestCommentApplications(Integer problemId, int size, Date date){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String questionMark = produceQuestionMark(applicationIds.size());
-        String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark+
-                ") and Content is not null and Feedback = 0 and AddTime>? and RequestFeedback =1 " +
+        String sql = "select * from ApplicationSubmit where ProblemId =? and Content is not null and Feedback = 0 and AddTime>? and RequestFeedback =1 " +
                 "order by length desc limit "+size;
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        List<Object> paramList = Lists.newArrayList(applicationIds);
-        paramList.add(date);
         try {
-            return runner.query(sql, h, paramList.toArray());
+            return runner.query(sql, h, problemId, date);
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -198,19 +195,18 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
     }
 
-    public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(List<Integer> applicationIds, int size, Date date, List<String> openids){
+    public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(Integer problemId, int size, Date date, List<String> openids){
         if(openids.size()==0){
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String questionMark1 = produceQuestionMark(applicationIds.size());
-        String questionMark2 = produceQuestionMark(openids.size());
+        String questionMark = produceQuestionMark(openids.size());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
-                "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid in ("+questionMark2+") " +
+        String sql = "select * from ApplicationSubmit where ProblemId =? "+
+                "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid in ("+questionMark+") " +
                 "order by length desc limit " + size;
         List<Object> param = Lists.newArrayList();
-        param.addAll(applicationIds);
+        param.add(problemId);
         param.add(date);
         param.addAll(openids);
 
@@ -222,18 +218,17 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ApplicationSubmit> loadUnderCommentApplicationsExcludeSomeone(List<Integer> applicationIds, int size, Date date, List<String> openids){
+    public List<ApplicationSubmit> loadUnderCommentApplicationsExcludeSomeone(Integer problemId, int size, Date date, List<String> openids){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String questionMark1 = produceQuestionMark(applicationIds.size());
-        String questionMark2 = produceQuestionMark(openids.size());
+        String questionMark = produceQuestionMark(openids.size());
         if(openids.size()!=0){
-            String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
-                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid not in ("+questionMark2+") " +
+            String sql = "select * from ApplicationSubmit where ProblemId =? " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid not in ("+questionMark+") " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
             List<Object> param = Lists.newArrayList();
-            param.addAll(applicationIds);
+            param.add(problemId);
             param.add(date);
             param.addAll(openids);
 
@@ -243,13 +238,13 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
                 logger.error(e.getLocalizedMessage(), e);
             }
         }else{
-            String sql = "select * from ApplicationSubmit where ApplicationId in ("+questionMark1+") " +
+            String sql = "select * from ApplicationSubmit where ProblemId =? " +
                     "and Feedback=0 and RequestFeedback =0 and AddTime>? " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
             List<Object> param = Lists.newArrayList();
-            param.addAll(applicationIds);
+            param.add(problemId);
             param.add(date);
 
             try{
@@ -262,4 +257,25 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public void requestComment(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update ApplicationSubmit set RequestFeedback=1 where Id=?";
+        try {
+            runner.update(sql, id);
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public List<UnderCommentCount> getUnderCommentCount(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<UnderCommentCount>> h = new BeanListHandler<>(UnderCommentCount.class);
+        String sql = "select ProblemId,count(*) as count from ApplicationSubmit where RequestFeedback=1 and Feedback=0 group by ProblemId";
+        try{
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }

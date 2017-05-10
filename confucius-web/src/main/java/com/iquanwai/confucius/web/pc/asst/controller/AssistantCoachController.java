@@ -85,11 +85,12 @@ public class AssistantCoachController {
         return WebUtils.result(countMap);
     }
 
-    @RequestMapping("/problem/list")
-    public ResponseEntity<Map<String, Object>> loadProblem(PCLoginUser pcLoginUser) {
+    @RequestMapping("/application/problem/list")
+    public ResponseEntity<Map<String, Object>> loadApplicationProblems(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<Problem> problems = problemService.loadProblems();
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentApplicationCount();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
             List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
@@ -97,6 +98,7 @@ public class AssistantCoachController {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
+                        problemList.setUnderCommentCount(underCommentMap.get(problem.getId()));
                         return problemList;
                     }).collect(Collectors.toList());
             dto.setProblems(collect);
@@ -106,7 +108,36 @@ public class AssistantCoachController {
 
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("助教后台")
-                .function("练习评论")
+                .function("应用练习评论")
+                .action("获取问题列表");
+        operationLogService.log(operationLog);
+        return WebUtils.result(result);
+    }
+
+    @RequestMapping("/subject/problem/list")
+    public ResponseEntity<Map<String, Object>> loadSubjectArticleProblems(PCLoginUser pcLoginUser) {
+        Assert.notNull(pcLoginUser, "用户不能为空");
+        List<Problem> problems = problemService.loadProblems();
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentSubjectArticleCount();
+        List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
+            ProblemCatalogDto dto = new ProblemCatalogDto();
+            List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
+                    .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
+                        ProblemListDto problemList = new ProblemListDto();
+                        problemList.setId(problem.getId());
+                        problemList.setProblem(problem.getProblem());
+                        problemList.setUnderCommentCount(underCommentMap.get(problem.getId()));
+                        return problemList;
+                    }).collect(Collectors.toList());
+            dto.setProblems(collect);
+            dto.setName(item.getName());
+            return dto;
+        }).collect(Collectors.toList());
+
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                .module("助教后台")
+                .function("小课分享评论")
                 .action("获取问题列表");
         operationLogService.log(operationLog);
         return WebUtils.result(result);
