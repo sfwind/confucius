@@ -94,9 +94,13 @@ public class PCIndexController {
             Map<String, String> userParam = Maps.newHashMap();
             userParam.put("userName", pcLoginUser.getWeixin().getWeixinName());
             userParam.put("headImage", pcLoginUser.getWeixin().getHeadimgUrl());
+            userParam.put("signature", pcLoginUser.getSignature());
             mav.addAllObjects(userParam);
-            mav.addObject("roleId", pcLoginUser.getRole() == null ? 0 : pcLoginUser.getRole());
-            mav.addObject("signature", pcLoginUser.getSignature() == null ? "" : pcLoginUser.getSignature());
+        }
+        if (pcLoginUser == null || pcLoginUser.getRole() == null) {
+            mav.addObject("roleId", 0);
+        } else {
+            mav.addObject("roleId", pcLoginUser.getRole());
         }
         mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
