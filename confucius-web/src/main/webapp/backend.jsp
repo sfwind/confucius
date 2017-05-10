@@ -20,7 +20,8 @@
         openFeedBack:${openFeedBack},
         openComment:${openComment},
         backend:true,
-
+        roleId:${roleId},
+        signature:${signature},
     }
 </script>
 

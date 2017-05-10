@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -77,9 +78,13 @@ public class LoginUserService {
             if (pcLoginUser != null) {
                 logger.info("act:{},已登录,user:{},nickName:{}", sessionId, pcLoginUser.getOpenId(), pcLoginUser.getWeixin() != null ? pcLoginUser.getWeixin().getWeixinName() : "没有微信信息");
                 return true;
+            } else {
+                logger.info("act:{},softReference失效");
+                return false;
             }
+        } else {
+            return false;
         }
-       return false;
     }
 
     /**
@@ -139,6 +144,13 @@ public class LoginUserService {
      * 1:PCLoginUser
      */
     public Pair<Integer, PCLoginUser> getLoginUser(String accessToken) {
+        // 先检查有没有缓存
+        SoftReference<PCLoginUser> pcLoginUserSoftReference = pcLoginUserMap.get(accessToken);
+        if (pcLoginUserSoftReference != null && pcLoginUserSoftReference.get() != null) {
+            logger.info("已缓存,_qt:{}", accessToken);
+            return new MutablePair<>(1, pcLoginUserSoftReference.get());
+        }
+
         String openid = oAuthService.pcOpenId(accessToken);
         if (openid == null) {
             // 没有查到openid，一般是该用户没有关注服务号
@@ -165,6 +177,7 @@ public class LoginUserService {
                 role = Role.student();
             }
         }
+        Profile profile = accountService.getProfile(openid, false);
         PCLoginUser pcLoginUser = new PCLoginUser();
         LoginUser loginUser = new LoginUser();
 
@@ -176,6 +189,7 @@ public class LoginUserService {
         pcLoginUser.setWeixin(loginUser);
         pcLoginUser.setOpenId(loginUser.getOpenId());
         pcLoginUser.setRole(role.getId());
+        pcLoginUser.setSignature(profile.getSignature());
         pcLoginUser.setPermissionList(permissionService.loadPermissions(role.getLevel()));
         logger.info("pcUser:{}", pcLoginUser);
         return new MutablePair<>(1, pcLoginUser);
