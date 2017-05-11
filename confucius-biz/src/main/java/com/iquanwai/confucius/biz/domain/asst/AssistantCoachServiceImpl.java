@@ -15,10 +15,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by justin on 17/4/26.
@@ -48,9 +50,22 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public Pair<Integer, Integer> getCommentCount(String openid) {
         List<Comment> commentList = commentDao.loadCommentsByOpenid(openid);
-        List<Comment> todayComments = commentList.stream().filter(comment -> DateUtils.interval(comment.getAddTime())==0)
-                .collect(Collectors.toList());
-        return new ImmutablePair<>(todayComments.size(), commentList.size());
+        // 将时间逆序排序按时间根据module和referenceid去重
+        Long totalCommentCnt = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime))
+                .map(comment -> comment.getReferencedId() + comment.getModuleId()).distinct().count();
+        // 将时间逆序列表过滤出其中日期为今日的评论并根据module和referencid去重
+        List<Comment> sortedComment = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime)).collect(Collectors.toList());
+        Map<String, Comment> filterMap = Maps.newHashMap();
+        sortedComment.forEach(comment -> {
+            if(filterMap.get(comment.getReferencedId().toString() + "-"+ comment.getModuleId().toString()) == null) {
+                filterMap.put(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
+            }
+        });
+
+        Long todayCommentCnt = Lists.newArrayList(filterMap.values()).stream().filter(comment -> DateUtils.interval(comment.getAddTime()) == 0)
+                .distinct().count();
+
+        return new ImmutablePair<>(todayCommentCnt.intValue(), totalCommentCnt.intValue());
     }
 
     @Override
