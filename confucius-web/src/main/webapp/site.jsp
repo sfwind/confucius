@@ -32,7 +32,7 @@
 
 <script>
     var display = '<%=ConfigUtils.domainName()%>'
-    if(display === 'http://www.iquanwai.com') {
+    if(display === 'http://www.iquanwai.com' || display === 'https://www.iquanwai.com') {
         var _hmt = _hmt || [];
         (function () {
 

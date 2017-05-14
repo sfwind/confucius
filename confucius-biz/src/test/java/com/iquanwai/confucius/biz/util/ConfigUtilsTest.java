@@ -31,8 +31,8 @@ public class ConfigUtilsTest extends TestBase {
     @Test
     public void setConfig(){
         ZKConfigUtils zkConfigUtils = new ZKConfigUtils();
-        zkConfigUtils.updateValue("course","static.resource.url","http://www.confucius.mobi/bundle.js?");
-        zkConfigUtils.updateValue("course","static.pc.resource.url","http://www.confucius.mobi/bundle.js?");
+        zkConfigUtils.updateValue("course","static.resource.url","https://www.confucius.mobi/bundle.js?");
+        zkConfigUtils.updateValue("course","static.pc.resource.url","https://www.confucius.mobi/bundle.js?");
 
     }
 }

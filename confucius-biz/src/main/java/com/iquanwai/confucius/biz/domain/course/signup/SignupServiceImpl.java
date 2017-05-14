@@ -496,7 +496,7 @@ public class SignupServiceImpl implements SignupService {
         data.put("keyword1", new TemplateMessage.Keyword("加入RISE精英会员群"));
         data.put("keyword2", new TemplateMessage.Keyword("高"));
         data.put("remark", new TemplateMessage.Keyword("\n点击详情，查看群二维码↓↓↓"));
-        templateMessage.setUrl("http://www.iquanwai.com/images/wxgroup/WechatIMG2.jpeg");
+        templateMessage.setUrl("https://www.iqycamp.com/images/wxgroup/WechatIMG2.jpeg");
 
         templateMessageService.sendMessage(templateMessage);
     }
