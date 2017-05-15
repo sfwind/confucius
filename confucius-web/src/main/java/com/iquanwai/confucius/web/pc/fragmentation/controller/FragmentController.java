@@ -250,10 +250,12 @@ public class FragmentController {
             resultDto.setRole(loginUser.getRole());
 //            resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
-            resultDto.setReplyId(dto.getReplyId());
-            Comment replyComment = commentDao.load(Comment.class, dto.getReplyId());
-            resultDto.setReplyName(accountService.getAccount(replyComment.getRepliedOpenId(), false).getNickname());
-            resultDto.setReplyContent(replyComment.getContent());
+            if(dto.getReplyId() != null) {
+                resultDto.setReplyId(dto.getReplyId());
+                Comment replyComment = commentDao.load(Comment.class, dto.getReplyId());
+                resultDto.setReplyName(accountService.getAccount(replyComment.getRepliedOpenId(), false).getNickname());
+                resultDto.setReplyContent(replyComment.getContent());
+            }
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");
