@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
@@ -57,7 +58,8 @@ public class FragmentController {
     private PointRepo pointRepo;
     @Autowired
     private AccountService accountService;
-
+    @Autowired
+    private CommentDao commentDao;
 
     /**
      * 点击fragment菜单后，确定需要跳转到的位置
@@ -194,8 +196,14 @@ public class FragmentController {
                 dto.setUpName(account.getNickname());
                 dto.setHeadPic(account.getHeadimgurl());
                 dto.setRole(account.getRole());
-//                dto.setSignature(account.getSignature());
+                // dto.setSignature(account.getSignature());
                 dto.setIsMine(item.getCommentOpenId().equals(loginUser.getOpenId()));
+                if(item.getRepliedId() != null) {
+                    Profile replyAccount = accountService.getProfile(item.getRepliedOpenId(), false);
+                    dto.setReplyId(item.getRepliedId());
+                    dto.setReplyName(replyAccount.getNickname());
+                    dto.setReplyContent(item.getRepliedComment());
+                }
                 return dto;
             } else {
                 logger.error("未找到该评论用户:{}",item);
@@ -225,7 +233,7 @@ public class FragmentController {
         Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
-        Pair<Integer, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent());
+        Pair<Integer, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent(), dto.getReplyId());
         if(result.getLeft()>0){
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
@@ -242,6 +250,10 @@ public class FragmentController {
             resultDto.setRole(loginUser.getRole());
 //            resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
+            resultDto.setReplyId(dto.getReplyId());
+            Comment replyComment = commentDao.load(Comment.class, dto.getReplyId());
+            resultDto.setReplyName(accountService.getAccount(replyComment.getRepliedOpenId(), false).getNickname());
+            resultDto.setReplyContent(replyComment.getContent());
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");

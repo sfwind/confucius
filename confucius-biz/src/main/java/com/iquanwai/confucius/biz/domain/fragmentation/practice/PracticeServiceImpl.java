@@ -151,7 +151,7 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Pair<Integer, String> comment(Integer moduleId, Integer referId, String openId, String content) {
+    public Pair<Integer, String> comment(Integer moduleId, Integer referId, String openId, String content, Integer replyId) {
         boolean isAsst = false;
         Profile profile = accountService.getProfile(openId, false);
         //是否是助教评论
@@ -214,6 +214,13 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setContent(content);
         comment.setCommentOpenId(openId);
         comment.setDevice(Constants.Device.PC);
+        if(replyId != null) {
+            Comment repliedComment = commentDao.load(Comment.class, replyId);
+            comment.setRepliedId(replyId);
+            comment.setRepliedOpenId(repliedComment.getCommentOpenId());
+            comment.setRepliedComment(repliedComment.getContent());
+            comment.setRepliedDel(repliedComment.getDel());
+        }
         int id = commentDao.insert(comment);
         return new MutablePair<>(id,"评论成功");
     }

@@ -15,4 +15,7 @@ public class RiseWorkCommentDto {
     private String signature;
     private Integer role;
     private Boolean isMine;
+    private Integer replyId;
+    private String replyName;
+    private String replyContent;
 }
