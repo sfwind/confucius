@@ -32,4 +32,16 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<ApplicationPractice> getAllPracticeByProblemId(Integer problemId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ApplicationPractice>> h = new BeanListHandler<>(ApplicationPractice.class);
+        String sql = "SELECT * FROM ApplicationPractice where ProblemId=?";
+        try {
+            return run.query(sql, h, problemId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }

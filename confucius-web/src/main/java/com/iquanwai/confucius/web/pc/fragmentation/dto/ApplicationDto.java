@@ -32,22 +32,4 @@ public class ApplicationDto {
     private Integer voteCount;
     private Boolean canVote;
 
-    public static ApplicationDto getFromPo(ApplicationPractice param){
-        if(param==null){
-            return null;
-        }
-        ApplicationDto result = new ApplicationDto();
-        result.setId(param.getId());
-        result.setTopic(param.getTopic());
-        result.setDescription(param.getDescription());
-        result.setKnowledgeId(param.getKnowledgeId());
-        result.setSceneId(param.getSceneId());
-        result.setDifficulty(param.getDifficulty());
-        result.setSubmitted(param.getSubmitted());
-        result.setContent(param.getContent());
-        result.setSubmitId(param.getSubmitId());
-        result.setSubmitUpdateTime(param.getSubmitUpdateTime());
-        result.setPlanId(param.getPlanId());
-        return result;
-    }
 }

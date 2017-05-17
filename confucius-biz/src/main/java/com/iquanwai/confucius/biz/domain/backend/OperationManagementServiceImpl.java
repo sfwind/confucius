@@ -50,7 +50,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 applicationSubmit.setUpName(profile.getNickname());
                 applicationSubmit.setHeadPic(profile.getHeadimgurl());
             }
-            applicationSubmit.setUpTime(DateUtils.parseDateToFormat5(applicationSubmit.getUpdateTime()));
+            applicationSubmit.setUpTime(DateUtils.parseDateToFormat5(applicationSubmit.getPublishTime()));
         });
 
         return applicationSubmitList;
