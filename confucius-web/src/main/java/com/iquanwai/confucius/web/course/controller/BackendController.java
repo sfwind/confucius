@@ -180,6 +180,9 @@ public class BackendController {
                     if(noticeMsgDto.getKeyword3()!=null) {
                         data.put("keyword3", new TemplateMessage.Keyword(noticeMsgDto.getKeyword3()));
                     }
+                    if(noticeMsgDto.getKeyword4()!=null) {
+                        data.put("keyword4", new TemplateMessage.Keyword(noticeMsgDto.getKeyword4()));
+                    }
                     if(noticeMsgDto.getRemark()!=null) {
                         String remark = noticeMsgDto.getRemark();
                         if(remark.contains("{username}")){
