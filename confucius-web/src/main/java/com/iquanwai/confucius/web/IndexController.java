@@ -177,7 +177,9 @@ public class IndexController {
         if (loginUser != null) {
             Map<String, String> userParam = Maps.newHashMap();
             userParam.put("userName", loginUser.getWeixinName());
-            userParam.put("headImage",loginUser.getHeadimgUrl());
+            if(loginUser.getHeadimgUrl()!=null){
+                userParam.put("headImage",loginUser.getHeadimgUrl().replace("http:","https:"));
+            }
             mav.addAllObjects(userParam);
         }
 
