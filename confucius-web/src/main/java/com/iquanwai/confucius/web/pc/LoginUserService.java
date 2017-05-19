@@ -182,9 +182,9 @@ public class LoginUserService {
         LoginUser loginUser = new LoginUser();
 
         loginUser.setOpenId(openid);
-        loginUser.setHeadimgUrl(account.getHeadimgurl());
-        loginUser.setRealName(account.getRealName());
-        loginUser.setWeixinName(account.getNickname());
+        loginUser.setHeadimgUrl(profile.getHeadimgurl());
+        loginUser.setRealName(profile.getRealName());
+        loginUser.setWeixinName(profile.getNickname());
 
         pcLoginUser.setWeixin(loginUser);
         pcLoginUser.setOpenId(loginUser.getOpenId());
