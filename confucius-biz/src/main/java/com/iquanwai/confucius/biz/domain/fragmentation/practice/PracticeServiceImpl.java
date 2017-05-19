@@ -247,7 +247,12 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page) {
         page.setTotal(subjectArticleDao.count(problemId));
-        return subjectArticleDao.loadArticles(problemId,page).stream().map(item->{
+        return subjectArticleDao.loadArticles(problemId,page).stream().map(item -> {
+            String content = CommonUtils.replaceHttpsDomainName(item.getContent());
+            if (!content.equals(item.getContent())) {
+                item.setContent(content);
+                subjectArticleDao.updateContent(item.getId(), content);
+            }
             item.setVoteCount(homeworkVoteDao.votedCount(Constants.VoteType.SUBJECT, item.getId()));
             item.setCommentCount(commentDao.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
             return item;

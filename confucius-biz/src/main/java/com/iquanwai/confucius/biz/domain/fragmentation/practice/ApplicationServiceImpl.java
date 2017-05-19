@@ -72,7 +72,16 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmitList(Integer applicationId) {
-        return applicationSubmitDao.load(applicationId);
+        List<ApplicationSubmit> applicationSubmits =  applicationSubmitDao.load(applicationId);
+        applicationSubmits.stream().forEach(applicationSubmit -> {
+            String content = CommonUtils.replaceHttpsDomainName(applicationSubmit.getContent());
+            if(!content.equals(applicationSubmit.getContent())){
+                applicationSubmit.setContent(content);
+                applicationSubmitDao.updateContent(applicationSubmit.getId(), content);
+            }
+        });
+
+        return applicationSubmits;
     }
 
     @Override
