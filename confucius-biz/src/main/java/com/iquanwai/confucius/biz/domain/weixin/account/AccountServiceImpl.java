@@ -307,7 +307,7 @@ public class AccountServiceImpl implements AccountService {
 
         if(profile!=null) {
             if(profile.getHeadimgurl()!=null){
-                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:","https"));
+                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:","https:"));
             }
             Integer role = userRoleMap.get(profile.getOpenid());
             if (role == null) {
