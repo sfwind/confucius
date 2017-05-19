@@ -259,7 +259,7 @@ public class ApplicationController {
         if (result) {
             // 提升提交数
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
-            if(submit.getPointStatus()!=null && submit.getPointStatus()==0){
+            if(submit.getPointStatus()==null || submit.getPointStatus()==0){
                 ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(applicationId);
                 return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
             } else {
