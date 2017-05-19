@@ -93,7 +93,9 @@ public class PCIndexController {
         if (pcLoginUser != null && pcLoginUser.getWeixin() != null) {
             Map<String, String> userParam = Maps.newHashMap();
             userParam.put("userName", pcLoginUser.getWeixin().getWeixinName());
-            userParam.put("headImage", pcLoginUser.getWeixin().getHeadimgUrl());
+            if(pcLoginUser.getWeixin().getHeadimgUrl()!=null){
+                userParam.put("headImage",pcLoginUser.getWeixin().getHeadimgUrl().replace("http:","https:"));
+            }
             userParam.put("signature", pcLoginUser.getSignature());
             mav.addAllObjects(userParam);
         }
