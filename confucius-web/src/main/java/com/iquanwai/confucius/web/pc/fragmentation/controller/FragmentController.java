@@ -233,7 +233,7 @@ public class FragmentController {
         Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
-        Pair<Integer, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent(), dto.getReplyId());
+        Pair<Integer, String> result = practiceService.replyComment(moduleId, submitId, loginUser.getOpenId(), dto.getContent(), dto.getReplyId());
         if(result.getLeft()>0){
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
@@ -248,7 +248,7 @@ public class FragmentController {
             resultDto.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
             resultDto.setUpTime(DateUtils.parseDateToFormat5(new Date()));
             resultDto.setRole(loginUser.getRole());
-//            resultDto.setSignature(loginUser.getSignature());
+            // resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
             if(dto.getReplyId() != null) {
                 resultDto.setReplyId(dto.getReplyId());

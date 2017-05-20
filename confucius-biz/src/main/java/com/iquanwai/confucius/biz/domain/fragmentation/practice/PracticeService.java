@@ -65,9 +65,14 @@ public interface PracticeService {
     Integer commentCount(Integer type, Integer referId);
 
     /**
+     * 评论
+     */
+    Pair<Integer,String> comment(Integer type, Integer referId, String openId, String content);
+
+    /**
      * 评论(replyId为该评论针对于哪条评论返回)
      */
-    Pair<Integer,String> comment(Integer type, Integer referId, String openId, String content, Integer replyId);
+    Pair<Integer,String> replyComment(Integer type, Integer referId, String openId, String content, Integer replyId);
 
     /**
      * 碎片化每日数据
