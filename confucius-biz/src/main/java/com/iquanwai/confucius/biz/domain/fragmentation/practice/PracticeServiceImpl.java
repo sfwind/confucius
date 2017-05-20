@@ -231,18 +231,18 @@ public class PracticeServiceImpl implements PracticeService {
         int id = commentDao.insert(comment);
         //被回复的评论
         Comment repliedComment = commentDao.load(Comment.class, repliedId);
-        if(repliedComment!=null && !repliedComment.getCommentOpenId().equals(openId)) {
+        if (repliedComment != null && !repliedComment.getCommentOpenId().equals(openId)) {
             String msg = "";
             StringBuilder url = new StringBuilder("/rise/static/message/comment/reply");
-            if(moduleId == 2) {
+            if (moduleId == 2) {
                 msg = "评论了我的应用作业";
-            } else if(moduleId == 3) {
+            } else if (moduleId == 3) {
                 msg = "评论了我的小课分享";
             }
             url = url.append("?moduleId=" + moduleId + "&submitId=" + referId + "&commentId=" + id);
             messageService.sendMessage(msg, repliedComment.getCommentOpenId(), openId, url.toString());
         }
-        return new MutablePair<>(id,"评论成功");
+        return new MutablePair<>(id, "评论成功");
     }
 
     private void asstCoachComment(String openId, Integer problemId) {

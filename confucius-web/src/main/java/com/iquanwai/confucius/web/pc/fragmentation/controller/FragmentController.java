@@ -253,7 +253,10 @@ public class FragmentController {
             if(dto.getReplyId() != null) {
                 resultDto.setReplyId(dto.getReplyId());
                 Comment replyComment = commentDao.load(Comment.class, dto.getReplyId());
-                resultDto.setReplyName(accountService.getAccount(replyComment.getRepliedOpenId(), false).getNickname());
+                Profile profile = accountService.getProfile(replyComment.getCommentOpenId(), false);
+                if (profile != null) {
+                    resultDto.setReplyName(profile.getNickname());
+                }
                 resultDto.setReplyContent(replyComment.getContent());
             }
             return WebUtils.result(resultDto);
