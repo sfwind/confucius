@@ -70,6 +70,11 @@ public interface PracticeService {
     Pair<Integer,String> comment(Integer type, Integer referId, String openId, String content);
 
     /**
+     * 评论(replyId为该评论针对于哪条评论返回)
+     */
+    Pair<Integer,String> replyComment(Integer type, Integer referId, String openId, String content, Integer replyId);
+
+    /**
      * 碎片化每日数据
      */
     void fragmentDailyPracticeData();

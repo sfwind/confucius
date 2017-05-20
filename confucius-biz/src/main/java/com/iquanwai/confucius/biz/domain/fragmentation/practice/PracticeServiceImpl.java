@@ -218,6 +218,33 @@ public class PracticeServiceImpl implements PracticeService {
         return new MutablePair<>(id,"评论成功");
     }
 
+    @Override
+    public Pair<Integer, String> replyComment(Integer moduleId, Integer referId, String openId,
+                                              String content, Integer repliedId) {
+        Comment comment = new Comment();
+        comment.setModuleId(moduleId);
+        comment.setReferencedId(referId);
+        comment.setType(Constants.CommentType.STUDENT);
+        comment.setContent(content);
+        comment.setCommentOpenId(openId);
+        comment.setDevice(Constants.Device.MOBILE);
+        int id = commentDao.insert(comment);
+        //被回复的评论
+        Comment repliedComment = commentDao.load(Comment.class, repliedId);
+        if (repliedComment != null && !repliedComment.getCommentOpenId().equals(openId)) {
+            String msg = "";
+            StringBuilder url = new StringBuilder("/rise/static/message/comment/reply");
+            if (moduleId == 2) {
+                msg = "评论了我的应用作业";
+            } else if (moduleId == 3) {
+                msg = "评论了我的小课分享";
+            }
+            url = url.append("?moduleId=" + moduleId + "&submitId=" + referId + "&commentId=" + id);
+            messageService.sendMessage(msg, repliedComment.getCommentOpenId(), openId, url.toString());
+        }
+        return new MutablePair<>(id, "评论成功");
+    }
+
     private void asstCoachComment(String openId, Integer problemId) {
         AsstCoachComment asstCoachComment =asstCoachCommentDao.loadAsstCoachComment(problemId, openId);
         if(asstCoachComment==null){
@@ -247,7 +274,12 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page) {
         page.setTotal(subjectArticleDao.count(problemId));
-        return subjectArticleDao.loadArticles(problemId,page).stream().map(item->{
+        return subjectArticleDao.loadArticles(problemId,page).stream().map(item -> {
+            String content = CommonUtils.replaceHttpsDomainName(item.getContent());
+            if (!content.equals(item.getContent())) {
+                item.setContent(content);
+                subjectArticleDao.updateContent(item.getId(), content);
+            }
             item.setVoteCount(homeworkVoteDao.votedCount(Constants.VoteType.SUBJECT, item.getId()));
             item.setCommentCount(commentDao.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
             return item;

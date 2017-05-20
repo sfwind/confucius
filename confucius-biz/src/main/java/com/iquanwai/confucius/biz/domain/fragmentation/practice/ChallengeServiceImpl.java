@@ -49,6 +49,13 @@ public class ChallengeServiceImpl implements ChallengeService {
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
         }
+        if(submit!=null && submit.getContent()!=null){
+            String content = CommonUtils.replaceHttpsDomainName(submit.getContent());
+            if (!content.equals(submit.getContent())) {
+                submit.setContent(content);
+                challengeSubmitDao.updateContent(submit.getId(), content);
+            }
+        }
         challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
         challengePractice.setPlanId(planId);
         challengePractice.setContent(submit==null?null:submit.getContent());
