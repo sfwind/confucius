@@ -221,6 +221,7 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Pair<Integer, String> replyComment(Integer moduleId, Integer referId, String openId,
                                               String content, Integer repliedId) {
+        Comment repliedComment = commentDao.load(Comment.class, repliedId);
         Comment comment = new Comment();
         comment.setModuleId(moduleId);
         comment.setReferencedId(referId);
@@ -228,9 +229,14 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setContent(content);
         comment.setCommentOpenId(openId);
         comment.setDevice(Constants.Device.MOBILE);
+        if(repliedComment != null) {
+            comment.setRepliedOpenId(repliedComment.getCommentOpenId());
+            comment.setRepliedId(repliedId);
+            comment.setRepliedDel(0);
+            comment.setRepliedComment(repliedComment.getContent());
+        }
         int id = commentDao.insert(comment);
         //被回复的评论
-        Comment repliedComment = commentDao.load(Comment.class, repliedId);
         if (repliedComment != null && !repliedComment.getCommentOpenId().equals(openId)) {
             String msg = "";
             StringBuilder url = new StringBuilder("/rise/static/message/comment/reply");
