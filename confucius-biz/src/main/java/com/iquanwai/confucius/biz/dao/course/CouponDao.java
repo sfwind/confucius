@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.course;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Coupon;
+import com.iquanwai.confucius.biz.po.systematism.Course;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -42,13 +43,30 @@ public class CouponDao extends DBUtil {
         ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
 
         try {
-            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Used in (0,2) and ExpiredDate>?",
+            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Used in (0,2) and >?",
                     h, new Date());
             return coupon;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
+        return Lists.newArrayList();
+    }
+
+    /**
+     * 获取当前学员特定类型优惠券信息
+     * @return
+     */
+    public List<Coupon> getCouponByCategory(String openId, String category) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
+        String sql = "select * from Coupon where openId = ? and category = ?";
+        try {
+            List<Coupon> couponList = runner.query(sql, h, openId, category);
+            return couponList;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
         return Lists.newArrayList();
     }
 
@@ -82,6 +100,18 @@ public class CouponDao extends DBUtil {
         try {
             run.insert(insertSql, new ScalarHandler<>(),
                     coupon.getOpenid(), coupon.getAmount(), coupon.getUsed(), coupon.getExpiredDate());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void insertGroupCategory(Coupon coupon) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String insertSql = "insert into Coupon (OpenId, Amount, Used, ExpiredDate, Category, Description) " +
+                "values (?, ?, ?, ?, ?, ?)";
+        try {
+            runner.insert(insertSql, new ScalarHandler<>(), coupon.getOpenid(), coupon.getAmount(), coupon.getUsed(),
+                    coupon.getExpiredDate(), coupon.getCategory(), coupon.getDescription());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

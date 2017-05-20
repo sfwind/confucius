@@ -301,4 +301,8 @@ public class ConfigUtils {
 	public static String getRisePcSecret() {
 		return getValue("rise.web.secret");
 	}
+
+	public static Date getDiscountExpiredDate() {
+		return DateUtils.parseStringToDateTime(getValue("operation.discount.expireddate"));
+	}
 }
