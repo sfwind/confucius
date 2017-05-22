@@ -8,9 +8,11 @@ import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
 import com.iquanwai.confucius.biz.po.systematism.Page;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -20,53 +22,49 @@ public class OperationServiceImpl implements OperationService {
 
     @Autowired
     private CouponDao couponDao;
-    @Autowired
-    private ClassMemberDao classMemberDao;
-    @Autowired
-    private CourseDao courseDao;
 
     @Override
-    public Boolean alreadyGetDiscount(String openId) {
-        List<Coupon> couponList = couponDao.getCouponByCategory(openId, "ELITE_RISE_MEMBER");
-        Boolean alreadyGet = couponList.size() > 0 ? true : false;
-        return alreadyGet;
+    public Coupon alreadyGetDiscount(String openId) {
+        Coupon coupon = couponDao.getCouponByCategory(openId, "ELITE_RISE_MEMBER");
+        return coupon;
     }
 
     @Override
     public Integer getDiscountValue(String openId) {
         Integer discount;
-        List<ClassMember> classMemberList = classMemberDao.loadByOpenId(openId);
-        List<Course> courseList = courseDao.loadAll(Course.class);
-        List<Integer> formalIdList = courseList.stream().filter(course -> course.getType() != 3).map(course -> course.getId())
-                .collect(Collectors.toList());
-        Long validCount = classMemberList.stream().filter(classMember -> formalIdList.contains(classMember.getCourseId())).count();
-        Long graduateCount = classMemberList.stream().filter(classMember -> classMember.getGraduate()).count();
-        if (validCount == 0) {
-            return 0;
-        }
-        if(graduateCount == 0) {
-            discount = new Random().nextInt(200) + 1;
+        // 高折扣:低折扣 = 2:8
+        double random = Math.random() * 100;
+        if (random >= 99) {
+            discount = new Random().nextInt(100) + 400;
+        } else if (random >= 80) {
+            discount = new Random().nextInt(100) + 300;
+        } else if (random >= 1) {
+            discount = new Random().nextInt(100) + 200;
         } else {
-            // 高折扣:低折扣 = 2:8
-            double random = Math.random() * 10;
-            if (random <= 2) {
-                discount = new Random().nextInt(100) + 301;
-            } else {
-                discount = new Random().nextInt(100) + 201;
-            }
-            // 用户获取成功优惠券之后，数据库进行记录
-            Coupon coupon = new Coupon();
-            //OpenId, Amount, Used, ExpiredDate, Category, Description
-            coupon.setOpenid(openId);
-            coupon.setAmount(discount.doubleValue());
-            coupon.setUsed(0);
-            coupon.setExpiredDate(ConfigUtils.getDiscountExpiredDate());
-            coupon.setCategory("ELITE_RISE_MEMBER");
-            coupon.setDescription("精英奖学金");
-            couponDao.insertGroupCategory(coupon);
+            discount = new Random().nextInt(100) + 100;
         }
-        System.out.println("discount = " + discount);
+        // 用户获取成功优惠券之后，数据库进行记录
+        Coupon coupon = new Coupon();
+        // OpenId, Amount, Used, ExpiredDate, Category, Description
+        coupon.setOpenid(openId);
+        coupon.setAmount(discount.doubleValue());
+        coupon.setUsed(0);
+        coupon.setExpiredDate(DateUtils.beforeDays(new Date(), 1));
+        coupon.setCategory("ELITE_RISE_MEMBER");
+        coupon.setDescription("精英奖学金");
+        couponDao.insertGroupCategory(coupon);
         return discount;
+    }
+
+
+    /**
+     * 更新优惠券的生效日期
+     */
+    public Integer validDiscount(String openId) {
+        Coupon coupon = new Coupon();
+        coupon.setOpenid(openId);
+        coupon.setCategory("ELITE_RISE_MEMBER");
+        return couponDao.updateExpiredDate(coupon);
     }
 
 }
