@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.Response;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -217,6 +218,7 @@ public class FragmentController {
         return WebUtils.result(listDto);
     }
 
+
     /**
      * 评论
      * TODO 根据角色设置评论类型
@@ -229,6 +231,46 @@ public class FragmentController {
     public ResponseEntity<Map<String,Object>> comment(PCLoginUser loginUser,
                                                            @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
                                                            @RequestBody RiseWorkCommentDto dto) {
+        Assert.notNull(loginUser,"登陆用户不能为空");
+        Assert.notNull(moduleId, "评论模块不能为空");
+        Assert.notNull(submitId, "文章不能为空");
+        Assert.notNull(dto, "内容不能为空");
+        Pair<Integer, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent());
+        if(result.getLeft()>0){
+            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                    .module("训练")
+                    .function("碎片化")
+                    .action("评论")
+                    .memo(moduleId+":"+submitId);
+            operationLogService.log(operationLog);
+            RiseWorkCommentDto resultDto = new RiseWorkCommentDto();
+            resultDto.setId(result.getLeft());
+            resultDto.setContent(dto.getContent());
+            resultDto.setUpName(loginUser.getWeixin().getWeixinName());
+            resultDto.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
+            resultDto.setUpTime(DateUtils.parseDateToFormat5(new Date()));
+            resultDto.setRole(loginUser.getRole());
+            // resultDto.setSignature(loginUser.getSignature());
+            resultDto.setIsMine(true);
+            return WebUtils.result(resultDto);
+        } else {
+            return WebUtils.error("评论失败");
+        }
+
+    }
+
+    /**
+     * 评论回复
+     * @param loginUser 登录人
+     * @param moduleId 评论模块
+     * @param submitId 文章id
+     * @param dto 评论内容，回复评论id
+     * @return
+     */
+    @RequestMapping(value = "/pc/fragment/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
+                                                            @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
+                                                            @RequestBody RiseWorkCommentDto dto) {
         Assert.notNull(loginUser,"登陆用户不能为空");
         Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
@@ -263,8 +305,8 @@ public class FragmentController {
         } else {
             return WebUtils.error("评论失败");
         }
-
     }
+
 
     private RiseWorkListDto loadUserRiseWork(ImprovementPlan plan) {
         RiseWorkListDto riseWorkListDto = new RiseWorkListDto();
