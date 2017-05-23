@@ -237,7 +237,7 @@ public class AccountServiceImpl implements AccountService {
         if (provinceList != null) {
             for (Region province : provinceList) {
                 if (StringUtils.equals(province.getName(), name)) {
-                        result = province;
+                    result = province;
                     break;
                 }
             }

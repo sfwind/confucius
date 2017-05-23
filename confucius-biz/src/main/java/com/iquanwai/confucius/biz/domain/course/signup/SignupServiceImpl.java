@@ -462,41 +462,50 @@ public class SignupServiceImpl implements SignupService {
 
     private void sendRiseMemberMsg(Profile profile,MemberType memberType,RiseMember riseMember) {
         Assert.notNull(profile, "openid不能为空");
+
+        logger.info("发送欢迎消息给付费用户{}", profile.getOpenid());
+        if(memberType.getId()==RiseMember.ELITE){
+            //发送消息给精英版用户
+            sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
+        }else{
+            //发送消息给专业版用户
+            sendProfessionalWelcomeMsg(profile, memberType, riseMember);
+        }
+    }
+
+    private void sendProfessionalWelcomeMsg(Profile profile, MemberType memberType, RiseMember riseMember) {
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTouser(profile.getOpenid());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setTemplate_id(ConfigUtils.productPaidMsg());
         String first = "Hi，" + profile.getNickname() + "，欢迎使用RISE正式版！\n\n";
-        first += "所有的小课都已开放。了解更多会员权益，请进入下方个人中心。有疑问请在下方留言给小Q哦\n";
+        first += "所有RISE小课已为你开放，快来学习哦！\n";
         data.put("first", new TemplateMessage.Keyword(first));
         data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
         data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
-        data.put("remark", new TemplateMessage.Keyword("\n想认识更多和你一样的RISER？点击详情，加入你的所在地的分舵吧↓↓↓"));
+        data.put("remark", new TemplateMessage.Keyword("\n想和更多优质小伙伴一起玩耍？点击详情，加入你所在地的分舵，玩转RISE吧～"));
         templateMessage.setUrl(ConfigUtils.domainName() + "/static/quanwai/wx/group");
         templateMessageService.sendMessage(templateMessage);
-
-        if(memberType.getId()==3){
-            //暂停功能
-//            sendEliteWelcomeMsg(openId);
-        }
     }
 
-    private void sendEliteWelcomeMsg(String openid) {
-        logger.info("发送欢迎消息给{}", openid);
-        String key = ConfigUtils.incompleteTaskMsgKey();
+    private void sendEliteWelcomeMsg(String openid, MemberType memberType, RiseMember riseMember) {
+        String key = ConfigUtils.productPaidMsg();
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTouser(openid);
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
 
-        data.put("first", new TemplateMessage.Keyword("Hi，"+profileDao.queryByOpenId(openid).getNickname()+"，你已经选择了RISE精英版，现在来加入专属群，和其他精英以及圈圈认识一下吧！\n"));
-        data.put("keyword1", new TemplateMessage.Keyword("加入RISE精英会员群"));
-        data.put("keyword2", new TemplateMessage.Keyword("高"));
-        data.put("remark", new TemplateMessage.Keyword("\n点击详情，查看群二维码↓↓↓"));
-        templateMessage.setUrl("https://www.iqycamp.com/images/wxgroup/WechatIMG2.jpeg");
+        data.put("first", new TemplateMessage.Keyword("Hi，"+profileDao.queryByOpenId(openid).getNickname()+"，欢迎进入RISE的学习旅程！\n"
+            +"所有的RISE小课都已为你开放。\n"
+            +"每一门都有兴趣，不知道怎么选择？请回复“个体势能模型”得到指南哦!\n"));
+        data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
+        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+        data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
+        data.put("remark", new TemplateMessage.Keyword("\n想扩展人脉，和精英RISER相互勾搭？点击详情，添加小Q，获得入群邀请哦～"));
+        templateMessage.setUrl("https://shimo.im/doc/pwp5qEcft2sKABtL");
 
         templateMessageService.sendMessage(templateMessage);
     }

@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.ua.UAUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -63,6 +64,22 @@ public class IndexController {
 
         return courseView(request);
     }
+
+    @RequestMapping(value = "/pay/pay",method = RequestMethod.GET)
+    public ModelAndView getPayPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
+        if(!checkAccessToken(request,response)){
+            return null;
+        }
+        String ua = request.getHeader("user-agent");
+        //TODO 可以写到配置里
+        if (UAUtils.isLowerAndroid(ua, 4, 4)) {
+            logger.error("openid:{},nickname;{},安卓版本过低，进入简化的付款页面", loginUser == null ? null : loginUser.getOpenId(), loginUser == null ? null : loginUser.getWeixinName());
+            response.sendRedirect("/pay/simple");
+            return null;
+        }
+        return courseView(request, loginUser);
+    }
+
 
     @RequestMapping(value = "/pay/**",method = RequestMethod.GET)
     public ModelAndView getPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
@@ -124,8 +141,10 @@ public class IndexController {
         }
 
         Account account = accountService.getAccount(openId, false);
+        logger.info("用户信息, {}", account);
         if (account != null) {
             if (account.getSubscribe() != null && account.getSubscribe() == 0) {
+                logger.info("用户未关注, {}", account);
                 // 未关注
                 try {
                     response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/subscribe");
