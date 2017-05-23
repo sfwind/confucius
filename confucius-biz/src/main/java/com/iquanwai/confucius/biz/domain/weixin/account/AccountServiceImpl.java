@@ -147,11 +147,12 @@ public class AccountServiceImpl implements AccountService {
             }else{
                 logger.info("更新用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null) {
-                    followUserDao.updateMeta(accountNew);
-                    updateProfile(accountNew);
                     if(accountNew.getSubscribe()==null){
                         //未关注用户
                         accountNew.setSubscribe(0);
+                    }else{
+                        followUserDao.updateMeta(accountNew);
+                        updateProfile(accountNew);
                     }
                 }else {
                     //未关注用户
