@@ -87,14 +87,15 @@ public class AccountServiceImpl implements AccountService {
             return account;
         }
 
-        synchronized (this){
-            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
-            Account accountTemp = followUserDao.queryByOpenid(openid);
-            if(!realTime && accountTemp != null) {
-                return accountTemp;
-            }
-            account = getAccountFromWeixin(openid, accountTemp);
-        }
+//        synchronized (this){
+//            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
+//            Account accountTemp = followUserDao.queryByOpenid(openid);
+//            if(!realTime && accountTemp != null) {
+//                return accountTemp;
+//            }
+//            account = getAccountFromWeixin(openid, accountTemp);
+//        }
+        account = getAccountFromWeixin(openid, account);
         logger.info("返回用户信息:{}",account);
         return account;
     }
