@@ -14,6 +14,11 @@ public interface OperationService {
     Coupon alreadyGetDiscount(String openId);
 
     /**
+     * 获取学员付费课程的历史数目
+     */
+    Integer getValidCourseCount(String openId);
+
+    /**
      * 根据学员不同类型生成随机折扣金额
      */
     Integer getDiscountValue(String openId);

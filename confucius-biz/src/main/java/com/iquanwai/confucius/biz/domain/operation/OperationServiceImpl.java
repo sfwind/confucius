@@ -22,6 +22,10 @@ public class OperationServiceImpl implements OperationService {
 
     @Autowired
     private CouponDao couponDao;
+    @Autowired
+    private CourseDao courseDao;
+    @Autowired
+    private ClassMemberDao classMemberDao;
 
     @Override
     public Coupon alreadyGetDiscount(String openId) {
@@ -56,10 +60,20 @@ public class OperationServiceImpl implements OperationService {
         return discount;
     }
 
+    /**
+     * 获取该学员courseid为1235的课程数目(是否购买过圈外产品)
+     */
+    @Override
+    public Integer getValidCourseCount(String openId) {
+        List<ClassMember> classMemberList = classMemberDao.loadByOpenId(openId);
+        Long validCourseCount = classMemberList.stream().filter(classMember -> "1235".contains(classMember.getCourseId().toString())).count();
+        return validCourseCount.intValue();
+    }
 
     /**
      * 更新优惠券的生效日期
      */
+    @Override
     public Integer validDiscount(String openId) {
         Coupon coupon = new Coupon();
         coupon.setOpenid(openId);
