@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.operation;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseDao;
+import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
@@ -26,6 +27,8 @@ public class OperationServiceImpl implements OperationService {
     private CourseDao courseDao;
     @Autowired
     private ClassMemberDao classMemberDao;
+    @Autowired
+    private CostRepo costRepo;
 
     @Override
     public Coupon alreadyGetDiscount(String openId) {
@@ -57,6 +60,7 @@ public class OperationServiceImpl implements OperationService {
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("精英奖学金");
         couponDao.insertGroupCategory(coupon);
+        costRepo.reloadCache();
         return discount;
     }
 
