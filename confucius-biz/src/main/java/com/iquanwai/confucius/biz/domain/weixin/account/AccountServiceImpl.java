@@ -93,8 +93,10 @@ public class AccountServiceImpl implements AccountService {
             if(!realTime && accountTemp != null) {
                 return accountTemp;
             }
-            return getAccountFromWeixin(openid, accountTemp);
+            account = getAccountFromWeixin(openid, accountTemp);
         }
+        logger.info("返回用户信息:{}",account);
+        return account;
     }
 
     private Account getAccountFromWeixin(String openid, Account account) {
@@ -165,7 +167,6 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-        logger.info("返回用户信息:{}",accountNew);
         return accountNew;
     }
 
