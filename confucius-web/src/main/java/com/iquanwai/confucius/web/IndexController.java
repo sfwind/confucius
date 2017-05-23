@@ -71,7 +71,9 @@ public class IndexController {
             return null;
         }
         String ua = request.getHeader("user-agent");
-        if (UAUtils.isLowerAndroid(ua, 6, 5)) {
+        //TODO 可以写到配置里
+        if (UAUtils.isLowerAndroid(ua, 4, 4)) {
+            logger.error("安卓版本过低，进入简化的付款页面");
             response.sendRedirect("/pay/simple");
             return null;
         }
