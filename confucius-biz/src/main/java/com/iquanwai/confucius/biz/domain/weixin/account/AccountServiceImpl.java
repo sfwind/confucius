@@ -87,20 +87,19 @@ public class AccountServiceImpl implements AccountService {
             return account;
         }
 
-//        synchronized (this){
-//            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
-//            Account accountTemp = followUserDao.queryByOpenid(openid);
-//            if(!realTime && accountTemp != null) {
-//                return accountTemp;
-//            }
-//            account = getAccountFromWeixin(openid, accountTemp);
-//        }
-        account = getAccountFromWeixin(openid, account);
+        synchronized (this){
+            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
+            account = followUserDao.queryByOpenid(openid);
+            if(!realTime && account != null) {
+                return account;
+            }
+            account = getAccountFromWeixin(openid, account==null);
+        }
         logger.info("返回用户信息:{}",account);
         return account;
     }
 
-    private Account getAccountFromWeixin(String openid, Account account) {
+    private Account getAccountFromWeixin(String openid, Boolean insert) {
         //调用api查询account对象
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
@@ -127,7 +126,7 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if(account==null) {
+            if(insert) {
                 redisUtil.lock("lock:wx:user:insert",(lock)->{
                     if(accountNew.getNickname()!=null){
                         Account finalQuery = followUserDao.queryByOpenid(openid);
@@ -288,7 +287,7 @@ public class AccountServiceImpl implements AccountService {
                 return profileTemp;
             }
             Account account = followUserDao.queryByOpenid(openid);
-            getAccountFromWeixin(openid,account);
+            getAccountFromWeixin(openid,account==null);
             return getProfileFromDB(openid);
         }
     }
