@@ -139,6 +139,9 @@ public class AccountServiceImpl implements AccountService {
                         } catch (Exception e) {
                             logger.error(e.getLocalizedMessage(), e);
                         }
+                    }else{
+                        //用户未关注
+                        accountNew.setSubscribe(0);
                     }
                 });
             }else{
