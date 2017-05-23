@@ -54,7 +54,7 @@ public class OperationController {
     @RequestMapping(value = "discount/valid", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> validDiscount(LoginUser loginUser) {
         // 日志记录
-        OperationLog operationLog = new OperationLog().module("临时活动").function("生效折扣金额");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("临时活动").function("生效折扣金额");
         operationLogService.log(operationLog);
         Integer validCount = operationService.validDiscount(loginUser.getOpenId());
         if (validCount > 0) {

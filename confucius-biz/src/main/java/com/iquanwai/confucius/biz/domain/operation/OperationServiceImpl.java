@@ -60,7 +60,6 @@ public class OperationServiceImpl implements OperationService {
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("精英奖学金");
         couponDao.insertGroupCategory(coupon);
-        costRepo.reloadCache();
         return discount;
     }
 
@@ -82,7 +81,9 @@ public class OperationServiceImpl implements OperationService {
         Coupon coupon = new Coupon();
         coupon.setOpenid(openId);
         coupon.setCategory("ELITE_RISE_MEMBER");
-        return couponDao.updateExpiredDate(coupon);
+        Integer result = couponDao.updateExpiredDate(coupon);
+        costRepo.reloadCache();
+        return result;
     }
 
 }
