@@ -32,7 +32,7 @@ public class OperationController {
     @RequestMapping(value = "discount", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> getDiscountValue(LoginUser loginUser) {
         // 日志记录
-        OperationLog operationLog = new OperationLog().module("临时活动").function("获取折扣金额");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("临时活动").function("获取折扣金额");
         operationLogService.log(operationLog);
         Integer validaCourseCount = operationService.getValidCourseCount(loginUser.getOpenId());
         if(validaCourseCount == 0) {
