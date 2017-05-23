@@ -161,6 +161,7 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
+        logger.info("返回用户信息:{}",accountNew);
         return accountNew;
     }
 
