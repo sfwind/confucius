@@ -143,8 +143,7 @@ public class IndexController {
         Account account = accountService.getAccount(openId, false);
         if (account != null) {
             logger.info("用户未关注, {}", account);
-            if (account.getSubscribe() != null && account.getSubscribe() == 0) {
-                logger.info("用户未关注, {}", openId);
+            if (account.getSubscribe() == null || account.getSubscribe() == 0) {
                 // 未关注
                 try {
                     response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/subscribe");
