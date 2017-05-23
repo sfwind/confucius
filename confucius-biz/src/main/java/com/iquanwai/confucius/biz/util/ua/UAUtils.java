@@ -30,18 +30,23 @@ public class UAUtils {
     }
 
     public static boolean isLowerAndroid(String ua,Integer major,Integer minor){
-        OS os = UAUtils.parseOs(ua);
-        if (os == null) {
-            logger.error("获取os失败,{}", ua);
-            return false;
-        }
-        logger.info("os:{}", os);
-        if (os.family != null && os.major != null && os.minor != null) {
-            String family = os.family.toLowerCase();
-            Integer tempMajor = Double.valueOf(os.major).intValue();
-            Integer tempMinor = Double.valueOf(os.minor).intValue();
-            return family.equals("android") && (tempMajor < major || (tempMajor.equals(major) && tempMinor < minor));
-        } else {
+        try {
+            OS os = UAUtils.parseOs(ua);
+            if (os == null) {
+                logger.error("获取os失败,{}", ua);
+                return false;
+            }
+            logger.info("os:{}", os);
+            if (os.family != null && os.major != null && os.minor != null) {
+                String family = os.family.toLowerCase();
+                Integer tempMajor = Double.valueOf(os.major).intValue();
+                Integer tempMinor = Double.valueOf(os.minor).intValue();
+                return family.equals("android") && (tempMajor < major || (tempMajor.equals(major) && tempMinor < minor));
+            } else {
+                return false;
+            }
+        } catch(Exception e){
+            logger.error("error for parse os", e);
             return false;
         }
     }
