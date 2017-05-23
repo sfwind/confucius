@@ -151,8 +151,11 @@ public class AccountServiceImpl implements AccountService {
                         //未关注用户
                         accountNew.setSubscribe(0);
                     }else{
-                        followUserDao.updateMeta(accountNew);
-                        updateProfile(accountNew);
+                        if(accountNew.getSubscribe()!=0){
+                            //只更新关注用户
+                            followUserDao.updateMeta(accountNew);
+                            updateProfile(accountNew);
+                        }
                     }
                 }else {
                     //未关注用户
