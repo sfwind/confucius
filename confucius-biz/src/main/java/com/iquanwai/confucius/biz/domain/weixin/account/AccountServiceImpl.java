@@ -89,17 +89,15 @@ public class AccountServiceImpl implements AccountService {
 
         synchronized (this){
             // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
-            account = followUserDao.queryByOpenid(openid);
-            if(!realTime && account != null) {
-                return account;
+            Account accountTemp = followUserDao.queryByOpenid(openid);
+            if(!realTime && accountTemp != null) {
+                return accountTemp;
             }
-            account = getAccountFromWeixin(openid, account==null);
+            return getAccountFromWeixin(openid, accountTemp);
         }
-        logger.info("返回用户信息:{}",account);
-        return account;
     }
 
-    private Account getAccountFromWeixin(String openid, Boolean insert) {
+    private Account getAccountFromWeixin(String openid, Account account) {
         //调用api查询account对象
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
@@ -126,7 +124,7 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if(insert) {
+            if(account==null) {
                 redisUtil.lock("lock:wx:user:insert",(lock)->{
                     if(accountNew.getNickname()!=null){
                         Account finalQuery = followUserDao.queryByOpenid(openid);
@@ -141,27 +139,13 @@ public class AccountServiceImpl implements AccountService {
                         } catch (Exception e) {
                             logger.error(e.getLocalizedMessage(), e);
                         }
-                    }else{
-                        //用户未关注
-                        accountNew.setSubscribe(0);
                     }
                 });
             }else{
                 logger.info("更新用户信息:{}",accountNew);
                 if(accountNew.getNickname()!=null) {
-                    if(accountNew.getSubscribe()==null){
-                        //未关注用户
-                        accountNew.setSubscribe(0);
-                    }else{
-                        if(accountNew.getSubscribe()!=0){
-                            //只更新关注用户
-                            followUserDao.updateMeta(accountNew);
-                            updateProfile(accountNew);
-                        }
-                    }
-                }else {
-                    //未关注用户
-                    accountNew.setSubscribe(0);
+                    followUserDao.updateMeta(accountNew);
+                    updateProfile(accountNew);
                 }
             }
         } catch (Exception e) {
@@ -253,7 +237,7 @@ public class AccountServiceImpl implements AccountService {
         if (provinceList != null) {
             for (Region province : provinceList) {
                 if (StringUtils.equals(province.getName(), name)) {
-                        result = province;
+                    result = province;
                     break;
                 }
             }
@@ -287,7 +271,7 @@ public class AccountServiceImpl implements AccountService {
                 return profileTemp;
             }
             Account account = followUserDao.queryByOpenid(openid);
-            getAccountFromWeixin(openid,account==null);
+            getAccountFromWeixin(openid,account);
             return getProfileFromDB(openid);
         }
     }
