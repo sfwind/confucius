@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.ua.UAUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -63,6 +64,20 @@ public class IndexController {
 
         return courseView(request);
     }
+
+    @RequestMapping(value = "/pay/pay",method = RequestMethod.GET)
+    public ModelAndView getPayPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
+        if(!checkAccessToken(request,response)){
+            return null;
+        }
+        String ua = request.getHeader("user-agent");
+        if (UAUtils.isLowerAndroid(ua, 6, 5)) {
+            response.sendRedirect("/pay/simple");
+            return null;
+        }
+        return courseView(request, loginUser);
+    }
+
 
     @RequestMapping(value = "/pay/**",method = RequestMethod.GET)
     public ModelAndView getPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
