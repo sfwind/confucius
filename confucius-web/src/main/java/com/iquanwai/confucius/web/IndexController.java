@@ -141,6 +141,7 @@ public class IndexController {
         }
 
         Account account = accountService.getAccount(openId, false);
+        logger.info("用户信息, {}", account);
         if (account != null) {
             if (account.getSubscribe() != null && account.getSubscribe() == 0) {
                 logger.info("用户未关注, {}", account);
