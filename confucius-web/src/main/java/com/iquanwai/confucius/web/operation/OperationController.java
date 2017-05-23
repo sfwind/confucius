@@ -51,7 +51,7 @@ public class OperationController {
         }
     }
 
-    @RequestMapping(value = "discount/valid", method = RequestMethod.GET)
+    @RequestMapping(value = "discount/valid", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> validDiscount(LoginUser loginUser) {
         // 日志记录
         OperationLog operationLog = new OperationLog().module("临时活动").function("生效折扣金额");
