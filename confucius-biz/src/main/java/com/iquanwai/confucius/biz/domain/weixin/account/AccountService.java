@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
 
+import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.EventWall;
 import com.iquanwai.confucius.biz.po.Region;
@@ -15,7 +16,7 @@ public interface AccountService {
     /**
      * 根据openid获取用户的详细信息
      * */
-    Account getAccount(String openid, boolean realTime);
+    Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
     /**
      * 更新个人信息

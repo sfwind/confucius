@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -157,14 +158,17 @@ public class LoginUserService {
             logger.info("accessToken:{} can't find openid", accessToken);
             return new MutablePair<>(-4, null);
         }
-        Account account = accountService.getAccount(openid, false);
+        Account account = null;
+        try {
+            account = accountService.getAccount(openid, false);
+        } catch (NotFollowingException e) {
+            return new MutablePair<>(-3, null);
+        }
         logger.info("accessToken:{},openId:{},account:{}", accessToken, openid, account);
         if (account == null) {
             return new MutablePair<>(-2, null);
         }
-        if (account.getSubscribe() != null && account.getSubscribe() == 0) {
-            return new MutablePair<>(-3, null);
-        }
+
         Role role = permissionService.getRole(openid);
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号

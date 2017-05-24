@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
+import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -140,19 +141,17 @@ public class IndexController {
             return false;
         }
 
-        Account account = accountService.getAccount(openId, false);
-        logger.info("用户信息, {}", account);
-        if (account != null) {
-            if (account.getSubscribe() != null && account.getSubscribe() == 0) {
-                logger.info("用户未关注, {}", account);
-                // 未关注
-                try {
-                    response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/subscribe");
-                } catch (IOException e) {
-                    logger.error(e.getLocalizedMessage(), e);
-                }
-                return false;
+        Account account = null;
+        try {
+            account = accountService.getAccount(openId, false);
+        } catch (NotFollowingException e) {
+            try {
+                response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/subscribe");
+            } catch (IOException e1) {
+                logger.error(e1.getLocalizedMessage(), e1);
             }
+        }
+        if (account != null) {
             return true;
         } else {
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);

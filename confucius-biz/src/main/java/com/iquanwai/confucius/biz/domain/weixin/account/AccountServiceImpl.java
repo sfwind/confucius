@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
+import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.EventWall;
 import com.iquanwai.confucius.biz.po.Region;
@@ -80,7 +81,7 @@ public class AccountServiceImpl implements AccountService {
         logger.info("role init complete");
     }
 
-    public Account getAccount(String openid, boolean realTime) {
+    public Account getAccount(String openid, boolean realTime) throws NotFollowingException {
         //从数据库查询account对象
         Account account = followUserDao.queryByOpenid(openid);
         if(!realTime && account != null) {
@@ -97,7 +98,7 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private Account getAccountFromWeixin(String openid, Account account) {
+    private Account getAccountFromWeixin(String openid, Account account) throws NotFollowingException {
         //调用api查询account对象
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
@@ -124,6 +125,9 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
+            if(accountNew.getSubscribe() == 0){
+                throw new NotFollowingException();
+            }
             if(account==null) {
                 redisUtil.lock("lock:wx:user:insert",(lock)->{
                     if(accountNew.getNickname()!=null){
@@ -148,6 +152,8 @@ public class AccountServiceImpl implements AccountService {
                     updateProfile(accountNew);
                 }
             }
+        } catch (NotFollowingException e1){
+            throw new NotFollowingException();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -193,7 +199,11 @@ public class AccountServiceImpl implements AccountService {
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
         for(String openid:usersDto.getData().getOpenid()) {
-            getAccount(openid, true);
+            try{
+                getAccount(openid, true);
+            }catch (Exception e){
+                logger.error(e.getMessage(), e);
+            }
         }
         logger.info("处理完成");
     }
@@ -209,7 +219,11 @@ public class AccountServiceImpl implements AccountService {
         List<String> openids = followUserDao.queryAll();
         for(String openid:usersDto.getData().getOpenid()) {
             if(!openids.contains(openid)) {
-                getAccountFromWeixin(openid, null);
+                try{
+                    getAccountFromWeixin(openid, null);
+                }catch (Exception e){
+                    logger.error(e.getMessage(), e);
+                }
             }
         }
         logger.info("处理完成");
@@ -271,7 +285,11 @@ public class AccountServiceImpl implements AccountService {
                 return profileTemp;
             }
             Account account = followUserDao.queryByOpenid(openid);
-            getAccountFromWeixin(openid,account);
+            try{
+                getAccountFromWeixin(openid,account);
+            }catch (Exception e){
+                logger.error(e.getMessage(), e);
+            }
             return getProfileFromDB(openid);
         }
     }
