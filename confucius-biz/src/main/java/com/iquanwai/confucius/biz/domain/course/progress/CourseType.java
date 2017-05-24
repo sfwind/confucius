@@ -40,8 +40,8 @@ public class CourseType {
         iconUnLockMap.put(NEW_CHALLENGE, PICURL_PREFIX+"course_incomplete.png");
         iconUnLockMap.put(NEW_HOMEWORK, PICURL_PREFIX+"course_incomplete.png");
 
-        iconCompleteMap.put(CHALLENGE, PICURL_PREFIX+"course_locked.png");
-        iconCompleteMap.put(HOMEWORK, PICURL_PREFIX+"course_locked.png");
+        iconCompleteMap.put(CHALLENGE, PICURL_PREFIX+"course_complete.png");
+        iconCompleteMap.put(HOMEWORK, PICURL_PREFIX+"course_complete.png");
         iconCompleteMap.put(ASSESSMENT, PICURL_PREFIX+"group_talk_locked.png");
         iconCompleteMap.put(RELAX, PICURL_PREFIX+"relax_day.png");
         iconCompleteMap.put(GRADUATE, PICURL_PREFIX+"graduate_locked.png");
