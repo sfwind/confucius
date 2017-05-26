@@ -83,5 +83,15 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
         }
     }
 
+    public int deleteDiscussById(int id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update WarmupPracticeDiscuss set Del = 1 where Id = ?";
+        try {
+            return runner.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
 
 }

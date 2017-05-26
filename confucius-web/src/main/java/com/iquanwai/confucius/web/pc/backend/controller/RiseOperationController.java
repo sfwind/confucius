@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -12,6 +13,7 @@ import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,8 @@ public class RiseOperationController {
     private ProblemService problemService;
     @Autowired
     private PracticeService practiceService;
+    @Autowired
+    private MessageService messageService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -107,6 +111,28 @@ public class RiseOperationController {
         operationLogService.log(operationLog);
 
         return WebUtils.result(warmupPractice);
+    }
+
+    /**
+     * 删除助教的巩固练习评论
+     */
+    @RequestMapping("/warmup/discuss/del/{discussId}")
+    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
+        Pair<Integer, String> result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习练习区")
+                .action("删除巩固练习评论")
+                .memo(discussId.toString());
+        operationLogService.log(operationLog);
+        if(result.getLeft() == 1) {
+            messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。", result.getRight(), loginUser.getOpenId(), null);
+            return WebUtils.success();
+        } else if(result.getLeft() == 0) {
+            return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
+        } else {
+            return WebUtils.error("系统异常");
+        }
     }
 
 
