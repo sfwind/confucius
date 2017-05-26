@@ -20,13 +20,14 @@ public class RiseWorkShowDto {
     private Boolean isMine; // 是否是自己的
     private Integer voteCount; //  点赞数
     private Integer voteStatus;// 0 没有点赞，1 点赞中
-    private Integer planId;
+    private Integer planId;  //训练计划id
     private Integer workId;
     private List<String> picList;
-    private String signature;
-    private Integer role;
+    private String signature; //签名
+    private Integer role; //角色id
     private Integer requestCommentCount; //求点评次数
     private Boolean request; //是否已求点评
+    private Integer knowledgeId; //知识点id
 
     private String desc; // 描述
     private List<LabelConfig> labelList;

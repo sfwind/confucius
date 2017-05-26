@@ -382,4 +382,18 @@ public class FragmentController {
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
+
+    @RequestMapping("/pc/fragment/knowledge/load/{knowledgeId}")
+    public ResponseEntity<Map<String, Object>> getKnowledge(PCLoginUser pcLoginUser,
+                                                            @PathVariable Integer knowledgeId) {
+        Assert.notNull(pcLoginUser, "用户不能为空");
+        Knowledge knowledge = applicationService.getKnowledge(knowledgeId);
+
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                .module("训练")
+                .function("应用练习")
+                .action("获取知识点");
+        operationLogService.log(operationLog);
+        return WebUtils.result(knowledge);
+    }
 }

@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -332,6 +333,10 @@ public class ApplicationController {
             ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
             show.setTitle(applicationPractice.getTopic());
             show.setDesc(applicationPractice.getDescription());
+            boolean integrated = Knowledge.isReview(applicationPractice.getKnowledgeId());
+            if(!integrated){
+                show.setKnowledgeId(applicationPractice.getKnowledgeId());
+            }
             // 查询照片
 //            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
 //            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));

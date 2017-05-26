@@ -1,10 +1,6 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
@@ -32,6 +28,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private PracticePlanDao practicePlanDao;
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
+    @Autowired
+    private KnowledgeDao knowledgeDao;
     @Autowired
     private PointRepo pointRepo;
     @Autowired
@@ -136,6 +134,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApplicationSubmit loadSubmit(Integer id){
         return applicationSubmitDao.load(ApplicationSubmit.class,id);
+    }
+
+    @Override
+    public Knowledge getKnowledge(Integer knowledgeId) {
+        return knowledgeDao.load(Knowledge.class, knowledgeId);
     }
 
 }
