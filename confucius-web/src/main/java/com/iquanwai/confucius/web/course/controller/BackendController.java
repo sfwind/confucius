@@ -19,6 +19,7 @@ import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +29,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.ref.SoftReference;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -243,17 +246,21 @@ public class BackendController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/login/users",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> loginUsersList(){
-        LOGGER.info("users:{}", LoginUserService.pcLoginUserMap);
-        List<Map<String,Object>> result = Lists.newArrayList();
-        Set<String> strings = LoginUserService.pcLoginUserMap.keySet();
-        strings.forEach((item)->{
-            Map<String,Object> temp = Maps.newHashMap();
-            temp.put(item, LoginUserService.pcLoginUserMap.get(item).get());
-            result.add(temp);
-        });
-        return WebUtils.result(result);
+    @RequestMapping(value = "/login/users", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loginUsersList(@RequestParam(value = "qt") String qt) {
+        LOGGER.info("qt:{},users:{}", qt, LoginUserService.pcLoginUserMap);
+        List<Map<String, Object>> result = Lists.newArrayList();
+        Set<String> keys = LoginUserService.pcLoginUserMap.keySet();
+        if(keys.contains(qt)){
+            SoftReference<PCLoginUser> pcLoginUserSoftReference = LoginUserService.pcLoginUserMap.get(qt);
+            if (pcLoginUserSoftReference != null) {
+                return WebUtils.result(pcLoginUserSoftReference.get());
+            } else {
+                return WebUtils.error("有cookie但是没有引用");
+            }
+        } else {
+            return WebUtils.error("没有这个cookie");
+        }
     }
 
 }
