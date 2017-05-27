@@ -80,7 +80,7 @@ public class LoginUserService {
                 logger.info("act:{},已登录,user:{},nickName:{}", sessionId, pcLoginUser.getOpenId(), pcLoginUser.getWeixin() != null ? pcLoginUser.getWeixin().getWeixinName() : "没有微信信息");
                 return true;
             } else {
-                logger.info("act:{},softReference失效");
+                logger.info("act:{},softReference失效", sessionId);
                 return false;
             }
         } else {
