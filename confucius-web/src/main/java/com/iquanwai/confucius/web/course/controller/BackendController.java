@@ -34,6 +34,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by justin on 16/10/8.
@@ -245,7 +246,14 @@ public class BackendController {
     @RequestMapping(value = "/login/users",method = RequestMethod.GET)
     public ResponseEntity<Map<String,Object>> loginUsersList(){
         LOGGER.info("users:{}", LoginUserService.pcLoginUserMap);
-        return WebUtils.result(LoginUserService.pcLoginUserMap);
+        List<Map<String,Object>> result = Lists.newArrayList();
+        Set<String> strings = LoginUserService.pcLoginUserMap.keySet();
+        strings.forEach((item)->{
+            Map<String,Object> temp = Maps.newHashMap();
+            temp.put(item, LoginUserService.pcLoginUserMap.get(item).get());
+            result.add(temp);
+        });
+        return WebUtils.result(result);
     }
 
 }
