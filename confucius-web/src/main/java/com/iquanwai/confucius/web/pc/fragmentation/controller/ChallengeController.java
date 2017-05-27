@@ -88,7 +88,7 @@ public class ChallengeController {
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
             ImprovementPlan improvementPlan = plan.get();
-            ChallengePractice challengePractice = practiceService.getChallengePractice(cid, openId, improvementPlan.getId(),false);
+            ChallengePractice challengePractice = challengeService.getChallengePractice(cid, openId, improvementPlan.getId(),false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
 //             result.setPic(param.getPic());
             dto.setSubmitId(challengePractice.getSubmitId());
@@ -121,7 +121,7 @@ public class ChallengeController {
                 .action("PC查看小目标")
                 .memo(pcLoginUser.getOpenId() + " look " + submitId);
         operationLogService.log(operationLog);
-        ChallengeSubmit submit = practiceService.loadChallengeSubmit(submitId);
+        ChallengeSubmit submit = challengeService.loadSubmit(submitId);
         if (submit == null) {
             return WebUtils.error(404, "无该提交记录");
         } else {
@@ -160,7 +160,7 @@ public class ChallengeController {
             }
             show.setVoteCount(votesCount);
             // 根据challengeId查询problemId
-            ChallengePractice challengePractice = practiceService.getChallenge(submit.getChallengeId());
+            ChallengePractice challengePractice = challengeService.getChallenge(submit.getChallengeId());
             Problem problem = problemService.getProblem(challengePractice.getProblemId());
             show.setTitle(problem.getProblem());
             // 查询照片

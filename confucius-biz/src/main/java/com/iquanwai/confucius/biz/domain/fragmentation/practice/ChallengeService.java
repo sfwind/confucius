@@ -14,4 +14,15 @@ public interface ChallengeService {
     Pair<Integer,Integer> submit(Integer id, String content);
 
     ChallengeSubmit loadSubmit(Integer id);
+
+    /**
+     * 获取小目标
+     * @param id 小目标id
+     * @param openid 学员id
+     * @param planId 训练计划id
+     * */
+    ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create);
+
+
+    ChallengePractice getChallenge(Integer id);
 }

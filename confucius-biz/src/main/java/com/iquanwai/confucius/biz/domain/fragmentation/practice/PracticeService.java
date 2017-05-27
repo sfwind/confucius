@@ -12,22 +12,6 @@ import java.util.List;
  */
 public interface PracticeService {
 
-
-
-    /**
-     * 获取小目标
-     * @param id 小目标id
-     * @param openid 学员id
-     * @param planId 训练计划id
-     * */
-    ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create);
-
-
-    ChallengePractice getChallenge(Integer id);
-
-
-    ChallengeSubmit loadChallengeSubmit(Integer challengeId);
-
     /**
      * 查询点赞数
      * @param type 1：小目标，2：体系化大作业
