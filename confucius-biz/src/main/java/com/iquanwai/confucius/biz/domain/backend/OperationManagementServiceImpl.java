@@ -228,7 +228,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public Pair<Integer, String> deleteAsstWarmupDiscuss(Integer discussId) {
+    public Pair<Integer, WarmupPracticeDiscuss> deleteAsstWarmupDiscuss(Integer discussId) {
         WarmupPracticeDiscuss warmupPracticeDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, discussId);
         String discussOpenid = warmupPracticeDiscuss.getOpenid();
         if(discussOpenid != null) {
@@ -236,12 +236,12 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             Long cnt = userRoleList.stream().filter(userRole -> Role.isAsst(userRole.getRoleId())).count();
             if(cnt > 0) {
                 warmupPracticeDiscussDao.deleteDiscussById(discussId);
-                return new MutablePair<>(1, discussOpenid);
+                return new MutablePair<>(1, warmupPracticeDiscuss);
             } else {
-                return new MutablePair<>(0, discussOpenid);
+                return new MutablePair<>(0, warmupPracticeDiscuss);
             }
         } else {
-            return new MutablePair<>(-1, discussOpenid);
+            return new MutablePair<>(-1, warmupPracticeDiscuss);
         }
     }
 

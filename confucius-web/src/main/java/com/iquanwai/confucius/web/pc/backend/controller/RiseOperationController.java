@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -120,7 +121,7 @@ public class RiseOperationController {
      */
     @RequestMapping("/warmup/discuss/del/{discussId}")
     public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
-        Pair<Integer, String> result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
+        Pair<Integer, WarmupPracticeDiscuss> result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习练习区")
@@ -128,7 +129,10 @@ public class RiseOperationController {
                 .memo(discussId.toString());
         operationLogService.log(operationLog);
         if(result.getLeft() == 1) {
-            messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。", result.getRight(), SYSTEM_MESSAGE, null);
+            WarmupPracticeDiscuss warmupPracticeDiscuss = result.getRight();
+            String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
+            url = MessageFormat.format(url, String.valueOf(warmupPracticeDiscuss.getId()), String.valueOf(warmupPracticeDiscuss.getWarmupPracticeId()));
+            messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。", result.getRight().getOpenid(), SYSTEM_MESSAGE, url);
             return WebUtils.success();
         } else if(result.getLeft() == 0) {
             return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
