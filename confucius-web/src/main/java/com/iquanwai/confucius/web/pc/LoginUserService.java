@@ -80,7 +80,7 @@ public class LoginUserService {
                 logger.info("act:{},已登录,user:{},nickName:{}", sessionId, pcLoginUser.getOpenId(), pcLoginUser.getWeixin() != null ? pcLoginUser.getWeixin().getWeixinName() : "没有微信信息");
                 return true;
             } else {
-                logger.info("act:{},softReference失效");
+                logger.info("act:{},softReference失效", sessionId);
                 return false;
             }
         } else {
@@ -108,7 +108,7 @@ public class LoginUserService {
                 pcLoginUserMap.remove(sessionId);
                 return new MutablePair<>(-2, callback);
             } else {
-                logger.info("key:{} is lost , search again: {}", result.getRight());
+                logger.info("key:{} is lost , search again: {}",sessionId, result.getRight());
                 login(sessionId, result.getRight());
                 return new MutablePair<>(1, callback);
             }
@@ -148,7 +148,7 @@ public class LoginUserService {
         // 先检查有没有缓存
         SoftReference<PCLoginUser> pcLoginUserSoftReference = pcLoginUserMap.get(accessToken);
         if (pcLoginUserSoftReference != null && pcLoginUserSoftReference.get() != null) {
-            logger.info("已缓存,_qt:{}", accessToken);
+            logger.debug("已缓存,_qt:{}", accessToken);
             return new MutablePair<>(1, pcLoginUserSoftReference.get());
         }
 
@@ -197,5 +197,21 @@ public class LoginUserService {
         pcLoginUser.setPermissionList(permissionService.loadPermissions(role.getLevel()));
         logger.info("pcUser:{}", pcLoginUser);
         return new MutablePair<>(1, pcLoginUser);
+    }
+
+    public Role getUserRole(String openid){
+        Role role = permissionService.getRole(openid);
+        if (role == null) {
+            // 获得用户的openid，根据openid查询用户的学号
+            //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
+            List<ClassMember> classMembers = courseProgressService.loadActiveCourse(openid);
+            List<ImprovementPlan> plans = planService.loadUserPlans(openid);
+            if (classMembers.isEmpty() && plans.isEmpty()) {
+                role = Role.stranger();
+            } else {
+                role = Role.student();
+            }
+        }
+        return role;
     }
 }
