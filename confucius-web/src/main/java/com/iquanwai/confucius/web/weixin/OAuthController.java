@@ -2,7 +2,9 @@ package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,6 +33,8 @@ public class OAuthController {
 
     @Autowired
     private OAuthService oAuthService;
+    @Autowired
+    private LoginUserService loginUserService;
 
     @RequestMapping("/auth")
     public void oauthCode(@RequestParam("callbackUrl") String callbackUrl,
@@ -154,6 +158,15 @@ public class OAuthController {
                         response);
                 response.sendRedirect("/servercode");
             } else {
+                Role userRole = loginUserService.getUserRole(callback.getOpenid());
+                if (userRole.getLevel().equals(0)) {
+                    // 选择小课
+                    LOGGER.info("_act:{},openid:{},提示开始训练");
+                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
+                            response);
+                    response.sendRedirect("/servercode");
+                    return;
+                }
                 // 进行跳转
                 // 返回带accessToken的url
                 LOGGER.info("set _act {} for {} ", callback.getPcAccessToken(), callback.getOpenid());
