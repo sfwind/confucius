@@ -47,6 +47,8 @@ public class RiseOperationController {
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private static final int APPLICATION_SUBMIT_SIZE = 20;
+    // 消息中心消息，显示为系统头像
+    private static final String SYSTEM_MESSAGE = "AUTO";
 
     @RequestMapping("/application/submit/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser loginUser,
@@ -126,7 +128,7 @@ public class RiseOperationController {
                 .memo(discussId.toString());
         operationLogService.log(operationLog);
         if(result.getLeft() == 1) {
-            messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。", result.getRight(), loginUser.getOpenId(), null);
+            messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。", result.getRight(), SYSTEM_MESSAGE, null);
             return WebUtils.success();
         } else if(result.getLeft() == 0) {
             return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
