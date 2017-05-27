@@ -89,6 +89,6 @@ public interface OperationManagementService {
      *  0：非教练评价
      * -1：数据异常
      */
-    Pair<Integer, WarmupPracticeDiscuss> deleteAsstWarmupDiscuss(Integer discussid);
+    Pair<Integer, String> deleteAsstWarmupDiscuss(Integer discussId);
 
 }
