@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.backend;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
@@ -78,4 +79,14 @@ public interface OperationManagementService {
      * @param prePracticeId 练习id
      */
     WarmupPractice getNextPractice(Integer problemId, Integer prePracticeId);
+
+    /**
+     * 删除巩固练习下的教练评论
+     * 返回left值
+     *  1：删除成功
+     *  0：非教练评价
+     * -1：数据异常
+     */
+    Pair<Integer, String> deleteAsstWarmupDiscuss(Integer discussid);
+
 }
