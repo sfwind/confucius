@@ -108,7 +108,7 @@ public class LoginUserService {
                 pcLoginUserMap.remove(sessionId);
                 return new MutablePair<>(-2, callback);
             } else {
-                logger.info("key:{} is lost , search again: {}", result.getRight());
+                logger.info("key:{} is lost , search again: {}",sessionId, result.getRight());
                 login(sessionId, result.getRight());
                 return new MutablePair<>(1, callback);
             }

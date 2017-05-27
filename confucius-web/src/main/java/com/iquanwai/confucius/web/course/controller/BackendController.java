@@ -17,6 +17,7 @@ import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.MarkDto;
 import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
 import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
+import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -240,4 +241,10 @@ public class BackendController {
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
+
+    @RequestMapping(value = "/login/users",method = RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> loginUsersList(){
+        return WebUtils.result(LoginUserService.pcLoginUserMap);
+    }
+
 }
