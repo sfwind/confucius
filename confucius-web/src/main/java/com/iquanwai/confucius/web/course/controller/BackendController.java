@@ -244,6 +244,7 @@ public class BackendController {
 
     @RequestMapping(value = "/login/users",method = RequestMethod.GET)
     public ResponseEntity<Map<String,Object>> loginUsersList(){
+        LOGGER.info("users:{}", LoginUserService.pcLoginUserMap);
         return WebUtils.result(LoginUserService.pcLoginUserMap);
     }
 
