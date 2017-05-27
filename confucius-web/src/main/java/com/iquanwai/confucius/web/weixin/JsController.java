@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.weixin.signature.JsSignature;
 import com.iquanwai.confucius.biz.domain.weixin.signature.JsSignatureService;
+import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,10 @@ public class JsController {
     private JsSignatureService jsSignatureService;
 
     @RequestMapping("/signature")
-    public ResponseEntity<Map<String, Object>> signature(@RequestParam("url") String url) throws IOException {
+    public ResponseEntity<Map<String, Object>> signature(@RequestParam("url") String url, LoginUser loginUser) throws IOException {
         try {
             JsSignature jsSignature = jsSignatureService.getJsSignature(url, false);
+            LOGGER.info("user:{} js config,url:{}", loginUser != null ? loginUser.getWeixinName() : null, url);
             return WebUtils.result(jsSignature);
         }catch (Exception e){
             LOGGER.error("js signature failed", e);
