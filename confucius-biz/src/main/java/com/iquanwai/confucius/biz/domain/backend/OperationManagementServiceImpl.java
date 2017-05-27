@@ -236,6 +236,9 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             Long cnt = userRoleList.stream().filter(userRole -> Role.isAsst(userRole.getRoleId())).count();
             if(cnt > 0) {
                 warmupPracticeDiscussDao.deleteDiscussById(discussId);
+                String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
+                url = MessageFormat.format(url, String.valueOf(warmupPracticeDiscuss.getId()), String.valueOf(warmupPracticeDiscuss.getWarmupPracticeId()));
+                messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。", discussOpenid, SYSTEM_MESSAGE, url);
                 return new MutablePair<>(1, discussOpenid);
             } else {
                 return new MutablePair<>(0, discussOpenid);

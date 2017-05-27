@@ -1,7 +1,9 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -87,6 +89,6 @@ public interface OperationManagementService {
      *  0：非教练评价
      * -1：数据异常
      */
-    Pair<Integer, String> deleteAsstWarmupDiscuss(Integer discussid);
+    Pair<Integer, String> deleteAsstWarmupDiscuss(Integer discussId);
 
 }
