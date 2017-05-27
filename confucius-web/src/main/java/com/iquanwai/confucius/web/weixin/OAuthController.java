@@ -145,6 +145,7 @@ public class OAuthController {
 
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
+            LOGGER.info("remoteIp:{} ask code", remoteIp);
             Callback callback = oAuthService.pcAccessToken(code, state);
             if (callback == null) {
                 response.sendRedirect("/403.jsp");
@@ -161,7 +162,7 @@ public class OAuthController {
                 Role userRole = loginUserService.getUserRole(callback.getOpenid());
                 if (userRole.getLevel().equals(0)) {
                     // 选择小课
-                    LOGGER.info("_act:{},openid:{},提示开始训练");
+                    LOGGER.info("state:{},openid:{},提示开始训练", state, callback.getOpenid());
                     CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
                             response);
                     response.sendRedirect("/servercode");
