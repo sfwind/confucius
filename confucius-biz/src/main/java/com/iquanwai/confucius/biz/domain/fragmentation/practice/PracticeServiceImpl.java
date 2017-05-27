@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,8 +28,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class PracticeServiceImpl implements PracticeService {
-    @Autowired
-    private ChallengePracticeDao challengePracticeDao;
     @Autowired
     private ChallengeSubmitDao challengeSubmitDao;
     @Autowired
@@ -64,48 +60,6 @@ public class PracticeServiceImpl implements PracticeService {
     private RiseMemberDao riseMemberDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Override
-    public ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create) {
-        Assert.notNull(openid, "openid不能为空");
-        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, id);
-
-        ChallengeSubmit submit = challengeSubmitDao.load(id, planId, openid);
-        if (submit == null || submit.getContent() == null) {
-            challengePractice.setSubmitted(false);
-        } else {
-            challengePractice.setSubmitted(true);
-        }
-        //生成小目标提交记录
-        if (submit == null && create) {
-            submit = new ChallengeSubmit();
-            submit.setOpenid(openid);
-            submit.setPlanId(planId);
-            submit.setChallengeId(id);
-            int submitId = challengeSubmitDao.insert(submit);
-            submit.setId(submitId);
-            submit.setUpdateTime(new Date());
-            // 生成浏览记录
-            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.CHALLENGE, submitId));
-        }
-        challengePractice.setContent(submit==null?null:submit.getContent());
-        challengePractice.setSubmitId(submit==null?null:submit.getId());
-        challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
-        challengePractice.setPlanId(planId);
-        return challengePractice;
-    }
-
-    @Override
-    public ChallengePractice getChallenge(Integer id) {
-        return challengePracticeDao.load(ChallengePractice.class, id);
-    }
-
-
-    @Override
-    public ChallengeSubmit loadChallengeSubmit(Integer submitId) {
-        return challengeSubmitDao.load(ChallengeSubmit.class, submitId);
-    }
-
 
     @Override
     public Integer loadHomeworkVotesCount(Integer type, Integer referencedId) {
@@ -245,7 +199,7 @@ public class PracticeServiceImpl implements PracticeService {
             } else if (moduleId == 3) {
                 msg = "评论了我的小课分享";
             }
-            url = url.append("?moduleId=" + moduleId + "&submitId=" + referId + "&commentId=" + id);
+            url = url.append("?moduleId=").append(moduleId).append("&submitId=").append(referId).append("&commentId=").append(id);
             messageService.sendMessage(msg, repliedComment.getCommentOpenId(), openId, url.toString());
         }
         return new MutablePair<>(id, "评论成功");

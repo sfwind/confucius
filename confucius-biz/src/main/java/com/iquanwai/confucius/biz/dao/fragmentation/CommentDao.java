@@ -83,7 +83,7 @@ public class CommentDao extends PracticeDBUtil {
     public List<Comment> loadCommentsByOpenid(String commentOpenId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<>(Comment.class);
-        String sql = "SELECT * FROM Comment where commentOpenId=? and Del = 0";
+        String sql = "SELECT * FROM Comment where commentOpenId=? and Del = 0 order by id desc";
         try {
             return run.query(sql, h, commentOpenId);
         } catch (SQLException e) {

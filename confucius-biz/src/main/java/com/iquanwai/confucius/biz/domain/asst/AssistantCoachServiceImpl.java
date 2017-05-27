@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -20,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by justin on 17/4/26.
@@ -57,7 +57,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<Comment> sortedComment = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime)).collect(Collectors.toList());
         Map<String, Comment> filterMap = Maps.newHashMap();
         sortedComment.forEach(comment -> {
-            if(filterMap.get(comment.getReferencedId().toString() + "-"+ comment.getModuleId().toString()) == null) {
+            if (filterMap.get(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString()) == null) {
                 filterMap.put(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
             }
         });
@@ -80,7 +80,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         subjectArticles.addAll(list);
         size = size - list.size();
 
-        if(size>0){
+        if (size > 0) {
             //已评价用户openid
             List<String> openIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
                     .map(AsstCoachComment::getOpenid).collect(Collectors.toList());
@@ -94,21 +94,21 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, unCommentedElite);
             subjectArticles.addAll(list);
             size = size - list.size();
-            if(size>0){
+            if (size > 0) {
                 //未点评普通=所有-（精英+已点评用户)
                 List<String> unCommentedNormal = Lists.newArrayList(elites);
                 unCommentedNormal.addAll(openIds);
                 list = subjectArticleDao.loadUnderCommentArticlesExcludeSomeone(problemId, size, date, unCommentedNormal);
                 subjectArticles.addAll(list);
                 size = size - list.size();
-                if(size>0){
+                if (size > 0) {
                     //已点评精英=精英&已点评用户
                     List<String> commentedElite = Lists.newArrayList(elites);
                     commentedElite.retainAll(openIds);
                     list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, commentedElite);
                     subjectArticles.addAll(list);
                     size = size - list.size();
-                    if(size>0){
+                    if (size > 0) {
                         //已点评精英=已点评用户-精英
                         List<String> commentedNormal = Lists.newArrayList(openIds);
                         commentedNormal.removeAll(elites);
@@ -119,16 +119,8 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             }
         }
 
-        subjectArticles.stream().forEach(subjectArticle ->{
-            RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(subjectArticle);
-            if(riseWorkInfoDto.getContent()!=null) {
-                riseWorkInfoDto.setContent(HtmlRegexpUtil.filterHtml(riseWorkInfoDto.getContent()));
-                riseWorkInfoDto.setContent(riseWorkInfoDto.getContent().length() > 180 ?
-                        riseWorkInfoDto.getContent().substring(0, 180) + "......" :
-                        riseWorkInfoDto.getContent());
-            }
-            //设置用户信息
-            buildRiseWorkInfo(riseWorkInfoDto, subjectArticle.getOpenid());
+        subjectArticles.stream().forEach(subjectArticle -> {
+            RiseWorkInfoDto riseWorkInfoDto = buildSubjectArticle(subjectArticle);
             underCommentArticles.add(riseWorkInfoDto);
         });
         return underCommentArticles;
@@ -149,7 +141,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         applicationSubmitList.addAll(list);
         size = size - list.size();
 
-        if(size>0){
+        if (size > 0) {
             //已评价用户openid
             List<String> openIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
                     .map(AsstCoachComment::getOpenid).collect(Collectors.toList());
@@ -163,21 +155,21 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, unCommentedElite);
             applicationSubmitList.addAll(list);
             size = size - list.size();
-            if(size>0){
+            if (size > 0) {
                 //未点评普通=所有-（精英+已点评用户)
                 List<String> unCommentedNormal = Lists.newArrayList(elites);
                 unCommentedNormal.addAll(openIds);
                 list = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, size, date, unCommentedNormal);
                 applicationSubmitList.addAll(list);
                 size = size - list.size();
-                if(size>0){
+                if (size > 0) {
                     //已点评精英=精英&已点评用户
                     List<String> commentedElite = Lists.newArrayList(elites);
                     commentedElite.retainAll(openIds);
                     list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedElite);
                     applicationSubmitList.addAll(list);
                     size = size - list.size();
-                    if(size>0){
+                    if (size > 0) {
                         //已点评精英=已点评用户-精英
                         List<String> commentedNormal = Lists.newArrayList(openIds);
                         commentedNormal.removeAll(elites);
@@ -189,21 +181,13 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         }
 
         applicationSubmitList.stream().forEach(applicationSubmit -> {
-            RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(applicationSubmit);
-            if (riseWorkInfoDto.getContent() != null) {
-                riseWorkInfoDto.setContent(HtmlRegexpUtil.filterHtml(riseWorkInfoDto.getContent()));
-                riseWorkInfoDto.setContent(riseWorkInfoDto.getContent().length() > 180 ?
-                        riseWorkInfoDto.getContent().substring(0, 180) + "......" :
-                        riseWorkInfoDto.getContent());
-            }
+            RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(applicationSubmit);
             //设置应用练习题目
             applicationPractices.stream().forEach(applicationPractice -> {
                 if (applicationSubmit.getApplicationId().equals(applicationPractice.getId())) {
                     riseWorkInfoDto.setTitle(applicationPractice.getTopic());
                 }
             });
-            //设置用户信息
-            buildRiseWorkInfo(riseWorkInfoDto, applicationSubmit.getOpenid());
             underCommentArticles.add(riseWorkInfoDto);
         });
 
@@ -230,14 +214,92 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         return countMap;
     }
 
-    private void buildRiseWorkInfo(RiseWorkInfoDto riseWorkInfoDto, String openid){
+    @Override
+    public List<RiseWorkInfoDto> getCommentedSubmit(String openid) {
+        List<RiseWorkInfoDto> riseWorkInfoDtos = Lists.newArrayList();
+        List<Comment> comments = commentDao.loadCommentsByOpenid(openid);
+
+        List<Integer> subjectArticleIdsList = Lists.newArrayList();
+        List<Integer> applicationSubmitIdsList = Lists.newArrayList();
+
+        comments.stream().forEach(comment -> {
+            if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
+                applicationSubmitIdsList.add(comment.getReferencedId());
+            } else if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
+                subjectArticleIdsList.add(comment.getReferencedId());
+            }
+        });
+
+        List<SubjectArticle> subjectArticleList = subjectArticleDao.loadArticles(subjectArticleIdsList);
+        List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.loadSubmits(applicationSubmitIdsList);
+
+        //按照评论顺序,组装RiseWorkInfoDto
+        comments.stream().forEach(comment -> {
+            if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
+                for (SubjectArticle subjectArticle : subjectArticleList) {
+                    if (subjectArticle.getId().equals(comment.getReferencedId())) {
+                        RiseWorkInfoDto riseWorkInfoDto = buildSubjectArticle(subjectArticle);
+                        riseWorkInfoDtos.add(riseWorkInfoDto);
+                        break;
+                    }
+                }
+            } else if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
+                for (ApplicationSubmit applicationSubmit : applicationSubmitList) {
+                    if (applicationSubmit.getId() == comment.getReferencedId()) {
+                        RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(applicationSubmit);
+                        riseWorkInfoDtos.add(riseWorkInfoDto);
+                        break;
+                    }
+                }
+            }
+        });
+
+        //过滤重复的文章
+        Map<String, RiseWorkInfoDto> filterMap = Maps.newLinkedHashMap();
+        riseWorkInfoDtos.forEach(riseWorkInfoDto -> {
+            if (filterMap.get(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString()) == null) {
+                filterMap.put(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString(), riseWorkInfoDto);
+            }
+        });
+
+        return Lists.newArrayList(filterMap.values());
+    }
+
+    private RiseWorkInfoDto buildApplicationSubmit(ApplicationSubmit applicationSubmit) {
+        RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(applicationSubmit);
+        if (riseWorkInfoDto.getContent() != null) {
+            riseWorkInfoDto.setContent(HtmlRegexpUtil.filterHtml(riseWorkInfoDto.getContent()));
+            riseWorkInfoDto.setContent(riseWorkInfoDto.getContent().length() > 180 ?
+                    riseWorkInfoDto.getContent().substring(0, 180) + "......" :
+                    riseWorkInfoDto.getContent());
+        }
+        //设置用户信息
+        buildRiseWorkInfo(riseWorkInfoDto, applicationSubmit.getOpenid());
+        return riseWorkInfoDto;
+    }
+
+    private void buildRiseWorkInfo(RiseWorkInfoDto riseWorkInfoDto, String openid) {
         Profile profile = accountService.getProfile(openid, false);
-        if(profile!=null){
+        if (profile != null) {
             riseWorkInfoDto.setHeadPic(profile.getHeadimgurl());
             riseWorkInfoDto.setRole(profile.getRole());
             riseWorkInfoDto.setUpName(profile.getNickname());
             riseWorkInfoDto.setSignature(profile.getSignature());
         }
+    }
+
+    private RiseWorkInfoDto buildSubjectArticle(SubjectArticle subjectArticle) {
+        RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(subjectArticle);
+        if (riseWorkInfoDto.getContent() != null) {
+            riseWorkInfoDto.setContent(HtmlRegexpUtil.filterHtml(riseWorkInfoDto.getContent()));
+            riseWorkInfoDto.setContent(riseWorkInfoDto.getContent().length() > 180 ?
+                    riseWorkInfoDto.getContent().substring(0, 180) + "......" :
+                    riseWorkInfoDto.getContent());
+        }
+        //设置用户信息
+        buildRiseWorkInfo(riseWorkInfoDto, subjectArticle.getOpenid());
+
+        return riseWorkInfoDto;
     }
 
 }

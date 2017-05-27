@@ -41,4 +41,10 @@ public interface AssistantCoachService {
      * 获取待评论的小课分享数量
      * */
     Map<Integer, Integer> getUnderCommentSubjectArticleCount();
+
+    /**
+     * 获取助教已评论的文章
+     * @param openid 助教openid
+     * */
+    List<RiseWorkInfoDto> getCommentedSubmit(String openid);
 }

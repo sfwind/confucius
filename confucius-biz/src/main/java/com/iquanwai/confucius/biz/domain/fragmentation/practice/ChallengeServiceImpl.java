@@ -2,8 +2,10 @@ package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengePracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ChallengeSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.PracticePlanDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
+import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengePractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ChallengeSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
@@ -16,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.Date;
 
@@ -33,6 +36,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     private PracticePlanDao practicePlanDao;
     @Autowired
     private PointRepo pointRepo;
+    @Autowired
+    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     @Override
     public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId,boolean create){
@@ -113,4 +118,40 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengeSubmit loadSubmit(Integer id){
         return challengeSubmitDao.load(ChallengeSubmit.class, id);
     }
+
+    @Override
+    public ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create) {
+        Assert.notNull(openid, "openid不能为空");
+        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, id);
+
+        ChallengeSubmit submit = challengeSubmitDao.load(id, planId, openid);
+        if (submit == null || submit.getContent() == null) {
+            challengePractice.setSubmitted(false);
+        } else {
+            challengePractice.setSubmitted(true);
+        }
+        //生成小目标提交记录
+        if (submit == null && create) {
+            submit = new ChallengeSubmit();
+            submit.setOpenid(openid);
+            submit.setPlanId(planId);
+            submit.setChallengeId(id);
+            int submitId = challengeSubmitDao.insert(submit);
+            submit.setId(submitId);
+            submit.setUpdateTime(new Date());
+            // 生成浏览记录
+            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.CHALLENGE, submitId));
+        }
+        challengePractice.setContent(submit==null?null:submit.getContent());
+        challengePractice.setSubmitId(submit==null?null:submit.getId());
+        challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
+        challengePractice.setPlanId(planId);
+        return challengePractice;
+    }
+
+    @Override
+    public ChallengePractice getChallenge(Integer id) {
+        return challengePracticeDao.load(ChallengePractice.class, id);
+    }
+
 }

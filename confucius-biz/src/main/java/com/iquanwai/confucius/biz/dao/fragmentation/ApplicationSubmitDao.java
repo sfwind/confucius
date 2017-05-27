@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.domain.asst.UnderCommentCount;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -287,5 +288,21 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public List<ApplicationSubmit> loadSubmits(List<Integer> ids){
+        if(CollectionUtils.isEmpty(ids)){
+            return Lists.newArrayList();
+        }
+        String questionMark = produceQuestionMark(ids.size());
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        String sql = "select * from ApplicationSubmit where id in ("+questionMark+")";
+        try{
+            return runner.query(sql,h,ids.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }

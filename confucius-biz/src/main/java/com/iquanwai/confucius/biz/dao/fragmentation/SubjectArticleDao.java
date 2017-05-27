@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.domain.asst.UnderCommentCount;
 import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -202,5 +203,21 @@ public class SubjectArticleDao extends PracticeDBUtil {
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public List<SubjectArticle> loadArticles(List<Integer> ids){
+        if(CollectionUtils.isEmpty(ids)){
+            return Lists.newArrayList();
+        }
+        String questionMark = produceQuestionMark(ids.size());
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
+        String sql = "select * from SubjectArticle where id in ("+questionMark+")";
+        try{
+            return runner.query(sql,h,ids.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }
