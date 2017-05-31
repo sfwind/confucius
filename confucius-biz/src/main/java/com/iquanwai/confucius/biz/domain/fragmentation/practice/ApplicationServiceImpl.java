@@ -141,4 +141,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         return knowledgeDao.load(Knowledge.class, knowledgeId);
     }
 
+    @Override
+    public Integer updateApplicationPractice(Integer id, String topic, String description) {
+        return applicationPracticeDao.updateApplicationPracticeById(id, topic, description);
+    }
+
+
 }
