@@ -3,6 +3,8 @@ package com.iquanwai.confucius.biz.dao.common.customer;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.PromotionUser;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,5 +32,18 @@ public class PromotionUserDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    public PromotionUser loadPromotion(String openid){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from PromotionUser where OpenId = ?";
+
+        try{
+            ResultSetHandler<PromotionUser> handler = new BeanHandler<>(PromotionUser.class);
+            return runner.query(sql, handler, openid);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 }

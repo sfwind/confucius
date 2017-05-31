@@ -326,10 +326,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void savePromotionUser(String openid, String source) {
-        PromotionUser promotionUser = new PromotionUser();
-        promotionUser.setOpenid(openid);
-        promotionUser.setSource(source);
-        promotionUserDao.insert(promotionUser);
+        if(promotionUserDao.loadPromotion(openid)==null){
+            PromotionUser promotionUser = new PromotionUser();
+            promotionUser.setOpenid(openid);
+            promotionUser.setSource(source);
+            promotionUserDao.insert(promotionUser);
+        }
     }
 
     private Profile getProfileFromDB(String openid) {
