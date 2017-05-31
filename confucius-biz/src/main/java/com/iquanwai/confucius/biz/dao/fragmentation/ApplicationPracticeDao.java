@@ -46,7 +46,7 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
 
     public Integer updateApplicationPracticeById(Integer id, String topic, String description) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ApplicationPractice set topic = ?, description = ? where id = ?";
+        String sql = "update ApplicationPractice set topic = ?, description = ?, updated = 1 where id = ?";
         try {
             return runner.update(sql, topic, description, id);
         } catch(SQLException e) {
