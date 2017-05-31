@@ -64,4 +64,9 @@ public interface AccountService {
     Profile getProfile(String openid, boolean realTime);
 
     List<EventWall> getEventWall();
+
+    /**
+     * 记录推广渠道获取的用户
+     */
+    void savePromotionUser(String openid, String source);
 }
