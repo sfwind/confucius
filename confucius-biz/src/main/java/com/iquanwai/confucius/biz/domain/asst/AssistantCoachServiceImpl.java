@@ -50,10 +50,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public Pair<Integer, Integer> getCommentCount(String openid) {
         List<Comment> commentList = commentDao.loadCommentsByOpenid(openid);
-        // 将时间逆序排序按时间根据module和referenceid去重
+        // 将时间逆序排序按时间根据module和referenceId去重
         Long totalCommentCnt = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime))
-                .map(comment -> comment.getReferencedId() + comment.getModuleId()).distinct().count();
-        // 将时间逆序列表过滤出其中日期为今日的评论并根据module和referencid去重
+                .map(comment -> comment.getReferencedId().toString() + "-" + comment.getModuleId().toString()).distinct().count();
+        // 将时间逆序列表过滤出其中日期为今日的评论并根据module和referenceId去重
         List<Comment> sortedComment = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime)).collect(Collectors.toList());
         Map<String, Comment> filterMap = Maps.newHashMap();
         sortedComment.forEach(comment -> {
@@ -61,8 +61,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                 filterMap.put(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
             }
         });
-
-        Long todayCommentCnt = Lists.newArrayList(filterMap.values()).stream().filter(comment -> DateUtils.interval(comment.getAddTime()) == 0)
+        Long todayCommentCnt = Lists.newArrayList(filterMap.values()).stream().filter(comment -> DateUtils.isToday(comment.getAddTime()))
                 .distinct().count();
 
         return new ImmutablePair<>(todayCommentCnt.intValue(), totalCommentCnt.intValue());
