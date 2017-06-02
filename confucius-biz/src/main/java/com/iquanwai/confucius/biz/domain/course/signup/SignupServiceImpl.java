@@ -451,7 +451,13 @@ public class SignupServiceImpl implements SignupService {
             if (!plan.getRiseMember()) {
                 // 不是会员的计划，设置一下
                 plan.setCloseDate(DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
-                improvementPlanDao.becomeRiseMember(plan);
+                if (plan.getStatus().equals(1) && memberType.getId().equals(3)) {
+                    // 给精英版正在进行的planid+1个求点评次数
+                    improvementPlanDao.becomeRiseEliteMember(plan);
+                } else {
+                    // 非精英版或者不是正在进行的，不加点评次数
+                    improvementPlanDao.becomeRiseMember(plan);
+                }
             }
         }
         Profile profile = profileDao.queryByOpenId(openId);
