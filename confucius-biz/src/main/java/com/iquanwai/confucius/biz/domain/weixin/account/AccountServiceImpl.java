@@ -68,7 +68,7 @@ public class AccountServiceImpl implements AccountService {
         loadUserRole();
     }
 
-    private void loadUserRole(){
+    private void loadUserRole() {
         List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
 
         userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole -> {
@@ -79,12 +79,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public Account getAccount(String openid, boolean realTime) throws NotFollowingException {
-        if(realTime){
+        if (realTime) {
             return getAccountFromWeixin(openid);
-        }else{
+        } else {
             //先从数据库查询account对象
             Account account = followUserDao.queryByOpenid(openid);
-            if(account != null) {
+            if (account != null) {
                 return account;
             }
             //从微信处获取
@@ -93,7 +93,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Profile getProfile(String openid, boolean realTime){
+    public Profile getProfile(String openid, boolean realTime) {
         return getProfileFromDB(openid);
     }
 
@@ -102,11 +102,11 @@ public class AccountServiceImpl implements AccountService {
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
-        logger.info("请求用户信息:{}",openid);
+        logger.info("请求用户信息:{}", openid);
         url = CommonUtils.placeholderReplace(url, map);
 
         String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}",body);
+        logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         Account accountNew = new Account();
         try {
@@ -124,14 +124,14 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if(accountNew.getSubscribe() == 0){
+            if (accountNew.getSubscribe() == 0) {
                 throw new NotFollowingException();
             }
             Account finalQuery = followUserDao.queryByOpenid(openid);
-            if(finalQuery==null) {
-                redisUtil.lock("lock:wx:user:insert",(lock)->{
-                    if(accountNew.getNickname()!=null){
-                        logger.info("插入用户信息:{}",accountNew);
+            if (finalQuery == null) {
+                redisUtil.lock("lock:wx:user:insert", (lock) -> {
+                    if (accountNew.getNickname() != null) {
+                        logger.info("插入用户信息:{}", accountNew);
                         followUserDao.insert(accountNew);
                         try {
                             updateProfile(accountNew);
@@ -140,14 +140,14 @@ public class AccountServiceImpl implements AccountService {
                         }
                     }
                 });
-            }else{
-                logger.info("更新用户信息:{}",accountNew);
-                if(accountNew.getNickname()!=null) {
+            } else {
+                logger.info("更新用户信息:{}", accountNew);
+                if (accountNew.getNickname() != null) {
                     followUserDao.updateMeta(accountNew);
                     updateProfile(accountNew);
                 }
             }
-        } catch (NotFollowingException e1){
+        } catch (NotFollowingException e1) {
             throw new NotFollowingException();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -157,26 +157,26 @@ public class AccountServiceImpl implements AccountService {
 
     private void updateProfile(Account accountNew) throws IllegalAccessException, InvocationTargetException {
         Profile profile = getProfileFromDB(accountNew.getOpenid());
-        if(profile==null){
+        if (profile == null) {
             profile = new Profile();
-            try{
+            try {
                 BeanUtils.copyProperties(profile, accountNew);
-                logger.info("插入Profile表信息:{}",profile);
+                logger.info("插入Profile表信息:{}", profile);
                 profile.setRiseId(CommonUtils.randomString(7));
                 profileDao.insertProfile(profile);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.error("beanUtils copy props error",e);
-            } catch (SQLException err){
+                logger.error("beanUtils copy props error", e);
+            } catch (SQLException err) {
                 profile.setRiseId(CommonUtils.randomString(7));
-                try{
+                try {
                     profileDao.insertProfile(profile);
-                } catch (SQLException subErr){
-                    logger.error("插入Profile失败，openId:{},riseId:{}",profile.getOpenid(),profile.getRiseId());
+                } catch (SQLException subErr) {
+                    logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
                 }
             }
-        }else{
+        } else {
             //更新原数据
-            BeanUtils.copyProperties(profile,accountNew);
+            BeanUtils.copyProperties(profile, accountNew);
             profileDao.updateMeta(profile);
         }
     }
@@ -189,10 +189,10 @@ public class AccountServiceImpl implements AccountService {
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
-        for(String openid:usersDto.getData().getOpenid()) {
-            try{
+        for (String openid : usersDto.getData().getOpenid()) {
+            try {
                 getAccount(openid, true);
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -208,11 +208,11 @@ public class AccountServiceImpl implements AccountService {
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
         List<String> openids = followUserDao.queryAll();
-        for(String openid:usersDto.getData().getOpenid()) {
-            if(!openids.contains(openid)) {
-                try{
+        for (String openid : usersDto.getData().getOpenid()) {
+            if (!openids.contains(openid)) {
+                try {
                     getAccountFromWeixin(openid);
-                }catch (Exception e){
+                } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }
             }
@@ -222,7 +222,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadAllProvinces() {
-        if(provinceList ==null){
+        if (provinceList == null) {
             provinceList = regionDao.loadAllProvinces();
         }
         return provinceList;
@@ -230,7 +230,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadCities() {
-        if(cityList==null) {
+        if (cityList == null) {
             cityList = regionDao.loadAllCities();
         }
         return cityList;
@@ -266,7 +266,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void savePromotionUser(String openid, String source) {
-        if(promotionUserDao.loadPromotion(openid)==null){
+        if (promotionUserDao.loadPromotion(openid) == null) {
             PromotionUser promotionUser = new PromotionUser();
             promotionUser.setOpenid(openid);
             promotionUser.setSource(source);
@@ -277,9 +277,9 @@ public class AccountServiceImpl implements AccountService {
     private Profile getProfileFromDB(String openid) {
         Profile profile = profileDao.queryByOpenId(openid);
 
-        if(profile!=null) {
-            if(profile.getHeadimgurl()!=null){
-                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:","https:"));
+        if (profile != null) {
+            if (profile.getHeadimgurl() != null) {
+                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
             Integer role = userRoleMap.get(profile.getOpenid());
             if (role == null) {

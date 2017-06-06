@@ -40,7 +40,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     @Override
-    public ChallengePractice loadMineChallengePractice(Integer planId, Integer profileId, Integer challengeId, String openId, boolean create) {
+    public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, Integer profileId, String openId, boolean create) {
         ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, challengeId);
         // 查询该用户是否提交
         ChallengeSubmit submit = challengeSubmitDao.load(challengeId, planId, openId);
