@@ -57,4 +57,9 @@ public interface AccountService {
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);
+
+    /**
+     * 记录推广渠道获取的用户
+     */
+    void savePromotionUser(String openid, String source);
 }

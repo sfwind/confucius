@@ -56,4 +56,13 @@ public interface ApplicationService {
      * @param knowledgeId 知识点id
      */
     Knowledge getKnowledge(Integer knowledgeId);
+
+    /**
+     * 更新应用练习题干
+     * @param applicationId id
+     * @param topic 主题
+     * @param description 描述
+     */
+    Integer updateApplicationPractice(Integer applicationId, String topic, String description);
+
 }

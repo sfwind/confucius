@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -106,4 +107,12 @@ public class DateUtils {
 
         return isSameDate;
     }
+
+    public static boolean isToday(Date date) {
+        String cmpDate = date.toString().substring(0, 10);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date()).toString().substring(0, 10);
+        return today.equals(cmpDate);
+    }
+
 }

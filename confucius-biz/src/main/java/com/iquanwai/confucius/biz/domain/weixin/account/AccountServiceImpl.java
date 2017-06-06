@@ -4,11 +4,13 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
+import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -52,6 +54,8 @@ public class AccountServiceImpl implements AccountService {
     private List<Region> cityList;
     @Autowired
     private UserRoleDao userRoleDao;
+    @Autowired
+    private PromotionUserDao promotionUserDao;
 
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
@@ -258,6 +262,16 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return result;
+    }
+
+    @Override
+    public void savePromotionUser(String openid, String source) {
+        if(promotionUserDao.loadPromotion(openid)==null){
+            PromotionUser promotionUser = new PromotionUser();
+            promotionUser.setOpenid(openid);
+            promotionUser.setSource(source);
+            promotionUserDao.insert(promotionUser);
+        }
     }
 
     private Profile getProfileFromDB(String openid) {
