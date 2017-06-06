@@ -85,7 +85,8 @@ public class FragmentController {
 
     /**
      * 碎片化总任务列表加载
-     * @param problemId 问题id
+     *
+     * @param problemId   问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/pc/fragment/homework/{problemId}")
@@ -122,41 +123,9 @@ public class FragmentController {
         Integer refer = vote.getReferencedId();
         Integer status = vote.getStatus();
         String openId = loginUser.getOpenId();
-        Pair<Integer, String> voteResult;
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("碎片化")
-                .function("小目标");
-        // TODO 业务逻辑下沉
+
         if (status == 1) {
-            // 点赞加积分
-            Integer planId = null;
-            String submitOpenId = null;
-            if(vote.getType()== Constants.VoteType.CHALLENGE){
-                // 小目标点赞
-                ChallengeSubmit submit = challengeService.loadSubmit(refer);
-                planId = submit.getPlanId();
-                submitOpenId = submit.getOpenid();
-            } else if(vote.getType() == Constants.VoteType.APPLICATION) {
-                // 应用任务点赞
-                ApplicationSubmit submit = applicationService.loadSubmit(refer);
-                planId = submit.getPlanId();
-                submitOpenId = submit.getOpenid();
-            } else if(vote.getType() == Constants.VoteType.SUBJECT){
-                // 小课论坛点赞
-                SubjectArticle submit = practiceService.loadSubjectArticle(refer);
-                submitOpenId = submit.getOpenid();
-                List<ImprovementPlan> improvementPlans = planService.loadUserPlans(submitOpenId);
-                for(ImprovementPlan plan:improvementPlans){
-                    if (plan.getProblemId().equals(submit.getProblemId())) {
-                        planId = plan.getId();
-                    }
-                }
-            }
-            // 点赞
-            practiceService.vote(vote.getType(), refer, openId, submitOpenId);
-            pointRepo.risePoint(planId,2);
-            pointRepo.riseCustomerPoint(submitOpenId,2);
-            operationLog.action("点赞").memo(loginUser.getOpenId() + "点赞" + refer);
+            practiceService.vote(vote.getType(), refer, loginUser.getProfileId(), openId);
         } else {
             // 禁止取消点赞
             logger.error("取消点赞！已禁止!");
@@ -165,19 +134,19 @@ public class FragmentController {
 //            operationLog.action("取消点赞").memo(loginUser.getOpenId() + "取消点赞" + refer);
         }
 
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("碎片化")
+                .function("小目标")
+                .action("点赞")
+                .memo(refer.toString());
         operationLogService.log(operationLog);
         return WebUtils.success();
-//        if (voteResult.getLeft() == 1) {
-//            return WebUtils.success();
-//        } else {
-//            return WebUtils.error(voteResult.getRight());
-//        }
     }
 
-    @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> loadComments(PCLoginUser loginUser,
-                                                           @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
-                                                           @ModelAttribute Page page){
+    @RequestMapping(value = "/pc/fragment/comment/{type}/{submitId}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadComments(PCLoginUser loginUser,
+                                                            @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
+                                                            @ModelAttribute Page page) {
         Assert.notNull(type, "评论类型不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(page, "页码不能为空");
@@ -185,11 +154,11 @@ public class FragmentController {
                 .module("训练")
                 .function("碎片化")
                 .action("加载评论")
-                .memo(type+":"+submitId);
+                .memo(type + ":" + submitId);
         operationLogService.log(operationLog);
-        List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId,page).stream().map(item->{
+        List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId, page).stream().map(item -> {
             Profile account = accountService.getProfile(item.getCommentOpenId(), false);
-            if(account!=null){
+            if (account != null) {
                 RiseWorkCommentDto dto = new RiseWorkCommentDto();
                 dto.setId(item.getId());
                 dto.setContent(item.getContent());
@@ -199,7 +168,7 @@ public class FragmentController {
                 dto.setRole(account.getRole());
                 // dto.setSignature(account.getSignature());
                 dto.setIsMine(item.getCommentOpenId().equals(loginUser.getOpenId()));
-                if(item.getRepliedId() != null) {
+                if (item.getRepliedId() != null) {
                     Profile replyAccount = accountService.getProfile(item.getRepliedOpenId(), false);
                     dto.setReplyId(item.getRepliedId());
                     dto.setReplyName(replyAccount.getNickname());
@@ -207,11 +176,12 @@ public class FragmentController {
                 }
                 return dto;
             } else {
-                logger.error("未找到该评论用户:{}",item);
+                logger.error("未找到该评论用户:{}", item);
                 return null;
             }
-        }).filter(Objects::nonNull).collect(Collectors.toList());;
-        Integer count = practiceService.commentCount(type,submitId);
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        ;
+        Integer count = practiceService.commentCount(type, submitId);
         RiseWorkCommentListDto listDto = new RiseWorkCommentListDto();
         listDto.setCount(count);
         listDto.setList(comments);
@@ -222,26 +192,28 @@ public class FragmentController {
     /**
      * 评论
      * TODO 根据角色设置评论类型
+     *
      * @param loginUser 登陆人
-     * @param moduleId 评论模块
-     * @param submitId 文章id
-     * @param dto 评论内容
+     * @param moduleId  评论模块
+     * @param submitId  文章id
+     * @param dto       评论内容
      */
     @RequestMapping(value = "/pc/fragment/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> comment(PCLoginUser loginUser,
-                                                           @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
-                                                           @RequestBody RiseWorkCommentDto dto) {
-        Assert.notNull(loginUser,"登陆用户不能为空");
+    public ResponseEntity<Map<String, Object>> comment(PCLoginUser loginUser,
+                                                       @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
+                                                       @RequestBody RiseWorkCommentDto dto) {
+        Assert.notNull(loginUser, "登陆用户不能为空");
         Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
-        Pair<Integer, String> result = practiceService.comment(moduleId, submitId, loginUser.getOpenId(), dto.getContent());
-        if(result.getLeft()>0){
+        Pair<Integer, String> result = practiceService.comment(moduleId, submitId,
+                loginUser.getOpenId(), loginUser.getProfileId(), dto.getContent());
+        if (result.getLeft() > 0) {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
                     .function("碎片化")
                     .action("评论")
-                    .memo(moduleId+":"+submitId);
+                    .memo(moduleId + ":" + submitId);
             operationLogService.log(operationLog);
             RiseWorkCommentDto resultDto = new RiseWorkCommentDto();
             resultDto.setId(result.getLeft());
@@ -261,27 +233,29 @@ public class FragmentController {
 
     /**
      * 评论回复
+     *
      * @param loginUser 登录人
-     * @param moduleId 评论模块
-     * @param submitId 文章id
-     * @param dto 评论内容，回复评论id
+     * @param moduleId  评论模块
+     * @param submitId  文章id
+     * @param dto       评论内容，回复评论id
      * @return
      */
     @RequestMapping(value = "/pc/fragment/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
                                                             @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
                                                             @RequestBody RiseWorkCommentDto dto) {
-        Assert.notNull(loginUser,"登陆用户不能为空");
+        Assert.notNull(loginUser, "登陆用户不能为空");
         Assert.notNull(moduleId, "评论模块不能为空");
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
-        Pair<Integer, String> result = practiceService.replyComment(moduleId, submitId, loginUser.getOpenId(), dto.getContent(), dto.getReplyId());
-        if(result.getLeft()>0){
+        Pair<Integer, String> result = practiceService.replyComment(moduleId, submitId,
+                loginUser.getOpenId(), loginUser.getProfileId(), dto.getContent(), dto.getReplyId());
+        if (result.getLeft() > 0) {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
                     .function("碎片化")
                     .action("评论")
-                    .memo(moduleId+":"+submitId);
+                    .memo(moduleId + ":" + submitId);
             operationLogService.log(operationLog);
             RiseWorkCommentDto resultDto = new RiseWorkCommentDto();
             resultDto.setId(result.getLeft());
@@ -292,7 +266,7 @@ public class FragmentController {
             resultDto.setRole(loginUser.getRole());
             // resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
-            if(dto.getReplyId() != null) {
+            if (dto.getReplyId() != null) {
                 resultDto.setReplyId(dto.getReplyId());
                 Comment replyComment = commentDao.load(Comment.class, dto.getReplyId());
                 Profile profile = accountService.getProfile(replyComment.getCommentOpenId(), false);
@@ -339,7 +313,8 @@ public class FragmentController {
                     dto.setScore(ConfigUtils.getChallengeScore());
                     riseWorkListDto.getChallengeWorkList().add(dto);
                 }
-            };
+            }
+            ;
         }
         return riseWorkListDto;
     }
@@ -368,7 +343,7 @@ public class FragmentController {
 
     @RequestMapping("/pc/fragment/delete/comment/{commentId}")
     public ResponseEntity<Map<String, Object>> deleteComment(PCLoginUser loginUser,
-                                                             @PathVariable Integer commentId){
+                                                             @PathVariable Integer commentId) {
 
         Assert.notNull(loginUser, "用户不能为空");
 

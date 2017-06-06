@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -58,6 +59,8 @@ public class PracticeServiceImpl implements PracticeService {
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private PointRepo pointRepo;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -68,13 +71,60 @@ public class PracticeServiceImpl implements PracticeService {
 
 
     @Override
-    public void vote(Integer type, Integer referencedId, String openId, String votedOpenId) {
-        HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openId);
+    public boolean vote(Integer type, Integer referencedId, Integer profileId, String openid) {
+        HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openid);
         if (vote == null) {
-            homeworkVoteDao.vote(type, referencedId, openId, votedOpenId, Constants.Device.PC);
+            Integer planId = null;
+            String submitOpenId = null;
+            Integer submitProfileId = null;
+            if (type == Constants.VoteType.CHALLENGE) {
+                // 挑战任务点赞
+                ChallengeSubmit submit = challengeSubmitDao.load(ChallengeSubmit.class, referencedId);
+                if (submit == null) {
+                    return false;
+                }
+                planId = submit.getPlanId();
+                submitOpenId = submit.getOpenid();
+                submitProfileId = submit.getProfileId();
+            } else if (type == Constants.VoteType.APPLICATION) {
+                // 应用任务点赞
+                ApplicationSubmit submit = applicationSubmitDao.load(ApplicationSubmit.class, referencedId);
+                if (submit == null) {
+                    return false;
+                }
+                planId = submit.getPlanId();
+                submitOpenId = submit.getOpenid();
+                submitProfileId = submit.getProfileId();
+            } else if (type == Constants.VoteType.SUBJECT) {
+                // 小课论坛点赞
+                SubjectArticle submit = subjectArticleDao.load(SubjectArticle.class, referencedId);
+                if (submit == null) {
+                    return false;
+                }
+                submitOpenId = submit.getOpenid();
+                submitProfileId = submit.getProfileId();
+                List<ImprovementPlan> improvementPlans = improvementPlanDao.loadUserPlans(openid);
+                for (ImprovementPlan plan : improvementPlans) {
+                    if (plan.getProblemId().equals(submit.getProblemId())) {
+                        planId = plan.getId();
+                    }
+                }
+            }
+            HomeworkVote homeworkVote = new HomeworkVote();
+            homeworkVote.setReferencedId(referencedId);
+            homeworkVote.setVoteOpenId(openid);
+            homeworkVote.setVoteProfileId(profileId);
+            homeworkVote.setType(type);
+            homeworkVote.setVotedOpenid(submitOpenId);
+            homeworkVote.setVotedProfileId(submitProfileId);
+            homeworkVote.setDevice(Constants.Device.PC);
+            homeworkVoteDao.vote(homeworkVote);
+            pointRepo.risePoint(planId, 2);
+            pointRepo.riseCustomerPoint(submitOpenId, 2);
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
+        return true;
     }
 
     @Override
@@ -105,7 +155,8 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Pair<Integer, String> comment(Integer moduleId, Integer referId, String openId, String content) {
+    public Pair<Integer, String> comment(Integer moduleId, Integer referId,
+                                         String openId, Integer profileId, String content) {
         boolean isAsst = false;
         Profile profile = accountService.getProfile(openId, false);
         //是否是助教评论
@@ -167,6 +218,7 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
+        comment.setCommentProfileId(profileId);
         comment.setDevice(Constants.Device.PC);
         int id = commentDao.insert(comment);
         return new MutablePair<>(id,"评论成功");
@@ -174,7 +226,7 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public Pair<Integer, String> replyComment(Integer moduleId, Integer referId, String openId,
-                                              String content, Integer repliedId) {
+                                              Integer profileId, String content, Integer repliedId) {
         Comment repliedComment = commentDao.load(Comment.class, repliedId);
         Comment comment = new Comment();
         comment.setModuleId(moduleId);
@@ -182,12 +234,14 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
-        comment.setDevice(Constants.Device.MOBILE);
+        comment.setCommentProfileId(profileId);
+        comment.setDevice(Constants.Device.PC);
         if(repliedComment != null) {
             comment.setRepliedOpenId(repliedComment.getCommentOpenId());
             comment.setRepliedId(repliedId);
             comment.setRepliedDel(0);
             comment.setRepliedComment(repliedComment.getContent());
+            comment.setRepliedProfileId(repliedComment.getCommentProfileId());
         }
         int id = commentDao.insert(comment);
         //被回复的评论

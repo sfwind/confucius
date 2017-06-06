@@ -151,25 +151,25 @@ public class ChallengeController {
                 }
                 show.setIsMine(false);
             }
-            // 查询点赞数
-            Integer votesCount = practiceService.loadHomeworkVotesCount(Constants.VoteType.CHALLENGE, submit.getId());
-            // 查询我对它的点赞状态
-            HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.CHALLENGE, submit.getId(), pcLoginUser.getOpenId());
-            if (myVote != null && myVote.getDel() == 0) {
-                // 点赞中
-                show.setVoteStatus(1);
-            } else {
-                show.setVoteStatus(0);
-            }
-            show.setVoteCount(votesCount);
+//            // 查询点赞数
+//            Integer votesCount = practiceService.loadHomeworkVotesCount(Constants.VoteType.CHALLENGE, submit.getId());
+//            // 查询我对它的点赞状态
+//            HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.CHALLENGE, submit.getId(), pcLoginUser.getOpenId());
+//            if (myVote != null && myVote.getDel() == 0) {
+//                // 点赞中
+//                show.setVoteStatus(1);
+//            } else {
+//                show.setVoteStatus(0);
+//            }
+//            show.setVoteCount(votesCount);
             // 根据challengeId查询problemId
             ChallengePractice challengePractice = challengeService.getChallenge(submit.getChallengeId());
             Problem problem = problemService.getProblem(challengePractice.getProblemId());
             show.setTitle(problem.getProblem());
             // 查询照片
-            show.setPicList(pictureService.loadPicture(Constants.PictureType.CHALLENGE, submit.getId())
-                    .stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName())
-                    .collect(Collectors.toList()));
+//            show.setPicList(pictureService.loadPicture(Constants.PictureType.CHALLENGE, submit.getId())
+//                    .stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.CHALLENGE) + item.getRealName())
+//                    .collect(Collectors.toList()));
             // 增加浏览量
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.CHALLENGE, submitId, Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);
