@@ -12,41 +12,48 @@ import java.util.List;
 public interface ApplicationService {
     /**
      * 获取应用练习
+     *
      * @param applicationId 应用练习id
-     * */
+     */
     ApplicationPractice loadApplicationPractice(Integer applicationId);
 
     /**
      * 加载自己的应用练习任务
-     * @param planId 计划id
+     *
+     * @param planId        计划id
      * @param applicationId 应用练习id
-     * @param OpenId openId
+     * @param openId        openId
      * @return 应用练习
      */
-    ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, String OpenId,boolean create);
+    ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, Integer profileId,
+                                                  String openId, boolean create);
 
     /**
      * 获取应用练习的提交答案
+     *
      * @param applicationId 应用练习id
-     * */
+     */
     List<ApplicationSubmit> loadApplicationSubmitList(Integer applicationId);
 
     /**
      * 提交
+     *
      * @param applicationId 应用练习id
-     * @param content 内容
-     * */
-    Boolean submit(Integer applicationId,String content);
+     * @param content       内容
+     */
+    Boolean submit(Integer applicationId, String content);
 
     /**
      * 获取提交记录
+     *
      * @param id 提交id
-     * */
+     */
     ApplicationSubmit loadSubmit(Integer id);
 
     /**
      * 获取知识点
+     *
      * @param knowledgeId 知识点id
-     * */
+     */
     Knowledge getKnowledge(Integer knowledgeId);
 }

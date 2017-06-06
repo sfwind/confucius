@@ -3,19 +3,16 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
-import com.iquanwai.confucius.biz.dao.common.customer.EventWallDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.EventWall;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
@@ -33,7 +30,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/10.
@@ -57,9 +53,6 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private UserRoleDao userRoleDao;
 
-    @Autowired
-    private EventWallDao eventWallDao;
-
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -82,23 +75,25 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public Account getAccount(String openid, boolean realTime) throws NotFollowingException {
-        //从数据库查询account对象
-        Account account = followUserDao.queryByOpenid(openid);
-        if(!realTime && account != null) {
-            return account;
-        }
-
-        synchronized (this){
-            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
-            Account accountTemp = followUserDao.queryByOpenid(openid);
-            if(!realTime && accountTemp != null) {
-                return accountTemp;
+        if(realTime){
+            return getAccountFromWeixin(openid);
+        }else{
+            //先从数据库查询account对象
+            Account account = followUserDao.queryByOpenid(openid);
+            if(account != null) {
+                return account;
             }
-            return getAccountFromWeixin(openid, accountTemp);
+            //从微信处获取
+            return getAccountFromWeixin(openid);
         }
     }
 
-    private Account getAccountFromWeixin(String openid, Account account) throws NotFollowingException {
+    @Override
+    public Profile getProfile(String openid, boolean realTime){
+        return getProfileFromDB(openid);
+    }
+
+    private Account getAccountFromWeixin(String openid) throws NotFollowingException {
         //调用api查询account对象
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
@@ -128,14 +123,10 @@ public class AccountServiceImpl implements AccountService {
             if(accountNew.getSubscribe() == 0){
                 throw new NotFollowingException();
             }
-            if(account==null) {
+            Account finalQuery = followUserDao.queryByOpenid(openid);
+            if(finalQuery==null) {
                 redisUtil.lock("lock:wx:user:insert",(lock)->{
                     if(accountNew.getNickname()!=null){
-                        Account finalQuery = followUserDao.queryByOpenid(openid);
-                        if (finalQuery != null) {
-                            // 已经插入了
-                            return;
-                        }
                         logger.info("插入用户信息:{}",accountNew);
                         followUserDao.insert(accountNew);
                         try {
@@ -186,10 +177,6 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    public void submitPersonalInfo(Account account) {
-        followUserDao.updateInfo(account);
-    }
-
     public void collectUsers() {
         //调用api查询account对象
         String url = GET_USERS_URL;
@@ -220,7 +207,7 @@ public class AccountServiceImpl implements AccountService {
         for(String openid:usersDto.getData().getOpenid()) {
             if(!openids.contains(openid)) {
                 try{
-                    getAccountFromWeixin(openid, null);
+                    getAccountFromWeixin(openid);
                 }catch (Exception e){
                     logger.error(e.getMessage(), e);
                 }
@@ -271,53 +258,6 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return result;
-    }
-
-    @Override
-    public Profile getProfile(String openid, boolean realTime){
-        Profile profile = getProfileFromDB(openid);
-        if(!realTime && profile != null){
-            return profile;
-        }
-        synchronized (this){
-            Profile profileTemp = getProfileFromDB(openid);
-            if(!realTime && profileTemp != null){
-                return profileTemp;
-            }
-            Account account = followUserDao.queryByOpenid(openid);
-            try{
-                getAccountFromWeixin(openid,account);
-            }catch (Exception e){
-                logger.error(e.getMessage(), e);
-            }
-            return getProfileFromDB(openid);
-        }
-    }
-
-
-    @Override
-    public List<EventWall> getEventWall() {
-        List<EventWall> eventWalls = eventWallDao.loadAll(EventWall.class).stream().filter(item -> !item.getDel()).collect(Collectors.toList());
-        eventWalls.forEach(item->{
-            Date startTime = item.getStartTime();
-            Date endTime = item.getEndTime();
-            item.setStartStr(DateUtils.parseDateToFormat6(startTime));
-
-            if (DateUtils.isSameDate(startTime, endTime)) {
-                item.setEndStr(DateUtils.parseDateToTimeFormat(endTime));
-            } else {
-                item.setEndStr(DateUtils.parseDateToFormat6(endTime));
-            }
-        });
-        eventWalls.sort((o1, o2) -> {
-            if (o1.getAddTime() == null) {
-                return 1;
-            } else if (o2.getAddTime() == null) {
-                return -1;
-            }
-            return o2.getAddTime().before(o1.getAddTime()) ? 1 : -1;
-        });
-        return eventWalls;
     }
 
     private Profile getProfileFromDB(String openid) {

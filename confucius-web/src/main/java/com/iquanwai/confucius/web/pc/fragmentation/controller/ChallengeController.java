@@ -64,22 +64,23 @@ public class ChallengeController {
 
     /**
      * 加载小目标内容
+     *
      * @param pcLoginUser 登陆人
-     * @param planId 计划id
-     * @param cid 小目标id
+     * @param planId      计划id
+     * @param cid         小目标id
      */
     @RequestMapping("/mine/{planId}/{cid}")
     public ResponseEntity<Map<String, Object>> loadMineChallenge(PCLoginUser pcLoginUser,
                                                                  @PathVariable("planId") Integer planId,
                                                                  @PathVariable("cid") Integer cid) {
-        Assert.notNull(pcLoginUser,"用户信息不能为空");
+        Assert.notNull(pcLoginUser, "用户信息不能为空");
         Assert.notNull(planId, "计划id不能为空");
-        Assert.notNull(cid,"小目标id不能为空");
+        Assert.notNull(cid, "小目标id不能为空");
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("训练")
                 .function("小目标")
                 .action("PC加载小目标")
-                .memo(planId+":"+cid);
+                .memo(planId + ":" + cid);
         operationLogService.log(operationLog);
         String openId = pcLoginUser.getOpenId();
         // 先检查该用户有没有买这个作业
@@ -88,7 +89,8 @@ public class ChallengeController {
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
             ImprovementPlan improvementPlan = plan.get();
-            ChallengePractice challengePractice = challengeService.getChallengePractice(cid, openId, improvementPlan.getId(),false);
+            ChallengePractice challengePractice = challengeService.getChallengePractice(cid, pcLoginUser.getProfileId(),
+                    openId, improvementPlan.getId(), false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
 //             result.setPic(param.getPic());
             dto.setSubmitId(challengePractice.getSubmitId());
@@ -99,18 +101,19 @@ public class ChallengeController {
                     .collect(Collectors.toList()));
             // 先写死
             dto.setDescription("Hi，欢迎来到圈外社区，这里有很多同路人在和你一起进步！<br/>" +
-                    "你有什么目标，可以利用本小课的训练实现呢？请在这里记录你的小目标吧！制定目标帮你更积极地学习，也带给你更多成就感！" );
+                    "你有什么目标，可以利用本小课的训练实现呢？请在这里记录你的小目标吧！制定目标帮你更积极地学习，也带给你更多成就感！");
             return WebUtils.result(dto);
         } else {
-            logger.error("用户:{},没有该训练计划:{}，小目标:{}",openId,plan,cid);
+            logger.error("用户:{},没有该训练计划:{}，小目标:{}", openId, plan, cid);
             return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
     }
 
     /**
      * 展示小目标提交内容
+     *
      * @param pcLoginUser 登陆人
-     * @param submitId 提交id
+     * @param submitId    提交id
      */
     @RequestMapping("/show/{submitId}")
     public ResponseEntity<Map<String, Object>> showChallenge(PCLoginUser pcLoginUser, @PathVariable("submitId") Integer submitId) {
@@ -176,7 +179,8 @@ public class ChallengeController {
 
     /**
      * 提交小目标
-     * @param loginUser 登陆人
+     *
+     * @param loginUser          登陆人
      * @param challengeSubmitDto 内容
      */
     @RequestMapping(value = "/submit/{planId}/{cid}", method = RequestMethod.POST)
@@ -185,9 +189,10 @@ public class ChallengeController {
                                                       @PathVariable("cid") Integer cid,
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
-        ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, cid, loginUser.getOpenId(), true);
+        ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, cid,
+                loginUser.getProfileId(), loginUser.getOpenId(), true);
         Integer submitId = challengePractice.getSubmitId();
-        Pair<Integer,Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
+        Pair<Integer, Integer> result = challengeService.submit(submitId, challengeSubmitDto.getAnswer());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("小目标")
@@ -210,8 +215,9 @@ public class ChallengeController {
 
     /**
      * 小目标列表展示自己的
-     * @param loginUser 登陆人
-     * @param planId 计划id
+     *
+     * @param loginUser   登陆人
+     * @param planId      计划id
      * @param challengeId 小目标id
      */
     @RequestMapping("/list/mine/{planId}/{challengeId}")
@@ -224,11 +230,12 @@ public class ChallengeController {
                 .action("小目标列表加载自己的")
                 .memo(planId + ":" + challengeId);
         operationLogService.log(operationLog);
-        ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, challengeId, loginUser.getOpenId(),false);
+        ChallengePractice challengePractice = challengeService.loadMineChallengePractice(planId, challengeId,
+                loginUser.getProfileId(), loginUser.getOpenId(), false);
         // 查询
         RiseWorkInfoDto info = new RiseWorkInfoDto();
         info.setSubmitId(challengePractice.getSubmitId());
-        if(challengePractice.getContent()!=null) {
+        if (challengePractice.getContent() != null) {
             challengePractice.setContent(HtmlRegexpUtil.filterHtml(challengePractice.getContent()));
             info.setContent(challengePractice.getContent().length() > 180 ?
                     challengePractice.getContent().substring(0, 180) + "......" :

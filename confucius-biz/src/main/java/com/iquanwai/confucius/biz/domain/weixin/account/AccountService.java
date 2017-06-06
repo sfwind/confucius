@@ -19,11 +19,6 @@ public interface AccountService {
     Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
     /**
-     * 更新个人信息
-     * */
-    void submitPersonalInfo(Account account);
-
-    /**
      * 收集所有关注用户的信息
      * */
     void collectUsers();
@@ -62,6 +57,4 @@ public interface AccountService {
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);
-
-    List<EventWall> getEventWall();
 }

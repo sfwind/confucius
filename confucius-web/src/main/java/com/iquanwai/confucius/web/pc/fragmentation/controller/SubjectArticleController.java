@@ -162,7 +162,7 @@ public class SubjectArticleController {
             String openId = submit.getOpenid();
             RiseWorkShowDto show = new RiseWorkShowDto();
             show.setSubmitId(submit.getId());
-            show.setUpTime(DateUtils.parseDateToFormat5(submit.getUpdateTime()));
+            show.setUpTime(DateUtils.parseDateToFormat5(submit.getAddTime()));
             show.setContent(submit.getContent());
             show.setType("subject");
             show.setRequest(submit.getRequestFeedback());
@@ -238,6 +238,7 @@ public class SubjectArticleController {
         Integer submitId = practiceService.submitSubjectArticle(new SubjectArticle(
                 workInfoDto.getSubmitId(),
                 loginUser.getOpenId(),
+                loginUser.getProfileId(),
                 problemId,
                 1,
                 0,

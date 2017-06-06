@@ -158,7 +158,7 @@ public class LoginUserService {
             logger.info("accessToken:{} can't find openid", accessToken);
             return new MutablePair<>(-4, null);
         }
-        Account account = null;
+        Account account;
         try {
             account = accountService.getAccount(openid, false);
         } catch (NotFollowingException e) {
@@ -191,6 +191,7 @@ public class LoginUserService {
         loginUser.setWeixinName(profile.getNickname());
 
         pcLoginUser.setWeixin(loginUser);
+        pcLoginUser.setProfileId(profile.getId());
         pcLoginUser.setOpenId(loginUser.getOpenId());
         pcLoginUser.setRole(role.getId());
         pcLoginUser.setSignature(profile.getSignature());
