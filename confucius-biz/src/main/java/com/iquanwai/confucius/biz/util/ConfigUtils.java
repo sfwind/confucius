@@ -154,6 +154,10 @@ public class ConfigUtils {
 		return getValue("default.openid");
 	}
 
+	public static Integer getDefaultProfileId(){
+		return getIntValue("default.profile.id");
+	}
+
 	/**
 	 * 业务配置获取
 	 */

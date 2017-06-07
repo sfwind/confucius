@@ -39,24 +39,24 @@ public class RiseWorkInfoDto {
     private Integer requestCommentCount;
     private Boolean request;
 
-    public RiseWorkInfoDto(SubjectArticle origin){
+    public RiseWorkInfoDto(SubjectArticle origin) {
         this.title = origin.getTitle();
         this.submitId = origin.getId();
         this.type = Constants.PracticeType.SUBJECT;
         this.content = origin.getContent();
         this.voteCount = origin.getVoteCount();
-        this.upTime = DateUtils.parseDateToString(origin.getUpdateTime());
+        this.upTime = DateUtils.parseDateToString(origin.getAddTime());
         this.commentCount = origin.getCommentCount();
         this.request = origin.getRequestFeedback();
         this.perfect = origin.getSequence() != null && origin.getSequence() > 0;
         this.authorType = origin.getAuthorType();
     }
 
-    public RiseWorkInfoDto(ApplicationSubmit origin){
+    public RiseWorkInfoDto(ApplicationSubmit origin) {
         this.submitId = origin.getId();
         this.type = Constants.PracticeType.APPLICATION;
         this.content = origin.getContent();
         this.request = origin.getRequestFeedback();
-        this.upTime = DateUtils.parseDateToString(origin.getUpdateTime());
+        this.upTime = DateUtils.parseDateToString(origin.getPublishTime());
     }
 }

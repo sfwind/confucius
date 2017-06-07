@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PCLoginUser {
+    private Integer profileId;
     private String openId;
     private LoginUser weixin;
     private Integer role;
@@ -24,7 +25,7 @@ public class PCLoginUser {
     private List<Authority> permissionList;
 
     public static PCLoginUser defaultUser(){
-        return new PCLoginUser(ConfigUtils.getDefaultOpenid(),
+        return new PCLoginUser(ConfigUtils.getDefaultProfileId(), ConfigUtils.getDefaultOpenid(),
                 LoginUser.defaultUser(), Role.ADMIN, null, Lists.newArrayList());
     }
 

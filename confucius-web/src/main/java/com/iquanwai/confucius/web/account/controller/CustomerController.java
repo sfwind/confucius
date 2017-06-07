@@ -295,14 +295,4 @@ public class CustomerController {
         }
         return WebUtils.result(riseMember);
     }
-
-    @RequestMapping("/event/list")
-    public ResponseEntity<Map<String,Object>> getEventList(LoginUser loginUser){
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("个人中心")
-                .function("活动墙")
-                .action("查询");
-        operationLogService.log(operationLog);
-        return WebUtils.result(accountService.getEventWall());
-    }
 }

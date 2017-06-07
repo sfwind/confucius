@@ -25,17 +25,17 @@ import java.util.List;
 public class SubjectArticleDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public int insert(SubjectArticle subjectArticle){
+    public int insert(SubjectArticle subjectArticle) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into SubjectArticle(Openid, ProblemId, AuthorType, Sequence,Title, Content, Length) " +
-                "values(?,?,?,?,?,?,?)";
+        String sql = "insert into SubjectArticle(ProfileId, Openid, ProblemId, AuthorType, Sequence,Title, Content, Length) " +
+                "values(?,?,?,?,?,?,?,?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
-                    subjectArticle.getOpenid(), subjectArticle.getProblemId(),
+                    subjectArticle.getProfileId(), subjectArticle.getOpenid(), subjectArticle.getProblemId(),
                     subjectArticle.getAuthorType(), subjectArticle.getSequence(), subjectArticle.getTitle(),
                     subjectArticle.getContent(), subjectArticle.getLength());
             return insertRs.intValue();
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
@@ -44,7 +44,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
     public boolean update(SubjectArticle subjectArticle) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update SubjectArticle set Title = ?,Content = ?, Length = ? where Id = ?";
-        try{
+        try {
             runner.update(sql, subjectArticle.getTitle(), subjectArticle.getContent(),
                     subjectArticle.getLength(), subjectArticle.getId());
         } catch (SQLException e) {
@@ -54,11 +54,11 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return true;
     }
 
-    public int count(Integer problemId){
+    public int count(Integer problemId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select count(1) from SubjectArticle where ProblemId = ?";
-        try{
-            Long id= runner.query(sql, new ScalarHandler<>(), problemId);
+        try {
+            Long id = runner.query(sql, new ScalarHandler<>(), problemId);
             return id.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -66,37 +66,37 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return -1;
     }
 
-    public List<SubjectArticle> loadArticles(Integer problemId,Page page){
+    public List<SubjectArticle> loadArticles(Integer problemId, Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? order by Sequence desc,UpdateTime desc limit " + page.getOffset() + "," + page.getLimit();
-        try{
-            return runner.query(sql,h,problemId);
+        try {
+            return runner.query(sql, h, problemId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-    public List<SubjectArticle> loadArticles(Integer problemId, String openId){
+    public List<SubjectArticle> loadArticles(Integer problemId, String openId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? and openid = ? order by Sequence desc,UpdateTime desc";
-        try{
-            return runner.query(sql,h,problemId,openId);
+        try {
+            return runner.query(sql, h, problemId, openId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-    public List<SubjectArticle> loadRequestCommentArticles(Integer problemId, int size, Date date){
+    public List<SubjectArticle> loadRequestCommentArticles(Integer problemId, int size, Date date) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
                 "and RequestFeedback =1 and AddTime>? " +
                 "order by length desc limit " + size;
-        try{
+        try {
             return runner.query(sql, h, problemId, date);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -104,22 +104,22 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<SubjectArticle> loadUnderCommentArticlesIncludeSomeone(Integer problemId, int size, Date date, List<String> openids){
-        if(openids.size()==0){
+    public List<SubjectArticle> loadUnderCommentArticlesIncludeSomeone(Integer problemId, int size, Date date, List<String> openids) {
+        if (openids.size() == 0) {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(openids.size());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
-                "and RequestFeedback =0 and AddTime>? and Openid in ("+questionMark+") " +
+                "and RequestFeedback =0 and AddTime>? and Openid in (" + questionMark + ") " +
                 "order by length desc limit " + size;
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
         param.add(date);
         param.addAll(openids);
 
-        try{
+        try {
             return runner.query(sql, h, param.toArray());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -127,10 +127,10 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<SubjectArticle> loadUnderCommentArticlesExcludeSomeone(Integer problemId, int size, Date date, List<String> openids){
+    public List<SubjectArticle> loadUnderCommentArticlesExcludeSomeone(Integer problemId, int size, Date date, List<String> openids) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(openids.size());
-        if(openids.size()!=0) {
+        if (openids.size() != 0) {
             ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
             String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
                     "and RequestFeedback =0 and AddTime>? and Openid not in (" + questionMark + ") " +
@@ -145,7 +145,7 @@ public class SubjectArticleDao extends PracticeDBUtil {
             } catch (SQLException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
-        }else{
+        } else {
             ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
             String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
                     "and RequestFeedback =0 and AddTime>? " +
@@ -163,31 +163,31 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public void asstFeedback(Integer id){
+    public void asstFeedback(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update SubjectArticle set Feedback=1 where Id=?";
         try {
             runner.update(sql, id);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public void requestComment(Integer id){
+    public void requestComment(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update SubjectArticle set RequestFeedback=1 where Id=?";
         try {
             runner.update(sql, id);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public List<UnderCommentCount> getUnderCommentCount(){
+    public List<UnderCommentCount> getUnderCommentCount() {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<UnderCommentCount>> h = new BeanListHandler<>(UnderCommentCount.class);
         String sql = "select ProblemId,count(*) as count from SubjectArticle where RequestFeedback=1 and Feedback=0 group by ProblemId";
-        try{
+        try {
             return runner.query(sql, h);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -195,26 +195,26 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public void updateContent(Integer id, String content){
+    public void updateContent(Integer id, String content) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update SubjectArticle set Content=? where Id=?";
         try {
             runner.update(sql, content, id);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public List<SubjectArticle> loadArticles(List<Integer> ids){
-        if(CollectionUtils.isEmpty(ids)){
+    public List<SubjectArticle> loadArticles(List<Integer> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
             return Lists.newArrayList();
         }
         String questionMark = produceQuestionMark(ids.size());
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
-        String sql = "select * from SubjectArticle where id in ("+questionMark+")";
-        try{
-            return runner.query(sql,h,ids.toArray());
+        String sql = "select * from SubjectArticle where id in (" + questionMark + ")";
+        try {
+            return runner.query(sql, h, ids.toArray());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

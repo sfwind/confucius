@@ -9,19 +9,20 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public interface ChallengeService {
 
-    ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId,boolean create);
+    ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, Integer profileId, String openId, boolean create);
 
-    Pair<Integer,Integer> submit(Integer id, String content);
+    Pair<Integer, Integer> submit(Integer id, String content);
 
     ChallengeSubmit loadSubmit(Integer id);
 
     /**
      * 获取小目标
-     * @param id 小目标id
+     *
+     * @param id     小目标id
      * @param openid 学员id
      * @param planId 训练计划id
-     * */
-    ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create);
+     */
+    ChallengePractice getChallengePractice(Integer id, Integer profileId, String openid, Integer planId, boolean create);
 
 
     ChallengePractice getChallenge(Integer id);

@@ -102,8 +102,9 @@ public class ApplicationController {
         List<ImprovementPlan> userPlans = planService.loadUserPlans(openId);
         // 看看这个id在不在
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
-        if(plan.isPresent()) {
-            ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(), false);
+        if (plan.isPresent()) {
+            ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId,
+                    loginUser.getProfileId(), loginUser.getOpenId(),false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
             dto.setSubmitId(applicationSubmit.getId());
             dto.setTitle(applicationSubmit.getTopic());
@@ -143,7 +144,8 @@ public class ApplicationController {
                 .action("应用任务列表加载自己的应用任务")
                 .memo(applicationId + "");
         operationLogService.log(operationLog);
-        ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(), false);
+        ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId,
+                loginUser.getProfileId(), loginUser.getOpenId(),false);
         RiseWorkInfoDto dto = new RiseWorkInfoDto();
         dto.setSubmitId(applicationSubmit.getId());
         dto.setTitle(applicationSubmit.getTopic());
@@ -156,7 +158,7 @@ public class ApplicationController {
         dto.setHeadPic(loginUser.getWeixin().getHeadimgUrl());
         dto.setType(Constants.PracticeType.APPLICATION);
         dto.setUpName(loginUser.getWeixin().getWeixinName());
-        dto.setUpTime(DateUtils.parseDateToFormat5(applicationSubmit.getUpdateTime()));
+        dto.setUpTime(DateUtils.parseDateToFormat5(applicationSubmit.getPublishTime()));
         dto.setVoteCount(practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, applicationSubmit.getId()));
         dto.setRequestCommentCount(practiceService.hasRequestComment(planId));
         dto.setRequest(applicationSubmit.getRequestFeedback());
@@ -244,7 +246,8 @@ public class ApplicationController {
                                                       @RequestBody ChallengeSubmitDto challengeSubmitDto) {
         Assert.notNull(loginUser, "用户不能为空");
         // 获取应用练习，没有则创建
-        ApplicationSubmit submit = applicationService.loadMineApplicationPractice(planId, applicationId, loginUser.getOpenId(), true);
+        ApplicationSubmit submit  = applicationService.loadMineApplicationPractice(planId, applicationId,
+                loginUser.getProfileId(), loginUser.getOpenId(), true);
         // 根据应用练习id获取提交记录
         // 继续之前的逻辑
         Integer submitId = submit.getId();
@@ -294,7 +297,7 @@ public class ApplicationController {
             String openId = submit.getOpenid();
             RiseWorkShowDto show = new RiseWorkShowDto();
             show.setSubmitId(submit.getId());
-            show.setUpTime(DateUtils.parseDateToFormat5(submit.getUpdateTime()));
+            show.setUpTime(DateUtils.parseDateToFormat5(submit.getPublishTime()));
             show.setContent(submit.getContent());
             show.setType("application");
             show.setRequest(submit.getRequestFeedback());
