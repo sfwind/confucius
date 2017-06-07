@@ -173,7 +173,7 @@ public class PracticeServiceImpl implements PracticeService {
             //自己给自己评论不提醒
             if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
-                messageService.sendMessage("评论了我的小目标", load.getOpenid(), openId, url);
+                messageService.sendMessage("评论了我的小目标", load.getProfileId().toString(), profileId.toString(), url);
             }
         } else if (moduleId == Constants.CommentModule.APPLICATION) {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
@@ -193,7 +193,7 @@ public class PracticeServiceImpl implements PracticeService {
             //自己给自己评论不提醒
             if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/application?id=" + load.getApplicationId();
-                messageService.sendMessage("评论了我的应用练习", load.getOpenid(), openId, url);
+                messageService.sendMessage("评论了我的应用练习", load.getProfileId().toString(), profileId.toString(), url);
             }
         } else if(moduleId == Constants.CommentModule.SUBJECT){
             SubjectArticle load = subjectArticleDao.load(SubjectArticle.class,referId);
@@ -209,7 +209,7 @@ public class PracticeServiceImpl implements PracticeService {
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/message/subject/reply?submitId=" + referId;
-                messageService.sendMessage("评论了我的小课分享", load.getOpenid(), openId, url);
+                messageService.sendMessage("评论了我的小课分享", load.getProfileId().toString(), profileId.toString(), url);
             }
         }
         Comment comment = new Comment();
@@ -245,7 +245,7 @@ public class PracticeServiceImpl implements PracticeService {
         }
         int id = commentDao.insert(comment);
         //被回复的评论
-        if (repliedComment != null && !repliedComment.getCommentOpenId().equals(openId)) {
+        if (repliedComment != null && !repliedComment.getCommentProfileId().equals(profileId)) {
             String msg = "";
             StringBuilder url = new StringBuilder("/rise/static/message/comment/reply");
             if (moduleId == 2) {
@@ -254,7 +254,7 @@ public class PracticeServiceImpl implements PracticeService {
                 msg = "评论了我的小课分享";
             }
             url = url.append("?moduleId=").append(moduleId).append("&submitId=").append(referId).append("&commentId=").append(id);
-            messageService.sendMessage(msg, repliedComment.getCommentOpenId(), openId, url.toString());
+            messageService.sendMessage(msg, repliedComment.getCommentProfileId().toString(), profileId.toString(), url.toString());
         }
         return new MutablePair<>(id, "评论成功");
     }

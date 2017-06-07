@@ -12,14 +12,13 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by justin on 17/3/16.
@@ -88,7 +87,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public void discuss(String openid, Integer warmupPracticeId, String comment, Integer repliedId) {
+    public void discuss(String openid, Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId) {
         WarmupPracticeDiscuss warmupPracticeDiscuss = new WarmupPracticeDiscuss();
         warmupPracticeDiscuss.setWarmupPracticeId(warmupPracticeId);
         warmupPracticeDiscuss.setComment(comment);
@@ -108,10 +107,10 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         //发送回复通知
         if(repliedId != null && !openid.equals(warmupPracticeDiscuss.getRepliedOpenid())) {
             String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
-            url = MessageFormat.format(url, id.toString(), warmupPracticeId.toString());
+            url = MessageFormat.format(url, Objects.toString(id), Objects.toString(warmupPracticeId));
             String message = "回复了我的巩固练习问题";
-            messageService.sendMessage(message, warmupPracticeDiscuss.getRepliedOpenid(),
-                    openid, url);
+            messageService.sendMessage(message, Objects.toString(warmupPracticeDiscuss.getRepliedProfileId()),
+                    Objects.toString(profileId), url);
         }
     }
 
@@ -125,29 +124,29 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             Integer practiceId = warmupPracticeDiscuss.getWarmupPracticeId();
 
             //通知被认证者
-            String highlightOne = warmupPracticeDiscuss.getOpenid();
+            Integer highlightOne = warmupPracticeDiscuss.getProfileId();
 
             String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
-            url = MessageFormat.format(url, discussId.toString(), practiceId.toString());
+            url = MessageFormat.format(url, Objects.toString(discussId), Objects.toString(practiceId));
             String message = "你对一个巩固练习的解答很棒，并得到了官方的认证，点击看看吧";
-            messageService.sendMessage(message, highlightOne,
+            messageService.sendMessage(message, Objects.toString(highlightOne),
                     SYSTEM_MESSAGE, url);
 
             //通知所有参与过讨论的用户
             List<WarmupPracticeDiscuss> warmupPracticeDiscussList = warmupPracticeDiscussDao.loadDiscuss(practiceId);
 
-            List<String> participants = Lists.newArrayList();
+            List<Integer> participants = Lists.newArrayList();
             warmupPracticeDiscussList.stream().forEach(discuss -> {
-                if(!participants.contains(discuss.getOpenid())) {
-                    participants.add(discuss.getOpenid());
+                if(!participants.contains(discuss.getProfileId())) {
+                    participants.add(discuss.getProfileId());
                 }
             });
 
             participants.stream().filter(participant -> !participant.equals(highlightOne)).forEach(participant -> {
                 String url2 = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
-                url2 = MessageFormat.format(url2, discussId.toString(), practiceId.toString());
+                url2 = MessageFormat.format(url2, Objects.toString(discussId), Objects.toString(practiceId));
                 String message2 = "你关注的巩固练习，有一个解答被官方认证了，点击看看吧";
-                messageService.sendMessage(message2, participant,
+                messageService.sendMessage(message2, Objects.toString(participant),
                         SYSTEM_MESSAGE, url2);
             });
         }
@@ -228,7 +227,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public Pair<Integer, String> deleteAsstWarmupDiscuss(Integer discussId) {
+    public Integer deleteAsstWarmupDiscuss(Integer discussId) {
         WarmupPracticeDiscuss warmupPracticeDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, discussId);
         String discussOpenid = warmupPracticeDiscuss.getOpenid();
         if(discussOpenid != null) {
@@ -237,14 +236,15 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             if(cnt > 0) {
                 warmupPracticeDiscussDao.deleteDiscussById(discussId);
                 String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
-                url = MessageFormat.format(url, String.valueOf(warmupPracticeDiscuss.getId()), String.valueOf(warmupPracticeDiscuss.getWarmupPracticeId()));
-                messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。", discussOpenid, SYSTEM_MESSAGE, url);
-                return new MutablePair<>(1, discussOpenid);
+                url = MessageFormat.format(url, Objects.toString(warmupPracticeDiscuss.getId()), Objects.toString(warmupPracticeDiscuss.getWarmupPracticeId()));
+                messageService.sendMessage("糟糕，由于不符合助教行为规范，你的留言已被管理员删除，有疑问请在助教群提出。",
+                        Objects.toString(warmupPracticeDiscuss.getProfileId()), SYSTEM_MESSAGE, url);
+                return 1;
             } else {
-                return new MutablePair<>(0, discussOpenid);
+                return 0;
             }
         } else {
-            return new MutablePair<>(-1, discussOpenid);
+            return -1;
         }
     }
 
