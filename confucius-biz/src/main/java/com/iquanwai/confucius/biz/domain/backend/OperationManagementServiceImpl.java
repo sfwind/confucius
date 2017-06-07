@@ -94,12 +94,14 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         warmupPracticeDiscuss.setDel(0);
         warmupPracticeDiscuss.setPriority(0);
         warmupPracticeDiscuss.setOpenid(openid);
+        warmupPracticeDiscuss.setProfileId(profileId);
         if(repliedId != null) {
             WarmupPracticeDiscuss repliedDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, repliedId);
             if(repliedDiscuss != null) {
                 warmupPracticeDiscuss.setRepliedId(repliedId);
                 warmupPracticeDiscuss.setRepliedComment(repliedDiscuss.getComment());
                 warmupPracticeDiscuss.setRepliedOpenid(repliedDiscuss.getOpenid());
+                warmupPracticeDiscuss.setRepliedProfileId(repliedDiscuss.getProfileId());
             }
         }
         Integer id = warmupPracticeDiscussDao.insert(warmupPracticeDiscuss);
