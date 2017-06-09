@@ -121,16 +121,16 @@ public class RiseOperationController {
      */
     @RequestMapping("/warmup/discuss/del/{discussId}")
     public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
-        Pair<Integer, String> result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
+        Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习练习区")
                 .action("删除巩固练习评论")
-                .memo(result.getRight());
+                .memo(discussId.toString());
         operationLogService.log(operationLog);
-        if(result.getLeft() == 1) {
+        if(result == 1) {
             return WebUtils.success();
-        } else if(result.getLeft() == 0) {
+        } else if(result == 0) {
             return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
         } else {
             return WebUtils.error("系统异常");
@@ -146,7 +146,8 @@ public class RiseOperationController {
             return WebUtils.result("您提交的讨论字数过长");
         }
 
-        operationManagementService.discuss(loginUser.getOpenId(), discussDto.getWarmupPracticeId(),
+        operationManagementService.discuss(loginUser.getOpenId(), loginUser.getProfileId(),
+                discussDto.getWarmupPracticeId(),
                 discussDto.getComment(), discussDto.getRepliedId());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
