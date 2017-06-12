@@ -57,7 +57,7 @@ public class IndexController {
         }
         if(ConfigUtils.isDevelopment()){
             //如果不在白名单中,直接403报错
-            boolean result = whiteListService.isInWhiteList(WhiteList.TEST, loginUser.getOpenId());
+            boolean result = whiteListService.isInWhiteList(WhiteList.TEST, loginUser.getId());
             if(!result){
                 response.sendRedirect("/403.jsp");
                 return null;

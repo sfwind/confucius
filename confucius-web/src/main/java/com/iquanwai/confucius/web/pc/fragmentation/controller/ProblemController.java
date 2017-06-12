@@ -91,8 +91,8 @@ public class ProblemController {
 
         List<ImprovementPlan> plans = pcLoginUser != null ? planService.loadUserPlans(pcLoginUser.getOpenId()) : Lists.newArrayList();
         List<Problem> problems = problemService.loadProblems();
-
-        boolean trialUser = pcLoginUser != null && whiteListService.isInWhiteList(TRIAL, pcLoginUser.getOpenId());
+        //是否是天使用户
+        boolean trialUser = pcLoginUser != null && whiteListService.isInWhiteList(TRIAL, pcLoginUser.getProfileId());
 
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
