@@ -231,9 +231,9 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Override
     public Integer deleteAsstWarmupDiscuss(Integer discussId) {
         WarmupPracticeDiscuss warmupPracticeDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, discussId);
-        String discussOpenid = warmupPracticeDiscuss.getOpenid();
-        if(discussOpenid != null) {
-            List<UserRole> userRoleList = userRoleDao.getRoles(discussOpenid);
+        Integer profileId = warmupPracticeDiscuss.getProfileId();
+        if(profileId != null) {
+            List<UserRole> userRoleList = userRoleDao.getRoles(profileId);
             Long cnt = userRoleList.stream().filter(userRole -> Role.isAsst(userRole.getRoleId())).count();
             if(cnt > 0) {
                 warmupPracticeDiscussDao.deleteDiscussById(discussId);

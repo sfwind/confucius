@@ -174,7 +174,7 @@ public class SignupController {
         // 创建订单
         QuanwaiOrder quanwaiOrder = null;
         try {
-            quanwaiOrder = signupService.signupRiseMember(openId, memberType);
+            quanwaiOrder = signupService.signupRiseMember(openId, memberType, null).getRight();
         } catch (Exception e) {
             return WebUtils.error(e.getLocalizedMessage());
         }
@@ -396,7 +396,7 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/coupon/calculate", method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> useCoupon(LoginUser loginUser, @RequestBody RiseMemberDto memberDto) {
+    public ResponseEntity<Map<String, Object>> useCoupon(LoginUser loginUser, @RequestBody RiseMemberDto memberDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(memberDto.getCouponId(), "优惠券不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -405,7 +405,7 @@ public class SignupController {
                 .action("计算优惠券减免")
                 .memo(memberDto.getCouponId() + "");
         Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getOpenId(), memberDto.getMemberType());
-        if(check.getLeft()!=1){
+        if (check.getLeft() != 1) {
             return WebUtils.error(check.getRight());
         }
         Double price = signupService.calculateCoupon(memberDto.getMemberType(), memberDto.getCouponId());
@@ -429,10 +429,11 @@ public class SignupController {
             remoteIp = ConfigUtils.getExternalIP();
         }
         Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getOpenId(), memberDto.getMemberType());
-        if(check.getLeft()!=1){
+        if (check.getLeft() != 1) {
             return WebUtils.error(check.getRight());
         }
-        Pair<Integer, QuanwaiOrder> quanwaiOrderPair = signupService.signupRiseMember(loginUser.getOpenId(), memberDto.getMemberType(), memberDto.getCouponId());
+        Pair<Integer, QuanwaiOrder> quanwaiOrderPair = signupService.signupRiseMember(loginUser.getOpenId(),
+                memberDto.getMemberType(), memberDto.getCouponId());
 
         if (quanwaiOrderPair.getLeft() == -1) {
             return WebUtils.error("该优惠券无效");
@@ -458,8 +459,8 @@ public class SignupController {
         }
     }
 
-    @RequestMapping(value="/rise/member",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> getRiseMemberPayInfo(LoginUser loginUser){
+    @RequestMapping(value = "/rise/member", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> getRiseMemberPayInfo(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
@@ -475,8 +476,8 @@ public class SignupController {
         return WebUtils.result(dto);
     }
 
-    @RequestMapping(value = "/rise/member/check/{memberTypeId}",method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser,@PathVariable Integer memberTypeId) {
+    @RequestMapping(value = "/rise/member/check/{memberTypeId}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser, @PathVariable Integer memberTypeId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
@@ -484,8 +485,8 @@ public class SignupController {
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
         Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getOpenId(), memberTypeId);
-        if(result.getLeft()!=1){
-            if(result.getLeft() == -4){
+        if (result.getLeft() != 1) {
+            if (result.getLeft() == -4) {
                 return WebUtils.error(214, result.getRight());
             } else {
                 return WebUtils.error(result.getRight());
@@ -506,7 +507,7 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/mark/pay/{type}")
-    public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser,@PathVariable String type) {
+    public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser, @PathVariable String type) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("打点")

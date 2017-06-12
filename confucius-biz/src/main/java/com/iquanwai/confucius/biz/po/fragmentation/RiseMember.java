@@ -10,12 +10,13 @@ import java.util.Date;
 @Data
 public class RiseMember {
     private Integer id;
-    private String orderId;
-    private String openId;
-    private Integer memberTypeId;
-    private Date expireDate;
-    private Boolean expired;
-    private Date addTime;
+    private String orderId; //订单id
+    private String openId; //openid
+    private Integer profileId; //用户id
+    private Integer memberTypeId; //会员类型1-专业版半年,2-专业版一年,3-精英版
+    private Date expireDate; //过期时间
+    private Boolean expired; //是否过期（0-否,1-是）
+    private Date addTime; //添加时间
 
     private String startTime; // 非DB字段，addTime
     private String endTime; // 非DB字段，expireDate

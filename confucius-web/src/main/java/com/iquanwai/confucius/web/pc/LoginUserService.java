@@ -169,7 +169,9 @@ public class LoginUserService {
             return new MutablePair<>(-2, null);
         }
 
-        Role role = permissionService.getRole(openid);
+
+        Profile profile = accountService.getProfile(openid, false);
+        Role role = permissionService.getRole(profile.getId());
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号
             //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
@@ -181,7 +183,6 @@ public class LoginUserService {
                 role = Role.student();
             }
         }
-        Profile profile = accountService.getProfile(openid, false);
         PCLoginUser pcLoginUser = new PCLoginUser();
         LoginUser loginUser = new LoginUser();
 

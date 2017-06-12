@@ -42,8 +42,6 @@ public interface SignupService {
     /**
      * 报名rise, 不生成预付订单
      */
-    QuanwaiOrder signupRiseMember(String openid, Integer memberType);
-
     Pair<Integer,QuanwaiOrder> signupRiseMember(String openid, Integer memberType,Integer couponId);
 
 
@@ -164,5 +162,5 @@ public interface SignupService {
      */
     Double calculateCoupon(Integer memberTypeId, Integer couponId);
 
-    RiseMember currentRiseMember(String openId);
+    RiseMember currentRiseMember(Integer profileId);
 }
