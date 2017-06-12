@@ -22,14 +22,15 @@ import java.util.List;
 public class RiseMemberDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public int insert(RiseMember riseMember){
+    public int insert(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into RiseMember(Openid, OrderId, MemberTypeId, ExpireDate) " +
-                " VALUES (?, ?, ?, ?)";
+        String sql = "insert into RiseMember(Openid, ProfileId, OrderId, MemberTypeId, ExpireDate) " +
+                " VALUES (?, ?, ?, ?, ?)";
 
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
-                   riseMember.getOpenId(),riseMember.getOrderId(),riseMember.getMemberTypeId(),riseMember.getExpireDate());
+                    riseMember.getOpenId(), riseMember.getProfileId(), riseMember.getOrderId(),
+                    riseMember.getMemberTypeId(), riseMember.getExpireDate());
             return insertRs.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -37,24 +38,24 @@ public class RiseMemberDao extends DBUtil {
         return -1;
     }
 
-    public RiseMember validRiseMember(String openId){
+    public RiseMember validRiseMember(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where OpenId = ? and expired = 0";
+        String sql = "select * from RiseMember where ProfileId = ? and expired = 0";
 
-        try{
+        try {
             ResultSetHandler<RiseMember> handler = new BeanHandler<>(RiseMember.class);
-            return runner.query(sql, handler, openId);
+            return runner.query(sql, handler, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }
 
-    public List<RiseMember> eliteMembers(){
+    public List<RiseMember> eliteMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where MemberTypeId = 3 and expired = 0";
 
-        try{
+        try {
             ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
             return runner.query(sql, handler);
         } catch (SQLException e) {

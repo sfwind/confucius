@@ -196,40 +196,6 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signupRiseMember(String openid, Integer memberTypeId) {
-        // 查询该openid是否是我们的用户
-        Profile profile = profileDao.queryByOpenId(openid);
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        Assert.notNull(profile, "用户信息错误");
-        Assert.notNull(memberType, "会员类型错误");
-        // 创建订单
-        QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
-        quanwaiOrder.setCreateTime(new Date());
-        quanwaiOrder.setOpenid(openid);
-        //orderId 16位随机字符
-        String orderId = CommonUtils.randomString(16);
-        quanwaiOrder.setOrderId(orderId);
-        quanwaiOrder.setTotal(memberType.getFee());
-        quanwaiOrder.setDiscount(0.0);
-        quanwaiOrder.setPrice(memberType.getFee());
-        quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY);
-        quanwaiOrder.setGoodsId(memberTypeId + "");
-        quanwaiOrder.setGoodsName(memberType.getName());
-        quanwaiOrder.setGoodsType(QuanwaiOrder.FRAGMENT_MEMBER);
-        quanwaiOrderDao.insert(quanwaiOrder);
-
-        // rise的报名数据
-        RiseOrder riseOrder = new RiseOrder();
-        riseOrder.setOpenid(openid);
-        riseOrder.setEntry(false);
-        riseOrder.setIsDel(false);
-        riseOrder.setMemberType(memberTypeId);
-        riseOrder.setOrderId(orderId);
-        riseOrderDao.insert(riseOrder);
-        return quanwaiOrder;
-    }
-
-    @Override
     public Pair<Integer, QuanwaiOrder> signupRiseMember(String openid, Integer memberTypeId, Integer couponId) {
         // 查询该openid是否是我们的用户
         Profile profile = profileDao.queryByOpenId(openid);
@@ -271,6 +237,7 @@ public class SignupServiceImpl implements SignupService {
         riseOrder.setIsDel(false);
         riseOrder.setMemberType(memberTypeId);
         riseOrder.setOrderId(orderId);
+        riseOrder.setProfileId(profile.getId());
         riseOrderDao.insert(riseOrder);
         return new MutablePair<>(1, quanwaiOrder);
     }
@@ -441,6 +408,7 @@ public class SignupServiceImpl implements SignupService {
         RiseMember riseMember = new RiseMember();
         riseMember.setOpenId(riseOrder.getOpenid());
         riseMember.setOrderId(riseOrder.getOrderId());
+        riseMember.setProfileId(riseOrder.getProfileId());
         riseMember.setMemberTypeId(memberType.getId());
         riseMember.setExpireDate(expireDate);
         riseMemberDao.insert(riseMember);
@@ -710,8 +678,8 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public RiseMember currentRiseMember(String openId) {
-        RiseMember riseMember = riseMemberDao.validRiseMember(openId);
+    public RiseMember currentRiseMember(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
         if (riseMember != null) {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getAddTime()));
             riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));

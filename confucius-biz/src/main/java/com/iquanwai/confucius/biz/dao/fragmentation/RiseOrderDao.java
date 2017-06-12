@@ -24,14 +24,13 @@ public class RiseOrderDao extends DBUtil {
 
     public int insert(RiseOrder riseOrder){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into RiseOrder(OrderId, Openid, MemberType, Entry, IsDel) " +
-                " VALUES (?, ?, ?, ?, ?)";
+        String sql = "insert into RiseOrder(OrderId, ProfileId, Openid, MemberType, Entry, IsDel) " +
+                " VALUES (?, ?, ?, ?, ?, ?)";
         try{
-
-           return runner.insert(sql, new ScalarHandler<Long>(),
-                    riseOrder.getOrderId(), riseOrder.getOpenid(),
-                    riseOrder.getMemberType(), riseOrder.getEntry(),
-                    riseOrder.getIsDel()).intValue();
+            Long insertRs = runner.insert(sql, new ScalarHandler<>(),
+                    riseOrder.getOrderId(), riseOrder.getProfileId(), riseOrder.getOpenid(),
+                    riseOrder.getMemberType(), riseOrder.getEntry(), riseOrder.getIsDel());
+            return insertRs.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

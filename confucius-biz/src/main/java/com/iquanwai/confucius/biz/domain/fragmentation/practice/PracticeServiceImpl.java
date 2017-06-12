@@ -160,7 +160,7 @@ public class PracticeServiceImpl implements PracticeService {
         boolean isAsst = false;
         Profile profile = accountService.getProfile(openId, false);
         //是否是助教评论
-        if(profile!=null){
+        if (profile != null) {
             isAsst = Role.isAsst(profile.getRole());
         }
 
@@ -171,7 +171,7 @@ public class PracticeServiceImpl implements PracticeService {
                 return new MutablePair<>(-1, "没有该文章");
             }
             //自己给自己评论不提醒
-            if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
+            if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
                 messageService.sendMessage("评论了我的小目标", load.getProfileId().toString(), profileId.toString(), url);
             }
@@ -182,29 +182,25 @@ public class PracticeServiceImpl implements PracticeService {
                 return new MutablePair<>(-1, "没有该文章");
             }
             //更新助教评论状态
-            if(isAsst){
+            if (isAsst) {
                 applicationSubmitDao.asstFeedback(load.getId());
-                Integer planId = load.getPlanId();
-                ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
-                if(plan!=null){
-                    asstCoachComment(load.getOpenid(), plan.getProblemId());
-                }
+                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
             }
             //自己给自己评论不提醒
-            if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
+            if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/application?id=" + load.getApplicationId();
                 messageService.sendMessage("评论了我的应用练习", load.getProfileId().toString(), profileId.toString(), url);
             }
-        } else if(moduleId == Constants.CommentModule.SUBJECT){
-            SubjectArticle load = subjectArticleDao.load(SubjectArticle.class,referId);
+        } else if (moduleId == Constants.CommentModule.SUBJECT) {
+            SubjectArticle load = subjectArticleDao.load(SubjectArticle.class, referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
                 return new MutablePair<>(-1, "没有该文章");
             }
             //更新助教评论状态
-            if(isAsst){
+            if (isAsst) {
                 subjectArticleDao.asstFeedback(load.getId());
-                asstCoachComment(load.getOpenid(), load.getProblemId());
+                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
             }
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
@@ -221,7 +217,7 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setCommentProfileId(profileId);
         comment.setDevice(Constants.Device.PC);
         int id = commentDao.insert(comment);
-        return new MutablePair<>(id,"评论成功");
+        return new MutablePair<>(id, "评论成功");
     }
 
     @Override
@@ -236,7 +232,7 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setCommentOpenId(openId);
         comment.setCommentProfileId(profileId);
         comment.setDevice(Constants.Device.PC);
-        if(repliedComment != null) {
+        if (repliedComment != null) {
             comment.setRepliedOpenId(repliedComment.getCommentOpenId());
             comment.setRepliedId(repliedId);
             comment.setRepliedDel(0);
@@ -259,16 +255,17 @@ public class PracticeServiceImpl implements PracticeService {
         return new MutablePair<>(id, "评论成功");
     }
 
-    private void asstCoachComment(String openId, Integer problemId) {
-        AsstCoachComment asstCoachComment =asstCoachCommentDao.loadAsstCoachComment(problemId, openId);
-        if(asstCoachComment==null){
+    private void asstCoachComment(String openId, Integer profileId, Integer problemId) {
+        AsstCoachComment asstCoachComment = asstCoachCommentDao.loadAsstCoachComment(problemId, profileId);
+        if (asstCoachComment == null) {
             asstCoachComment = new AsstCoachComment();
             asstCoachComment.setCount(1);
             asstCoachComment.setOpenid(openId);
+            asstCoachComment.setProfileId(profileId);
             asstCoachComment.setProblemId(problemId);
             asstCoachCommentDao.insert(asstCoachComment);
-        }else{
-            asstCoachComment.setCount(asstCoachComment.getCount()+1);
+        } else {
+            asstCoachComment.setCount(asstCoachComment.getCount() + 1);
             asstCoachCommentDao.updateCount(asstCoachComment);
         }
     }
@@ -288,7 +285,7 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page) {
         page.setTotal(subjectArticleDao.count(problemId));
-        return subjectArticleDao.loadArticles(problemId,page).stream().map(item -> {
+        return subjectArticleDao.loadArticles(problemId, page).stream().map(item -> {
             String content = CommonUtils.replaceHttpsDomainName(item.getContent());
             if (!content.equals(item.getContent())) {
                 item.setContent(content);
@@ -302,25 +299,25 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId) {
-        return subjectArticleDao.loadArticles(problemId,openId);
+        return subjectArticleDao.loadArticles(problemId, openId);
     }
 
     @Override
-    public List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId){
+    public List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId) {
         return articleLabelDao.loadArticleActiveLabels(moduleId, articleId);
     }
 
     @Override
-    public SubjectArticle loadSubjectArticle(Integer submitId){
+    public SubjectArticle loadSubjectArticle(Integer submitId) {
         return subjectArticleDao.load(SubjectArticle.class, submitId);
     }
 
     @Override
-    public Integer submitSubjectArticle(SubjectArticle subjectArticle){
+    public Integer submitSubjectArticle(SubjectArticle subjectArticle) {
         String content = CommonUtils.removeHTMLTag(subjectArticle.getContent());
         subjectArticle.setLength(content.length());
         Integer submitId = subjectArticle.getId();
-        if (subjectArticle.getId()==null){
+        if (subjectArticle.getId() == null) {
             // 第一次提交
             submitId = subjectArticleDao.insert(subjectArticle);
             // 生成记录表
@@ -333,15 +330,15 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels){
+    public List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels) {
         List<ArticleLabel> oldLabels = articleLabelDao.loadArticleLabels(module, articleId);
         List<ArticleLabel> shouldDels = Lists.newArrayList();
         List<ArticleLabel> shouldReAdds = Lists.newArrayList();
-        labels = labels==null?Lists.newArrayList():labels;
+        labels = labels == null ? Lists.newArrayList() : labels;
         List<Integer> userChoose = labels.stream().map(LabelConfig::getId).collect(Collectors.toList());
-        oldLabels.forEach(item->{
-            if(userChoose.contains(item.getLabelId())){
-                if(item.getDel()){
+        oldLabels.forEach(item -> {
+            if (userChoose.contains(item.getLabelId())) {
+                if (item.getDel()) {
                     shouldReAdds.add(item);
                 }
             } else {
@@ -352,18 +349,18 @@ public class PracticeServiceImpl implements PracticeService {
         userChoose.forEach(item -> articleLabelDao.insertArticleLabel(module, articleId, item));
         shouldDels.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 1));
         shouldReAdds.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 0));
-        return articleLabelDao.loadArticleActiveLabels(module,articleId);
+        return articleLabelDao.loadArticleActiveLabels(module, articleId);
     }
 
     @Override
-    public List<LabelConfig> loadProblemLabels(Integer problemId){
+    public List<LabelConfig> loadProblemLabels(Integer problemId) {
         return labelConfigDao.loadLabelConfigs(problemId);
     }
 
     @Override
-    public void updatePicReference(List<String> picList, Integer submitId){
-        picList.forEach(item->{
-           pictureDao.updateReference(item, submitId);
+    public void updatePicReference(List<String> picList, Integer submitId) {
+        picList.forEach(item -> {
+            pictureDao.updateReference(item, submitId);
         });
     }
 
@@ -380,18 +377,18 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Integer hasRequestComment(Integer planId) {
         ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
-        if(improvementPlan==null){
+        if (improvementPlan == null) {
             return null;
         }
-        if(improvementPlan.getRequestCommentCount()>0){
+        if (improvementPlan.getRequestCommentCount() > 0) {
             return improvementPlan.getRequestCommentCount();
-        }else{
-            RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getOpenid());
+        } else {
+            RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getProfileId());
             if (riseMember == null) {
                 // 已经不是会员了就返回null
                 return null;
             }
-            if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
+            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
                 return 0;
             }
         }
