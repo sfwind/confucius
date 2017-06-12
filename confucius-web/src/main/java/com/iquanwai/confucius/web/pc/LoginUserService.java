@@ -185,7 +185,7 @@ public class LoginUserService {
         }
         PCLoginUser pcLoginUser = new PCLoginUser();
         LoginUser loginUser = new LoginUser();
-
+        loginUser.setId(profile.getId());
         loginUser.setOpenId(openid);
         loginUser.setHeadimgUrl(profile.getHeadimgurl());
         loginUser.setRealName(profile.getRealName());

@@ -283,7 +283,7 @@ public class CustomerController {
 
     @RequestMapping("/rise/member")
     public ResponseEntity<Map<String,Object>> riseMember(LoginUser loginUser){
-        RiseMember riseMember = signupService.currentRiseMember(loginUser.getOpenId());
+        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("用户信息")
                 .function("RISE")
