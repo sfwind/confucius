@@ -37,9 +37,4 @@ public class ClassDaoTest extends TestBase {
                 .setDateFormat("yyyy-MM-dd")
                 .create().toJson(cla));
     }
-    @Test
-    public void testClassMember(){
-        List<ClassMember> classMembers = classMemberDao.loadByOpenId("o5h6ywsiXYMcLlex2xt7DRAgQX-A");
-        logger.info("{}",classMembers);
-    }
 }

@@ -81,18 +81,18 @@ public class SignupController {
             operationLogService.log(operationLog);
 
             //课程免单用户
-            if (signupService.free(courseId, loginUser.getOpenId())) {
-                signupDto.setFree(true);
-                return WebUtils.result(signupDto);
-            }
+//            if (signupService.free(courseId, loginUser.getOpenId())) {
+//                signupDto.setFree(true);
+//                return WebUtils.result(signupDto);
+//            }
             // 检查人数，已加锁。
-            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+            ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getId(), courseId);
             if (classMember != null) {
                 // 已报名
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.already"));
             }
 
-            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getOpenId(), courseId);
+            Pair<Integer, Integer> result = signupService.signupCheck(loginUser.getId(), courseId);
             if (result.getLeft() == -1) {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.full"));
             }
@@ -118,7 +118,8 @@ public class SignupController {
                 signupDto.setClassOpenTime("7天");
             }
             // TODO 优惠券改为可选，下面这个service放到新接口，增加优惠券参数
-            QuanwaiOrder quanwaiOrder = signupService.signup(loginUser.getOpenId(), courseId, result.getRight());
+            QuanwaiOrder quanwaiOrder = signupService.signupCourse(loginUser.getOpenId(), loginUser.getId(),
+                    courseId, result.getRight());
             productId = quanwaiOrder.getOrderId();
             if (quanwaiOrder.getDiscount() != 0.0) {
                 signupDto.setNormal(quanwaiOrder.getTotal());
@@ -306,7 +307,7 @@ public class SignupController {
                 .function("提交个人信息")
                 .action("加载个人信息");
         operationLogService.log(operationLog);
-        Profile account = profileService.getProfile(loginUser.getOpenId());
+        Profile account = accountService.getProfile(loginUser.getId());
         try {
             BeanUtils.copyProperties(infoSubmitDto, account);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -385,7 +386,7 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> listCoupon(LoginUser loginUser, @RequestParam("orderId") String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(orderId, "订单不能为空");
-        List<Coupon> coupons = signupService.getCoupons(loginUser.getOpenId());
+        List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
@@ -469,7 +470,7 @@ public class SignupController {
         operationLogService.log(operationLog);
         List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
         // 查看优惠券信息
-        List<Coupon> coupons = signupService.getCoupons(loginUser.getOpenId());
+        List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberTypes(memberTypesPayInfo);
         dto.setCoupons(coupons);

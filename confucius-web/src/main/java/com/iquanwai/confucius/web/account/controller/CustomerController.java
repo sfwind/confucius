@@ -78,7 +78,7 @@ public class CustomerController {
                 .action("加载个人信息");
         operationLogService.log(operationLog);
         ProfileDto profileDto = new ProfileDto();
-        Profile account = profileService.getProfile(loginUser.getOpenId());
+        Profile account = accountService.getProfile(loginUser.getId());
 
         try {
             BeanUtils.copyProperties(profileDto,account);
@@ -133,7 +133,7 @@ public class CustomerController {
                 .function("RISE")
                 .action("查询rise信息");
         operationLogService.log(operationLog);
-        Profile profile = profileService.getProfile(loginUser.getOpenId());
+        Profile profile = accountService.getProfile(loginUser.getId());
         RiseDto riseDto = new RiseDto();
         riseDto.setPoint(profile.getPoint());
         return WebUtils.result(riseDto);
@@ -185,8 +185,8 @@ public class CustomerController {
                 .action("查询报过的课程列表 ");
         operationLogService.log(operationLog);
         // 查询是否有真实姓名
-        Profile profile = profileService.getProfile(loginUser.getOpenId());
-        List<ClassMember> classMembers = courseProgressService.loadClassMembers(loginUser.getOpenId());
+        Profile profile = accountService.getProfile(loginUser.getId());
+        List<ClassMember> classMembers = courseProgressService.loadClassMembers(loginUser.getId());
         List<CourseDto> list = classMembers
                 .stream().map(item -> {
                     CourseDto dto = new CourseDto();
@@ -214,7 +214,7 @@ public class CustomerController {
                 .function("用户信息")
                 .action("查询RiseId ");
         operationLogService.log(operationLog);
-        Profile profile = profileService.getProfile(loginUser.getOpenId());
+        Profile profile = accountService.getProfile(loginUser.getId());
         if(profile==null){
             logger.error("用户:{} 缺少Profile信息，进入个人中心失败",loginUser.getOpenId());
             return WebUtils.error("数据异常，请联系管理员");

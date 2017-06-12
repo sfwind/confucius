@@ -59,7 +59,7 @@ public class RiseOperationController {
         List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page);
 
         applicationSubmitList.stream().forEach(applicationSubmit -> {
-            Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), loginUser.getOpenId());
+            Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), loginUser.getProfileId());
             applicationSubmit.setComment(isComment?1:0);
         });
 

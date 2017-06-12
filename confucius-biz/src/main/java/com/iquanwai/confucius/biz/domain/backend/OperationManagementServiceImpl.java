@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -36,7 +37,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Autowired
     private WarmupChoiceDao warmupChoiceDao;
     @Autowired
-    private ProfileDao profileDao;
+    private AccountService accountService;
     @Autowired
     private CommentDao commentDao;
     @Autowired
@@ -51,8 +52,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
         List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.getPracticeSubmit(practiceId, page);
         applicationSubmitList.stream().forEach(applicationSubmit -> {
-            String openid = applicationSubmit.getOpenid();
-            Profile profile = profileDao.queryByOpenId(openid);
+            Integer profileId = applicationSubmit.getProfileId();
+            Profile profile = accountService.getProfile(profileId);
             if(profile != null) {
                 applicationSubmit.setUpName(profile.getNickname());
                 applicationSubmit.setHeadPic(profile.getHeadimgurl());
@@ -74,8 +75,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
         List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadDiscuss(practiceId);
         warmupPracticeDiscusses.stream().forEach(discuss -> {
-            String openid = discuss.getOpenid();
-            Profile profile = profileDao.queryByOpenId(openid);
+            Integer profileId = discuss.getProfileId();
+            Profile profile = accountService.getProfile(profileId);
             if(profile != null) {
                 discuss.setAvatar(profile.getHeadimgurl());
                 discuss.setName(profile.getNickname());
@@ -107,7 +108,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         Integer id = warmupPracticeDiscussDao.insert(warmupPracticeDiscuss);
 
         //发送回复通知
-        if(repliedId != null && !openid.equals(warmupPracticeDiscuss.getRepliedOpenid())) {
+        if(repliedId != null && !profileId.equals(warmupPracticeDiscuss.getRepliedProfileId())) {
             String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
             url = MessageFormat.format(url, Objects.toString(id), Objects.toString(warmupPracticeId));
             String message = "回复了我的巩固练习问题";
@@ -180,8 +181,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public boolean isComment(Integer submitId, String commentOpenid) {
-        Comment comment = commentDao.loadComment(Constants.CommentModule.APPLICATION, submitId, commentOpenid);
+    public boolean isComment(Integer submitId, Integer commentProfileId) {
+        Comment comment = commentDao.loadComment(Constants.CommentModule.APPLICATION, submitId, commentProfileId);
 
         return comment != null;
     }

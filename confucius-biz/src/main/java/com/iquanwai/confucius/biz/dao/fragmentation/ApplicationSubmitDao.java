@@ -197,20 +197,21 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
     }
 
-    public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(Integer problemId, int size, Date date, List<String> openids) {
-        if (openids.size() == 0) {
+    public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(Integer problemId, int size, Date date,
+                                                                              List<Integer> profileIds) {
+        if (CollectionUtils.isEmpty(profileIds)) {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String questionMark = produceQuestionMark(openids.size());
+        String questionMark = produceQuestionMark(profileIds.size());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid in (" + questionMark + ") " +
+                "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId in (" + questionMark + ") " +
                 "order by length desc limit " + size;
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
         param.add(date);
-        param.addAll(openids);
+        param.addAll(profileIds);
 
         try {
             return runner.query(sql, h, param.toArray());
@@ -220,19 +221,20 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ApplicationSubmit> loadUnderCommentApplicationsExcludeSomeone(Integer problemId, int size, Date date, List<String> openids) {
+    public List<ApplicationSubmit> loadUnderCommentApplicationsExcludeSomeone(Integer problemId, int size, Date date,
+                                                                              List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String questionMark = produceQuestionMark(openids.size());
-        if (openids.size() != 0) {
+        String questionMark = produceQuestionMark(profileIds.size());
+        if (profileIds.size() != 0) {
             String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and Openid not in (" + questionMark + ") " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId not in (" + questionMark + ") " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
             List<Object> param = Lists.newArrayList();
             param.add(problemId);
             param.add(date);
-            param.addAll(openids);
+            param.addAll(profileIds);
 
             try {
                 return runner.query(sql, h, param.toArray());

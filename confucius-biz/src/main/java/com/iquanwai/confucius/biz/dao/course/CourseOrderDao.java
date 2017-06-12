@@ -19,24 +19,25 @@ import java.util.List;
  * Created by justin on 16/9/10.
  */
 @Repository
-public class CourseOrderDao extends DBUtil{
+public class CourseOrderDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public void insert(CourseOrder courseOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO CourseOrder(OrderId, Openid, CourseId, ClassId, Entry, IsDel) " +
-                "VALUES(?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO CourseOrder(OrderId, Openid, ProfileId, CourseId, ClassId, Entry, IsDel) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
-                    courseOrder.getOrderId(), courseOrder.getOpenid(), courseOrder.getCourseId(),
-                    courseOrder.getClassId(), courseOrder.getEntry(), courseOrder.getIsDel());
+                    courseOrder.getOrderId(), courseOrder.getOpenid(), courseOrder.getProfileId(),
+                    courseOrder.getCourseId(), courseOrder.getClassId(),
+                    courseOrder.getEntry(), courseOrder.getIsDel());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
     }
 
-    public CourseOrder loadOrder(String orderId){
+    public CourseOrder loadOrder(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<CourseOrder> h = new BeanHandler<>(CourseOrder.class);
 
@@ -50,16 +51,16 @@ public class CourseOrderDao extends DBUtil{
         return null;
     }
 
-    public List<CourseOrder> loadNotExpiredClassOrder(List<Integer> classId){
+    public List<CourseOrder> loadNotExpiredClassOrder(List<Integer> classId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<CourseOrder>> h = new BeanListHandler<>(CourseOrder.class);
-        if(classId.isEmpty()){
+        if (classId.isEmpty()) {
             return Lists.newArrayList();
         }
         String questionMark = produceQuestionMark(classId.size());
 
         try {
-            List<CourseOrder> order = run.query("SELECT * FROM CourseOrder where ClassId in ("+questionMark+") and IsDel=0", h, classId.toArray());
+            List<CourseOrder> order = run.query("SELECT * FROM CourseOrder where ClassId in (" + questionMark + ") and IsDel=0", h, classId.toArray());
             return order;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -68,12 +69,12 @@ public class CourseOrderDao extends DBUtil{
         return Lists.newArrayList();
     }
 
-    public int underPaidCount(String openid, Integer classId){
+    public int underPaidCount(Integer profileId, Integer classId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();
-        String sql = "SELECT count(*) FROM CourseOrder where Openid=? and ClassId=? and Entry=0 and IsDel=0";
+        String sql = "SELECT count(*) FROM CourseOrder where ProfileId=? and ClassId=? and Entry=0 and IsDel=0";
         try {
-            Long count = run.query(sql, h, openid, classId);
+            Long count = run.query(sql, h, profileId, classId);
             return count.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -82,34 +83,24 @@ public class CourseOrderDao extends DBUtil{
         return 0;
     }
 
-    public void closeOrder(String orderId){
+    public void closeOrder(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
         String sql = "Update CourseOrder set IsDel=1 where OrderId=?";
         try {
-            run.update(sql,orderId);
+            run.update(sql, orderId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public void entry(String orderId){
+    public void entry(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
         String sql = "Update CourseOrder set Entry=1 where OrderId=?";
         try {
-            run.update(sql,orderId);
+            run.update(sql, orderId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public void updatePromoCode(String orderId, String promoCode) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "Update CourseOrder set PromoCode=? where OrderId=?";
-        try {
-            run.update(sql,promoCode,orderId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-    }
 }

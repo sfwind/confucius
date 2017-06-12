@@ -60,9 +60,9 @@ public interface OperationManagementService {
     /**
      * 作业是否已评论
      * @param submitId 提交id
-     * @param commentOpenid 评论者openid
+     * @param commentProfileId 评论者id
      */
-    boolean isComment(Integer submitId, String commentOpenid);
+    boolean isComment(Integer submitId, Integer commentProfileId);
 
     /**
      * 获取小课的所有巩固练习

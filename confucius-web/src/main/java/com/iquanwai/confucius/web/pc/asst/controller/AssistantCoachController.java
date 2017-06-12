@@ -71,7 +71,7 @@ public class AssistantCoachController {
     @RequestMapping("/comment/count")
     public ResponseEntity<Map<String, Object>> getCommentCount(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
-        Pair<Integer, Integer> counts = assistantCoachService.getCommentCount(pcLoginUser.getOpenId());
+        Pair<Integer, Integer> counts = assistantCoachService.getCommentCount(pcLoginUser.getProfileId());
         Map<String, Integer> countMap = Maps.newHashMap();
         countMap.put("totalComment", counts.getRight());
         countMap.put("todayComment", counts.getLeft());
@@ -146,7 +146,7 @@ public class AssistantCoachController {
     @RequestMapping("/commented/submit")
     public ResponseEntity<Map<String, Object>> getCommentedSubmit(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
-        List<RiseWorkInfoDto> riseWorkInfoDtos = assistantCoachService.getCommentedSubmit(pcLoginUser.getOpenId());
+        List<RiseWorkInfoDto> riseWorkInfoDtos = assistantCoachService.getCommentedSubmit(pcLoginUser.getProfileId());
 
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("助教后台")
