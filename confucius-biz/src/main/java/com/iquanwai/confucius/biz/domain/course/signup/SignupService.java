@@ -25,7 +25,6 @@ public interface SignupService {
      * @param courseId  课程id
      * @return {-1,0} 已报满，
      * {-2,0} 没有设置课程，
-     * {-3,0} 已报名成功，
      * {1,*} 预报名成功,返回班级id
      */
     Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId);

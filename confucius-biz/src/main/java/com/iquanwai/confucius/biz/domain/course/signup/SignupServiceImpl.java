@@ -113,15 +113,15 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId) {
-        if (!ConfigUtils.pressTestSwitch()) {
-            ClassMember classMember = classMemberDao.classMember(profileId, courseId);
-            if (classMember != null) {
-                // 并且他正在进行的课程里有这门课
-                if (DateUtils.startDay(new Date()).before(classMember.getCloseDate())) {
-                    return new ImmutablePair<>(-3, 0);
-                }
-            }
-        }
+//        if (!ConfigUtils.pressTestSwitch()) {
+//            ClassMember classMember = classMemberDao.classMember(profileId, courseId);
+//            if (classMember != null) {
+//                // 并且他正在进行的课程里有这门课
+//                if (DateUtils.startDay(new Date()).before(classMember.getCloseDate())) {
+//                    return new ImmutablePair<>(-3, 0);
+//                }
+//            }
+//        }
         // 还没有正式进入班级
         return classMemberCountRepo.prepareSignup(profileId, courseId);
     }
