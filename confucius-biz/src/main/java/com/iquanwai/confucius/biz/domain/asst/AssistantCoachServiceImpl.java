@@ -75,7 +75,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         int size = SIZE;
         //获取求点评的文章
         List<SubjectArticle> subjectArticles = Lists.newArrayList();
-        List<SubjectArticle> list = subjectArticleDao.loadRequestCommentArticles(problemId, size, date);
+        List<SubjectArticle> list = subjectArticleDao.loadRequestCommentArticles(problemId, size);
         subjectArticles.addAll(list);
         size = size - list.size();
 
@@ -136,7 +136,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         int size = SIZE;
         //获取求点评的文章
         List<ApplicationSubmit> applicationSubmitList = Lists.newArrayList();
-        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, size, date);
+        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, size);
         applicationSubmitList.addAll(list);
         size = size - list.size();
 

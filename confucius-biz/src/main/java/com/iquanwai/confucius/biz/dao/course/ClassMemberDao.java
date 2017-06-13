@@ -117,7 +117,7 @@ public class ClassMemberDao extends DBUtil {
         ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
 
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where ProfileId=? and ProfileId=? ",
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where ProfileId=? and ClassId=? ",
                     h, profileId, classId);
             return classMember;
         } catch (SQLException e) {

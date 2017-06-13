@@ -139,13 +139,14 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ApplicationSubmit> loadRequestCommentApplications(Integer problemId, int size, Date date) {
+    public List<ApplicationSubmit> loadRequestCommentApplications(Integer problemId, int size) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ApplicationSubmit where ProblemId =? and Content is not null and Feedback = 0 and AddTime>? and RequestFeedback =1 " +
+        String sql = "select * from ApplicationSubmit where ProblemId =? and Content is not null " +
+                "and Feedback = 0 and RequestFeedback =1 " +
                 "order by length desc limit " + size;
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
-            return runner.query(sql, h, problemId, date);
+            return runner.query(sql, h, problemId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

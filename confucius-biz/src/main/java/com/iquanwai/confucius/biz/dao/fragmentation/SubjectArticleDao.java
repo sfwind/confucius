@@ -90,14 +90,14 @@ public class SubjectArticleDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<SubjectArticle> loadRequestCommentArticles(Integer problemId, int size, Date date) {
+    public List<SubjectArticle> loadRequestCommentArticles(Integer problemId, int size) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubjectArticle>> h = new BeanListHandler<>(SubjectArticle.class);
         String sql = "select * from SubjectArticle where ProblemId = ? and Feedback=0 and AuthorType=1 " +
-                "and RequestFeedback =1 and AddTime>? " +
+                "and RequestFeedback =1 " +
                 "order by length desc limit " + size;
         try {
-            return runner.query(sql, h, problemId, date);
+            return runner.query(sql, h, problemId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
