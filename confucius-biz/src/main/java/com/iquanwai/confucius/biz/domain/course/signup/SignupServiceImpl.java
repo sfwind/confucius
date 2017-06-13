@@ -31,6 +31,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
 import lombok.Data;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -85,11 +86,6 @@ public class SignupServiceImpl implements SignupService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-     * 付费名单(openid+courseId)
-     */
-    private List<Payment> payList = Lists.newArrayList();
-
-    /**
      * 支付二维码的高度
      */
     private final static int QRCODE_HEIGHT = 200;
@@ -111,51 +107,37 @@ public class SignupServiceImpl implements SignupService {
      * 初始化缓存
      * */
     public void init() {
-        //统计待付款的人数
-        List<QuanwaiClass> quanwaiClassList = classDao.openClass();
-        List<Integer> openClass = Lists.newArrayList(); // 开放报名的班级id
-        for (QuanwaiClass quanwaiClass : quanwaiClassList) {
-            Integer classId = quanwaiClass.getId();
-            openClass.add(classId);
-        }
-        List<ClassMember> members = classMemberDao.loadActiveMembers();
-        //
-        //清空缓存
-        payList.clear();
         classMap.clear();
         courseMap.clear();
-        members.stream().filter(member -> !payList.contains(new Payment(member.getOpenId(), member.getCourseId())))
-                .forEach(member -> payList.add(new Payment(member.getOpenId(), member.getCourseId())));
-
-        logger.info("init under payment map complete");
     }
 
-
-    public Pair<Integer, Integer> signupCheck(String openid, Integer courseId) {
-//        if(!ConfigUtils.pressTestSwitch()) {
-//            ClassMember classMember = classMemberDao.classMember(openid, courseId);
-//            if(classMember!=null){
+    @Override
+    public Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId) {
+//        if (!ConfigUtils.pressTestSwitch()) {
+//            ClassMember classMember = classMemberDao.classMember(profileId, courseId);
+//            if (classMember != null) {
 //                // 并且他正在进行的课程里有这门课
 //                if (DateUtils.startDay(new Date()).before(classMember.getCloseDate())) {
-//                    return new ImmutablePair(-3, 0);
+//                    return new ImmutablePair<>(-3, 0);
 //                }
 //            }
 //        }
         // 还没有正式进入班级
-        return classMemberCountRepo.prepareSignup(openid, courseId);
+        return classMemberCountRepo.prepareSignup(profileId, courseId);
     }
 
     @Override
-    public Pair<Integer, String> riseMemberSignupCheck(String openId, Integer memberTypeId) {
-        return riseMemberCountRepo.prepareSignup(openId);
+    public Pair<Integer, String> riseMemberSignupCheck(Integer profileId, Integer memberTypeId) {
+        return riseMemberCountRepo.prepareSignup(profileId);
     }
 
     @Override
-    public Pair<Integer, String> riseMemberSignupCheckNoHold(String openId, Integer memberTypeId) {
-        return riseMemberCountRepo.prepareSignup(openId, false);
+    public Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId) {
+        return riseMemberCountRepo.prepareSignup(profileId, false);
     }
 
-    public QuanwaiOrder signup(String openid, Integer courseId, Integer classId) {
+    @Override
+    public QuanwaiOrder signupCourse(String openid, Integer profileId, Integer courseId, Integer classId) {
         //生成订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
         quanwaiOrder.setCreateTime(new Date());
@@ -170,8 +152,8 @@ public class SignupServiceImpl implements SignupService {
         }
         double discount = 0.0;
         //计算优惠
-        if (costRepo.hasCoupon(openid)) {
-            discount = costRepo.discount(course.getFee(), openid, orderId);
+        if (costRepo.hasCoupon(profileId)) {
+            discount = costRepo.discount(course.getFee(), profileId, orderId);
         }
         quanwaiOrder.setTotal(course.getFee());
         quanwaiOrder.setDiscount(discount);
@@ -189,6 +171,7 @@ public class SignupServiceImpl implements SignupService {
         courseOrder.setEntry(false);
         courseOrder.setIsDel(false);
         courseOrder.setOpenid(openid);
+        courseOrder.setProfileId(profileId);
         courseOrder.setOrderId(orderId);
         courseOrderDao.insert(courseOrder);
 
@@ -196,9 +179,9 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Pair<Integer, QuanwaiOrder> signupRiseMember(String openid, Integer memberTypeId, Integer couponId) {
+    public Pair<Integer, QuanwaiOrder> signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
         // 查询该openid是否是我们的用户
-        Profile profile = profileDao.queryByOpenId(openid);
+        Profile profile = profileDao.load(Profile.class, profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Assert.notNull(profile, "用户信息错误");
         Assert.notNull(memberType, "会员类型错误");
@@ -206,7 +189,7 @@ public class SignupServiceImpl implements SignupService {
         // 创建订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
         quanwaiOrder.setCreateTime(new Date());
-        quanwaiOrder.setOpenid(openid);
+        quanwaiOrder.setOpenid(profile.getOpenid());
         //orderId 16位随机字符
         String orderId = CommonUtils.randomString(16);
         double discount = 0d;
@@ -217,7 +200,7 @@ public class SignupServiceImpl implements SignupService {
                 // 优惠券无效
                 return new MutablePair<>(-1, null);
             }
-            discount = costRepo.discount(memberType.getFee(), openid, orderId, coupon);
+            discount = costRepo.discount(memberType.getFee(), orderId, coupon);
         }
 
         quanwaiOrder.setOrderId(orderId);
@@ -232,7 +215,7 @@ public class SignupServiceImpl implements SignupService {
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
-        riseOrder.setOpenid(openid);
+        riseOrder.setOpenid(profile.getOpenid());
         riseOrder.setEntry(false);
         riseOrder.setIsDel(false);
         riseOrder.setMemberType(memberTypeId);
@@ -243,57 +226,15 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signup(String openid, Integer courseId, Integer classId, String promoCode, Double discount) {
-        //生成订单
-        QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
-        quanwaiOrder.setCreateTime(new Date());
-        quanwaiOrder.setOpenid(openid);
-        //orderId 16位随机字符
-        String orderId = CommonUtils.randomString(16);
-        quanwaiOrder.setOrderId(orderId);
-        CourseIntroduction course = getCachedCourse(courseId);
-        if (course == null) {
-            logger.error("courseId {} is not existed", courseId);
-            return null;
-        }
-        //计算优惠 该二维码不计算优惠券
-//        if(costRepo.hasCoupon(openid)) {
-//            discount = costRepo.discount(course.getFee(), openid, orderId);
-//        }
-        if (course.getFee().equals(discount) || course.getFee() < discount) {
-            discount = course.getFee();
-        }
-        quanwaiOrder.setTotal(course.getFee());
-        quanwaiOrder.setDiscount(discount);
-        quanwaiOrder.setPrice(CommonUtils.substract(course.getFee(), discount));
-        quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY); //待支付
-        quanwaiOrder.setGoodsId(courseId + "");
-        quanwaiOrder.setGoodsName(course.getCourseName());
-        quanwaiOrder.setGoodsType(QuanwaiOrder.SYSTEMATISM);
-        quanwaiOrderDao.insert(quanwaiOrder);
-
-        //生成体系化报名数据
-        CourseOrder courseOrder = new CourseOrder();
-        courseOrder.setClassId(classId);
-        courseOrder.setCourseId(courseId);
-        courseOrder.setEntry(false);
-        courseOrder.setIsDel(false);
-        courseOrder.setOpenid(openid);
-        courseOrder.setOrderId(orderId);
-        courseOrderDao.insert(courseOrder);
-
-        return quanwaiOrder;
-    }
-
-    @Override
     public ClassMember classMember(String orderId) {
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
         if (courseOrder != null) {
-            return classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getOpenid());
+            return classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getProfileId());
         }
         return null;
     }
 
+    @Override
     public String payQRCode(String productId) {
         String payUrl = payUrl(productId);
         String path = "/data/static/images/qrcode/" + productId + ".jpg";
@@ -310,6 +251,7 @@ public class SignupServiceImpl implements SignupService {
         return picUrl;
     }
 
+    @Override
     public QuanwaiClass getCachedClass(Integer classId) {
         if (classMap.get(classId) == null || classMap.get(classId).get() == null) {
             QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
@@ -320,6 +262,7 @@ public class SignupServiceImpl implements SignupService {
         return classMap.get(classId).get();
     }
 
+    @Override
     public CourseIntroduction getCachedCourse(Integer courseId) {
         if (courseMap.get(courseId) == null) {
             CourseIntroduction course = courseIntroductionDao.getByCourseId(courseId);
@@ -330,18 +273,21 @@ public class SignupServiceImpl implements SignupService {
         return courseMap.get(courseId);
     }
 
+    @Override
     public CourseOrder getOrder(String orderId) {
         return courseOrderDao.loadOrder(orderId);
     }
 
+    @Override
     public String entry(String orderId) {
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
         Integer classId = courseOrder.getClassId();
         Integer courseId = courseOrder.getCourseId();
         String openid = courseOrder.getOpenid();
+        Integer profileId = courseOrder.getProfileId();
         //体系化订单标记已报名
         courseOrderDao.entry(orderId);
-        ClassMember classMember = classMemberDao.getClassMember(classId, openid);
+        ClassMember classMember = classMemberDao.getClassMember(classId, profileId);
         Date closeDate = getCloseDate(classId, courseId);
         if (classMember != null) {
             //已经毕业或者已经超过关闭时间,重置学员数据
@@ -349,7 +295,7 @@ public class SignupServiceImpl implements SignupService {
                 classMemberDao.reEntry(classMember.getId(), closeDate);
             }
             //发送录取消息
-            sendWelcomeMsg(courseId, openid, classId);
+            sendWelcomeMsg(courseId, openid, classId, classMember.getMemberId());
             return classMember.getMemberId();
         }
         classMember = new ClassMember();
@@ -364,14 +310,10 @@ public class SignupServiceImpl implements SignupService {
         }
         //设置课程关闭时间
         classMember.setCloseDate(closeDate);
-
+        classMember.setProfileId(profileId);
         classMemberDao.entry(classMember);
-        //加入已付款列表
-        if (!payList.contains(new Payment(openid, courseId))) {
-            payList.add(new Payment(openid, courseId));
-        }
         //发送录取消息
-        sendWelcomeMsg(courseId, openid, classId);
+        sendWelcomeMsg(courseId, openid, classId, memberId);
         return memberId;
     }
 
@@ -499,23 +441,13 @@ public class SignupServiceImpl implements SignupService {
         return closeDate;
     }
 
-    public boolean free(Integer courseId, String openid) {
-        CourseIntroduction courseIntroduction = this.getCachedCourse(courseId);
-        if (courseIntroduction == null) {
-            logger.error("courseId {} is invalid", courseId);
-            return false;
-        }
-
-        return courseIntroduction.getFree() ||
-                costRepo.isWhite(courseId, openid);
-    }
-
+    @Override
     public void giveupSignup(String orderId) {
         CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
-        ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getOpenid());
+        ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getProfileId());
         //未付款时退还名额
         if (classMember == null) {
-            classMemberCountRepo.quitClass(courseOrder.getOpenid(), courseOrder.getCourseId(),
+            classMemberCountRepo.quitClass(courseOrder.getProfileId(), courseOrder.getCourseId(),
                     courseOrder.getClassId());
         }
         //关闭订单
@@ -527,10 +459,10 @@ public class SignupServiceImpl implements SignupService {
     public void giveupRiseSignup(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
         Profile profile = profileDao.queryByOpenId(riseOrder.getOpenid());
-        Integer count = riseOrderDao.userNotCloseOrder(riseOrder.getOpenid());
+        Integer count = riseOrderDao.userNotCloseOrder(riseOrder.getProfileId());
         if (!profile.getRiseMember() && count == 1) {
             // 未成功报名，并且是最后一个单子,退还名额
-            riseMemberCountRepo.quitSignup(riseOrder.getOrderId(), riseOrder.getMemberType());
+            riseMemberCountRepo.quitSignup(riseOrder.getProfileId(), riseOrder.getMemberType());
         }
 
         //关闭订单
@@ -538,7 +470,7 @@ public class SignupServiceImpl implements SignupService {
         quanwaiOrderDao.closeOrder(orderId);
     }
 
-    public void sendWelcomeMsg(Integer courseId, String openid, Integer classId) {
+    private void sendWelcomeMsg(Integer courseId, String openid, Integer classId, String memberId) {
         logger.info("发送欢迎消息给{}", openid);
         String key = ConfigUtils.signupSuccessMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
@@ -547,7 +479,6 @@ public class SignupServiceImpl implements SignupService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
 
-        ClassMember classMember = classMemberDao.getClassMember(classId, openid);
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
         CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
 
@@ -555,7 +486,7 @@ public class SignupServiceImpl implements SignupService {
             data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。\n"));
             data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(quanwaiClass.getOpenTime()) + "-" + DateUtils.parseDateToStringByCommon(quanwaiClass.getCloseTime())));
-            String remark = "\n到期后自动关闭\n\n你的学号是" + classMember.getMemberId() + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
+            String remark = "\n到期后自动关闭\n\n你的学号是" + memberId + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
             data.put("remark", new TemplateMessage.Keyword(remark));
             templateMessage.setUrl(quanwaiClass.getWeixinGroup());
         } else if (course.getType() == Course.SHORT_COURSE) {
@@ -595,22 +526,13 @@ public class SignupServiceImpl implements SignupService {
 //        }
     }
 
+    @Override
     public void reloadClass() {
         init();
         //初始化班级剩余人数
         classMemberCountRepo.initClass();
         //初始化白名单和优惠券
         costRepo.reloadCache();
-    }
-
-    @Override
-    public CourseOrder getCourseOrder(String orderId) {
-        return courseOrderDao.loadOrder(orderId);
-    }
-
-    @Override
-    public List<QuanwaiOrder> getActiveOrders(String openId, Integer courseId) {
-        return quanwaiOrderDao.loadActiveOrders(openId);
     }
 
     @Override
@@ -621,11 +543,6 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public Integer getRiseRemindingCount() {
         return riseMemberCountRepo.getRemindingCount();
-    }
-
-    @Override
-    public void updatePromoCode(String orderId, String promoCode) {
-        courseOrderDao.updatePromoCode(orderId, promoCode);
     }
 
     @Override
@@ -644,9 +561,9 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public List<Coupon> getCoupons(String openId) {
-        if (costRepo.hasCoupon(openId)) {
-            List<Coupon> coupons = costRepo.getCoupons(openId);
+    public List<Coupon> getCoupons(Integer profileId) {
+        if (costRepo.hasCoupon(profileId)) {
+            List<Coupon> coupons = costRepo.getCoupons(profileId);
             coupons.forEach(item -> {
                 item.setExpired(DateUtils.parseDateToStringByCommon(item.getExpiredDate()));
             });
@@ -713,7 +630,7 @@ public class SignupServiceImpl implements SignupService {
         return CommonUtils.placeholderReplace(PAY_URL, map);
     }
 
-    public synchronized Integer getMemberNumber(Integer classId) {
+    private synchronized Integer getMemberNumber(Integer classId) {
         if (memberCount.get(classId) == null) {
             int number = classMemberDao.classMemberNumber(classId);
             memberCount.put(classId, number + 1);
@@ -724,17 +641,5 @@ public class SignupServiceImpl implements SignupService {
         memberCount.put(classId, count);
         return count;
     }
-
-    @Data
-    private static class Payment {
-        private String openid;
-        private Integer courseId;
-
-        public Payment(String openid, Integer courseId) {
-            this.openid = openid;
-            this.courseId = courseId;
-        }
-    }
-
 
 }

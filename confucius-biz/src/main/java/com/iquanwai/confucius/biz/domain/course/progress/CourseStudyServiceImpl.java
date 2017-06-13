@@ -6,10 +6,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.iquanwai.confucius.biz.dao.course.*;
-import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Material;
-import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -62,8 +60,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private ClassDao classDao;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private OperationLogService operationLogService;
 
     private Map<Integer, Question> questionMap = Maps.newConcurrentMap();
 
@@ -72,80 +68,80 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private final static String shortUrlService = "http://tinyurl.com/api-create.php?url=";
 
     @PostConstruct
-    public void initQuestion(){
+    public void initQuestion() {
         List<Question> questionList = questionDao.loadAll(Question.class);
         List<Choice> choiceList = choiceDao.loadAll(Choice.class);
-        for(Question question:questionList){
+        for (Question question : questionList) {
             List<Choice> choices = Lists.newArrayList();
             choices.addAll(choiceList.stream().filter(choice -> choice.getQuestionId().
                     equals(question.getId())).collect(Collectors.toList()));
             question.setChoiceList(choices);
             questionMap.put(question.getId(), question);
             //语音分析，拼接完整url
-            if(question.getVoice()!=null){
-                question.setVoice(ConfigUtils.streamResourceDomainName()+"/audio/"+question.getVoice());
+            if (question.getVoice() != null) {
+                question.setVoice(ConfigUtils.streamResourceDomainName() + "/audio/" + question.getVoice());
             }
         }
 
     }
 
-    public Page loadPage(String openid, Integer chapterId, Integer pageSequence, Boolean lazyLoad) {
-        Assert.notNull(openid, "openid不能为空");
+    @Override
+    public Page loadPage(String openid, Integer profileId, Integer chapterId, Integer pageSequence, Boolean lazyLoad) {
         //首次学习
-        if(pageSequence==null){
+        if (pageSequence == null) {
             pageSequence = 1;
         }
 
         Page page = pageDao.loadPage(chapterId, pageSequence);
-        if(page!=null) {
+        if (page != null) {
             List<Material> materialList = materialDao.loadPageMaterials(page.getId());
             //拼接url前缀
-            for(Material m:materialList){
-                materialHandle(openid, chapterId, m);
+            for (Material m : materialList) {
+                materialHandle(profileId, chapterId, m);
             }
             page.setMaterialList(materialList);
             //记录到阅读到第几页
-            if(!lazyLoad) {
-                markPage(openid, chapterId, pageSequence);
+            if (!lazyLoad) {
+                markPage(openid, profileId, chapterId, pageSequence);
             }
         }
         return page;
     }
 
-    private void materialHandle(String openid, Integer chapterId, Material m) {
+    private void materialHandle(Integer profileId, Integer chapterId, Material m) {
         Assert.notNull(m, "material不能为空");
         //图片，语音加前缀
-        if(m.getType()==2){
-            m.setContent(ConfigUtils.resourceDomainName()+"/images/"+m.getContent());
-        }else if(m.getType()==3){
-            m.setContent(ConfigUtils.streamResourceDomainName()+"/audio/"+m.getContent());
-        //占位符替换，当文字处理
-        }else if(m.getType()==11){
-            m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
+        if (m.getType() == 2) {
+            m.setContent(ConfigUtils.resourceDomainName() + "/images/" + m.getContent());
+        } else if (m.getType() == 3) {
+            m.setContent(ConfigUtils.streamResourceDomainName() + "/audio/" + m.getContent());
+            //占位符替换，当文字处理
+        } else if (m.getType() == 11) {
+            m.setContent(classPlaceholder(m.getContent(), chapterId, profileId));
             m.setType(1);
-        }else if(m.getType()==12){
-            m.setContent(classMemberPlaceholder(m.getContent(), chapterId, openid));
+        } else if (m.getType() == 12) {
+            m.setContent(classMemberPlaceholder(m.getContent(), chapterId, profileId));
             m.setType(1);
-        }else if(m.getType()==13){
-            m.setContent(accountPlaceholder(m.getContent(), openid));
+        } else if (m.getType() == 13) {
+            m.setContent(accountPlaceholder(m.getContent(), profileId));
             m.setType(1);
-        //占位符替换，当图片处理
-        }else if(m.getType()==21){
-            m.setContent(classPlaceholder(m.getContent(), chapterId, openid));
+            //占位符替换，当图片处理
+        } else if (m.getType() == 21) {
+            m.setContent(classPlaceholder(m.getContent(), chapterId, profileId));
             m.setType(2);
-        } else if(m.getType()==31){
+        } else if (m.getType() == 31) {
             // 支付链接，占位符替换，当文字处理
             Pattern pattern = Pattern.compile("\\{\\d+\\}");
 
             Matcher matcher = pattern.matcher(m.getContent());
             String courseId = null;
             String placeholder = null;
-            if(matcher.find()){
+            if (matcher.find()) {
                 placeholder = matcher.group();
-                courseId = placeholder.substring(1, placeholder.length()-1);
+                courseId = placeholder.substring(1, placeholder.length() - 1);
             }
 
-            if(courseId==null){
+            if (courseId == null) {
                 logger.error("查询该章节对应的正式课程失败,素材id:{}", m.getId());
             } else {
                 m.setContent(m.getContent().replace(placeholder,
@@ -155,11 +151,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }
     }
 
-    private String accountPlaceholder(String content, String openid) {
-        Assert.notNull(openid, "openid不能为空");
-        Profile account = accountService.getProfile(openid, false);
-        if(account==null){
-            logger.error("openid {} is invalid", openid);
+    private String accountPlaceholder(String content, Integer profileId) {
+        Profile account = accountService.getProfile(profileId);
+        if (account == null) {
+            logger.error("openid {} is invalid", profileId);
             return content;
         }
 
@@ -172,17 +167,16 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return CommonUtils.placeholderReplace(content, memos);
     }
 
-    private String classMemberPlaceholder(String content, Integer chapterId, String openid) {
-        Assert.notNull(openid, "openid不能为空");
+    private String classMemberPlaceholder(String content, Integer chapterId, Integer profileId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
-        if(chapter==null){
+        if (chapter == null) {
             logger.error("chapterId {} is invalid", chapterId);
             return content;
         }
-        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, chapter.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return content;
         }
 
@@ -195,21 +189,20 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return CommonUtils.placeholderReplace(content, memos);
     }
 
-    private String classPlaceholder(String content, Integer chapterId, String openid) {
-        Assert.notNull(openid, "openid不能为空");
+    private String classPlaceholder(String content, Integer chapterId, Integer profileId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
-        if(chapter==null){
+        if (chapter == null) {
             logger.error("chapterId {} is invalid", chapterId);
             return content;
         }
-        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, chapter.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return content;
         }
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
-        if(quanwaiClass==null){
+        if (quanwaiClass == null) {
             //未报名不能获取数据
             logger.error("classId {} is invalid", classMember.getClassId());
             return content;
@@ -224,10 +217,10 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return CommonUtils.placeholderReplace(content, memos);
     }
 
-    public Chapter loadChapter(String openid, Integer chapterId) {
-        Assert.notNull(openid, "openid不能为空");
+    @Override
+    public Chapter loadChapter(Integer chapterId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
-        if(chapter==null){
+        if (chapter == null) {
             logger.error("chapterId {} is invalid", chapterId);
             return null;
         }
@@ -238,60 +231,65 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return chapter;
     }
 
-    public Question loadQuestion(String openid, Integer questionId) {
-        Assert.notNull(openid, "openid不能为空");
+    @Override
+    public Question loadQuestion(Integer profileId, Integer questionId) {
         Question question = questionMap.get(questionId);
-        if(question==null){
+        if (question == null) {
             logger.error("questionId {} is invalid", questionId);
             return null;
         }
-        ClassMember classMember = classMemberDao.classMember(openid, question.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, question.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return null;
         }
 
-        boolean submitted = questionSubmitDao.submitted(openid, classMember.getClassId(), questionId);
+        boolean submitted = questionSubmitDao.submitted(profileId, classMember.getClassId(), questionId);
         question.setAnswered(submitted);
 
         return question;
     }
 
-    public Homework loadHomework(String openid, Integer homeworkId) {
-        Assert.notNull(openid, "openid不能为空");
+    @Override
+    public Homework loadHomework(Integer profileId, Integer homeworkId) {
         Homework homework = homeworkDao.load(Homework.class, homeworkId);
-        if(homework==null){
+        if (homework == null) {
             logger.error("homeworkId {} is invalid", homeworkId);
             return null;
         }
-        ClassMember classMember = classMemberDao.classMember(openid, homework.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, homework.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return null;
         }
 
-        HomeworkSubmit submit = homeworkSubmitDao.loadHomeworkSubmit(openid, classMember.getClassId(), homeworkId);
-        if(submit==null || submit.getSubmitContent()==null) {
+        HomeworkSubmit submit = homeworkSubmitDao.loadHomeworkSubmit(profileId, classMember.getClassId(), homeworkId);
+        if (submit == null || submit.getSubmitContent() == null) {
             homework.setSubmitted(false);
-        }else{
+        } else {
             homework.setSubmitted(true);
         }
-        if(homework.getVoice()!=null) {
+        if (homework.getVoice() != null) {
             homework.setVoice(ConfigUtils.streamResourceDomainName() + homework.getVoice());
         }
-        if(submit==null){
-            String url = "/static/h?id="+ CommonUtils.randomString(6);
-            String shortUrl = generateShortUrl(ConfigUtils.domainName()+url);
+        if (submit == null) {
+            String url = "/static/h?id=" + CommonUtils.randomString(6);
+            String shortUrl = generateShortUrl(ConfigUtils.domainName() + url);
             homework.setPcurl(shortUrl);
-            if(shortUrl.equals(ConfigUtils.domainName()+url)){
-                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, null);
-            }else {
-                homeworkSubmitDao.insert(openid, classMember.getClassId(), homeworkId, url, shortUrl);
+            HomeworkSubmit homeworkSubmit = new HomeworkSubmit();
+            homeworkSubmit.setSubmitProfileId(profileId);
+            homeworkSubmit.setSubmitOpenid(classMember.getOpenId());
+            homeworkSubmit.setClassId(classMember.getClassId());
+            homeworkSubmit.setHomeworkId(homeworkId);
+            homeworkSubmit.setSubmitUrl(url);
+            if (!shortUrl.equals(ConfigUtils.domainName() + url)) {
+                homeworkSubmit.setShortUrl(shortUrl);
             }
-        }else{
-            if(submit.getSubmitUrl()!=null){
+            homeworkSubmitDao.insert(homeworkSubmit);
+        } else {
+            if (submit.getSubmitUrl() != null) {
                 homework.setPcurl(submit.getShortUrl());
             }
             homework.setContent(submit.getSubmitContent());
@@ -309,36 +307,38 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         }
         //FIX:偶尔调用失败的bug
         String shortUrl = restfulHelper.getPlain(requestUrl);
-        if(shortUrl.startsWith("http")){
+        if (shortUrl.startsWith("http")) {
             return shortUrl;
-        }else{
+        } else {
             return url;
         }
     }
 
+    @Override
     public HomeworkSubmit loadHomework(String url) {
         return homeworkSubmitDao.loadByUrl(url);
     }
 
+    @Override
     public List<HomeworkSubmit> loadSubmittedHomework(Integer homeworkId) {
         return homeworkSubmitDao.submittedHomework(homeworkId);
     }
 
-    public void submitHomework(String content, String openid, Integer homeworkId) {
-        Assert.notNull(openid, "openid不能为空");
+    @Override
+    public void submitHomework(String content, Integer profileId, Integer homeworkId) {
         Homework homework = homeworkDao.load(Homework.class, homeworkId);
-        if(homework==null){
+        if (homework == null) {
             logger.error("homeworkId {} is invalid", homeworkId);
             return;
         }
-        ClassMember classMember = classMemberDao.classMember(openid, homework.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, homework.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return;
         }
 
-        homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), openid, content);
+        homeworkSubmitDao.submit(homeworkId, classMember.getClassId(), profileId, content);
         completeHomework(homeworkId, classMember);
     }
 
@@ -358,7 +358,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         Map<Integer, Integer> pageChapterMap = Maps.newHashMap();
         List<Page> pages = pageDao.loadPages(chapterIds);
         List<Integer> pageIds = Lists.newArrayList();
-        for(Page page:pages){
+        for (Page page : pages) {
             pageIds.add(page.getId());
             pageChapterMap.put(page.getId(), page.getChapterId());
         }
@@ -367,34 +367,34 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
         materials.stream().filter(material -> homeworkId.toString().equals(material.getContent())).forEach(material -> {
             Chapter chapter = chapterDao.load(Chapter.class, pageChapterMap.get(material.getPageId()));
-            completeChapter(classMember.getOpenId(), chapter);
+            completeChapter(classMember.getProfileId(), chapter);
         });
     }
 
-    public boolean submitQuestion(String openid, Integer questionId, List<Integer> choiceList) {
-        Assert.notNull(openid, "openid不能为空");
+    @Override
+    public boolean submitQuestion(String openid, Integer profileId, Integer questionId, List<Integer> choiceList) {
         String answer = "";
         Question q = questionMap.get(questionId);
-        if(q==null){
+        if (q == null) {
             logger.error("questionId {} is invalid", questionId);
             return false;
         }
-        ClassMember classMember = classMemberDao.classMember(openid, q.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, q.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return false;
         }
         Integer score = score(q, choiceList);
         boolean right = false;
-        if(score.equals(q.getPoint())){
+        if (score.equals(q.getPoint())) {
             right = true;
         }
-        for(Integer choice:choiceList){
-            answer = answer+","+choice;
+        for (Integer choice : choiceList) {
+            answer = answer + "," + choice;
         }
 
-        if(StringUtils.isNotEmpty(answer)) {
+        if (StringUtils.isNotEmpty(answer)) {
             answer = answer.substring(1);
             QuestionSubmit questionSubmit = new QuestionSubmit();
             questionSubmit.setClassId(classMember.getClassId());
@@ -402,109 +402,107 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             questionSubmit.setQuestionId(questionId);
             questionSubmit.setSubmitAnswer(answer);
             questionSubmit.setSubmitOpenid(openid);
+            questionSubmit.setSubmitProfileId(profileId);
             questionSubmit.setIsRight(right ? 1 : 0);
             questionSubmitDao.insert(questionSubmit);
         }
         return right;
     }
 
-    public void completeChapter(String openid, Integer chapterId) {
+    @Override
+    public void completeChapter(Integer profileId, Integer chapterId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
-        if(chapter==null){
+        if (chapter == null) {
             logger.error("chapterId {} is invalid", chapterId);
             return;
         }
-        if(chapter.getType()==CourseType.HOMEWORK || chapter.getType()==CourseType.NEW_HOMEWORK){
+        if (chapter.getType() == CourseType.HOMEWORK || chapter.getType() == CourseType.NEW_HOMEWORK) {
             return;
         }
-        completeChapter(openid, chapter);
+        completeChapter(profileId, chapter);
     }
 
-    public void completeChapter(String openid, Chapter chapter) {
+    private void completeChapter(Integer profileId, Chapter chapter) {
         Assert.notNull(chapter, "chapter不能为空");
-        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, chapter.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return;
         }
         String progress = progressMark(classMember.getComplete(), chapter.getSequence());
-        if(progress!=null) {
-            classMemberDao.complete(openid, classMember.getClassId(), progress);
-            OperationLog operationLog = OperationLog.create().openid(openid)
-                    .module("课程")
-                    .function("学习章节")
-                    .action("完成章节")
-                    .memo(chapter.getId()+"");
-            operationLogService.log(operationLog);
+        if (progress != null) {
+            classMemberDao.complete(profileId, classMember.getClassId(), progress);
         }
     }
 
-    public void remark(String openid, Integer classId, Integer homeworkId, boolean excellent, boolean fail) {
+    @Override
+    public void remark(Integer profileId, Integer classId, Integer homeworkId, boolean excellent, boolean fail) {
         int score = getScore(excellent, fail);
-        homeworkSubmitDao.remark(homeworkId, classId, openid, null, score);
+        homeworkSubmitDao.remark(homeworkId, classId, profileId, null, score);
     }
 
-    public void markPage(String openid, Integer chapterId, Integer pageSequence) {
-        currentChapterPageDao.updatePage(openid, chapterId, pageSequence);
+    @Override
+    public void markPage(String openid, Integer profileId, Integer chapterId, Integer pageSequence) {
+        currentChapterPageDao.updatePage(openid, profileId, chapterId, pageSequence);
         //判断第一页
-        if(pageSequence==1){
-            progressChapter(openid, chapterId);
+        if (pageSequence == 1) {
+            progressChapter(profileId, chapterId);
         }
 
         //判断是否最后一页
         int count = pageDao.chapterPageNumber(chapterId);
-        if(count==pageSequence){
-            completeChapter(openid, chapterId);
+        if (count == pageSequence) {
+            completeChapter(profileId, chapterId);
         }
     }
 
-    private void progressChapter(String openid, Integer chapterId) {
+    private void progressChapter(Integer profileId, Integer chapterId) {
         Chapter chapter = chapterDao.load(Chapter.class, chapterId);
-        if(chapter==null){
+        if (chapter == null) {
             logger.error("chapterId {} is invalid", chapterId);
             return;
         }
-        ClassMember classMember = classMemberDao.classMember(openid, chapter.getCourseId());
-        if(classMember==null){
+        ClassMember classMember = classMemberDao.classMember(profileId, chapter.getCourseId());
+        if (classMember == null) {
             //未报名不能获取数据
-            logger.error("{} has no active course", openid);
+            logger.error("{} has no active course", profileId);
             return;
         }
         String progress = progressMark(classMember.getProgress(), chapter.getSequence());
-        if(progress!=null) {
-            classMemberDao.progress(openid, classMember.getClassId(), progress);
+        if (progress != null) {
+            classMemberDao.progress(profileId, classMember.getClassId(), progress);
         }
     }
 
-    private String progressMark(String progress, Integer sequence){
+    private String progressMark(String progress, Integer sequence) {
         boolean mark = false;
-        if(StringUtils.isEmpty(progress)){
-            progress = sequence +"";
-        }else{
+        if (StringUtils.isEmpty(progress)) {
+            progress = sequence + "";
+        } else {
             String[] progressArr = progress.split(",");
-            for(String prog:progressArr){
-                if(prog.equals(String.valueOf(sequence))){
+            for (String prog : progressArr) {
+                if (prog.equals(String.valueOf(sequence))) {
                     mark = true;
                 }
             }
-            if(!mark) {
-                progress = progress+","+sequence;
+            if (!mark) {
+                progress = progress + "," + sequence;
             }
         }
-        if(!mark){
+        if (!mark) {
             return progress;
-        }else{
+        } else {
             return null;
         }
     }
 
     private int getScore(boolean excellent, boolean fail) {
         int score = 75;
-        if(excellent){
+        if (excellent) {
             score = 90;
         }
-        if(fail){
+        if (fail) {
             score = 59;
         }
         return score;
@@ -518,26 +516,27 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         right.addAll(all.stream().filter(Choice::getRight).
                 collect(Collectors.toList()));
 
-        for(Choice choice:right){
-            if(!choiceList.contains(choice.getId())) {
+        for (Choice choice : right) {
+            if (!choiceList.contains(choice.getId())) {
                 return 0;
             }
         }
 
-        if(right.size()==choiceList.size()){
+        if (right.size() == choiceList.size()) {
             return question.getPoint();
         }
         return 0;
     }
 
+    @Override
     public Chapter loadFirstChapter(Integer courseId) {
         List<Chapter> chapters = chapterDao.loadChapters(courseId);
         //初始化序号
         int first = Integer.MAX_VALUE;
         Chapter firstChapter = null;
 
-        for(Chapter chapter:chapters){
-            if(chapter.getSequence()<first){
+        for (Chapter chapter : chapters) {
+            if (chapter.getSequence() < first) {
                 first = chapter.getSequence();
                 firstChapter = chapter;
             }
@@ -545,13 +544,9 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         return firstChapter;
     }
 
+    @Override
     public void reloadQuestion() {
         initQuestion();
-    }
-
-    @Override
-    public HomeworkSubmit loadMemberSubmittedHomework(Integer submitId){
-        return homeworkSubmitDao.load(HomeworkSubmit.class,submitId);
     }
 
 }

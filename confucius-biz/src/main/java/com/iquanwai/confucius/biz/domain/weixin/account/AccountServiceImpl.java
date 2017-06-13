@@ -97,6 +97,25 @@ public class AccountServiceImpl implements AccountService {
         return getProfileFromDB(openid);
     }
 
+    @Override
+    public Profile getProfile(Integer profileId) {
+        Profile profile = profileDao.load(Profile.class, profileId);
+
+        if (profile != null) {
+            if (profile.getHeadimgurl() != null) {
+                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
+            }
+            Integer role = userRoleMap.get(profile.getOpenid());
+            if (role == null) {
+                profile.setRole(0);
+            } else {
+                profile.setRole(role);
+            }
+        }
+
+        return profile;
+    }
+
     private Account getAccountFromWeixin(String openid) throws NotFollowingException {
         //调用api查询account对象
         String url = USER_INFO_URL;

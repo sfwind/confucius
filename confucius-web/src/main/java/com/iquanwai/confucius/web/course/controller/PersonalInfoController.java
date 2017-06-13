@@ -80,7 +80,7 @@ public class PersonalInfoController {
         InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
         try{
             Assert.notNull(loginUser, "用户不能为空");
-            Profile account = profileService.getProfile(loginUser.getOpenId());
+            Profile account = accountService.getProfile(loginUser.getId());
             try{
                 BeanUtils.copyProperties(infoSubmitDto,account);
             } catch (IllegalAccessException | InvocationTargetException e) {

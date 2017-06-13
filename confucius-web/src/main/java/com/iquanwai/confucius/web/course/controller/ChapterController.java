@@ -39,11 +39,11 @@ public class ChapterController {
     public ResponseEntity<Map<String, Object>> load(LoginUser loginUser,
                                                     @PathVariable("chapterId") Integer chapterId){
         Assert.notNull(loginUser, "用户不能为空");
-        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+        Chapter chapter = courseStudyService.loadChapter(chapterId);
         if(chapter==null){
             return WebUtils.error("获取用户当前章节页失败");
         }
-        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getId(), chapter.getCourseId());
         if(classMember==null){
             LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
@@ -64,7 +64,8 @@ public class ChapterController {
 
     private ChapterPageDto loadPage(LoginUser loginUser, Chapter chapter, Integer pageSequence, Boolean lazyLoad) {
         ChapterPageDto chapterPageDto = new ChapterPageDto();
-        Page page = courseStudyService.loadPage(loginUser.getOpenId(), chapter.getId(), pageSequence, lazyLoad);
+        Page page = courseStudyService.loadPage(loginUser.getOpenId(), loginUser.getId(),
+                chapter.getId(), pageSequence, lazyLoad);
         chapterPageDto.setPage(page);
 
         chapterPageDto.setChapterPic(chapter.getIcon());
@@ -81,11 +82,11 @@ public class ChapterController {
                                                     @PathVariable("chapterId") Integer chapterId,
                                                     @PathVariable("sequence") Integer pageSequence){
         Assert.notNull(loginUser, "用户不能为空");
-        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+        Chapter chapter = courseStudyService.loadChapter(chapterId);
         if(chapter==null){
             return WebUtils.error("获取用户当前章节页失败");
         }
-        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), chapter.getCourseId());
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getId(), chapter.getCourseId());
         if(classMember==null){
             LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
@@ -114,7 +115,7 @@ public class ChapterController {
 //                    .action("打开章节某页")
 //                    .memo(chapterId+","+pageSequence);
 //            operationLogService.log(operationLog);
-        Chapter chapter = courseStudyService.loadChapter(loginUser.getOpenId(), chapterId);
+        Chapter chapter = courseStudyService.loadChapter(chapterId);
         if(chapter==null){
             return WebUtils.error("懒加载章节页失败");
         }
@@ -135,7 +136,7 @@ public class ChapterController {
                 .action("加载选择题")
                 .memo(questionId+"");
         operationLogService.log(operationLog);
-        Question question = courseStudyService.loadQuestion(loginUser.getOpenId(), questionId);
+        Question question = courseStudyService.loadQuestion(loginUser.getId(), questionId);
         if(question==null){
             return WebUtils.error("获取选择题失败");
         }
@@ -147,7 +148,8 @@ public class ChapterController {
                                                               @PathVariable("questionId") Integer questionId,
                                                               @RequestBody AnswerDto answerDto){
         Assert.notNull(loginUser, "用户不能为空");
-        boolean right = courseStudyService.submitQuestion(loginUser.getOpenId(), questionId, answerDto.getAnswers());
+        boolean right = courseStudyService.submitQuestion(loginUser.getOpenId(), loginUser.getId(),
+                questionId, answerDto.getAnswers());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("章节")
@@ -168,7 +170,7 @@ public class ChapterController {
                 .action("加载作业")
                 .memo(homeworkId+"");
         operationLogService.log(operationLog);
-        Homework homework = courseStudyService.loadHomework(loginUser.getOpenId(), homeworkId);
+        Homework homework = courseStudyService.loadHomework(loginUser.getId(), homeworkId);
         if(homework==null){
             return WebUtils.error("获取作业失败");
         }
@@ -186,7 +188,7 @@ public class ChapterController {
         if(homeworkSubmitDto.getAnswer().length()>10000){
             return WebUtils.error("字数太长，请删减到10000字以下");
         }
-        courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), loginUser.getOpenId(), homeworkId);
+        courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), loginUser.getId(), homeworkId);
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("作业")
@@ -202,7 +204,7 @@ public class ChapterController {
                                                         @PathVariable("chapterId") Integer chapterId,
                                                         @PathVariable("sequence") Integer sequence){
         Assert.notNull(loginUser, "用户不能为空");
-        courseStudyService.markPage(loginUser.getOpenId(), chapterId, sequence);
+        courseStudyService.markPage(loginUser.getOpenId(), loginUser.getId(), chapterId, sequence);
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("章节")

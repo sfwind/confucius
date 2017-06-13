@@ -9,32 +9,28 @@ import java.util.List;
  */
 public interface CostRepo {
     /**
-     * 是否是课程免费用户
-     * */
-    boolean isWhite(Integer courseId, String openid);
-    /**
      * 用户使用折扣后的实际金额
-     * */
-    double discount(Double price, String openid, String orderId);
+     */
+    double discount(Double price, Integer profileId, String orderId);
 
-    double discount(Double price, String openid, String orderId, Coupon coupon);
+    double discount(Double price, String orderId, Coupon coupon);
 
     /**
      * 是否有优惠券
-     * */
-    boolean hasCoupon(String openid);
+     */
+    boolean hasCoupon(Integer profileId);
 
     /**
      * 刷新缓存
-     * */
+     */
     void reloadCache();
 
     /**
      * 更新优惠券状态
-     * */
+     */
     void updateCoupon(Integer status, String orderId);
 
-    List<Coupon> getCoupons(String openId);
+    List<Coupon> getCoupons(Integer profileId);
 
     Coupon getCoupon(Integer id);
 }

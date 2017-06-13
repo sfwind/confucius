@@ -24,12 +24,12 @@ import java.util.List;
 public class ClassMemberDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ClassMember classMember(String openid, Integer courseId){
+    public ClassMember classMember(Integer profileId, Integer courseId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? and Graduate=0",
-                    h, openid, courseId);
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where ProfileId=? and CourseId=? and Graduate=0",
+                    h, profileId, courseId);
             return classMember;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -38,12 +38,13 @@ public class ClassMemberDao extends DBUtil {
         return null;
     }
 
-    public List<ClassMember> classMember(String openid){
+    public List<ClassMember> classMember(Integer profileId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
-            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where Openid=? and Graduate = 0", h, openid);
+            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ProfileId=? and Graduate = 0",
+                    h, profileId);
             return classMember;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -54,9 +55,10 @@ public class ClassMemberDao extends DBUtil {
 
     /**
      * 查询还有N天要关闭课程的学员
+     *
      * @param date
      */
-    public List<ClassMember> willCloseMembers(Date date){
+    public List<ClassMember> willCloseMembers(Date date) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
@@ -70,13 +72,13 @@ public class ClassMemberDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ClassMember> graduateInfo(String openid, Integer courseId){
+    public List<ClassMember> graduateInfo(Integer profileId, Integer courseId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
         try {
-            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where Openid=? and CourseId=? and Graduate = 1 " +
-                    "order by UpdateTime desc", h, openid, courseId);
+            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ProfileId=? and CourseId=? and Graduate = 1 " +
+                    "order by UpdateTime desc", h, profileId, courseId);
             return classMember;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -86,37 +88,37 @@ public class ClassMemberDao extends DBUtil {
     }
 
 
-    public void progress(String openid, Integer classId, String progress){
+    public void progress(Integer profileId, Integer classId, String progress) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
             run.update("UPDATE ClassMember SET Progress =? " +
-                    "where Openid=? and ClassId=?", progress, openid, classId);
+                    "where ProfileId=? and ClassId=?", progress, profileId, classId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public void complete(String openid, Integer classId, String complete){
+    public void complete(Integer profileId, Integer classId, String complete) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
             run.update("UPDATE ClassMember SET Complete =? " +
-                    "where Openid=? and ClassId=?", complete, openid, classId);
+                    "where ProfileId=? and ClassId=?", complete, profileId, classId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public ClassMember getClassMember(Integer classId, String openid){
+    public ClassMember getClassMember(Integer classId, Integer profileId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
 
         try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where Openid=? and ClassId=? ",
-                    h, openid, classId);
+            ClassMember classMember = run.query("SELECT * FROM ClassMember where ProfileId=? and ClassId=? ",
+                    h, profileId, classId);
             return classMember;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -125,7 +127,7 @@ public class ClassMemberDao extends DBUtil {
         return null;
     }
 
-    public List<ClassMember> getClassMember(Integer classId){
+    public List<ClassMember> getClassMember(Integer classId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
@@ -140,7 +142,7 @@ public class ClassMemberDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ClassMember> getClassMember(Integer classId,Date closeDate){
+    public List<ClassMember> getClassMember(Integer classId, Date closeDate) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
 
@@ -158,19 +160,19 @@ public class ClassMemberDao extends DBUtil {
 
     public void entry(ClassMember classMember) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO ClassMember(ClassId, CourseId, Openid, MemberId, Graduate, CloseDate) " +
-                "VALUES(?, ?, ?, ?, 0, ?)";
+        String insertSql = "INSERT INTO ClassMember(ClassId, CourseId, Openid, ProfileId, MemberId, Graduate, CloseDate) " +
+                "VALUES(?, ?, ?, ?, ?, 0, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
                     classMember.getClassId(), classMember.getCourseId(),
-                    classMember.getOpenId(), classMember.getMemberId(),
-                    classMember.getCloseDate());
+                    classMember.getOpenId(), classMember.getProfileId(),
+                    classMember.getMemberId(), classMember.getCloseDate());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public Integer classMemberNumber(Integer classId){
+    public Integer classMemberNumber(Integer classId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();
 
@@ -184,22 +186,7 @@ public class ClassMemberDao extends DBUtil {
         return -1;
     }
 
-    public List<ClassMember> getPassMember(Integer classId){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
-
-        try {
-            List<ClassMember> classMember = run.query("SELECT * FROM ClassMember where ClassId=? and Pass = 1 and Graduate = 0",
-                    h, classId);
-            return classMember;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return null;
-    }
-
-    public void graduate(Integer id){
+    public void graduate(Integer id) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
@@ -211,19 +198,19 @@ public class ClassMemberDao extends DBUtil {
         }
     }
 
-    public void updateCertificateNo(Integer classId, String openid, String certificateNo){
+    public void updateCertificateNo(Integer classId, Integer profileId, String certificateNo) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
             run.update("UPDATE ClassMember SET CertificateNo=? " +
-                    "where Openid=? and ClassId=? ", certificateNo, openid, classId);
+                    "where ProfileId=? and ClassId=? ", certificateNo, profileId, classId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public ClassMember loadByCertificateNo(String certificateNo){
+    public ClassMember loadByCertificateNo(String certificateNo) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
         try {
@@ -237,21 +224,7 @@ public class ClassMemberDao extends DBUtil {
         return null;
     }
 
-    public ClassMember loadByMemberId(String memberId){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
-        try {
-            ClassMember classMember = run.query("SELECT * FROM ClassMember where MemberId=?",
-                    h, memberId);
-            return classMember;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return null;
-    }
-
-    public void reEntry(Integer classMemberId, Date closeDate){
+    public void reEntry(Integer classMemberId, Date closeDate) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
@@ -261,32 +234,6 @@ public class ClassMemberDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-    }
-
-    public List<ClassMember> loadByOpenId(String openId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
-
-        try {
-            return run.query("SELECT * FROM ClassMember where Openid=?", h, openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
-    }
-
-    public List<ClassMember> loadActiveMembers() {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
-
-        try {
-            return run.query("SELECT * FROM ClassMember where CloseDate<?", h, DateUtils.parseDateToString(new Date()));
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
     }
 
 }

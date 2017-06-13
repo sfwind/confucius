@@ -43,8 +43,6 @@ public class CourseController {
     private OperationLogService operationLogService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private ProfileService profileService;
 
     private String[] WEEK_INDEXES = {"开营前", "第一周", "第二周", "第三周"};
 
@@ -53,7 +51,7 @@ public class CourseController {
         Assert.notNull(loginUser,"用户不能为空");
         Course c = courseProgressService.loadCourse(courseId);
 
-        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getId(), courseId);
         if(classMember==null){
             LOGGER.error("用户"+loginUser.getWeixinName()+"还没有报名, openid is {}", loginUser.getOpenId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("course.load.nopaid"));
@@ -105,7 +103,7 @@ public class CourseController {
 
         courseProgressService.loadChapter(classMember, week, course);
         //设置看到某一页
-        courseProgressService.personalChapterPage(loginUser.getOpenId(), course.getChapterList());
+        courseProgressService.personalChapterPage(loginUser.getId(), course.getChapterList());
         CoursePageDto coursePageDto = new CoursePageDto();
         coursePageDto.setCourse(course);
         //加载周主题
@@ -141,7 +139,7 @@ public class CourseController {
                                                         @PathVariable("week") Integer week,
                                                         LoginUser loginUser){
         Assert.notNull(loginUser,"用户不能为空");
-        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getOpenId(), courseId);
+        ClassMember classMember = courseProgressService.loadActiveCourse(loginUser.getId(), courseId);
         if(classMember==null){
             WebUtils.error("用户"+loginUser.getWeixinName()+"还没有报名");
         }
@@ -165,20 +163,20 @@ public class CourseController {
                                                                LoginUser loginUser){
         Assert.notNull(loginUser,"用户不能为空");
         CertificateDto certificateDto = new CertificateDto();
-        Profile account = profileService.getProfile(loginUser.getOpenId());
+        Profile account = accountService.getProfile(loginUser.getId());
         if(account!=null){
             certificateDto.setName(account.getRealName());
         }
         // TODO:传classId
-        List<ClassMember> classMemberList = courseProgressService.loadGraduateClassMember(loginUser.getOpenId(), courseId);
+        List<ClassMember> classMemberList = courseProgressService.loadGraduateClassMember(loginUser.getId(), courseId);
         if(CollectionUtils.isNotEmpty(classMemberList)){
             ClassMember classMember = classMemberList.get(0);
             certificateDto.setCertificateNo(classMember.getCertificateNo());
             Course course = courseProgressService.loadCourse(classMember.getCourseId());
             if(course!=null){
                 certificateDto.setCertificateBg(course.getCertificatePic());
+                certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
             }
-            certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
         }
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())

@@ -10,6 +10,7 @@ public class CourseOrder {
     private int id;
     private String orderId; //订单id
     private String openid; //openid
+    private Integer profileId; //用户id
     private Integer courseId; //课程id
     private Integer classId; //班级id
     private Boolean entry; //是否已报名 0-未报名,1-已报名

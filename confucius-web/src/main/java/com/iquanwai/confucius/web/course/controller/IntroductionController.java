@@ -45,7 +45,7 @@ public class IntroductionController {
         AllCourseDto allCourseDto = new AllCourseDto();
         Assert.notNull(loginUser, "用户不能为空");
         List<MyCourseDto> courseDtos = Lists.newArrayList();
-        List<ClassMember> classMemberList = courseProgressService.loadActiveCourse(loginUser.getOpenId());
+        List<ClassMember> classMemberList = courseProgressService.loadActiveCourse(loginUser.getId());
         List<CourseIntroduction> notEntryCourses = courseIntroductionService.loadNotEntryCourses(classMemberList);
         allCourseDto.setOtherCourses(notEntryCourses);
         for(ClassMember classMember:classMemberList) {

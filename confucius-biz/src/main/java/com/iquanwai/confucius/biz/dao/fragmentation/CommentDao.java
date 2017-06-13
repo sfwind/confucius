@@ -68,24 +68,24 @@ public class CommentDao extends PracticeDBUtil {
         return 0;
     }
 
-    public Comment loadComment(Integer moduleId, Integer referId, String commentOpenId){
+    public Comment loadComment(Integer moduleId, Integer referId, Integer commentProfileId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<Comment> h = new BeanHandler<>(Comment.class);
-        String sql = "SELECT * FROM Comment where ReferencedId = ? and ModuleId = ? and commentOpenId=? and Del = 0";
+        String sql = "SELECT * FROM Comment where ReferencedId = ? and ModuleId = ? and CommentProfileId=? and Del = 0";
         try {
-            return run.query(sql, h, referId, moduleId, commentOpenId);
+            return run.query(sql, h, referId, moduleId, commentProfileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }
 
-    public List<Comment> loadCommentsByOpenid(String commentOpenId){
+    public List<Comment> loadCommentsByProfileId(Integer profileId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Comment>> h = new BeanListHandler<>(Comment.class);
-        String sql = "SELECT * FROM Comment where commentOpenId=? and Del = 0 order by id desc";
+        String sql = "SELECT * FROM Comment where commentProfileId=? and Del = 0 order by id desc";
         try {
-            return run.query(sql, h, commentOpenId);
+            return run.query(sql, h, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
