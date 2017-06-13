@@ -29,7 +29,7 @@ public interface SignupService {
      */
     Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId);
 
-    Pair<Integer, String> riseMemberSignupCheckNoHold(String openId, Integer memberTypeId);
+    Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId);
 
     /**
      * 课程报名，生成预付订单
@@ -38,12 +38,12 @@ public interface SignupService {
      */
     QuanwaiOrder signupCourse(String openid, Integer profileId, Integer courseId, Integer classId);
 
-    Pair<Integer, String> riseMemberSignupCheck(String openId, Integer memberTypeId);
+    Pair<Integer, String> riseMemberSignupCheck(Integer profileId, Integer memberTypeId);
 
     /**
      * 报名rise, 不生成预付订单
      */
-    Pair<Integer, QuanwaiOrder> signupRiseMember(String openid, Integer memberType, Integer couponId);
+    Pair<Integer, QuanwaiOrder> signupRiseMember(Integer profileId, Integer memberType, Integer couponId);
 
     /**
      * 获取学员详情

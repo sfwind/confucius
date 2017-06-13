@@ -160,7 +160,8 @@ public class SignupController {
      * @return
      */
     @RequestMapping(value = "/rise/signup")
-    public ResponseEntity<Map<String, Object>> riseMemberSignup(@RequestBody RiseMemberDto riseMemberDto) {
+    public ResponseEntity<Map<String, Object>> riseMemberSignup(LoginUser loginUser, @RequestBody RiseMemberDto riseMemberDto) {
+        Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(riseMemberDto, "请求参数不能为空");
         String openId = riseMemberDto.getOpenId();
         Integer memberType = riseMemberDto.getMemberType();
@@ -175,7 +176,7 @@ public class SignupController {
         // 创建订单
         QuanwaiOrder quanwaiOrder = null;
         try {
-            quanwaiOrder = signupService.signupRiseMember(openId, memberType, null).getRight();
+            quanwaiOrder = signupService.signupRiseMember(loginUser.getId(), memberType, null).getRight();
         } catch (Exception e) {
             return WebUtils.error(e.getLocalizedMessage());
         }
@@ -405,7 +406,7 @@ public class SignupController {
                 .function("报名页面")
                 .action("计算优惠券减免")
                 .memo(memberDto.getCouponId() + "");
-        Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getOpenId(), memberDto.getMemberType());
+        Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getId(), memberDto.getMemberType());
         if (check.getLeft() != 1) {
             return WebUtils.error(check.getRight());
         }
@@ -429,11 +430,11 @@ public class SignupController {
             LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), memberDto);
             remoteIp = ConfigUtils.getExternalIP();
         }
-        Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getOpenId(), memberDto.getMemberType());
+        Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getId(), memberDto.getMemberType());
         if (check.getLeft() != 1) {
             return WebUtils.error(check.getRight());
         }
-        Pair<Integer, QuanwaiOrder> quanwaiOrderPair = signupService.signupRiseMember(loginUser.getOpenId(),
+        Pair<Integer, QuanwaiOrder> quanwaiOrderPair = signupService.signupRiseMember(loginUser.getId(),
                 memberDto.getMemberType(), memberDto.getCouponId());
 
         if (quanwaiOrderPair.getLeft() == -1) {
@@ -485,7 +486,7 @@ public class SignupController {
                 .action("点击RISE会员选择按钮")
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
-        Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getOpenId(), memberTypeId);
+        Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getId(), memberTypeId);
         if (result.getLeft() != 1) {
             if (result.getLeft() == -4) {
                 return WebUtils.error(214, result.getRight());

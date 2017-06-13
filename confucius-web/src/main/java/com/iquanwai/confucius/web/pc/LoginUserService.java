@@ -175,7 +175,7 @@ public class LoginUserService {
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号
             //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
-            List<ClassMember> classMembers = courseProgressService.loadActiveCourse(openid);
+            List<ClassMember> classMembers = courseProgressService.loadActiveCourse(profile.getId());
             List<ImprovementPlan> plans = planService.loadUserPlans(openid);
             if (classMembers.isEmpty() && plans.isEmpty()) {
                 role = Role.stranger();

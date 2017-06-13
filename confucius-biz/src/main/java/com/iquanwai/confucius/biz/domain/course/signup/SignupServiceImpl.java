@@ -127,13 +127,13 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Pair<Integer, String> riseMemberSignupCheck(String openId, Integer memberTypeId) {
-        return riseMemberCountRepo.prepareSignup(openId);
+    public Pair<Integer, String> riseMemberSignupCheck(Integer profileId, Integer memberTypeId) {
+        return riseMemberCountRepo.prepareSignup(profileId);
     }
 
     @Override
-    public Pair<Integer, String> riseMemberSignupCheckNoHold(String openId, Integer memberTypeId) {
-        return riseMemberCountRepo.prepareSignup(openId, false);
+    public Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId) {
+        return riseMemberCountRepo.prepareSignup(profileId, false);
     }
 
     @Override
@@ -179,9 +179,9 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Pair<Integer, QuanwaiOrder> signupRiseMember(String openid, Integer memberTypeId, Integer couponId) {
+    public Pair<Integer, QuanwaiOrder> signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
         // 查询该openid是否是我们的用户
-        Profile profile = profileDao.queryByOpenId(openid);
+        Profile profile = profileDao.load(Profile.class, profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Assert.notNull(profile, "用户信息错误");
         Assert.notNull(memberType, "会员类型错误");
@@ -189,7 +189,7 @@ public class SignupServiceImpl implements SignupService {
         // 创建订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
         quanwaiOrder.setCreateTime(new Date());
-        quanwaiOrder.setOpenid(openid);
+        quanwaiOrder.setOpenid(profile.getOpenid());
         //orderId 16位随机字符
         String orderId = CommonUtils.randomString(16);
         double discount = 0d;
@@ -215,7 +215,7 @@ public class SignupServiceImpl implements SignupService {
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
-        riseOrder.setOpenid(openid);
+        riseOrder.setOpenid(profile.getOpenid());
         riseOrder.setEntry(false);
         riseOrder.setIsDel(false);
         riseOrder.setMemberType(memberTypeId);
@@ -459,10 +459,10 @@ public class SignupServiceImpl implements SignupService {
     public void giveupRiseSignup(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
         Profile profile = profileDao.queryByOpenId(riseOrder.getOpenid());
-        Integer count = riseOrderDao.userNotCloseOrder(riseOrder.getOpenid());
+        Integer count = riseOrderDao.userNotCloseOrder(riseOrder.getProfileId());
         if (!profile.getRiseMember() && count == 1) {
             // 未成功报名，并且是最后一个单子,退还名额
-            riseMemberCountRepo.quitSignup(riseOrder.getOrderId(), riseOrder.getMemberType());
+            riseMemberCountRepo.quitSignup(riseOrder.getProfileId(), riseOrder.getMemberType());
         }
 
         //关闭订单
