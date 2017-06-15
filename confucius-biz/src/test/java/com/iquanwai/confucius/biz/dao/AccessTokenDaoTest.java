@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao;
 import com.iquanwai.confucius.biz.TestBase;
 import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.wx.AccessTokenDao;
+import com.iquanwai.confucius.biz.domain.weixin.accessToken.AccessTokenService;
 import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.util.Constants;
 import org.junit.Test;
@@ -16,10 +17,13 @@ public class AccessTokenDaoTest extends TestBase {
     private AccessTokenDao accessTokenDao;
     @Autowired
     private FragmentAnalysisDataDao fragmentAnalysisDataDao;
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     @Test
     public void testInsert() {
-        accessTokenDao.insertOrUpdate("9uaMU9ItPjEVp0X1I4ZXkQmqTchOlKGs4ka77qw6ygPbY14b_Fbr4q4bRFGkcGm7_sQlYt4r_HyXEQBkEDPpa6obcCYYL3q_TzfbascmyTpeqynQLkO6OndfGi8f7SdSGTXfAIATGK");
+        accessTokenService.refreshAccessToken(true);
+       // accessTokenDao.insertOrUpdate("9uaMU9ItPjEVp0X1I4ZXkQmqTchOlKGs4ka77qw6ygPbY14b_Fbr4q4bRFGkcGm7_sQlYt4r_HyXEQBkEDPpa6obcCYYL3q_TzfbascmyTpeqynQLkO6OndfGi8f7SdSGTXfAIATGK");
     }
 
     @Test
