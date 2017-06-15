@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -22,6 +21,7 @@ import java.util.function.Consumer;
 public class RedisUtil {
     private RedissonClient redissonClient;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final long EXPIRED_TIME = 24 * 60 * 60;
 
     @Autowired
     public void setRedissonClient(RedissonClient redissonClient){
@@ -59,15 +59,7 @@ public class RedisUtil {
      * @param value value
      */
     public void set(String key, Object value) {
-        Assert.notNull(key, "message 不能为null");
-        Assert.notNull(value, "object 不能为null");
-        RBucket<String> bucket = redissonClient.getBucket(key);
-        if(value instanceof String){
-            bucket.set(value.toString());
-        } else {
-            String json = JSONObject.toJSONString(value);
-            bucket.set(json);
-        }
+        set(key, value, EXPIRED_TIME);
     }
 
     /**
@@ -77,23 +69,24 @@ public class RedisUtil {
      * @param timeToExpired 过期时间，单位秒
      */
     public void set(String key,Object value,Long timeToExpired){
-        Assert.notNull(key, "message 不能为null");
-        Assert.notNull(value, "object 不能为null");
+        Assert.notNull(key, "key 不能为null");
+        Assert.notNull(value, "value 不能为null");
         RBucket<String> bucket = redissonClient.getBucket(key);
         String finalValue = null;
+        // 如果是字符串就不用再转一次，如果是数字／对象都会经过fastjson转换为字符串
         if(value instanceof String){
             finalValue = value.toString();
         } else {
             finalValue =  JSONObject.toJSONString(value);
         }
-        if (timeToExpired == null) {
-            bucket.set(finalValue);
-        } else {
-            bucket.set(finalValue, timeToExpired, TimeUnit.SECONDS);
-        }
+        bucket.set(finalValue, timeToExpired == null ? EXPIRED_TIME : timeToExpired, TimeUnit.SECONDS);
     }
 
-
+    /**
+     * 同步锁
+     * @param key 锁
+     * @param consumer 在锁里的操作
+     */
     public void lock(String key, Consumer<RLock> consumer) {
         RLock lock = redissonClient.getLock(key);
         logger.info("Thread {} want the lock", Thread.currentThread().getId());
@@ -109,6 +102,39 @@ public class RedisUtil {
         logger.info("Thread {} don't have the lock :{}", Thread.currentThread().getId(), lock.isHeldByCurrentThread());
     }
 
+    /**
+     * 根据正则获取keys,默认每次向redis请求获取10行
+     * @param pattern 正则
+     */
+    public Iterable<String> getKeysByPattern(String pattern) {
+        return redissonClient.getKeys().getKeysByPattern(pattern);
+    }
+
+    /**
+     * 根据正则获取keys
+     * @param pattern 正则
+     * @param count 每次向redis请求时最多获取多少行
+     */
+    public Iterable<String> getKeysByPattern(String pattern,Integer count) {
+        return redissonClient.getKeys().getKeysByPattern(pattern, count);
+    }
+
+
+
+    /**
+     * 通过正则删除数据
+     * @param pattern 正则
+     * @return 删除的条数
+     */
+    public long deleteByPattern(String pattern){
+        return redissonClient.getKeys().deleteByPattern(pattern);
+    }
+
+
+    /**
+     * 获取value <br/>
+     * redisson的转换器会存储class信息，所以这个第一个参数只传String.class
+     */
     private <T> T get(Class<T> tClass, String key) {
         RBucket<T> bucket = redissonClient.getBucket(key);
         return bucket.get();
