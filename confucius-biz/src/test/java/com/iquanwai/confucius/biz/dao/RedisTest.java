@@ -15,10 +15,23 @@ public class RedisTest extends TestBase {
     @Test
     public void test(){
 
-//        AccessToken token = new AccessToken();
-//        token.setAccessToken("fwefewfew");
+        AccessToken token = new AccessToken();
+        token.setAccessToken("fwefewfew");
 //        redisUtil.set("accessToken", token);
-        log(redisUtil.get(AccessToken.class, "accessToken").getAccessToken());
+//        log(redisUtil.get(AccessToken.class, "accessToken").getAccessToken());
+        AccessToken act = redisUtil.get("act", AccessToken.class);
+        System.out.println("act:" + (act == null ? "null" : act));
+        redisUtil.set("fef",token,5l);
+        try {
+            Thread.sleep(6 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        AccessToken act1 = redisUtil.get("fef", AccessToken.class);
+        System.out.println(act1.getAccessToken());
+        System.out.println(act1.equals(token));
+        System.out.println(act1 == token);
+
     }
 
     @Test
