@@ -324,6 +324,12 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>1.10</version>
             </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.33</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     <build>
