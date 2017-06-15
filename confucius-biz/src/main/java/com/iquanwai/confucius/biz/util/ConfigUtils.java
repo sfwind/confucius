@@ -345,10 +345,14 @@ public class ConfigUtils {
 		return smsConfig;
 	}
 
-	public static List<String> getAlarmList(){
+	public static List<String> getAlarmList() {
 		List<String> list = Lists.newArrayList();
 		String[] split = getValue("sms.alarm.openids").split(",");
 		CollectionUtils.addAll(list, split);
 		return list;
+	}
+
+	public static Integer getVoteScore(){
+		return getIntValue("vote.score");
 	}
 }

@@ -12,6 +12,7 @@ import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -119,8 +120,8 @@ public class PracticeServiceImpl implements PracticeService {
             homeworkVote.setVotedProfileId(submitProfileId);
             homeworkVote.setDevice(Constants.Device.PC);
             homeworkVoteDao.vote(homeworkVote);
-            pointRepo.risePoint(planId, 2);
-            pointRepo.riseCustomerPoint(submitOpenId, 2);
+            pointRepo.risePoint(planId, ConfigUtils.getVoteScore());
+            pointRepo.riseCustomerPoint(submitOpenId, ConfigUtils.getVoteScore());
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
