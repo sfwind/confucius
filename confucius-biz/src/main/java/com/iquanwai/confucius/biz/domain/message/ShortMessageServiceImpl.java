@@ -85,10 +85,6 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         // 解析请求结果
         SMSSendResult smsSendResult = JSONObject.parseObject(post, SMSSendResult.class);
         logger.info("result:{}", smsSendResult);
-        if (smsSendResult != null && "0".equals(smsSendResult.getResult())) {
-            // 发送成功
-
-        }
         return smsSendResult;
     }
 

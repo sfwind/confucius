@@ -92,6 +92,7 @@ public class AccountController {
 
             SMSSendResult result = shortMessageService.sendMessage(shortMessage);
             if (result != null && "0".equals(result.getResult())) {
+                shortMessageService.raiseSendCount(smsDto.getProfileId());
                 return WebUtils.result(result);
             } else {
                 return WebUtils.error(result);
