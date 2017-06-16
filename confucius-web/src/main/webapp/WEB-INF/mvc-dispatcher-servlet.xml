@@ -79,6 +79,7 @@
             <mvc:exclude-mapping path="/file/image/**" />
             <mvc:exclude-mapping path="/account/login/**"/>
             <mvc:exclude-mapping path="/account/get"/>
+            <mvc:exclude-mapping path="/account/sms"/>
             <mvc:exclude-mapping path="/session/**"/>
             <mvc:exclude-mapping path="/login" />
             <mvc:exclude-mapping path="/pc/**"/>
