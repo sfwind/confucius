@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.util;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.domain.message.SMSConfig;
 import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -308,5 +309,38 @@ public class ConfigUtils {
 
 	public static Date getDiscountExpiredDate() {
 		return DateUtils.parseStringToDateTime(getValue("operation.discount.expireddate"));
+	}
+
+	public static Integer getMinSendLimit(){
+		return getIntValue("sms.min.send.limit");
+	}
+
+	public static Integer getHourSendLimit(){
+		return getIntValue("sms.hour.send.limit");
+	}
+
+	public static Integer getDaySendLimit(){
+		return getIntValue("sms.day.send.limit");
+	}
+
+	public static String getBizAccount(){
+		return getValue("sms.business.account");
+	}
+	public static String getBizPassword(){
+		return getValue("sms.business.password");
+	}
+	public static String getBizSign(){
+		return getValue("sms.business.sign");
+	}
+	public static String getSmsCodeTemplate(){
+		return getValue("sms.template.code");
+	}
+
+	public static SMSConfig getBizMsgConfig(){
+		SMSConfig smsConfig = new SMSConfig();
+		smsConfig.setAccount(getBizAccount());
+		smsConfig.setPassword(getBizPassword());
+		smsConfig.setSign(getBizSign());
+		return smsConfig;
 	}
 }

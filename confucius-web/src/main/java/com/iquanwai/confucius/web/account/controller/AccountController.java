@@ -3,6 +3,9 @@ package com.iquanwai.confucius.web.account.controller;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.message.SMSSendResult;
+import com.iquanwai.confucius.biz.domain.message.ShortMessage;
+import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
@@ -13,13 +16,14 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.web.account.dto.AccountDto;
 import com.iquanwai.confucius.web.account.dto.LoginCheckDto;
+import com.iquanwai.confucius.web.account.dto.SMSDto;
 import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
-import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +58,50 @@ public class AccountController {
     private PermissionService permissionService;
     @Autowired
     private LoginUserService loginUserService;
+    @Autowired
+    private ShortMessageService shortMessageService;
+
+
+    /**
+     * 短信发送
+     * left:-1:一分钟规则不满足 -2:一小时规则不满足 -3:一天规则不满足 -201:profileId异常 -202:电话号码数量异常 -203:内容异常 -221:请求异常 <br/>
+     * right: 当前规则下已经发送多少条了/最大电话数量／最大内容数量/请求结果
+     */
+    @RequestMapping(value = "/sms", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> sendMessage(HttpServletRequest request, @RequestBody SMSDto smsDto) {
+        logger.info("param:{}", smsDto);
+        Assert.notNull(smsDto);
+        String remoteIp = request.getHeader("X-Forwarded-For");
+        boolean isInternalIp = CommonUtils.internalIp(remoteIp);
+        logger.info("请求来源：{},是否内网：{}", remoteIp, isInternalIp);
+        if (isInternalIp) {
+            // 是内网ip的请求
+            ShortMessage shortMessage = new ShortMessage();
+            shortMessage.setProfileId(smsDto.getProfileId());
+            shortMessage.setContent(smsDto.getContent());
+            shortMessage.setPhones(smsDto.getPhones());
+            shortMessage.setReplace(smsDto.getReplace());
+
+            // 检查发送条数限制
+            Pair<Integer, Integer> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
+            if (checkSendLimit.getLeft() < 0) {
+                logger.error("已经不能发送了:", checkSendLimit.getRight());
+                // 不可以发送
+                return WebUtils.error(checkSendLimit.getLeft(), checkSendLimit.getRight());
+            }
+
+            SMSSendResult result = shortMessageService.sendMessage(shortMessage);
+            if (result != null && "0".equals(result.getResult())) {
+                return WebUtils.result(result);
+            } else {
+                return WebUtils.error(result);
+            }
+        } else {
+            return WebUtils.error("非内网请求，禁止访问");
+        }
+
+
+    }
 
     /**
      * mobile扫描二维码结果

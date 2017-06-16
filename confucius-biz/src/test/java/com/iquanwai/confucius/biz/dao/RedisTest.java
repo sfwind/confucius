@@ -1,12 +1,18 @@
 package com.iquanwai.confucius.biz.dao;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.TestBase;
+import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageRedisDao;
+import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import org.junit.Test;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +21,10 @@ import java.util.Map;
 public class RedisTest extends TestBase {
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private ShortMessageService shortMessageService;
+    @Autowired
+    private ShortMessageRedisDao shortMessageRedisDao;
 
     /**
      * 测试
@@ -99,21 +109,6 @@ public class RedisTest extends TestBase {
 
     @Test
     public void setTest() throws InterruptedException {
-//        redisUtil.set("a", "gsegsdfsdf");
-//        log(redisUtil.get(String.class, "a"));
-//        Profile profile = new Profile();
-//        profile.setNickname("薛定谔的猫");
-//
-//        redisUtil.set("user:xue", profile);
-
-//        log(redisUtil.get(Profile.class, "user:xue").getNickname());
-
-//        log(redisUtil.get(Profile.class, "user:xue").getNickname());
-
-//        redisUtil.set("a", "fwefewf");
-
-//        log(redisUtil.get(String.class, "a"));
-
         new Thread(()->{
             redisUtil.lock("flag", lock -> {
                 Map<String, Object> map = Maps.newHashMap();
@@ -135,6 +130,37 @@ public class RedisTest extends TestBase {
 
 
         Thread.sleep(10000);
-
     }
+
+    @Test
+    public void numberTet() throws InterruptedException {
+        redisUtil.set("tet",3,7l);
+        RedissonClient redissonClient = redisUtil.getRedissonClient();
+
+
+
+        new Thread(()->{
+            long thatTime = System.currentTimeMillis();
+            Integer time = 1;
+            while(true){
+                long curTime = System.currentTimeMillis();
+                if ((curTime - thatTime) / 1000 >= 1) {
+                    thatTime = curTime;
+                    log("时间:" + (time++) + "s");
+                    RBucket<Object> bucket = redissonClient.getBucket("tet");
+                    long remain = bucket.remainTimeToLive();
+                    log("剩余过期时间:" + remain);
+                }
+            }
+        }).start();
+        Thread.sleep(10000l);
+    }
+
+    @Test
+    public void shortMessageTest() throws InterruptedException {
+        List<String> phoneList = Lists.newArrayList();
+        phoneList.add("13122535350");
+//        shortMessageService.sendMessage(2333, phoneList);
+    }
+
 }

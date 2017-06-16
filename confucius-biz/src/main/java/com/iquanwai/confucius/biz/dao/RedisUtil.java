@@ -119,7 +119,19 @@ public class RedisUtil {
         return redissonClient.getKeys().getKeysByPattern(pattern, count);
     }
 
-
+    /**
+     * 获取剩余的过期时间
+     * @param key key
+     * @return 不存在则返回-2，没有过期时间返回-1
+     */
+    public long getRemainTime(String key){
+        long time = redissonClient.getBucket(key).remainTimeToLive();
+        if(time < 0){
+            return time;
+        } else {
+            return time / 1000;
+        }
+    }
 
     /**
      * 通过正则删除数据
@@ -131,11 +143,20 @@ public class RedisUtil {
     }
 
 
+    public Integer getInt(String key){
+        return getInt(key, null);
+    }
+
+    public Integer getInt(String key,Integer defaultValue){
+        String number = get(key);
+        return number == null ? defaultValue : Integer.parseInt(number);
+    }
+
     /**
      * 获取value <br/>
      * redisson的转换器会存储class信息，所以这个第一个参数只传String.class
      */
-    private <T> T get(Class<T> tClass, String key) {
+    private  <T> T get(Class<T> tClass, String key) {
         RBucket<T> bucket = redissonClient.getBucket(key);
         return bucket.get();
     }
