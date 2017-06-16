@@ -55,7 +55,7 @@ public class InternalController {
             // 检查发送条数限制
             Pair<Integer, Integer> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
             if (checkSendLimit.getLeft() < 0) {
-                logger.error("发送参数异常，无法发送{}:{}", checkSendLimit.getRight());
+                logger.error("发送参数异常，无法发送{}:{}", checkSendLimit.getLeft(), checkSendLimit.getRight());
                 // 不可以发送
                 return WebUtils.error(checkSendLimit.getLeft(), checkSendLimit.getRight());
             }
