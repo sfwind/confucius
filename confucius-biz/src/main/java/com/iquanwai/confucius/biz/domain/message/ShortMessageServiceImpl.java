@@ -75,6 +75,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     public SMSSendResult sendMessage(ShortMessage shortMessage) {
         // 初始化请求参数
         SMSConfig config = ConfigUtils.getBizMsgConfig();
+        logger.info("config:{}", config);
         String content = CommonUtils.placeholderReplace(shortMessage.getContent(), shortMessage.getReplace());
         String phones = StringUtils.join(shortMessage.getPhones().iterator(), ",");
         Map<String, String> param = Maps.newHashMap();
