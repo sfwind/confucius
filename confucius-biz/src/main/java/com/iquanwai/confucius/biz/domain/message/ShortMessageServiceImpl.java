@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.message;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageRedisDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageSubmitDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -17,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 /**
  * Created by nethunder on 2017/6/15.
@@ -75,10 +72,8 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     public SMSSendResult sendMessage(ShortMessage shortMessage) {
         // 初始化请求参数
         SMSConfig config = ConfigUtils.getBizMsgConfig();
-        logger.info("config:{}", config);
         String content = CommonUtils.placeholderReplace(shortMessage.getContent(), shortMessage.getReplace());
         String phones = StringUtils.join(shortMessage.getPhones().iterator(), ",");
-        Map<String, String> param = Maps.newHashMap();
         ShortMessageSubmit shortMessageSubmit = new ShortMessageSubmit();
         shortMessageSubmit.setAccount(config.getAccount());
         shortMessageSubmit.setPassword(config.getPassword());
@@ -86,7 +81,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         shortMessageSubmit.setContent(content);
         shortMessageSubmit.setPhones(phones);
         shortMessageSubmit.setMsgId(CommonUtils.randomString(32));
-        String json = JSONObject.toJSONString(param);
+        String json = JSONObject.toJSONString(shortMessageSubmit);
         logger.info("param:{}", json);
         // 开始请求
         String post = restfulHelper.post(SMS_SEND_URL, json);
