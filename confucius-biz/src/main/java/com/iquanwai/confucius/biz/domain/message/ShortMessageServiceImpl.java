@@ -87,6 +87,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         shortMessageSubmit.setPhones(phones);
         shortMessageSubmit.setMsgId(CommonUtils.randomString(32));
         String json = JSONObject.toJSONString(param);
+        logger.info("param:{}", json);
         // 开始请求
         String post = restfulHelper.post(SMS_SEND_URL, json);
         // 解析请求结果
