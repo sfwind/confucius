@@ -3,8 +3,10 @@ package com.iquanwai.confucius.biz.domain.message;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageRedisDao;
+import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageSubmitDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.message.ShortMessageSubmit;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -32,6 +34,8 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     private RestfulHelper restfulHelper;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private ShortMessageSubmitDao shortMessageSubmitDao;
 
     @Override
     public Pair<Integer, Integer> checkSendAble(ShortMessage shortMessage) {
@@ -74,20 +78,27 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         String content = CommonUtils.placeholderReplace(shortMessage.getContent(), shortMessage.getReplace());
         String phones = StringUtils.join(shortMessage.getPhones().iterator(), ",");
         Map<String, String> param = Maps.newHashMap();
-        param.put("account", config.getAccount());
-        param.put("password", config.getPassword());
-        param.put("sign", config.getSign());
-        param.put("content", content);
-        param.put("phones", phones);
+        ShortMessageSubmit shortMessageSubmit = new ShortMessageSubmit();
+        shortMessageSubmit.setAccount(config.getAccount());
+        shortMessageSubmit.setPassword(config.getPassword());
+        shortMessageSubmit.setSign(config.getSign());
+        shortMessageSubmit.setContent(content);
+        shortMessageSubmit.setPhones(phones);
+        shortMessageSubmit.setMsgId(CommonUtils.randomString(32));
         String json = JSONObject.toJSONString(param);
         // 开始请求
         String post = restfulHelper.post(SMS_SEND_URL, json);
         // 解析请求结果
         SMSSendResult smsSendResult = JSONObject.parseObject(post, SMSSendResult.class);
         logger.info("result:{}", smsSendResult);
+        if (smsSendResult != null) {
+            shortMessageSubmit.setResult(smsSendResult.getResult());
+            shortMessageSubmit.setDescription(smsSendResult.getDesc());
+            shortMessageSubmit.setFailPhones(smsSendResult.getFailPhones());
+        }
+        shortMessageSubmitDao.insert(shortMessageSubmit);
         return smsSendResult;
     }
-
 
     @Override
     public void raiseSendCount(Integer profileId){
