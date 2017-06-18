@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.domain.operation.OperationService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.web.account.dto.SMSDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -75,28 +76,28 @@ public class OperationController {
     }
 
     @RequestMapping(value = "send/message", method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> sendMessage(LoginUser loginUser, @RequestBody SMSDto smsDto){
+    public ResponseEntity<Map<String,Object>> sendMessage(PCLoginUser loginUser, @RequestBody SMSDto smsDto){
         Assert.notNull(loginUser);
         OperationLog operationLog = OperationLog.create()
                 .module("运营")
                 .function("短信")
                 .action("发送短信")
-                .memo(loginUser.getId() + "");
-        ShortMessage shortMessage = new ShortMessage(loginUser.getId(),
+                .memo(loginUser.getProfileId() + "");
+        ShortMessage shortMessage = new ShortMessage(loginUser.getProfileId(),
                 smsDto.getPhones(), smsDto.getContent(), smsDto.getReplace());
         Pair<Integer, Integer> checkSendAble = shortMessageService.checkSendAble(shortMessage);
         if (checkSendAble.getLeft() > 0) {
             SMSSendResult smsSendResult = shortMessageService.sendMessage(shortMessage);
             if (smsSendResult != null && "0".equals(smsSendResult.getResult())) {
                 // 发送成功
-                shortMessageService.raiseSendCount(loginUser.getId());
+                shortMessageService.raiseSendCount(loginUser.getProfileId());
             } else {
                 logger.info("发送失败:{}", smsDto);
                 return WebUtils.error("发送失败" + (smsSendResult != null ? (":" + smsSendResult.getDesc()) : ""));
             }
             return WebUtils.success();
         } else {
-            logger.info("用户:{}，暂时不能发送:{}", loginUser.getId(), checkSendAble);
+            logger.info("用户:{}，暂时不能发送:{}", loginUser.getProfileId(), checkSendAble);
             return WebUtils.error("暂时不能发送，请稍后再发");
         }
     }
