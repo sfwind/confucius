@@ -93,6 +93,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
             shortMessageSubmit.setDescription(smsSendResult.getDesc());
             shortMessageSubmit.setFailPhones(smsSendResult.getFailPhones());
         }
+        shortMessageSubmit.setProfileId(shortMessage.getProfileId());
         shortMessageSubmitDao.insert(shortMessageSubmit);
         return smsSendResult;
     }
