@@ -109,7 +109,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
             alarmList.forEach(openid->{
                 this.SMSAlarm(openid,
                         shortMessage.getNickname(),
-                        smsSendResult != null ? smsSendResult.getMsgid() : "空",
+                        shortMessageSubmit.getMsgId(),
                         smsSendResult != null ? smsSendResult.getResult() : "空",
                         smsSendResult != null ? smsSendResult.getDesc() : "空");
             });
@@ -131,12 +131,12 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        String message = "\n\n发送人：" + (nickname == null ? "无昵称" : nickname) + "\n" +
+        String message = "发送人：" + (nickname == null ? "无昵称" : nickname) + "\n" +
                 "msgId：" + msgId + "\n" +
                 "异常码：" + result + "\n" +
                 "错误信息：" + desc;
 
-        data.put("first", new TemplateMessage.Keyword("报警! 短信发送失败"));
+        data.put("first", new TemplateMessage.Keyword("报警! 短信发送失败!\n"));
         data.put("keyword1", new TemplateMessage.Keyword("处理短信发送异常"));
         data.put("keyword2", new TemplateMessage.Keyword("高"));
         data.put("remark", new TemplateMessage.Keyword(message));
