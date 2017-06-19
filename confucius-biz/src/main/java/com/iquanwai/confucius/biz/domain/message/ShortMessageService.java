@@ -24,4 +24,6 @@ public interface ShortMessageService {
     SMSSendResult sendMessage(ShortMessage shortMessage);
 
     void raiseSendCount(Integer profileId);
+
+    void SMSAlarm(String profileId, String nickname,String msgId, String result, String desc);
 }

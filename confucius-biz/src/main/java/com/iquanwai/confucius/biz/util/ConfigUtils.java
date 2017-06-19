@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.message.SMSConfig;
 import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -342,5 +343,12 @@ public class ConfigUtils {
 		smsConfig.setPassword(getBizPassword());
 		smsConfig.setSign(getBizSign());
 		return smsConfig;
+	}
+
+	public static List<String> getAlarmList(){
+		List<String> list = Lists.newArrayList();
+		String[] split = getValue("sms.alarm.openids").split(",");
+		CollectionUtils.addAll(list, split);
+		return list;
 	}
 }

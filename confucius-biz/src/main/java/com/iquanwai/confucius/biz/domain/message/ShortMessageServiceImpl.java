@@ -1,9 +1,12 @@
 package com.iquanwai.confucius.biz.domain.message;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageRedisDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageSubmitDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
+import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.message.ShortMessageSubmit;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -16,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nethunder on 2017/6/15.
@@ -33,6 +39,8 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     private AccountService accountService;
     @Autowired
     private ShortMessageSubmitDao shortMessageSubmitDao;
+    @Autowired
+    private TemplateMessageService templateMessageService;
 
     @Override
     public Pair<Integer, Integer> checkSendAble(ShortMessage shortMessage) {
@@ -95,12 +103,40 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         }
         shortMessageSubmit.setProfileId(shortMessage.getProfileId());
         shortMessageSubmitDao.insert(shortMessageSubmit);
+
+        if (smsSendResult == null || !"0".equals(smsSendResult.getResult())) {
+            List<String> alarmList = ConfigUtils.getAlarmList();
+            alarmList.forEach(openid->{
+                this.SMSAlarm(openid,
+                        shortMessage.getNickname(),
+                        smsSendResult != null ? smsSendResult.getMsgid() : "空",
+                        smsSendResult != null ? smsSendResult.getResult() : "空",
+                        smsSendResult != null ? smsSendResult.getDesc() : "空");
+            });
+        }
         return smsSendResult;
     }
 
     @Override
     public void raiseSendCount(Integer profileId){
         shortMessageRedisDao.addSendCount(profileId);
+    }
+
+    @Override
+    public void SMSAlarm(String openId, String nickname, String msgId, String result, String desc) {
+        String key = ConfigUtils.incompleteTaskMsgKey();
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(openId);
+
+        templateMessage.setTemplate_id(key);
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setData(data);
+
+        data.put("first", new TemplateMessage.Keyword("警报！用户: " + nickname + " 进行短信发送失败"));
+        data.put("keyword1", new TemplateMessage.Keyword(msgId));
+        data.put("keyword2", new TemplateMessage.Keyword(result));
+        data.put("remark", new TemplateMessage.Keyword(desc));
+        templateMessageService.sendMessage(templateMessage);
     }
 
 }

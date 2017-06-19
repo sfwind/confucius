@@ -14,7 +14,8 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShortMessage {
-    private Integer profileId;
+    private Integer profileId;// 进行发送操作的profileId
+    private String nickname; // 进行发送操作的nickname
     private List<String> phones;
     private String content;
     private Map<String,String> replace;
