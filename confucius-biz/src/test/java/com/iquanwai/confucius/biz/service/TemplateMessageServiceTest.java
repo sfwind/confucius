@@ -24,7 +24,7 @@ public class TemplateMessageServiceTest extends TestBase {
     public void testSend(){
 
         String[] arrs = {
-                "o5h6ywlXxHLmoGrLzH9Nt7uyoHbM",
+                "o5h6ywsiXYMcLlex2xt7DRAgQX-A",
         };
 
         for(String openid:arrs) {

@@ -54,6 +54,18 @@ public class DateUtils {
         return (int)Math.abs((now - thatTime)/1000)/60/60/24;
     }
 
+    public static long nextDayRemainSeconds(Date tody){
+        Long current = System.currentTimeMillis();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(DateUtils.afterDays(tody, 1));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date zero = calendar.getTime();
+        long zeroTime = zero.getTime();
+        return (zeroTime-current)/1000;
+    }
+
     public static long currentTimestamp(){
         return System.currentTimeMillis()/1000;
     }

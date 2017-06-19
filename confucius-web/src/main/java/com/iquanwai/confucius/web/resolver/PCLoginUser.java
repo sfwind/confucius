@@ -22,6 +22,7 @@ public class PCLoginUser {
     private LoginUser weixin;
     private Integer role;
     private String signature;
+
     private List<Authority> permissionList;
 
     public static PCLoginUser defaultUser(){
