@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.account.dto;
 
 import lombok.Data;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,7 +10,7 @@ import java.util.Map;
 @Data
 public class SMSDto {
     private Integer profileId;
-    private List<String> phones;
+    private String phone;
     private String content;
     private Map<String,String> replace;
 }

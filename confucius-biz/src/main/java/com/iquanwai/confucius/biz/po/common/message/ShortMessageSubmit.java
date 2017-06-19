@@ -12,14 +12,14 @@ public class ShortMessageSubmit {
     private Integer id;
     private String msgId;
     private Integer profileId;
-    private String phones;
+    private String phone;
     private String content;
     private String sign;
     private String subcode;
     private Date sendTime;
     private String result;
     private String description;
-    private String failPhones;
+    private String failPhone;
 
 
     private String account;

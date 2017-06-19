@@ -49,7 +49,7 @@ public class InternalController {
             ShortMessage shortMessage = new ShortMessage();
             shortMessage.setProfileId(smsDto.getProfileId());
             shortMessage.setContent(smsDto.getContent());
-            shortMessage.setPhones(smsDto.getPhones());
+            shortMessage.setPhone(smsDto.getPhone());
             shortMessage.setReplace(smsDto.getReplace());
 
             // 检查发送条数限制

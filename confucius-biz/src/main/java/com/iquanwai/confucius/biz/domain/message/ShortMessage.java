@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,7 +15,7 @@ import java.util.Map;
 public class ShortMessage {
     private Integer profileId;// 进行发送操作的profileId
     private String nickname; // 进行发送操作的nickname
-    private List<String> phones;
+    private String phone;
     private String content;
     private Map<String,String> replace;
 

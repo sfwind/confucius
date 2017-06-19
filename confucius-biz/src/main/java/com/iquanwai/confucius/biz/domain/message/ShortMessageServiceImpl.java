@@ -12,7 +12,6 @@ import com.iquanwai.confucius.biz.po.common.message.ShortMessageSubmit;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -62,10 +62,10 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         if (limit.getDaySend() >= ConfigUtils.getDaySendLimit()) {
             return new MutablePair<>(-3, limit.getDaySend());
         }
-        // 3.电话号码数量检查
-        if (shortMessage.getPhones() == null || shortMessage.getPhones().size() > MAX_PHONE_COUNT) {
-            return new MutablePair<>(-202, MAX_PHONE_COUNT);
-        }
+//        // 3.电话号码数量检查
+//        if (shortMessage.getPhones() == null || shortMessage.getPhones().size() > MAX_PHONE_COUNT) {
+//            return new MutablePair<>(-202, MAX_PHONE_COUNT);
+//        }
         // 4.文字内容检查
         String content = CommonUtils.placeholderReplace(shortMessage.getContent(), shortMessage.getReplace());
         if (content.length() > MAX_CONTENT_SIZE) {
@@ -81,13 +81,13 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         // 初始化请求参数
         SMSConfig config = ConfigUtils.getBizMsgConfig();
         String content = CommonUtils.placeholderReplace(shortMessage.getContent(), shortMessage.getReplace());
-        String phones = StringUtils.join(shortMessage.getPhones().iterator(), ",");
+        String phone = shortMessage.getPhone();
         ShortMessageSubmit shortMessageSubmit = new ShortMessageSubmit();
         shortMessageSubmit.setAccount(config.getAccount());
         shortMessageSubmit.setPassword(config.getPassword());
         shortMessageSubmit.setSign(config.getSign());
         shortMessageSubmit.setContent(content);
-        shortMessageSubmit.setPhones(phones);
+        shortMessageSubmit.setPhone(phone);
         shortMessageSubmit.setMsgId(CommonUtils.randomString(32));
         String json = JSONObject.toJSONString(shortMessageSubmit);
         logger.info("param:{}", json);
@@ -99,9 +99,12 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         if (smsSendResult != null) {
             shortMessageSubmit.setResult(smsSendResult.getResult());
             shortMessageSubmit.setDescription(smsSendResult.getDesc());
-            shortMessageSubmit.setFailPhones(smsSendResult.getFailPhones());
+            shortMessageSubmit.setFailPhone(smsSendResult.getFailPhones());
         }
         shortMessageSubmit.setProfileId(shortMessage.getProfileId());
+        if (shortMessageSubmit.getSendTime() == null) {
+            shortMessageSubmit.setSendTime(new Date());
+        }
         shortMessageSubmitDao.insert(shortMessageSubmit);
 
         if (smsSendResult == null || !"0".equals(smsSendResult.getResult())) {

@@ -83,8 +83,9 @@ public class OperationController {
                 .function("短信")
                 .action("发送短信")
                 .memo(loginUser.getProfileId() + "");
-        ShortMessage shortMessage = new ShortMessage(loginUser.getProfileId(), loginUser.getWeixin() != null ? loginUser.getWeixin().getWeixinName() : "",
-                smsDto.getPhones(), smsDto.getContent(), smsDto.getReplace());
+        ShortMessage shortMessage = new ShortMessage(loginUser.getProfileId(),
+                loginUser.getWeixin() != null ? loginUser.getWeixin().getWeixinName() : "",
+                smsDto.getPhone(), smsDto.getContent(), smsDto.getReplace());
         Pair<Integer, Integer> checkSendAble = shortMessageService.checkSendAble(shortMessage);
         if (checkSendAble.getLeft() > 0) {
             SMSSendResult smsSendResult = shortMessageService.sendMessage(shortMessage);
