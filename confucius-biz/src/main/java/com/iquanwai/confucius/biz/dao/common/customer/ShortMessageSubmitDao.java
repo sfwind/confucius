@@ -24,7 +24,7 @@ public class ShortMessageSubmitDao extends DBUtil{
         try{
             return runner.insert(sql, new ScalarHandler<Long>(),
                     shortMessageSubmit.getMsgId(), shortMessageSubmit.getProfileId(), shortMessageSubmit.getPhone(),
-                    shortMessageSubmit.getContent(), shortMessageSubmit.getSign(), shortMessageSubmit.getSubcode(), shortMessageSubmit.getSendTime(),
+                    shortMessageSubmit.getContent(), shortMessageSubmit.getSign(), shortMessageSubmit.getSendTime(),
                     shortMessageSubmit.getResult(), shortMessageSubmit.getDescription(), shortMessageSubmit.getFailPhone()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
