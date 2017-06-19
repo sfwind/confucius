@@ -6,6 +6,7 @@ import java.util.Map;
 
 /**
  * Created by nethunder on 2017/6/15.
+ * 短信信息，发送给单个用户
  */
 @Data
 public class SMSDto {

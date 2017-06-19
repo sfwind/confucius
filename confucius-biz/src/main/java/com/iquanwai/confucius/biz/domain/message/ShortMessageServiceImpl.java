@@ -87,7 +87,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         shortMessageSubmit.setPassword(config.getPassword());
         shortMessageSubmit.setSign(config.getSign());
         shortMessageSubmit.setContent(content);
-        shortMessageSubmit.setPhone(phone);
+        shortMessageSubmit.setPhones(phone);
         shortMessageSubmit.setMsgId(CommonUtils.randomString(32));
         String json = JSONObject.toJSONString(shortMessageSubmit);
         logger.info("param:{}", json);
@@ -99,7 +99,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         if (smsSendResult != null) {
             shortMessageSubmit.setResult(smsSendResult.getResult());
             shortMessageSubmit.setDescription(smsSendResult.getDesc());
-            shortMessageSubmit.setFailPhone(smsSendResult.getFailPhones());
+            shortMessageSubmit.setFailPhones(smsSendResult.getFailPhones());
         }
         shortMessageSubmit.setProfileId(shortMessage.getProfileId());
         if (shortMessageSubmit.getSendTime() == null) {

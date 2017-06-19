@@ -19,13 +19,13 @@ public class ShortMessageSubmitDao extends DBUtil{
 
     public int insert(ShortMessageSubmit shortMessageSubmit){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO ShortMessageSubmit(MsgId, ProfileId, Phone, Content, Sign, SendTime, Result, Description,FailPhone)  " +
+        String sql = "INSERT INTO ShortMessageSubmit(MsgId, ProfileId, Phones, Content, Sign, SendTime, Result, Description,FailPhones)  " +
                 "    VALUE (?,?,?,?,?,?,?,?,?)";
         try{
             return runner.insert(sql, new ScalarHandler<Long>(),
-                    shortMessageSubmit.getMsgId(), shortMessageSubmit.getProfileId(), shortMessageSubmit.getPhone(),
+                    shortMessageSubmit.getMsgId(), shortMessageSubmit.getProfileId(), shortMessageSubmit.getPhones(),
                     shortMessageSubmit.getContent(), shortMessageSubmit.getSign(), shortMessageSubmit.getSendTime(),
-                    shortMessageSubmit.getResult(), shortMessageSubmit.getDescription(), shortMessageSubmit.getFailPhone()).intValue();
+                    shortMessageSubmit.getResult(), shortMessageSubmit.getDescription(), shortMessageSubmit.getFailPhones()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -6,20 +6,21 @@ import java.util.Date;
 
 /**
  * Created by nethunder on 2017/6/18.
+ * 短信提交表
+ * 这个表每条记录都只能发送给单个用户
  */
 @Data
 public class ShortMessageSubmit {
     private Integer id;
     private String msgId;
     private Integer profileId;
-    private String phone;
+    private String phones;
     private String content;
     private String sign;
-    private String subcode;
     private Date sendTime;
     private String result;
     private String description;
-    private String failPhone;
+    private String failPhones;
 
 
     private String account;
