@@ -24,7 +24,6 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             String url = SEND_MESSAGE_URL;
             String json = new Gson().toJson(templateMessage);
             String body = restfulHelper.post(url, json);
-            System.out.println(body);
             return StringUtils.isNotEmpty(body);
         }
 
