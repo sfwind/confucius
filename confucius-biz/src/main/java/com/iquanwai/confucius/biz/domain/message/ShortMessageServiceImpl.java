@@ -131,11 +131,15 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
+        String message = "\n\n发送人：" + (nickname == null ? "无昵称" : nickname) + "\n" +
+                "msgId：" + msgId + "\n" +
+                "异常码：" + result + "\n" +
+                "错误信息：" + desc;
 
-        data.put("first", new TemplateMessage.Keyword("警报！用户: " + nickname + " 进行短信发送失败"));
-        data.put("keyword1", new TemplateMessage.Keyword(msgId));
-        data.put("keyword2", new TemplateMessage.Keyword(result));
-        data.put("remark", new TemplateMessage.Keyword(desc));
+        data.put("first", new TemplateMessage.Keyword("报警! 短信发送失败"));
+        data.put("keyword1", new TemplateMessage.Keyword("处理短信发送异常"));
+        data.put("keyword2", new TemplateMessage.Keyword("高"));
+        data.put("remark", new TemplateMessage.Keyword(message));
         templateMessageService.sendMessage(templateMessage);
     }
 
