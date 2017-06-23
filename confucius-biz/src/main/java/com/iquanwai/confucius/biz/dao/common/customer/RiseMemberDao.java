@@ -51,6 +51,19 @@ public class RiseMemberDao extends DBUtil {
         return null;
     }
 
+    public RiseMember loadByOrderId(String orderId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from RiseMember where OrderId = ?";
+
+        try {
+            ResultSetHandler<RiseMember> handler = new BeanHandler<>(RiseMember.class);
+            return runner.query(sql, handler, orderId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public List<RiseMember> eliteMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where MemberTypeId = 3 and expired = 0";

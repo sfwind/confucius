@@ -30,8 +30,6 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
-import lombok.Data;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -320,8 +318,19 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public void riseMemberEntry(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
+        try{
+            RiseMember exist = riseMemberDao.loadByOrderId(orderId);
+            if (riseOrder.getEntry() && exist != null && !exist.getExpired() && DateUtils.isSameDate(exist.getAddTime(), new Date())) {
+                // 这个单子已经成功，且已经插入了riseMember，并且未过期,并且是今天的
+                return;
+            }
+        } catch (Exception e){
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
         riseOrderDao.entry(orderId);
         String openId = riseOrder.getOpenid();
+
 
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         Date expireDate;
