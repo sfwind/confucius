@@ -264,10 +264,6 @@ public class ConfigUtils {
 		return getValue("activity.start.msg");
 	}
 
-	public static String qaMsgKey(){
-		return getValue("qa.msg");
-	}
-
 	public static String getUploadDomain(){
 		return getValue("upload.image.domain");
 	}

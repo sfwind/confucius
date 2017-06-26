@@ -320,8 +320,9 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
         data.put("first", new TemplateMessage.Keyword("童鞋，我们发现你最近还有部分学习任务未完成。点击下方按钮“训练营”，进入页面开始补课吧！"));
         data.put("keyword1", new TemplateMessage.Keyword("完成学习任务"));
-        data.put("keyword2", new TemplateMessage.Keyword("hin高"));
-        data.put("remark", new TemplateMessage.Keyword("课程前面的标示，圆圈表示待学习，打钩才是完成哦！"));
+        data.put("keyword2", new TemplateMessage.Keyword("课程前面的标示，圆圈表示待学习，打钩才是完成哦！"));
+        data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+//        data.put("remark", new TemplateMessage.Keyword("课程前面的标示，圆圈表示待学习，打钩才是完成哦！"));
         templateMessageService.sendMessage(templateMessage);
     }
 

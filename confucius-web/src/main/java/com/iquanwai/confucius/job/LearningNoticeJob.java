@@ -25,9 +25,7 @@ public class LearningNoticeJob {
         logger.info("LearningNoticeJob start");
 
         List<QuanwaiClass> quanwaiClassList = courseProgressService.loadActiveClass();
-        for(QuanwaiClass quanwaiClass:quanwaiClassList){
-            courseProgressService.noticeIncompleteMembers(quanwaiClass);
-        }
+        quanwaiClassList.forEach(courseProgressService::noticeIncompleteMembers);
 
         logger.info("LearningNoticeJob end");
     }
