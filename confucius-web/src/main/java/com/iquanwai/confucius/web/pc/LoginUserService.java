@@ -66,7 +66,6 @@ public class LoginUserService {
         pcLoginUserMap.put(sessionId, temp);
     }
 
-
     /**
      * 根据sessionId判断用户是否登录
      * @param sessionId SessionId
@@ -86,6 +85,14 @@ public class LoginUserService {
         } else {
             return false;
         }
+    }
+
+    /**
+     * 用户登出，删除登录缓存数据
+     * @param sessionId 存储的 cookie 的值
+     */
+    public void logout(String sessionId) {
+        pcLoginUserMap.remove(sessionId);
     }
 
     /**

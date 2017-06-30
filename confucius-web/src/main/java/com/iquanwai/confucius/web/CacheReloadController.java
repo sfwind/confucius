@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web;
 
-import com.iquanwai.confucius.biz.domain.mq.CacheReloadReceiver;
+import com.iquanwai.confucius.mq.CacheReloadReceiver;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.util.WebUtils;

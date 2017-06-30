@@ -1,8 +1,12 @@
 package com.iquanwai.confucius.web;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import com.iquanwai.confucius.mq.CustomerReceiver;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.util.CookieUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -11,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.ConnectException;
 import java.util.Map;
 
 /**
@@ -68,18 +74,43 @@ public class PCIndexController {
         return pcView(request, pcLoginUser);
     }
 
-    private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser){
+    /**
+     * 用户请求注销
+     * 1、删除本地 cookie 数据
+     * 2、MQ 发送广播，删除其余节点上的 cookie 数据
+     */
+    @RequestMapping(value = "/rise/logout")
+    public ModelAndView getLogoutPage(HttpServletRequest request, HttpServletResponse response, PCLoginUser pcLoginUser) {
+        // 获取当前链接 cookie 的值，作为删除 cookieMap 的 key 值
+        String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
+        if(cookie == null) {
+            return pcView(request, pcLoginUser);
+        }
+        // 1、删除 cookie
+        CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.adapterDomainName(), response);
+        try {
+            // 2、通过 MQ 发送广播，删除每个节点上的 cookie 数据
+            RabbitMQPublisher mqPublisher = new RabbitMQPublisher();
+            mqPublisher.init(CustomerReceiver.TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
+            mqPublisher.publish(cookie);
+        } catch(ConnectException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+        return pcView(request, pcLoginUser);
+    }
+
+    private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser) {
         return pcView(request, pcLoginUser, "site");
     }
 
-    private ModelAndView pcView(HttpServletRequest request,PCLoginUser pcLoginUser, String view) {
+    private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser, String view) {
         ModelAndView mav = new ModelAndView(view);
-        if(ConfigUtils.isPcMaintenance()){
+        if(ConfigUtils.isPcMaintenance()) {
             // 正在维护
             mav = new ModelAndView("maintenance");
         }
-        if (request.getParameter("debug") != null) {
-            if (ConfigUtils.isFrontDebug()) {
+        if(request.getParameter("debug") != null) {
+            if(ConfigUtils.isFrontDebug()) {
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
                 mav.addObject("loginSocketUrl", "127.0.0.1:8080/session");
             } else {
@@ -90,16 +121,16 @@ public class PCIndexController {
             mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
             mav.addObject("loginSocketUrl", ConfigUtils.getLoginSocketUrl());
         }
-        if (pcLoginUser != null && pcLoginUser.getWeixin() != null) {
+        if(pcLoginUser != null && pcLoginUser.getWeixin() != null) {
             Map<String, String> userParam = Maps.newHashMap();
             userParam.put("userName", pcLoginUser.getWeixin().getWeixinName());
-            if(pcLoginUser.getWeixin().getHeadimgUrl()!=null){
-                userParam.put("headImage",pcLoginUser.getWeixin().getHeadimgUrl().replace("http:","https:"));
+            if(pcLoginUser.getWeixin().getHeadimgUrl() != null) {
+                userParam.put("headImage", pcLoginUser.getWeixin().getHeadimgUrl().replace("http:", "https:"));
             }
             userParam.put("signature", pcLoginUser.getSignature());
             mav.addAllObjects(userParam);
         }
-        if (pcLoginUser == null || pcLoginUser.getRole() == null) {
+        if(pcLoginUser == null || pcLoginUser.getRole() == null) {
             mav.addObject("roleId", 0);
         } else {
             mav.addObject("roleId", pcLoginUser.getRole());

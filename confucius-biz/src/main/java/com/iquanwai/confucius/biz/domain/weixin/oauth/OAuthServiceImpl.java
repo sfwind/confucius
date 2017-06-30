@@ -114,7 +114,6 @@ public class OAuthServiceImpl implements OAuthService {
         return newAccessToken;
     }
 
-
     /**
      * 新增pc获取accessToken
      */
@@ -194,6 +193,9 @@ public class OAuthServiceImpl implements OAuthService {
         return null;
     }
 
+    /**
+     * 根据请求中的回调 URI，拼凑出用于生成微信二维码的参数
+     */
     @Override
     public Map<String,String> pcRedirectUrl(String callbackUrl){
         Callback callback = new Callback();
