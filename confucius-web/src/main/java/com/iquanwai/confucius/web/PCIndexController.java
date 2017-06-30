@@ -86,14 +86,14 @@ public class PCIndexController {
         String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
         System.out.println("cookie = " + cookie);
         logger.info("11111111111111111111");
-        logger.info("cookie", cookie);
+        logger.info("cookie:" + cookie);
         if(cookie == null) {
             response.sendRedirect("/login");
             return;
         }
         logger.info(ConfigUtils.domainName());
         // 1、删除 cookie
-        CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.domainName(), response);
+        CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.realDomainName(), response);
         try {
             // 2、通过 MQ 发送广播，删除每个节点上的 cookie 数据
             RabbitMQPublisher mqPublisher = new RabbitMQPublisher();
