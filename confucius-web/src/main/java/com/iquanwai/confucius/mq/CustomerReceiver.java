@@ -41,13 +41,10 @@ public class CustomerReceiver {
                                        AMQP.BasicProperties properties, byte[] body) {
                 String message = new String(body);
                 logger.info("receive message {}", message);
-                switch(message) {
-                    case "logout":
-                        loginUserService.logout(message);
-                }
+                loginUserService.logout(message);
             }
         };
     }
-
-
 }
+
+
