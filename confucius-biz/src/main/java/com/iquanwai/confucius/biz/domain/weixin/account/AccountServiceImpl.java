@@ -3,19 +3,18 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
-import com.iquanwai.confucius.biz.dao.common.customer.EventWallDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
+import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.EventWall;
+import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
@@ -33,7 +32,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/10.
@@ -56,9 +54,8 @@ public class AccountServiceImpl implements AccountService {
     private List<Region> cityList;
     @Autowired
     private UserRoleDao userRoleDao;
-
     @Autowired
-    private EventWallDao eventWallDao;
+    private PromotionUserDao promotionUserDao;
 
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
@@ -71,7 +68,7 @@ public class AccountServiceImpl implements AccountService {
         loadUserRole();
     }
 
-    private void loadUserRole(){
+    private void loadUserRole() {
         List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
 
         userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole -> {
@@ -82,32 +79,53 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public Account getAccount(String openid, boolean realTime) throws NotFollowingException {
-        //从数据库查询account对象
-        Account account = followUserDao.queryByOpenid(openid);
-        if(!realTime && account != null) {
-            return account;
-        }
-
-        synchronized (this){
-            // 这里再查询一遍，上面的代码老用户会走的，这里是只有新用户增加时才会走
-            Account accountTemp = followUserDao.queryByOpenid(openid);
-            if(!realTime && accountTemp != null) {
-                return accountTemp;
+        if (realTime) {
+            return getAccountFromWeixin(openid);
+        } else {
+            //先从数据库查询account对象
+            Account account = followUserDao.queryByOpenid(openid);
+            if (account != null) {
+                return account;
             }
-            return getAccountFromWeixin(openid, accountTemp);
+            //从微信处获取
+            return getAccountFromWeixin(openid);
         }
     }
 
-    private Account getAccountFromWeixin(String openid, Account account) throws NotFollowingException {
+    @Override
+    public Profile getProfile(String openid, boolean realTime) {
+        return getProfileFromDB(openid);
+    }
+
+    @Override
+    public Profile getProfile(Integer profileId) {
+        Profile profile = profileDao.load(Profile.class, profileId);
+
+        if (profile != null) {
+            if (profile.getHeadimgurl() != null) {
+                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
+            }
+            Integer role = userRoleMap.get(profile.getOpenid());
+            if (role == null) {
+                profile.setRole(0);
+            } else {
+                profile.setRole(role);
+            }
+        }
+
+        return profile;
+    }
+
+    private Account getAccountFromWeixin(String openid) throws NotFollowingException {
         //调用api查询account对象
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
-        logger.info("请求用户信息:{}",openid);
+        logger.info("请求用户信息:{}", openid);
         url = CommonUtils.placeholderReplace(url, map);
 
         String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}",body);
+        logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         Account accountNew = new Account();
         try {
@@ -125,18 +143,14 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if(accountNew.getSubscribe() == 0){
+            if (accountNew.getSubscribe() == 0) {
                 throw new NotFollowingException();
             }
-            if(account==null) {
-                redisUtil.lock("lock:wx:user:insert",(lock)->{
-                    if(accountNew.getNickname()!=null){
-                        Account finalQuery = followUserDao.queryByOpenid(openid);
-                        if (finalQuery != null) {
-                            // 已经插入了
-                            return;
-                        }
-                        logger.info("插入用户信息:{}",accountNew);
+            Account finalQuery = followUserDao.queryByOpenid(openid);
+            if (finalQuery == null) {
+                redisUtil.lock("lock:wx:user:insert", (lock) -> {
+                    if (accountNew.getNickname() != null) {
+                        logger.info("插入用户信息:{}", accountNew);
                         followUserDao.insert(accountNew);
                         try {
                             updateProfile(accountNew);
@@ -145,14 +159,14 @@ public class AccountServiceImpl implements AccountService {
                         }
                     }
                 });
-            }else{
-                logger.info("更新用户信息:{}",accountNew);
-                if(accountNew.getNickname()!=null) {
+            } else {
+                logger.info("更新用户信息:{}", accountNew);
+                if (accountNew.getNickname() != null) {
                     followUserDao.updateMeta(accountNew);
                     updateProfile(accountNew);
                 }
             }
-        } catch (NotFollowingException e1){
+        } catch (NotFollowingException e1) {
             throw new NotFollowingException();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -162,32 +176,28 @@ public class AccountServiceImpl implements AccountService {
 
     private void updateProfile(Account accountNew) throws IllegalAccessException, InvocationTargetException {
         Profile profile = getProfileFromDB(accountNew.getOpenid());
-        if(profile==null){
+        if (profile == null) {
             profile = new Profile();
-            try{
+            try {
                 BeanUtils.copyProperties(profile, accountNew);
-                logger.info("插入Profile表信息:{}",profile);
+                logger.info("插入Profile表信息:{}", profile);
                 profile.setRiseId(CommonUtils.randomString(7));
                 profileDao.insertProfile(profile);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.error("beanUtils copy props error",e);
-            } catch (SQLException err){
+                logger.error("beanUtils copy props error", e);
+            } catch (SQLException err) {
                 profile.setRiseId(CommonUtils.randomString(7));
-                try{
+                try {
                     profileDao.insertProfile(profile);
-                } catch (SQLException subErr){
-                    logger.error("插入Profile失败，openId:{},riseId:{}",profile.getOpenid(),profile.getRiseId());
+                } catch (SQLException subErr) {
+                    logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
                 }
             }
-        }else{
+        } else {
             //更新原数据
-            BeanUtils.copyProperties(profile,accountNew);
+            BeanUtils.copyProperties(profile, accountNew);
             profileDao.updateMeta(profile);
         }
-    }
-
-    public void submitPersonalInfo(Account account) {
-        followUserDao.updateInfo(account);
     }
 
     public void collectUsers() {
@@ -198,10 +208,10 @@ public class AccountServiceImpl implements AccountService {
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
-        for(String openid:usersDto.getData().getOpenid()) {
-            try{
+        for (String openid : usersDto.getData().getOpenid()) {
+            try {
                 getAccount(openid, true);
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -217,11 +227,11 @@ public class AccountServiceImpl implements AccountService {
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
         List<String> openids = followUserDao.queryAll();
-        for(String openid:usersDto.getData().getOpenid()) {
-            if(!openids.contains(openid)) {
-                try{
-                    getAccountFromWeixin(openid, null);
-                }catch (Exception e){
+        for (String openid : usersDto.getData().getOpenid()) {
+            if (!openids.contains(openid)) {
+                try {
+                    getAccountFromWeixin(openid);
+                } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }
             }
@@ -231,7 +241,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadAllProvinces() {
-        if(provinceList ==null){
+        if (provinceList == null) {
             provinceList = regionDao.loadAllProvinces();
         }
         return provinceList;
@@ -239,7 +249,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Region> loadCities() {
-        if(cityList==null) {
+        if (cityList == null) {
             cityList = regionDao.loadAllCities();
         }
         return cityList;
@@ -274,58 +284,21 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Profile getProfile(String openid, boolean realTime){
-        Profile profile = getProfileFromDB(openid);
-        if(!realTime && profile != null){
-            return profile;
+    public void savePromotionUser(String openid, String source) {
+        if (promotionUserDao.loadPromotion(openid) == null) {
+            PromotionUser promotionUser = new PromotionUser();
+            promotionUser.setOpenid(openid);
+            promotionUser.setSource(source);
+            promotionUserDao.insert(promotionUser);
         }
-        synchronized (this){
-            Profile profileTemp = getProfileFromDB(openid);
-            if(!realTime && profileTemp != null){
-                return profileTemp;
-            }
-            Account account = followUserDao.queryByOpenid(openid);
-            try{
-                getAccountFromWeixin(openid,account);
-            }catch (Exception e){
-                logger.error(e.getMessage(), e);
-            }
-            return getProfileFromDB(openid);
-        }
-    }
-
-
-    @Override
-    public List<EventWall> getEventWall() {
-        List<EventWall> eventWalls = eventWallDao.loadAll(EventWall.class).stream().filter(item -> !item.getDel()).collect(Collectors.toList());
-        eventWalls.forEach(item->{
-            Date startTime = item.getStartTime();
-            Date endTime = item.getEndTime();
-            item.setStartStr(DateUtils.parseDateToFormat6(startTime));
-
-            if (DateUtils.isSameDate(startTime, endTime)) {
-                item.setEndStr(DateUtils.parseDateToTimeFormat(endTime));
-            } else {
-                item.setEndStr(DateUtils.parseDateToFormat6(endTime));
-            }
-        });
-        eventWalls.sort((o1, o2) -> {
-            if (o1.getAddTime() == null) {
-                return 1;
-            } else if (o2.getAddTime() == null) {
-                return -1;
-            }
-            return o2.getAddTime().before(o1.getAddTime()) ? 1 : -1;
-        });
-        return eventWalls;
     }
 
     private Profile getProfileFromDB(String openid) {
         Profile profile = profileDao.queryByOpenId(openid);
 
-        if(profile!=null) {
-            if(profile.getHeadimgurl()!=null){
-                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:","https:"));
+        if (profile != null) {
+            if (profile.getHeadimgurl() != null) {
+                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
             Integer role = userRoleMap.get(profile.getOpenid());
             if (role == null) {

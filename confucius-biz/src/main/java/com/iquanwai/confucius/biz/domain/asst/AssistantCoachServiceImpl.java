@@ -48,12 +48,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private static final int PREVIOUS_DAY = 30;
 
     @Override
-    public Pair<Integer, Integer> getCommentCount(String openid) {
-        List<Comment> commentList = commentDao.loadCommentsByOpenid(openid);
-        // 将时间逆序排序按时间根据module和referenceid去重
+    public Pair<Integer, Integer> getCommentCount(Integer profileId) {
+        List<Comment> commentList = commentDao.loadCommentsByProfileId(profileId);
+        // 将时间逆序排序按时间根据module和referenceId去重
         Long totalCommentCnt = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime))
-                .map(comment -> comment.getReferencedId() + comment.getModuleId()).distinct().count();
-        // 将时间逆序列表过滤出其中日期为今日的评论并根据module和referencid去重
+                .map(comment -> comment.getReferencedId().toString() + "-" + comment.getModuleId().toString()).distinct().count();
+        // 将时间逆序列表过滤出其中日期为今日的评论并根据module和referenceId去重
         List<Comment> sortedComment = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime)).collect(Collectors.toList());
         Map<String, Comment> filterMap = Maps.newHashMap();
         sortedComment.forEach(comment -> {
@@ -61,8 +61,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                 filterMap.put(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
             }
         });
-
-        Long todayCommentCnt = Lists.newArrayList(filterMap.values()).stream().filter(comment -> DateUtils.interval(comment.getAddTime()) == 0)
+        Long todayCommentCnt = Lists.newArrayList(filterMap.values()).stream().filter(comment -> DateUtils.isToday(comment.getAddTime()))
                 .distinct().count();
 
         return new ImmutablePair<>(todayCommentCnt.intValue(), totalCommentCnt.intValue());
@@ -76,41 +75,41 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         int size = SIZE;
         //获取求点评的文章
         List<SubjectArticle> subjectArticles = Lists.newArrayList();
-        List<SubjectArticle> list = subjectArticleDao.loadRequestCommentArticles(problemId, size, date);
+        List<SubjectArticle> list = subjectArticleDao.loadRequestCommentArticles(problemId, size);
         subjectArticles.addAll(list);
         size = size - list.size();
 
         if (size > 0) {
-            //已评价用户openid
-            List<String> openIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
-                    .map(AsstCoachComment::getOpenid).collect(Collectors.toList());
-            //精英用户openid
-            List<String> elites = riseMemberDao.eliteMembers().stream()
-                    .map(RiseMember::getOpenId).collect(Collectors.toList());
+            //已评价用户id
+            List<Integer> profileIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
+                    .map(AsstCoachComment::getProfileId).collect(Collectors.toList());
+            //精英用户id
+            List<Integer> elites = riseMemberDao.eliteMembers().stream()
+                    .map(RiseMember::getProfileId).collect(Collectors.toList());
 
             //未点评精英=精英-已点评用户
-            List<String> unCommentedElite = Lists.newArrayList(elites);
-            unCommentedElite.removeAll(openIds);
+            List<Integer> unCommentedElite = Lists.newArrayList(elites);
+            unCommentedElite.removeAll(profileIds);
             list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, unCommentedElite);
             subjectArticles.addAll(list);
             size = size - list.size();
             if (size > 0) {
                 //未点评普通=所有-（精英+已点评用户)
-                List<String> unCommentedNormal = Lists.newArrayList(elites);
-                unCommentedNormal.addAll(openIds);
+                List<Integer> unCommentedNormal = Lists.newArrayList(elites);
+                unCommentedNormal.addAll(profileIds);
                 list = subjectArticleDao.loadUnderCommentArticlesExcludeSomeone(problemId, size, date, unCommentedNormal);
                 subjectArticles.addAll(list);
                 size = size - list.size();
                 if (size > 0) {
                     //已点评精英=精英&已点评用户
-                    List<String> commentedElite = Lists.newArrayList(elites);
-                    commentedElite.retainAll(openIds);
+                    List<Integer> commentedElite = Lists.newArrayList(elites);
+                    commentedElite.retainAll(profileIds);
                     list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, commentedElite);
                     subjectArticles.addAll(list);
                     size = size - list.size();
                     if (size > 0) {
                         //已点评精英=已点评用户-精英
-                        List<String> commentedNormal = Lists.newArrayList(openIds);
+                        List<Integer> commentedNormal = Lists.newArrayList(profileIds);
                         commentedNormal.removeAll(elites);
                         list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, commentedNormal);
                         subjectArticles.addAll(list);
@@ -137,41 +136,41 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         int size = SIZE;
         //获取求点评的文章
         List<ApplicationSubmit> applicationSubmitList = Lists.newArrayList();
-        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, size, date);
+        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, size);
         applicationSubmitList.addAll(list);
         size = size - list.size();
 
         if (size > 0) {
-            //已评价用户openid
-            List<String> openIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
-                    .map(AsstCoachComment::getOpenid).collect(Collectors.toList());
-            //精英用户openid
-            List<String> elites = riseMemberDao.eliteMembers().stream()
-                    .map(RiseMember::getOpenId).collect(Collectors.toList());
+            //已评价用户id
+            List<Integer> profileIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
+                    .map(AsstCoachComment::getProfileId).collect(Collectors.toList());
+            //精英用户id
+            List<Integer> elites = riseMemberDao.eliteMembers().stream()
+                    .map(RiseMember::getProfileId).collect(Collectors.toList());
 
             //未点评精英=精英-已点评用户
-            List<String> unCommentedElite = Lists.newArrayList(elites);
-            unCommentedElite.removeAll(openIds);
+            List<Integer> unCommentedElite = Lists.newArrayList(elites);
+            unCommentedElite.removeAll(profileIds);
             list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, unCommentedElite);
             applicationSubmitList.addAll(list);
             size = size - list.size();
             if (size > 0) {
                 //未点评普通=所有-（精英+已点评用户)
-                List<String> unCommentedNormal = Lists.newArrayList(elites);
-                unCommentedNormal.addAll(openIds);
+                List<Integer> unCommentedNormal = Lists.newArrayList(elites);
+                unCommentedNormal.addAll(profileIds);
                 list = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, size, date, unCommentedNormal);
                 applicationSubmitList.addAll(list);
                 size = size - list.size();
                 if (size > 0) {
                     //已点评精英=精英&已点评用户
-                    List<String> commentedElite = Lists.newArrayList(elites);
-                    commentedElite.retainAll(openIds);
+                    List<Integer> commentedElite = Lists.newArrayList(elites);
+                    commentedElite.retainAll(profileIds);
                     list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedElite);
                     applicationSubmitList.addAll(list);
                     size = size - list.size();
                     if (size > 0) {
                         //已点评精英=已点评用户-精英
-                        List<String> commentedNormal = Lists.newArrayList(openIds);
+                        List<Integer> commentedNormal = Lists.newArrayList(profileIds);
                         commentedNormal.removeAll(elites);
                         list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedNormal);
                         applicationSubmitList.addAll(list);
@@ -215,9 +214,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     }
 
     @Override
-    public List<RiseWorkInfoDto> getCommentedSubmit(String openid) {
+    public List<RiseWorkInfoDto> getCommentedSubmit(Integer profileId) {
         List<RiseWorkInfoDto> riseWorkInfoDtos = Lists.newArrayList();
-        List<Comment> comments = commentDao.loadCommentsByOpenid(openid);
+        List<Comment> comments = commentDao.loadCommentsByProfileId(profileId);
 
         List<Integer> subjectArticleIdsList = Lists.newArrayList();
         List<Integer> applicationSubmitIdsList = Lists.newArrayList();
@@ -274,12 +273,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                     riseWorkInfoDto.getContent());
         }
         //设置用户信息
-        buildRiseWorkInfo(riseWorkInfoDto, applicationSubmit.getOpenid());
+        buildRiseWorkInfo(riseWorkInfoDto, applicationSubmit.getProfileId());
         return riseWorkInfoDto;
     }
 
-    private void buildRiseWorkInfo(RiseWorkInfoDto riseWorkInfoDto, String openid) {
-        Profile profile = accountService.getProfile(openid, false);
+    private void buildRiseWorkInfo(RiseWorkInfoDto riseWorkInfoDto, Integer profileId) {
+        Profile profile = accountService.getProfile(profileId);
         if (profile != null) {
             riseWorkInfoDto.setHeadPic(profile.getHeadimgurl());
             riseWorkInfoDto.setRole(profile.getRole());
@@ -297,7 +296,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                     riseWorkInfoDto.getContent());
         }
         //设置用户信息
-        buildRiseWorkInfo(riseWorkInfoDto, subjectArticle.getOpenid());
+        buildRiseWorkInfo(riseWorkInfoDto, subjectArticle.getProfileId());
 
         return riseWorkInfoDto;
     }

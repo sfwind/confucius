@@ -12,12 +12,12 @@ public interface RiseMemberCountRepo {
     void reload();
 
     // 预报名
-    Pair<Integer,String> prepareSignup(String openId);
+    Pair<Integer,String> prepareSignup(Integer profileId);
 
-    Pair<Integer,String> prepareSignup(String openId, Boolean hold);
+    Pair<Integer,String> prepareSignup(Integer profileId, Boolean hold);
 
     // 退出预报名
-    void quitSignup(String openId,Integer memberTypeId);
+    void quitSignup(Integer profileId,Integer memberTypeId);
 
     Integer getRemindingCount();
 }

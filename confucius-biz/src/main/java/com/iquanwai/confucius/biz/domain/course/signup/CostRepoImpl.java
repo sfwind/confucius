@@ -1,11 +1,8 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
-import com.iquanwai.confucius.biz.dao.course.CourseFreeListDao;
 import com.iquanwai.confucius.biz.po.Coupon;
-import com.iquanwai.confucius.biz.po.systematism.CourseFreeList;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by justin on 16/10/13.
@@ -22,65 +18,45 @@ import java.util.Map;
 @Repository
 public class CostRepoImpl implements CostRepo {
     @Autowired
-    private CourseFreeListDao courseFreeListDao;
-    @Autowired
     private CouponDao couponDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    //课程白名单
-    private Map<Integer, List<String>> whiteList = Maps.newHashMap();
     //有优惠券的名单
-    private List<String> couponList = Lists.newArrayList();
+    private List<Integer> couponList = Lists.newArrayList();
 
     @PostConstruct
-    public void init(){
-        List<CourseFreeList> courseFreeLists = courseFreeListDao.loadAll(CourseFreeList.class);
-        whiteList.clear();
-        for(CourseFreeList freeList:courseFreeLists){
-            List<String> openids = whiteList.get(freeList.getCourseId());
-            if(openids==null){
-                openids = Lists.newArrayList();
-                whiteList.put(freeList.getCourseId(), openids);
-            }
-            openids.add(freeList.getOpenid());
-        }
+    public void init() {
         //初始化优惠券
         reloadCoupon();
 
         logger.info("init white list & coupon complete");
     }
 
-    public boolean isWhite(Integer courseId, String openid) {
-        List<String> classWhiteList = whiteList.get(courseId);
-        //白名单中包含用户openid
-        return classWhiteList!=null && classWhiteList.contains(openid);
-    }
-
-    public double discount(Double price, String openid, String orderId) {
-        List<Coupon> coupons = couponDao.getCoupon(openid);
+    public double discount(Double price, Integer profileId, String orderId) {
+        List<Coupon> coupons = couponDao.getCoupon(profileId);
         Double remain = price;
-        for(Coupon coupon:coupons){
+        for (Coupon coupon : coupons) {
             Double amount = coupon.getAmount();
-            if(remain>amount){
+            if (remain > amount) {
                 remain = CommonUtils.substract(remain, amount);
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
-            //余额为0时,仍然付0.01元
-            }else if(remain.equals(amount)){
+                //余额为0时,仍然付0.01元
+            } else if (remain.equals(amount)) {
                 remain = 0d;
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
                 break;
-            }else{
+            } else {
                 remain = 0d;
                 couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
                 break;
             }
         }
         reloadCoupon();
-        return CommonUtils.substract(price,remain);
+        return CommonUtils.substract(price, remain);
     }
 
     @Override
-    public double discount(Double price, String openid, String orderId, Coupon coupon) {
+    public double discount(Double price, String orderId, Coupon coupon) {
         Double remain = price;
         Double amount = coupon.getAmount();
         if (remain > amount) {
@@ -94,8 +70,8 @@ public class CostRepoImpl implements CostRepo {
         return CommonUtils.substract(price, remain);
     }
 
-    public boolean hasCoupon(String openid) {
-        return couponList.contains(openid);
+    public boolean hasCoupon(Integer profileId) {
+        return couponList.contains(profileId);
     }
 
     public void reloadCache() {
@@ -109,20 +85,20 @@ public class CostRepoImpl implements CostRepo {
     }
 
     @Override
-    public List<Coupon> getCoupons(String openId) {
-        return couponDao.getCoupon(openId);
+    public List<Coupon> getCoupons(Integer profileId) {
+        return couponDao.getCoupon(profileId);
     }
 
     @Override
-    public Coupon getCoupon(Integer id){
-        return couponDao.load(Coupon.class,id);
+    public Coupon getCoupon(Integer id) {
+        return couponDao.load(Coupon.class, id);
     }
 
 
-    private void reloadCoupon(){
-        List<Coupon> coupons  = couponDao.getUnusedCoupon();
+    private void reloadCoupon() {
+        List<Coupon> coupons = couponDao.getUnusedCoupon();
         couponList.clear();
-        coupons.stream().filter(coupon -> !couponList.contains(coupon.getOpenid()))
-                .forEach(coupon -> couponList.add(coupon.getOpenid()));
+        coupons.stream().filter(coupon -> !couponList.contains(coupon.getProfileId()))
+                .forEach(coupon -> couponList.add(coupon.getProfileId()));
     }
 }

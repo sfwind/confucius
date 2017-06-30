@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -11,6 +12,7 @@ import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -58,6 +60,8 @@ public class PracticeServiceImpl implements PracticeService {
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private PointRepo pointRepo;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -68,13 +72,60 @@ public class PracticeServiceImpl implements PracticeService {
 
 
     @Override
-    public void vote(Integer type, Integer referencedId, String openId, String votedOpenId) {
-        HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openId);
+    public boolean vote(Integer type, Integer referencedId, Integer profileId, String openid) {
+        HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openid);
         if (vote == null) {
-            homeworkVoteDao.vote(type, referencedId, openId, votedOpenId, Constants.Device.PC);
+            Integer planId = null;
+            String submitOpenId = null;
+            Integer submitProfileId = null;
+            if (type == Constants.VoteType.CHALLENGE) {
+                // 挑战任务点赞
+                ChallengeSubmit submit = challengeSubmitDao.load(ChallengeSubmit.class, referencedId);
+                if (submit == null) {
+                    return false;
+                }
+                planId = submit.getPlanId();
+                submitOpenId = submit.getOpenid();
+                submitProfileId = submit.getProfileId();
+            } else if (type == Constants.VoteType.APPLICATION) {
+                // 应用任务点赞
+                ApplicationSubmit submit = applicationSubmitDao.load(ApplicationSubmit.class, referencedId);
+                if (submit == null) {
+                    return false;
+                }
+                planId = submit.getPlanId();
+                submitOpenId = submit.getOpenid();
+                submitProfileId = submit.getProfileId();
+            } else if (type == Constants.VoteType.SUBJECT) {
+                // 小课论坛点赞
+                SubjectArticle submit = subjectArticleDao.load(SubjectArticle.class, referencedId);
+                if (submit == null) {
+                    return false;
+                }
+                submitOpenId = submit.getOpenid();
+                submitProfileId = submit.getProfileId();
+                List<ImprovementPlan> improvementPlans = improvementPlanDao.loadUserPlans(openid);
+                for (ImprovementPlan plan : improvementPlans) {
+                    if (plan.getProblemId().equals(submit.getProblemId())) {
+                        planId = plan.getId();
+                    }
+                }
+            }
+            HomeworkVote homeworkVote = new HomeworkVote();
+            homeworkVote.setReferencedId(referencedId);
+            homeworkVote.setVoteOpenId(openid);
+            homeworkVote.setVoteProfileId(profileId);
+            homeworkVote.setType(type);
+            homeworkVote.setVotedOpenid(submitOpenId);
+            homeworkVote.setVotedProfileId(submitProfileId);
+            homeworkVote.setDevice(Constants.Device.PC);
+            homeworkVoteDao.vote(homeworkVote);
+            pointRepo.risePoint(planId, ConfigUtils.getVoteScore());
+            pointRepo.riseCustomerPoint(submitOpenId, ConfigUtils.getVoteScore());
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
+        return true;
     }
 
     @Override
@@ -105,11 +156,12 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Pair<Integer, String> comment(Integer moduleId, Integer referId, String openId, String content) {
+    public Pair<Integer, String> comment(Integer moduleId, Integer referId,
+                                         String openId, Integer profileId, String content) {
         boolean isAsst = false;
         Profile profile = accountService.getProfile(openId, false);
         //是否是助教评论
-        if(profile!=null){
+        if (profile != null) {
             isAsst = Role.isAsst(profile.getRole());
         }
 
@@ -120,9 +172,9 @@ public class PracticeServiceImpl implements PracticeService {
                 return new MutablePair<>(-1, "没有该文章");
             }
             //自己给自己评论不提醒
-            if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
+            if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
-                messageService.sendMessage("评论了我的小目标", load.getOpenid(), openId, url);
+                messageService.sendMessage("评论了我的小目标", load.getProfileId().toString(), profileId.toString(), url);
             }
         } else if (moduleId == Constants.CommentModule.APPLICATION) {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
@@ -131,34 +183,30 @@ public class PracticeServiceImpl implements PracticeService {
                 return new MutablePair<>(-1, "没有该文章");
             }
             //更新助教评论状态
-            if(isAsst){
+            if (isAsst) {
                 applicationSubmitDao.asstFeedback(load.getId());
-                Integer planId = load.getPlanId();
-                ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
-                if(plan!=null){
-                    asstCoachComment(load.getOpenid(), plan.getProblemId());
-                }
+                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
             }
             //自己给自己评论不提醒
-            if(load.getOpenid()!=null && !load.getOpenid().equals(openId)) {
+            if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/practice/application?id=" + load.getApplicationId();
-                messageService.sendMessage("评论了我的应用练习", load.getOpenid(), openId, url);
+                messageService.sendMessage("评论了我的应用练习", load.getProfileId().toString(), profileId.toString(), url);
             }
-        } else if(moduleId == Constants.CommentModule.SUBJECT){
-            SubjectArticle load = subjectArticleDao.load(SubjectArticle.class,referId);
+        } else if (moduleId == Constants.CommentModule.SUBJECT) {
+            SubjectArticle load = subjectArticleDao.load(SubjectArticle.class, referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
                 return new MutablePair<>(-1, "没有该文章");
             }
             //更新助教评论状态
-            if(isAsst){
+            if (isAsst) {
                 subjectArticleDao.asstFeedback(load.getId());
-                asstCoachComment(load.getOpenid(), load.getProblemId());
+                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
             }
             //自己给自己评论不提醒
             if (load.getOpenid() != null && !load.getOpenid().equals(openId)) {
                 String url = "/rise/static/message/subject/reply?submitId=" + referId;
-                messageService.sendMessage("评论了我的小课分享", load.getOpenid(), openId, url);
+                messageService.sendMessage("评论了我的小课分享", load.getProfileId().toString(), profileId.toString(), url);
             }
         }
         Comment comment = new Comment();
@@ -167,14 +215,15 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
+        comment.setCommentProfileId(profileId);
         comment.setDevice(Constants.Device.PC);
         int id = commentDao.insert(comment);
-        return new MutablePair<>(id,"评论成功");
+        return new MutablePair<>(id, "评论成功");
     }
 
     @Override
     public Pair<Integer, String> replyComment(Integer moduleId, Integer referId, String openId,
-                                              String content, Integer repliedId) {
+                                              Integer profileId, String content, Integer repliedId) {
         Comment repliedComment = commentDao.load(Comment.class, repliedId);
         Comment comment = new Comment();
         comment.setModuleId(moduleId);
@@ -182,16 +231,18 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentOpenId(openId);
-        comment.setDevice(Constants.Device.MOBILE);
-        if(repliedComment != null) {
+        comment.setCommentProfileId(profileId);
+        comment.setDevice(Constants.Device.PC);
+        if (repliedComment != null) {
             comment.setRepliedOpenId(repliedComment.getCommentOpenId());
             comment.setRepliedId(repliedId);
             comment.setRepliedDel(0);
             comment.setRepliedComment(repliedComment.getContent());
+            comment.setRepliedProfileId(repliedComment.getCommentProfileId());
         }
         int id = commentDao.insert(comment);
         //被回复的评论
-        if (repliedComment != null && !repliedComment.getCommentOpenId().equals(openId)) {
+        if (repliedComment != null && !repliedComment.getCommentProfileId().equals(profileId)) {
             String msg = "";
             StringBuilder url = new StringBuilder("/rise/static/message/comment/reply");
             if (moduleId == 2) {
@@ -200,21 +251,22 @@ public class PracticeServiceImpl implements PracticeService {
                 msg = "评论了我的小课分享";
             }
             url = url.append("?moduleId=").append(moduleId).append("&submitId=").append(referId).append("&commentId=").append(id);
-            messageService.sendMessage(msg, repliedComment.getCommentOpenId(), openId, url.toString());
+            messageService.sendMessage(msg, repliedComment.getCommentProfileId().toString(), profileId.toString(), url.toString());
         }
         return new MutablePair<>(id, "评论成功");
     }
 
-    private void asstCoachComment(String openId, Integer problemId) {
-        AsstCoachComment asstCoachComment =asstCoachCommentDao.loadAsstCoachComment(problemId, openId);
-        if(asstCoachComment==null){
+    private void asstCoachComment(String openId, Integer profileId, Integer problemId) {
+        AsstCoachComment asstCoachComment = asstCoachCommentDao.loadAsstCoachComment(problemId, profileId);
+        if (asstCoachComment == null) {
             asstCoachComment = new AsstCoachComment();
             asstCoachComment.setCount(1);
             asstCoachComment.setOpenid(openId);
+            asstCoachComment.setProfileId(profileId);
             asstCoachComment.setProblemId(problemId);
             asstCoachCommentDao.insert(asstCoachComment);
-        }else{
-            asstCoachComment.setCount(asstCoachComment.getCount()+1);
+        } else {
+            asstCoachComment.setCount(asstCoachComment.getCount() + 1);
             asstCoachCommentDao.updateCount(asstCoachComment);
         }
     }
@@ -234,7 +286,7 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page) {
         page.setTotal(subjectArticleDao.count(problemId));
-        return subjectArticleDao.loadArticles(problemId,page).stream().map(item -> {
+        return subjectArticleDao.loadArticles(problemId, page).stream().map(item -> {
             String content = CommonUtils.replaceHttpsDomainName(item.getContent());
             if (!content.equals(item.getContent())) {
                 item.setContent(content);
@@ -248,25 +300,25 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId) {
-        return subjectArticleDao.loadArticles(problemId,openId);
+        return subjectArticleDao.loadArticles(problemId, openId);
     }
 
     @Override
-    public List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId){
+    public List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId) {
         return articleLabelDao.loadArticleActiveLabels(moduleId, articleId);
     }
 
     @Override
-    public SubjectArticle loadSubjectArticle(Integer submitId){
+    public SubjectArticle loadSubjectArticle(Integer submitId) {
         return subjectArticleDao.load(SubjectArticle.class, submitId);
     }
 
     @Override
-    public Integer submitSubjectArticle(SubjectArticle subjectArticle){
+    public Integer submitSubjectArticle(SubjectArticle subjectArticle) {
         String content = CommonUtils.removeHTMLTag(subjectArticle.getContent());
         subjectArticle.setLength(content.length());
         Integer submitId = subjectArticle.getId();
-        if (subjectArticle.getId()==null){
+        if (subjectArticle.getId() == null) {
             // 第一次提交
             submitId = subjectArticleDao.insert(subjectArticle);
             // 生成记录表
@@ -279,15 +331,15 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels){
+    public List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels) {
         List<ArticleLabel> oldLabels = articleLabelDao.loadArticleLabels(module, articleId);
         List<ArticleLabel> shouldDels = Lists.newArrayList();
         List<ArticleLabel> shouldReAdds = Lists.newArrayList();
-        labels = labels==null?Lists.newArrayList():labels;
+        labels = labels == null ? Lists.newArrayList() : labels;
         List<Integer> userChoose = labels.stream().map(LabelConfig::getId).collect(Collectors.toList());
-        oldLabels.forEach(item->{
-            if(userChoose.contains(item.getLabelId())){
-                if(item.getDel()){
+        oldLabels.forEach(item -> {
+            if (userChoose.contains(item.getLabelId())) {
+                if (item.getDel()) {
                     shouldReAdds.add(item);
                 }
             } else {
@@ -298,18 +350,18 @@ public class PracticeServiceImpl implements PracticeService {
         userChoose.forEach(item -> articleLabelDao.insertArticleLabel(module, articleId, item));
         shouldDels.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 1));
         shouldReAdds.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 0));
-        return articleLabelDao.loadArticleActiveLabels(module,articleId);
+        return articleLabelDao.loadArticleActiveLabels(module, articleId);
     }
 
     @Override
-    public List<LabelConfig> loadProblemLabels(Integer problemId){
+    public List<LabelConfig> loadProblemLabels(Integer problemId) {
         return labelConfigDao.loadLabelConfigs(problemId);
     }
 
     @Override
-    public void updatePicReference(List<String> picList, Integer submitId){
-        picList.forEach(item->{
-           pictureDao.updateReference(item, submitId);
+    public void updatePicReference(List<String> picList, Integer submitId) {
+        picList.forEach(item -> {
+            pictureDao.updateReference(item, submitId);
         });
     }
 
@@ -326,18 +378,18 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Integer hasRequestComment(Integer planId) {
         ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
-        if(improvementPlan==null){
+        if (improvementPlan == null) {
             return null;
         }
-        if(improvementPlan.getRequestCommentCount()>0){
+        if (improvementPlan.getRequestCommentCount() > 0) {
             return improvementPlan.getRequestCommentCount();
-        }else{
-            RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getOpenid());
+        } else {
+            RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getProfileId());
             if (riseMember == null) {
                 // 已经不是会员了就返回null
                 return null;
             }
-            if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
+            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
                 return 0;
             }
         }

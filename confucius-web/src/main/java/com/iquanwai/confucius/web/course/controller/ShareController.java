@@ -43,10 +43,10 @@ public class ShareController {
             Course course = courseProgressService.loadCourse(classMember.getCourseId());
             if(course!=null){
                 certificateDto.setCertificateBg(course.getCertificatePic());
+                certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
             }
-            certificateDto.setComment(courseProgressService.certificateComment(course.getName(), classMember));
             //获取真名
-            Profile account = accountService.getProfile(classMember.getOpenId(), false);
+            Profile account = accountService.getProfile(classMember.getProfileId());
             if(account!=null){
                 certificateDto.setName(account.getRealName());
             }

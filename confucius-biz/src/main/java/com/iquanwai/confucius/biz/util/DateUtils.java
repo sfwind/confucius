@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -51,6 +52,18 @@ public class DateUtils {
         long thatTime = date.getTime();
 
         return (int)Math.abs((now - thatTime)/1000)/60/60/24;
+    }
+
+    public static long nextDayRemainSeconds(Date tody){
+        Long current = System.currentTimeMillis();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(DateUtils.afterDays(tody, 1));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date zero = calendar.getTime();
+        long zeroTime = zero.getTime();
+        return (zeroTime-current)/1000;
     }
 
     public static long currentTimestamp(){
@@ -106,4 +119,12 @@ public class DateUtils {
 
         return isSameDate;
     }
+
+    public static boolean isToday(Date date) {
+        String cmpDate = date.toString().substring(0, 10);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date()).toString().substring(0, 10);
+        return today.equals(cmpDate);
+    }
+
 }

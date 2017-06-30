@@ -9,8 +9,11 @@ import com.iquanwai.confucius.biz.dao.course.CourseDao;
 import com.iquanwai.confucius.biz.dao.course.CourseWeekDao;
 import com.iquanwai.confucius.biz.dao.course.CurrentChapterPageDao;
 import com.iquanwai.confucius.biz.domain.course.signup.ClassMemberCountRepo;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
+import com.iquanwai.confucius.biz.exception.NotFollowingException;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -46,6 +49,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private ClassMemberCountRepo classMemberCountRepo;
     @Autowired
     private CourseWeekDao courseWeekDao;
+    @Autowired
+    private AccountService accountService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -55,13 +60,12 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     private final static int CERTIFICATE_OFFSET = 51000;
 
-
-    public ClassMember loadActiveCourse(String openid, Integer courseId) {
-        Assert.notNull(openid, "openid不能为空");
-        ClassMember classMember = classMemberDao.classMember(openid, courseId);
+    @Override
+    public ClassMember loadActiveCourse(Integer profileId, Integer courseId) {
+        ClassMember classMember = classMemberDao.classMember(profileId, courseId);
 
         //如果课程已结束,返回空
-        if (isOver(classMember)){
+        if (isOver(classMember)) {
             return null;
         }
         //设置课程进度
@@ -70,14 +74,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private boolean isOver(ClassMember classMember) {
-        if(classMember==null){
+        if (classMember == null) {
             return true;
         }
-        if(classMember.getCloseDate().before(DateUtils.startDay(new Date()))){
-            if(!classMember.getGraduate()){
+        if (classMember.getCloseDate().before(DateUtils.startDay(new Date()))) {
+            if (!classMember.getGraduate()) {
                 Course course = courseDao.load(Course.class, classMember.getCourseId());
                 //短课程或者试听课程关闭以后,如果用户还未毕业,强制设置成毕业
-                if(course.getType()==Course.SHORT_COURSE || course.getType() == Course.AUDITION_COURSE) {
+                if (course.getType() == Course.SHORT_COURSE || course.getType() == Course.AUDITION_COURSE) {
                     classMemberDao.graduate(classMember.getId());
                 }
             }
@@ -86,10 +90,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         return false;
     }
 
-    public List<ClassMember> loadActiveCourse(String openid) {
-        List<ClassMember> classMemberList = classMemberDao.classMember(openid);
+    @Override
+    public List<ClassMember> loadActiveCourse(Integer profileId) {
+        List<ClassMember> classMemberList = classMemberDao.classMember(profileId);
 
-        List<ClassMember> tempList =  classMemberList.stream().filter(classMember -> !isOver(classMember))
+        return classMemberList.stream().filter(classMember -> !isOver(classMember))
                 .map(classMember -> {
                     classProgress(classMember);
                     return classMember;
@@ -104,14 +109,21 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                         return 0;
                     }
                 }).collect(Collectors.toList());
-
-        return tempList;
     }
 
     @Override
-    public List<ClassMember> loadGraduateClassMember(String openid, Integer courseId) {
-        return classMemberDao.graduateInfo(openid, courseId).stream().filter(
-                classMember -> classMember.getCertificateNo()!=null).collect(Collectors.toList());
+    public List<ClassMember> loadActiveCourse(String openid) {
+        Profile profile = accountService.getProfile(openid, false);
+        if (profile == null) {
+            return Lists.newArrayList();
+        }
+        return loadActiveCourse(profile.getId());
+    }
+
+    @Override
+    public List<ClassMember> loadGraduateClassMember(Integer profileId, Integer courseId) {
+        return classMemberDao.graduateInfo(profileId, courseId).stream().filter(
+                classMember -> classMember.getCertificateNo() != null).collect(Collectors.toList());
     }
 
     @Override
@@ -123,13 +135,13 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         course.setChapterList(buildChapter(chapters, classMember.getComplete(), classMember.getClassProgress()));
     }
 
-    private void classProgress(ClassMember classMember){
+    private void classProgress(ClassMember classMember) {
         Assert.notNull(classMember, "classMember不能为空");
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
-        if(quanwaiClass==null){
+        if (quanwaiClass == null) {
             return;
         }
-        if(classMember.getGraduate()){
+        if (classMember.getGraduate()) {
             logger.info("{} has no active course {}", classMember.getOpenId(), classMember.getCourseId());
             return;
         }
@@ -137,13 +149,15 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         classMember.setClassProgress(quanwaiClass.getProgress());
     }
 
+    @Override
     public Course loadCourse(Integer courseId) {
         return courseDao.load(Course.class, courseId);
     }
 
+    @Override
     public void classProgress() {
         List<QuanwaiClass> openClass = classDao.loadRunningClass();
-        for(QuanwaiClass clazz:openClass){
+        for (QuanwaiClass clazz : openClass) {
             Course course = courseDao.load(Course.class, clazz.getCourseId());
             // 短课程,试听课程不需要修改progress
             if (course != null && course.getType() != Course.SHORT_COURSE && course.getType() != Course.AUDITION_COURSE) {
@@ -166,13 +180,14 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         classMemberCountRepo.initClass();
     }
 
-    public void personalChapterPage(String openid, List<Chapter> chapters) {
+    @Override
+    public void personalChapterPage(Integer profileId, List<Chapter> chapters) {
         Assert.notNull(chapters, "chapters不能为空");
         List<Integer> chapterIds = Lists.transform(chapters, Chapter::getId);
 
         //设置学员的章节上次看到的页码
-        List<CurrentChapterPage> currentChapterPages = currentChapterPageDao.currentPages(openid, chapterIds);
-        for(Chapter chapter:chapters){
+        List<CurrentChapterPage> currentChapterPages = currentChapterPageDao.currentPages(profileId, chapterIds);
+        for (Chapter chapter : chapters) {
             //如果用户已经学习完，则从第一页开始学习
             currentChapterPages.stream().filter(currentChapterPage -> chapter.getId() == currentChapterPage.getChapterId())
                     .forEach(currentChapterPage -> {
@@ -182,20 +197,21 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                         } else {
                             chapter.setPageSequence(1);
                         }
-            });
+                    });
         }
 
     }
 
+    @Override
     public void graduate(Integer classId) {
         List<ClassMember> classMembers = classMemberDao.getClassMember(classId);
 //        List<ClassMember> classMembers = classMemberDao.getPassMember(classId);
-        for(ClassMember classMember:classMembers){
+        for (ClassMember classMember : classMembers) {
             try {
                 if (classMember.getPass() != null && classMember.getPass()) {
                     //生成毕业证书
                     String certificateNo = generateCertificate(classMember);
-                    classMemberDao.updateCertificateNo(classId, classMember.getOpenId(), certificateNo);
+                    classMemberDao.updateCertificateNo(classId, classMember.getProfileId(), certificateNo);
                     Course course = courseDao.load(Course.class, classMember.getCourseId());
                     classMemberDao.graduate(classMember.getId());
                     graduateMessage(classMember, course);
@@ -203,7 +219,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                     // 单纯只设置毕业
                     classMemberDao.graduate(classMember.getId());
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
         }
@@ -217,7 +233,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         templateMessage.setTouser(classMember.getOpenId());
 
         boolean pass = classMember.getPass();
-        boolean superb = classMember.getSuperb()==null?false:classMember.getSuperb();
+        boolean superb = classMember.getSuperb() == null ? false : classMember.getSuperb();
 
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
@@ -225,31 +241,34 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
         String first = coursePassStartMsg(pass, superb, course.getName());
         String remark = courseRemarkStartMsg(pass, superb);
-        data.put("first",new TemplateMessage.Keyword(first));
-        data.put("keyword1",new TemplateMessage.Keyword(course.getName()));
-        data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
-        data.put("remark",new TemplateMessage.Keyword(remark));
-        templateMessage.setUrl(ConfigUtils.domainName()+CERTIFICATE_PERSONAL_INFO_URL+"?courseId="+classMember.getCourseId());
+        data.put("first", new TemplateMessage.Keyword(first));
+        data.put("keyword1", new TemplateMessage.Keyword(course.getName()));
+        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+        data.put("remark", new TemplateMessage.Keyword(remark));
+        templateMessage.setUrl(ConfigUtils.domainName() + CERTIFICATE_PERSONAL_INFO_URL + "?courseId=" + classMember.getCourseId());
         templateMessageService.sendMessage(templateMessage);
     }
 
+    @Override
     public void closeClassEntry() {
         Date date = DateUtils.afterDays(new Date(), 1);
         List<QuanwaiClass> openClasses = classDao.loadClassByOpenDate(date);
-        for(QuanwaiClass quanwaiClass:openClasses){
+        for (QuanwaiClass quanwaiClass : openClasses) {
             Integer courseId = quanwaiClass.getCourseId();
             Course course = courseDao.load(Course.class, courseId);
             //只有长课程会关闭报名
-            if(course!=null && course.getType() == Course.LONG_COURSE) {
+            if (course != null && course.getType() == Course.LONG_COURSE) {
                 classDao.closeEntry(quanwaiClass.getId());
             }
         }
     }
 
+    @Override
     public List<QuanwaiClass> loadActiveClass() {
         return classDao.loadRunningClass();
     }
 
+    @Override
     public void noticeIncompleteMembers(QuanwaiClass quanwaiClass) {
         Assert.notNull(quanwaiClass, "quanwaiClass不能为空");
         Integer progress = quanwaiClass.getProgress();
@@ -263,23 +282,23 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
         List<ClassMember> classMembers = classMemberDao.getClassMember(quanwaiClass.getId(), new Date());
         List<ClassMember> incompleteMembers = Lists.newArrayList();
-        for(ClassMember classMember:classMembers){
+        for (ClassMember classMember : classMembers) {
             String complete = classMember.getComplete();
-            if(complete==null){
+            if (complete == null) {
                 incompleteMembers.add(classMember);
                 continue;
             }
             // 比较已经解锁的任务和已完成的任务
-            for(Integer sequence:taskSequences) {
+            for (Integer sequence : taskSequences) {
                 boolean isComplete = false;
                 String[] completeChapters = complete.split(",");
                 for (String completeChapter : completeChapters) {
-                    if(sequence.toString().equals(completeChapter)){
+                    if (sequence.toString().equals(completeChapter)) {
                         isComplete = true;
                         break;
                     }
                 }
-                if(!isComplete){
+                if (!isComplete) {
                     incompleteMembers.add(classMember);
                     break;
                 }
@@ -289,7 +308,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     //通知未完成任务的学员
-    private void noticeMembers(ClassMember classMember){
+    private void noticeMembers(ClassMember classMember) {
         Assert.notNull(classMember, "classMember不能为空");
         String key = ConfigUtils.incompleteTaskMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
@@ -299,10 +318,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
 
-        data.put("first",new TemplateMessage.Keyword("童鞋，我们发现你最近还有部分学习任务未完成。点击下方按钮“训练营”，进入页面开始补课吧！"));
-        data.put("keyword1",new TemplateMessage.Keyword("完成学习任务"));
-        data.put("keyword2",new TemplateMessage.Keyword("hin高"));
-        data.put("remark",new TemplateMessage.Keyword("课程前面的标示，圆圈表示待学习，打钩才是完成哦！"));
+        data.put("first", new TemplateMessage.Keyword("童鞋，我们发现你最近还有部分学习任务未完成。点击下方按钮“训练营”，进入页面开始补课吧！"));
+        data.put("keyword1", new TemplateMessage.Keyword("完成学习任务"));
+        data.put("keyword2", new TemplateMessage.Keyword("课程前面的标示，圆圈表示待学习，打钩才是完成哦！"));
+        data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+//        data.put("remark", new TemplateMessage.Keyword("课程前面的标示，圆圈表示待学习，打钩才是完成哦！"));
         templateMessageService.sendMessage(templateMessage);
     }
 
@@ -316,27 +336,27 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     private String courseRemarkStartMsg(boolean pass, boolean superb) {
-        if(pass){
-            if(superb){
+        if (pass) {
+            if (superb) {
                 return "请耐心等待圈外助手联系你发奖品哦\n" +
                         "点击获取你的专属毕业证书吧！";
-            }else{
+            } else {
                 return "点击获取你的专属毕业证书吧！";
             }
-        }else{
+        } else {
             return "在下周之内补完作业，还可以顺利毕业、拿到专属毕业证书哦！";
         }
     }
 
     private String coursePassStartMsg(boolean pass, boolean superb, String courseName) {
-        if(pass){
-            if(superb){
-                return "你已完成"+courseName+"训练营的所有挑战，并且以出色的成绩，作为“优秀学员”毕业，给自己一个拥抱吧。";
-            }else{
-                return "你已完成"+courseName+"训练营的所有挑战，不知不觉就走完了这段学习历程。";
+        if (pass) {
+            if (superb) {
+                return "你已完成" + courseName + "训练营的所有挑战，并且以出色的成绩，作为“优秀学员”毕业，给自己一个拥抱吧。";
+            } else {
+                return "你已完成" + courseName + "训练营的所有挑战，不知不觉就走完了这段学习历程。";
             }
-        }else{
-            return "很遗憾你未能完成"+courseName+"训练营的所有挑战";
+        } else {
+            return "很遗憾你未能完成" + courseName + "训练营的所有挑战";
         }
     }
 
@@ -346,11 +366,11 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         List<Chapter> chaptersNew = Lists.newArrayList();
 
         //章节按sequence排序
-        chapters.sort((o1, o2) -> o1.getSequence()-o2.getSequence());
+        chapters.sort((o1, o2) -> o1.getSequence() - o2.getSequence());
 
         //前序课程是否完成
         boolean lastCompleted = true;
-        for(Chapter chapter:chapters){
+        for (Chapter chapter : chapters) {
             boolean unlock = checkUnlock(chapter, classProgress, lastCompleted);
             boolean complete = checkComplete(chapter, personalCompleteProgress);
             String comment = comment(unlock, chapter);
@@ -370,16 +390,16 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     private String chapterName(Chapter chapter) {
         Assert.notNull(chapter, "chapter不能为空");
         //任务型课程用原名
-        if(chapter.getType()==CourseType.NEW_CHALLENGE||chapter.getType()==CourseType.NEW_HOMEWORK){
+        if (chapter.getType() == CourseType.NEW_CHALLENGE || chapter.getType() == CourseType.NEW_HOMEWORK) {
             return chapter.getName();
         }
         //长课程章节名前增加Day 1, Day 2。。。Day 7
-        int sequence = chapter.getSequence()%7;
-        if(sequence == 0){
+        int sequence = chapter.getSequence() % 7;
+        if (sequence == 0) {
             sequence = 7;
         }
         //其他使用Day+空格+序号+空格+章节名字
-        return "Day "+sequence+" "+chapter.getName();
+        return "Day " + sequence + " " + chapter.getName();
     }
 
     private String comment(boolean unlock, Chapter chapter) {
@@ -411,17 +431,17 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     private boolean checkComplete(Chapter chapter, String personalProgress) {
         Assert.notNull(chapter, "chapter不能为空");
-        if(personalProgress==null){
+        if (personalProgress == null) {
             return false;
         }
 
         String[] arr = personalProgress.split(",");
-        for(String completeChapter:arr){
+        for (String completeChapter : arr) {
             try {
                 if (Integer.valueOf(completeChapter).equals(chapter.getSequence())) {
                     return true;
                 }
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 logger.error("{} is invalid", personalProgress);
             }
         }
@@ -431,32 +451,34 @@ public class CourseProgressServiceImpl implements CourseProgressService {
 
     private boolean checkUnlock(Chapter chapter, int classProgress, boolean lastCompleted) {
         Assert.notNull(chapter, "chapter不能为空");
-        if(chapter.getType()==CourseType.NEW_CHALLENGE||
-                chapter.getType()==CourseType.NEW_HOMEWORK){
+        if (chapter.getType() == CourseType.NEW_CHALLENGE ||
+                chapter.getType() == CourseType.NEW_HOMEWORK) {
             return lastCompleted;
         }
 
-        if(chapter.getType()==CourseType.RELAX||
-                chapter.getType()==CourseType.ASSESSMENT||
-                chapter.getType()==CourseType.GRADUATE){
-            if(chapter.getStartDay()==classProgress && chapter.getEndDay()==classProgress) {
+        if (chapter.getType() == CourseType.RELAX ||
+                chapter.getType() == CourseType.ASSESSMENT ||
+                chapter.getType() == CourseType.GRADUATE) {
+            if (chapter.getStartDay() == classProgress && chapter.getEndDay() == classProgress) {
                 return true;
             }
         }
 
         //章节进度小于课程当前进度，则当前章节解锁
-        return chapter.getStartDay()<=classProgress;
+        return chapter.getStartDay() <= classProgress;
     }
 
+    @Override
     public CourseWeek loadCourseWeek(Integer courseId, Integer week) {
         return courseWeekDao.getCourseWeek(courseId, week);
     }
 
+    @Override
     public String certificateComment(String courseName, ClassMember classMember) {
         Assert.notNull(classMember, "classMember不能为空");
         StringBuilder sb = new StringBuilder();
         QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classMember.getClassId());
-        if(quanwaiClass==null){
+        if (quanwaiClass == null) {
             logger.error("classId {} is not found", classMember.getClassId());
             return "";
         }
@@ -465,7 +487,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
                 .append(dateTime.getMonthOfYear()).append("月").append("完成了圈外第")
                 .append(NumberToHanZi.formatInteger(quanwaiClass.getSeason())).append("期<br/>")
                 .append(courseName).append("训练营所有课程<br/>")
-                .append(classMember.getSuperb()!=null && classMember.getSuperb() ? "荣膺优秀学员，":"").append("特此发证");
+                .append(classMember.getSuperb() != null && classMember.getSuperb() ? "荣膺优秀学员，" : "").append("特此发证");
         return sb.toString();
     }
 
@@ -475,22 +497,17 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     @Override
-    public ClassMember loadClassMemberByMemberId(String memberId) {
-        return classMemberDao.loadByMemberId(memberId);
-    }
-
-    @Override
     public void noticeWillCloseMember() {
         logger.info("noticeWillCloseMember start");
         List<ClassMember> classMembers = classMemberDao.willCloseMembers(DateUtils.afterDays(new Date(), 3));
         List<Course> courses = courseDao.loadAll(Course.class);
-        Map<Integer,String> courseName = Maps.newHashMap();
-        courses.forEach(item->{
-            courseName.put(item.getId(),item.getName());
+        Map<Integer, String> courseName = Maps.newHashMap();
+        courses.forEach(item -> {
+            courseName.put(item.getId(), item.getName());
         });
-        classMembers.stream().filter(item->{
+        classMembers.stream().filter(item -> {
             String name = courseName.get(item.getCourseId());
-            if(name==null){
+            if (name == null) {
                 logger.error("用户:{}的课程异常:{}", item.getOpenId(), item.getCourseId());
                 return false;
             } else {
@@ -502,17 +519,17 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     @Override
-    public List<ClassMember> loadClassMembers(String openId) {
-        return classMemberDao.loadByOpenId(openId);
+    public List<ClassMember> loadClassMembersByProfileId(Integer profileId) {
+        return classMemberDao.classMember(profileId);
     }
 
     @Override
-    public List<ClassMember> loadClassMembers(Integer classId){
+    public List<ClassMember> loadClassMembers(Integer classId) {
         return classMemberDao.getClassMember(classId);
     }
 
     //通知未完成任务的学员
-    private void noticeMembersWillClose(ClassMember classMember){
+    private void noticeMembersWillClose(ClassMember classMember) {
         Assert.notNull(classMember, "classMember不能为空");
         String key = ConfigUtils.willCloseMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
@@ -521,19 +538,19 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        Course course = courseDao.load(Course.class,classMember.getCourseId());
+        Course course = courseDao.load(Course.class, classMember.getCourseId());
         // 只有长／短课程会发送课程关闭提醒
-        if(course.getType() == Course.LONG_COURSE){
+        if (course.getType() == Course.LONG_COURSE) {
             data.put("first", new TemplateMessage.Keyword("你的课程即将到期，请检查自己是否完成随堂练习并提交大作业。小组作业提交情况可咨询小组长。"));
             data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
-            data.put("remark",new TemplateMessage.Keyword("课程到期后将自动关闭。完成所有作业的学员，会在关闭后的一天内收到毕业证书。如有疑问请咨询助教。"));
+            data.put("remark", new TemplateMessage.Keyword("课程到期后将自动关闭。完成所有作业的学员，会在关闭后的一天内收到毕业证书。如有疑问请咨询助教。"));
             templateMessageService.sendMessage(templateMessage);
-        } else if(course.getType() == Course.SHORT_COURSE){
+        } else if (course.getType() == Course.SHORT_COURSE) {
             data.put("first", new TemplateMessage.Keyword("你的以下课程即将到期："));
             data.put("keyword1", new TemplateMessage.Keyword(classMember.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToFormat5(classMember.getCloseDate())));
-            data.put("remark",new TemplateMessage.Keyword("到期后将自动关闭。"));
+            data.put("remark", new TemplateMessage.Keyword("到期后将自动关闭。"));
             templateMessageService.sendMessage(templateMessage);
         }
     }

@@ -89,6 +89,17 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    public Role getRole(Integer profileId){
+        List<UserRole> userRoles = userRoleDao.getRoles(profileId);
+        if(CollectionUtils.isEmpty(userRoles)){
+            return null;
+        }else{
+            Integer roleId = userRoles.get(0).getRoleId();
+            return roleDao.load(Role.class, roleId);
+        }
+    }
+
+    @Override
     public Role getRole(String openid){
         List<UserRole> userRoles = userRoleDao.getRoles(openid);
         if(CollectionUtils.isEmpty(userRoles)){

@@ -31,6 +31,11 @@ public interface PermissionService {
     /**
      * 获取用户的角色
      * */
+    Role getRole(Integer profileId);
+
+    /**
+     * 获取用户的角色
+     * */
     Role getRole(String openid);
 
 }

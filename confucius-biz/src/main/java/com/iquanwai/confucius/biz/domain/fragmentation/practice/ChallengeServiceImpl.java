@@ -40,41 +40,42 @@ public class ChallengeServiceImpl implements ChallengeService {
     private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     @Override
-    public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, String openId,boolean create){
-        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class,challengeId);
+    public ChallengePractice loadMineChallengePractice(Integer planId, Integer challengeId, Integer profileId, String openId, boolean create) {
+        ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, challengeId);
         // 查询该用户是否提交
         ChallengeSubmit submit = challengeSubmitDao.load(challengeId, planId, openId);
-        if(submit==null && create){
+        if (submit == null && create) {
             // 没有提交，生成
             submit = new ChallengeSubmit();
             submit.setOpenid(openId);
+            submit.setProfileId(profileId);
             submit.setPlanId(planId);
             submit.setChallengeId(challengeId);
             int submitId = challengeSubmitDao.insert(submit);
             submit.setId(submitId);
             submit.setUpdateTime(new Date());
         }
-        if(submit!=null && submit.getContent()!=null){
+        if (submit != null && submit.getContent() != null) {
             String content = CommonUtils.replaceHttpsDomainName(submit.getContent());
             if (!content.equals(submit.getContent())) {
                 submit.setContent(content);
                 challengeSubmitDao.updateContent(submit.getId(), content);
             }
         }
-        challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
+        challengePractice.setSubmitUpdateTime(submit == null ? null : submit.getUpdateTime());
         challengePractice.setPlanId(planId);
-        challengePractice.setContent(submit==null?null:submit.getContent());
-        challengePractice.setSubmitId(submit==null?null:submit.getId());
+        challengePractice.setContent(submit == null ? null : submit.getContent());
+        challengePractice.setSubmitId(submit == null ? null : submit.getId());
         return challengePractice;
     }
 
 
     @Override
-    public Pair<Integer,Integer> submit(Integer id, String content) {
+    public Pair<Integer, Integer> submit(Integer id, String content) {
         ChallengeSubmit submit = challengeSubmitDao.load(ChallengeSubmit.class, id);
         if (submit == null) {
             logger.error("submitId {} is not existed", id);
-            return new MutablePair<>(-1,0);
+            return new MutablePair<>(-1, 0);
         }
         boolean result;
         int length = CommonUtils.removeHTMLTag(content).length();
@@ -95,7 +96,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         } else {
             // 提交失败
             logger.error("提交失败,submitId:{}", id);
-            return new MutablePair<>(-2,0);
+            return new MutablePair<>(-2, 0);
         }
         // 这里都是提交成功的
         if (submit.getPointStatus() == 0 && content.length() > 50) {
@@ -106,21 +107,21 @@ public class ChallengeServiceImpl implements ChallengeService {
             if (practicePlan != null) {
                 pointRepo.risePoint(submit.getPlanId(), ConfigUtils.getChallengeScore());
                 challengeSubmitDao.updatePointStatus(id);
-                pointRepo.riseCustomerPoint(submit.getOpenid(),ConfigUtils.getChallengeScore());
+                pointRepo.riseCustomerPoint(submit.getOpenid(), ConfigUtils.getChallengeScore());
             }
-            return new MutablePair<>(2,ConfigUtils.getChallengeScore());
+            return new MutablePair<>(2, ConfigUtils.getChallengeScore());
         } else {
-            return new MutablePair<>(1,0);
+            return new MutablePair<>(1, 0);
         }
     }
 
     @Override
-    public ChallengeSubmit loadSubmit(Integer id){
+    public ChallengeSubmit loadSubmit(Integer id) {
         return challengeSubmitDao.load(ChallengeSubmit.class, id);
     }
 
     @Override
-    public ChallengePractice getChallengePractice(Integer id, String openid, Integer planId,boolean create) {
+    public ChallengePractice getChallengePractice(Integer id, Integer profileId, String openid, Integer planId, boolean create) {
         Assert.notNull(openid, "openid不能为空");
         ChallengePractice challengePractice = challengePracticeDao.load(ChallengePractice.class, id);
 
@@ -133,6 +134,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         //生成小目标提交记录
         if (submit == null && create) {
             submit = new ChallengeSubmit();
+            submit.setProfileId(profileId);
             submit.setOpenid(openid);
             submit.setPlanId(planId);
             submit.setChallengeId(id);
@@ -142,9 +144,9 @@ public class ChallengeServiceImpl implements ChallengeService {
             // 生成浏览记录
             fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.CHALLENGE, submitId));
         }
-        challengePractice.setContent(submit==null?null:submit.getContent());
-        challengePractice.setSubmitId(submit==null?null:submit.getId());
-        challengePractice.setSubmitUpdateTime(submit==null?null:submit.getUpdateTime());
+        challengePractice.setContent(submit == null ? null : submit.getContent());
+        challengePractice.setSubmitId(submit == null ? null : submit.getId());
+        challengePractice.setSubmitUpdateTime(submit == null ? null : submit.getUpdateTime());
         challengePractice.setPlanId(planId);
         return challengePractice;
     }

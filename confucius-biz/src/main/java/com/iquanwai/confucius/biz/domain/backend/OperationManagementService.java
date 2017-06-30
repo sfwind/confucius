@@ -36,11 +36,12 @@ public interface OperationManagementService {
      * 内容运营回复某个巩固练习
      *
      * @param openid           发表讨论的用户openid
+     * @param profileId           发表讨论的用户id
      * @param warmupPracticeId 巩固练习id
      * @param comment          讨论内容
      * @param repliedId        回复的讨论id
      */
-    void discuss(String openid, Integer warmupPracticeId, String comment, Integer repliedId);
+    void discuss(String openid, Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId);
 
     /**
      * 回复加精
@@ -59,9 +60,9 @@ public interface OperationManagementService {
     /**
      * 作业是否已评论
      * @param submitId 提交id
-     * @param commentOpenid 评论者openid
+     * @param commentProfileId 评论者id
      */
-    boolean isComment(Integer submitId, String commentOpenid);
+    boolean isComment(Integer submitId, Integer commentProfileId);
 
     /**
      * 获取小课的所有巩固练习
@@ -89,6 +90,6 @@ public interface OperationManagementService {
      *  0：非教练评价
      * -1：数据异常
      */
-    Pair<Integer, String> deleteAsstWarmupDiscuss(Integer discussId);
+    Integer deleteAsstWarmupDiscuss(Integer discussId);
 
 }

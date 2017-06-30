@@ -3,6 +3,7 @@ package com.iquanwai.confucius.web.account.controller;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
@@ -17,7 +18,6 @@ import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
-import com.iquanwai.confucius.web.resolver.PCLoginUserResolver;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -54,6 +54,7 @@ public class AccountController {
     private PermissionService permissionService;
     @Autowired
     private LoginUserService loginUserService;
+
 
     /**
      * mobile扫描二维码结果

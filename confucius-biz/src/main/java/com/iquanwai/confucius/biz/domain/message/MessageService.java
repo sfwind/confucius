@@ -13,4 +13,6 @@ public interface MessageService {
      * @param url 打开后跳转的链接
      * */
     void sendMessage(String message, String toUser, String fromUser, String url);
+
+    String SYSTEM_MESSAGE ="AUTO";
 }

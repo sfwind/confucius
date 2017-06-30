@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.customer;
 
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
-import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -21,22 +20,15 @@ public class ProfileServiceImpl implements ProfileService {
     @Autowired
     private ProfileDao profileDao;
     @Autowired
-    private FollowUserDao followUserDao;
-    @Autowired
     private PointRepo pointRepo;
-
-    @Override
-    public Profile getProfile(String openId) {
-        return profileDao.queryByOpenId(openId);
-    }
 
     @Override
     public void submitPersonalCenterProfile(Profile profile) {
         Assert.notNull(profile.getOpenid(), "openID不能为空");
         Profile oldProfile = profileDao.queryByOpenId(profile.getOpenid());
         Boolean result = profileDao.submitPersonalCenterProfile(profile);
-        if(result && oldProfile.getIsFull()==0){
-            logger.info("用户:{} 完成个人信息填写,加{}积分",profile.getOpenid(),ConfigUtils.getProfileFullScore());
+        if (result && oldProfile.getIsFull() == 0) {
+            logger.info("用户:{} 完成个人信息填写,加{}积分", profile.getOpenid(), ConfigUtils.getProfileFullScore());
             // 第一次提交，加分
             pointRepo.riseCustomerPoint(profile.getOpenid(), ConfigUtils.getProfileFullScore());
             // 更新信息状态
@@ -45,12 +37,12 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void submitPersonalInfo(Profile profile,Boolean risePoint) {
+    public void submitPersonalInfo(Profile profile, Boolean risePoint) {
         Assert.notNull(profile.getOpenid(), "openID不能为空");
         Profile oldProfile = profileDao.queryByOpenId(profile.getOpenid());
         Boolean result = profileDao.submitPersonalProfile(profile);
-        if(result && oldProfile.getIsFull()==0 && risePoint){
-            logger.info("用户:{} 完成个人信息填写,加{}积分",profile.getOpenid(),ConfigUtils.getProfileFullScore());
+        if (result && oldProfile.getIsFull() == 0 && risePoint) {
+            logger.info("用户:{} 完成个人信息填写,加{}积分", profile.getOpenid(), ConfigUtils.getProfileFullScore());
             // 第一次提交，加分
             pointRepo.riseCustomerPoint(profile.getOpenid(), ConfigUtils.getProfileFullScore());
             // 更新信息状态

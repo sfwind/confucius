@@ -43,25 +43,6 @@ public class HomeworkVoteDao extends PracticeDBUtil {
     }
 
     /**
-     * 根据类型和依赖id查询有效的被点赞的次数
-     *
-     * @param type         1:小目标,2：体系化大作业
-     * @param referencedId 被依赖的id
-     */
-    public List<HomeworkVote> voteAbleList(Integer type, Integer referencedId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<HomeworkVote>> h = new BeanListHandler<HomeworkVote>(HomeworkVote.class);
-        try {
-            List<HomeworkVote> list = run.query("select * from HomeworkVote where referencedId=? and  Type=? and Del=0"
-                    , h, referencedId, type);
-            return list;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    /**
      * 被点赞的次数
      */
     public int votedCount(Integer type, Integer referencedId) {
@@ -79,17 +60,16 @@ public class HomeworkVoteDao extends PracticeDBUtil {
     /**
      * 进行点赞
      *
-     * @param type         1:小目标，2：体系化大作业
-     * @param referencedId 被依赖的id
-     * @param openid       点赞的人
      * @return 插入结果
      */
-    public void vote(Integer type, Integer referencedId, String openid,String votedOpenId, Integer device) {
+    public void vote(HomeworkVote homeworkVote) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO HomeworkVote(Type,ReferencedId,VoteOpenId,VotedOpenId,Device) " +
-                "VALUES(?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO HomeworkVote(Type,ReferencedId,VoteOpenId,VoteProfileId,VotedOpenId,VotedProfileId,Device) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?)";
         try {
-            run.insert(insertSql, new ScalarHandler<>(), type, referencedId, openid,votedOpenId, device);
+            run.insert(insertSql, new ScalarHandler<>(), homeworkVote.getType(), homeworkVote.getReferencedId(),
+                    homeworkVote.getVoteOpenId(), homeworkVote.getVoteProfileId(), homeworkVote.getVotedOpenid(),
+                    homeworkVote.getVotedProfileId(), homeworkVote.getDevice());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

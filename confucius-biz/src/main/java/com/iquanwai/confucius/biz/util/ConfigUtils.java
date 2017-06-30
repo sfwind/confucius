@@ -1,9 +1,11 @@
 package com.iquanwai.confucius.biz.util;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.domain.message.SMSConfig;
 import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,6 +156,10 @@ public class ConfigUtils {
 		return getValue("default.openid");
 	}
 
+	public static Integer getDefaultProfileId(){
+		return getIntValue("default.profile.id");
+	}
+
 	/**
 	 * 业务配置获取
 	 */
@@ -258,10 +264,6 @@ public class ConfigUtils {
 		return getValue("activity.start.msg");
 	}
 
-	public static String qaMsgKey(){
-		return getValue("qa.msg");
-	}
-
 	public static String getUploadDomain(){
 		return getValue("upload.image.domain");
 	}
@@ -304,5 +306,49 @@ public class ConfigUtils {
 
 	public static Date getDiscountExpiredDate() {
 		return DateUtils.parseStringToDateTime(getValue("operation.discount.expireddate"));
+	}
+
+	public static Integer getMinSendLimit(){
+		return getIntValue("sms.min.send.limit");
+	}
+
+	public static Integer getHourSendLimit(){
+		return getIntValue("sms.hour.send.limit");
+	}
+
+	public static Integer getDaySendLimit(){
+		return getIntValue("sms.day.send.limit");
+	}
+
+	public static String getBizAccount(){
+		return getValue("sms.business.account");
+	}
+	public static String getBizPassword(){
+		return getValue("sms.business.password");
+	}
+	public static String getBizSign(){
+		return getValue("sms.business.sign");
+	}
+	public static String getSmsCodeTemplate(){
+		return getValue("sms.template.code");
+	}
+
+	public static SMSConfig getBizMsgConfig(){
+		SMSConfig smsConfig = new SMSConfig();
+		smsConfig.setAccount(getBizAccount());
+		smsConfig.setPassword(getBizPassword());
+		smsConfig.setSign(getBizSign());
+		return smsConfig;
+	}
+
+	public static List<String> getAlarmList() {
+		List<String> list = Lists.newArrayList();
+		String[] split = getValue("sms.alarm.openids").split(",");
+		CollectionUtils.addAll(list, split);
+		return list;
+	}
+
+	public static Integer getVoteScore(){
+		return getIntValue("vote.score");
 	}
 }

@@ -41,7 +41,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, String openId,boolean create) {
+    public ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, Integer profileId,
+                                                         String openId, boolean create) {
         // 查询该应用练习
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交
@@ -50,15 +51,15 @@ public class ApplicationServiceImpl implements ApplicationService {
             // 没有提交，生成
             submit = new ApplicationSubmit();
             submit.setOpenid(openId);
+            submit.setProfileId(profileId);
             submit.setPlanId(planId);
             submit.setApplicationId(applicationId);
             submit.setProblemId(applicationPractice.getProblemId());
             int submitId = applicationSubmitDao.insert(submit);
             submit.setId(submitId);
-            submit.setUpdateTime(new Date());
             fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));
-        }else{
-            if(submit==null) {
+        } else {
+            if (submit == null) {
                 submit = new ApplicationSubmit();
             }
         }
@@ -70,10 +71,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmitList(Integer applicationId) {
-        List<ApplicationSubmit> applicationSubmits =  applicationSubmitDao.load(applicationId);
+        List<ApplicationSubmit> applicationSubmits = applicationSubmitDao.load(applicationId);
         applicationSubmits.stream().forEach(applicationSubmit -> {
             String content = CommonUtils.replaceHttpsDomainName(applicationSubmit.getContent());
-            if(!content.equals(applicationSubmit.getContent())){
+            if (!content.equals(applicationSubmit.getContent())) {
                 applicationSubmit.setContent(content);
                 applicationSubmitDao.updateContent(applicationSubmit.getId(), content);
             }
@@ -91,7 +92,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         boolean result;
         int length = CommonUtils.removeHTMLTag(content).length();
-        if(submit.getContent() == null){
+        if (submit.getContent() == null) {
             result = applicationSubmitDao.firstAnswer(id, content, length);
         } else {
             result = applicationSubmitDao.answer(id, content, length);
@@ -110,9 +111,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
 
             Integer type;
-            if(Knowledge.isReview(applicationPractice.getKnowledgeId())){
+            if (Knowledge.isReview(applicationPractice.getKnowledgeId())) {
                 type = PracticePlan.APPLICATION_REVIEW;
-            }else{
+            } else {
                 type = PracticePlan.APPLICATION;
             }
 
@@ -122,23 +123,29 @@ public class ApplicationServiceImpl implements ApplicationService {
                 practicePlanDao.complete(practicePlan.getId());
                 Integer point = PointRepoImpl.score.get(applicationPracticeDao.load(ApplicationPractice.class, submit.getApplicationId()).getDifficulty());
                 // 查看难度，加分
-                pointRepo.risePoint(submit.getPlanId(),point);
+                pointRepo.risePoint(submit.getPlanId(), point);
                 // 修改status
                 applicationSubmitDao.updatePointStatus(id);
-                pointRepo.riseCustomerPoint(submit.getOpenid(),point);
+                pointRepo.riseCustomerPoint(submit.getOpenid(), point);
             }
         }
         return result;
     }
 
     @Override
-    public ApplicationSubmit loadSubmit(Integer id){
-        return applicationSubmitDao.load(ApplicationSubmit.class,id);
+    public ApplicationSubmit loadSubmit(Integer id) {
+        return applicationSubmitDao.load(ApplicationSubmit.class, id);
     }
 
     @Override
     public Knowledge getKnowledge(Integer knowledgeId) {
         return knowledgeDao.load(Knowledge.class, knowledgeId);
     }
+
+    @Override
+    public Integer updateApplicationPractice(Integer id, String topic, String description) {
+        return applicationPracticeDao.updateApplicationPracticeById(id, topic, description);
+    }
+
 
 }

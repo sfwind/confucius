@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.accessToken;
 
 
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.wx.AccessTokenDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     private WeiXinAccessTokenRepo weiXinAccessTokenRepo;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private AccessTokenDao accessTokenDao;
 
     public String getAccessToken() {
         if(accessToken!=null){
@@ -25,7 +28,9 @@ public class AccessTokenServiceImpl implements AccessTokenService {
         String token = redisUtil.get("accessToken");
         if(token==null){
             logger.info("insert access token");
-            redisUtil.set("accessToken", _getAccessToken());
+            String accessToken = _getAccessToken();
+            redisUtil.set("accessToken", accessToken);
+            accessTokenDao.insertOrUpdate(accessToken);
         }else {
             accessToken = token;
         }
@@ -49,7 +54,9 @@ public class AccessTokenServiceImpl implements AccessTokenService {
             String token = redisUtil.get("accessToken");
             if(token==null){
                 logger.info("insert access token");
-                redisUtil.set("accessToken", _getAccessToken());
+                String accessToken = _getAccessToken();
+                redisUtil.set("accessToken", accessToken);
+                accessTokenDao.insertOrUpdate(accessToken);
             }else{
                 //如果数据库的accessToken未刷新,则强制刷新
                 if(token.equals(accessToken)){
@@ -68,5 +75,6 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     private void forceUpdateAccessToken(){
         String accessToken = _getAccessToken();
         redisUtil.set("accessToken", accessToken);
+        accessTokenDao.insertOrUpdate(accessToken);
     }
 }

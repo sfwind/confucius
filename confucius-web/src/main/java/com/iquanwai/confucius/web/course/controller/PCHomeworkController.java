@@ -3,13 +3,12 @@ package com.iquanwai.confucius.web.course.controller;
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
-import com.iquanwai.confucius.biz.po.systematism.Homework;
-import com.iquanwai.confucius.biz.po.systematism.HomeworkSubmit;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
+import com.iquanwai.confucius.biz.po.systematism.Homework;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkSubmit;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.web.course.dto.HomeworkLoadDto;
-import com.iquanwai.confucius.web.course.dto.HomeworkReviewDto;
 import com.iquanwai.confucius.web.course.dto.HomeworkSubmitDto;
 import com.iquanwai.confucius.web.course.dto.PictureDto;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -18,11 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -57,7 +52,7 @@ public class PCHomeworkController {
                 .action("PC加载作业")
                 .memo(submit.getHomeworkId()+"");
         operationLogService.log(operationLog);
-        Homework homework = courseStudyService.loadHomework(openid, submit.getHomeworkId());
+        Homework homework = courseStudyService.loadHomework(submit.getSubmitProfileId(), submit.getHomeworkId());
         if(homework==null){
             return WebUtils.error("获取作业失败");
         }
@@ -89,7 +84,7 @@ public class PCHomeworkController {
             return WebUtils.error("字数太长，请删减到10000字以下");
         }
         String openid = submit.getSubmitOpenid();
-        courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), openid, submit.getHomeworkId());
+        courseStudyService.submitHomework(homeworkSubmitDto.getAnswer(), submit.getSubmitProfileId(), submit.getHomeworkId());
 
         OperationLog operationLog = OperationLog.create().openid(openid)
                 .module("作业")
@@ -107,14 +102,4 @@ public class PCHomeworkController {
         return WebUtils.result(submit);
     }
 
-    @RequestMapping(value = "/remark", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> remark(@RequestBody HomeworkReviewDto homeworkReviewDto){
-        courseStudyService.remark(homeworkReviewDto.getOpenid(),
-                homeworkReviewDto.getClassId(),
-                homeworkReviewDto.getHomeworkId(),
-                homeworkReviewDto.isExcellent(),
-                homeworkReviewDto.isFail());
-
-        return WebUtils.success();
-    }
 }

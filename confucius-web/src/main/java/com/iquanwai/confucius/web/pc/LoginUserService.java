@@ -165,7 +165,7 @@ public class LoginUserService {
             logger.info("accessToken:{} can't find openid", accessToken);
             return new MutablePair<>(-4, null);
         }
-        Account account = null;
+        Account account;
         try {
             account = accountService.getAccount(openid, false);
         } catch (NotFollowingException e) {
@@ -176,11 +176,13 @@ public class LoginUserService {
             return new MutablePair<>(-2, null);
         }
 
-        Role role = permissionService.getRole(openid);
+
+        Profile profile = accountService.getProfile(openid, false);
+        Role role = permissionService.getRole(profile.getId());
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号
             //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
-            List<ClassMember> classMembers = courseProgressService.loadActiveCourse(openid);
+            List<ClassMember> classMembers = courseProgressService.loadActiveCourse(profile.getId());
             List<ImprovementPlan> plans = planService.loadUserPlans(openid);
             if (classMembers.isEmpty() && plans.isEmpty()) {
                 role = Role.stranger();
@@ -188,16 +190,16 @@ public class LoginUserService {
                 role = Role.student();
             }
         }
-        Profile profile = accountService.getProfile(openid, false);
         PCLoginUser pcLoginUser = new PCLoginUser();
         LoginUser loginUser = new LoginUser();
-
+        loginUser.setId(profile.getId());
         loginUser.setOpenId(openid);
         loginUser.setHeadimgUrl(profile.getHeadimgurl());
         loginUser.setRealName(profile.getRealName());
         loginUser.setWeixinName(profile.getNickname());
 
         pcLoginUser.setWeixin(loginUser);
+        pcLoginUser.setProfileId(profile.getId());
         pcLoginUser.setOpenId(loginUser.getOpenId());
         pcLoginUser.setRole(role.getId());
         pcLoginUser.setSignature(profile.getSignature());

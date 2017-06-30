@@ -8,8 +8,12 @@ import lombok.Data;
 @Data
 public class HomeworkVote {
     private Integer id;
-    private Integer referencedId;// '依赖的id',
-    private Integer type; //1:挑战小目标,2:大作业',
-    private String voteOpenId;//'谁点的赞',
-    private Integer del;//'是否删除，1代表取消点赞',
+    private Integer referencedId;// 依赖的id
+    private Integer type; //1:小目标,2:应用练习
+    private String voteOpenId;//点赞人
+    private Integer voteProfileId; //点赞人id
+    private Integer del;//是否删除，1代表取消点赞
+    private String votedOpenid; //被点赞人
+    private Integer votedProfileId; //被点赞人id
+    private Integer device; //设备
 }

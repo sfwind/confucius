@@ -11,6 +11,7 @@ import java.util.Date;
 public class Coupon {
     private int id;
     private String openid;
+    private Integer profileId;
     private Double amount;
     private Integer used; //是否使用（0-否，1-是，2-正在使用）
     private Double cost; //本次订单已消耗的金额，当orderId不为空时有值

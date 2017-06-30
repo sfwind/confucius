@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -67,19 +68,19 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     }
 
     @Override
-    public Pair<Integer, String> prepareSignup(String openId) {
-        return this.prepareSignup(openId, true);
+    public Pair<Integer, String> prepareSignup(Integer profileId) {
+        return this.prepareSignup(profileId, true);
     }
 
     @Override
-    public Pair<Integer,String> prepareSignup(String openId, Boolean hold){
-        Profile profile = profileDao.queryByOpenId(openId);
+    public Pair<Integer,String> prepareSignup(Integer profileId, Boolean hold){
+        Profile profile = profileDao.load(Profile.class, profileId);
         if(profile.getRiseMember()){
             // 已经报名
             return new MutablePair<>(-3,"您已是RISER");
         } else {
             // 未报名,查看是否有未关闭的订单
-            Integer counts = riseOrderDao.userNotCloseOrder(openId);
+            Integer counts = riseOrderDao.userNotCloseOrder(profileId);
             if(counts>0){
                 // 如果有未关闭的订单，则即使未再报名期间之内应该也可以报名
                 return new MutablePair<>(1,"ok");
@@ -104,7 +105,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     }
 
     @Override
-    public void quitSignup(String openId, Integer memberTypeId) {
+    public void quitSignup(Integer profileId, Integer memberTypeId) {
         synchronized (lock){
             // 退还名额
             remainCount.incrementAndGet();

@@ -13,10 +13,10 @@ public interface AssistantCoachService {
 
     /**
      * 获取助教的评论数
-     * @param openid 助教openid
+     * @param profileId 助教id
      * @return 当日评论数/总评论数
      * */
-    Pair<Integer, Integer> getCommentCount(String openid);
+    Pair<Integer, Integer> getCommentCount(Integer profileId);
 
 
     /**
@@ -44,7 +44,7 @@ public interface AssistantCoachService {
 
     /**
      * 获取助教已评论的文章
-     * @param openid 助教openid
+     * @param profileId 助教id
      * */
-    List<RiseWorkInfoDto> getCommentedSubmit(String openid);
+    List<RiseWorkInfoDto> getCommentedSubmit(Integer profileId);
 }

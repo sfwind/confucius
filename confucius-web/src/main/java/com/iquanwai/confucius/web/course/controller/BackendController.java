@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
@@ -13,10 +14,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
-import com.iquanwai.confucius.web.course.dto.backend.MarkDto;
-import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
-import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
+import com.iquanwai.confucius.web.course.dto.backend.*;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -25,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +56,8 @@ public class BackendController {
     private TemplateMessageService templateMessageService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private MessageService messageService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -199,6 +200,24 @@ public class BackendController {
                         templateMessage.setUrl(noticeMsgDto.getUrl());
                     }
                     templateMessageService.sendMessage(templateMessage);
+
+                });
+            }catch (Exception e){
+                LOGGER.error("发送通知失败", e);
+            }
+        }).start();
+        return WebUtils.result("正在运行中");
+    }
+
+    @RequestMapping(value = "/system/msg", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> systemMsg(@RequestBody SystemMsgDto systemMsgDto){
+        Assert.notNull(systemMsgDto.getMessage(), "消息不能为空");
+        new Thread(() -> {
+            try {
+                List<Integer> profileIds = systemMsgDto.getProfileIds();
+                profileIds.stream().forEach(profileId -> {
+                    messageService.sendMessage(systemMsgDto.getMessage(), profileId.toString(),
+                            MessageService.SYSTEM_MESSAGE, null);
 
                 });
             }catch (Exception e){

@@ -29,7 +29,7 @@ import java.util.Map;
  * Created by justin on 17/2/14.
  */
 @Service
-public class PromoCodeServiceImpl implements PromoCodeService{
+public class PromoCodeServiceImpl implements PromoCodeService {
     @Autowired
     private PromoCodeDao promoCodeDao;
     @Autowired
@@ -63,7 +63,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
 
     private boolean isValid(PromoCode promoCode) {
         //优惠码存在且没过期
-        if(promoCode!=null && promoCode.getExpiredDate()!=null && promoCode.getExpiredDate().after(new Date())){
+        if (promoCode != null && promoCode.getExpiredDate() != null && promoCode.getExpiredDate().after(new Date())) {
             return true;
         }
         return false;
@@ -81,7 +81,7 @@ public class PromoCodeServiceImpl implements PromoCodeService{
     @Override
     public void usePromoCode(String openid, String code) {
         Activity activity = ActivityFactory.getActivity(ActivityFactory.ACTIVITY_CAREER_COURSE_PACKAGE);
-        if(activity==null){
+        if (activity == null) {
             logger.error("活动 {} 不存在", ActivityFactory.ACTIVITY_CAREER_COURSE_PACKAGE);
             return;
         }
@@ -95,27 +95,27 @@ public class PromoCodeServiceImpl implements PromoCodeService{
         return promoCodeDao.queryPromoCodeByActivityCode(activityCode);
     }
 
-    private void careerActivity(Activity activity, String openid, String code){
+    private void careerActivity(Activity activity, String openid, String code) {
         PromoCode promoCode = promoCodeDao.queryPromoCode(code, activity.getName());
-        if(promoCode==null){
+        if (promoCode == null) {
             logger.error("优惠码{}不存在", code);
             return;
         }
-        if(!isValid(promoCode)){
+        if (!isValid(promoCode)) {
             logger.error("优惠码{}已过期", code);
             return;
         }
-        if(promoCode.getUseCount() < activity.getPromoCodeUsageLimit()){
-            synchronized (this){
+        if (promoCode.getUseCount() < activity.getPromoCodeUsageLimit()) {
+            synchronized (this) {
                 promoCode = promoCodeDao.queryPromoCode(code, activity.getName());
-                if(promoCode.getUseCount() < activity.getPromoCodeUsageLimit()){
+                if (promoCode.getUseCount() < activity.getPromoCodeUsageLimit()) {
                     //插入优惠券
                     Coupon coupon = new Coupon();
                     coupon.setOpenid(promoCode.getOwner());
                     coupon.setAmount(promoCode.getDiscount());
                     coupon.setUsed(0);
                     //过期日期是结束日期+1
-                    coupon.setExpiredDate(DateUtils.afterDays(activity.getEndDate(),1));
+                    coupon.setExpiredDate(DateUtils.afterDays(activity.getEndDate(), 1));
                     couponDao.insert(coupon);
                     //发送优惠码折扣通知
                     sendCouponMsg(promoCode, activity, openid);
@@ -139,32 +139,20 @@ public class PromoCodeServiceImpl implements PromoCodeService{
 
         Profile account = accountService.getProfile(openid, true);
         String nickname = account.getNickname();
-        data.put("first",new TemplateMessage.Keyword("恭喜，你的优惠码已被"+nickname+"成功使用！", TemplateMessage.BLACK));
-        data.put("keyword1",new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
-        data.put("keyword2",new TemplateMessage.Keyword("这个春天，一起来重新学习职业发展！"));
-        int discount_percent = 20*(promoCode.getUseCount()+1);
-        data.put("keyword3",new TemplateMessage.Keyword("已优惠"+discount_percent+"%"));
-        if(discount_percent==100) {
+        data.put("first", new TemplateMessage.Keyword("恭喜，你的优惠码已被" + nickname + "成功使用！", TemplateMessage.BLACK));
+        data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
+        data.put("keyword2", new TemplateMessage.Keyword("这个春天，一起来重新学习职业发展！"));
+        int discount_percent = 20 * (promoCode.getUseCount() + 1);
+        data.put("keyword3", new TemplateMessage.Keyword("已优惠" + discount_percent + "%"));
+        if (discount_percent == 100) {
             data.put("remark", new TemplateMessage.Keyword("恭喜，你已免费获得一门职业发展课程\n" +
                     "点击下方训练营，可免费报名“求职背后的秘密”或“战略性职业规划”任意一门"));
-        }else{
-            data.put("remark", new TemplateMessage.Keyword("你现在的课程优惠价格为"+(45-activity.getDiscount().intValue()*(promoCode.getUseCount()+1))+"元\n" +
-                    "距离免费听课只剩"+(activity.getPromoCodeUsageLimit()-promoCode.getUseCount()-1)+"次"));
+        } else {
+            data.put("remark", new TemplateMessage.Keyword("你现在的课程优惠价格为" + (45 - activity.getDiscount().intValue() * (promoCode.getUseCount() + 1)) + "元\n" +
+                    "距离免费听课只剩" + (activity.getPromoCodeUsageLimit() - promoCode.getUseCount() - 1) + "次"));
         }
         templateMessage.setData(data);
 
         templateMessageService.sendMessage(templateMessage);
-    }
-
-    public static void main(String[] args) {
-
-        for(int i=0;i<2000;i++){
-            String code = CommonUtils.randomString(4).toUpperCase();
-            while (code.contains("1")||code.contains("0")
-                    ||code.contains("O")||code.contains("I")){
-                code = CommonUtils.randomString(4).toUpperCase();
-            }
-            System.out.println(code);
-        }
     }
 }
