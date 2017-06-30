@@ -80,12 +80,13 @@ public class PCIndexController {
      * 1、删除本地 cookie 数据
      * 2、MQ 发送广播，删除其余节点上的 cookie 数据
      */
-    @RequestMapping(value = "/rise/logout")
+    @RequestMapping(value = "/logout")
     public void getLogoutPage(HttpServletRequest request, HttpServletResponse response, PCLoginUser pcLoginUser) throws IOException {
         // 获取当前链接 cookie 的值，作为删除 cookieMap 的 key 值
         String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
         if(cookie == null) {
             response.sendRedirect("/login");
+            return;
         }
         // 1、删除 cookie
         CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.adapterDomainName(), response);
