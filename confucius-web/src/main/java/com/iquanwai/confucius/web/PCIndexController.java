@@ -89,7 +89,7 @@ public class PCIndexController {
             return;
         }
         // 1、删除 cookie
-        CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.adapterDomainName(), response);
+        CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.domainName(), response);
         try {
             // 2、通过 MQ 发送广播，删除每个节点上的 cookie 数据
             RabbitMQPublisher mqPublisher = new RabbitMQPublisher();
