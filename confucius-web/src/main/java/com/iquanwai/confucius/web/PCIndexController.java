@@ -16,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.util.Map;
 
@@ -80,11 +81,11 @@ public class PCIndexController {
      * 2、MQ 发送广播，删除其余节点上的 cookie 数据
      */
     @RequestMapping(value = "/rise/logout")
-    public ModelAndView getLogoutPage(HttpServletRequest request, HttpServletResponse response, PCLoginUser pcLoginUser) {
+    public void getLogoutPage(HttpServletRequest request, HttpServletResponse response, PCLoginUser pcLoginUser) throws IOException {
         // 获取当前链接 cookie 的值，作为删除 cookieMap 的 key 值
         String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
         if(cookie == null) {
-            return pcView(request, pcLoginUser);
+            response.sendRedirect("/login");
         }
         // 1、删除 cookie
         CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.adapterDomainName(), response);
@@ -96,7 +97,7 @@ public class PCIndexController {
         } catch(ConnectException e) {
             logger.error(e.getLocalizedMessage());
         }
-        return pcView(request, pcLoginUser);
+        response.sendRedirect("/login");
     }
 
     private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser) {
