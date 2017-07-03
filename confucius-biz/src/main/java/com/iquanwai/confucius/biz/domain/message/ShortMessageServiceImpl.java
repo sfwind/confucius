@@ -43,25 +43,26 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     private TemplateMessageService templateMessageService;
 
     @Override
-    public Pair<Integer, Integer> checkSendAble(ShortMessage shortMessage) {
+    public Pair<Integer, String> checkSendAble(ShortMessage shortMessage) {
         // 1.profileId查询
         Profile profile = accountService.getProfile(shortMessage.getProfileId());
         if (profile == null) {
             // profileId异常
-            return new MutablePair<>(-201, 0);
+            return new MutablePair<>(-201, "发送失败，请联系管理员");
         }
 
         // 2.发送条数限制
         SendLimit limit = shortMessageRedisDao.getUserSendLimit(shortMessage.getProfileId());
         if (limit.getMinSend() >= ConfigUtils.getMinSendLimit()) {
-            return new MutablePair<>(-1, limit.getMinSend());
+            return new MutablePair<>(-1, "操作过于频繁，请稍后再试");
         }
         if (limit.getHourSend() >= ConfigUtils.getHourSendLimit()) {
-            return new MutablePair<>(-2, limit.getHourSend());
+            return new MutablePair<>(-2, "操作过于频繁，请稍后再试");
         }
         if (limit.getDaySend() >= ConfigUtils.getDaySendLimit()) {
-            return new MutablePair<>(-3, limit.getDaySend());
+            return new MutablePair<>(-3, "操作过于频繁，请稍后再试");
         }
+
 //        // 3.电话号码数量检查
 //        if (shortMessage.getPhones() == null || shortMessage.getPhones().size() > MAX_PHONE_COUNT) {
 //            return new MutablePair<>(-202, MAX_PHONE_COUNT);
@@ -69,12 +70,11 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         // 4.文字内容检查
         String content = shortMessage.getContent();
         if (content.length() > MAX_CONTENT_SIZE) {
-            return new MutablePair<>(-203, MAX_CONTENT_SIZE);
+            return new MutablePair<>(-203, "短信内容过长，请进行精简");
         }
         // 通过检查
-        return new MutablePair<>(1, 0);
+        return new MutablePair<>(1, "ok");
     }
-
 
     @Override
     public SMSSendResult sendMessage(ShortMessage shortMessage) {

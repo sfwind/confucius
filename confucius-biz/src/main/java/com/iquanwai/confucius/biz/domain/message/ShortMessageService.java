@@ -18,7 +18,7 @@ public interface ShortMessageService {
      * @return left:-1:一分钟规则不满足  -2:一小时规则不满足  -3:一天规则不满足 -201:profileId异常 -202:电话号码数量异常 -203:内容异常<br/>
      *         right: 当前规则下已经发送多少条了/最大电话数量／最大内容数量
      */
-    Pair<Integer,Integer> checkSendAble(ShortMessage shortMessage);
+    Pair<Integer,String> checkSendAble(ShortMessage shortMessage);
 
 
     SMSSendResult sendMessage(ShortMessage shortMessage);
