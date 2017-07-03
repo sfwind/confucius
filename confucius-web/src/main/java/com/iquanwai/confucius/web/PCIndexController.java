@@ -85,7 +85,6 @@ public class PCIndexController {
         // 获取当前链接 cookie 的值，作为删除 cookieMap 的 key 值
         String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
         System.out.println("cookie = " + cookie);
-        logger.info("11111111111111111111");
         logger.info("cookie:" + cookie);
         if(cookie == null) {
             response.sendRedirect("/login");

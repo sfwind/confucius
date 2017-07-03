@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -91,7 +92,7 @@ public class AccountController {
                 accountDto.setKey(sessionId);
                 if (role.getId().equals(Role.STRANGE)) {
                     // 没有正在就读的班级
-                    this.handlerLoginSocket(sessionId, LoginType.PERMISSION_DENIED, accountDto);
+                        this.handlerLoginSocket(sessionId, LoginType.PERMISSION_DENIED, accountDto);
                     return WebUtils.error("您还未报名课程，关注圈外了解更多!");
                 } else {
                     // 缓存起来
@@ -148,6 +149,16 @@ public class AccountController {
 
     }
 
+    @RequestMapping(value = "/check/follow")
+    public ResponseEntity<Map<String,Object>> checkIsFollow(LoginUser loginUser) {
+         boolean isFollowing = loginUserService.userIsFollowing(loginUser);
+         if(isFollowing) {
+             return WebUtils.success();
+         } else {
+             return WebUtils.error(401,"当前用户尚未关注服务号");
+         }
+    }
+
     private Role getRole(String openid) {
         Role role = permissionService.getRole(openid);
         if(role!=null){
@@ -164,7 +175,6 @@ public class AccountController {
             return Role.student();
         }
     }
-
 
     @RequestMapping("/get")
     public ResponseEntity<Map<String, Object>> getAccount(PCLoginUser pcLoginUser) {
