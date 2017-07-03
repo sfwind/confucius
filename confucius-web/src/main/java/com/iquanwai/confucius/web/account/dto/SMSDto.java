@@ -2,8 +2,6 @@ package com.iquanwai.confucius.web.account.dto;
 
 import lombok.Data;
 
-import java.util.Map;
-
 /**
  * Created by nethunder on 2017/6/15.
  * 短信信息，发送给单个用户
@@ -13,5 +11,6 @@ public class SMSDto {
     private Integer profileId;
     private String phone;
     private String content;
-    private Map<String,String> replace;
+    private Integer type; // 短信类型 1.非营销  2.营销
+
 }

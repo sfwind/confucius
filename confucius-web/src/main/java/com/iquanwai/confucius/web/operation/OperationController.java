@@ -85,7 +85,7 @@ public class OperationController {
                 .memo(loginUser.getProfileId() + "");
         ShortMessage shortMessage = new ShortMessage(loginUser.getProfileId(),
                 loginUser.getWeixin() != null ? loginUser.getWeixin().getWeixinName() : "",
-                smsDto.getPhone(), smsDto.getContent(), smsDto.getReplace());
+                smsDto.getPhone(), smsDto.getContent(), smsDto.getType());
         Pair<Integer, Integer> checkSendAble = shortMessageService.checkSendAble(shortMessage);
         if (checkSendAble.getLeft() > 0) {
             SMSSendResult smsSendResult = shortMessageService.sendMessage(shortMessage);

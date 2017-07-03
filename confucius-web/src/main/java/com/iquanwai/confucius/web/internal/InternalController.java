@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.web.account.dto.SMSDto;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class InternalController {
             shortMessage.setProfileId(smsDto.getProfileId());
             shortMessage.setContent(smsDto.getContent());
             shortMessage.setPhone(smsDto.getPhone());
-            shortMessage.setReplace(smsDto.getReplace());
+            shortMessage.setType(smsDto.getType());
 
             // 检查发送条数限制
             Pair<Integer, Integer> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
@@ -61,7 +62,8 @@ public class InternalController {
             }
 
             SMSSendResult result = shortMessageService.sendMessage(shortMessage);
-            if (result != null && "0".equals(result.getResult())) {
+            if (result != null && "0".equals(result.getResult()) && StringUtils.isBlank(result.getFailPhones())) {
+                // 提交成功，并且没有发送失败的短信
                 shortMessageService.raiseSendCount(smsDto.getProfileId());
                 return WebUtils.result(result);
             } else {
