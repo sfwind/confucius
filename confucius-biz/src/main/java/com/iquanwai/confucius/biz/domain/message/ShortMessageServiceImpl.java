@@ -12,7 +12,6 @@ import com.iquanwai.confucius.biz.po.common.message.ShortMessageSubmit;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -121,7 +120,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         shortMessageSubmit.setType(shortMessage.getType());
         shortMessageSubmitDao.insert(shortMessageSubmit);
 
-        if (smsSendResult == null || !"0".equals(smsSendResult.getResult()) || !StringUtils.isBlank(smsSendResult.getFailPhones())) {
+        if (smsSendResult == null || !"0".equals(smsSendResult.getResult())) {
             if (smsSendResult == null ||
                     // 短信内容超过最大限制
                     (!"6".equals(smsSendResult.getResult()) &&
