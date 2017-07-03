@@ -10,6 +10,7 @@ import com.iquanwai.confucius.web.account.dto.SMSDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,12 +87,17 @@ public class OperationController {
         ShortMessage shortMessage = new ShortMessage(loginUser.getProfileId(),
                 loginUser.getWeixin() != null ? loginUser.getWeixin().getWeixinName() : "",
                 smsDto.getPhone(), smsDto.getContent(), smsDto.getType());
-        Pair<Integer, Integer> checkSendAble = shortMessageService.checkSendAble(shortMessage);
+        Pair<Integer, String> checkSendAble = shortMessageService.checkSendAble(shortMessage);
         if (checkSendAble.getLeft() > 0) {
             SMSSendResult smsSendResult = shortMessageService.sendMessage(shortMessage);
             if (smsSendResult != null && "0".equals(smsSendResult.getResult())) {
-                // 发送成功
-                shortMessageService.raiseSendCount(loginUser.getProfileId());
+                if (StringUtils.isBlank(smsSendResult.getFailPhones())) {
+                    // 发送成功
+                    shortMessageService.raiseSendCount(loginUser.getProfileId());
+                } else {
+                    return WebUtils.error("手机号码无效，请检查");
+                }
+
             } else {
                 logger.info("发送失败:{}", smsDto);
                 return WebUtils.error("发送失败" + (smsSendResult != null ? (":" + smsSendResult.getDesc()) : ""));
