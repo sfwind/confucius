@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.dao;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.TestBase;
 import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageRedisDao;
@@ -12,7 +11,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -158,9 +156,7 @@ public class RedisTest extends TestBase {
 
     @Test
     public void shortMessageTest() throws InterruptedException {
-        List<String> phoneList = Lists.newArrayList();
-        phoneList.add("13122535350");
-//        shortMessageService.sendMessage(2333, phoneList);
+        redisUtil.deleteByPattern("LOGIN_*");
     }
 
 }

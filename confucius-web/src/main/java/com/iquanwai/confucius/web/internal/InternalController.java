@@ -51,6 +51,7 @@ public class InternalController {
             shortMessage.setProfileId(smsDto.getProfileId());
             shortMessage.setContent(smsDto.getContent());
             shortMessage.setPhone(smsDto.getPhone());
+            shortMessage.setType(smsDto.getType());
 
             // 检查发送条数限制
             Pair<Integer, Integer> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
