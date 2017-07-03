@@ -54,7 +54,7 @@ public class ShortMessageRedisDao extends RedisUtil {
             minExpired = redisUtil.getRemainTime(minKey);
         }
         if (userSendLimit.getHourSend() == 0) {
-            hourExpired = 24 * 60L;
+            hourExpired = 60 * 60L;
         } else {
             hourExpired = redisUtil.getRemainTime(hourKey);
         }
