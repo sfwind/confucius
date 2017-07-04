@@ -82,6 +82,7 @@
             <mvc:exclude-mapping path="/session/**"/>
             <mvc:exclude-mapping path="/login" />
             <mvc:exclude-mapping path="/logout" />
+            <mvc:exclude-mapping path="/check/follow" />
             <mvc:exclude-mapping path="/pc/**"/>
             <mvc:exclude-mapping path="/home/**" />
             <mvc:exclude-mapping path="/fragment/**"/>
