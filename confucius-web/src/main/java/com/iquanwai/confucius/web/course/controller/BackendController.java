@@ -217,7 +217,7 @@ public class BackendController {
                 List<Integer> profileIds = systemMsgDto.getProfileIds();
                 profileIds.stream().forEach(profileId -> {
                     messageService.sendMessage(systemMsgDto.getMessage(), profileId.toString(),
-                            MessageService.SYSTEM_MESSAGE, null);
+                            MessageService.SYSTEM_MESSAGE, systemMsgDto.getUrl());
 
                 });
             }catch (Exception e){

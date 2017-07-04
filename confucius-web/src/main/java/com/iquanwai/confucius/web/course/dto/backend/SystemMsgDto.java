@@ -11,4 +11,5 @@ import java.util.List;
 public class SystemMsgDto {
     private List<Integer> profileIds;
     private String message;
+    private String url;
 }
