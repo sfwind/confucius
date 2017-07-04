@@ -151,12 +151,12 @@ public class AccountController {
 
     @RequestMapping(value = "/check/follow")
     public ResponseEntity<Map<String, Object>> checkIsFollow(HttpServletRequest request, LoginUser loginUser) {
-        System.out.println("loginUser = " + loginUser.getId());
+        logger.info("loginUser:" + loginUser.getId());
         String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
-        System.out.println("cookie = " + cookie);
+        logger.info("cookie" + cookie);
         if(cookie != null) {
             boolean isFollowing = loginUserService.userIsFollowing(loginUser);
-            System.out.println("isFollowing = " + isFollowing);
+            logger.info("isFollowing" + isFollowing);
             if(isFollowing) {
                 return WebUtils.success();
             } else {
