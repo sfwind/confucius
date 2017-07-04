@@ -100,12 +100,14 @@ public class LoginUserService {
      * 调用微信接口查看当前扫码用户是否已经关注
      * @return true: 用户已关注 false: 用户未关注
      */
-    public boolean userIsFollowing(LoginUser loginUser) {
+    public boolean userIsFollowing(PCLoginUser loginUser) {
         Account account = null;
         try {
             account = accountService.getAccount(loginUser.getOpenId(), true);
         } catch(NotFollowingException e) {
-            logger.info(loginUser.getWeixinName() + "未关注");
+            if(loginUser.getWeixin() != null) {
+                logger.info(loginUser.getWeixin().getWeixinName() + "未关注");
+            }
         }
         return account != null;
     }
