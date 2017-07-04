@@ -2,12 +2,16 @@ package com.iquanwai.confucius.web.pc.asst.controller;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
+import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
+import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
+import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.pc.backend.dto.DiscussDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -16,9 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,8 @@ public class AssistantCoachController {
     private OperationLogService operationLogService;
     @Autowired
     private AssistantCoachService assistantCoachService;
+    @Autowired
+    private OperationManagementService operationManagementService;
     @Autowired
     private ProblemService problemService;
 
@@ -155,6 +159,56 @@ public class AssistantCoachController {
         operationLogService.log(operationLog);
 
         return WebUtils.result(riseWorkInfoDtos);
+    }
+
+    @RequestMapping("/hot/warmup")
+    public ResponseEntity<Map<String, Object>> getHotPracticeDiscuss(PCLoginUser loginUser, @ModelAttribute Page page) {
+        //每页50道题目
+        page.setPageSize(50);
+        List<WarmupPractice> warmupPractices = operationManagementService.getLastSixtyDayActivePractice(page);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习讨论区")
+                .action("加载最热的巩固练习");
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(warmupPractices);
+    }
+
+    @RequestMapping("/warmup/load/{practiceId}")
+    public ResponseEntity<Map<String, Object>> getPracticeDiscuss(PCLoginUser loginUser,
+                                                                  @PathVariable Integer practiceId) {
+        WarmupPractice warmupPractice = operationManagementService.getWarmupPractice(practiceId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习讨论区")
+                .action("加载巩固练习讨论")
+                .memo(practiceId.toString());
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(warmupPractice);
+    }
+
+    @RequestMapping(value = "/reply/discuss", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> replyDiscuss(PCLoginUser loginUser,
+                                                            @RequestBody DiscussDto discussDto) {
+        if (discussDto.getComment() == null || discussDto.getComment().length() > 1000) {
+            return WebUtils.result("您提交的讨论字数过长");
+        }
+
+        operationManagementService.discuss(loginUser.getOpenId(), loginUser.getProfileId(),
+                discussDto.getWarmupPracticeId(),
+                discussDto.getComment(), discussDto.getRepliedId());
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习")
+                .action("回复讨论")
+                .memo(discussDto.getWarmupPracticeId().toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
     }
 
 }

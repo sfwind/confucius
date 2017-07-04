@@ -73,20 +73,6 @@ public class RiseOperationController {
         return WebUtils.result(applicationSubmitList);
     }
 
-
-    @RequestMapping("/hot/warmup")
-    public ResponseEntity<Map<String, Object>> getHotPracticeDiscuss(PCLoginUser loginUser) {
-        List<WarmupPractice> warmupPractices = operationManagementService.getLastTwoDayActivePractice();
-
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习讨论区")
-                .action("加载最热的巩固练习");
-        operationLogService.log(operationLog);
-
-        return WebUtils.result(warmupPractices);
-    }
-
     @RequestMapping("/warmup/list/{problemId}")
     public ResponseEntity<Map<String, Object>> getProblemWarmupPractice(PCLoginUser loginUser,
                                                                         @PathVariable Integer problemId) {
@@ -99,64 +85,6 @@ public class RiseOperationController {
         operationLogService.log(operationLog);
 
         return WebUtils.result(warmupPractices);
-    }
-
-    @RequestMapping("/warmup/load/{practiceId}")
-    public ResponseEntity<Map<String, Object>> getPracticeDiscuss(PCLoginUser loginUser,
-                                                                  @PathVariable Integer practiceId) {
-        WarmupPractice warmupPractice = operationManagementService.getWarmupPractice(practiceId);
-
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习讨论区")
-                .action("加载巩固练习讨论")
-                .memo(practiceId.toString());
-        operationLogService.log(operationLog);
-
-        return WebUtils.result(warmupPractice);
-    }
-
-    /**
-     * 删除助教的巩固练习评论
-     */
-    @RequestMapping("/warmup/discuss/del/{discussId}")
-    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
-        Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习练习区")
-                .action("删除巩固练习评论")
-                .memo(discussId.toString());
-        operationLogService.log(operationLog);
-        if(result == 1) {
-            return WebUtils.success();
-        } else if(result == 0) {
-            return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
-        } else {
-            return WebUtils.error("系统异常");
-        }
-    }
-
-
-    @RequestMapping(value = "/reply/discuss", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> replyDiscuss(PCLoginUser loginUser,
-                                                            @RequestBody DiscussDto discussDto) {
-        if (discussDto.getComment() == null || discussDto.getComment().length() > 300) {
-            LOGGER.error("{} 巩固练习讨论字数过长", loginUser.getOpenId());
-            return WebUtils.result("您提交的讨论字数过长");
-        }
-
-        operationManagementService.discuss(loginUser.getOpenId(), loginUser.getProfileId(),
-                discussDto.getWarmupPracticeId(),
-                discussDto.getComment(), discussDto.getRepliedId());
-
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习")
-                .action("回复讨论")
-                .memo(discussDto.getWarmupPracticeId().toString());
-        operationLogService.log(operationLog);
-        return WebUtils.success();
     }
 
     @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
@@ -216,6 +144,26 @@ public class RiseOperationController {
         return WebUtils.result(result);
     }
 
+    /**
+     * 删除助教的巩固练习评论
+     */
+    @RequestMapping("/warmup/discuss/del/{discussId}")
+    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
+        Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习练习区")
+                .action("删除巩固练习评论")
+                .memo(discussId.toString());
+        operationLogService.log(operationLog);
+        if(result == 1) {
+            return WebUtils.success();
+        } else if(result == 0) {
+            return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
+        } else {
+            return WebUtils.error("系统异常");
+        }
+    }
 
     /**
      * 碎片化总任务列表加载

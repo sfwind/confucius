@@ -65,8 +65,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public List<WarmupPractice> getLastTwoDayActivePractice() {
-        List<Integer> warmupPracticeIds = warmupPracticeDiscussDao.loadHotWarmupPracticeDiscussLastNDay(2);
+    public List<WarmupPractice> getLastSixtyDayActivePractice(Page page) {
+        List<Integer> warmupPracticeIds = warmupPracticeDiscussDao.loadHotWarmupPracticeDiscussLastNDay(60, page);
         return warmupPracticeDao.loadPractices(warmupPracticeIds);
     }
 

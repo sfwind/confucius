@@ -22,9 +22,9 @@ public interface OperationManagementService {
     List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page);
 
     /**
-     * 获取48小时内讨论区活跃的问题
+     * 获取60天内讨论区活跃的问题
      */
-    List<WarmupPractice> getLastTwoDayActivePractice();
+    List<WarmupPractice> getLastSixtyDayActivePractice(Page page);
 
     /**
      * 获取巩固练习
