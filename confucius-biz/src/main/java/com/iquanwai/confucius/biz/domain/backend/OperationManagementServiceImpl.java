@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;

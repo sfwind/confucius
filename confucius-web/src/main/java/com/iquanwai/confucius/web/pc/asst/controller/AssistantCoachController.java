@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.pc.backend.dto.DiscussDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RefreshListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -173,7 +174,11 @@ public class AssistantCoachController {
                 .action("加载最热的巩固练习");
         operationLogService.log(operationLog);
 
-        return WebUtils.result(warmupPractices);
+        RefreshListDto<WarmupPractice> refreshListDto = new RefreshListDto<>();
+        refreshListDto.setEnd(page.isLastPage());
+        refreshListDto.setList(warmupPractices);
+
+        return WebUtils.result(refreshListDto);
     }
 
     @RequestMapping("/warmup/load/{practiceId}")
