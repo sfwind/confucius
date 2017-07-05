@@ -326,18 +326,31 @@ public class ConfigUtils {
 	public static String getBizPassword(){
 		return getValue("sms.business.password");
 	}
-	public static String getBizSign(){
-		return getValue("sms.business.sign");
+	public static String getSMSSign(){
+		return getValue("sms.sign");
 	}
-	public static String getSmsCodeTemplate(){
-		return getValue("sms.template.code");
+	public static String getMarketAccount(){
+		return getValue("sms.market.account");
 	}
+
+	public static String getMarketPassword(){
+		return getValue("sms.market.password");
+	}
+
 
 	public static SMSConfig getBizMsgConfig(){
 		SMSConfig smsConfig = new SMSConfig();
 		smsConfig.setAccount(getBizAccount());
 		smsConfig.setPassword(getBizPassword());
-		smsConfig.setSign(getBizSign());
+		smsConfig.setSign(getSMSSign());
+		return smsConfig;
+	}
+
+	public static SMSConfig getMarketMsgConfig(){
+		SMSConfig smsConfig = new SMSConfig();
+		smsConfig.setAccount(getMarketAccount());
+		smsConfig.setPassword(getMarketPassword());
+		smsConfig.setSign(getSMSSign());
 		return smsConfig;
 	}
 

@@ -43,44 +43,54 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     private TemplateMessageService templateMessageService;
 
     @Override
-    public Pair<Integer, Integer> checkSendAble(ShortMessage shortMessage) {
+    public Pair<Integer, String> checkSendAble(ShortMessage shortMessage) {
         // 1.profileId查询
         Profile profile = accountService.getProfile(shortMessage.getProfileId());
         if (profile == null) {
             // profileId异常
-            return new MutablePair<>(-201, 0);
+            return new MutablePair<>(-201, "发送失败，请联系管理员");
         }
 
         // 2.发送条数限制
         SendLimit limit = shortMessageRedisDao.getUserSendLimit(shortMessage.getProfileId());
         if (limit.getMinSend() >= ConfigUtils.getMinSendLimit()) {
-            return new MutablePair<>(-1, limit.getMinSend());
+            return new MutablePair<>(-1, "操作过于频繁，请稍后再试");
         }
         if (limit.getHourSend() >= ConfigUtils.getHourSendLimit()) {
-            return new MutablePair<>(-2, limit.getHourSend());
+            return new MutablePair<>(-2, "操作过于频繁，请稍后再试");
         }
         if (limit.getDaySend() >= ConfigUtils.getDaySendLimit()) {
-            return new MutablePair<>(-3, limit.getDaySend());
+            return new MutablePair<>(-3, "操作过于频繁，请稍后再试");
         }
+
 //        // 3.电话号码数量检查
 //        if (shortMessage.getPhones() == null || shortMessage.getPhones().size() > MAX_PHONE_COUNT) {
 //            return new MutablePair<>(-202, MAX_PHONE_COUNT);
 //        }
         // 4.文字内容检查
-        String content = CommonUtils.placeholderReplace(shortMessage.getContent(), shortMessage.getReplace());
+        String content = shortMessage.getContent();
         if (content.length() > MAX_CONTENT_SIZE) {
-            return new MutablePair<>(-203, MAX_CONTENT_SIZE);
+            return new MutablePair<>(-203, "短信内容过长，请进行精简");
         }
         // 通过检查
-        return new MutablePair<>(1, 0);
+        return new MutablePair<>(1, "ok");
     }
-
 
     @Override
     public SMSSendResult sendMessage(ShortMessage shortMessage) {
         // 初始化请求参数
-        SMSConfig config = ConfigUtils.getBizMsgConfig();
-        String content = CommonUtils.placeholderReplace(shortMessage.getContent(), shortMessage.getReplace());
+        SMSConfig config = null;
+        if (ShortMessage.MARKETING.equals(shortMessage.getType())) {
+            // 营销短信
+            config = ConfigUtils.getMarketMsgConfig();
+        } else {
+            // 默认行业短信
+            config = ConfigUtils.getBizMsgConfig();
+            // 如果是null或者其他乱七八糟的type或者本身即是BUSINESS，默认设置为BUSINESS
+            shortMessage.setType(ShortMessage.BUSINESS);
+        }
+
+        String content = shortMessage.getContent();
         String phone = shortMessage.getPhone();
         ShortMessageSubmit shortMessageSubmit = new ShortMessageSubmit();
         shortMessageSubmit.setAccount(config.getAccount());
@@ -96,6 +106,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         // 解析请求结果
         SMSSendResult smsSendResult = JSONObject.parseObject(post, SMSSendResult.class);
         logger.info("result:{}", smsSendResult);
+        // 填充请求结果
         if (smsSendResult != null) {
             shortMessageSubmit.setResult(smsSendResult.getResult());
             shortMessageSubmit.setDescription(smsSendResult.getDesc());
@@ -105,17 +116,30 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         if (shortMessageSubmit.getSendTime() == null) {
             shortMessageSubmit.setSendTime(new Date());
         }
+        // 设置短信类型
+        shortMessageSubmit.setType(shortMessage.getType());
         shortMessageSubmitDao.insert(shortMessageSubmit);
 
         if (smsSendResult == null || !"0".equals(smsSendResult.getResult())) {
-            List<String> alarmList = ConfigUtils.getAlarmList();
-            alarmList.forEach(openid->{
-                this.SMSAlarm(openid,
-                        shortMessage.getNickname(),
-                        shortMessageSubmit.getMsgId(),
-                        smsSendResult != null ? smsSendResult.getResult() : "空",
-                        smsSendResult != null ? smsSendResult.getDesc() : "空");
-            });
+            if (smsSendResult == null ||
+                    // 短信内容超过最大限制
+                    (!"6".equals(smsSendResult.getResult()) &&
+                            // 定时发送时间格式错误
+                            !"8".equals(smsSendResult.getResult()) &&
+                            // 手机号码为空
+                            !"14".equals(smsSendResult.getResult()) &&
+                            // 短信内容为空
+                            !"21".equals(smsSendResult.getResult()))) {
+                // 其他情况发送报警消息
+                List<String> alarmList = ConfigUtils.getAlarmList();
+                alarmList.forEach(openid -> {
+                    this.SMSAlarm(openid,
+                            shortMessage.getNickname(),
+                            shortMessageSubmit.getMsgId(),
+                            smsSendResult != null ? smsSendResult.getResult() : "空",
+                            smsSendResult != null ? smsSendResult.getDesc() : "空");
+                });
+            }
         }
         return smsSendResult;
     }

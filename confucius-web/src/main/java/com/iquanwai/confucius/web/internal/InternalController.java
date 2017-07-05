@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.web.account.dto.SMSDto;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,25 +51,37 @@ public class InternalController {
             shortMessage.setProfileId(smsDto.getProfileId());
             shortMessage.setContent(smsDto.getContent());
             shortMessage.setPhone(smsDto.getPhone());
-            shortMessage.setReplace(smsDto.getReplace());
+            shortMessage.setType(smsDto.getType());
 
             // 检查发送条数限制
-            Pair<Integer, Integer> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
+            Pair<Integer, String> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
             if (checkSendLimit.getLeft() < 0) {
                 logger.error("发送参数异常，无法发送{}:{}", checkSendLimit.getLeft(), checkSendLimit.getRight());
                 // 不可以发送
-                return WebUtils.error(checkSendLimit.getLeft(), checkSendLimit.getRight());
+                SMSSendResult temp = new SMSSendResult();
+                temp.setResult(checkSendLimit.getLeft().toString());
+                temp.setDesc(checkSendLimit.getRight());
+                return WebUtils.error(temp);
             }
 
             SMSSendResult result = shortMessageService.sendMessage(shortMessage);
-            if (result != null && "0".equals(result.getResult())) {
+            if (result != null && "0".equals(result.getResult()) && StringUtils.isBlank(result.getFailPhones())) {
+                // 提交成功，并且没有发送失败的短信
                 shortMessageService.raiseSendCount(smsDto.getProfileId());
                 return WebUtils.result(result);
             } else {
-                return WebUtils.error(result);
+                if (result != null && "0".equals(result.getResult()) && !StringUtils.isBlank(result.getFailPhones())) {
+                    result.setDesc("发送失败，手机号码异常");
+                    return WebUtils.error(result);
+                } else {
+                    return WebUtils.error(result);
+                }
             }
         } else {
-            return WebUtils.error("非内网请求，禁止访问");
+            SMSSendResult smsSendResult = new SMSSendResult();
+            smsSendResult.setResult("-1");
+            smsSendResult.setDesc("非内网请求，禁止访问");
+            return WebUtils.error(smsSendResult);
         }
     }
 }

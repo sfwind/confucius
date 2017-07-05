@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 /**
  * Created by nethunder on 2017/6/15.
  */
@@ -17,6 +15,10 @@ public class ShortMessage {
     private String nickname; // 进行发送操作的nickname
     private String phone;
     private String content;
-    private Map<String,String> replace;
+    private Integer type; // 短信类型 1.非营销  2.营销
+
+
+    public static final Integer MARKETING = 2;
+    public static final Integer BUSINESS = 1;
 
 }

@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -66,7 +67,6 @@ public class LoginUserService {
         pcLoginUserMap.put(sessionId, temp);
     }
 
-
     /**
      * 根据sessionId判断用户是否登录
      * @param sessionId SessionId
@@ -86,6 +86,30 @@ public class LoginUserService {
         } else {
             return false;
         }
+    }
+
+    /**
+     * 用户登出，删除登录缓存数据
+     * @param sessionId 存储的 cookie 的值
+     */
+    public void logout(String sessionId) {
+        pcLoginUserMap.remove(sessionId);
+    }
+
+    /**
+     * 调用微信接口查看当前扫码用户是否已经关注
+     * @return true: 用户已关注 false: 用户未关注
+     */
+    public boolean userIsFollowing(PCLoginUser loginUser) {
+        Account account = null;
+        try {
+            account = accountService.getAccount(loginUser.getOpenId(), true);
+        } catch(NotFollowingException e) {
+            if(loginUser.getWeixin() != null) {
+                logger.info(loginUser.getWeixin().getWeixinName() + "未关注");
+            }
+        }
+        return account != null;
     }
 
     /**

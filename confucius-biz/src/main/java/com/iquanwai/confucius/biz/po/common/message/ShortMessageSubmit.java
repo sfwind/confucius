@@ -21,6 +21,7 @@ public class ShortMessageSubmit {
     private String result;
     private String description;
     private String failPhones;
+    private Integer type;
 
 
     private String account;
