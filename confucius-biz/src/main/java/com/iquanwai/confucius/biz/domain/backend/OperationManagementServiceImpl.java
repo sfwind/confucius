@@ -41,6 +41,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private CommentDao commentDao;
     @Autowired
     private UserRoleDao userRoleDao;
+    @Autowired
+    private ProblemDao problemDao;
 
     //每个练习的精华上限
     private static final int HIGHLIGHT_LIMIT = 3;
@@ -66,7 +68,15 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Override
     public List<WarmupPractice> getLastSixtyDayActivePractice(Page page) {
         List<Integer> warmupPracticeIds = warmupPracticeDiscussDao.loadHotWarmupPracticeDiscussLastNDay(60, page);
-        return warmupPracticeDao.loadPractices(warmupPracticeIds);
+        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPractices(warmupPracticeIds);
+
+        warmupPractices.forEach(warmupPractice -> {
+            Problem problem = problemDao.load(Problem.class, warmupPractice.getProblemId());
+            if(problem != null){
+                warmupPractice.setProblemName(problem.getProblem());
+            }
+        });
+        return warmupPractices;
     }
 
     @Override
