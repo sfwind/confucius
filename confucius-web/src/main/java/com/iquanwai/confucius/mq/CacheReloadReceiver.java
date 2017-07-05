@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.mq;
+package com.iquanwai.confucius.mq;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberCountRepo;

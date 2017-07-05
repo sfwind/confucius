@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -78,7 +79,7 @@ public class AccountController {
             Assert.notNull(sessionId, "SessionId不能为空");
             Assert.isTrue(LoginEndpoint.isValidSession(sessionId), "该SessionId无效");
             // 判断sessionId是否有效
-            if (status.equals(Constants.Status.OK)) {
+            if(status.equals(Constants.Status.OK)) {
                 LoginUser loginUser = loginCheckDto.getLoginUser();
                 Assert.notNull(loginUser, "用户信息不能为空");
                 // 下面的数据返回前端
@@ -89,7 +90,7 @@ public class AccountController {
                 Role role = getRole(loginUser.getOpenId());
                 accountDto.setRole(role.getId());
                 accountDto.setKey(sessionId);
-                if (role.getId().equals(Role.STRANGE)) {
+                if(role.getId().equals(Role.STRANGE)) {
                     // 没有正在就读的班级
                     this.handlerLoginSocket(sessionId, LoginType.PERMISSION_DENIED, accountDto);
                     return WebUtils.error("您还未报名课程，关注圈外了解更多!");
@@ -109,13 +110,13 @@ public class AccountController {
             } else {
                 // 校验失败,超时的话刷新二维码
                 // TODO 就算校验失败，也应该是能拿到用户信息的
-                if (ErrorConstants.SESSION_TIME_OUT == error) {
+                if(ErrorConstants.SESSION_TIME_OUT == error) {
                     // 扫二维码超时，通知socket更新
                     logger.error("刷新二维码,异常码:{}", error);
                     LoginEndpoint.refreshQRCode(sessionId);
                     return WebUtils.success();
-                } else if (ErrorConstants.NOT_FOLLOW == error) {
-                    logger.error("未关注公众号,异常码:{}",error);
+                } else if(ErrorConstants.NOT_FOLLOW == error) {
+                    logger.error("未关注公众号,异常码:{}", error);
                     LoginEndpoint.jumpServerCode(sessionId);
                     return WebUtils.success();
                 } else {
@@ -124,33 +125,48 @@ public class AccountController {
                     return WebUtils.success();
                 }
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             logger.error("pc登陆结果处理error", e);
             return WebUtils.error(e.getLocalizedMessage());
         }
     }
 
-    @RequestMapping( value = "/login",method = RequestMethod.GET)
-    public void login(HttpServletRequest request, HttpServletResponse response,@ModelAttribute AccountDto accountDto){
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public void login(HttpServletRequest request, HttpServletResponse response, @ModelAttribute AccountDto accountDto) {
         Assert.notNull(accountDto);
         String key = accountDto.getKey();
-        if (key != null) {
-            if (loginUserService.isLogin(key)) {
+        if(key != null) {
+            if(loginUserService.isLogin(key)) {
                 CookieUtils.addCookie(LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME,
                         key, OAuthService.SEVEN_DAYS, response);
             }
         }
         try {
             response.sendRedirect(accountDto.getCallbackUrl());
-        } catch (IOException e) {
-            logger.error("重定向失败,{}",accountDto);
+        } catch(IOException e) {
+            logger.error("重定向失败,{}", accountDto);
         }
 
     }
 
+    @RequestMapping(value = "/check/follow")
+    public ResponseEntity<Map<String, Object>> checkIsFollow(HttpServletRequest request, PCLoginUser loginUser) {
+        String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
+        if(cookie != null) {
+            boolean isFollowing = loginUserService.userIsFollowing(loginUser);
+            if(isFollowing) {
+                return WebUtils.success();
+            } else {
+                return WebUtils.error(403, "当前用户尚未关注服务号");
+            }
+        } else {
+            return WebUtils.error(401, "当前用户未登录");
+        }
+    }
+
     private Role getRole(String openid) {
         Role role = permissionService.getRole(openid);
-        if(role!=null){
+        if(role != null) {
             return role;
         }
 
@@ -158,25 +174,24 @@ public class AccountController {
         List<ClassMember> classMembers = courseProgressService.loadActiveCourse(openid);
         List<ImprovementPlan> plans = planService.loadUserPlans(openid);
         //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
-        if (classMembers.isEmpty() && plans.isEmpty()){
+        if(classMembers.isEmpty() && plans.isEmpty()) {
             return Role.stranger();
-        }else {
+        } else {
             return Role.student();
         }
     }
 
-
     @RequestMapping("/get")
     public ResponseEntity<Map<String, Object>> getAccount(PCLoginUser pcLoginUser) {
-        try{
-            Assert.notNull(pcLoginUser,"用户不能为空");
+        try {
+            Assert.notNull(pcLoginUser, "用户不能为空");
             AccountDto accountDto = new AccountDto();
             accountDto.setWeixinName(pcLoginUser.getWeixin().getWeixinName());
             accountDto.setHeadimgUrl(pcLoginUser.getWeixin().getHeadimgUrl());
             accountDto.setRole(pcLoginUser.getRole());
             return WebUtils.result(accountDto);
-        } catch (Exception err){
-            logger.error("获取用户信息失败",err.getLocalizedMessage());
+        } catch(Exception err) {
+            logger.error("获取用户信息失败", err.getLocalizedMessage());
             return WebUtils.error("获取用户信息失败");
         }
     }
@@ -193,7 +208,7 @@ public class AccountController {
         Map<String, Object> map = Maps.newHashMap();
         map.put("type", type);
         map.put("data", data);
-        LoginEndpoint.sendMessage(sessionId,CommonUtils.mapToJson(map));
+        LoginEndpoint.sendMessage(sessionId, CommonUtils.mapToJson(map));
     }
 
     /**
