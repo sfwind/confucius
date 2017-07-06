@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -57,14 +58,12 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
     }
 
 
-    public List<Integer> loadHotWarmupPracticeDiscussLastNDay(int day){
+    public List<Integer> loadHotWarmupPracticeDiscussLastNDay(int day, Page page){
         QueryRunner run = new QueryRunner(getDataSource());
-        //上限100个问题
-        int limit = 100;
         Date date = DateUtils.beforeDays(new Date(), day);
         ResultSetHandler<List<Integer>> h = new ColumnListHandler<>("WarmupPracticeId");
         String sql = "SELECT WarmupPracticeId FROM WarmupPracticeDiscuss where AddTime > ? group by WarmupPracticeId " +
-                "order by Count(*) desc limit "+ limit;
+                "order by Count(*) desc limit "+ page.getOffset() + "," + page.getLimit();
         try {
             return run.query(sql, h, date);
         } catch (SQLException e) {

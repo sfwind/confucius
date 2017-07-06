@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -42,6 +41,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private CommentDao commentDao;
     @Autowired
     private UserRoleDao userRoleDao;
+    @Autowired
+    private ProblemDao problemDao;
 
     //每个练习的精华上限
     private static final int HIGHLIGHT_LIMIT = 3;
@@ -65,9 +66,17 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public List<WarmupPractice> getLastTwoDayActivePractice() {
-        List<Integer> warmupPracticeIds = warmupPracticeDiscussDao.loadHotWarmupPracticeDiscussLastNDay(2);
-        return warmupPracticeDao.loadPractices(warmupPracticeIds);
+    public List<WarmupPractice> getLastSixtyDayActivePractice(Page page) {
+        List<Integer> warmupPracticeIds = warmupPracticeDiscussDao.loadHotWarmupPracticeDiscussLastNDay(60, page);
+        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPractices(warmupPracticeIds);
+
+        warmupPractices.forEach(warmupPractice -> {
+            Problem problem = problemDao.load(Problem.class, warmupPractice.getProblemId());
+            if(problem != null){
+                warmupPractice.setProblemName(problem.getProblem());
+            }
+        });
+        return warmupPractices;
     }
 
     @Override
