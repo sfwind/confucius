@@ -30,10 +30,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String openid = XMLHelper.getNode(document, FROM_USER);
         String content = XMLHelper.getNode(document, CONTENT);
         TextMessage textMessage = new TextMessage();
-        textMessage.content = content;
+        textMessage.content = XMLHelper.appendCDATA(content);
         textMessage.createTime = System.currentTimeMillis()/1000;
-        textMessage.fromUserName = ConfigUtils.getAppid();
-        textMessage.toUserName = openid;
+        textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
+        textMessage.toUserName = XMLHelper.appendCDATA(openid);
         String xml = XMLHelper.createXML(textMessage);
         return xml;
     }
