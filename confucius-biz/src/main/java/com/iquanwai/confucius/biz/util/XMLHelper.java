@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.util;
 
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
@@ -97,5 +99,15 @@ public class XMLHelper {
         }
 
         return null;
+    }
+
+    public static String getNode(Document document, String nodeName) {
+        if (document == null) {
+            return null;
+        }
+        Element element = document.getDocumentElement();
+        NodeList list = element.getElementsByTagName(nodeName);
+        String nodeValue = list.item(0).getTextContent();
+        return nodeValue;
     }
 }

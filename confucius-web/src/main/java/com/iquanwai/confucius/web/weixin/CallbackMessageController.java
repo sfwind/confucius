@@ -1,7 +1,5 @@
 package com.iquanwai.confucius.web.weixin;
 
-import com.iquanwai.confucius.biz.domain.weixin.aes.Prpcrypt;
-import com.iquanwai.confucius.biz.domain.weixin.aes.Result;
 import com.iquanwai.confucius.biz.domain.weixin.message.CallbackMessageService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
@@ -119,7 +117,7 @@ public class CallbackMessageController {
 //            String decryptedXml = result.getResult();
             LOGGER.info("xml is \n" + xml);
 //            Document decryptedDocument = XMLHelper.convertStringToDocument(decryptedXml);
-            callbackMessageService.handleCallback(document);
+            return callbackMessageService.handleCallback(document);
         } catch (Exception e) {
             LOGGER.error("received user message failed", e);
         }
