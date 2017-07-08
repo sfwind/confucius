@@ -13,6 +13,7 @@ import org.w3c.dom.Document;
 public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String MESSAGE_TYPE = "MsgType";
     private static final String FROM_USER = "FromUserName";
+    private static final String TO_USER = "ToUserName";
     private static final String CONTENT = "Content";
 
     private static final String TEXT = "text";
@@ -27,11 +28,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private String handleText(Document document){
         String openid = XMLHelper.getNode(document, FROM_USER);
+        String toUser = XMLHelper.getNode(document, TO_USER);
         String content = XMLHelper.getNode(document, CONTENT);
         TextMessage textMessage = new TextMessage();
         textMessage.content = XMLHelper.appendCDATA(content);
         textMessage.createTime = System.currentTimeMillis()/1000;
-        textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
+        textMessage.fromUserName = XMLHelper.appendCDATA(toUser);
         textMessage.toUserName = XMLHelper.appendCDATA(openid);
         return XMLHelper.createXML(textMessage);
     }
