@@ -6,8 +6,6 @@ import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
-import java.util.Date;
-
 /**
  * Created by justin on 17/7/6.
  */
@@ -21,7 +19,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private static final String TEXT = "text";
     @Override
-    public String handleCallback(Document document) throws MessageException{
+    public Message handleCallback(Document document) throws MessageException{
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
         if(messageType.equals(TEXT)){
             return handleText(document);
@@ -29,19 +27,19 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         throw new MessageException();
     }
 
-    private String handleText(Document document){
+    private Message handleText(Document document){
         String openid = XMLHelper.getNode(document, FROM_USER);
         String content = XMLHelper.getNode(document, CONTENT);
-        TextMessage textMessage = new TextMessage();
+        Message textMessage = new Message();
         textMessage.content = XMLHelper.appendCDATA(content);
-        textMessage.createTime = new Date().getTime();
+        textMessage.createTime = System.currentTimeMillis()/1000;
         textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
         textMessage.toUserName = XMLHelper.appendCDATA(openid);
-        return XMLHelper.createXML(textMessage);
+        return textMessage;
     }
 
     public static void main(String[] args) {
-        TextMessage textMessage = new TextMessage();
+        Message textMessage = new Message();
         textMessage.content = XMLHelper.appendCDATA("丁志君");
         textMessage.createTime = System.currentTimeMillis()/1000;
         textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());

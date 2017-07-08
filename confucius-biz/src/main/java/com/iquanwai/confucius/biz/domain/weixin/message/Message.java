@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.message;
 
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -10,7 +11,8 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name="xml")
 @Setter
-public class TextMessage {
+@ToString
+public class Message {
     @XmlElement(name="ToUserName")
     public String toUserName;
     @XmlElement(name="FromUserName")
