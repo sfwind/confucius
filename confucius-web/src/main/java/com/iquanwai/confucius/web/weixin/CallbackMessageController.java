@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.weixin.message.CallbackMessageService;
-import com.iquanwai.confucius.biz.exception.MessageException;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.apache.commons.io.IOUtils;

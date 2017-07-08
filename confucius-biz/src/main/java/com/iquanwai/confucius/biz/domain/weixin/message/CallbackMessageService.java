@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.domain.weixin.message;
 
-import com.iquanwai.confucius.biz.exception.MessageException;
 import org.w3c.dom.Document;
 
 /**

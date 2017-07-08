@@ -1,7 +1,8 @@
 package com.iquanwai.confucius.biz.domain.weixin.message;
 
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.exception.MessageException;
+import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
+import com.iquanwai.confucius.biz.domain.weixin.message.customer.MessageType;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.slf4j.Logger;
@@ -23,6 +24,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String EVENT_KEY = "EventKey";
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private CustomerMessageService customerMessageService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -95,6 +98,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             } catch (NotFollowingException e) {
                 // ignore
             }
+            customerMessageService.sendCustomerMessage(openid, "你好,我是客服", MessageType.TEXT);
             return "你好,欢迎关注";
         } else if (event.equals(EVENT_UNSUBSCRIBE)) {
             accountService.unfollow(openid);
