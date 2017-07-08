@@ -1,12 +1,11 @@
 package com.iquanwai.confucius.biz.domain.weixin.qrcode;
 
 import com.google.gson.Gson;
-import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 /**
  * Created by justin on 16/8/12.
@@ -16,16 +15,24 @@ public class QRCodeServiceImpl implements QRCodeService {
     @Autowired
     private RestfulHelper restfulHelper;
 
-    public String generateQRCode(String scene, int expire_seconds) {
-        QRRequest qrRequest = new QRRequest(scene, expire_seconds);
-        String json = new Gson().toJson(qrRequest);
-        String body = restfulHelper.post(GEN_QRCODE_URL, json);
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
-        Map<String, Object> result = CommonUtils.jsonToMap(body);
-        return (String)result.get("url");
+    public QRResponse generateTemporaryQRCode(String scene, int expire_seconds) {
+        QRTemporaryRequest qrRequest = new QRTemporaryRequest(scene, expire_seconds);
+        String json = new Gson().toJson(qrRequest);
+        return generate(json);
     }
 
-    public String generateQRCode(String scene) {
-        return generateQRCode(scene, DEFAULT_EXPIRED_TIME);
+    public QRResponse generatePermanentQRCode(String scene) {
+        QRPermanentRequest qrRequest = new QRPermanentRequest(scene);
+        String json = new Gson().toJson(qrRequest);
+        return generate(json);
+    }
+
+    private QRResponse generate(String json) {
+        String body = restfulHelper.post(GEN_QRCODE_URL, json);
+        System.out.println("return message " + body);
+        Gson gson = new Gson();
+        return gson.fromJson(body, QRResponse.class);
     }
 }

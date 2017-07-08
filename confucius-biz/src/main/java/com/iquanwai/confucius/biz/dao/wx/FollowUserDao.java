@@ -70,7 +70,7 @@ public class FollowUserDao extends DBUtil {
 
     public void updateMeta(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String updateSql = "Update FollowUsers Set Nickname=?, Headimgurl=?, UnionId = ? where Openid=?";
+        String updateSql = "Update FollowUsers Set Nickname=?, Headimgurl=?, UnionId=?, Subscribe=1 where Openid=?";
         try {
             run.update(updateSql,
                     account.getNickname(), account.getHeadimgurl(), account.getUnionid(), account.getOpenid());
@@ -90,6 +90,16 @@ public class FollowUserDao extends DBUtil {
                     account.getWorkingLife(), account.getRealName(),
                     account.getCity(), account.getProvince(),
                     account.getOpenid());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void unsubscribe(String openid) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        String updateSql = "Update FollowUsers Set Subscribe=0 where Openid=?";
+        try {
+            run.update(updateSql, openid);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

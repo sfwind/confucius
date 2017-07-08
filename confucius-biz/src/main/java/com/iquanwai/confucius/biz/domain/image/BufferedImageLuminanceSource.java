@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.weixin.qrcode;
+package com.iquanwai.confucius.biz.domain.image;
 
 
 import com.google.zxing.LuminanceSource;
