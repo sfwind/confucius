@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -78,7 +79,6 @@ public class CallbackMessageController {
             LOGGER.error("NoSuchAlgorithmException", e);
         }
 
-
         return INVALID_SIGNATURE;
     }
 
@@ -99,26 +99,26 @@ public class CallbackMessageController {
             LOGGER.info("xml is \n" + xml);
             String returnXml = callbackMessageService.handleCallback(document);
             LOGGER.info("returnXml is \n" + returnXml);
-            Writer writer = response.getWriter();
+            PrintWriter writer = response.getWriter();
             try {
                 response.setHeader("Content-Type", "application/xml");
-                writer.write(returnXml);
+                writer.print(returnXml);
                 response.flushBuffer();
             } catch (IOException e1) {
                 e1.printStackTrace();
-            }finally {
+            } finally {
                 IOUtils.closeQuietly(writer);
             }
-        } catch (MessageException e){
-            Writer writer = null;
+        } catch (MessageException e) {
+            PrintWriter writer = null;
             try {
                 writer = response.getWriter();
                 response.setHeader("Content-Type", "text/plain");
-                writer.write(SUCCESS);
+                writer.print(SUCCESS);
                 response.flushBuffer();
             } catch (IOException e1) {
                 e1.printStackTrace();
-            }finally {
+            } finally {
                 IOUtils.closeQuietly(writer);
             }
         } catch (Exception e) {
