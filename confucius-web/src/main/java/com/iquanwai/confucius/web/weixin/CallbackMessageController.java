@@ -103,8 +103,9 @@ public class CallbackMessageController {
             LOGGER.info("returnXml is \n" + returnXml);
             Writer writer = response.getWriter();
             try {
-                IOUtils.write(returnXml, writer);
-                writer.flush();
+                response.setHeader("Content-Type", "application/xml");
+                writer.write(returnXml);
+                response.flushBuffer();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }finally {
@@ -114,8 +115,9 @@ public class CallbackMessageController {
             Writer writer = null;
             try {
                 writer = response.getWriter();
+                response.setHeader("Content-Type", "text/plain");
                 writer.write(SUCCESS);
-                writer.flush();
+                response.flushBuffer();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }finally {
