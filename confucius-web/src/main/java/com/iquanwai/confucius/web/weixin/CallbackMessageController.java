@@ -72,6 +72,7 @@ public class CallbackMessageController {
             byte[] codedBytes = sha1.digest();
             //将加密后的字节数组转换成字符串
             String codedString = new BigInteger(1, codedBytes).toString(16);
+            LOGGER.info("codedString is " + codedString);
             //将加密的结果与请求参数中的signature比对，如果相同，原样返回echostr参数内容
             if (codedString.equals(signature)) {
                 Result result;
