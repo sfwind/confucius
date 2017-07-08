@@ -14,6 +14,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.aes;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -191,7 +192,7 @@ public class Prpcrypt {
         }
 
         // 生成安全签名
-        if (timestamp == "") {
+        if (StringUtils.isEmpty(timestamp)) {
             timestamp = Long.toString(System.currentTimeMillis());
         }
 

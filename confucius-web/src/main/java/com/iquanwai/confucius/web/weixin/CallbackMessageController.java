@@ -39,12 +39,14 @@ public class CallbackMessageController {
     @Autowired
     private CallbackMessageService callbackMessageService;
 
+
+
     @RequestMapping(value = "/message", method = RequestMethod.GET)
     @ResponseBody
     public String openCallbackMode(HttpServletRequest request, HttpServletResponse response) {
 
         //获取请求参数
-        String signature = request.getParameter("msg_signature");
+        String signature = request.getParameter("signature");
         String timestamp = request.getParameter("timestamp");
         String nonce = request.getParameter("nonce");
         String echostring = request.getParameter("echostr");
@@ -74,7 +76,6 @@ public class CallbackMessageController {
             if (codedString.equals(signature)) {
                 Result result;
                 try {
-//                echostring = aesManager.decrypt(echostring);
                     LOGGER.info("aeskey is " + ConfigUtils.getEncodingAESKey());
                     Prpcrypt crypt = new Prpcrypt(ConfigUtils.getEncodingAESKey());
                     result = crypt.decrypt(echostring, "");
