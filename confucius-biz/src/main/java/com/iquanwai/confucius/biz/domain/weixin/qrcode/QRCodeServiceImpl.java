@@ -17,7 +17,10 @@ public class QRCodeServiceImpl implements QRCodeService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public QRResponse generateTemporaryQRCode(String scene, int expire_seconds) {
+    public QRResponse generateTemporaryQRCode(String scene, Integer expire_seconds) {
+        if(expire_seconds==null){
+            expire_seconds = DEFAULT_EXPIRED_TIME;
+        }
         QRTemporaryRequest qrRequest = new QRTemporaryRequest(scene, expire_seconds);
         String json = new Gson().toJson(qrRequest);
         return generate(json);
