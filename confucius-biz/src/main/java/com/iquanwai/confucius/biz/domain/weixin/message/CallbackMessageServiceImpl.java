@@ -1,15 +1,18 @@
 package com.iquanwai.confucius.biz.domain.weixin.message;
 
+import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
-import com.iquanwai.confucius.biz.domain.weixin.message.customer.MessageType;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
+import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
+
+import java.util.List;
 
 /**
  * Created by justin on 17/7/6.
@@ -26,6 +29,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private AccountService accountService;
     @Autowired
     private CustomerMessageService customerMessageService;
+    @Autowired
+    private SubscribeMessageDao subscribeMessageDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -57,7 +62,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String toUser = XMLHelper.getNode(document, TO_USER);
         String content = XMLHelper.getNode(document, CONTENT);
         String replyMessage = messageReply(content, openid);
-        return bulidReplyMessage(openid, toUser, replyMessage);
+        return bulidTextReplyMessage(openid, toUser, replyMessage);
     }
 
     private String handleEvent(Document document) {
@@ -65,16 +70,15 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String toUser = XMLHelper.getNode(document, TO_USER);
         String event = XMLHelper.getNode(document, EVENT);
         String eventKey = XMLHelper.getNode(document, EVENT_KEY);
-        String replyMessage = eventReply(event, eventKey, openid);
-        return bulidReplyMessage(openid, toUser, replyMessage);
+        return eventReply(event, eventKey, openid, toUser);
     }
 
-    private String bulidReplyMessage(String openid, String toUser, String replyMessage) {
+    private String bulidTextReplyMessage(String openid, String wxid, String replyMessage) {
         if (replyMessage != null) {
             TextMessage textMessage = new TextMessage();
             textMessage.content = XMLHelper.appendCDATA(replyMessage);
             textMessage.createTime = System.currentTimeMillis() / 1000;
-            textMessage.fromUserName = XMLHelper.appendCDATA(toUser);
+            textMessage.fromUserName = XMLHelper.appendCDATA(wxid);
             textMessage.toUserName = XMLHelper.appendCDATA(openid);
             return XMLHelper.createXML(textMessage);
         }
@@ -87,7 +91,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         return message;
     }
 
-    private String eventReply(String event, String eventKey, String openid) {
+    private String eventReply(String event, String eventKey, String openid, String wxid) {
         if (event.equals(EVENT_SUBSCRIBE)) {
             if (eventKey != null) {
                 logger.info("eventkey is {}", eventKey);
@@ -98,7 +102,15 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             } catch (NotFollowingException e) {
                 // ignore
             }
-            customerMessageService.sendCustomerMessage(openid, "你好,我是客服", MessageType.TEXT);
+            List<SubscribeMessage> subscribeMessages = subscribeMessageDao.loadAllMessages();
+            SubscribeMessage lastOne = subscribeMessages.remove(subscribeMessages.size()-1);
+            subscribeMessages.forEach(subscribeMessage -> {
+                customerMessageService.sendCustomerMessage(openid,
+                        subscribeMessage.getMessage(), subscribeMessage.getType());
+            });
+            if(CustomerMessageService.TEXT.equals(lastOne.getType())){
+                return bulidTextReplyMessage(openid, wxid, lastOne.getMessage());
+            }
             return "你好,欢迎关注";
         } else if (event.equals(EVENT_UNSUBSCRIBE)) {
             accountService.unfollow(openid);

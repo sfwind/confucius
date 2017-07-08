@@ -18,18 +18,18 @@ public class CustomerMessageServiceImpl implements CustomerMessageService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public void sendCustomerMessage(String openid, String message, MessageType type) {
-        if (type.equals(MessageType.TEXT)) {
+    public void sendCustomerMessage(String openid, String message, Integer type) {
+        if (TEXT.equals(type)) {
             TextCustomerMessage customerMessage = new TextCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
             restfulHelper.post(SEND_CUSTOMER_MESSAGE_URL, json);
-        } else if(type.equals(MessageType.IMAGE)){
+        } else if(IMAGE.equals(type)){
             ImageCustomerMessage customerMessage = new ImageCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
             restfulHelper.post(SEND_CUSTOMER_MESSAGE_URL, json);
-        } else if(type.equals(MessageType.VOICE)){
+        } else if(VOICE.equals(type)){
             VoiceCustomerMessage customerMessage = new VoiceCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
