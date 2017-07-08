@@ -104,6 +104,7 @@ public class CallbackMessageController {
             Writer writer = response.getWriter();
             try {
                 IOUtils.write(returnXml, writer);
+                writer.flush();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }finally {
@@ -114,6 +115,7 @@ public class CallbackMessageController {
             try {
                 writer = response.getWriter();
                 writer.write(SUCCESS);
+                writer.flush();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }finally {
