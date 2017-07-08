@@ -39,8 +39,6 @@ public class CallbackMessageController {
     @Autowired
     private CallbackMessageService callbackMessageService;
 
-
-
     @RequestMapping(value = "/message", method = RequestMethod.GET)
     @ResponseBody
     public Long openCallbackMode(HttpServletRequest request, HttpServletResponse response) {

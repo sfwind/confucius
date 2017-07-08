@@ -21,9 +21,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     @Override
     public String handleCallback(Document document) throws MessageException{
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
-        if(messageType.equals(TEXT)){
-            return handleText(document);
-        }
+//        if(messageType.equals(TEXT)){
+//            return handleText(document);
+//        }
         throw new MessageException();
     }
 
