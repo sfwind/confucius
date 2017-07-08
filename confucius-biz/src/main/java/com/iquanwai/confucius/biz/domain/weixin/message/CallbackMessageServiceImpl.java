@@ -30,12 +30,14 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String EVENT_SUBSCRIBE = "subscribe";
     //取关事件
     private static final String EVENT_UNSUBSCRIBE = "unsubscribe";
+    //扫码关注事件
+    private static final String EVENT_SCAN = "SCAN";
 
     private static final String TYPE_TEXT = "text";
     private static final String TYPE_EVENT = "event";
 
     @Override
-    public String handleCallback(Document document) throws MessageException {
+    public String handleCallback(Document document) {
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
         //处理文字消息
         if (messageType.equals(TYPE_TEXT)) {
@@ -44,7 +46,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         } else if (messageType.equals(TYPE_EVENT)) {
             return handleEvent(document);
         }
-        throw new MessageException();
+        return null;
     }
 
     private String handleText(Document document) {
@@ -96,6 +98,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             return "你好,欢迎关注";
         } else if (event.equals(EVENT_UNSUBSCRIBE)) {
             accountService.unfollow(openid);
+        } else if (event.equals(EVENT_SCAN)){
+            return "你好,欢迎扫码";
         }
 
         return null;

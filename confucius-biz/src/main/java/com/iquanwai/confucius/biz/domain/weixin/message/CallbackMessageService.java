@@ -10,5 +10,5 @@ public interface CallbackMessageService {
     /**
      * 处理消息回调
      * */
-    String handleCallback(Document document) throws MessageException;
+    String handleCallback(Document document);
 }

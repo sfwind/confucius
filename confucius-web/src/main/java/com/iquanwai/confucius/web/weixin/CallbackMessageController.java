@@ -97,28 +97,29 @@ public class CallbackMessageController {
 
             LOGGER.info("xml is \n" + xml);
             String returnXml = callbackMessageService.handleCallback(document);
-            LOGGER.info("returnXml is \n" + returnXml);
-            PrintWriter writer = response.getWriter();
-            try {
-                response.setHeader("Content-Type", "application/xml");
-                writer.print(returnXml);
-                response.flushBuffer();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            } finally {
-                IOUtils.closeQuietly(writer);
-            }
-        } catch (MessageException e) {
-            PrintWriter writer = null;
-            try {
-                writer = response.getWriter();
-                response.setHeader("Content-Type", "text/plain");
-                writer.print(SUCCESS);
-                response.flushBuffer();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            } finally {
-                IOUtils.closeQuietly(writer);
+            if(returnXml!=null){
+                LOGGER.info("returnXml is \n" + returnXml);
+                PrintWriter writer = response.getWriter();
+                try {
+                    response.setHeader("Content-Type", "application/xml");
+                    writer.print(returnXml);
+                    response.flushBuffer();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } finally {
+                    IOUtils.closeQuietly(writer);
+                }
+            }else{
+                PrintWriter writer = response.getWriter();
+                try {
+                    response.setHeader("Content-Type", "text/plain");
+                    writer.print(SUCCESS);
+                    response.flushBuffer();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } finally {
+                    IOUtils.closeQuietly(writer);
+                }
             }
         } catch (Exception e) {
             LOGGER.error("received user message failed", e);
