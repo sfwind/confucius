@@ -7,5 +7,5 @@ import org.w3c.dom.Document;
  * Created by justin on 17/7/6.
  */
 public interface CallbackMessageService {
-    Message handleCallback(Document document) throws MessageException;
+    String handleCallback(Document document) throws MessageException;
 }

@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="xml")
 @Setter
 @ToString
-public class Message {
+public class TextMessage {
     @XmlElement(name="ToUserName")
     public String toUserName;
     @XmlElement(name="FromUserName")
@@ -20,7 +20,7 @@ public class Message {
     @XmlElement(name="CreateTime")
     public Long createTime;
     @XmlElement(name="MsgType")
-    public String msgType="![CDATA[text]]";
+    public String msgType="<![CDATA[text]]>";
     @XmlElement(name="Content")
     public String content;
 }

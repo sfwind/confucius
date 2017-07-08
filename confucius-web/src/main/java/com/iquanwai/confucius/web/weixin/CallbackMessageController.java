@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.weixin.message.CallbackMessageService;
-import com.iquanwai.confucius.biz.domain.weixin.message.Message;
 import com.iquanwai.confucius.biz.exception.MessageException;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
@@ -9,8 +8,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -85,8 +82,8 @@ public class CallbackMessageController {
     }
 
 
-    @RequestMapping(value = "/message", produces = "application/xml", method = RequestMethod.POST)
-    public ResponseEntity<Message> receiveCallback(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "/message", method = RequestMethod.POST)
+    public void receiveCallback(HttpServletRequest request, HttpServletResponse response) {
 
         try {
             // 获取请求和响应
@@ -99,9 +96,18 @@ public class CallbackMessageController {
             IOUtils.closeQuietly(is);
 
             LOGGER.info("xml is \n" + xml);
-            Message message = callbackMessageService.handleCallback(document);
-            LOGGER.info("return message is \n" + message);
-            return new ResponseEntity<>(message, HttpStatus.OK);
+            String returnXml = callbackMessageService.handleCallback(document);
+            LOGGER.info("returnXml is \n" + returnXml);
+            PrintWriter writer = response.getWriter();
+            try {
+                response.setHeader("Content-Type", "application/xml");
+                writer.print(returnXml);
+                response.flushBuffer();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } finally {
+                IOUtils.closeQuietly(writer);
+            }
         } catch (MessageException e) {
             PrintWriter writer = null;
             try {
@@ -118,6 +124,5 @@ public class CallbackMessageController {
             LOGGER.error("received user message failed", e);
         }
 
-        return null;
     }
 }

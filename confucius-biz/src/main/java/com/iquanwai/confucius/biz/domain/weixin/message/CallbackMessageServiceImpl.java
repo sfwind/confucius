@@ -11,15 +11,13 @@ import org.w3c.dom.Document;
  */
 @Service
 public class CallbackMessageServiceImpl implements CallbackMessageService {
-    private static final String SUCCESS = "success";
-
     private static final String MESSAGE_TYPE = "MsgType";
     private static final String FROM_USER = "FromUserName";
     private static final String CONTENT = "Content";
 
     private static final String TEXT = "text";
     @Override
-    public Message handleCallback(Document document) throws MessageException{
+    public String handleCallback(Document document) throws MessageException{
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
         if(messageType.equals(TEXT)){
             return handleText(document);
@@ -27,25 +25,15 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         throw new MessageException();
     }
 
-    private Message handleText(Document document){
+    private String handleText(Document document){
         String openid = XMLHelper.getNode(document, FROM_USER);
         String content = XMLHelper.getNode(document, CONTENT);
-        Message textMessage = new Message();
+        TextMessage textMessage = new TextMessage();
         textMessage.content = XMLHelper.appendCDATA(content);
         textMessage.createTime = System.currentTimeMillis()/1000;
         textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
         textMessage.toUserName = XMLHelper.appendCDATA(openid);
-        return textMessage;
-    }
-
-    public static void main(String[] args) {
-        Message textMessage = new Message();
-        textMessage.content = XMLHelper.appendCDATA("丁志君");
-        textMessage.createTime = System.currentTimeMillis()/1000;
-        textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
-        textMessage.toUserName = XMLHelper.appendCDATA("openid");
-        String xml = XMLHelper.createXML(textMessage);
-        System.out.println(xml);
+        return XMLHelper.createXML(textMessage);
     }
 
 }
