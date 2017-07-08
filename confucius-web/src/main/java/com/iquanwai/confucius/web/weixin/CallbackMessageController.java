@@ -100,6 +100,7 @@ public class CallbackMessageController {
 
             LOGGER.info("xml is \n" + xml);
             String returnXml = callbackMessageService.handleCallback(document);
+            LOGGER.info("returnXml is \n" + returnXml);
             Writer writer = response.getWriter();
             try {
                 IOUtils.write(returnXml, writer);
