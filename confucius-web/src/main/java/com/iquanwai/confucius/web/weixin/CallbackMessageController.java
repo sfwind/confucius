@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.weixin.message.CallbackMessageService;
+import com.iquanwai.confucius.biz.exception.MessageException;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import org.w3c.dom.Document;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -82,8 +86,7 @@ public class CallbackMessageController {
 
 
     @RequestMapping(value = "/message", method = RequestMethod.POST)
-    @ResponseBody
-    public String receiveCallback(HttpServletRequest request, HttpServletResponse response) {
+    public void receiveCallback(HttpServletRequest request, HttpServletResponse response) {
 
         try {
             // 获取请求和响应
@@ -93,35 +96,31 @@ public class CallbackMessageController {
             Document document = XMLHelper.parseDocument(is);
             String xml = XMLHelper.convertDocumentToString(document);
             // 转换成string后关闭
-            is.close();
+            IOUtils.closeQuietly(is);
 
-            //获取请求参数
-//            String signature = request.getParameter("msg_signature");
-//            String timestamp = request.getParameter("timestamp");
-//            String nonce = request.getParameter("nonce");
-//            if (signature == null || timestamp == null ||
-//                    nonce == null) {
-//                return INVALID_REQUEST;
-//            }
-//
-//            // 加密xml
-//            String encryptedXml = xml;
-//            // weixin token
-//            String token = ConfigUtils.getToken();
-//
-//            Result result = Prpcrypt.fromTencent(encryptedXml, ConfigUtils.getEncodingAESKey(), signature, token, timestamp, nonce, "");
-//            if (result.getCode() != 0) {
-//                return INVALID_REQUEST;
-//            }
-//
-//            String decryptedXml = result.getResult();
             LOGGER.info("xml is \n" + xml);
-//            Document decryptedDocument = XMLHelper.convertStringToDocument(decryptedXml);
-            return callbackMessageService.handleCallback(document);
+            String returnXml = callbackMessageService.handleCallback(document);
+            Writer writer = response.getWriter();
+            try {
+                IOUtils.write(returnXml, writer);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }finally {
+                IOUtils.closeQuietly(writer);
+            }
+        } catch (MessageException e){
+            Writer writer = null;
+            try {
+                writer = response.getWriter();
+                writer.write(SUCCESS);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }finally {
+                IOUtils.closeQuietly(writer);
+            }
         } catch (Exception e) {
             LOGGER.error("received user message failed", e);
         }
 
-        return SUCCESS;
     }
 }

@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.weixin.message;
 
+import com.iquanwai.confucius.biz.exception.MessageException;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.springframework.stereotype.Service;
@@ -18,12 +19,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private static final String TEXT = "text";
     @Override
-    public String handleCallback(Document document) {
+    public String handleCallback(Document document) throws MessageException{
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
         if(messageType.equals(TEXT)){
             return handleText(document);
         }
-        return SUCCESS;
+        throw new MessageException();
     }
 
     private String handleText(Document document){
@@ -34,8 +35,17 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         textMessage.createTime = System.currentTimeMillis()/1000;
         textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
         textMessage.toUserName = XMLHelper.appendCDATA(openid);
+        return XMLHelper.createXML(textMessage);
+    }
+
+    public static void main(String[] args) {
+        TextMessage textMessage = new TextMessage();
+        textMessage.content = XMLHelper.appendCDATA("丁志君");
+        textMessage.createTime = System.currentTimeMillis()/1000;
+        textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
+        textMessage.toUserName = XMLHelper.appendCDATA("openid");
         String xml = XMLHelper.createXML(textMessage);
-        return xml;
+        System.out.println(xml);
     }
 
 }
