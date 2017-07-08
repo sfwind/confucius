@@ -23,19 +23,16 @@ public class CustomerMessageServiceImpl implements CustomerMessageService {
             TextCustomerMessage customerMessage = new TextCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
-            logger.info("json is {}", json);
             restfulHelper.post(SEND_CUSTOMER_MESSAGE_URL, json);
         } else if(type.equals(MessageType.IMAGE)){
             ImageCustomerMessage customerMessage = new ImageCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
-            logger.info("json is {}", json);
             restfulHelper.post(SEND_CUSTOMER_MESSAGE_URL, json);
         } else if(type.equals(MessageType.VOICE)){
             VoiceCustomerMessage customerMessage = new VoiceCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
-            logger.info("json is {}", json);
             restfulHelper.post(SEND_CUSTOMER_MESSAGE_URL, json);
         }
     }

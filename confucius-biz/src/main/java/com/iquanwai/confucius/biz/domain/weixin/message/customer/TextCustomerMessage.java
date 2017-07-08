@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class TextCustomerMessage {
     private String touser;
-    private String msgtype = "voice";
+    private String msgtype = "text";
     private Text text;
 
     public TextCustomerMessage(String openid, String content){

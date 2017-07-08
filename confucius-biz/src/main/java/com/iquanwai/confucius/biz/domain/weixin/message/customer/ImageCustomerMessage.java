@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.customer;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Created by justin on 17/7/8.
