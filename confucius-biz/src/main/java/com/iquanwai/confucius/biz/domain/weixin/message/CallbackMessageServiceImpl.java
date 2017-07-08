@@ -6,6 +6,8 @@ import com.iquanwai.confucius.biz.util.XMLHelper;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
+import java.util.Date;
+
 /**
  * Created by justin on 17/7/6.
  */
@@ -21,9 +23,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     @Override
     public String handleCallback(Document document) throws MessageException{
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
-//        if(messageType.equals(TEXT)){
-//            return handleText(document);
-//        }
+        if(messageType.equals(TEXT)){
+            return handleText(document);
+        }
         throw new MessageException();
     }
 
@@ -32,7 +34,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String content = XMLHelper.getNode(document, CONTENT);
         TextMessage textMessage = new TextMessage();
         textMessage.content = XMLHelper.appendCDATA(content);
-        textMessage.createTime = System.currentTimeMillis()/1000;
+        textMessage.createTime = new Date().getTime();
         textMessage.fromUserName = XMLHelper.appendCDATA(ConfigUtils.getAppid());
         textMessage.toUserName = XMLHelper.appendCDATA(openid);
         return XMLHelper.createXML(textMessage);
