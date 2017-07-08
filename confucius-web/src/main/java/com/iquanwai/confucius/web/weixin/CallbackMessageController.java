@@ -29,9 +29,8 @@ import java.util.Arrays;
 @Controller
 public class CallbackMessageController {
 
-    private static final String INVALID_REQUEST = "invalid_request";
-    private static final String INVALID_DECRYPT = "invalid_decrypt";
-    private static final String INVALID_SIGNATURE = "invalid_signature";
+    private static final Long INVALID_REQUEST = -1L;
+    private static final Long INVALID_SIGNATURE = -2L;
     private static final String SUCCESS = "success";
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -42,7 +41,7 @@ public class CallbackMessageController {
 
     @RequestMapping(value = "/message", method = RequestMethod.GET)
     @ResponseBody
-    public String openCallbackMode(HttpServletRequest request, HttpServletResponse response) {
+    public Long openCallbackMode(HttpServletRequest request, HttpServletResponse response) {
 
         //获取请求参数
         String signature = request.getParameter("signature");
@@ -74,7 +73,7 @@ public class CallbackMessageController {
             LOGGER.info("codedString is " + codedString);
             //将加密的结果与请求参数中的signature比对，如果相同，原样返回echostr参数内容
             if (codedString.equals(signature)) {
-                return echostring;
+                return Long.valueOf(echostring);
             }
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("NoSuchAlgorithmException", e);
