@@ -28,12 +28,12 @@ import java.util.Arrays;
  */
 @RequestMapping("/wx/callback")
 @Controller
-public class MessageController {
+public class CallbackMessageController {
 
-    private static String INVALID_REQUEST = "invalid_request";
-    private static String INVALID_DECRYPT = "invalid_decrypt";
-    private static String INVALID_SIGNATURE = "invalid_signature";
-    private static String SUCCESS = "success";
+    private static final String INVALID_REQUEST = "invalid_request";
+    private static final String INVALID_DECRYPT = "invalid_decrypt";
+    private static final String INVALID_SIGNATURE = "invalid_signature";
+    private static final String SUCCESS = "success";
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Autowired
@@ -41,7 +41,7 @@ public class MessageController {
 
     @RequestMapping(value = "/message", method = RequestMethod.GET)
     @ResponseBody
-    public String openCallbackMode(@PathVariable String app, HttpServletRequest request, HttpServletResponse response) {
+    public String openCallbackMode(HttpServletRequest request, HttpServletResponse response) {
 
         //获取请求参数
         String signature = request.getParameter("msg_signature");
@@ -52,7 +52,8 @@ public class MessageController {
                 nonce == null || echostring == null) {
             return INVALID_REQUEST;
         }
-
+        LOGGER.info("msg_signature is " + signature + ", timestamp is " + timestamp
+                + ", nonce is " + nonce + " , echostring is " + echostring);
         String token = ConfigUtils.getToken();
         //对请求参数和自己的token进行排序，并连接排序后的结果为一个字符串
         String[] strSet = new String[]{token, timestamp, nonce, echostring};
@@ -74,7 +75,7 @@ public class MessageController {
                 Result result;
                 try {
 //                echostring = aesManager.decrypt(echostring);
-                    LOGGER.info("aeskey is "+ ConfigUtils.getEncodingAESKey());
+                    LOGGER.info("aeskey is " + ConfigUtils.getEncodingAESKey());
                     Prpcrypt crypt = new Prpcrypt(ConfigUtils.getEncodingAESKey());
                     result = crypt.decrypt(echostring, "");
                 } catch (Exception e) {
@@ -82,10 +83,10 @@ public class MessageController {
                     return INVALID_DECRYPT;
                 }
                 if (result != null && !result.getResult().isEmpty()) {
-                    LOGGER.info("result is "+result.getResult());
+                    LOGGER.info("result is " + result.getResult());
                     return result.getResult();
-                } else if(result != null){
-                    LOGGER.info("error code is "+result.getCode());
+                } else if (result != null) {
+                    LOGGER.info("error code is " + result.getCode());
                 }
             }
         } catch (NoSuchAlgorithmException e) {
@@ -99,7 +100,7 @@ public class MessageController {
 
     @RequestMapping(value = "/message", method = RequestMethod.POST)
     @ResponseBody
-    public String receiveCallback(@PathVariable String app, HttpServletRequest request, HttpServletResponse response) {
+    public String receiveCallback(HttpServletRequest request, HttpServletResponse response) {
 
         try {
             // 获取请求和响应

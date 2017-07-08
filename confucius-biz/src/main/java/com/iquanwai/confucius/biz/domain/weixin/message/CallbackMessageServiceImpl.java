@@ -8,8 +8,9 @@ import org.w3c.dom.Document;
  */
 @Service
 public class CallbackMessageServiceImpl implements CallbackMessageService {
+    private static final String SUCCESS = "success";
     @Override
     public String handleCallback(Document document) {
-        return null;
+        return SUCCESS;
     }
 }
