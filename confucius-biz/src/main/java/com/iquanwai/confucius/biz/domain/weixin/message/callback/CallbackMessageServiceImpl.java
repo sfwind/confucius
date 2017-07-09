@@ -5,7 +5,9 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.qiniu.util.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,8 +64,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String openid = XMLHelper.getNode(document, FROM_USER);
         String toUser = XMLHelper.getNode(document, TO_USER);
         String content = XMLHelper.getNode(document, CONTENT);
-        String replyMessage = messageReply(content, openid);
-        return bulidTextReplyMessage(openid, toUser, replyMessage);
+        return messageReply(content, openid, toUser);
     }
 
     private String handleEvent(Document document) {
@@ -98,10 +99,13 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         return null;
     }
 
-    private String messageReply(String message, String openid) {
-
-        // TODO:
-        return message;
+    private String messageReply(String message, String openid, String wxid) {
+        List<String> words = CommonUtils.separateWords(message);
+        String reply = null;
+        if(CollectionUtils.isNotEmpty(words)){
+            reply = "有效词语:"+StringUtils.join(words, ",");
+        }
+        return bulidTextReplyMessage(openid, wxid, reply);
     }
 
     private String eventReply(String event, String eventKey, String openid, String wxid) {
