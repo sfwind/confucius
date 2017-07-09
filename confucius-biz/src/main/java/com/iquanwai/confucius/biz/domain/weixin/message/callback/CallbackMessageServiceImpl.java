@@ -1,13 +1,15 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
+import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
+import com.iquanwai.confucius.biz.po.AutoReplyMessage;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
-import com.qiniu.util.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 17/7/6.
@@ -34,6 +38,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private CustomerMessageService customerMessageService;
     @Autowired
     private SubscribeMessageDao subscribeMessageDao;
+    @Autowired
+    private AutoReplyMessageDao autoReplyMessageDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -47,13 +53,33 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String TYPE_TEXT = "text";
     private static final String TYPE_EVENT = "event";
 
+    private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
+
+    @PostConstruct
+    public void init() {
+        List<AutoReplyMessage> messages = autoReplyMessageDao.loadAllMessages();
+        messages.forEach(autoReplyMessage -> {
+            String keyword = autoReplyMessage.getKeyword();
+            if (keyword.contains("|")) {
+                String[] word = keyword.split("\\|");
+                for (String w : word) {
+                    autoReplyMessageMap.put(w, autoReplyMessage);
+                }
+            } else {
+                autoReplyMessageMap.put(autoReplyMessage.getKeyword(), autoReplyMessage);
+            }
+
+        });
+        logger.info("load auto reply message complete");
+    }
+
     @Override
     public String handleCallback(Document document) {
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
         //处理文字消息
         if (messageType.equals(TYPE_TEXT)) {
             return handleUserMessage(document);
-        //处理事件消息
+            //处理事件消息
         } else if (messageType.equals(TYPE_EVENT)) {
             return handleEvent(document);
         }
@@ -101,11 +127,19 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private String messageReply(String message, String openid, String wxid) {
         List<String> words = CommonUtils.separateWords(message);
-        String reply = null;
-        if(CollectionUtils.isNotEmpty(words)){
-            reply = "有效词语:"+StringUtils.join(words, ",");
+        for (String word : words) {
+            if (autoReplyMessageMap.get(word) != null) {
+                AutoReplyMessage autoReplyMessage = autoReplyMessageMap.get(word);
+                if (CustomerMessageService.TEXT.equals(autoReplyMessage.getType())) {
+                    return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                } else if (CustomerMessageService.IMAGE.equals(autoReplyMessage.getType())) {
+                    return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                } else if (CustomerMessageService.VOICE.equals(autoReplyMessage.getType())) {
+                    return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                }
+            }
         }
-        return bulidTextReplyMessage(openid, wxid, reply);
+        return null;
     }
 
     private String eventReply(String event, String eventKey, String openid, String wxid) {
@@ -117,7 +151,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
-                }else{
+                } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
                 try {
@@ -127,7 +161,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     // ignore
                 }
 
-                if(CollectionUtils.isNotEmpty(subscribeMessages)){
+                if (CollectionUtils.isNotEmpty(subscribeMessages)) {
                     return sendSubscribeMessage(openid, wxid, subscribeMessages);
                 }
                 break;
@@ -136,7 +170,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 break;
             case EVENT_SCAN:
                 List<SubscribeMessage> scanMessages = subscribeMessageDao.loadScanMessages();
-                if(CollectionUtils.isNotEmpty(scanMessages)){
+                if (CollectionUtils.isNotEmpty(scanMessages)) {
                     return sendSubscribeMessage(openid, wxid, scanMessages);
                 }
                 break;
@@ -148,15 +182,13 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private String sendSubscribeMessage(String openid, String wxid, List<SubscribeMessage> subscribeMessages) {
         SubscribeMessage lastOne = subscribeMessages.remove(subscribeMessages.size() - 1);
         //发送客服消息
-        subscribeMessages.forEach(subscribeMessage -> {
-            customerMessageService.sendCustomerMessage(openid,
-                    subscribeMessage.getMessage(), subscribeMessage.getType());
-        });
+        subscribeMessages.forEach(subscribeMessage -> customerMessageService.sendCustomerMessage(openid,
+                subscribeMessage.getMessage(), subscribeMessage.getType()));
         if (CustomerMessageService.TEXT.equals(lastOne.getType())) {
             return bulidTextReplyMessage(openid, wxid, lastOne.getMessage());
-        } else if(CustomerMessageService.IMAGE.equals(lastOne.getType())){
+        } else if (CustomerMessageService.IMAGE.equals(lastOne.getType())) {
             return buildImageReplyMessage(openid, wxid, lastOne.getMessage());
-        } else if(CustomerMessageService.VOICE.equals(lastOne.getType())){
+        } else if (CustomerMessageService.VOICE.equals(lastOne.getType())) {
             return buildVoiceReplyMessage(openid, wxid, lastOne.getMessage());
         }
 

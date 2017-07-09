@@ -185,11 +185,12 @@ public class CommonUtils {
 
         IKSegmentation ikSeg = new IKSegmentation(new StringReader(words) , false);
         try {
-            Lexeme l = null;
+            Lexeme l;
             while( (l = ikSeg.next()) != null){
-                //找出普通词性的单词
-                if(l.getLexemeType() == Lexeme.TYPE_CJK_NORMAL){
-                    usefulWords.add(l.getLexemeText());
+                //找出词语,数字,英文单词
+                if(l.getLexemeType() == Lexeme.TYPE_CJK_NORMAL || l.getLexemeType() == Lexeme.TYPE_NUM ||
+                        l.getLexemeType() == Lexeme.TYPE_LETTER){
+                    usefulWords.add(l.getLexemeText().toUpperCase());
                 }
             }
         } catch (IOException e) {
