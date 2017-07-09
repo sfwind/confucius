@@ -21,12 +21,41 @@ public class SubscribeMessageDao extends DBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<SubscribeMessage> loadAllMessages() {
+    public List<SubscribeMessage> loadSubscribeMessages() {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubscribeMessage>> h = new BeanListHandler<>(SubscribeMessage.class);
 
         try {
-            List<SubscribeMessage> messages = run.query("SELECT * FROM SubscribeMessage where Del=0", h);
+            List<SubscribeMessage> messages = run.query("SELECT * FROM SubscribeMessage where Event=1 and Del=0", h);
+            return messages;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public List<SubscribeMessage> loadSubscribeMessages(String channel) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<SubscribeMessage>> h = new BeanListHandler<>(SubscribeMessage.class);
+
+        try {
+            List<SubscribeMessage> messages =
+                    run.query("SELECT * FROM SubscribeMessage where Channel=? Event=1 and Del=0", h, channel);
+            return messages;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public List<SubscribeMessage> loadScanMessages() {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<SubscribeMessage>> h = new BeanListHandler<>(SubscribeMessage.class);
+
+        try {
+            List<SubscribeMessage> messages = run.query("SELECT * FROM SubscribeMessage where Event=2 and Del=0", h);
             return messages;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

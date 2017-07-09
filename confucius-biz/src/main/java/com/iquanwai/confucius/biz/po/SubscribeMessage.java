@@ -10,4 +10,5 @@ public class SubscribeMessage {
     private int id;
     private String message;
     private Integer type;
+    private String channel;
 }

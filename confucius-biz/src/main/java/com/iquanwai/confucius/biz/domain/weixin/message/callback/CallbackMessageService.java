@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.weixin.message;
+package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
 import org.w3c.dom.Document;
 
