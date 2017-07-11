@@ -123,4 +123,13 @@ public interface PracticeService {
      */
     void deleteComment(Integer commentId);
 
+    /**
+     * 插入巩固练习数据，返回主键 id
+     */
+    Integer insertWarmupPractice(WarmupPractice warmupPractice);
+
+    /**
+     * 多个选择题分别插入 Choice 表
+     */
+    Integer insertWarmupChoice(Integer questionId, List<WarmupChoice> choices);
 }

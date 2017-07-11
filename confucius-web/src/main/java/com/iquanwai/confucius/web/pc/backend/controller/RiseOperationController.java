@@ -6,7 +6,9 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.systematism.Choice;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.pc.backend.dto.ProblemKnowledgesDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -54,7 +56,7 @@ public class RiseOperationController {
 
         applicationSubmitList.stream().forEach(applicationSubmit -> {
             Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), loginUser.getProfileId());
-            applicationSubmit.setComment(isComment?1:0);
+            applicationSubmit.setComment(isComment ? 1 : 0);
         });
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -110,7 +112,6 @@ public class RiseOperationController {
         return WebUtils.success();
     }
 
-
     @RequestMapping("/problem/list")
     public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
 
@@ -118,7 +119,7 @@ public class RiseOperationController {
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
-            List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
+            List<ProblemListDto> collect = problems.stream().filter(problem -> !problem.getDel())
                     .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
@@ -180,16 +181,16 @@ public class RiseOperationController {
     }
 
 
-    @RequestMapping(value="/warmup/save", method = RequestMethod.POST)
+    @RequestMapping(value = "/warmup/save", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> savePractice(PCLoginUser loginUser,
-                                                                  @RequestBody WarmupPractice warmupPractice) {
+                                                            @RequestBody WarmupPractice warmupPractice) {
 
         operationManagementService.save(warmupPractice);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习编辑")
                 .action("保存巩固练习")
-                .memo(warmupPractice.getId()+"");
+                .memo(warmupPractice.getId() + "");
         operationLogService.log(operationLog);
 
         return WebUtils.success();
@@ -209,4 +210,38 @@ public class RiseOperationController {
 
         return WebUtils.result(warmupPractice);
     }
+
+    @RequestMapping(value = "/warmup/load/knowledges", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadKnowledgesGroupByProblem(PCLoginUser loginUser) {
+        Assert.notNull(loginUser, "用户信息不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("巩固练习更改").function("巩固练习新增").action("加载问题与知识点");
+        operationLogService.log(operationLog);
+        List<Problem> problems = problemService.loadProblems();
+        List<ProblemSchedule> knowledges = operationManagementService.loadKnowledgesGroupByProblem();
+        if(problems != null && knowledges != null) {
+            ProblemKnowledgesDto dto = new ProblemKnowledgesDto();
+            dto.setProblems(problems);
+            dto.setKnowledges(knowledges);
+            return WebUtils.result(dto);
+        }
+        return WebUtils.error("未找到小课与知识点关联信息");
+    }
+
+    @RequestMapping(value = "/warmup/insert/practice", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> insertWarmupPractice(PCLoginUser loginUser, @RequestBody WarmupPractice warmupPractice) {
+        Assert.notNull(loginUser, "用户不能为空");
+        List<WarmupChoice> warmupChoices = warmupPractice.getChoices();
+        Integer knowledgeId = practiceService.insertWarmupPractice(warmupPractice);
+        if(knowledgeId <= 0) {
+            return WebUtils.error("巩固练习数据插入失败，请及时练习管理员");
+        } else {
+            Integer result = practiceService.insertWarmupChoice(knowledgeId, warmupChoices);
+            if(result <= 0) {
+                return WebUtils.error("选项数据插入失败，请及时练习管理员");
+            }
+        }
+        return WebUtils.success();
+    }
+
 }

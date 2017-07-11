@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -19,8 +20,8 @@ import java.util.List;
  */
 @Repository
 public class WarmupPracticeDao extends PracticeDBUtil {
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     public List<WarmupPractice> loadPractices(List<Integer> practiceIds){
         if(practiceIds.size()==0){
@@ -38,7 +39,6 @@ public class WarmupPracticeDao extends PracticeDBUtil {
 
         return Lists.newArrayList();
     }
-
 
     public List<WarmupPractice> loadPracticesByProblemId(Integer problemId){
         QueryRunner run = new QueryRunner(getDataSource());
@@ -75,4 +75,22 @@ public class WarmupPracticeDao extends PracticeDBUtil {
 
         return null;
     }
+
+    // 数据库插入巩固练习数据
+    public Integer insertWarmupPractice(WarmupPractice practice) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "insert into WarmupPractice (Question, Type, Analysis, Pic, Difficulty, " +
+                "KnowledgeId, SceneId, ProblemId, Sequence, PracticeUid, Example, Updated) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            Long result = runner.insert(sql, new ScalarHandler<>(), practice.getQuestion(), practice.getType(), practice.getAnalysis(),
+                    practice.getPic(), practice.getDifficulty(), practice.getKnowledgeId(), 1, practice.getProblemId(),
+                    practice.getSequence(), practice.getPracticeUid(), practice.getExample(), practice.getUpdated());
+            return result.intValue();
+        } catch(SQLException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+        return -1;
+    }
+
 }
