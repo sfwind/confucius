@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupChoice;
+import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -57,5 +58,26 @@ public class WarmupChoiceDao extends PracticeDBUtil {
         }
         return -1;
     }
+
+    // 批量插入数据
+    public void batchInsert(List<WarmupChoice> choices) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "insert into Choice (QuestionId, Sequence, Subject, IsRight) VALUES (?, ?, ?, ?)";
+        try {
+            Object[][] param = new Object[choices.size()][];
+            for(int i = 0; i < choices.size(); i++) {
+                WarmupChoice choice = choices.get(i);
+                param[i] = new Object[4];
+                param[i][0] = choice.getQuestionId();
+                param[i][1] = choice.getSequence();
+                param[i][2] = choice.getSubject();
+                param[i][3] = choice.getIsRight();
+            }
+            runner.batch(sql, param);
+        } catch(SQLException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+    }
+
 
 }

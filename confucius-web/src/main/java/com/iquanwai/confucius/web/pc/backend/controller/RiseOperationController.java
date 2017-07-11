@@ -232,16 +232,41 @@ public class RiseOperationController {
     public ResponseEntity<Map<String, Object>> insertWarmupPractice(PCLoginUser loginUser, @RequestBody WarmupPractice warmupPractice) {
         Assert.notNull(loginUser, "用户不能为空");
         List<WarmupChoice> warmupChoices = warmupPractice.getChoices();
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("巩固练习新增")
+                .action("新增巩固练习");
+        operationLogService.log(operationLog);
+        // 删除过期巩固练习
+        // practiceService.delWarmupPracticeByPracticeUid(warmupPractice.getPracticeUid());
+        // 根据 PracticeUid 获取 WarmupPractice 的总数
+        Integer practiceCnt =  practiceService.loadWarmupPracticeCntByPracticeUid(warmupPractice.getPracticeUid());
+        if(practiceCnt > 0) {
+            return WebUtils.error("当前 UID 巩固练习已存在，请联系管理员重试");
+        }
         Integer knowledgeId = practiceService.insertWarmupPractice(warmupPractice);
         if(knowledgeId <= 0) {
             return WebUtils.error("巩固练习数据插入失败，请及时练习管理员");
         } else {
-            Integer result = practiceService.insertWarmupChoice(knowledgeId, warmupChoices);
-            if(result <= 0) {
-                return WebUtils.error("选项数据插入失败，请及时练习管理员");
-            }
+            practiceService.insertWarmupChoice(knowledgeId, warmupChoices);
         }
         return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/warmup/load/problem/{practiceUid}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadProblemByPracticeUid(PCLoginUser loginUser, @PathVariable String practiceUid) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("巩固练习新增")
+                .action("获取默认小课信息");
+        operationLogService.log(operationLog);
+        WarmupPractice warmupPractice = practiceService.loadWarmupPracticeByPracticeUid(practiceUid);
+        if(warmupPractice != null) {
+            return WebUtils.result(warmupPractice);
+        } else  {
+            return WebUtils.error("未找到对应小课数据");
+        }
     }
 
 }

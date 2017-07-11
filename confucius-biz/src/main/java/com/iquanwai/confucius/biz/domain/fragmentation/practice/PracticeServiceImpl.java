@@ -448,20 +448,24 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Integer insertWarmupChoice(Integer questionId, List<WarmupChoice> choices) {
-        if(questionId == null || choices.size() == 0) {
-            return -1;
-        }
-        Integer result = 1;
-        List<Integer> eachResultList = choices.stream().map(choice -> {
-            choice.setQuestionId(questionId);
-            return warmupChoiceDao.insertChoice(choice);
-        }).collect(Collectors.toList());
-        for(Integer eachResult : eachResultList) {
-            result *= eachResult;
-        }
-        return result;
+    public void insertWarmupChoice(Integer questionId, List<WarmupChoice> choices) {
+        choices.forEach(choice -> choice.setQuestionId(questionId));
+        warmupChoiceDao.batchInsert(choices);
     }
 
+    @Override
+    public WarmupPractice loadWarmupPracticeByPracticeUid(String practiceUid) {
+        return warmupPracticeDao.loadWarmupPracticeByPracticeUid(practiceUid);
+    }
+
+    @Override
+    public Integer loadWarmupPracticeCntByPracticeUid(String practiceUid) {
+        return warmupPracticeDao.loadWarmupPracticeCntByPracticeUid(practiceUid);
+    }
+
+    @Override
+    public Integer delWarmupPracticeByPracticeUid(String practiceUid) {
+        return warmupPracticeDao.delWarmupPracticeByPracticeUid(practiceUid);
+    }
 
 }
