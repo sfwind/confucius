@@ -10,4 +10,6 @@ public interface CallbackMessageService {
      * 处理消息回调
      * */
     String handleCallback(Document document);
+
+    String SUBSCRIBE_TOPIC = "subscribe_quanwai";
 }

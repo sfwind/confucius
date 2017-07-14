@@ -10,7 +10,6 @@ import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -27,8 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -249,16 +246,6 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return result;
-    }
-
-    @Override
-    public void savePromotionUser(String openid, String source) {
-        if (promotionUserDao.loadPromotion(openid) == null) {
-            PromotionUser promotionUser = new PromotionUser();
-            promotionUser.setOpenid(openid);
-            promotionUser.setSource(source);
-            promotionUserDao.insert(promotionUser);
-        }
     }
 
     @Override

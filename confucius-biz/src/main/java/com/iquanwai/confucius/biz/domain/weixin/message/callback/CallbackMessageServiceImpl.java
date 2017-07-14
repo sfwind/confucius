@@ -1,15 +1,19 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.AutoReplyMessage;
+import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
 import javax.annotation.PostConstruct;
+import java.net.ConnectException;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +45,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private SubscribeMessageDao subscribeMessageDao;
     @Autowired
     private AutoReplyMessageDao autoReplyMessageDao;
+    @Autowired
+    private PromotionUserDao promotionUserDao;
+
+    private RabbitMQPublisher rabbitMQPublisher;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -57,6 +66,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     @PostConstruct
     public void init() {
+        //初始化自动回复消息
         List<AutoReplyMessage> messages = autoReplyMessageDao.loadAllMessages();
         messages.forEach(autoReplyMessage -> {
             String keyword = autoReplyMessage.getKeyword();
@@ -71,6 +81,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
         });
         logger.info("load auto reply message complete");
+        //初始化mq
+        rabbitMQPublisher = new RabbitMQPublisher();
+        rabbitMQPublisher.init(SUBSCRIBE_TOPIC, ConfigUtils.getRabbitMQIp(),
+                ConfigUtils.getRabbitMQPort());
     }
 
     @Override
@@ -150,6 +164,23 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     logger.info("eventkey is {}", eventKey);
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
+                    //发送订阅消息
+                    SubscribeEvent subscribeEvent = new SubscribeEvent();
+                    subscribeEvent.setOpenid(openid);
+                    subscribeEvent.setScene(channel);
+                    try {
+                        rabbitMQPublisher.publish(subscribeEvent);
+                    } catch (ConnectException e) {
+                        logger.error("rabbit mq init failed");
+                    }
+                    // 插入推广数据
+                    if (promotionUserDao.loadPromotion(openid) == null) {
+                        PromotionUser promotionUser = new PromotionUser();
+                        promotionUser.setSource(channel);
+                        promotionUser.setOpenid(openid);
+                        promotionUser.setPaid(false);
+                        promotionUserDao.insert(promotionUser);
+                    }
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();

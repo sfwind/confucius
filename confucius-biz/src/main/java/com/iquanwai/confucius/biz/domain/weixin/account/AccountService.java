@@ -66,11 +66,6 @@ public interface AccountService {
     Profile getProfile(Integer profileId);
 
     /**
-     * 记录推广渠道获取的用户
-     */
-    void savePromotionUser(String openid, String source);
-
-    /**
      * 取消关注
      */
     void unfollow(String openid);

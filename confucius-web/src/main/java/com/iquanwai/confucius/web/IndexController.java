@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -180,13 +179,6 @@ public class IndexController {
         return mav;
     }
 
-    @RequestMapping(value = "/promotion/{source}",method = RequestMethod.GET)
-    public ModelAndView getPromotion(HttpServletRequest request, HttpServletResponse response,
-                                     @PathVariable("source") String source) throws Exception {
-        checkNewUser(request, response, source);
-        return courseView(request);
-    }
-
     private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser){
         ModelAndView mav = new ModelAndView("course");
 
@@ -210,34 +202,5 @@ public class IndexController {
         }
 
         return mav;
-    }
-
-    private boolean checkNewUser(HttpServletRequest request,HttpServletResponse response, String source){
-        if(request.getParameter("debug")!=null && ConfigUtils.isFrontDebug()){
-            return false;
-        }
-
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
-        String openId = oAuthService.openId(accessToken);
-
-        //没有openid,先去授权
-        if(StringUtils.isEmpty(openId)){
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
-            try {
-                WebUtils.auth(request, response);
-            } catch (Exception e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-            return false;
-        }
-
-        try {
-            accountService.getAccount(openId, true);
-        } catch (NotFollowingException e) {
-            accountService.savePromotionUser(openId, source);
-            return true;
-        }
-
-        return false;
     }
 }
