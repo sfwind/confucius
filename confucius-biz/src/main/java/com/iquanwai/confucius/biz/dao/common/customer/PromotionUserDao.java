@@ -21,8 +21,8 @@ public class PromotionUserDao extends DBUtil {
 
     public int insert(PromotionUser promotionUser){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into PromotionUser(Openid, Source) " +
-                " VALUES (?, ?)";
+        String sql = "insert into PromotionUser(Openid, Source, Action) " +
+                " VALUES (?, ?, ?)";
 
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),

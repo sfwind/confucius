@@ -178,7 +178,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         PromotionUser promotionUser = new PromotionUser();
                         promotionUser.setSource(channel);
                         promotionUser.setOpenid(openid);
-                        promotionUser.setPaid(false);
+                        promotionUser.setAction(0);
                         promotionUserDao.insert(promotionUser);
                     }
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
