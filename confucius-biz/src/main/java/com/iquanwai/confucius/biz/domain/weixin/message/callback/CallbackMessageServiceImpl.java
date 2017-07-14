@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
@@ -162,13 +161,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             case EVENT_SUBSCRIBE:
                 List<SubscribeMessage> subscribeMessages;
                 if (eventKey != null) {
-                    logger.info("eventkey is {}", eventKey);
-                    // 去掉前缀 qrscene_
-                    String channel = eventKey.substring(8);
+                    logger.info("event key is {}", eventKey);
                     //发送订阅消息
                     SubscribeEvent subscribeEvent = new SubscribeEvent();
                     subscribeEvent.setOpenid(openid);
-                    subscribeEvent.setScene(channel);
+                    subscribeEvent.setScene(eventKey);
                     try {
                         rabbitMQPublisher.publish(subscribeEvent);
                     } catch (ConnectException e) {
@@ -177,12 +174,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     // 插入推广数据
                     if (promotionUserDao.loadPromotion(openid) == null) {
                         PromotionUser promotionUser = new PromotionUser();
-                        promotionUser.setSource(channel);
+                        promotionUser.setSource(eventKey);
                         promotionUser.setOpenid(openid);
                         promotionUser.setAction(0);
                         promotionUserDao.insert(promotionUser);
                     }
-                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
+                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages(eventKey);
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
@@ -203,10 +200,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             case EVENT_SCAN:
                 List<SubscribeMessage> scanMessages;
                 if (eventKey != null) {
-                    logger.info("eventkey is {}", eventKey);
-                    // 去掉前缀 qrscene_
-                    String channel = eventKey.substring(8);
-                    scanMessages = subscribeMessageDao.loadScanMessages(channel);
+                    logger.info("event key is {}", eventKey);
+                    scanMessages = subscribeMessageDao.loadScanMessages(eventKey);
                 } else {
                     scanMessages = subscribeMessageDao.loadScanMessages();
                 }
