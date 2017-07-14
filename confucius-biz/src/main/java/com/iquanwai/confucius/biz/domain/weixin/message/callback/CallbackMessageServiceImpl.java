@@ -206,9 +206,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     logger.info("eventkey is {}", eventKey);
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
-                    scanMessages = subscribeMessageDao.loadSubscribeMessages(channel);
+                    scanMessages = subscribeMessageDao.loadScanMessages(channel);
                 } else {
-                    scanMessages = subscribeMessageDao.loadSubscribeMessages();
+                    scanMessages = subscribeMessageDao.loadScanMessages();
                 }
                 if (CollectionUtils.isNotEmpty(scanMessages)) {
                     return sendSubscribeMessage(openid, wxid, scanMessages);
@@ -221,6 +221,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private String sendSubscribeMessage(String openid, String wxid, List<SubscribeMessage> subscribeMessages) {
         SubscribeMessage lastOne = subscribeMessages.remove(subscribeMessages.size() - 1);
+        logger.info("发送关注消息给{}", openid);
         //发送客服消息
         subscribeMessages.forEach(subscribeMessage -> customerMessageService.sendCustomerMessage(openid,
                 subscribeMessage.getMessage(), subscribeMessage.getType()));
