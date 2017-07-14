@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
@@ -200,7 +201,15 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 accountService.unfollow(openid);
                 break;
             case EVENT_SCAN:
-                List<SubscribeMessage> scanMessages = subscribeMessageDao.loadScanMessages();
+                List<SubscribeMessage> scanMessages;
+                if (eventKey != null) {
+                    logger.info("eventkey is {}", eventKey);
+                    // 去掉前缀 qrscene_
+                    String channel = eventKey.substring(8);
+                    scanMessages = subscribeMessageDao.loadSubscribeMessages(channel);
+                } else {
+                    scanMessages = subscribeMessageDao.loadSubscribeMessages();
+                }
                 if (CollectionUtils.isNotEmpty(scanMessages)) {
                     return sendSubscribeMessage(openid, wxid, scanMessages);
                 }
