@@ -26,7 +26,8 @@ public class SubscribeMessageDao extends DBUtil {
         ResultSetHandler<List<SubscribeMessage>> h = new BeanListHandler<>(SubscribeMessage.class);
 
         try {
-            List<SubscribeMessage> messages = run.query("SELECT * FROM SubscribeMessage where Event=1 and Del=0 and Channel is null", h);
+            List<SubscribeMessage> messages =
+                    run.query("SELECT * FROM SubscribeMessage where Event=1 and Del=0 and Channel is null", h);
             return messages;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -55,7 +56,8 @@ public class SubscribeMessageDao extends DBUtil {
         ResultSetHandler<List<SubscribeMessage>> h = new BeanListHandler<>(SubscribeMessage.class);
 
         try {
-            List<SubscribeMessage> messages = run.query("SELECT * FROM SubscribeMessage where Event=2 and Del=0 and Channel is null", h);
+            List<SubscribeMessage> messages =
+                    run.query("SELECT * FROM SubscribeMessage where Event=2 and Del=0 and Channel is null", h);
             return messages;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

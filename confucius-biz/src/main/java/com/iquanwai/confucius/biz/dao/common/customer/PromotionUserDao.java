@@ -26,7 +26,8 @@ public class PromotionUserDao extends DBUtil {
 
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
-                    promotionUser.getOpenid(),promotionUser.getSource());
+                    promotionUser.getOpenid(),promotionUser.getSource(),
+                    promotionUser.getAction());
             return insertRs.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

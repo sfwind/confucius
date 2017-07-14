@@ -162,10 +162,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 List<SubscribeMessage> subscribeMessages;
                 if (eventKey != null) {
                     logger.info("event key is {}", eventKey);
+                    // 去掉前缀 qrscene_
+                    String channel = eventKey.substring(8);
                     //发送订阅消息
                     SubscribeEvent subscribeEvent = new SubscribeEvent();
                     subscribeEvent.setOpenid(openid);
-                    subscribeEvent.setScene(eventKey);
+                    subscribeEvent.setScene(channel);
                     try {
                         rabbitMQPublisher.publish(subscribeEvent);
                     } catch (ConnectException e) {
@@ -174,12 +176,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     // 插入推广数据
                     if (promotionUserDao.loadPromotion(openid) == null) {
                         PromotionUser promotionUser = new PromotionUser();
-                        promotionUser.setSource(eventKey);
+                        promotionUser.setSource(channel);
                         promotionUser.setOpenid(openid);
                         promotionUser.setAction(0);
                         promotionUserDao.insert(promotionUser);
                     }
-                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages(eventKey);
+                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
