@@ -161,25 +161,24 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Pair<Integer, String> comment(Integer moduleId, Integer referId,
                                          String openId, Integer profileId, String content) {
+        //先插入评论
+        Comment comment = new Comment();
+        comment.setModuleId(moduleId);
+        comment.setReferencedId(referId);
+        comment.setType(Constants.CommentType.STUDENT);
+        comment.setContent(content);
+        comment.setCommentOpenId(openId);
+        comment.setCommentProfileId(profileId);
+        comment.setDevice(Constants.Device.PC);
+        int id = commentDao.insert(comment);
+
         boolean isAsst = false;
-        Profile profile = accountService.getProfile(openId, false);
+        Profile profile = accountService.getProfile(profileId);
         //是否是助教评论
         if(profile != null) {
             isAsst = Role.isAsst(profile.getRole());
         }
-
-        if(moduleId == Constants.CommentModule.CHALLENGE) {
-            ChallengeSubmit load = challengeSubmitDao.load(ChallengeSubmit.class, referId);
-            if(load == null) {
-                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
-                return new MutablePair<>(-1, "没有该文章");
-            }
-            //自己给自己评论不提醒
-            if(load.getOpenid() != null && !load.getOpenid().equals(openId)) {
-                String url = "/rise/static/practice/challenge?id=" + load.getChallengeId();
-                messageService.sendMessage("评论了我的小目标", load.getProfileId().toString(), profileId.toString(), url);
-            }
-        } else if(moduleId == Constants.CommentModule.APPLICATION) {
+        if (moduleId == Constants.CommentModule.APPLICATION) {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
             if(load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
@@ -191,8 +190,8 @@ public class PracticeServiceImpl implements PracticeService {
                 asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
             }
             //自己给自己评论不提醒
-            if(load.getOpenid() != null && !load.getOpenid().equals(openId)) {
-                String url = "/rise/static/practice/application?id=" + load.getApplicationId();
+            if (load.getProfileId() != null && !load.getProfileId().equals(profileId)) {
+                String url = "/rise/static/message/application/reply?submitId=" + referId + "&commentId=" + id;
                 messageService.sendMessage("评论了我的应用练习", load.getProfileId().toString(), profileId.toString(), url);
             }
         } else if(moduleId == Constants.CommentModule.SUBJECT) {
@@ -207,50 +206,78 @@ public class PracticeServiceImpl implements PracticeService {
                 asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
             }
             //自己给自己评论不提醒
-            if(load.getOpenid() != null && !load.getOpenid().equals(openId)) {
+            if (load.getProfileId() != null && !load.getProfileId().equals(profileId)) {
                 String url = "/rise/static/message/subject/reply?submitId=" + referId;
                 messageService.sendMessage("评论了我的小课分享", load.getProfileId().toString(), profileId.toString(), url);
             }
         }
-        Comment comment = new Comment();
-        comment.setModuleId(moduleId);
-        comment.setReferencedId(referId);
-        comment.setType(Constants.CommentType.STUDENT);
-        comment.setContent(content);
-        comment.setCommentOpenId(openId);
-        comment.setCommentProfileId(profileId);
-        comment.setDevice(Constants.Device.PC);
-        int id = commentDao.insert(comment);
         return new MutablePair<>(id, "评论成功");
     }
 
     @Override
     public Pair<Integer, String> replyComment(Integer moduleId, Integer referId, String openId,
                                               Integer profileId, String content, Integer repliedId) {
+        // 查看该评论是否为助教回复
+        boolean isAsst = false;
+        Profile profile = accountService.getProfile(profileId);
+        if (profile != null) {
+            isAsst = Role.isAsst(profile.getRole());
+        }
+
+        if(moduleId == Constants.CommentModule.APPLICATION) {
+            ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
+            if (load == null) {
+                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
+                return new MutablePair<>(-1, "没有该文章");
+            }
+            // 是助教评论
+            if (isAsst) {
+                // 将此条评论所对应的 ApplicationSubmit 置为已被助教评论
+                applicationSubmitDao.asstFeedback(load.getId());
+                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
+            }
+        }else if (moduleId == Constants.CommentModule.SUBJECT){
+            SubjectArticle load = subjectArticleDao.load(SubjectArticle.class, referId);
+            if (load == null) {
+                logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
+                return new MutablePair<>(-1, "没有该文章");
+            }
+            // 是助教评论
+            if (isAsst) {
+                // 将此条评论所对应的 SubjectArticle 置为已被助教评论
+                subjectArticleDao.asstFeedback(load.getId());
+                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
+            }
+        }
+
+        //被回复的评论
         Comment repliedComment = commentDao.load(Comment.class, repliedId);
+        if (repliedComment == null) {
+            return new MutablePair<>(-1, "评论失败");
+        }
+
         Comment comment = new Comment();
         comment.setModuleId(moduleId);
         comment.setReferencedId(referId);
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
-        comment.setCommentOpenId(openId);
         comment.setCommentProfileId(profileId);
+        comment.setCommentOpenId(openId);
+        comment.setRepliedProfileId(repliedComment.getCommentProfileId());
+        comment.setRepliedComment(repliedComment.getContent());
+        comment.setRepliedDel(0);
+        comment.setRepliedOpenId(repliedComment.getCommentOpenId());
+        comment.setRepliedId(repliedId);
         comment.setDevice(Constants.Device.PC);
-        if(repliedComment != null) {
-            comment.setRepliedOpenId(repliedComment.getCommentOpenId());
-            comment.setRepliedId(repliedId);
-            comment.setRepliedDel(0);
-            comment.setRepliedComment(repliedComment.getContent());
-            comment.setRepliedProfileId(repliedComment.getCommentProfileId());
-        }
+
         int id = commentDao.insert(comment);
-        //被回复的评论
-        if(repliedComment != null && !repliedComment.getCommentProfileId().equals(profileId)) {
+        //评论自己的评论,不发通知
+        if (!repliedComment.getCommentProfileId().equals(profileId)) {
             String msg = "";
             StringBuilder url = new StringBuilder("/rise/static/message/comment/reply");
-            if(moduleId == 2) {
-                msg = "评论了我的应用作业";
-            } else if(moduleId == 3) {
+            if (moduleId == 2) {
+                msg = "评论了我的应用练习";
+            } else if (moduleId == 3) {
                 msg = "评论了我的小课分享";
             }
             url = url.append("?moduleId=").append(moduleId).append("&submitId=").append(referId).append("&commentId=").append(id);
@@ -363,9 +390,7 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public void updatePicReference(List<String> picList, Integer submitId) {
-        picList.forEach(item -> {
-            pictureDao.updateReference(item, submitId);
-        });
+        picList.forEach(item -> pictureDao.updateReference(item, submitId));
     }
 
     @Override
