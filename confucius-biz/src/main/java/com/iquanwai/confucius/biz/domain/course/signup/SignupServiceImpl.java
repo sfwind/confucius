@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
@@ -360,7 +361,7 @@ public class SignupServiceImpl implements SignupService {
         Callback callback = callbackDao.loadUserCallback(profile.getOpenid());
         if (callback == null) {
             logger.error("异常");
-            messageService.sendAlarm("报名模块出错", "付费回调接口异常", "高", "该用户没有Callback数据", "无");
+            messageService.sendAlarm("报名模块出错", "付费回调接口异常", "高", "该用户没有Callback数据\n订单id:" + orderId, "无");
             return;
         }
         String cookieName;
@@ -380,8 +381,9 @@ public class SignupServiceImpl implements SignupService {
                 messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回题响应为空 \n 订单id:" + orderId, "");
                 return;
             } else {
-                Map<String, Object> result = CommonUtils.jsonToMap(body);
-                if (new Integer("200").equals(Integer.valueOf(result.get("code").toString()))) {
+//                Map<String, Object> result = CommonUtils.jsonToMap(body);
+                JSONObject result = JSONObject.parseObject(body);
+                if (200 == result.getInteger("code")) {
                     Integer planId = Integer.valueOf(result.get("msg").toString());
                     // 将plan的risemember设置为1并且将延长时间延长30天
                     ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
