@@ -10,6 +10,6 @@ public class GraphicMessage {
     private int id;
     private String title;
     private String description;
-    private String picUrl;
+    private String pic;
     private String url;
 }

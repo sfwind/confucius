@@ -68,7 +68,7 @@ public class NewsMessage {
         public Article(GraphicMessage graphicMessage){
             this.title = XMLHelper.appendCDATA(graphicMessage.getTitle());
             this.description = XMLHelper.appendCDATA(graphicMessage.getDescription());
-            this.picUrl = XMLHelper.appendCDATA(graphicMessage.getPicUrl());
+            this.picUrl = XMLHelper.appendCDATA(graphicMessage.getPic());
             this.url = XMLHelper.appendCDATA(graphicMessage.getUrl());
         }
     }
