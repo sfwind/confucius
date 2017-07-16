@@ -15,4 +15,13 @@ public class ImageCustomerMessage {
         this.touser = openid;
         this.image = new Image(mediaId);
     }
+
+    @Data
+    public static class Image {
+        private String media_id;
+
+        public Image(String mediaId) {
+            this.media_id = mediaId;
+        }
+    }
 }

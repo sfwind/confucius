@@ -15,4 +15,13 @@ public class TextCustomerMessage {
         this.touser = openid;
         this.text = new Text(content);
     }
+
+    @Data
+    public static class Text {
+        private String content;
+
+        public Text(String content) {
+            this.content = content;
+        }
+    }
 }

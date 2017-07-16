@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.customer;
 
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +20,17 @@ public class CustomerMessageServiceImpl implements CustomerMessageService {
 
     @Override
     public void sendCustomerMessage(String openid, String message, Integer type) {
-        if (TEXT.equals(type)) {
+        if (Constants.WEIXIN_MESSAGE_TYPE.TEXT == type) {
             TextCustomerMessage customerMessage = new TextCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
             restfulHelper.post(SEND_CUSTOMER_MESSAGE_URL, json);
-        } else if(IMAGE.equals(type)){
+        } else if(Constants.WEIXIN_MESSAGE_TYPE.IMAGE == type){
             ImageCustomerMessage customerMessage = new ImageCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);
             restfulHelper.post(SEND_CUSTOMER_MESSAGE_URL, json);
-        } else if(VOICE.equals(type)){
+        } else if(Constants.WEIXIN_MESSAGE_TYPE.VOICE == type){
             VoiceCustomerMessage customerMessage = new VoiceCustomerMessage(openid, message);
             Gson gson = new Gson();
             String json = gson.toJson(customerMessage);

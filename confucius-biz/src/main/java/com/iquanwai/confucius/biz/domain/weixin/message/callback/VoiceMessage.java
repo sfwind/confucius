@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -30,5 +31,17 @@ public class VoiceMessage {
         this.createTime = System.currentTimeMillis() / 1000;
         this.fromUserName = XMLHelper.appendCDATA(wxid);
         this.toUserName = XMLHelper.appendCDATA(openid);
+    }
+
+    @Setter
+    @ToString
+    @NoArgsConstructor
+    public static class Voice {
+        @XmlElement(name="MediaId")
+        public String media_id;
+
+        public Voice(String mediaId) {
+            this.media_id = XMLHelper.appendCDATA(mediaId);
+        }
     }
 }

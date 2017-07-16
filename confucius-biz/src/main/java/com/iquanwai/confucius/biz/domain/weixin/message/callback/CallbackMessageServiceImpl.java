@@ -1,17 +1,21 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
+import com.iquanwai.confucius.biz.dao.wx.GraphicMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.AutoReplyMessage;
+import com.iquanwai.confucius.biz.po.GraphicMessage;
 import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.collections.CollectionUtils;
@@ -48,6 +52,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private AutoReplyMessageDao autoReplyMessageDao;
     @Autowired
     private PromotionUserDao promotionUserDao;
+    @Autowired
+    private GraphicMessageDao graphicMessageDao;
 
     private RabbitMQPublisher rabbitMQPublisher;
 
@@ -64,6 +70,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String TYPE_EVENT = "event";
 
     private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
+    private Map<String, List<GraphicMessage>> newsMessageMap = Maps.newHashMap();
 
     @PostConstruct
     public void init() {
@@ -78,6 +85,20 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 }
             } else {
                 autoReplyMessageMap.put(autoReplyMessage.getKeyword(), autoReplyMessage);
+            }
+            //构造图文消息
+            if(autoReplyMessage.getType().equals(Constants.WEIXIN_MESSAGE_TYPE.NEWS)){
+                //message字段存储图文消息的id,多条图文时,用|隔开
+                String message = autoReplyMessage.getMessage();
+                String[] word = message.split("\\|");
+                List<GraphicMessage> graphicMessages = Lists.newArrayList();
+                for (String w : word) {
+                    GraphicMessage graphicMessage = graphicMessageDao.load(GraphicMessage.class, Integer.valueOf(w));
+                    if(graphicMessage!=null){
+                        graphicMessages.add(graphicMessage);
+                    }
+                }
+                newsMessageMap.put(keyword, graphicMessages);
             }
 
         });
@@ -140,6 +161,15 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         return null;
     }
 
+    private String buildNewsReplyMessage(String openid, String wxid, String keyword) {
+        if (keyword != null) {
+            List<GraphicMessage> graphicMessages = newsMessageMap.get(keyword);
+            NewsMessage newsMessage = new NewsMessage(wxid, openid, graphicMessages);
+            return XMLHelper.createXML(newsMessage);
+        }
+        return null;
+    }
+
     private String messageReply(String message, String openid, String wxid) {
         if(StringUtils.isEmpty(message)){
             return null;
@@ -147,12 +177,14 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
         // 精确匹配
         AutoReplyMessage autoReplyMessage = autoReplyMessageMap.get(message);
-        if (CustomerMessageService.TEXT.equals(autoReplyMessage.getType())) {
+        if (Constants.WEIXIN_MESSAGE_TYPE.TEXT == autoReplyMessage.getType()) {
             return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-        } else if (CustomerMessageService.IMAGE.equals(autoReplyMessage.getType())) {
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.IMAGE == autoReplyMessage.getType()) {
             return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-        } else if (CustomerMessageService.VOICE.equals(autoReplyMessage.getType())) {
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.VOICE == autoReplyMessage.getType()) {
             return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.NEWS == autoReplyMessage.getType()){
+            return buildNewsReplyMessage(openid, wxid, autoReplyMessage.getKeyword());
         }
 
         // 模糊匹配
@@ -161,11 +193,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             if (autoReplyMessageMap.get(word) != null) {
                 autoReplyMessage = autoReplyMessageMap.get(word);
                 if(!autoReplyMessage.getExact()){
-                    if (CustomerMessageService.TEXT.equals(autoReplyMessage.getType())) {
+                    if (Constants.WEIXIN_MESSAGE_TYPE.TEXT == autoReplyMessage.getType()) {
                         return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-                    } else if (CustomerMessageService.IMAGE.equals(autoReplyMessage.getType())) {
+                    } else if (Constants.WEIXIN_MESSAGE_TYPE.IMAGE == autoReplyMessage.getType()) {
                         return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-                    } else if (CustomerMessageService.VOICE.equals(autoReplyMessage.getType())) {
+                    } else if (Constants.WEIXIN_MESSAGE_TYPE.VOICE == autoReplyMessage.getType()) {
                         return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
                     }
                 }
@@ -240,11 +272,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         //发送客服消息
         subscribeMessages.forEach(subscribeMessage -> customerMessageService.sendCustomerMessage(openid,
                 subscribeMessage.getMessage(), subscribeMessage.getType()));
-        if (CustomerMessageService.TEXT.equals(lastOne.getType())) {
+        if (Constants.WEIXIN_MESSAGE_TYPE.TEXT == lastOne.getType()) {
             return bulidTextReplyMessage(openid, wxid, lastOne.getMessage());
-        } else if (CustomerMessageService.IMAGE.equals(lastOne.getType())) {
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.IMAGE == lastOne.getType()) {
             return buildImageReplyMessage(openid, wxid, lastOne.getMessage());
-        } else if (CustomerMessageService.VOICE.equals(lastOne.getType())) {
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.VOICE == lastOne.getType()) {
             return buildVoiceReplyMessage(openid, wxid, lastOne.getMessage());
         }
 

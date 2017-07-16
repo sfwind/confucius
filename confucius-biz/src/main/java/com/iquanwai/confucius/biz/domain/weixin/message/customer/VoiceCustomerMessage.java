@@ -15,4 +15,13 @@ public class VoiceCustomerMessage {
         this.touser = openid;
         this.voice = new Voice(mediaId);
     }
+
+    @Data
+    public static class Voice {
+        private String media_id;
+
+        public Voice(String mediaId) {
+            this.media_id = mediaId;
+        }
+    }
 }
