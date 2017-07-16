@@ -9,16 +9,24 @@ import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseCourseDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
+import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.TemplateMessageService;
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCourse;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -30,6 +38,7 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -37,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.awt.*;
@@ -78,10 +88,21 @@ public class SignupServiceImpl implements SignupService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
+    @Autowired
+    private ProblemDao problemDao;
+    @Autowired
+    private RiseCourseDao riseCourseDao;
+    @Autowired
+    private CallbackDao callbackDao;
+    @Autowired
+    private MessageService messageService;
+    @Autowired
+    private RestfulHelper restfulHelper;
 
-    int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
+    private int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
 
     /**
      * 支付二维码的高度
@@ -127,6 +148,17 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public Pair<Integer, String> riseMemberSignupCheck(Integer profileId, Integer memberTypeId) {
         return riseMemberCountRepo.prepareSignup(profileId);
+    }
+
+    @Override
+    public Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId) {
+        RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
+        List<ImprovementPlan> plans = improvementPlanDao.loadAllPlans(profileId);
+        // Rise会员可以直接学习，页面上应该不会调用这个接口，以防万一
+        if (riseMember != null) {
+            return new MutablePair<>(-1, "您已经是RISE会员，无需单独购买小课");
+        }
+        return new MutablePair<>(1, "");
     }
 
     @Override
@@ -177,39 +209,43 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Pair<Integer, QuanwaiOrder> signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
+    public QuanwaiOrder signupRiseCourse(Integer profileId,Integer problemId,Integer couponId) {
+        // 查询该openid 是否是我们的用户
+        Profile profile = profileDao.load(Profile.class, profileId);
+        Integer trialProblemId = ConfigUtils.getTrialProblemId();
+        Double fee = ConfigUtils.getRiseCourseFee();
+        Problem problem = problemDao.load(Problem.class, problemId);
+        Assert.notNull(problem, "小课数据异常");
+        Assert.notNull(fee, "会员价格异常");
+        Assert.isTrue(!problemId.equals(trialProblemId), "限免课程无需付费");
+        Assert.notNull(profile, "用户信息不能为空");
+        Pair<String, Double> orderPair = generateOrderId(fee, couponId);
+        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
+                orderPair.getLeft(), fee, orderPair.getRight(),
+                problemId.toString(), problem.getProblem(), QuanwaiOrder.FRAGMENT_RISE_COURSE);
+        // 插入rise小课单卖的报名数据
+        RiseCourse riseCourse = new RiseCourse();
+        riseCourse.setProblemId(problemId);
+        riseCourse.setProfileId(profileId);
+        riseCourse.setOpenid(profile.getOpenid());
+        riseCourse.setOrderId(orderPair.getLeft());
+        riseCourseDao.insert(riseCourse);
+        return quanwaiOrder;
+    }
+
+
+    @Override
+    public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
         // 查询该openid是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        Pair<String, Double> orderPair = generateOrderId(memberType.getFee(), couponId);
+
         Assert.notNull(profile, "用户信息错误");
         Assert.notNull(memberType, "会员类型错误");
-
-        // 创建订单
-        QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
-        quanwaiOrder.setCreateTime(new Date());
-        quanwaiOrder.setOpenid(profile.getOpenid());
-        //orderId 16位随机字符
-        String orderId = CommonUtils.randomString(16);
-        double discount = 0d;
-        if (couponId != null) {
-            // 计算优惠
-            Coupon coupon = costRepo.getCoupon(couponId);
-            if (coupon == null || coupon.getUsed() == Coupon.USED || coupon.getExpiredDate().before(new Date())) {
-                // 优惠券无效
-                return new MutablePair<>(-1, null);
-            }
-            discount = costRepo.discount(memberType.getFee(), orderId, coupon);
-        }
-
-        quanwaiOrder.setOrderId(orderId);
-        quanwaiOrder.setTotal(memberType.getFee());
-        quanwaiOrder.setDiscount(discount);
-        quanwaiOrder.setPrice(CommonUtils.substract(memberType.getFee(), discount));
-        quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY);
-        quanwaiOrder.setGoodsId(memberTypeId + "");
-        quanwaiOrder.setGoodsName(memberType.getName());
-        quanwaiOrder.setGoodsType(QuanwaiOrder.FRAGMENT_MEMBER);
-        quanwaiOrderDao.insert(quanwaiOrder);
+        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
+                orderPair.getLeft(), memberType.getFee(), orderPair.getRight(),
+                memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAGMENT_MEMBER);
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
@@ -217,10 +253,10 @@ public class SignupServiceImpl implements SignupService {
         riseOrder.setEntry(false);
         riseOrder.setIsDel(false);
         riseOrder.setMemberType(memberTypeId);
-        riseOrder.setOrderId(orderId);
+        riseOrder.setOrderId(orderPair.getLeft());
         riseOrder.setProfileId(profile.getId());
         riseOrderDao.insert(riseOrder);
-        return new MutablePair<>(1, quanwaiOrder);
+        return quanwaiOrder;
     }
 
     @Override
@@ -313,6 +349,52 @@ public class SignupServiceImpl implements SignupService {
         //发送录取消息
         sendWelcomeMsg(courseId, openid, classId, memberId);
         return memberId;
+    }
+
+    @Override
+    public void riseCourseEntry(String orderId){
+        RiseCourse riseCourse = riseCourseDao.loadOrder(orderId);
+        // 用户购买小课逻辑
+        Integer profileId = riseCourse.getProfileId();
+        Profile profile = profileDao.load(Profile.class, profileId);
+        Callback callback = callbackDao.loadUserCallback(profile.getOpenid());
+        if (callback == null) {
+            logger.error("异常");
+            messageService.sendAlarm("报名模块出错", "付费回调接口异常", "高", "该用户没有Callback数据", "无");
+            return;
+        }
+        String cookieName;
+        String cookieValue;
+
+        if (callback.getAccessToken() != null) {
+            cookieName = OAuthService.ACCESS_TOKEN_COOKIE_NAME;
+            cookieValue = callback.getAccessToken();
+        } else {
+            cookieName = OAuthService.QUANWAI_TOKEN_COOKIE_NAME;
+            cookieValue = callback.getPcAccessToken();
+        }
+        try {
+            String body = restfulHelper.risePlanChoose(cookieName, cookieValue, riseCourse.getProblemId());
+            if (StringUtils.isEmpty(body)) {
+                logger.error("调用rise生成小课接口异常");
+                messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回题响应为空 \n 订单id:" + orderId, "");
+                return;
+            } else {
+                Map<String, Object> result = CommonUtils.jsonToMap(body);
+                if (new Integer("200").equals(Integer.valueOf(result.get("code").toString()))) {
+                    Integer planId = Integer.valueOf(result.get("msg").toString());
+                    // 将plan的risemember设置为1并且将延长时间延长30天
+                    ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
+                    if (!plan.getRiseMember()) {
+                        // 该计划不是会员计划，需要延长时间
+                        plan.setCloseDate(DateUtils.afterDays(new Date(), 30));
+                        improvementPlanDao.becomeRiseMember(plan);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "riseCourseEntry方法异常\n订单id:" + orderId, e.getLocalizedMessage());
+        }
     }
 
     @Override
@@ -649,6 +731,41 @@ public class SignupServiceImpl implements SignupService {
         int count = memberCount.get(classId) + 1;
         memberCount.put(classId, count);
         return count;
+    }
+
+    /**
+     * 生成orderId以及计算优惠价格
+     * @param fee 总价格
+     * @param couponId 优惠券id 如果
+     */
+    private Pair<String,Double> generateOrderId(Double fee,Integer couponId){
+        //orderId 16位随机字符
+        String orderId = CommonUtils.randomString(16);
+        Double discount = 0d;
+        if (couponId != null) {
+            // 计算优惠
+            Coupon coupon = costRepo.getCoupon(couponId);
+            Assert.notNull(coupon, "优惠券无效");
+            discount = costRepo.discount(fee, orderId, coupon);
+        }
+        return new MutablePair<>(orderId, discount);
+    }
+
+    private QuanwaiOrder createQuanwaiOrder(String openId,String orderId,Double fee,Double discount,String goodsId,String goodsName,String goodsType){
+        // 创建订单
+        QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
+        quanwaiOrder.setCreateTime(new Date());
+        quanwaiOrder.setOpenid(openId);
+        quanwaiOrder.setOrderId(orderId);
+        quanwaiOrder.setTotal(fee);
+        quanwaiOrder.setDiscount(discount);
+        quanwaiOrder.setPrice(CommonUtils.substract(fee, discount));
+        quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY);
+        quanwaiOrder.setGoodsId(goodsId);
+        quanwaiOrder.setGoodsName(goodsName);
+        quanwaiOrder.setGoodsType(goodsType);
+        quanwaiOrderDao.insert(quanwaiOrder);
+        return quanwaiOrder;
     }
 
 }

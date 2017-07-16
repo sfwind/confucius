@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -68,6 +69,19 @@ public class CostRepoImpl implements CostRepo {
         }
         reloadCoupon();
         return CommonUtils.substract(price, remain);
+    }
+
+    @Override
+    public boolean checkDiscount(Integer profileId, Integer couponId) {
+        if (couponId != null) {
+            // 计算优惠
+            Coupon coupon = this.getCoupon(couponId);
+            if (coupon == null || coupon.getUsed() == Coupon.USED || coupon.getExpiredDate().before(new Date())) {
+                // 优惠券无效
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean hasCoupon(Integer profileId) {

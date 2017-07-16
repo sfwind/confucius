@@ -167,6 +167,18 @@ public class ZKConfigUtils {
         return null;
     }
 
+    public Double getDoubleValue(String key){
+        String value = getValue(key);
+        try{
+            Assert.notNull  (value);
+            return Double.valueOf(value);
+        }catch (Exception e){
+            logger.error("zk" + zkAddress + " get int {}", value);
+        }
+
+        return null;
+    }
+
     public void updateValue(String projectId, String key, String value){
         try {
             String json = new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");

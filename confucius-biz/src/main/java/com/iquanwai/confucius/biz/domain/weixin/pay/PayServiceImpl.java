@@ -153,7 +153,7 @@ public class PayServiceImpl implements PayService{
     }
 
     @Override
-    public void riseMemberPaySuccess(String orderId){
+    public void risePaySuccess(String orderId){
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         if(quanwaiOrder==null){
             logger.error("订单 {} 不存在", orderId);
@@ -162,6 +162,8 @@ public class PayServiceImpl implements PayService{
         if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
             signupService.riseMemberEntry(quanwaiOrder.getOrderId());
+        } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+            signupService.riseCourseEntry(quanwaiOrder.getOrderId());
         }
         //使用优惠券
         if(quanwaiOrder.getDiscount()!=0.0){
@@ -169,6 +171,8 @@ public class PayServiceImpl implements PayService{
             costRepo.updateCoupon(Coupon.USED, orderId);
         }
     }
+
+
 
     public void closeOrder() {
         //点开付费的保留5分钟

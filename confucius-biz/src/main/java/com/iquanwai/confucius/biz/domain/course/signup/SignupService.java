@@ -29,6 +29,18 @@ public interface SignupService {
      */
     Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId);
 
+    /**
+     * 检查该用户是否可以购买该小课
+     * @param profileId 用户id
+     * @param problemId 小课id
+     */
+    Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId);
+
+    /**
+     * 检查是否在报名中
+     * @param profileId 用户id
+     * @param memberTypeId  会员类型
+     */
     Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId);
 
     /**
@@ -43,7 +55,9 @@ public interface SignupService {
     /**
      * 报名rise, 不生成预付订单
      */
-    Pair<Integer, QuanwaiOrder> signupRiseMember(Integer profileId, Integer memberType, Integer couponId);
+    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberType, Integer couponId);
+
+    QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId);
 
     /**
      * 获取学员详情
@@ -79,6 +93,8 @@ public interface SignupService {
      * @return 返回学号
      */
     String entry(String orderId);
+
+    void riseCourseEntry(String orderId);
 
     void riseMemberEntry(String orderId);
 

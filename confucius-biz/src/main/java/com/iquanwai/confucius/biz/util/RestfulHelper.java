@@ -2,12 +2,17 @@ package com.iquanwai.confucius.biz.util;
 
 import com.iquanwai.confucius.biz.domain.weixin.accessToken.AccessTokenService;
 import com.iquanwai.confucius.biz.exception.WeixinException;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 /**
  * Created by justin on 8/3/16.
@@ -137,6 +142,46 @@ public class RestfulHelper {
                 return body;
             } catch (Exception e) {
                 logger.error("execute " + requestUrl + " error", e);
+            }
+        }
+        return "";
+    }
+
+    public String risePlanChoose(String cookieName, String cookieValue, Integer problemId) {
+        Assert.notNull(problemId);
+        String url = ConfigUtils.domainName() + "/rise/plan/choose/problem/" + problemId;
+        return postRise(url, "{\"default\":\"null\"}", cookieName, cookieValue);
+    }
+
+
+    public String postRise(String url, String json, String cookieName,String cookieValue) {
+//        if (callback == null || callback.getOpenid() == null) {
+//            logger.error("调用rise接口异常，没有身份信息,callbackId:{}", callback != null ? callback.getState() : null);
+//            return "";
+//        }
+//        String cookieName = "";
+//        String cookieValue = "";
+//        if (callback.getAccessToken() != null) {
+//            cookieName = OAuthService.ACCESS_TOKEN_COOKIE_NAME;
+//            cookieValue = callback.getAccessToken();
+//        } else {
+//            cookieName = OAuthService.QUANWAI_TOKEN_COOKIE_NAME;
+//            cookieValue = callback.getPcAccessToken();
+//        }
+        String cookie = cookieName+"="+cookieValue;
+
+        if (StringUtils.isNotEmpty(url) && StringUtils.isNotEmpty(json)) {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(RequestBody.create(JSON, json))
+                    .addHeader("Cookie", cookie)
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                return response.body().string();
+            } catch (Exception e) {
+                logger.error("execute " + url + " error", e);
             }
         }
         return "";
