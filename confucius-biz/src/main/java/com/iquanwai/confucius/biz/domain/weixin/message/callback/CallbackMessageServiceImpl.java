@@ -214,6 +214,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     logger.info("event key is {}", eventKey);
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
+                    //TODO: 老用户判断
                     //发送订阅消息
                     SubscribeEvent subscribeEvent = new SubscribeEvent();
                     subscribeEvent.setOpenid(openid);
@@ -231,7 +232,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         promotionUser.setAction(0);
                         promotionUserDao.insert(promotionUser);
                     }
-                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
+                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
+                    subscribeMessages.addAll(subscribeMessageDao.loadSubscribeMessages(channel));
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
