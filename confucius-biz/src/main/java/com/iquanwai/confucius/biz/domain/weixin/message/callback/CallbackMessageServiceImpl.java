@@ -255,7 +255,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 List<SubscribeMessage> scanMessages;
                 if (eventKey != null) {
                     logger.info("event key is {}", eventKey);
-                    scanMessages = subscribeMessageDao.loadScanMessages(eventKey);
+                    scanMessages = subscribeMessageDao.loadSubscribeMessages();
+                    scanMessages.addAll(subscribeMessageDao.loadSubscribeMessages(eventKey));
                 } else {
                     scanMessages = subscribeMessageDao.loadScanMessages();
                 }
