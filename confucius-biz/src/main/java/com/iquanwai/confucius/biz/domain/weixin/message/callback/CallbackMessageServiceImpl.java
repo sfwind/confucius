@@ -15,6 +15,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,16 +141,33 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     }
 
     private String messageReply(String message, String openid, String wxid) {
+        if(StringUtils.isEmpty(message)){
+            return null;
+        }
+
+        // 精确匹配
+        AutoReplyMessage autoReplyMessage = autoReplyMessageMap.get(message);
+        if (CustomerMessageService.TEXT.equals(autoReplyMessage.getType())) {
+            return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+        } else if (CustomerMessageService.IMAGE.equals(autoReplyMessage.getType())) {
+            return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+        } else if (CustomerMessageService.VOICE.equals(autoReplyMessage.getType())) {
+            return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+        }
+
+        // 模糊匹配
         List<String> words = CommonUtils.separateWords(message);
         for (String word : words) {
             if (autoReplyMessageMap.get(word) != null) {
-                AutoReplyMessage autoReplyMessage = autoReplyMessageMap.get(word);
-                if (CustomerMessageService.TEXT.equals(autoReplyMessage.getType())) {
-                    return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-                } else if (CustomerMessageService.IMAGE.equals(autoReplyMessage.getType())) {
-                    return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-                } else if (CustomerMessageService.VOICE.equals(autoReplyMessage.getType())) {
-                    return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                autoReplyMessage = autoReplyMessageMap.get(word);
+                if(!autoReplyMessage.getExact()){
+                    if (CustomerMessageService.TEXT.equals(autoReplyMessage.getType())) {
+                        return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                    } else if (CustomerMessageService.IMAGE.equals(autoReplyMessage.getType())) {
+                        return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                    } else if (CustomerMessageService.VOICE.equals(autoReplyMessage.getType())) {
+                        return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                    }
                 }
             }
         }
