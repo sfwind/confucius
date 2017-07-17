@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -149,6 +151,23 @@ public class AccountServiceImpl implements AccountService {
                     if (accountNew.getNickname() != null) {
                         logger.info("插入用户信息:{}", accountNew);
                         followUserDao.insert(accountNew);
+                        // 插入profile表
+                        Profile profile = new Profile();
+                        try{
+                            BeanUtils.copyProperties(profile, accountNew);
+                            logger.info("插入Profile表信息:{}",profile);
+                            profile.setRiseId(CommonUtils.randomString(7));
+                            profileDao.insertProfile(profile);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            logger.error("beanUtils copy props error",e);
+                        } catch (SQLException err){
+                            profile.setRiseId(CommonUtils.randomString(7));
+                            try{
+                                profileDao.insertProfile(profile);
+                            } catch (SQLException subErr){
+                                logger.error("插入Profile失败，openId:{},riseId:{}",profile.getOpenid(),profile.getRiseId());
+                            }
+                        }
                     }
                 });
             } else {
