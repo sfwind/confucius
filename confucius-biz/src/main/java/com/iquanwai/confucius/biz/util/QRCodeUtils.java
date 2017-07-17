@@ -4,7 +4,7 @@ import com.google.zxing.*;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.iquanwai.confucius.biz.domain.weixin.qrcode.BufferedImageLuminanceSource;
+import com.iquanwai.confucius.biz.domain.image.BufferedImageLuminanceSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

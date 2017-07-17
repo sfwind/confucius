@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.weixin.message;
+package com.iquanwai.confucius.biz.domain.weixin.message.template;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;

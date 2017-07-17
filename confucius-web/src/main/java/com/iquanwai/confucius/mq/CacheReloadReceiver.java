@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
 import com.rabbitmq.client.*;
@@ -37,16 +38,18 @@ public class CacheReloadReceiver {
     private RiseMemberTypeRepo riseMemberTypeRepo;
     @Autowired
     private RiseMemberCountRepo riseMemberCountRepo;
+    @Autowired
+    private CallbackMessageService callbackMessageService;
 
     @PostConstruct
     public void init(){
         RabbitMQReceiver receiver = new RabbitMQReceiver();
         receiver.init(null, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
         Channel channel = receiver.getChannel();
-        logger.info("通道建立");
+        logger.info(TOPIC + "通道建立");
         Consumer consumer = getConsumer(channel);
         receiver.listen(consumer);
-        logger.info("开启队列监听");
+        logger.info(TOPIC + "开启队列监听");
     }
 
 
@@ -72,6 +75,10 @@ public class CacheReloadReceiver {
                     case "rise_member":
                         riseMemberTypeRepo.reload();
                         riseMemberCountRepo.reload();
+                        break;
+                    case "weixin_message":
+                        callbackMessageService.reload();
+                        break;
                 }
 
             }
