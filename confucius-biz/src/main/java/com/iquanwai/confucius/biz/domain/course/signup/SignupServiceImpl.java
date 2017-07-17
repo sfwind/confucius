@@ -210,7 +210,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signupRiseCourse(Integer profileId,Integer problemId,Integer couponId) {
+    public QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId) {
         // 查询该openid 是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
         Integer trialProblemId = ConfigUtils.getTrialProblemId();
@@ -353,20 +353,42 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public void riseCourseEntry(String orderId){
+    public void riseCourseEntry(String orderId) {
         RiseCourse riseCourse = riseCourseDao.loadOrder(orderId);
         // 用户购买小课逻辑
         Integer profileId = riseCourse.getProfileId();
         Profile profile = profileDao.load(Profile.class, profileId);
-        Callback callback = callbackDao.loadUserCallback(profile.getOpenid());
+
+
+        // 检查用户是不是已经学过这个小课
+        ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourse.getProblemId());
+        if (plan == null) {
+            // 用户没有学过这个小课，生成他
+            Integer planId = createPlan(riseCourse);
+            improvementPlanDao.reOpenPlan(planId, DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+        } else {
+            // 用户有这个小课
+            if (plan.getStatus() == ImprovementPlan.TRIALCLOSE) {
+                // 试用结束，设置成正在进行，延长三十天
+                improvementPlanDao.reOpenPlan(plan.getId(), DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+            } else {
+                logger.error("报名小课异常，小课状态为:{}", plan.getStatus());
+                messageService.sendAlarm("报名模块出错", "用户小课数据异常",
+                        "高", "订单id:" + orderId, "该用户购买的小课，状态并不是使用结束");
+                return;
+            }
+        }
+    }
+
+    private Integer createPlan(RiseCourse riseCourse) {
+        Callback callback = callbackDao.loadUserCallback(riseCourse.getOpenid());
         if (callback == null) {
-            logger.error("异常");
-            messageService.sendAlarm("报名模块出错", "付费回调接口异常", "高", "该用户没有Callback数据\n订单id:" + orderId, "无");
-            return;
+            logger.error("报名小课异常，没有callback数据,orderId:{}", riseCourse.getOrderId());
+            messageService.sendAlarm("报名模块出错", "付费回调接口异常", "高", "订单id:" + riseCourse.getOrderId(), "该用户没有Callback数据");
+            return -1;
         }
         String cookieName;
         String cookieValue;
-
         if (callback.getAccessToken() != null) {
             cookieName = OAuthService.ACCESS_TOKEN_COOKIE_NAME;
             cookieValue = callback.getAccessToken();
@@ -378,37 +400,33 @@ public class SignupServiceImpl implements SignupService {
             String body = restfulHelper.risePlanChoose(cookieName, cookieValue, riseCourse.getProblemId());
             if (StringUtils.isEmpty(body)) {
                 logger.error("调用rise生成小课接口异常");
-                messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回题响应为空 \n 订单id:" + orderId, "");
-                return;
+                messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "订单id:" + riseCourse.getOrderId(), "返回题响应为空 ");
+                return -1;
             } else {
-//                Map<String, Object> result = CommonUtils.jsonToMap(body);
                 JSONObject result = JSONObject.parseObject(body);
                 if (200 == result.getInteger("code")) {
-                    Integer planId = Integer.valueOf(result.get("msg").toString());
-                    // 将plan的risemember设置为1并且将延长时间延长30天
-                    ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
-                    if (!plan.getRiseMember()) {
-                        // 该计划不是会员计划，需要延长时间
-                        plan.setCloseDate(DateUtils.afterDays(new Date(), 30));
-                        improvementPlanDao.becomeRiseMember(plan);
-                    }
+                    return Integer.valueOf(result.get("msg").toString());
+                } else {
+                    messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回code异常 \n 订单id:" + riseCourse.getOrderId(), result.toJSONString());
+                    return -1;
                 }
             }
         } catch (Exception e) {
-            messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "riseCourseEntry方法异常\n订单id:" + orderId, e.getLocalizedMessage());
+            messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "riseCourseEntry方法异常\n订单id:" + riseCourse.getOrderId(), e.getLocalizedMessage());
+            return -1;
         }
     }
 
     @Override
     public void riseMemberEntry(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
-        try{
+        try {
             RiseMember exist = riseMemberDao.loadByOrderId(orderId);
             if (riseOrder.getEntry() && exist != null && !exist.getExpired() && DateUtils.isSameDate(exist.getAddTime(), new Date())) {
                 // 这个单子已经成功，且已经插入了riseMember，并且未过期,并且是今天的
                 return;
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
@@ -737,10 +755,11 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee      总价格
      * @param couponId 优惠券id 如果
      */
-    private Pair<String,Double> generateOrderId(Double fee,Integer couponId){
+    private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
         //orderId 16位随机字符
         String orderId = CommonUtils.randomString(16);
         Double discount = 0d;
@@ -753,7 +772,7 @@ public class SignupServiceImpl implements SignupService {
         return new MutablePair<>(orderId, discount);
     }
 
-    private QuanwaiOrder createQuanwaiOrder(String openId,String orderId,Double fee,Double discount,String goodsId,String goodsName,String goodsType){
+    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId, String goodsName, String goodsType) {
         // 创建订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
         quanwaiOrder.setCreateTime(new Date());

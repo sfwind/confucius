@@ -25,7 +25,7 @@ public class CallbackDao extends DBUtil {
         ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
 
         try {
-            Callback callback = run.query("SELECT * FROM Callback where OpenId=?", h, openId    );
+            Callback callback = run.query("SELECT * FROM Callback where OpenId=? and (AccessToken is not null or PcAccessToken is not null) limit 1", h, openId);
             return callback;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
