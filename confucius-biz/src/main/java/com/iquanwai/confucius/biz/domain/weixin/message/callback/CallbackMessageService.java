@@ -12,4 +12,6 @@ public interface CallbackMessageService {
     String handleCallback(Document document);
 
     String SUBSCRIBE_TOPIC = "subscribe_quanwai";
+
+    void reload();
 }

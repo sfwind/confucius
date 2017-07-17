@@ -70,6 +70,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String TYPE_EVENT = "event";
 
     private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
+    private AutoReplyMessage defaultReply;
     private Map<String, List<GraphicMessage>> newsMessageMap = Maps.newHashMap();
 
     @PostConstruct
@@ -77,6 +78,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         //初始化自动回复消息
         List<AutoReplyMessage> messages = autoReplyMessageDao.loadAllMessages();
         messages.forEach(autoReplyMessage -> {
+            // 判断是否是默认回复
+            if (autoReplyMessage.getIsDefault()) {
+                defaultReply = autoReplyMessage;
+                return;
+            }
+
             String keyword = autoReplyMessage.getKeyword();
             if (keyword.contains("|")) {
                 String[] word = keyword.split("\\|");
@@ -87,14 +94,14 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 autoReplyMessageMap.put(autoReplyMessage.getKeyword(), autoReplyMessage);
             }
             //构造图文消息
-            if(autoReplyMessage.getType().equals(Constants.WEIXIN_MESSAGE_TYPE.NEWS)){
+            if (autoReplyMessage.getType().equals(Constants.WEIXIN_MESSAGE_TYPE.NEWS)) {
                 //message字段存储图文消息的id,多条图文时,用|隔开
                 String message = autoReplyMessage.getMessage();
                 String[] word = message.split("\\|");
                 List<GraphicMessage> graphicMessages = Lists.newArrayList();
                 for (String w : word) {
                     GraphicMessage graphicMessage = graphicMessageDao.load(GraphicMessage.class, Integer.valueOf(w));
-                    if(graphicMessage!=null){
+                    if (graphicMessage != null) {
                         graphicMessages.add(graphicMessage);
                     }
                 }
@@ -120,6 +127,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             return handleEvent(document);
         }
         return null;
+    }
+
+    @Override
+    public void reload() {
+        init();
     }
 
     private String handleUserMessage(Document document) {
@@ -171,20 +183,17 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     }
 
     private String messageReply(String message, String openid, String wxid) {
-        if(StringUtils.isEmpty(message)){
+        if (StringUtils.isEmpty(message)) {
             return null;
         }
 
         // 精确匹配
         AutoReplyMessage autoReplyMessage = autoReplyMessageMap.get(message);
-        if (Constants.WEIXIN_MESSAGE_TYPE.TEXT == autoReplyMessage.getType()) {
-            return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-        } else if (Constants.WEIXIN_MESSAGE_TYPE.IMAGE == autoReplyMessage.getType()) {
-            return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-        } else if (Constants.WEIXIN_MESSAGE_TYPE.VOICE == autoReplyMessage.getType()) {
-            return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-        } else if (Constants.WEIXIN_MESSAGE_TYPE.NEWS == autoReplyMessage.getType()){
-            return buildNewsReplyMessage(openid, wxid, autoReplyMessage.getKeyword());
+        if (autoReplyMessage != null) {
+            String msg = buildMessage(openid, wxid, autoReplyMessage);
+            if (msg != null) {
+                return msg;
+            }
         }
 
         // 模糊匹配
@@ -192,16 +201,31 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         for (String word : words) {
             if (autoReplyMessageMap.get(word) != null) {
                 autoReplyMessage = autoReplyMessageMap.get(word);
-                if(!autoReplyMessage.getExact()){
-                    if (Constants.WEIXIN_MESSAGE_TYPE.TEXT == autoReplyMessage.getType()) {
-                        return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-                    } else if (Constants.WEIXIN_MESSAGE_TYPE.IMAGE == autoReplyMessage.getType()) {
-                        return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
-                    } else if (Constants.WEIXIN_MESSAGE_TYPE.VOICE == autoReplyMessage.getType()) {
-                        return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+                if (!autoReplyMessage.getExact()) {
+                    String msg = buildMessage(openid, wxid, autoReplyMessage);
+                    if (msg != null) {
+                        return msg;
                     }
                 }
             }
+        }
+
+        //没有匹配到任何消息时,回复默认消息
+        return buildMessage(openid, wxid, defaultReply);
+    }
+
+    private String buildMessage(String openid, String wxid, AutoReplyMessage autoReplyMessage) {
+        if (autoReplyMessage == null) {
+            return null;
+        }
+        if (Constants.WEIXIN_MESSAGE_TYPE.TEXT == autoReplyMessage.getType()) {
+            return bulidTextReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.IMAGE == autoReplyMessage.getType()) {
+            return buildImageReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.VOICE == autoReplyMessage.getType()) {
+            return buildVoiceReplyMessage(openid, wxid, autoReplyMessage.getMessage());
+        } else if (Constants.WEIXIN_MESSAGE_TYPE.NEWS == autoReplyMessage.getType()) {
+            return buildNewsReplyMessage(openid, wxid, autoReplyMessage.getKeyword());
         }
         return null;
     }

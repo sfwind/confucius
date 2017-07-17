@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
 import com.rabbitmq.client.*;
@@ -37,6 +38,8 @@ public class CacheReloadReceiver {
     private RiseMemberTypeRepo riseMemberTypeRepo;
     @Autowired
     private RiseMemberCountRepo riseMemberCountRepo;
+    @Autowired
+    private CallbackMessageService callbackMessageService;
 
     @PostConstruct
     public void init(){
@@ -72,6 +75,8 @@ public class CacheReloadReceiver {
                     case "rise_member":
                         riseMemberTypeRepo.reload();
                         riseMemberCountRepo.reload();
+                    case "weixin_message":
+                        callbackMessageService.reload();
                 }
 
             }

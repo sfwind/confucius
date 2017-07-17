@@ -71,4 +71,14 @@ public class CacheReloadController {
             return WebUtils.error("reload riseMember error");
         }
     }
+
+    @RequestMapping("/weixin/message/reload")
+    public ResponseEntity<Map<String,Object>> weixinMessageReload(){
+        try{
+            rabbitMQPublisher.publish("weixin_message");
+            return WebUtils.success();
+        } catch (Exception e){
+            return WebUtils.error("reload riseMember error");
+        }
+    }
 }

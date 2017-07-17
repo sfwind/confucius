@@ -12,4 +12,5 @@ public class AutoReplyMessage {
     private Integer type; //类型（1-文字，2-图片，3-语音，4-图文）
     private String keyword; //关键字
     private Boolean exact; //精确匹配（0-否，1-是）
+    private Boolean isDefault; //默认回复（0-否，1-是）
 }
