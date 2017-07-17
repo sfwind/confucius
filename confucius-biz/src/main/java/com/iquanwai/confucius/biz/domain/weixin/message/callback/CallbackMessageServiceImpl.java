@@ -75,6 +75,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     @PostConstruct
     public void init() {
+        autoReplyMessageMap.clear();
+        newsMessageMap.clear();
+        defaultReply = null;
         //初始化自动回复消息
         List<AutoReplyMessage> messages = autoReplyMessageDao.loadAllMessages();
         messages.forEach(autoReplyMessage -> {
