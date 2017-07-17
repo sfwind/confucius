@@ -38,7 +38,7 @@ public class XMLHelper {
         }
         String escaped_xml = sw.toString();
 
-        return escaped_xml.replace("&lt;![CDATA", "<![CDATA").replace("]]&gt;", "]]>");
+        return escaped_xml.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&");
     }
 
     public static <T> T parseXml(Class<T> clazz, String xml) {
