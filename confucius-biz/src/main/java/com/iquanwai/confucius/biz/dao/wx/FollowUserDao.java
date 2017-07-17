@@ -70,10 +70,11 @@ public class FollowUserDao extends DBUtil {
 
     public void updateMeta(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String updateSql = "Update FollowUsers Set Nickname=?, Headimgurl=?, UnionId=?, Subscribe=1 where Openid=?";
+        String updateSql = "Update FollowUsers Set Nickname=?, Headimgurl=?, UnionId=?, Subscribe=? where Openid=?";
         try {
             run.update(updateSql,
-                    account.getNickname(), account.getHeadimgurl(), account.getUnionid(), account.getOpenid());
+                    account.getNickname(), account.getHeadimgurl(),
+                    account.getUnionid(), account.getSubscribe(), account.getOpenid());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
