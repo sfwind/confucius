@@ -237,7 +237,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         switch (event) {
             case EVENT_SUBSCRIBE:
                 List<SubscribeMessage> subscribeMessages;
-                if (eventKey != null) {
+                if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
@@ -280,7 +280,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 break;
             case EVENT_SCAN:
                 List<SubscribeMessage> scanMessages;
-                if (eventKey != null) {
+                if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
                     scanMessages = subscribeMessageDao.loadScanMessages();
                     scanMessages.addAll(subscribeMessageDao.loadScanMessages(eventKey));
