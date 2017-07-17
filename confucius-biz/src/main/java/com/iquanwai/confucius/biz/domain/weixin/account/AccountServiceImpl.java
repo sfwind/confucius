@@ -194,14 +194,16 @@ public class AccountServiceImpl implements AccountService {
         String body = restfulHelper.get(url);
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
-
+        String lastOpenid = "";
         for (String openid : usersDto.getData().getOpenid()) {
+            lastOpenid = openid;
             try {
                 getAccount(openid, true);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
         }
+        logger.info("最后一个openid:" + lastOpenid);
         logger.info("处理完成");
     }
 
@@ -223,6 +225,27 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
+        logger.info("处理完成");
+    }
+
+    @Override
+    public void collectNext(String nextOpenid) {
+        //调用api查询account对象
+        String url = GET_NEXT_USERS_URL;
+        url = url.replace("{next_openid}", nextOpenid);
+        String body = restfulHelper.get(url);
+
+        UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
+        String lastOpenid = "";
+        for (String openid : usersDto.getData().getOpenid()) {
+            lastOpenid = openid;
+            try {
+                getAccount(openid, true);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        logger.info("最后一个openid:" + lastOpenid);
         logger.info("处理完成");
     }
 

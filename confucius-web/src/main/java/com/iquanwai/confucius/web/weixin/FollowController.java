@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -34,6 +35,14 @@ public class FollowController {
     @RequestMapping("/new")
     public ResponseEntity<Map<String, Object>> getNew() throws IOException {
         new Thread(accountService::collectNewUsers).start();
+        return WebUtils.result("正在运行中");
+    }
+
+    @RequestMapping("/next")
+    public ResponseEntity<Map<String, Object>> getNext(@RequestParam("openid") String openid) throws IOException {
+        new Thread(() -> {
+            accountService.collectNext(openid);
+        }).start();
         return WebUtils.result("正在运行中");
     }
 

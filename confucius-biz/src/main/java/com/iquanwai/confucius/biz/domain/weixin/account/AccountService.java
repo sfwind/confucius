@@ -18,6 +18,8 @@ public interface AccountService {
 
     String GET_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}";
 
+    String GET_NEXT_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}&next_openid={next_openid}";
+
     String PC_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN";
 
     /**
@@ -34,6 +36,11 @@ public interface AccountService {
      * 收集新关注用户的信息
      */
     void collectNewUsers();
+
+    /**
+     * 收集关注用户的信息
+     */
+    void collectNext(String openid);
 
     /**
      * 获取所有的省份信息

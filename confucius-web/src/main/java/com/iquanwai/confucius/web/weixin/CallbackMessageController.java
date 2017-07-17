@@ -94,10 +94,8 @@ public class CallbackMessageController {
             // 转换成string后关闭
             IOUtils.closeQuietly(is);
 
-            LOGGER.info("xml is \n" + xml);
             String returnXml = callbackMessageService.handleCallback(document);
             if(returnXml!=null){
-                LOGGER.info("returnXml is \n" + returnXml);
                 PrintWriter writer = response.getWriter();
                 try {
                     response.setHeader("Content-Type", "application/xml");
