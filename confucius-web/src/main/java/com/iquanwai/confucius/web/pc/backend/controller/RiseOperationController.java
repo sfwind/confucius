@@ -4,16 +4,15 @@ import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
-import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.systematism.Choice;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.pc.backend.dto.DiscussDto;
+import com.iquanwai.confucius.web.pc.backend.dto.ProblemKnowledgesDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,8 +40,6 @@ public class RiseOperationController {
     private ProblemService problemService;
     @Autowired
     private PracticeService practiceService;
-    @Autowired
-    private MessageService messageService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -60,7 +56,7 @@ public class RiseOperationController {
 
         applicationSubmitList.stream().forEach(applicationSubmit -> {
             Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), loginUser.getProfileId());
-            applicationSubmit.setComment(isComment?1:0);
+            applicationSubmit.setComment(isComment ? 1 : 0);
         });
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -71,20 +67,6 @@ public class RiseOperationController {
         operationLogService.log(operationLog);
 
         return WebUtils.result(applicationSubmitList);
-    }
-
-
-    @RequestMapping("/hot/warmup")
-    public ResponseEntity<Map<String, Object>> getHotPracticeDiscuss(PCLoginUser loginUser) {
-        List<WarmupPractice> warmupPractices = operationManagementService.getLastTwoDayActivePractice();
-
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习讨论区")
-                .action("加载最热的巩固练习");
-        operationLogService.log(operationLog);
-
-        return WebUtils.result(warmupPractices);
     }
 
     @RequestMapping("/warmup/list/{problemId}")
@@ -99,64 +81,6 @@ public class RiseOperationController {
         operationLogService.log(operationLog);
 
         return WebUtils.result(warmupPractices);
-    }
-
-    @RequestMapping("/warmup/load/{practiceId}")
-    public ResponseEntity<Map<String, Object>> getPracticeDiscuss(PCLoginUser loginUser,
-                                                                  @PathVariable Integer practiceId) {
-        WarmupPractice warmupPractice = operationManagementService.getWarmupPractice(practiceId);
-
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习讨论区")
-                .action("加载巩固练习讨论")
-                .memo(practiceId.toString());
-        operationLogService.log(operationLog);
-
-        return WebUtils.result(warmupPractice);
-    }
-
-    /**
-     * 删除助教的巩固练习评论
-     */
-    @RequestMapping("/warmup/discuss/del/{discussId}")
-    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
-        Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习练习区")
-                .action("删除巩固练习评论")
-                .memo(discussId.toString());
-        operationLogService.log(operationLog);
-        if(result == 1) {
-            return WebUtils.success();
-        } else if(result == 0) {
-            return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
-        } else {
-            return WebUtils.error("系统异常");
-        }
-    }
-
-
-    @RequestMapping(value = "/reply/discuss", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> replyDiscuss(PCLoginUser loginUser,
-                                                            @RequestBody DiscussDto discussDto) {
-        if (discussDto.getComment() == null || discussDto.getComment().length() > 300) {
-            LOGGER.error("{} 巩固练习讨论字数过长", loginUser.getOpenId());
-            return WebUtils.result("您提交的讨论字数过长");
-        }
-
-        operationManagementService.discuss(loginUser.getOpenId(), loginUser.getProfileId(),
-                discussDto.getWarmupPracticeId(),
-                discussDto.getComment(), discussDto.getRepliedId());
-
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("内容运营")
-                .function("巩固练习")
-                .action("回复讨论")
-                .memo(discussDto.getWarmupPracticeId().toString());
-        operationLogService.log(operationLog);
-        return WebUtils.success();
     }
 
     @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
@@ -188,7 +112,6 @@ public class RiseOperationController {
         return WebUtils.success();
     }
 
-
     @RequestMapping("/problem/list")
     public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
 
@@ -196,7 +119,7 @@ public class RiseOperationController {
         List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
-            List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
+            List<ProblemListDto> collect = problems.stream().filter(problem -> !problem.getDel())
                     .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
@@ -216,6 +139,26 @@ public class RiseOperationController {
         return WebUtils.result(result);
     }
 
+    /**
+     * 删除助教的巩固练习评论
+     */
+    @RequestMapping("/warmup/discuss/del/{discussId}")
+    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
+        Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习练习区")
+                .action("删除巩固练习评论")
+                .memo(discussId.toString());
+        operationLogService.log(operationLog);
+        if(result == 1) {
+            return WebUtils.success();
+        } else if(result == 0) {
+            return WebUtils.error(201, "抱歉，暂时不能删除非助教评论");
+        } else {
+            return WebUtils.error("系统异常");
+        }
+    }
 
     /**
      * 碎片化总任务列表加载
@@ -238,16 +181,16 @@ public class RiseOperationController {
     }
 
 
-    @RequestMapping(value="/warmup/save", method = RequestMethod.POST)
+    @RequestMapping(value = "/warmup/save", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> savePractice(PCLoginUser loginUser,
-                                                                  @RequestBody WarmupPractice warmupPractice) {
+                                                            @RequestBody WarmupPractice warmupPractice) {
 
         operationManagementService.save(warmupPractice);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习编辑")
                 .action("保存巩固练习")
-                .memo(warmupPractice.getId()+"");
+                .memo(warmupPractice.getId() + "");
         operationLogService.log(operationLog);
 
         return WebUtils.success();
@@ -267,4 +210,63 @@ public class RiseOperationController {
 
         return WebUtils.result(warmupPractice);
     }
+
+    @RequestMapping(value = "/warmup/load/knowledges", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadKnowledgesGroupByProblem(PCLoginUser loginUser) {
+        Assert.notNull(loginUser, "用户信息不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("巩固练习更改").function("巩固练习新增").action("加载问题与知识点");
+        operationLogService.log(operationLog);
+        List<Problem> problems = problemService.loadProblems();
+        List<ProblemSchedule> knowledges = operationManagementService.loadKnowledgesGroupByProblem();
+        if(problems != null && knowledges != null) {
+            ProblemKnowledgesDto dto = new ProblemKnowledgesDto();
+            dto.setProblems(problems);
+            dto.setKnowledges(knowledges);
+            return WebUtils.result(dto);
+        }
+        return WebUtils.error("未找到小课与知识点关联信息");
+    }
+
+    @RequestMapping(value = "/warmup/insert/practice", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> insertWarmupPractice(PCLoginUser loginUser, @RequestBody WarmupPractice warmupPractice) {
+        Assert.notNull(loginUser, "用户不能为空");
+        List<WarmupChoice> warmupChoices = warmupPractice.getChoices();
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("巩固练习新增")
+                .action("新增巩固练习");
+        operationLogService.log(operationLog);
+        // 删除过期巩固练习
+        // practiceService.delWarmupPracticeByPracticeUid(warmupPractice.getPracticeUid());
+        // 根据 PracticeUid 获取 WarmupPractice 的总数
+        Integer practiceCnt =  practiceService.loadWarmupPracticeCntByPracticeUid(warmupPractice.getPracticeUid());
+        if(practiceCnt > 0) {
+            return WebUtils.error("当前 UID 巩固练习已存在，请联系管理员重试");
+        }
+        Integer knowledgeId = practiceService.insertWarmupPractice(warmupPractice);
+        if(knowledgeId <= 0) {
+            return WebUtils.error("巩固练习数据插入失败，请及时练习管理员");
+        } else {
+            practiceService.insertWarmupChoice(knowledgeId, warmupChoices);
+        }
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/warmup/load/problem/{practiceUid}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadProblemByPracticeUid(PCLoginUser loginUser, @PathVariable String practiceUid) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("巩固练习新增")
+                .action("获取默认小课信息");
+        operationLogService.log(operationLog);
+        WarmupPractice warmupPractice = practiceService.loadWarmupPracticeByPracticeUid(practiceUid);
+        if(warmupPractice != null) {
+            return WebUtils.result(warmupPractice);
+        } else  {
+            return WebUtils.error("未找到对应小课数据");
+        }
+    }
+
 }

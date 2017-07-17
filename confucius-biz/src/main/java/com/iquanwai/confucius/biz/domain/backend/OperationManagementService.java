@@ -1,9 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.Comment;
-import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -22,9 +19,9 @@ public interface OperationManagementService {
     List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page);
 
     /**
-     * 获取48小时内讨论区活跃的问题
+     * 获取60天内讨论区活跃的问题
      */
-    List<WarmupPractice> getLastTwoDayActivePractice();
+    List<WarmupPractice> getLastSixtyDayActivePractice(Page page);
 
     /**
      * 获取巩固练习
@@ -91,5 +88,10 @@ public interface OperationManagementService {
      * -1：数据异常
      */
     Integer deleteAsstWarmupDiscuss(Integer discussId);
+
+    /**
+     * 获取所有小课列表对应的知识点集合
+     */
+    List<ProblemSchedule> loadKnowledgesGroupByProblem();
 
 }

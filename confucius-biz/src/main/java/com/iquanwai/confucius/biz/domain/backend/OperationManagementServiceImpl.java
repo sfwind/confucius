@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -13,13 +13,18 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 17/3/16.
@@ -42,6 +47,12 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private CommentDao commentDao;
     @Autowired
     private UserRoleDao userRoleDao;
+    @Autowired
+    private ProblemDao problemDao;
+    @Autowired
+    private KnowledgeDao knowledgeDao;
+    @Autowired
+    private ProblemScheduleDao problemScheduleDao;
 
     //每个练习的精华上限
     private static final int HIGHLIGHT_LIMIT = 3;
@@ -65,9 +76,17 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public List<WarmupPractice> getLastTwoDayActivePractice() {
-        List<Integer> warmupPracticeIds = warmupPracticeDiscussDao.loadHotWarmupPracticeDiscussLastNDay(2);
-        return warmupPracticeDao.loadPractices(warmupPracticeIds);
+    public List<WarmupPractice> getLastSixtyDayActivePractice(Page page) {
+        List<Integer> warmupPracticeIds = warmupPracticeDiscussDao.loadHotWarmupPracticeDiscussLastNDay(60, page);
+        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPractices(warmupPracticeIds);
+
+        warmupPractices.forEach(warmupPractice -> {
+            Problem problem = problemDao.load(Problem.class, warmupPractice.getProblemId());
+            if(problem != null) {
+                warmupPractice.setProblemName(problem.getProblem());
+            }
+        });
+        return warmupPractices;
     }
 
     @Override
@@ -249,6 +268,39 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         } else {
             return -1;
         }
+    }
+
+    @Override
+    public List<ProblemSchedule> loadKnowledgesGroupByProblem() {
+        List<Problem> problems = problemDao.loadAll(Problem.class);
+        List<ProblemSchedule> problemSchedules = problemScheduleDao.loadAll(ProblemSchedule.class);
+        // 取出所有知识点列表，并且将知识点列表转换成键值对
+        List<Knowledge> knowledges = knowledgeDao.loadAll(Knowledge.class);
+        Map<Integer, Knowledge> knowledgeMap = Maps.newHashMap();
+        knowledges.forEach(knowledge -> knowledgeMap.put(knowledge.getId(), knowledge));
+        // 过滤出未被删除的小课列表
+        List<Problem> validProblems = problems.stream().filter(problem -> !problem.getDel()).collect(Collectors.toList());
+        // 逐个便利小课，并将该小课，与该小课对应的所有知识点合并成一个对象进行返回
+        List<ProblemSchedule> problemAndKnowledges = validProblems.stream().map(problem -> {
+            ProblemSchedule targetProblemSchedule = new ProblemSchedule();
+            // 取出该小课的 id
+            Integer problemId = problem.getId();
+            targetProblemSchedule.setId(problemId);
+            targetProblemSchedule.setProblemId(problemId);
+            // 根据取出的小课 id，遍历 problemSchedules 列表，取出二者 problemId 相同对象，并返回该所有对象的相关 KnowledgeId 的集合
+            List<Integer> relatedKnowledgeIds = problemSchedules.stream().filter(problemSchedule -> problemId.equals(problemSchedule.getProblemId()))
+                    .map(ProblemSchedule::getKnowledgeId).collect(Collectors.toList());
+            List<Knowledge> targetKnowledges = Lists.newArrayList();
+            relatedKnowledgeIds.forEach(relatedKnowledgeId -> {
+                Knowledge targetKnowledge = knowledgeMap.get(relatedKnowledgeId);
+                if(targetKnowledge != null) {
+                    targetKnowledges.add(targetKnowledge);
+                }
+            });
+            targetProblemSchedule.setKnowledges(targetKnowledges);
+            return targetProblemSchedule;
+        }).collect(Collectors.toList());
+        return problemAndKnowledges;
     }
 
 }
