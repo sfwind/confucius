@@ -46,10 +46,10 @@ public class CacheReloadReceiver {
         RabbitMQReceiver receiver = new RabbitMQReceiver();
         receiver.init(null, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
         Channel channel = receiver.getChannel();
-        logger.info("通道建立");
+        logger.info(TOPIC + "通道建立");
         Consumer consumer = getConsumer(channel);
         receiver.listen(consumer);
-        logger.info("开启队列监听");
+        logger.info(TOPIC + "开启队列监听");
     }
 
 
