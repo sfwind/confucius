@@ -75,8 +75,10 @@ public class CacheReloadReceiver {
                     case "rise_member":
                         riseMemberTypeRepo.reload();
                         riseMemberCountRepo.reload();
+                        break;
                     case "weixin_message":
                         callbackMessageService.reload();
+                        break;
                 }
 
             }
