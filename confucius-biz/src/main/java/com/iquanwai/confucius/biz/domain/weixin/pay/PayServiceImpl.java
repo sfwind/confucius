@@ -44,7 +44,7 @@ public class PayServiceImpl implements PayService{
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
-
+    private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
         QuanwaiOrder courseOrder = quanwaiOrderDao.loadOrder(orderId);
@@ -323,6 +323,8 @@ public class PayServiceImpl implements PayService{
             notify_url = ConfigUtils.adapterDomainName() + PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
+        } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+            notify_url = ConfigUtils.adapterDomainName() + RISE_COURSE_PAY_CALLBACK_PATH;
         }
         Assert.notNull(notify_url, "回调地址不能为空");
         map.put("notify_url", notify_url);
