@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.weixin.message;
+package com.iquanwai.confucius.biz.domain.weixin.message.template;
 
 /**
  * Created by justin on 16/8/10.

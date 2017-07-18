@@ -8,8 +8,12 @@ import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.exception.WeixinException;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.wltea.analyzer.IKSegmentation;
+import org.wltea.analyzer.Lexeme;
 import sun.net.util.IPAddressUtil;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -174,5 +178,25 @@ public class CommonUtils {
             default:
                 return false;
         }
+    }
+
+    public static List<String> separateWords(String words){
+        List<String> usefulWords = Lists.newArrayList();
+
+        IKSegmentation ikSeg = new IKSegmentation(new StringReader(words) , false);
+        try {
+            Lexeme l;
+            while( (l = ikSeg.next()) != null){
+                //找出词语,数字,英文单词
+                if(l.getLexemeType() == Lexeme.TYPE_CJK_NORMAL || l.getLexemeType() == Lexeme.TYPE_NUM ||
+                        l.getLexemeType() == Lexeme.TYPE_LETTER){
+                    usefulWords.add(l.getLexemeText().toUpperCase());
+                }
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+
+        return usefulWords;
     }
 }

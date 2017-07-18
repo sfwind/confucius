@@ -10,7 +10,6 @@ import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -152,10 +151,25 @@ public class AccountServiceImpl implements AccountService {
                     if (accountNew.getNickname() != null) {
                         logger.info("插入用户信息:{}", accountNew);
                         followUserDao.insert(accountNew);
-                        try {
-                            updateProfile(accountNew);
-                        } catch (Exception e) {
-                            logger.error(e.getLocalizedMessage(), e);
+                        // 插入profile表
+                        Profile profile = getProfileFromDB(accountNew.getOpenid());
+                        if (profile == null) {
+                            profile = new Profile();
+                            try {
+                                BeanUtils.copyProperties(profile, accountNew);
+                                logger.info("插入Profile表信息:{}", profile);
+                                profile.setRiseId(CommonUtils.randomString(7));
+                                profileDao.insertProfile(profile);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                logger.error("beanUtils copy props error", e);
+                            } catch (SQLException err) {
+                                profile.setRiseId(CommonUtils.randomString(7));
+                                try {
+                                    profileDao.insertProfile(profile);
+                                } catch (SQLException subErr) {
+                                    logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
+                                }
+                            }
                         }
                     }
                 });
@@ -163,7 +177,6 @@ public class AccountServiceImpl implements AccountService {
                 logger.info("更新用户信息:{}", accountNew);
                 if (accountNew.getNickname() != null) {
                     followUserDao.updateMeta(accountNew);
-                    updateProfile(accountNew);
                 }
             }
         } catch (NotFollowingException e1) {
@@ -174,32 +187,6 @@ public class AccountServiceImpl implements AccountService {
         return accountNew;
     }
 
-    private void updateProfile(Account accountNew) throws IllegalAccessException, InvocationTargetException {
-        Profile profile = getProfileFromDB(accountNew.getOpenid());
-        if (profile == null) {
-            profile = new Profile();
-            try {
-                BeanUtils.copyProperties(profile, accountNew);
-                logger.info("插入Profile表信息:{}", profile);
-                profile.setRiseId(CommonUtils.randomString(7));
-                profileDao.insertProfile(profile);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.error("beanUtils copy props error", e);
-            } catch (SQLException err) {
-                profile.setRiseId(CommonUtils.randomString(7));
-                try {
-                    profileDao.insertProfile(profile);
-                } catch (SQLException subErr) {
-                    logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
-                }
-            }
-        } else {
-            //更新原数据
-            BeanUtils.copyProperties(profile, accountNew);
-            profileDao.updateMeta(profile);
-        }
-    }
-
     public void collectUsers() {
         //调用api查询account对象
         String url = GET_USERS_URL;
@@ -207,14 +194,16 @@ public class AccountServiceImpl implements AccountService {
         String body = restfulHelper.get(url);
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
-
+        String lastOpenid = "";
         for (String openid : usersDto.getData().getOpenid()) {
+            lastOpenid = openid;
             try {
                 getAccount(openid, true);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
         }
+        logger.info("最后一个openid:" + lastOpenid);
         logger.info("处理完成");
     }
 
@@ -236,6 +225,27 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
+        logger.info("处理完成");
+    }
+
+    @Override
+    public void collectNext(String nextOpenid) {
+        //调用api查询account对象
+        String url = GET_NEXT_USERS_URL;
+        url = url.replace("{next_openid}", nextOpenid);
+        String body = restfulHelper.get(url);
+
+        UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
+        String lastOpenid = "";
+        for (String openid : usersDto.getData().getOpenid()) {
+            lastOpenid = openid;
+            try {
+                getAccount(openid, true);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        logger.info("最后一个openid:" + lastOpenid);
         logger.info("处理完成");
     }
 
@@ -284,13 +294,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void savePromotionUser(String openid, String source) {
-        if (promotionUserDao.loadPromotion(openid) == null) {
-            PromotionUser promotionUser = new PromotionUser();
-            promotionUser.setOpenid(openid);
-            promotionUser.setSource(source);
-            promotionUserDao.insert(promotionUser);
-        }
+    public void unfollow(String openid) {
+        followUserDao.unsubscribe(openid);
     }
 
     private Profile getProfileFromDB(String openid) {

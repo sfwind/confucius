@@ -103,6 +103,7 @@ public class LoginUserService {
     public boolean userIsFollowing(PCLoginUser loginUser) {
         Account account = null;
         try {
+            //TODO:改造成数据库查询
             account = accountService.getAccount(loginUser.getOpenId(), true);
         } catch(NotFollowingException e) {
             if(loginUser.getWeixin() != null) {

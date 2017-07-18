@@ -123,4 +123,26 @@ public interface PracticeService {
      */
     void deleteComment(Integer commentId);
 
+    /**
+     * 插入巩固练习数据，返回主键 id
+     */
+    Integer insertWarmupPractice(WarmupPractice warmupPractice);
+
+    /**
+     * 多个选择题分别插入 Choice 表
+     */
+    void insertWarmupChoice(Integer questionId, List<WarmupChoice> choices);
+
+    /**
+     * 根据 WarmupPracticeId 加载其余 WarmupPractice 信息
+     */
+    WarmupPractice loadWarmupPracticeByPracticeUid(String practiceUid);
+
+
+    Integer loadWarmupPracticeCntByPracticeUid(String practiceUid);
+
+    /**
+     * 根据 PracticeUid 删除 WarmupPractice
+     */
+    Integer delWarmupPracticeByPracticeUid(String practiceUid);
 }

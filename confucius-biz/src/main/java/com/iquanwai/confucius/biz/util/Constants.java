@@ -68,4 +68,11 @@ public interface Constants {
         int APPLICATION = 2;
         int SUBJECT = 3;
     }
+
+    interface WEIXIN_MESSAGE_TYPE{
+        int TEXT = 1;
+        int IMAGE = 2;
+        int VOICE = 3;
+        int NEWS = 4;
+    }
 }

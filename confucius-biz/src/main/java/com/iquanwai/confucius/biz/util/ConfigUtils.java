@@ -45,6 +45,14 @@ public class ConfigUtils {
 		config = fileconfig.withFallback(config);
 	}
 
+	public static String getToken(){
+		return getValue("token");
+	}
+
+	public static String getEncodingAESKey(){
+		return getValue("encoding.aes.key");
+	}
+
 	public static String getAppid() {
 		return getValue("appid");
 	}
