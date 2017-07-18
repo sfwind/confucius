@@ -124,7 +124,9 @@ public class CallbackMessageController {
             String xml = XMLHelper.convertDocumentToString(document);
             LOGGER.info(xml);
             try{
-                LOGGER.info(document.getElementsByTagName("MsgType").item(0).getNodeValue());
+                LOGGER.info("MsgType:", XMLHelper.getNode(document, "MsgType"));
+                LOGGER.info("FromUserName:", XMLHelper.getNode(document, "FromUserName"));
+
             } catch (Exception e){
                 LOGGER.error("error:{}", e);
             }
