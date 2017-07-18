@@ -91,6 +91,7 @@ public class CallbackMessageController {
             // 从输入流解析document
             Document document = XMLHelper.parseDocument(is);
             String xml = XMLHelper.convertDocumentToString(document);
+            LOGGER.info(xml);
             // 转换成string后关闭
             IOUtils.closeQuietly(is);
 
