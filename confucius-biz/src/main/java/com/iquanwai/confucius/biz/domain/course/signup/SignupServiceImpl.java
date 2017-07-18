@@ -27,7 +27,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCourse;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -225,12 +225,12 @@ public class SignupServiceImpl implements SignupService {
                 orderPair.getLeft(), fee, orderPair.getRight(),
                 problemId.toString(), problem.getProblem(), QuanwaiOrder.FRAGMENT_RISE_COURSE);
         // 插入rise小课单卖的报名数据
-        RiseCourse riseCourse = new RiseCourse();
-        riseCourse.setProblemId(problemId);
-        riseCourse.setProfileId(profileId);
-        riseCourse.setOpenid(profile.getOpenid());
-        riseCourse.setOrderId(orderPair.getLeft());
-        riseCourseDao.insert(riseCourse);
+        RiseCourseOrder riseCourseOrder = new RiseCourseOrder();
+        riseCourseOrder.setProblemId(problemId);
+        riseCourseOrder.setProfileId(profileId);
+        riseCourseOrder.setOpenid(profile.getOpenid());
+        riseCourseOrder.setOrderId(orderPair.getLeft());
+        riseCourseDao.insert(riseCourseOrder);
         return quanwaiOrder;
     }
 
@@ -354,17 +354,17 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public void riseCourseEntry(String orderId) {
-        RiseCourse riseCourse = riseCourseDao.loadOrder(orderId);
+        RiseCourseOrder riseCourseOrder = riseCourseDao.loadOrder(orderId);
         // 用户购买小课逻辑
-        Integer profileId = riseCourse.getProfileId();
+        Integer profileId = riseCourseOrder.getProfileId();
         Profile profile = profileDao.load(Profile.class, profileId);
 
 
         // 检查用户是不是已经学过这个小课
-        ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourse.getProblemId());
+        ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourseOrder.getProblemId());
         if (plan == null) {
             // 用户没有学过这个小课，生成他
-            Integer planId = createPlan(riseCourse);
+            Integer planId = createPlan(riseCourseOrder);
             improvementPlanDao.reOpenPlan(planId, DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
         } else {
             // 用户有这个小课
@@ -380,11 +380,11 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
-    private Integer createPlan(RiseCourse riseCourse) {
-        Callback callback = callbackDao.loadUserCallback(riseCourse.getOpenid());
+    private Integer createPlan(RiseCourseOrder riseCourseOrder) {
+        Callback callback = callbackDao.loadUserCallback(riseCourseOrder.getOpenid());
         if (callback == null) {
-            logger.error("报名小课异常，没有callback数据,orderId:{}", riseCourse.getOrderId());
-            messageService.sendAlarm("报名模块出错", "付费回调接口异常", "高", "订单id:" + riseCourse.getOrderId(), "该用户没有Callback数据");
+            logger.error("报名小课异常，没有callback数据,orderId:{}", riseCourseOrder.getOrderId());
+            messageService.sendAlarm("报名模块出错", "付费回调接口异常", "高", "订单id:" + riseCourseOrder.getOrderId(), "该用户没有Callback数据");
             return -1;
         }
         String cookieName;
@@ -397,22 +397,22 @@ public class SignupServiceImpl implements SignupService {
             cookieValue = callback.getPcAccessToken();
         }
         try {
-            String body = restfulHelper.risePlanChoose(cookieName, cookieValue, riseCourse.getProblemId());
+            String body = restfulHelper.risePlanChoose(cookieName, cookieValue, riseCourseOrder.getProblemId());
             if (StringUtils.isEmpty(body)) {
                 logger.error("调用rise生成小课接口异常");
-                messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "订单id:" + riseCourse.getOrderId(), "返回题响应为空 ");
+                messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "订单id:" + riseCourseOrder.getOrderId(), "返回题响应为空 ");
                 return -1;
             } else {
                 JSONObject result = JSONObject.parseObject(body);
                 if (200 == result.getInteger("code")) {
                     return Integer.valueOf(result.get("msg").toString());
                 } else {
-                    messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回code异常 \n 订单id:" + riseCourse.getOrderId(), result.toJSONString());
+                    messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回code异常 \n 订单id:" + riseCourseOrder.getOrderId(), result.toJSONString());
                     return -1;
                 }
             }
         } catch (Exception e) {
-            messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "riseCourseEntry方法异常\n订单id:" + riseCourse.getOrderId(), e.getLocalizedMessage());
+            messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "riseCourseEntry方法异常\n订单id:" + riseCourseOrder.getOrderId(), e.getLocalizedMessage());
             return -1;
         }
     }
@@ -567,6 +567,13 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public void giveupRiseCourseSignup(String orderId) {
+        //关闭订单
+        riseCourseDao.closeOrder(orderId);
+        quanwaiOrderDao.closeOrder(orderId);
+    }
+
+    @Override
     public void giveupRiseSignup(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
         Profile profile = profileDao.queryByOpenId(riseOrder.getOpenid());
@@ -664,6 +671,11 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public RiseOrder getRiseOrder(String orderId) {
         return riseOrderDao.loadOrder(orderId);
+    }
+
+    @Override
+    public RiseCourseOrder getRiseCourse(String orderId) {
+        return riseCourseDao.loadOrder(orderId);
     }
 
     @Override

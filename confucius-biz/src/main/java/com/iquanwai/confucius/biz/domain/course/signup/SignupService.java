@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -103,6 +104,8 @@ public interface SignupService {
      */
     void giveupSignup(String orderId);
 
+    void giveupRiseCourseSignup(String orderId);
+
     /**
      * 放弃rise的报名
      */
@@ -132,6 +135,8 @@ public interface SignupService {
      * @param orderId 订单id
      */
     RiseOrder getRiseOrder(String orderId);
+
+    RiseCourseOrder getRiseCourse(String orderId);
 
     /**
      * 获取会员类型

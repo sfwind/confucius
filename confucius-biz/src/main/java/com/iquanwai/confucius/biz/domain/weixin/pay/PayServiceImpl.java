@@ -208,6 +208,7 @@ public class PayServiceImpl implements PayService{
                 logger.error("orderId: {} close failed", orderId);
             }
 
+            // 关闭业务订单
             closeOrder(orderId);
             //如果有使用优惠券,还原优惠券状态
             if(courseOrder.getDiscount()!=0.0){
@@ -229,6 +230,10 @@ public class PayServiceImpl implements PayService{
         }
         if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupRiseSignup(orderId);
+        }
+        if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+            signupService.giveupRiseCourseSignup(orderId);
+
         }
     }
 
