@@ -68,6 +68,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private static final String TYPE_TEXT = "text";
     private static final String TYPE_EVENT = "event";
+    // 模版消息推送回调
+    private static final String TEMPLATE_SEND_JOB_FINISH = "TEMPLATESENDJOBFINISH";
 
     private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
     private AutoReplyMessage defaultReply;
@@ -291,6 +293,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 if (CollectionUtils.isNotEmpty(scanMessages)) {
                     return sendSubscribeMessage(openid, wxid, scanMessages);
                 }
+                break;
+            case TEMPLATE_SEND_JOB_FINISH:
+                // ignore 忽略模版消息推送成功的事件
                 break;
         }
 
