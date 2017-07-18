@@ -121,7 +121,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     @Override
     public String handleCallback(Document document) {
+        logger.info("获取,document:{},type:{}", document, MESSAGE_TYPE);
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
+        logger.info("获取后的type:{}", messageType);
         //处理文字消息
         if (messageType.equals(TYPE_TEXT)) {
             return handleUserMessage(document);
