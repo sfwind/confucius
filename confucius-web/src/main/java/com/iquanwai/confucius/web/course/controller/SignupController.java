@@ -44,7 +44,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -401,15 +400,13 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/coupon/list", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> listCoupon(LoginUser loginUser, @RequestParam("orderId") String orderId) {
+    public ResponseEntity<Map<String, Object>> listCoupon(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(orderId, "订单不能为空");
         List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
-                .action("加载优惠券")
-                .memo(orderId);
+                .action("加载优惠券");
         operationLogService.log(operationLog);
         return WebUtils.result(coupons);
     }
@@ -434,6 +431,24 @@ public class SignupController {
             return WebUtils.error(check.getRight());
         }
         Double price = signupService.calculateCoupon(memberDto.getMemberType(), memberDto.getCouponId());
+        operationLogService.log(operationLog);
+        return WebUtils.result(price);
+    }
+
+    /**
+     * 计算优惠券
+     * @param loginUser 用户信息
+     */
+    @RequestMapping(value = "/coupon/course/calculate", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> useCoupon(LoginUser loginUser, @RequestBody RiseCourseDto riseCourseDto) {
+        Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(riseCourseDto.getCouponId(), "优惠券不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("计算优惠券减免")
+                .memo(riseCourseDto.getCouponId() + "");
+        Double price = signupService.calculateCourseCoupon(riseCourseDto.getProblemId(), riseCourseDto.getCouponId());
         operationLogService.log(operationLog);
         return WebUtils.result(price);
     }

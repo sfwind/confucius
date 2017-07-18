@@ -160,5 +160,12 @@ public interface SignupService {
      */
     Double calculateCoupon(Integer memberTypeId, Integer couponId);
 
+    /**
+     * 计算小课单卖多少钱
+     * @param problemId 小课id
+     * @param couponId 优惠券id
+     */
+    Double calculateCourseCoupon(Integer problemId, Integer couponId);
+
     RiseMember currentRiseMember(Integer profileId);
 }

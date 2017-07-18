@@ -706,6 +706,17 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public Double calculateCourseCoupon(Integer problemId, Integer couponId) {
+        Coupon coupon = costRepo.getCoupon(couponId);
+        Double amount = coupon.getAmount();
+        Double fee = ConfigUtils.getRiseCourseFee();
+        if (fee >= amount) {
+            return CommonUtils.substract(fee, amount);
+        } else {
+            return 0D;
+        }
+    }
+    @Override
     public RiseMember currentRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
         if (riseMember != null) {
