@@ -131,6 +131,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         } else if (messageType.equals(TYPE_EVENT)) {
             return handleEvent(document);
         }
+        logger.info("获取结束:{}", messageType);
         return null;
     }
 
@@ -150,7 +151,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String openid = XMLHelper.getNode(document, FROM_USER);
         String toUser = XMLHelper.getNode(document, TO_USER);
         String event = XMLHelper.getNode(document, EVENT);
+        logger.info("开始获取Event_Key:{},Type:{}", document, EVENT_KEY);
         String eventKey = XMLHelper.getNode(document, EVENT_KEY);
+        logger.info("开始获取Event_Key:{},Type:{},EVENT_KEY", document, EVENT_KEY);
+
         return eventReply(event, eventKey, openid, toUser);
     }
 
