@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * Created by nethunder on 2017/7/14.
  */
 @Repository
-public class RiseCourseDao extends DBUtil {
+public class RiseCourseOrderDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public int insert(RiseCourseOrder riseCourseOrder) {
@@ -56,6 +56,17 @@ public class RiseCourseDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public void entry(String orderId) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "Update RiseCourseOrder SET Entry = 1 where OrderId = ?";
+        try {
+            run.update(sql, orderId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
 
 
 }

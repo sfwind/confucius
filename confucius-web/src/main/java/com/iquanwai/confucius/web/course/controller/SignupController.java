@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
@@ -78,6 +79,8 @@ public class SignupController {
     private CostRepo costRepo;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private MessageService messageService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId, HttpServletRequest request) {
@@ -314,17 +317,24 @@ public class SignupController {
                 .memo(orderId);
         operationLogService.log(operationLog);
         Double zero = 0d;
-        if (zero.equals(quanwaiOrder.getPrice())) {
-            // 免费，自动报名
-            payService.handlePayResult(orderId, true);
-            payService.risePaySuccess(orderId);
-        } else {
-            // 非免费，查询是否报名成功
-            if (!entry) {
-                LOGGER.error("订单:{},未支付", orderId);
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+        try{
+            if (zero.equals(quanwaiOrder.getPrice())) {
+                // 免费，自动报名
+                payService.handlePayResult(orderId, true);
+                payService.risePaySuccess(orderId);
+            } else {
+                // 非免费，查询是否报名成功
+                if (!entry) {
+                    LOGGER.error("订单:{},未支付", orderId);
+                    return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
+                }
             }
+        } catch (Exception e){
+            LOGGER.error("报名出错", e);
+            messageService.sendAlarm("报名模块出错", "运行时异常",
+                    "高", "订单id:" + orderId, e.getLocalizedMessage());
         }
+
         return WebUtils.success();
     }
 

@@ -233,7 +233,6 @@ public class PayServiceImpl implements PayService{
         }
         if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupRiseCourseSignup(orderId);
-
         }
     }
 

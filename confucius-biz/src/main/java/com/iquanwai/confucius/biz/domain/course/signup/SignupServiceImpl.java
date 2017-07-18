@@ -11,7 +11,7 @@ import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
 import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseCourseDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseCourseOrderDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
@@ -92,7 +92,7 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ProblemDao problemDao;
     @Autowired
-    private RiseCourseDao riseCourseDao;
+    private RiseCourseOrderDao riseCourseOrderDao;
     @Autowired
     private CallbackDao callbackDao;
     @Autowired
@@ -230,7 +230,7 @@ public class SignupServiceImpl implements SignupService {
         riseCourseOrder.setProfileId(profileId);
         riseCourseOrder.setOpenid(profile.getOpenid());
         riseCourseOrder.setOrderId(orderPair.getLeft());
-        riseCourseDao.insert(riseCourseOrder);
+        riseCourseOrderDao.insert(riseCourseOrder);
         return quanwaiOrder;
     }
 
@@ -354,10 +354,10 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public void riseCourseEntry(String orderId) {
-        RiseCourseOrder riseCourseOrder = riseCourseDao.loadOrder(orderId);
+        RiseCourseOrder riseCourseOrder = riseCourseOrderDao.loadOrder(orderId);
         // 用户购买小课逻辑
         Integer profileId = riseCourseOrder.getProfileId();
-
+        riseCourseOrderDao.entry(orderId);
         // 检查用户是不是已经学过这个小课
         ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourseOrder.getProblemId());
         if (plan == null) {
@@ -572,7 +572,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public void giveupRiseCourseSignup(String orderId) {
         //关闭订单
-        riseCourseDao.closeOrder(orderId);
+        riseCourseOrderDao.closeOrder(orderId);
         quanwaiOrderDao.closeOrder(orderId);
     }
 
@@ -678,7 +678,7 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public RiseCourseOrder getRiseCourse(String orderId) {
-        return riseCourseDao.loadOrder(orderId);
+        return riseCourseOrderDao.loadOrder(orderId);
     }
 
     @Override
