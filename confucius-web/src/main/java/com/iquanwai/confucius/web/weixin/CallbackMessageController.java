@@ -91,13 +91,6 @@ public class CallbackMessageController {
             Document document = XMLHelper.parseDocument(is);
             String xml = XMLHelper.convertDocumentToString(document);
             LOGGER.info(xml);
-            try{
-                LOGGER.info("MsgType:{}", XMLHelper.getNode(document, "MsgType"));
-                LOGGER.info("FromUserName:{}", XMLHelper.getNode(document, "FromUserName"));
-
-            } catch (Exception e){
-                LOGGER.error("error:{}", e);
-            }
             // 转换成string后关闭
             IOUtils.closeQuietly(is);
 

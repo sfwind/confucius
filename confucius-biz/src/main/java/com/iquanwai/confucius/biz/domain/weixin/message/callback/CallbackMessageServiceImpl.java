@@ -121,9 +121,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     @Override
     public String handleCallback(Document document) {
-        logger.info("获取,document:{},type:{}", document, MESSAGE_TYPE);
         String messageType = XMLHelper.getNode(document, MESSAGE_TYPE);
-        logger.info("获取后的type:{}", messageType);
         //处理文字消息
         if (messageType.equals(TYPE_TEXT)) {
             return handleUserMessage(document);
@@ -131,7 +129,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         } else if (messageType.equals(TYPE_EVENT)) {
             return handleEvent(document);
         }
-        logger.info("获取结束:{}", messageType);
         return null;
     }
 
@@ -151,9 +148,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String openid = XMLHelper.getNode(document, FROM_USER);
         String toUser = XMLHelper.getNode(document, TO_USER);
         String event = XMLHelper.getNode(document, EVENT);
-        logger.info("开始获取Event_Key:{},Type:{}", document, EVENT_KEY);
         String eventKey = XMLHelper.getNode(document, EVENT_KEY);
-        logger.info("开始获取Event_Key:{},Type:{},EVENT_KEY:{}", document, eventKey);
 
         return eventReply(event, eventKey, openid, toUser);
     }
