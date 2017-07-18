@@ -101,20 +101,6 @@ public class XMLHelper {
         return null;
     }
 
-    public static void main(String[] args) {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><xml><ToUserName><![CDATA[gh_f504104ef687]]></ToUserName>\n" +
-                "<FromUserName><![CDATA[o-Es21bZakuqjBfVr7a-_j90WQuI]]></FromUserName>\n" +
-                "<CreateTime>1500384056</CreateTime>\n" +
-                "<MsgType><![CDATA[event]]></MsgType>\n" +
-                "<Event><![CDATA[TEMPLATESENDJOBFINISH]]></Event>\n" +
-                "<MsgID>413729376</MsgID>\n" +
-                "<Status><![CDATA[success]]></Status>\n" +
-                "</xml>";
-        Document document = XMLHelper.convertStringToDocument(xml);
-        String event = XMLHelper.getNode(document, "Event");
-        System.out.println(event);
-    }
-
     public static String getNode(Document document, String nodeName) {
         if (document == null) {
             return null;
