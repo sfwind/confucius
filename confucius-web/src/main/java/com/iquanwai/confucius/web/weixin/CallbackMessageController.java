@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -81,6 +82,36 @@ public class CallbackMessageController {
     }
 
 
+    public static void main(String[] args) {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><xml><ToUserName><![CDATA[gh_f504104ef687]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[o-Es21bZakuqjBfVr7a-_j90WQuI]]></FromUserName>\n" +
+                "<CreateTime>1500380357</CreateTime>\n" +
+                "<MsgType><![CDATA[text]]></MsgType>\n" +
+                "<Content><![CDATA[发发发]]></Content>\n" +
+                "<MsgId>6444084565289531719</MsgId>\n" +
+                "</xml>\n";
+        InputStream is = new ByteArrayInputStream(xml.getBytes());
+        IOUtils.closeQuietly(is);
+
+//        Document document = XMLHelper.convertStringToDocument(xml);
+        Document document = XMLHelper.parseDocument(is);
+        assert document != null;
+        System.out.println(XMLHelper.getNode(document, "MsgType"));
+
+        String xml2 = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><xml><ToUserName><![CDATA[gh_f504104ef687]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[o-Es21bZakuqjBfVr7a-_j90WQuI]]></FromUserName>\n" +
+                "<CreateTime>1500379349</CreateTime>\n" +
+                "<MsgType><![CDATA[event]]></MsgType>\n" +
+                "<Event><![CDATA[TEMPLATESENDJOBFINISH]]></Event>\n" +
+                "<MsgID>413726593</MsgID>\n" +
+                "<Status><![CDATA[success]]></Status>\n" +
+                "</xml>\n";
+        Document document1 = XMLHelper.convertStringToDocument(xml2);
+        assert document1 != null;
+        System.out.println(XMLHelper.getNode(document1, "MsgType"));
+
+    }
+
     @RequestMapping(value = "/message", method = RequestMethod.POST)
     public void receiveCallback(HttpServletRequest request, HttpServletResponse response) {
 
@@ -92,6 +123,11 @@ public class CallbackMessageController {
             Document document = XMLHelper.parseDocument(is);
             String xml = XMLHelper.convertDocumentToString(document);
             LOGGER.info(xml);
+            try{
+                LOGGER.info(document.getElementsByTagName("MsgType").item(0).getNodeValue());
+            } catch (Exception e){
+                LOGGER.error("error:{}", e);
+            }
             // 转换成string后关闭
             IOUtils.closeQuietly(is);
 
