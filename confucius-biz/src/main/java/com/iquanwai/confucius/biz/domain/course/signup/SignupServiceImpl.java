@@ -357,15 +357,18 @@ public class SignupServiceImpl implements SignupService {
         RiseCourseOrder riseCourseOrder = riseCourseDao.loadOrder(orderId);
         // 用户购买小课逻辑
         Integer profileId = riseCourseOrder.getProfileId();
-        Profile profile = profileDao.load(Profile.class, profileId);
-
 
         // 检查用户是不是已经学过这个小课
         ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourseOrder.getProblemId());
         if (plan == null) {
             // 用户没有学过这个小课，生成他
             Integer planId = createPlan(riseCourseOrder);
-            improvementPlanDao.reOpenPlan(planId, DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+            if (planId < 0) {
+                logger.error("报名小课异常，返回的planId异常");
+                return;
+            } else {
+                improvementPlanDao.reOpenPlan(planId, DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+            }
         } else {
             // 用户有这个小课
             if (plan.getStatus() == ImprovementPlan.TRIALCLOSE) {
@@ -400,14 +403,14 @@ public class SignupServiceImpl implements SignupService {
             String body = restfulHelper.risePlanChoose(cookieName, cookieValue, riseCourseOrder.getProblemId());
             if (StringUtils.isEmpty(body)) {
                 logger.error("调用rise生成小课接口异常");
-                messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "订单id:" + riseCourseOrder.getOrderId(), "返回题响应为空 ");
+                messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "订单id:" + riseCourseOrder.getOrderId(), "返回体响应为空 ");
                 return -1;
             } else {
                 JSONObject result = JSONObject.parseObject(body);
                 if (200 == result.getInteger("code")) {
                     return Integer.valueOf(result.get("msg").toString());
                 } else {
-                    messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回code异常 \n 订单id:" + riseCourseOrder.getOrderId(), result.toJSONString());
+                    messageService.sendAlarm("报名模块出错", "生成小课接口异常", "高", "返回code异常 \n订单id:" + riseCourseOrder.getOrderId(), result.toJSONString());
                     return -1;
                 }
             }
