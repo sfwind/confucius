@@ -283,7 +283,8 @@ public class SignupController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/paid/risemember/{orderId}", method = RequestMethod.POST)
+    //    @RequestMapping(value = "/paid/risemember/{orderId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
         QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
@@ -496,7 +497,7 @@ public class SignupController {
             return WebUtils.error(check.getRight());
         }
         // 检查优惠券
-        if (costRepo.checkDiscount(loginUser.getId(), riseCourseDto.getCouponId())) {
+        if (!costRepo.checkDiscount(loginUser.getId(), riseCourseDto.getCouponId())) {
             return WebUtils.error("该优惠券无效");
         }
 
