@@ -563,7 +563,7 @@ public class SignupController {
             return WebUtils.error(check.getRight());
         }
         // 检查优惠券
-        if (costRepo.checkDiscount(loginUser.getId(), memberDto.getCouponId())) {
+        if (!costRepo.checkDiscount(loginUser.getId(), memberDto.getCouponId())) {
             return WebUtils.error("该优惠券无效");
         }
 
