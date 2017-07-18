@@ -153,7 +153,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String event = XMLHelper.getNode(document, EVENT);
         logger.info("开始获取Event_Key:{},Type:{}", document, EVENT_KEY);
         String eventKey = XMLHelper.getNode(document, EVENT_KEY);
-        logger.info("开始获取Event_Key:{},Type:{},EVENT_KEY", document, EVENT_KEY);
+        logger.info("开始获取Event_Key:{},Type:{},EVENT_KEY:{}", document, eventKey);
 
         return eventReply(event, eventKey, openid, toUser);
     }
