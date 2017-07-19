@@ -103,7 +103,7 @@
             display: inline-block;
             top:21px;
             padding: 8px 16px 8px 16px;
-            width: 88px;
+            /*width: 88px;*/
             left: 200px;
             text-transform: uppercase;
             letter-spacing: 0px;
