@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>圈外</title>
-    <meta name="keywords" content="圈外,RISE">
+    <meta name="keywords" content="圈外,圈外同学">
     <meta name="description" content="圈外训练营">
     <link href="//www.iqycamp.com/images/logo.png" rel="shortcut icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -271,7 +271,7 @@
         <img class="imgL" alt="圈外logo" src="//www.iqycamp.com/images/logo.png"/>
         <span class="textL">圈外</span>
         <button class="menu">首页</button>
-        <button class="menu init" onclick="openUrl()">RISE</button>
+        <button class="menu init" onclick="openUrl()">圈外同学</button>
     </div>
 </div>
 <div class="mid">
@@ -281,12 +281,12 @@
         </div>
         <ul class="intro-card-list">
             <li class="intro-card">
-                <div class="title">RISE</div>
+                <div class="title">圈外同学</div>
                 <div class="intro">解决问题</div>
                 <div class="intro">提升能力</div>
                 <div class="intro">养成习惯</div>
                 <div class="intro">交流经验</div>
-                <div class="qrcode"><img alt="RISE二维码" src="//www.iqycamp.com/images/serverQrCode.jpg"></div>
+                <div class="qrcode"><img alt="圈外同学二维码" src="//www.iqycamp.com/images/serverQrCode.jpg"></div>
             </li>
             <li class="intro-card">
                 <div class="title">训练营</div>
