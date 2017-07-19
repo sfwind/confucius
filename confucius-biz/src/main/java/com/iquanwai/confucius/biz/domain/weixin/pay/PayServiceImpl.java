@@ -191,6 +191,7 @@ public class PayServiceImpl implements PayService{
         }
         // 发送mq消息
         try {
+            logger.info("发送支付成功message:{}", quanwaiOrder);
             rabbitMQPublisher.publish(quanwaiOrder);
         } catch (ConnectException e) {
             logger.error("发送支付成功mq失败", e);
