@@ -404,13 +404,13 @@ public class SignupServiceImpl implements SignupService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setTemplate_id(ConfigUtils.productPaidMsg());
-        String first = "Hi，" + profile.getNickname() + "，欢迎使用RISE正式版！\n\n";
-        first += "所有RISE小课已为你开放，快来学习哦！\n";
+        String first = "Hi，" + profile.getNickname() + "，欢迎使用【圈外同学】正式版！\n\n";
+        first += "所有圈外小课已为你开放，快来学习哦！\n";
         data.put("first", new TemplateMessage.Keyword(first));
         data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
         data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
-        data.put("remark", new TemplateMessage.Keyword("\n想和更多优质小伙伴一起玩耍？点击详情，加入你所在地的分舵，玩转RISE吧～"));
+        data.put("remark", new TemplateMessage.Keyword("\n想和更多优质小伙伴一起玩耍？点击详情，加入你所在地的分舵，玩转【圈外同学】吧～"));
         templateMessage.setUrl(ConfigUtils.domainName() + "/static/quanwai/wx/group");
         templateMessageService.sendMessage(templateMessage);
     }
@@ -423,7 +423,7 @@ public class SignupServiceImpl implements SignupService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
 
-        data.put("first", new TemplateMessage.Keyword("Hi，" + profileDao.queryByOpenId(openid).getNickname() + "，欢迎进入RISE的学习旅程！\n"
+        data.put("first", new TemplateMessage.Keyword("Hi，" + profileDao.queryByOpenId(openid).getNickname() + "，欢迎进入【圈外同学】的学习旅程！\n"
                 + "现在还有最后一步——加入精英社群，大部分学习交流和服务通知都要在社群里完成，请务必入坑，找到你的精英小伙伴们。\n"
                 + "方式：点击详情，添加小Q，获得入群邀请～\n"));
         data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));

@@ -103,7 +103,7 @@ public class FragmentController {
         ImprovementPlan matchPlan = planService.loadUserPlan(pcLoginUser.getOpenId(), problemId);
         if (matchPlan == null) {
             logger.error("用户:{} 未购买小课:{}", pcLoginUser.getOpenId(), problemId);
-            return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT, "没找到进行中的RISE训练");
+            return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT, "没找到进行中的小课");
         } else {
             // 购买过小课
             RiseWorkListDto riseHomework = loadUserRiseWork(matchPlan);

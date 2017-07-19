@@ -6,13 +6,11 @@ import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.GraphicMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.po.AutoReplyMessage;
-import com.iquanwai.confucius.biz.po.GraphicMessage;
-import com.iquanwai.confucius.biz.po.PromotionUser;
-import com.iquanwai.confucius.biz.po.SubscribeMessage;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -54,6 +52,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private PromotionUserDao promotionUserDao;
     @Autowired
     private GraphicMessageDao graphicMessageDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private RabbitMQPublisher rabbitMQPublisher;
 
@@ -264,6 +264,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
+
+                OperationLog operationLog = OperationLog.create().module("圈外同学")
+                        .function("关注").action("扫码关注").memo(eventKey);
+                operationLogService.log(operationLog);
                 try {
                     //更新用户信息
                     accountService.getAccount(openid, true);
