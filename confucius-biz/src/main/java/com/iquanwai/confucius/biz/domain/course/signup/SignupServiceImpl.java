@@ -362,6 +362,7 @@ public class SignupServiceImpl implements SignupService {
         ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourseOrder.getProblemId());
         if (plan == null) {
             // 用户没有学过这个小课，生成他
+            // TODO 这里不能改成异步mq，因为要等待rise返回planId
             Integer planId = createPlan(riseCourseOrder);
             if (planId < 0) {
                 logger.error("报名小课异常，返回的planId异常");
