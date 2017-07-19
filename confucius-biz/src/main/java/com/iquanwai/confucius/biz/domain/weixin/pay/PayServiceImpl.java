@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -13,12 +14,15 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
+import java.net.ConnectException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,16 +32,31 @@ import java.util.Map;
  */
 @Service
 public class PayServiceImpl implements PayService{
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
     private CostRepo costRepo;
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SignupService signupService;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private MessageService messageService;
+
+    private RabbitMQPublisher rabbitMQPublisher;
+
+    @PostConstruct
+    public void init(){
+        // 初始化mq
+        rabbitMQPublisher = new RabbitMQPublisher();
+        rabbitMQPublisher.init(RISE_PAY_SUCCESS_TOPIC, ConfigUtils.getRabbitMQIp(),
+                ConfigUtils.getRabbitMQPort());
+    }
+
+
+
 
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
@@ -169,6 +188,14 @@ public class PayServiceImpl implements PayService{
         if(quanwaiOrder.getDiscount()!=0.0){
             logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
             costRepo.updateCoupon(Coupon.USED, orderId);
+        }
+        // 发送mq消息
+        try {
+            rabbitMQPublisher.publish(quanwaiOrder);
+        } catch (ConnectException e) {
+            logger.error("发送支付成功mq失败", e);
+            messageService.sendAlarm("报名模块出错", "发送支付成功mq失败",
+                    "高", "订单id:" + orderId, e.getLocalizedMessage());
         }
     }
 

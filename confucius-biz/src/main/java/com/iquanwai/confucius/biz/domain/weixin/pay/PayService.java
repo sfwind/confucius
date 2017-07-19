@@ -34,6 +34,10 @@ public interface PayService {
      * */
     void paySuccess(String orderId);
 
+    /**
+     * rise支付成功
+     * @param orderId 订单id
+     */
     void risePaySuccess(String orderId);
 
     /**
@@ -66,5 +70,7 @@ public interface PayService {
     String DUP_PAID = "ORDERPAID";
     String ORDER_CLOSE = "ORDERCLOSED";
     String SYSTEM_ERROR = "SYSTEMERROR";
+    String RISE_PAY_SUCCESS_TOPIC = "rise_pay_success_topic";
+
 
 }
