@@ -21,12 +21,12 @@ public class DailyJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Scheduled(cron="${dailyJob.cron}")
     public void work(){
-        logger.info("DailyJob start");
-        courseProgress();
-        closeClass();
-        noticeBeforeMemberClose();
-        signupService.reloadClass();
-        logger.info("DailyJob end");
+//        logger.info("DailyJob start");
+//        courseProgress();
+//        closeClass();
+//        noticeBeforeMemberClose();
+//        signupService.reloadClass();
+//        logger.info("DailyJob end");
     }
 
     private void noticeBeforeMemberClose() {

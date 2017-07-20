@@ -18,8 +18,8 @@ public class AccessTokenJob {
 
     @Scheduled(cron="${accessTokenJob.cron}")
     public void work(){
-        logger.info("AccessTokenJob start");
-        accessTokenService.refreshAccessToken(true);
-        logger.info("AccessTokenJob end");
+//        logger.info("AccessTokenJob start");
+//        accessTokenService.refreshAccessToken(true);
+//        logger.info("AccessTokenJob end");
     }
 }
