@@ -39,7 +39,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     @PostConstruct
     @Override
     public synchronized void init() {
-        logger.info("初始化rise会员报名参数");
+        logger.info("初始化圈外会员报名参数");
         // 查询当前已报名的人数和待付款的人数
         remainCount = new AtomicInteger(ConfigUtils.riseMemberTotal());
         // 未付款+未过期=所占名额
@@ -54,7 +54,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
         // 未过期
         Integer nowCount = profileDao.riseMemberCount();
         Long total = nowCount+holderCount;
-        logger.info("当前RISE会员:{},待付费人数:{},总名额:{},剩余名额:{}", nowCount, holderCount, total, remainCount.get() - total);
+        logger.info("当前圈外会员:{},待付费人数:{},总名额:{},剩余名额:{}", nowCount, holderCount, total, remainCount.get() - total);
         Integer remain = remainCount.addAndGet(-total.intValue());
         // 剩余人数
         if (remain < 0) {
@@ -77,7 +77,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
         Profile profile = profileDao.load(Profile.class, profileId);
         if(profile.getRiseMember()){
             // 已经报名
-            return new MutablePair<>(-3,"您已是RISER");
+            return new MutablePair<>(-3,"您已是圈外会员");
         } else {
             // 未报名,查看是否有未关闭的订单
             Integer counts = riseOrderDao.userNotCloseOrder(profileId);
@@ -87,7 +87,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
             } else {
                 // 如果不是在报名时间内，则禁止报名
                 if(ConfigUtils.getRisePayStopTime().before(new Date())){
-                    return new MutablePair<>(-4, "Hi，谢谢你关注RISE!\n不过...本次报名已达到限额了\n记得及时关注下期开放通知哦");
+                    return new MutablePair<>(-4, "Hi，谢谢你关注【圈外同学】!\n不过...本次报名已达到限额了\n记得及时关注下期开放通知哦");
                 }
             }
         }

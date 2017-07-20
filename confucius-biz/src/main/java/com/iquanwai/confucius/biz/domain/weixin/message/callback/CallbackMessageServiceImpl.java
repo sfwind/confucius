@@ -6,13 +6,11 @@ import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.GraphicMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.po.AutoReplyMessage;
-import com.iquanwai.confucius.biz.po.GraphicMessage;
-import com.iquanwai.confucius.biz.po.PromotionUser;
-import com.iquanwai.confucius.biz.po.SubscribeMessage;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -54,8 +52,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private PromotionUserDao promotionUserDao;
     @Autowired
     private GraphicMessageDao graphicMessageDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private RabbitMQPublisher rabbitMQPublisher;
+    //推广活动分隔符,分割活动和用户id
+    private static final String ACTIVITY_SEPERATE_CHAR = "_";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -260,6 +262,17 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         promotionUser.setSource(channel);
                         promotionUser.setOpenid(openid);
                         promotionUser.setAction(0);
+                        if(channel.contains(ACTIVITY_SEPERATE_CHAR)){
+                            String[] splits = StringUtils.split(channel, ACTIVITY_SEPERATE_CHAR);
+                            if(splits.length>1){
+                                try{
+                                    int profileId =Integer.valueOf(splits[1]);
+                                    promotionUser.setProfileId(profileId);
+                                }catch (NumberFormatException e){
+                                    // ignore
+                                }
+                            }
+                        }
                         promotionUserDao.insert(promotionUser);
                     }
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
@@ -267,6 +280,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
+
+                OperationLog operationLog = OperationLog.create().module("圈外同学")
+                        .function("关注").action("扫码关注").memo(eventKey);
+                operationLogService.log(operationLog);
                 try {
                     //更新用户信息
                     accountService.getAccount(openid, true);
@@ -319,4 +336,18 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         return null;
     }
 
+    public static void main(String[] args) {
+        String channel = "freelimit_8";
+        if(channel.contains(ACTIVITY_SEPERATE_CHAR)){
+            String[] splits = StringUtils.split(channel, ACTIVITY_SEPERATE_CHAR);
+            if(splits.length>1){
+                try{
+                    int profileId =Integer.valueOf(splits[1]);
+                    System.out.println(profileId);
+                }catch (NumberFormatException e){
+                    // ignore
+                }
+            }
+        }
+    }
 }
