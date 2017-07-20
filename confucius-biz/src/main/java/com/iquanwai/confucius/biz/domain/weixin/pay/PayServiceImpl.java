@@ -43,8 +43,6 @@ public class PayServiceImpl implements PayService{
     @Autowired
     private RestfulHelper restfulHelper;
 
-    private RabbitMQReceiver rabbitMQReceiver;
-
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
 
@@ -56,6 +54,7 @@ public class PayServiceImpl implements PayService{
 
     @PostConstruct
     public void init(){
+        RabbitMQReceiver rabbitMQReceiver = new RabbitMQReceiver();
         rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
         Channel channel = rabbitMQReceiver.getChannel();
         logger.info(TOPIC + "通道建立");
