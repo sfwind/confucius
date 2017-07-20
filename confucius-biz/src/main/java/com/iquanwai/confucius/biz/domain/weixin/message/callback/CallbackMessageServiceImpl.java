@@ -56,6 +56,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private OperationLogService operationLogService;
 
     private RabbitMQPublisher rabbitMQPublisher;
+    //推广活动分隔符,分割活动和用户id
+    private static final String ACTIVITY_SEPERATE_CHAR = "_";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -257,6 +259,17 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         promotionUser.setSource(channel);
                         promotionUser.setOpenid(openid);
                         promotionUser.setAction(0);
+                        if(channel.contains(ACTIVITY_SEPERATE_CHAR)){
+                            String[] splits = StringUtils.split(channel, ACTIVITY_SEPERATE_CHAR);
+                            if(splits.length>1){
+                                try{
+                                    int profileId =Integer.valueOf(splits[1]);
+                                    promotionUser.setProfileId(profileId);
+                                }catch (NumberFormatException e){
+                                    // ignore
+                                }
+                            }
+                        }
                         promotionUserDao.insert(promotionUser);
                     }
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
