@@ -15,7 +15,7 @@ public class QRServiceTest extends TestBase {
     @Test
     public void generateCode(){
 //        qrCodeService.generatePermanentQRCode("promotion");
-        qrCodeService.generateTemporaryQRCode("freeLimitRISE", 2592000);
+        qrCodeService.generateTemporaryQRCode("freeLimit_8", 2592000);
 //        qrCodeService.generateTemporaryQRCode("freeLimit8", 2592000);
     }
 }
