@@ -326,6 +326,8 @@ public class SignupController {
                 // 非免费，查询是否报名成功
                 if (!entry) {
                     LOGGER.error("订单:{},未支付", orderId);
+                    messageService.sendAlarm("报名模块出错", "订单未支付",
+                            "高", "订单id:" + orderId,"订单未支付，却进行了支付完成操作");
                     return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
                 }
             }
