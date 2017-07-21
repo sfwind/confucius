@@ -19,7 +19,7 @@ public class CloseOrderJob {
     @Scheduled(cron="${closeOrderJob.cron}")
     public void work(){
 //        logger.info("CloseOrderJob start");
-        payService.closeOrder();
+//        payService.closeOrder();
 //        logger.info("CloseOrderJob end");
     }
 }

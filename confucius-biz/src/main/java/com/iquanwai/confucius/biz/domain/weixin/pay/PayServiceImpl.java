@@ -13,12 +13,16 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
+import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +46,34 @@ public class PayServiceImpl implements PayService{
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
 
+    private static final String CLOSE_ORDER_QUEUE = "close_order_queue";
+    private static final String TOPIC ="close_quanwai_order";
+
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
+
+    @PostConstruct
+    public void init(){
+        RabbitMQReceiver rabbitMQReceiver = new RabbitMQReceiver();
+        rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
+        Channel channel = rabbitMQReceiver.getChannel();
+        logger.info(TOPIC + "通道建立");
+        Consumer consumer = getConsumer(channel);
+        rabbitMQReceiver.listen(consumer);
+        logger.info(TOPIC + "开启队列监听");
+    }
+
+    private Consumer getConsumer(Channel channel){
+        return new DefaultConsumer(channel){
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope,
+                                       AMQP.BasicProperties properties, byte[] body) throws IOException {
+                String message = new String(body);
+                logger.info("receive message {}", message);
+                closeOrder(message);
+            }
+        };
+    }
 
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
@@ -219,7 +249,6 @@ public class PayServiceImpl implements PayService{
             logger.error("订单 {} 不存在", orderId);
             return;
         }
-        //TODO:改成消息中间件
         if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupSignup(orderId);
         }

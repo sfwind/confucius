@@ -22,11 +22,11 @@ public class LearningNoticeJob {
 
     @Scheduled(cron="${learning.notice.cron}")
     public void work(){
-        logger.info("LearningNoticeJob start");
-
-        List<QuanwaiClass> quanwaiClassList = courseProgressService.loadActiveClass();
-        quanwaiClassList.forEach(courseProgressService::noticeIncompleteMembers);
-
-        logger.info("LearningNoticeJob end");
+//        logger.info("LearningNoticeJob start");
+//
+//        List<QuanwaiClass> quanwaiClassList = courseProgressService.loadActiveClass();
+//        quanwaiClassList.forEach(courseProgressService::noticeIncompleteMembers);
+//
+//        logger.info("LearningNoticeJob end");
     }
 }
