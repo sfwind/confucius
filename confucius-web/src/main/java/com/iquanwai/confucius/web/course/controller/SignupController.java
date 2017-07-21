@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -14,6 +15,7 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
@@ -82,6 +84,8 @@ public class SignupController {
     private RestfulHelper restfulHelper;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private PlanService planService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId, HttpServletRequest request) {
@@ -293,6 +297,8 @@ public class SignupController {
         Assert.notNull(loginUser, "用户不能为空");
         QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
         Boolean entry;
+        Integer problemId = null;
+        Integer planId = null;
         if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAGMENT_MEMBER)) {
             RiseOrder riseOrder = signupService.getRiseOrder(orderId);
             if (riseOrder == null) {
@@ -309,6 +315,7 @@ public class SignupController {
             } else {
                 entry = riseCourseOrder.getEntry();
             }
+            problemId = riseCourseOrder.getProblemId();
         }
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -332,13 +339,19 @@ public class SignupController {
                     return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
                 }
             }
+            if (problemId != null) {
+                ImprovementPlan plan = planService.loadPlanByProblemId(loginUser.getId(), problemId);
+                if (plan != null) {
+                    planId = plan.getId();
+                }
+            }
         } catch (Exception e){
             LOGGER.error("报名出错", e);
             messageService.sendAlarm("报名模块出错", "运行时异常",
                     "高", "订单id:" + orderId, e.getLocalizedMessage());
         }
 
-        return WebUtils.success();
+        return WebUtils.result(planId);
     }
 
 

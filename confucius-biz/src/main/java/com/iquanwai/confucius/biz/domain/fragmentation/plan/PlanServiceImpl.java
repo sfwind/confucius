@@ -50,6 +50,11 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
+    public ImprovementPlan loadPlanByProblemId(Integer profileId,Integer problemId){
+        return improvementPlanDao.loadPlanByProblemId(profileId, problemId);
+    }
+
+    @Override
     public List<PracticePlan> loadWorkPlanList(Integer planId) {
         List<PracticePlan> result = Lists.newArrayList();
         List<PracticePlan> temp = practicePlanDao.loadPracticePlan(planId);
