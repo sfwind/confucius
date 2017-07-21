@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -10,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -24,42 +24,48 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Repository
 public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    // 剩余的人数
-    private AtomicInteger remainCount;
-    public static final Object lock = new Object();
-
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Autowired
     private RiseOrderDao riseOrderDao;
     @Autowired
     private ProfileDao profileDao;
 
-
+    //精英用户余额
+    private final static String REMAIN_NUMBER_KEY = "remain:elite:set";
+    //精英用户余额锁
+    private final static String REMAIN_NUMBER_LOCK_KEY = "lock:elite:number:set";
 
     @PostConstruct
     @Override
-    public synchronized void init() {
+    public void init() {
         logger.info("初始化圈外会员报名参数");
-        // 查询当前已报名的人数和待付款的人数
-        remainCount = new AtomicInteger(ConfigUtils.riseMemberTotal());
-        // 未付款+未过期=所占名额
-        // 未付款
-//        Integer holderCount = riseOrderDao.loadHolderCount();
-        // 未关闭的订单中，如果用户已经是rise会员，则这个未关闭订单不要再占据一个名额
-        List<RiseOrder> holderList = riseOrderDao.loadActiveOrder();
-        long holderCount = holderList.stream().filter(item -> {
-            Profile profile = profileDao.queryByOpenId(item.getOpenid());
-            return !profile.getRiseMember();
-        }).map(RiseOrder::getOpenid).distinct().count();
-        // 未过期
-        Integer nowCount = profileDao.riseMemberCount();
-        Long total = nowCount+holderCount;
-        logger.info("当前圈外会员:{},待付费人数:{},总名额:{},剩余名额:{}", nowCount, holderCount, total, remainCount.get() - total);
-        Integer remain = remainCount.addAndGet(-total.intValue());
-        // 剩余人数
-        if (remain < 0) {
-            remainCount.set(0);
-        }
+
+        redisUtil.lock(REMAIN_NUMBER_LOCK_KEY, (lock) -> {
+            // 查询当前已报名的人数和待付款的人数
+            AtomicInteger remainCount = new AtomicInteger(ConfigUtils.riseMemberTotal());
+            // 未付款+未过期=所占名额
+            // 未付款
+//          Integer holderCount = riseOrderDao.loadHolderCount();
+            // 未关闭的订单中，如果用户已经是rise会员，则这个未关闭订单不要再占据一个名额
+            List<RiseOrder> holderList = riseOrderDao.loadActiveOrder();
+            long holderCount = holderList.stream().filter(item -> {
+                Profile profile = profileDao.queryByOpenId(item.getOpenid());
+                return !profile.getRiseMember();
+            }).map(RiseOrder::getOpenid).distinct().count();
+            // 未过期
+            Integer nowCount = profileDao.riseMemberCount();
+            Long total = nowCount+holderCount;
+            logger.info("当前圈外会员:{},待付费人数:{},总名额:{},剩余名额:{}", nowCount, holderCount, total,
+                    remainCount.get() - total);
+            Integer remain = remainCount.addAndGet(-total.intValue());
+            // 剩余人数
+            if (remain < 0) {
+                remainCount.set(0);
+            }
+            redisUtil.set(REMAIN_NUMBER_KEY, remainCount.get(), 60*60*24*30L);
+        });
     }
 
     @Override
@@ -91,30 +97,34 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
                 }
             }
         }
-        synchronized (lock){
-            if(remainCount.get() <= 0){
-                return new MutablePair<>(-1,"报名人数已满");
-            } else {
-                // 是否要占
-                if(hold){
-                    remainCount.decrementAndGet();
-                }
-                return new MutablePair<>(1,"ok");
+        Integer remainCount = getRemindingCount();
+        if(remainCount <= 0){
+            return new MutablePair<>(-1,"报名人数已满");
+        } else {
+            // 是否要占
+            if(hold){
+                redisUtil.lock(REMAIN_NUMBER_LOCK_KEY, (lock) -> {
+                    Integer remainCountFinal = getRemindingCount();
+                    logger.info("剩余精英用户:{}", remainCountFinal);
+                    redisUtil.set(REMAIN_NUMBER_KEY, remainCountFinal-1, 60*60*24*30L);
+                });
             }
+            return new MutablePair<>(1,"ok");
         }
     }
 
     @Override
     public void quitSignup(Integer profileId, Integer memberTypeId) {
-        synchronized (lock){
-            // 退还名额
-            remainCount.incrementAndGet();
-        }
+        redisUtil.lock(REMAIN_NUMBER_LOCK_KEY, (lock) -> {
+            Integer remainCount = getRemindingCount();
+            logger.info("剩余精英用户:{}", remainCount);
+            redisUtil.set(REMAIN_NUMBER_KEY, remainCount+1, 60*60*24*30L);
+        });
     }
 
     @Override
     public Integer getRemindingCount(){
-        return remainCount.get();
+        return Integer.parseInt(redisUtil.get(REMAIN_NUMBER_KEY));
     }
 
 

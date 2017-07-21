@@ -20,8 +20,8 @@ public class FragmentDailyDataJob {
 
     @Scheduled(cron="${fragmentDailyDataJob.cron}")
     public void work(){
-        logger.info("FragmentDailyDataJob start");
-        practiceService.fragmentDailyPracticeData();
-        logger.info("FragmentDailyDataJob end");
+//        logger.info("FragmentDailyDataJob start");
+//        practiceService.fragmentDailyPracticeData();
+//        logger.info("FragmentDailyDataJob end");
     }
 }
