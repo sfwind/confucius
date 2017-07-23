@@ -351,6 +351,12 @@ public class SignupServiceImpl implements SignupService {
                 profileDao.becomeRiseEliteMember(openId);
                 break;
             }
+            case 4: {
+                //精英会员
+                expireDate = DateUtils.afterMonths(new Date(), 6);
+                profileDao.becomeRiseEliteMember(openId);
+                break;
+            }
             default:
                 logger.error("该会员ID异常{}", memberType);
                 return;
@@ -370,7 +376,7 @@ public class SignupServiceImpl implements SignupService {
             if (!plan.getRiseMember()) {
                 // 不是会员的计划，设置一下
                 plan.setCloseDate(DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
-                if (plan.getStatus().equals(1) && memberType.getId().equals(3)) {
+                if (plan.getStatus().equals(1) && (memberType.getId().equals(3) || memberType.getId().equals(4))) {
                     // 给精英版正在进行的planid+1个求点评次数
                     improvementPlanDao.becomeRiseEliteMember(plan);
                 } else {
