@@ -7,10 +7,15 @@ import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.GraphicMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.AutoReplyMessage;
+import com.iquanwai.confucius.biz.po.GraphicMessage;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.PromotionUser;
+import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -54,6 +59,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private GraphicMessageDao graphicMessageDao;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private MQService mqService;
 
     private RabbitMQPublisher rabbitMQPublisher;
     //推广活动分隔符,分割活动和用户id
@@ -121,6 +128,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         rabbitMQPublisher = new RabbitMQPublisher();
         rabbitMQPublisher.init(SUBSCRIBE_TOPIC, ConfigUtils.getRabbitMQIp(),
                 ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.setSendCallback(queue -> mqService.saveMQSendOperation(queue));
+
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
@@ -16,7 +17,6 @@ import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
-import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,6 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.net.ConnectException;
-import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +46,8 @@ public class PayServiceImpl implements PayService{
     private RestfulHelper restfulHelper;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private MQService mqService;
 
     private RabbitMQPublisher rabbitMQPublisher;
 
@@ -67,28 +67,21 @@ public class PayServiceImpl implements PayService{
         rabbitMQPublisher = new RabbitMQPublisher();
         rabbitMQPublisher.init(RISE_PAY_SUCCESS_TOPIC, ConfigUtils.getRabbitMQIp(),
                 ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.setSendCallback(queue -> mqService.saveMQSendOperation(queue));
+
         logger.info(RISE_PAY_SUCCESS_TOPIC + ",MQ提供者初始化");
 
         // 初始化接听mq
         RabbitMQReceiver rabbitMQReceiver = new RabbitMQReceiver();
         rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
-        Channel channel = rabbitMQReceiver.getChannel();
         logger.info(TOPIC + "通道建立");
-        Consumer consumer = getConsumer(channel);
-        rabbitMQReceiver.listen(consumer);
+        rabbitMQReceiver.setAfterDealQueue(mqService::updateAfterDealOperation);
+        rabbitMQReceiver.listen(o -> {
+            String message = o.toString();
+            logger.info("receive message {}", message);
+            closeOrder(message);
+        });
         logger.info(TOPIC + "开启队列监听");
-    }
-
-    private Consumer getConsumer(Channel channel){
-        return new DefaultConsumer(channel){
-            @Override
-            public void handleDelivery(String consumerTag, Envelope envelope,
-                                       AMQP.BasicProperties properties, byte[] body) throws IOException {
-                String message = new String(body);
-                logger.info("receive message {}", message);
-                closeOrder(message);
-            }
-        };
     }
 
     public String unifiedOrder(String orderId) {

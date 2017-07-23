@@ -1,14 +1,18 @@
 package com.iquanwai.confucius.biz.util.rabbitmq;
 
-import com.google.gson.Gson;
+import com.alibaba.fastjson.JSON;
+import com.iquanwai.confucius.biz.po.common.message.MessageQueue;
+import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import lombok.Setter;
 import org.springframework.util.Assert;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.function.Consumer;
 
 /**
  * Created by justin on 17/1/19.
@@ -19,6 +23,8 @@ public class RabbitMQPublisher {
     private Channel channel;
     private String ipAddress;
     private int port = 5672;
+    @Setter
+    private Consumer<MessageQueue> sendCallback;
 
     public void init(String topic, String ipAddress, Integer port){
         Assert.notNull(topic, "消息主题不能为空");
@@ -58,21 +64,34 @@ public class RabbitMQPublisher {
         }
     }
 
-    public void publish(String message) throws ConnectException {
-        //重连尝试
-        if(connection==null || channel==null){
-            init(topic, ipAddress, port);
-        }
-        if(channel==null){
-            throw new ConnectException();
-        }
-
-        try {
-            channel.basicPublish(topic, "", null, message.getBytes());
-        }catch (IOException e) {
-            //ignore
-        }
-    }
+//    public void publish(String message) throws ConnectException {
+//        //重连尝试
+//        if(connection==null || channel==null){
+//            init(topic, ipAddress, port);
+//        }
+//        if(channel==null){
+//            throw new ConnectException();
+//        }
+//
+//        try {
+//            String msgId = CommonUtils.randomString(32);
+//            RabbitMQDto dto = new RabbitMQDto();
+//            dto.setMsgId(msgId);
+//            dto.setMessage(message);
+//            String json = JSON.toJSONString(dto);
+//
+//            channel.basicPublish(topic, "", null, json.getBytes());
+//            if (this.sendCallback != null) {
+//                MessageQueue messageQueue = new MessageQueue();
+//                messageQueue.setMessage(message);
+//                messageQueue.setTopic(topic);
+//                messageQueue.setMsgId(f);
+//                this.sendCallback.accept(messageQueue);
+//            }
+//        }catch (IOException e) {
+//            //ignore
+//        }
+//    }
 
     public <T> void publish(T message) throws ConnectException {
         //重连尝试
@@ -83,9 +102,22 @@ public class RabbitMQPublisher {
             throw new ConnectException();
         }
 
-        String json = new Gson().toJson(message);
+        String msgId = CommonUtils.randomString(32);
+
+        RabbitMQDto dto = new RabbitMQDto();
+        dto.setMsgId(msgId);
+        dto.setMessage(message);
+        String json = JSON.toJSONString(dto);
         try {
             channel.basicPublish(topic, "", null, json.getBytes());
+            if (this.sendCallback != null) {
+                MessageQueue messageQueue = new MessageQueue();
+                messageQueue.setMsgId(msgId);
+                messageQueue.setStatus(0);
+                messageQueue.setMessage(message instanceof String ? message.toString() : JSON.toJSONString(message));
+                messageQueue.setTopic(topic);
+                this.sendCallback.accept(messageQueue);
+            }
         }catch (IOException e) {
             //ignore
         }
