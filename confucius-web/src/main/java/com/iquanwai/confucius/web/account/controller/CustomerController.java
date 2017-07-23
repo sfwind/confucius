@@ -28,6 +28,7 @@ import com.iquanwai.confucius.web.account.dto.RiseDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,7 @@ public class CustomerController {
         Region province = accountService.loadProvinceByName(account.getProvince());
         profileDto.setCityId(city == null ? null : city.getId());
         profileDto.setProvinceId(province == null ? null : province.getId());
+        profileDto.setBindMobile(StringUtils.isNotEmpty(account.getMobileNo()));
         return WebUtils.result(profileDto);
     }
 
