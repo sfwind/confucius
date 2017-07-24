@@ -256,40 +256,13 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
                     Profile profile = accountService.getProfile(openid, false);
-                    //从未关注过的全新用户
+                    //从未关注过的全新用户或者未付费的用户
                     boolean isNew = false;
-                    if(profile == null){
+                    if(profile == null || !profile.getRiseMember()){
                         isNew = true;
                     }
                     if(isNew){
-                        //发送订阅消息
-                        SubscribeEvent subscribeEvent = new SubscribeEvent();
-                        subscribeEvent.setOpenid(openid);
-                        subscribeEvent.setScene(channel);
-                        try {
-                            rabbitMQPublisher.publish(subscribeEvent);
-                        } catch (ConnectException e) {
-                            logger.error("rabbit mq init failed");
-                        }
-                        // 插入推广数据
-                        if (promotionUserDao.loadPromotion(openid) == null) {
-                            PromotionUser promotionUser = new PromotionUser();
-                            promotionUser.setSource(channel);
-                            promotionUser.setOpenid(openid);
-                            promotionUser.setAction(0);
-                            if(channel.contains(ACTIVITY_SEPERATE_CHAR)){
-                                String[] splits = StringUtils.split(channel, ACTIVITY_SEPERATE_CHAR);
-                                if(splits.length>1){
-                                    try{
-                                        int profileId =Integer.valueOf(splits[1]);
-                                        promotionUser.setProfileId(profileId);
-                                    }catch (NumberFormatException e){
-                                        // ignore
-                                    }
-                                }
-                            }
-                            promotionUserDao.insert(promotionUser);
-                        }
+                        promotionSuccess(channel, openid);
                     }
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                     subscribeMessages.addAll(subscribeMessageDao.loadSubscribeMessages(channel));
@@ -316,6 +289,16 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 accountService.unfollow(openid);
                 break;
             case EVENT_SCAN:
+                Profile profile = accountService.getProfile(openid, false);
+                //从未关注过的全新用户或者未付费的用户
+                boolean isNew = false;
+                if(profile == null || !profile.getRiseMember()){
+                    isNew = true;
+                }
+                if(isNew){
+                    promotionSuccess(eventKey, openid);
+                }
+
                 List<SubscribeMessage> scanMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
@@ -334,6 +317,37 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         }
 
         return null;
+    }
+
+    private void promotionSuccess(String eventKey, String openid) {
+        //发送订阅消息
+        SubscribeEvent subscribeEvent = new SubscribeEvent();
+        subscribeEvent.setOpenid(openid);
+        subscribeEvent.setScene(eventKey);
+        try {
+            rabbitMQPublisher.publish(subscribeEvent);
+        } catch (ConnectException e) {
+            logger.error("rabbit mq init failed");
+        }
+        // 插入推广数据
+        if (promotionUserDao.loadPromotion(openid) == null) {
+            PromotionUser promotionUser = new PromotionUser();
+            promotionUser.setSource(eventKey);
+            promotionUser.setOpenid(openid);
+            promotionUser.setAction(0);
+            if(eventKey.contains(ACTIVITY_SEPERATE_CHAR)){
+                String[] splits = StringUtils.split(eventKey, ACTIVITY_SEPERATE_CHAR);
+                if(splits.length>1){
+                    try{
+                        int profileId =Integer.valueOf(splits[1]);
+                        promotionUser.setProfileId(profileId);
+                    }catch (NumberFormatException e){
+                        // ignore
+                    }
+                }
+            }
+            promotionUserDao.insert(promotionUser);
+        }
     }
 
     private String sendSubscribeMessage(String openid, String wxid, List<SubscribeMessage> subscribeMessages) {
