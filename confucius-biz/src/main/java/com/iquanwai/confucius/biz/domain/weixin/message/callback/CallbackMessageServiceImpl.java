@@ -290,7 +290,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
 
-                OperationLog operationLog = OperationLog.create().module("圈外同学")
+                OperationLog operationLog = OperationLog.create().openid(openid)
+                        .module("圈外同学")
                         .function("关注").action("扫码关注").memo(eventKey);
                 operationLogService.log(operationLog);
                 try {
