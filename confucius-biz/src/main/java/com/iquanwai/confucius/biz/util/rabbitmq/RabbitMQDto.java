@@ -10,4 +10,5 @@ public class RabbitMQDto {
     private String msgId;
     private String queue; // 接收时所用的队列名
     private Object message;
+    private String topic;
 }

@@ -76,8 +76,8 @@ public class PayServiceImpl implements PayService{
         rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
         logger.info(TOPIC + "通道建立");
         rabbitMQReceiver.setAfterDealQueue(mqService::updateAfterDealOperation);
-        rabbitMQReceiver.listen(o -> {
-            String message = o.toString();
+        rabbitMQReceiver.listen(orderId -> {
+            String message = orderId.toString();
             logger.info("receive message {}", message);
             closeOrder(message);
         });

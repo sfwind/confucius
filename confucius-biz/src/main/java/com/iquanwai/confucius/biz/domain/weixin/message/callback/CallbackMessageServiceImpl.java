@@ -130,7 +130,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         rabbitMQPublisher.init(SUBSCRIBE_TOPIC, ConfigUtils.getRabbitMQIp(),
                 ConfigUtils.getRabbitMQPort());
         rabbitMQPublisher.setSendCallback(queue -> mqService.saveMQSendOperation(queue));
-
     }
 
     @Override

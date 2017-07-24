@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.message;
 
 
-import com.iquanwai.confucius.biz.po.common.message.MessageQueue;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
 
 /**
@@ -9,7 +8,7 @@ import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
  */
 public interface MQService {
 
-    void saveMQSendOperation(MessageQueue queue);
+    void saveMQSendOperation(MQSendLog queue);
 
     void updateAfterDealOperation(RabbitMQDto msgId);
 }
