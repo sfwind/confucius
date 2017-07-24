@@ -16,6 +16,7 @@ import com.iquanwai.confucius.biz.po.GraphicMessage;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -255,34 +256,41 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     logger.info("event key is {}", eventKey);
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
-                    //TODO: 老用户判断
-                    //发送订阅消息
-                    SubscribeEvent subscribeEvent = new SubscribeEvent();
-                    subscribeEvent.setOpenid(openid);
-                    subscribeEvent.setScene(channel);
-                    try {
-                        rabbitMQPublisher.publish(subscribeEvent);
-                    } catch (ConnectException e) {
-                        logger.error("rabbit mq init failed");
+                    Profile profile = accountService.getProfile(openid, false);
+                    //从未关注过的全新用户
+                    boolean isNew = false;
+                    if(profile == null){
+                        isNew = true;
                     }
-                    // 插入推广数据
-                    if (promotionUserDao.loadPromotion(openid) == null) {
-                        PromotionUser promotionUser = new PromotionUser();
-                        promotionUser.setSource(channel);
-                        promotionUser.setOpenid(openid);
-                        promotionUser.setAction(0);
-                        if(channel.contains(ACTIVITY_SEPERATE_CHAR)){
-                            String[] splits = StringUtils.split(channel, ACTIVITY_SEPERATE_CHAR);
-                            if(splits.length>1){
-                                try{
-                                    int profileId =Integer.valueOf(splits[1]);
-                                    promotionUser.setProfileId(profileId);
-                                }catch (NumberFormatException e){
-                                    // ignore
+                    if(isNew){
+                        //发送订阅消息
+                        SubscribeEvent subscribeEvent = new SubscribeEvent();
+                        subscribeEvent.setOpenid(openid);
+                        subscribeEvent.setScene(channel);
+                        try {
+                            rabbitMQPublisher.publish(subscribeEvent);
+                        } catch (ConnectException e) {
+                            logger.error("rabbit mq init failed");
+                        }
+                        // 插入推广数据
+                        if (promotionUserDao.loadPromotion(openid) == null) {
+                            PromotionUser promotionUser = new PromotionUser();
+                            promotionUser.setSource(channel);
+                            promotionUser.setOpenid(openid);
+                            promotionUser.setAction(0);
+                            if(channel.contains(ACTIVITY_SEPERATE_CHAR)){
+                                String[] splits = StringUtils.split(channel, ACTIVITY_SEPERATE_CHAR);
+                                if(splits.length>1){
+                                    try{
+                                        int profileId =Integer.valueOf(splits[1]);
+                                        promotionUser.setProfileId(profileId);
+                                    }catch (NumberFormatException e){
+                                        // ignore
+                                    }
                                 }
                             }
+                            promotionUserDao.insert(promotionUser);
                         }
-                        promotionUserDao.insert(promotionUser);
                     }
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                     subscribeMessages.addAll(subscribeMessageDao.loadSubscribeMessages(channel));
