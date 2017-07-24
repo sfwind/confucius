@@ -97,20 +97,21 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
                 }
             }
         }
-        Integer remainCount = getRemindingCount();
-        if(remainCount <= 0){
-            return new MutablePair<>(-1,"报名人数已满");
-        } else {
-            // 是否要占
-            if(hold){
-                redisUtil.lock(REMAIN_NUMBER_LOCK_KEY, (lock) -> {
-                    Integer remainCountFinal = getRemindingCount();
-                    logger.info("剩余精英用户:{}", remainCountFinal);
-                    redisUtil.set(REMAIN_NUMBER_KEY, remainCountFinal-1, 60*60*24*30L);
-                });
-            }
+        // TODO 不限制报名人数
+//        Integer remainCount = getRemindingCount();
+//        if(remainCount <= 0){
+//            return new MutablePair<>(-1,"报名人数已满");
+//        } else {
+//            // 是否要占
+//            if(hold){
+//                redisUtil.lock(REMAIN_NUMBER_LOCK_KEY, (lock) -> {
+//                    Integer remainCountFinal = getRemindingCount();
+//                    logger.info("剩余精英用户:{}", remainCountFinal);
+//                    redisUtil.set(REMAIN_NUMBER_KEY, remainCountFinal-1, 60*60*24*30L);
+//                });
+//            }
             return new MutablePair<>(1,"ok");
-        }
+//        }
     }
 
     @Override

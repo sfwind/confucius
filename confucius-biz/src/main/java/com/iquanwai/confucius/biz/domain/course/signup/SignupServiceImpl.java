@@ -12,6 +12,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
@@ -78,6 +79,8 @@ public class SignupServiceImpl implements SignupService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
+    @Autowired
+    private MessageService messageService;
 
     int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
@@ -322,6 +325,8 @@ public class SignupServiceImpl implements SignupService {
             RiseMember exist = riseMemberDao.loadByOrderId(orderId);
             if (riseOrder.getEntry() && exist != null && !exist.getExpired() && DateUtils.isSameDate(exist.getAddTime(), new Date())) {
                 // 这个单子已经成功，且已经插入了riseMember，并且未过期,并且是今天的
+                messageService.sendAlarm("报名模块次级异常", "微信多次回调",
+                        "中", "订单id:" + orderId, "再次处理今天已经插入的risemember");
                 return;
             }
         } catch (Exception e){
@@ -359,6 +364,8 @@ public class SignupServiceImpl implements SignupService {
             }
             default:
                 logger.error("该会员ID异常{}", memberType);
+                messageService.sendAlarm("报名模块出错", "会员id异常",
+                        "高", "订单id:" + orderId, "会员类型异常");
                 return;
         }
         // 添加会员表
@@ -390,7 +397,7 @@ public class SignupServiceImpl implements SignupService {
         sendRiseMemberMsg(profile, memberType, riseMember);
     }
 
-
+    // TODO 是否需要修改？
     private void sendRiseMemberMsg(Profile profile, MemberType memberType, RiseMember riseMember) {
         Assert.notNull(profile, "openid不能为空");
 
