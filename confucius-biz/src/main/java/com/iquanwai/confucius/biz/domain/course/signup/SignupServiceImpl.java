@@ -415,7 +415,7 @@ public class SignupServiceImpl implements SignupService {
         } else if (memberType.getId() == RiseMember.HALF_ELITE) {
             // 发送消息给半年精英版用户
             customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.half.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-            messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
+            messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.half.send.system.url"));
 //            sendHalfEliteWelcomeMsg(profile.getOpenid(),)
         } else {
             //发送消息给专业版用户
