@@ -346,24 +346,24 @@ public class SignupServiceImpl implements SignupService {
         Date expireDate;
         switch (memberType.getId()) {
             case 1: {
-                expireDate = DateUtils.afterMonths(new Date(), 6);
+                expireDate = DateUtils.afterNatureMonths(new Date(), 6);
                 profileDao.becomeRiseMember(openId);
                 break;
             }
             case 2: {
-                expireDate = DateUtils.afterYears(new Date(), 1);
+                expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseMember(openId);
                 break;
             }
             case 3: {
                 //精英会员
-                expireDate = DateUtils.afterYears(new Date(), 1);
+                expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseEliteMember(openId);
                 break;
             }
             case 4: {
                 //精英会员
-                expireDate = DateUtils.afterMonths(new Date(), 6);
+                expireDate = DateUtils.afterNatureMonths(new Date(), 6);
                 profileDao.becomeRiseEliteMember(openId);
                 break;
             }
