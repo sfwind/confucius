@@ -16,6 +16,7 @@ public class ProfileDto {
     private String province; //省份
     private Integer provinceId;
     private Boolean isFull;
+    private Boolean bindMobile;
 
     public void isFullCheck() {
         this.isFull = StringUtils.isNoneEmpty(industry, function, workingLife, city, province);

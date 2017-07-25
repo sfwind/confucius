@@ -571,6 +571,8 @@ public class SignupController {
         String remoteIp = request.getHeader("X-Forwarded-For");
         if (remoteIp == null) {
             LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), memberDto);
+            messageService.sendAlarm("报名模块出错", "获取用户:" + loginUser.getId() + " IP失败",
+                    "高", "会员类型:" + memberDto.getMemberType(), "IP获取失败");
             remoteIp = ConfigUtils.getExternalIP();
         }
         // 检查是否能够支付
