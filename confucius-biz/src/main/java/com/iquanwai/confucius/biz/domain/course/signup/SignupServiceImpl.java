@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
@@ -29,6 +30,7 @@ import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -45,6 +47,7 @@ import java.lang.ref.SoftReference;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by justin on 16/9/10.
@@ -81,6 +84,8 @@ public class SignupServiceImpl implements SignupService {
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private CustomerMessageService customerMessageService;
 
     int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
@@ -397,17 +402,26 @@ public class SignupServiceImpl implements SignupService {
         sendRiseMemberMsg(profile, memberType, riseMember);
     }
 
-    // TODO 是否需要修改？
+
     private void sendRiseMemberMsg(Profile profile, MemberType memberType, RiseMember riseMember) {
         Assert.notNull(profile, "openid不能为空");
 
         logger.info("发送欢迎消息给付费用户{}", profile.getOpenid());
         if (memberType.getId() == RiseMember.ELITE) {
-            //发送消息给精英版用户
-            sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
+            //发送消息给一年精英版用户
+            customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+            messageService.sendMessage("测试，一年精英", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, null);
+//            sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
+        } else if (memberType.getId() == RiseMember.HALF_ELITE) {
+            // 发送消息给半年精英版用户
+            customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.half.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+            messageService.sendMessage("测试，半年精英", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, null);
+//            sendHalfEliteWelcomeMsg(profile.getOpenid(),)
         } else {
             //发送消息给专业版用户
-            sendProfessionalWelcomeMsg(profile, memberType, riseMember);
+            messageService.sendAlarm("报名模块出错", "报名后发送消息",
+                    "中", "订单id:" + riseMember.getOrderId() + "\nprofileId:" + profile.getId(), "会员类型异常");
+//            sendProfessionalWelcomeMsg(profile, memberType, riseMember);
         }
     }
 

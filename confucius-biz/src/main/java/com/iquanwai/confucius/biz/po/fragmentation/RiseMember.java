@@ -23,4 +23,5 @@ public class RiseMember {
     private String name; //非DB字段
 
     public static final int ELITE =3;//精英用户
+    public static final int HALF_ELITE = 4;
 }

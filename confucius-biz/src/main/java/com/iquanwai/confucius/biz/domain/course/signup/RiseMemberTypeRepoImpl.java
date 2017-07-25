@@ -28,7 +28,9 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
 
     @PostConstruct
     public void init(){
-        List<MemberType> types = memberTypeDao.loadAll(MemberType.class);
+        List<MemberType> types = memberTypeDao.loadAll(MemberType.class).stream().filter(item -> !item.getDel())
+                .collect(Collectors.toList());
+
         types.forEach(item -> memberTypes.put(item.getId(), item));
         logger.info("圈外会员价格:{}", RiseMemberTypeRepoImpl.memberTypes);
     }
