@@ -45,6 +45,10 @@ public class ConfigUtils {
 		config = fileconfig.withFallback(config);
 	}
 
+	public static Boolean payPrePublish(){
+		return getBooleanValue("pay.pre.publish");
+	}
+
 	public static String getToken(){
 		return getValue("token");
 	}
