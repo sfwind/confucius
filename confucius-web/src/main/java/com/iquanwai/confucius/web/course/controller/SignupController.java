@@ -534,4 +534,25 @@ public class SignupController {
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
+
+    @RequestMapping(value = "/mark/pay/{function}/{action}")
+    public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser, @PathVariable(value = "function") String function, @PathVariable(value = "action") String action, @RequestParam(required = false) String param) {
+        String memo = "";
+        if (param != null) {
+            if(param.length()>1024){
+                memo = param.substring(0,1024);
+            } else {
+                memo = param;
+            }
+        }
+        messageService.sendAlarm("报名模块出错", "订单支付失败",
+                "高", "profileId:" + loginUser.getId(), memo);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("支付")
+                .function(function)
+                .action(action)
+                .memo(memo);
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
 }
