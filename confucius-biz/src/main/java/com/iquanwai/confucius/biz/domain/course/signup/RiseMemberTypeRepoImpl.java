@@ -45,7 +45,7 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
         List<MemberType> collect = memberTypes.values().stream().map(MemberType::copy).collect(Collectors.toList());
         collect.forEach(item->{
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.afterMonths(new Date(), item.getOpenMonth())));
+            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth())));
         });
         return collect;
     }

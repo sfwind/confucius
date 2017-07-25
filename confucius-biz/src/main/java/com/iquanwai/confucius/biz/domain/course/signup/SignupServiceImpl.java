@@ -613,7 +613,7 @@ public class SignupServiceImpl implements SignupService {
         List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
         memberTypes.forEach(item -> {
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), item.getOpenMonth()), 1)));
+            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
         });
         return memberTypes;
     }
