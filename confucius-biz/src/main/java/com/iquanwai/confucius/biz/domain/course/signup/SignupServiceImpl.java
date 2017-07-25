@@ -12,6 +12,8 @@ import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
@@ -28,6 +30,7 @@ import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QRCodeUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -44,6 +47,7 @@ import java.lang.ref.SoftReference;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by justin on 16/9/10.
@@ -78,6 +82,10 @@ public class SignupServiceImpl implements SignupService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
+    @Autowired
+    private MessageService messageService;
+    @Autowired
+    private CustomerMessageService customerMessageService;
 
     int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
@@ -322,6 +330,8 @@ public class SignupServiceImpl implements SignupService {
             RiseMember exist = riseMemberDao.loadByOrderId(orderId);
             if (riseOrder.getEntry() && exist != null && !exist.getExpired() && DateUtils.isSameDate(exist.getAddTime(), new Date())) {
                 // 这个单子已经成功，且已经插入了riseMember，并且未过期,并且是今天的
+                messageService.sendAlarm("报名模块次级异常", "微信多次回调",
+                        "中", "订单id:" + orderId, "再次处理今天已经插入的risemember");
                 return;
             }
         } catch (Exception e){
@@ -336,23 +346,31 @@ public class SignupServiceImpl implements SignupService {
         Date expireDate;
         switch (memberType.getId()) {
             case 1: {
-                expireDate = DateUtils.afterMonths(new Date(), 6);
+                expireDate = DateUtils.afterNatureMonths(new Date(), 6);
                 profileDao.becomeRiseMember(openId);
                 break;
             }
             case 2: {
-                expireDate = DateUtils.afterYears(new Date(), 1);
+                expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseMember(openId);
                 break;
             }
             case 3: {
                 //精英会员
-                expireDate = DateUtils.afterYears(new Date(), 1);
+                expireDate = DateUtils.afterNatureMonths(new Date(), 12);
+                profileDao.becomeRiseEliteMember(openId);
+                break;
+            }
+            case 4: {
+                //精英会员
+                expireDate = DateUtils.afterNatureMonths(new Date(), 6);
                 profileDao.becomeRiseEliteMember(openId);
                 break;
             }
             default:
                 logger.error("该会员ID异常{}", memberType);
+                messageService.sendAlarm("报名模块出错", "会员id异常",
+                        "高", "订单id:" + orderId, "会员类型异常");
                 return;
         }
         // 添加会员表
@@ -370,7 +388,7 @@ public class SignupServiceImpl implements SignupService {
             if (!plan.getRiseMember()) {
                 // 不是会员的计划，设置一下
                 plan.setCloseDate(DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
-                if (plan.getStatus().equals(1) && memberType.getId().equals(3)) {
+                if (plan.getStatus().equals(1) && (memberType.getId().equals(3) || memberType.getId().equals(4))) {
                     // 给精英版正在进行的planid+1个求点评次数
                     improvementPlanDao.becomeRiseEliteMember(plan);
                 } else {
@@ -390,11 +408,20 @@ public class SignupServiceImpl implements SignupService {
 
         logger.info("发送欢迎消息给付费用户{}", profile.getOpenid());
         if (memberType.getId() == RiseMember.ELITE) {
-            //发送消息给精英版用户
-            sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
+            //发送消息给一年精英版用户
+            customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+            messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
+//            sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
+        } else if (memberType.getId() == RiseMember.HALF_ELITE) {
+            // 发送消息给半年精英版用户
+            customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.half.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+            messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
+//            sendHalfEliteWelcomeMsg(profile.getOpenid(),)
         } else {
             //发送消息给专业版用户
-            sendProfessionalWelcomeMsg(profile, memberType, riseMember);
+            messageService.sendAlarm("报名模块出错", "报名后发送消息",
+                    "中", "订单id:" + riseMember.getOrderId() + "\nprofileId:" + profile.getId(), "会员类型异常");
+//            sendProfessionalWelcomeMsg(profile, memberType, riseMember);
         }
     }
 
@@ -586,7 +613,7 @@ public class SignupServiceImpl implements SignupService {
         List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
         memberTypes.forEach(item -> {
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), item.getOpenMonth()), 1)));
+            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
         });
         return memberTypes;
     }

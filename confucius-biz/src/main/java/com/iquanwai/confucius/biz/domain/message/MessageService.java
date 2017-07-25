@@ -15,4 +15,6 @@ public interface MessageService {
     void sendMessage(String message, String toUser, String fromUser, String url);
 
     String SYSTEM_MESSAGE ="AUTO";
+
+    void sendAlarm(String alarmTitle, String alarmTips, String alarmLevel, String desc, String exception);
 }

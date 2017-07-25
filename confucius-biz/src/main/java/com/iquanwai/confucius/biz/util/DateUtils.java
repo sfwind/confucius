@@ -82,6 +82,10 @@ public class DateUtils {
         return new DateTime(date).plusMinutes(increment).toDate();
     }
 
+    public static Date afterNatureMonths(Date date,int increment) {
+        return DateUtils.afterMonths(new DateTime(DateUtils.afterMonths(date, 1)).withDayOfMonth(1).toDate(), increment);
+    }
+
     public static Date startDay(Date date){
         return new DateTime(date).withTimeAtStartOfDay().toDate();
     }

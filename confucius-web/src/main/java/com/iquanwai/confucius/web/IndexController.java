@@ -71,6 +71,15 @@ public class IndexController {
         if(!checkAccessToken(request,response)){
             return null;
         }
+        if (ConfigUtils.payPrePublish()) {
+            // 测试状态
+            boolean inWhite = whiteListService.isInWhiteList(WhiteList.PAY_TEST, loginUser.getId());
+            if (!inWhite) {
+                response.sendRedirect("/403.jsp");
+                return null;
+            }
+        }
+
         String ua = request.getHeader("user-agent");
         //TODO 可以写到配置里
         if (UAUtils.isLowerAndroid(ua, 4, 4)) {

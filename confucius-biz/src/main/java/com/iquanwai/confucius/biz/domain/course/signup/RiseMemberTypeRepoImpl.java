@@ -28,7 +28,9 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
 
     @PostConstruct
     public void init(){
-        List<MemberType> types = memberTypeDao.loadAll(MemberType.class);
+        List<MemberType> types = memberTypeDao.loadAll(MemberType.class).stream().filter(item -> !item.getDel())
+                .collect(Collectors.toList());
+
         types.forEach(item -> memberTypes.put(item.getId(), item));
         logger.info("圈外会员价格:{}", RiseMemberTypeRepoImpl.memberTypes);
     }
@@ -43,7 +45,7 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
         List<MemberType> collect = memberTypes.values().stream().map(MemberType::copy).collect(Collectors.toList());
         collect.forEach(item->{
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.afterMonths(new Date(), item.getOpenMonth())));
+            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth())));
         });
         return collect;
     }

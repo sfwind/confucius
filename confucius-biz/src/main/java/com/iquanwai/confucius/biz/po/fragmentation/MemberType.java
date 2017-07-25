@@ -18,6 +18,7 @@ public class MemberType {
     private Integer openMonth; // 会员时长
     private String startTime; // 开启时间 非DB字段
     private String endTime; // 结束时间 非DB字段
+    private Boolean del; // 是否删除
 
     public MemberType copy(){
         MemberType temp = new MemberType();
@@ -28,6 +29,7 @@ public class MemberType {
         temp.setOpenMonth(this.openMonth);
         temp.setStartTime(this.startTime);
         temp.setEndTime(this.endTime);
+        temp.setDel(this.del);
         return temp;
     }
 }

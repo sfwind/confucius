@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
@@ -61,6 +62,8 @@ public class SignupController {
     private PayService payService;
     @Autowired
     private CourseProgressService courseProgressService;
+    @Autowired
+    private MessageService messageService;
 
     @RequestMapping(value = "/course/{courseId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> signup(LoginUser loginUser, @PathVariable Integer courseId, HttpServletRequest request) {
@@ -428,6 +431,9 @@ public class SignupController {
         String remoteIp = request.getHeader("X-Forwarded-For");
         if (remoteIp == null) {
             LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), memberDto);
+            messageService.sendAlarm("报名模块出错", "获取用户:" + loginUser.getId() + " IP失败",
+                    "高", "会员类型:" + memberDto.getMemberType(), "IP获取失败");
+
             remoteIp = ConfigUtils.getExternalIP();
         }
         Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getId(), memberDto.getMemberType());
@@ -438,6 +444,9 @@ public class SignupController {
                 memberDto.getMemberType(), memberDto.getCouponId());
 
         if (quanwaiOrderPair.getLeft() == -1) {
+            messageService.sendAlarm("报名模块出错", "优惠券无效,profileId:" + loginUser.getId(),
+                    "高","会员类型:" + memberDto.getMemberType() + "\n优惠券id:" + memberDto.getCouponId(),
+                    "优惠券无效");
             return WebUtils.error("该优惠券无效");
         } else {
             // 下单
@@ -455,6 +464,13 @@ public class SignupController {
                         .function("微信支付")
                         .action("下单")
                         .memo(signParams.toString());
+                operationLogService.log(payParamLog);
+            } else {
+                OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
+                        .module("报名")
+                        .function("圈外会员")
+                        .action("优惠券抵消免费上课")
+                        .memo(quanwaiOrder.getId() + "");
                 operationLogService.log(payParamLog);
             }
             return WebUtils.result(signupDto);
@@ -515,6 +531,27 @@ public class SignupController {
                 .function("打点")
                 .action("支付")
                 .memo(type);
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/mark/pay/{function}/{action}")
+    public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser, @PathVariable(value = "function") String function, @PathVariable(value = "action") String action, @RequestParam(required = false) String param) {
+        String memo = "";
+        if (param != null) {
+            if(param.length()>1024){
+                memo = param.substring(0,1024);
+            } else {
+                memo = param;
+            }
+        }
+        messageService.sendAlarm("报名模块出错", "订单支付失败",
+                "高", "profileId:" + loginUser.getId(), memo);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("支付")
+                .function(function)
+                .action(action)
+                .memo(memo);
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
