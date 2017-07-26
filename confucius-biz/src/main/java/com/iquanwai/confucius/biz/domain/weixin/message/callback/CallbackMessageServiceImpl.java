@@ -249,6 +249,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private String eventReply(String event, String eventKey, String openid, String wxid) {
         switch (event) {
+            // 关注事件
             case EVENT_SUBSCRIBE:
                 List<SubscribeMessage> subscribeMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
@@ -262,10 +263,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         isNew = true;
                     }
                     if(isNew){
-                        promotionSuccess(channel, openid);
+                        promotionSuccess(channel, openid, SubscribeEvent.SUBSCRIBE);
                     }
-                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
-                    subscribeMessages.addAll(subscribeMessageDao.loadSubscribeMessages(channel));
+                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
@@ -285,9 +285,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     return sendSubscribeMessage(openid, wxid, subscribeMessages);
                 }
                 break;
+            // 取消关注事件
             case EVENT_UNSUBSCRIBE:
                 accountService.unfollow(openid);
                 break;
+            // 扫描事件
             case EVENT_SCAN:
                 Profile profile = accountService.getProfile(openid, false);
                 //从未关注过的全新用户或者未付费的用户
@@ -296,14 +298,13 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     isNew = true;
                 }
                 if(isNew){
-                    promotionSuccess(eventKey, openid);
+                    promotionSuccess(eventKey, openid, SubscribeEvent.SCAN);
                 }
 
                 List<SubscribeMessage> scanMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
-                    scanMessages = subscribeMessageDao.loadScanMessages();
-                    scanMessages.addAll(subscribeMessageDao.loadScanMessages(eventKey));
+                    scanMessages = subscribeMessageDao.loadScanMessages(eventKey);
                 } else {
                     scanMessages = subscribeMessageDao.loadScanMessages();
                 }
@@ -311,19 +312,19 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     return sendSubscribeMessage(openid, wxid, scanMessages);
                 }
                 break;
-            case TEMPLATE_SEND_JOB_FINISH:
-                // ignore 忽略模版消息推送成功的事件
+            default:
                 break;
         }
 
         return null;
     }
 
-    private void promotionSuccess(String eventKey, String openid) {
+    private void promotionSuccess(String eventKey, String openid, String event) {
         //发送订阅消息
         SubscribeEvent subscribeEvent = new SubscribeEvent();
-        subscribeEvent.setOpenid(openid);
         subscribeEvent.setScene(eventKey);
+        subscribeEvent.setOpenid(openid);
+        subscribeEvent.setEvent(event);
         try {
             rabbitMQPublisher.publish(subscribeEvent);
         } catch (ConnectException e) {
