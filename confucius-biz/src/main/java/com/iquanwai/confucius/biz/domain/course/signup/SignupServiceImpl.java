@@ -371,7 +371,6 @@ public class SignupServiceImpl implements SignupService {
             Integer planId = createPlan(riseCourseOrder);
             if (planId < 0) {
                 logger.error("报名小课异常，返回的planId异常");
-                return;
             } else {
                 improvementPlanDao.reOpenPlan(planId, DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
             }
@@ -384,7 +383,6 @@ public class SignupServiceImpl implements SignupService {
                 logger.error("报名小课异常，小课状态为:{}", plan.getStatus());
                 messageService.sendAlarm("报名模块出错", "用户小课数据异常",
                         "高", "订单id:" + orderId, "该用户购买的小课，状态并不是使用结束");
-                return;
             }
         }
     }
@@ -606,7 +604,7 @@ public class SignupServiceImpl implements SignupService {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
         Profile profile = profileDao.queryByOpenId(riseOrder.getOpenid());
         Integer count = riseOrderDao.userNotCloseOrder(riseOrder.getProfileId());
-        if (!profile.getRiseMember() && count == 1) {
+        if (profile.getRiseMember() == Constants.RISE_MEMBER.FREE && count == 1) {
             // 未成功报名，并且是最后一个单子,退还名额
             riseMemberCountRepo.quitSignup(riseOrder.getProfileId(), riseOrder.getMemberType());
         }

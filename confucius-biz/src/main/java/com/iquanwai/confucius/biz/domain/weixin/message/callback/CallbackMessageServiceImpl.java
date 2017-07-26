@@ -259,7 +259,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     Profile profile = accountService.getProfile(openid, false);
                     //从未关注过的全新用户或者未付费的用户
                     boolean isNew = false;
-                    if(profile == null || !profile.getRiseMember()){
+                    if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
                         isNew = true;
                     }
                     if(isNew){
@@ -294,7 +294,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 Profile profile = accountService.getProfile(openid, false);
                 //从未关注过的全新用户或者未付费的用户
                 boolean isNew = false;
-                if(profile == null || !profile.getRiseMember()){
+                if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
                     isNew = true;
                 }
                 if(isNew){
