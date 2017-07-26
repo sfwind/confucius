@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.EventWall;
 import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 
@@ -76,4 +75,9 @@ public interface AccountService {
      * 取消关注
      */
     void unfollow(String openid);
+
+    /**
+     * 更新riseMember状态
+     * */
+    void updateRiseMember(String openid, Integer riseMember);
 }

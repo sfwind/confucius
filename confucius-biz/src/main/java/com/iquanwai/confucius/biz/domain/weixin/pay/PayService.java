@@ -71,6 +71,7 @@ public interface PayService {
     String ORDER_CLOSE = "ORDERCLOSED";
     String SYSTEM_ERROR = "SYSTEMERROR";
     String RISE_PAY_SUCCESS_TOPIC = "rise_pay_success_topic";
+    String LOGIN_USER_RELOAD_TOPIC ="login_user_reload";
 
 
 }

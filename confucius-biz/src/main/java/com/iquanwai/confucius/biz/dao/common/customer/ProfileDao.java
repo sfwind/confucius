@@ -104,6 +104,16 @@ public class ProfileDao extends DBUtil{
         }
     }
 
+    public void updateRiseMember(String openId, int riseMember) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Profile SET RiseMember = ? where OpenId = ?";
+        try {
+            runner.update(sql, riseMember, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public void completeProfile(String openId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE Profile SET IsFull = 1 where Openid = ?";
