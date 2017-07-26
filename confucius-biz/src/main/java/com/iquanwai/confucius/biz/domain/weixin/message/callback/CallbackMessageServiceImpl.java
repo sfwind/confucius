@@ -129,7 +129,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         rabbitMQPublisher = new RabbitMQPublisher();
         rabbitMQPublisher.init(SUBSCRIBE_TOPIC, ConfigUtils.getRabbitMQIp(),
                 ConfigUtils.getRabbitMQPort());
-        rabbitMQPublisher.setSendCallback(queue -> mqService.saveMQSendOperation(queue));
+        rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
     }
 
     @Override
@@ -366,20 +366,5 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         }
 
         return null;
-    }
-
-    public static void main(String[] args) {
-        String channel = "freelimit_8";
-        if(channel.contains(ACTIVITY_SEPERATE_CHAR)){
-            String[] splits = StringUtils.split(channel, ACTIVITY_SEPERATE_CHAR);
-            if(splits.length>1){
-                try{
-                    int profileId =Integer.valueOf(splits[1]);
-                    System.out.println(profileId);
-                }catch (NumberFormatException e){
-                    // ignore
-                }
-            }
-        }
     }
 }

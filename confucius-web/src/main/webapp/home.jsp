@@ -6,7 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>圈外</title>
     <meta name="keywords" content="圈外,圈外同学">
-    <meta name="description" content="圈外训练营">
+    <meta name="description" content="圈外同学">
     <link href="//www.iqycamp.com/images/logo.png" rel="shortcut icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <script>
