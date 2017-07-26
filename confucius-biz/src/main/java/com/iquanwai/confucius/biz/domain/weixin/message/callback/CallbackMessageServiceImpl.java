@@ -347,6 +347,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     }
                 }
             }
+            logger.info("promotionUser" + promotionUser.getOpenid());
+            logger.info("promotionUser" + promotionUser.getSource());
+            logger.info("promotionUser" + promotionUser.getAction());
+            logger.info("promotionUser" + promotionUser.getProfileId());
             promotionUserDao.insert(promotionUser);
         }
     }
