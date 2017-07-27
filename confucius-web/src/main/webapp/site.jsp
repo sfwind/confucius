@@ -22,6 +22,7 @@
         backend:false,
         roleId:${roleId},
         signature:"${signature}",
+        configUrl:window.location.href,
     }
 </script>
 
