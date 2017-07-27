@@ -264,7 +264,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     }
                     //发送订阅消息
                     SubscribeEvent subscribeEvent = new SubscribeEvent();
-                    subscribeEvent.setScene(eventKey);
+                    subscribeEvent.setScene(channel);
                     subscribeEvent.setOpenid(openid);
                     subscribeEvent.setEvent(event);
                     try {
