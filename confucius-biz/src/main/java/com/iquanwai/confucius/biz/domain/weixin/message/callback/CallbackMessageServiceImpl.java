@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.message.callback;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.GraphicMessageDao;
@@ -84,6 +85,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
     private AutoReplyMessage defaultReply;
     private Map<String, List<GraphicMessage>> newsMessageMap = Maps.newHashMap();
+    @Autowired
+    private RedisUtil redisUtil;
 
     @PostConstruct
     public void init() {
@@ -262,6 +265,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
                         isNew = true;
                     }
+                    //加锁防止微信消息重放
+                    if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 60)){
+                        return null;
+                    }
                     //发送订阅消息
                     SubscribeEvent subscribeEvent = new SubscribeEvent();
                     subscribeEvent.setScene(channel);
@@ -305,6 +312,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 boolean isNew = false;
                 if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
                     isNew = true;
+                }
+                //加锁防止微信消息重放
+                if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 60)){
+                    return null;
                 }
                 //发送订阅消息
                 SubscribeEvent subscribeEvent = new SubscribeEvent();

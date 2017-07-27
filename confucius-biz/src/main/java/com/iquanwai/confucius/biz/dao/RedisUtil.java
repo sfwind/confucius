@@ -102,6 +102,18 @@ public class RedisUtil {
         logger.info("Thread {} don't have the lock :{}", Thread.currentThread().getId(), lock.isHeldByCurrentThread());
     }
 
+    public boolean tryLock(String key, int wait, int release){
+        RLock lock = redissonClient.getLock(key);
+        logger.info("Thread {} want the lock", Thread.currentThread().getId());
+        try {
+            return lock.tryLock(wait, release, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return false;
+    }
+
     /**
      * 根据正则获取keys,默认每次向redis请求获取10行
      * @param pattern 正则
