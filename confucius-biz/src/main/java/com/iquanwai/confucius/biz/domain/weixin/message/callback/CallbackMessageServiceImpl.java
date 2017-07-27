@@ -266,7 +266,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         isNew = true;
                     }
                     //加锁防止微信消息重放
-                    if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 60)){
+                    if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 5)){
                         return null;
                     }
                     //发送订阅消息
@@ -314,7 +314,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     isNew = true;
                 }
                 //加锁防止微信消息重放
-                if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 60)){
+                if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 5)){
                     return null;
                 }
                 //发送订阅消息
