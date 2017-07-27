@@ -218,12 +218,10 @@ public class SignupServiceImpl implements SignupService {
     public QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId) {
         // 查询该openid 是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
-        Integer trialProblemId = ConfigUtils.getTrialProblemId();
         Double fee = ConfigUtils.getRiseCourseFee();
         Problem problem = problemDao.load(Problem.class, problemId);
         Assert.notNull(problem, "小课数据异常");
         Assert.notNull(fee, "会员价格异常");
-        Assert.isTrue(!problemId.equals(trialProblemId), "限免课程无需付费");
         Assert.notNull(profile, "用户信息不能为空");
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
