@@ -156,6 +156,7 @@ public class IndexController {
         } catch (NotFollowingException e) {
             try {
                 response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/subscribe");
+                return false;
             } catch (IOException e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
             }
