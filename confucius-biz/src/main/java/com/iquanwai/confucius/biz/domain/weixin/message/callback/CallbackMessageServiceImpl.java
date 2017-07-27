@@ -262,6 +262,16 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
                         isNew = true;
                     }
+                    //发送订阅消息
+                    SubscribeEvent subscribeEvent = new SubscribeEvent();
+                    subscribeEvent.setScene(eventKey);
+                    subscribeEvent.setOpenid(openid);
+                    subscribeEvent.setEvent(event);
+                    try {
+                        rabbitMQPublisher.publish(subscribeEvent);
+                    } catch (ConnectException e) {
+                        logger.error("rabbit mq init failed");
+                    }
                     if(isNew){
                         promotionSuccess(channel, openid, SubscribeEvent.SUBSCRIBE);
                     }
@@ -280,7 +290,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 } catch (NotFollowingException e) {
                     // ignore
                 }
-
                 if (CollectionUtils.isNotEmpty(subscribeMessages)) {
                     return sendSubscribeMessage(openid, wxid, subscribeMessages);
                 }
@@ -297,10 +306,19 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
                     isNew = true;
                 }
+                //发送订阅消息
+                SubscribeEvent subscribeEvent = new SubscribeEvent();
+                subscribeEvent.setScene(eventKey);
+                subscribeEvent.setOpenid(openid);
+                subscribeEvent.setEvent(event);
+                try {
+                    rabbitMQPublisher.publish(subscribeEvent);
+                } catch (ConnectException e) {
+                    logger.error("rabbit mq init failed");
+                }
                 if(isNew){
                     promotionSuccess(eventKey, openid, SubscribeEvent.SCAN);
                 }
-
                 List<SubscribeMessage> scanMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
@@ -320,16 +338,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     }
 
     private void promotionSuccess(String eventKey, String openid, String event) {
-        //发送订阅消息
-        SubscribeEvent subscribeEvent = new SubscribeEvent();
-        subscribeEvent.setScene(eventKey);
-        subscribeEvent.setOpenid(openid);
-        subscribeEvent.setEvent(event);
-        try {
-            rabbitMQPublisher.publish(subscribeEvent);
-        } catch (ConnectException e) {
-            logger.error("rabbit mq init failed");
-        }
         // 插入推广数据
         if (promotionUserDao.loadPromotion(openid) == null) {
             PromotionUser promotionUser = new PromotionUser();
