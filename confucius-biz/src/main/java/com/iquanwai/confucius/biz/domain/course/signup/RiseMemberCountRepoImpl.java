@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
             List<RiseOrder> holderList = riseOrderDao.loadActiveOrder();
             long holderCount = holderList.stream().filter(item -> {
                 Profile profile = profileDao.queryByOpenId(item.getOpenid());
-                return !profile.getRiseMember();
+                return profile.getRiseMember() == Constants.RISE_MEMBER.FREE;
             }).map(RiseOrder::getOpenid).distinct().count();
             // 未过期
             Integer nowCount = profileDao.riseMemberCount();
@@ -81,7 +82,7 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
     @Override
     public Pair<Integer,String> prepareSignup(Integer profileId, Boolean hold){
         Profile profile = profileDao.load(Profile.class, profileId);
-        if(profile.getRiseMember()){
+        if(profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP){
             // 已经报名
             return new MutablePair<>(-3,"您已是圈外会员");
         } else {

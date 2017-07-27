@@ -9,4 +9,12 @@ import lombok.Data;
 public class SubscribeEvent {
     private String scene;
     private String openid;
+    private String event;
+
+    /**
+     * 事件关注类型
+     */
+    public static final String SUBSCRIBE = "subscribe";
+    public static final String SCAN = "scan";
+
 }

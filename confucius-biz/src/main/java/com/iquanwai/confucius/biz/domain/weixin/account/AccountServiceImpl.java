@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
@@ -296,6 +297,18 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void unfollow(String openid) {
         followUserDao.unsubscribe(openid);
+    }
+
+    @Override
+    public void updateRiseMember(String openid, Integer riseMember) {
+        if(riseMember == Constants.RISE_MEMBER.COURSE_USER){
+            Profile profile = profileDao.queryByOpenId(openid);
+            //会员的等级最高
+            if(profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP){
+                return;
+            }
+        }
+        profileDao.updateRiseMember(openid, riseMember);
     }
 
     private Profile getProfileFromDB(String openid) {

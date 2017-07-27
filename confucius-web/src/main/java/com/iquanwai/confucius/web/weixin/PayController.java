@@ -85,14 +85,32 @@ public class PayController {
         try {
             payService.handlePayResult(payCallback);
             if(payCallback.getResult_code().equals("SUCCESS")) {
-                payService.riseMemberPaySuccess(payCallback.getOut_trade_no());
+                payService.risePaySuccess(payCallback.getOut_trade_no());
             }else{
                 LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
             }
         }catch (Exception e){
-            LOGGER.error("支付结果回调处理失败", e);
+            LOGGER.error("rise会员支付结果回调处理失败", e);
         }
 
+        response.setHeader("Content-Type", "application/xml");
+        response.getWriter().print(SUCCESS_RETURN);
+        response.flushBuffer();
+    }
+
+    @RequestMapping(value = "/result/risecourse/callback")
+    public void riseCoursePayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
+        LOGGER.info("rise小课单卖微信支付回调:{}", payCallback.toString());
+        try{
+            payService.handlePayResult(payCallback);
+            if (payCallback.getResult_code().equals("SUCCESS")) {
+                payService.risePaySuccess(payCallback.getOut_trade_no());
+            } else {
+                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+            }
+        } catch (Exception e){
+            LOGGER.error("小课单卖支付结果回调处理失败", e);
+        }
         response.setHeader("Content-Type", "application/xml");
         response.getWriter().print(SUCCESS_RETURN);
         response.flushBuffer();

@@ -1,11 +1,13 @@
 package com.iquanwai.confucius.web;
 
-import com.iquanwai.confucius.mq.CacheReloadReceiver;
+import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import com.iquanwai.confucius.mq.CacheReloadReceiver;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +23,9 @@ import java.util.Map;
 public class CacheReloadController {
     private RabbitMQPublisher rabbitMQPublisher;
 
+    @Autowired
+    private MQService mqService;
+
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @PostConstruct
@@ -28,6 +33,8 @@ public class CacheReloadController {
         rabbitMQPublisher = new RabbitMQPublisher();
         rabbitMQPublisher.init(CacheReloadReceiver.TOPIC, ConfigUtils.getRabbitMQIp(),
                 ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.setSendCallback(queue -> mqService.saveMQSendOperation(queue));
+
     }
 
     @RequestMapping("/class/reload")

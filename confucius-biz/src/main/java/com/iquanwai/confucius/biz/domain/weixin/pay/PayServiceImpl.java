@@ -6,15 +6,14 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.message.MQService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
-import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
-import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +31,26 @@ import java.util.Map;
  */
 @Service
 public class PayServiceImpl implements PayService{
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
     private CostRepo costRepo;
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SignupService signupService;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private MessageService messageService;
+    @Autowired
+    private MQService mqService;
+    @Autowired
+    private AccountService accountService;
+
+    private RabbitMQPublisher closeOrderPublisher;
+
+    private RabbitMQPublisher freshLoginUserPublisher;
 
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
@@ -51,28 +60,37 @@ public class PayServiceImpl implements PayService{
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
+    private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
 
     @PostConstruct
     public void init(){
+        // 初始化发送mq
+        closeOrderPublisher = new RabbitMQPublisher();
+        closeOrderPublisher.init(RISE_PAY_SUCCESS_TOPIC, ConfigUtils.getRabbitMQIp(),
+                ConfigUtils.getRabbitMQPort());
+        closeOrderPublisher.setSendCallback(mqService::saveMQSendOperation);
+
+        logger.info(RISE_PAY_SUCCESS_TOPIC + ",MQ提供者初始化");
+
+        // 初始化接听mq
         RabbitMQReceiver rabbitMQReceiver = new RabbitMQReceiver();
         rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
-        Channel channel = rabbitMQReceiver.getChannel();
         logger.info(TOPIC + "通道建立");
-        Consumer consumer = getConsumer(channel);
-        rabbitMQReceiver.listen(consumer);
+        rabbitMQReceiver.setAfterDealQueue(mqService::updateAfterDealOperation);
+        rabbitMQReceiver.listen(orderId -> {
+            String message = orderId.toString();
+            logger.info("receive message {}", message);
+            closeOrder(message);
+        });
         logger.info(TOPIC + "开启队列监听");
-    }
 
-    private Consumer getConsumer(Channel channel){
-        return new DefaultConsumer(channel){
-            @Override
-            public void handleDelivery(String consumerTag, Envelope envelope,
-                                       AMQP.BasicProperties properties, byte[] body) throws IOException {
-                String message = new String(body);
-                logger.info("receive message {}", message);
-                closeOrder(message);
-            }
-        };
+        freshLoginUserPublisher = new RabbitMQPublisher();
+        freshLoginUserPublisher.init(LOGIN_USER_RELOAD_TOPIC, ConfigUtils.getRabbitMQIp(),
+                ConfigUtils.getRabbitMQPort());
+        freshLoginUserPublisher.setSendCallback(mqService::saveMQSendOperation);
+
+        logger.info(LOGIN_USER_RELOAD_TOPIC + ",MQ提供者初始化");
+
     }
 
     public String unifiedOrder(String orderId) {
@@ -170,7 +188,6 @@ public class PayServiceImpl implements PayService{
             logger.error("订单 {} 不存在", orderId);
             return;
         }
-        //TODO:改成消息中间件
         if(quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)){
             signupService.entry(quanwaiOrder.getOrderId());
         }
@@ -183,7 +200,7 @@ public class PayServiceImpl implements PayService{
     }
 
     @Override
-    public void riseMemberPaySuccess(String orderId){
+    public void risePaySuccess(String orderId){
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         if(quanwaiOrder==null){
             logger.error("订单 {} 不存在", orderId);
@@ -192,13 +209,38 @@ public class PayServiceImpl implements PayService{
         if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
             signupService.riseMemberEntry(quanwaiOrder.getOrderId());
+            accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
+            try {
+                freshLoginUserPublisher.publish(quanwaiOrder.getOpenid());
+            } catch (ConnectException e) {
+                logger.error("发送会员信息更新mq失败", e);
+            }
+        } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+            signupService.riseCourseEntry(quanwaiOrder.getOrderId());
+            accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
+            try {
+                freshLoginUserPublisher.publish(quanwaiOrder.getOpenid());
+            } catch (ConnectException e) {
+                logger.error("发送会员信息更新mq失败", e);
+            }
         }
         //使用优惠券
         if(quanwaiOrder.getDiscount()!=0.0){
             logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
             costRepo.updateCoupon(Coupon.USED, orderId);
         }
+        // 发送mq消息
+        try {
+            logger.info("发送支付成功message:{}", quanwaiOrder);
+            closeOrderPublisher.publish(quanwaiOrder);
+        } catch (ConnectException e) {
+            logger.error("发送支付成功mq失败", e);
+            messageService.sendAlarm("报名模块出错", "发送支付成功mq失败",
+                    "高", "订单id:" + orderId, e.getLocalizedMessage());
+        }
     }
+
+
 
     public void closeOrder() {
         //点开付费的保留5分钟
@@ -234,6 +276,7 @@ public class PayServiceImpl implements PayService{
                 logger.error("orderId: {} close failed", orderId);
             }
 
+            // 关闭业务订单
             closeOrder(orderId);
             //如果有使用优惠券,还原优惠券状态
             if(courseOrder.getDiscount()!=0.0){
@@ -254,6 +297,9 @@ public class PayServiceImpl implements PayService{
         }
         if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupRiseSignup(orderId);
+        }
+        if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+            signupService.giveupRiseCourseSignup(orderId);
         }
     }
 
@@ -348,6 +394,8 @@ public class PayServiceImpl implements PayService{
             notify_url = ConfigUtils.adapterDomainName() + PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
+        } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+            notify_url = ConfigUtils.adapterDomainName() + RISE_COURSE_PAY_CALLBACK_PATH;
         }
         Assert.notNull(notify_url, "回调地址不能为空");
         map.put("notify_url", notify_url);

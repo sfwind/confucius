@@ -216,6 +216,18 @@ public class ConfigUtils {
 		}
 	}
 
+	public static Double getDoubleValue(String key){
+		if (config.hasPath(key)) {
+			return config.getDouble(key);
+		} else {
+			Double value = zkConfigUtils.getDoubleValue(key);
+			if (value == null) {
+				value = zkConfigUtils.getDoubleValue(key);
+			}
+			return value;
+		}
+	}
+
 	public static String getLoginSalt(){
 		return getValue("login.salt");
 	}
@@ -349,6 +361,13 @@ public class ConfigUtils {
 		return getValue("sms.market.password");
 	}
 
+	public static Double getRiseCourseFee(){
+		return getDoubleValue("rise.course.fee");
+	}
+
+	public static Integer getTrialProblemId(){
+		return getIntValue("rise.trial.problem.id");
+	}
 
 	public static SMSConfig getBizMsgConfig(){
 		SMSConfig smsConfig = new SMSConfig();

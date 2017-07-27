@@ -1,24 +1,35 @@
 package com.iquanwai.confucius.biz.util.rabbitmq;
 
+import com.alibaba.fastjson.JSONObject;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import lombok.Getter;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  * Created by justin on 17/1/19.
  */
 public class RabbitMQReceiver {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Connection connection;
     @Getter
     private Channel channel;
     private String queue;
     private int port = 5672;
+    private String topic;
+    @Setter
+    private Consumer<RabbitMQDto> afterDealQueue;
 
     public void init(String queue, String topic, String ipAddress, Integer port){
         Assert.notNull(topic, "消息主题不能为空");
@@ -45,6 +56,7 @@ public class RabbitMQReceiver {
                 channel.queueDeclare(queue, false, false, false, null);
             }
             this.queue = queue;
+            this.topic = topic;
 
             //队列交换机绑定
             channel.queueBind(queue, topic, "");
@@ -67,10 +79,24 @@ public class RabbitMQReceiver {
         }
     }
 
-    public void listen(Consumer consumer) {
+
+    public void listen(Consumer<Object> consumer) {
+        DefaultConsumer defaultConsumer = new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                RabbitMQDto messageQueue = JSONObject.parseObject(body, RabbitMQDto.class);
+                logger.info("接收 topic:{},queue:{},message:{}", messageQueue);
+                consumer.accept(messageQueue.getMessage());
+                messageQueue.setQueue(queue);
+                messageQueue.setTopic(topic);
+                if (afterDealQueue != null) {
+                    afterDealQueue.accept(messageQueue);
+                }
+            }
+        };
 
         try{
-            channel.basicConsume(queue, true, consumer);
+            channel.basicConsume(queue, true, defaultConsumer);
         }catch (IOException e){
             //ignore
         }

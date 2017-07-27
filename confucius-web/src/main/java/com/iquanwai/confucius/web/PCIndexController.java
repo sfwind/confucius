@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
@@ -9,11 +10,13 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -26,6 +29,17 @@ import java.util.Map;
 @Controller
 public class PCIndexController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private RabbitMQPublisher mqPublisher;
+    @Autowired
+    private MQService mqService;
+
+    @PostConstruct
+    public void init(){
+        mqPublisher = new RabbitMQPublisher();
+        mqPublisher.init(CustomerReceiver.TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
+        mqPublisher.setSendCallback(mqService::saveMQSendOperation);
+    }
 
     @RequestMapping(value = "/pc/static/**")
     public ModelAndView getStatic(HttpServletRequest request, PCLoginUser pcLoginUser) {
@@ -95,8 +109,6 @@ public class PCIndexController {
         CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.realDomainName(), response);
         try {
             // 2、通过 MQ 发送广播，删除每个节点上的 cookie 数据
-            RabbitMQPublisher mqPublisher = new RabbitMQPublisher();
-            mqPublisher.init(CustomerReceiver.TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
             mqPublisher.publish(cookie);
         } catch(ConnectException e) {
             logger.error(e.getLocalizedMessage());

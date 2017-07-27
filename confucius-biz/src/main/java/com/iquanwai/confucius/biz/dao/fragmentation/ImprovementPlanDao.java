@@ -63,6 +63,30 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         return null;
     }
 
+    public ImprovementPlan loadPlanByProblemId(Integer profileId, Integer problemId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ImprovementPlan WHERE ProfileId=? and ProblemId=? and Del=0";
+        ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
+        try {
+            return runner.query(sql, h, profileId, problemId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    public List<ImprovementPlan> loadAllPlans(Integer profileId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ImprovementPlan WHERE ProfileId=? and Del=0";
+        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 
     public void updatePoint(Integer planId, Integer point){
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -114,5 +138,20 @@ public class ImprovementPlanDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
 
+    }
+
+    /**
+     * 重新开课
+     * @param planId planId
+     * @param closeDate 关闭订单
+     */
+    public void reOpenPlan(Integer planId, Date closeDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE ImprovementPlan set RiseMember = 1,Status = 1,CloseDate =? WHERE Id = ?";
+        try{
+            runner.update(sql, closeDate, planId);
+        } catch (SQLException e){
+            logger.error(e.getLocalizedMessage());
+        }
     }
 }

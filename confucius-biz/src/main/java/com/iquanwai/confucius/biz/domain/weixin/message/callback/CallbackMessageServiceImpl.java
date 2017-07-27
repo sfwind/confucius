@@ -7,10 +7,16 @@ import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.GraphicMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.AutoReplyMessage;
+import com.iquanwai.confucius.biz.po.GraphicMessage;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.PromotionUser;
+import com.iquanwai.confucius.biz.po.SubscribeMessage;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -54,8 +60,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private GraphicMessageDao graphicMessageDao;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private MQService mqService;
 
     private RabbitMQPublisher rabbitMQPublisher;
+    //推广活动分隔符,分割活动和用户id
+    private static final String ACTIVITY_SEPERATE_CHAR = "_";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -68,6 +78,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private static final String TYPE_TEXT = "text";
     private static final String TYPE_EVENT = "event";
+    // 模版消息推送回调
+    private static final String TEMPLATE_SEND_JOB_FINISH = "TEMPLATESENDJOBFINISH";
 
     private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
     private AutoReplyMessage defaultReply;
@@ -117,6 +129,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         rabbitMQPublisher = new RabbitMQPublisher();
         rabbitMQPublisher.init(SUBSCRIBE_TOPIC, ConfigUtils.getRabbitMQIp(),
                 ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
     }
 
     @Override
@@ -149,6 +162,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String toUser = XMLHelper.getNode(document, TO_USER);
         String event = XMLHelper.getNode(document, EVENT);
         String eventKey = XMLHelper.getNode(document, EVENT_KEY);
+
         return eventReply(event, eventKey, openid, toUser);
     }
 
@@ -235,37 +249,29 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private String eventReply(String event, String eventKey, String openid, String wxid) {
         switch (event) {
+            // 关注事件
             case EVENT_SUBSCRIBE:
                 List<SubscribeMessage> subscribeMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
-                    //TODO: 老用户判断
-                    //发送订阅消息
-                    SubscribeEvent subscribeEvent = new SubscribeEvent();
-                    subscribeEvent.setOpenid(openid);
-                    subscribeEvent.setScene(channel);
-                    try {
-                        rabbitMQPublisher.publish(subscribeEvent);
-                    } catch (ConnectException e) {
-                        logger.error("rabbit mq init failed");
+                    Profile profile = accountService.getProfile(openid, false);
+                    //从未关注过的全新用户或者未付费的用户
+                    boolean isNew = false;
+                    if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
+                        isNew = true;
                     }
-                    // 插入推广数据
-                    if (promotionUserDao.loadPromotion(openid) == null) {
-                        PromotionUser promotionUser = new PromotionUser();
-                        promotionUser.setSource(channel);
-                        promotionUser.setOpenid(openid);
-                        promotionUser.setAction(0);
-                        promotionUserDao.insert(promotionUser);
+                    if(isNew){
+                        promotionSuccess(channel, openid, SubscribeEvent.SUBSCRIBE);
                     }
-                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
-                    subscribeMessages.addAll(subscribeMessageDao.loadSubscribeMessages(channel));
+                    subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
                 }
 
-                OperationLog operationLog = OperationLog.create().module("圈外同学")
+                OperationLog operationLog = OperationLog.create().openid(openid)
+                        .module("圈外同学")
                         .function("关注").action("扫码关注").memo(eventKey);
                 operationLogService.log(operationLog);
                 try {
@@ -279,15 +285,26 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     return sendSubscribeMessage(openid, wxid, subscribeMessages);
                 }
                 break;
+            // 取消关注事件
             case EVENT_UNSUBSCRIBE:
                 accountService.unfollow(openid);
                 break;
+            // 扫描事件
             case EVENT_SCAN:
+                Profile profile = accountService.getProfile(openid, false);
+                //从未关注过的全新用户或者未付费的用户
+                boolean isNew = false;
+                if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
+                    isNew = true;
+                }
+                if(isNew){
+                    promotionSuccess(eventKey, openid, SubscribeEvent.SCAN);
+                }
+
                 List<SubscribeMessage> scanMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
-                    scanMessages = subscribeMessageDao.loadScanMessages();
-                    scanMessages.addAll(subscribeMessageDao.loadScanMessages(eventKey));
+                    scanMessages = subscribeMessageDao.loadScanMessages(eventKey);
                 } else {
                     scanMessages = subscribeMessageDao.loadScanMessages();
                 }
@@ -295,9 +312,43 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     return sendSubscribeMessage(openid, wxid, scanMessages);
                 }
                 break;
+            default:
+                break;
         }
 
         return null;
+    }
+
+    private void promotionSuccess(String eventKey, String openid, String event) {
+        //发送订阅消息
+        SubscribeEvent subscribeEvent = new SubscribeEvent();
+        subscribeEvent.setScene(eventKey);
+        subscribeEvent.setOpenid(openid);
+        subscribeEvent.setEvent(event);
+        try {
+            rabbitMQPublisher.publish(subscribeEvent);
+        } catch (ConnectException e) {
+            logger.error("rabbit mq init failed");
+        }
+        // 插入推广数据
+        if (promotionUserDao.loadPromotion(openid) == null) {
+            PromotionUser promotionUser = new PromotionUser();
+            promotionUser.setSource(eventKey);
+            promotionUser.setOpenid(openid);
+            promotionUser.setAction(0);
+            if(eventKey.contains(ACTIVITY_SEPERATE_CHAR)){
+                String[] splits = StringUtils.split(eventKey, ACTIVITY_SEPERATE_CHAR);
+                if(splits.length>1){
+                    try{
+                        int profileId =Integer.valueOf(splits[1]);
+                        promotionUser.setProfileId(profileId);
+                    }catch (NumberFormatException e){
+                        // ignore
+                    }
+                }
+            }
+            promotionUserDao.insert(promotionUser);
+        }
     }
 
     private String sendSubscribeMessage(String openid, String wxid, List<SubscribeMessage> subscribeMessages) {
@@ -316,5 +367,4 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
         return null;
     }
-
 }

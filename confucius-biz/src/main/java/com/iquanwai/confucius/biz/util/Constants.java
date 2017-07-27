@@ -75,4 +75,10 @@ public interface Constants {
         int VOICE = 3;
         int NEWS = 4;
     }
+
+    interface RISE_MEMBER{
+        int FREE = 0;
+        int MEMBERSHIP = 1;
+        int COURSE_USER = 2;
+    }
 }

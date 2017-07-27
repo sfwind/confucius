@@ -4,19 +4,19 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
-import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  * Created by justin on 17/4/25.
@@ -40,47 +40,46 @@ public class CacheReloadReceiver {
     private RiseMemberCountRepo riseMemberCountRepo;
     @Autowired
     private CallbackMessageService callbackMessageService;
+    @Autowired
+    private MQService mqService;
 
     @PostConstruct
     public void init(){
         RabbitMQReceiver receiver = new RabbitMQReceiver();
         receiver.init(null, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
-        Channel channel = receiver.getChannel();
         logger.info(TOPIC + "通道建立");
-        Consumer consumer = getConsumer(channel);
+        receiver.setAfterDealQueue(mqService::updateAfterDealOperation);
+        Consumer<Object> consumer = getConsumer();
         receiver.listen(consumer);
         logger.info(TOPIC + "开启队列监听");
     }
 
 
-    private Consumer getConsumer(Channel channel){
-        return new DefaultConsumer(channel){
-            @Override
-            public void handleDelivery(String consumerTag, Envelope envelope,
-                                       AMQP.BasicProperties properties, byte[] body) throws IOException {
-                String message = new String(body);
-                logger.info("receive message {}", message);
-                switch (message){
-                    case "class":
-                        signupService.reloadClass();
-                        courseStudyService.reloadQuestion();
-                        break;
-                    case "permission":
-                        permissionService.initPermission();
-                        break;
-                    case "region":
-                        accountService.loadAllProvinces();
-                        accountService.loadCities();
-                        break;
-                    case "rise_member":
-                        riseMemberTypeRepo.reload();
-                        riseMemberCountRepo.reload();
-                        break;
-                    case "weixin_message":
-                        callbackMessageService.reload();
-                        break;
-                }
-
+    private Consumer<Object> getConsumer(){
+        return queueMessage -> {
+            String message = queueMessage.toString();
+            logger.info("receive message {}", message);
+            switch (message) {
+                case "class":
+                    signupService.reloadClass();
+                    courseStudyService.reloadQuestion();
+                    break;
+                case "permission":
+                    permissionService.initPermission();
+                    break;
+                case "region":
+                    accountService.loadAllProvinces();
+                    accountService.loadCities();
+                    break;
+                case "rise_member":
+                    riseMemberTypeRepo.reload();
+                    riseMemberCountRepo.reload();
+                    break;
+                case "weixin_message":
+                    callbackMessageService.reload();
+                    break;
+                default:
+                    logger.error("异常，获取cacheReloadMq数据异常:{}", message);
             }
         };
     }

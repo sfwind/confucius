@@ -107,9 +107,10 @@ public class XMLHelper {
         }
         Element element = document.getDocumentElement();
         NodeList list = element.getElementsByTagName(nodeName);
-        if (list.getLength() == 0) {
+        if (list.getLength() > 0) {
+            return list.item(0).getTextContent();
+        } else {
             return null;
         }
-        return list.item(0).getTextContent();
     }
 }

@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
@@ -29,6 +30,18 @@ public interface SignupService {
      */
     Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId);
 
+    /**
+     * 检查该用户是否可以购买该小课
+     * @param profileId 用户id
+     * @param problemId 小课id
+     */
+    Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId);
+
+    /**
+     * 检查是否在报名中
+     * @param profileId 用户id
+     * @param memberTypeId  会员类型
+     */
     Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId);
 
     /**
@@ -43,7 +56,9 @@ public interface SignupService {
     /**
      * 报名rise, 不生成预付订单
      */
-    Pair<Integer, QuanwaiOrder> signupRiseMember(Integer profileId, Integer memberType, Integer couponId);
+    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberType, Integer couponId);
+
+    QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId);
 
     /**
      * 获取学员详情
@@ -80,12 +95,16 @@ public interface SignupService {
      */
     String entry(String orderId);
 
+    void riseCourseEntry(String orderId);
+
     void riseMemberEntry(String orderId);
 
     /**
      * 未及时付款，去掉预报名抢占的名额
      */
     void giveupSignup(String orderId);
+
+    void giveupRiseCourseSignup(String orderId);
 
     /**
      * 放弃rise的报名
@@ -117,6 +136,8 @@ public interface SignupService {
      */
     RiseOrder getRiseOrder(String orderId);
 
+    RiseCourseOrder getRiseCourse(String orderId);
+
     /**
      * 获取会员类型
      *
@@ -143,6 +164,13 @@ public interface SignupService {
      * @return 打的折扣是多少
      */
     Double calculateCoupon(Integer memberTypeId, Integer couponId);
+
+    /**
+     * 计算小课单卖多少钱
+     * @param problemId 小课id
+     * @param couponId 优惠券id
+     */
+    Double calculateCourseCoupon(Integer problemId, Integer couponId);
 
     RiseMember currentRiseMember(Integer profileId);
 }

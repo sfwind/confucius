@@ -15,6 +15,8 @@ public interface CostRepo {
 
     double discount(Double price, String orderId, Coupon coupon);
 
+    boolean checkDiscount(Integer profileId, Integer couponId);
+
     /**
      * 是否有优惠券
      */

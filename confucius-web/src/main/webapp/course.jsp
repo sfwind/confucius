@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>圈外训练营</title>
+    <title>圈外同学</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 </head>
 <body>
@@ -13,12 +13,16 @@
         reactMountPoint: "react-app",
         userName: "${userName}",
         headImage:"${headImage}",
+        configUrl:window.location.href,
     }
 </script>
 
+<div id="loading"><img src="//static.iqycamp.com/images/loading_page2.gif" style="width:300px;display: block;margin: 0 auto;"/></div>
 <div id="react-app"></div>
 <!-- 业务代码-->
-<script src="${resource}"></script>
+<script src="${resource}" onload="document.getElementById('loading').style.display = 'none'"></script>
+<!-- 业务代码-->
+<%--<script src="${resource}"></script>--%>
 <script src="//res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

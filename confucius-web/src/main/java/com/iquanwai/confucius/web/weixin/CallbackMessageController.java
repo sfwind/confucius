@@ -80,17 +80,17 @@ public class CallbackMessageController {
         return INVALID_SIGNATURE;
     }
 
-
     @RequestMapping(value = "/message", method = RequestMethod.POST)
     public void receiveCallback(HttpServletRequest request, HttpServletResponse response) {
-
+        // 如果有报错就打印xml数据
+        String xml = "";
         try {
             // 获取请求和响应
             InputStream is = request.getInputStream();
 
             // 从输入流解析document
             Document document = XMLHelper.parseDocument(is);
-            String xml = XMLHelper.convertDocumentToString(document);
+            xml = XMLHelper.convertDocumentToString(document);
             // 转换成string后关闭
             IOUtils.closeQuietly(is);
 
@@ -119,7 +119,7 @@ public class CallbackMessageController {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("received user message failed", e);
+            LOGGER.error("received user message failed,xml:" + xml, e);
         }
 
     }

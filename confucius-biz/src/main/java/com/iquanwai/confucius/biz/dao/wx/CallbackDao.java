@@ -19,6 +19,21 @@ import java.sql.SQLException;
 public class CallbackDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+
+    public Callback loadUserCallback(String openId) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
+
+        try {
+            Callback callback = run.query("SELECT * FROM Callback where OpenId=? and (AccessToken is not null or PcAccessToken is not null) limit 1", h, openId);
+            return callback;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
+    }
+
     public void insert(Callback callback) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO Callback(Openid, Accesstoken, CallbackUrl, RefreshToken, State) " +
