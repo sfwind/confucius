@@ -13,7 +13,7 @@
         reactMountPoint: "react-app",
         userName: "${userName}",
         headImage:"${headImage}",
-        configUrl:window.location.href,
+        configUrl:'',
     }
 </script>
 
@@ -62,6 +62,7 @@
                 mta('send', 'page');
             }
         })()
+        window.ENV.configUrl=window.location.href;
     };
 </script>
 <%--性能数据js资源--%>
