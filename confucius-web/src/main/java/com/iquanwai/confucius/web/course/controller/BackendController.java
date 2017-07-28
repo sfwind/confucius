@@ -11,13 +11,13 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.mq.CacheReloadReceiver;
 import com.iquanwai.confucius.web.course.dto.backend.*;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -28,18 +28,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.ref.SoftReference;
-import java.net.ConnectException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +68,7 @@ public class BackendController {
     @PostConstruct
     public void init(){
         rabbitMQPublisher = new RabbitMQPublisher();
-        rabbitMQPublisher.init(CacheReloadReceiver.TOPIC, ConfigUtils.getRabbitMQIp(),
+        rabbitMQPublisher.init(PayService.LOGIN_USER_RELOAD_TOPIC, ConfigUtils.getRabbitMQIp(),
                 ConfigUtils.getRabbitMQPort());
         rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
     }
