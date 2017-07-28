@@ -5,15 +5,19 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.*;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -24,13 +28,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.ref.SoftReference;
@@ -61,6 +61,17 @@ public class BackendController {
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
+    private RabbitMQPublisher rabbitMQPublisher;
+    @Autowired
+    private MQService mqService;
+
+    @PostConstruct
+    public void init(){
+        rabbitMQPublisher = new RabbitMQPublisher();
+        rabbitMQPublisher.init(PayService.LOGIN_USER_RELOAD_TOPIC, ConfigUtils.getRabbitMQIp(),
+                ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
+    }
 
     @RequestMapping("/entry/{orderId}")
     public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId){
@@ -268,7 +279,6 @@ public class BackendController {
     @RequestMapping(value = "/login/users", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loginUsersList(@RequestParam(value = "qt") String qt) {
         LOGGER.info("qt:{},users:{}", qt, LoginUserService.pcLoginUserMap);
-        List<Map<String, Object>> result = Lists.newArrayList();
         Set<String> keys = LoginUserService.pcLoginUserMap.keySet();
         if(keys.contains(qt)){
             SoftReference<PCLoginUser> pcLoginUserSoftReference = LoginUserService.pcLoginUserMap.get(qt);
@@ -282,4 +292,25 @@ public class BackendController {
         }
     }
 
+
+    @RequestMapping(value = "/refresh/users", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> loginUsersList(@RequestBody RefreshLoginUserDto refreshLoginUserDto) {
+        new Thread(() -> {
+            try {
+                List<String> openIds = refreshLoginUserDto.getOpenIds();
+                openIds.stream().forEach(openid -> {
+                    try {
+                        rabbitMQPublisher.publish(openid);
+                        //防止队列阻塞
+                        Thread.sleep(50);
+                    } catch (Exception e) {
+                        LOGGER.error(e.getLocalizedMessage(), e);
+                    }
+                });
+            }catch (Exception e){
+                LOGGER.error("发送通知失败", e);
+            }
+        }).start();
+        return WebUtils.result("正在运行中");
+    }
 }
