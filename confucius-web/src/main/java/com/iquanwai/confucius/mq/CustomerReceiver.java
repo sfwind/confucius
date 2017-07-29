@@ -1,10 +1,8 @@
 package com.iquanwai.confucius.mq;
 
 import com.iquanwai.confucius.biz.domain.message.MQService;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
 import com.iquanwai.confucius.web.pc.LoginUserService;
-import com.rabbitmq.client.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +28,7 @@ public class CustomerReceiver {
     @PostConstruct
     public void init() {
         RabbitMQReceiver receiver = new RabbitMQReceiver();
-        receiver.init(null, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
-        Channel channel = receiver.getChannel();
+        receiver.init(null, TOPIC);
         logger.info(TOPIC + "通道建立");
         receiver.setAfterDealQueue(mqService::updateAfterDealOperation);
         Consumer<Object> consumer = getConsumer();

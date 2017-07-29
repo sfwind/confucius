@@ -130,8 +130,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         logger.info("load auto reply message complete");
         //初始化mq
         rabbitMQPublisher = new RabbitMQPublisher();
-        rabbitMQPublisher.init(SUBSCRIBE_TOPIC, ConfigUtils.getRabbitMQIp(),
-                ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.init(SUBSCRIBE_TOPIC);
         rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
     }
 

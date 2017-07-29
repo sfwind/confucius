@@ -37,7 +37,7 @@ public class PCIndexController {
     @PostConstruct
     public void init(){
         mqPublisher = new RabbitMQPublisher();
-        mqPublisher.init(CustomerReceiver.TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
+        mqPublisher.init(CustomerReceiver.TOPIC);
         mqPublisher.setSendCallback(mqService::saveMQSendOperation);
     }
 

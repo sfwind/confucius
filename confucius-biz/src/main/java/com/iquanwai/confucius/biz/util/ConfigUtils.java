@@ -365,8 +365,12 @@ public class ConfigUtils {
 		return getDoubleValue("rise.course.fee");
 	}
 
-	public static Integer getTrialProblemId(){
-		return getIntValue("rise.trial.problem.id");
+	public static String getRabbitMQUser() {
+		return getValue("rabbitmq.user");
+	}
+
+	public static String getRabbitMQPasswd() {
+		return getValue("rabbitmq.password");
 	}
 
 	public static SMSConfig getBizMsgConfig(){
