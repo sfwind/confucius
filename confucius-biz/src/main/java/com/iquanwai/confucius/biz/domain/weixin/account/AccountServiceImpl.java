@@ -143,7 +143,8 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if (accountNew.getSubscribe() == 0) {
+            if (accountNew.getSubscribe()!=null && accountNew.getSubscribe() == 0) {
+                //未关注直接抛异常
                 throw new NotFollowingException();
             }
             Account finalQuery = followUserDao.queryByOpenid(openid);
