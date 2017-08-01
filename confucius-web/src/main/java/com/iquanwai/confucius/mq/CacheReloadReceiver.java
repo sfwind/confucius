@@ -46,7 +46,7 @@ public class CacheReloadReceiver {
     @PostConstruct
     public void init(){
         RabbitMQReceiver receiver = new RabbitMQReceiver();
-        receiver.init(null, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
+        receiver.init(null, TOPIC);
         logger.info(TOPIC + "通道建立");
         receiver.setAfterDealQueue(mqService::updateAfterDealOperation);
         Consumer<Object> consumer = getConsumer();

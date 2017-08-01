@@ -68,8 +68,7 @@ public class BackendController {
     @PostConstruct
     public void init(){
         rabbitMQPublisher = new RabbitMQPublisher();
-        rabbitMQPublisher.init(PayService.LOGIN_USER_RELOAD_TOPIC, ConfigUtils.getRabbitMQIp(),
-                ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.init(PayService.LOGIN_USER_RELOAD_TOPIC);
         rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
     }
 

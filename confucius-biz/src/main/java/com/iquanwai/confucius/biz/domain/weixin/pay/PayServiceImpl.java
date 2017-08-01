@@ -48,7 +48,7 @@ public class PayServiceImpl implements PayService{
     @Autowired
     private AccountService accountService;
 
-    private RabbitMQPublisher closeOrderPublisher;
+    private RabbitMQPublisher paySuccessPublisher;
 
     private RabbitMQPublisher freshLoginUserPublisher;
 
@@ -65,28 +65,26 @@ public class PayServiceImpl implements PayService{
     @PostConstruct
     public void init(){
         // 初始化发送mq
-        closeOrderPublisher = new RabbitMQPublisher();
-        closeOrderPublisher.init(RISE_PAY_SUCCESS_TOPIC, ConfigUtils.getRabbitMQIp(),
-                ConfigUtils.getRabbitMQPort());
-        closeOrderPublisher.setSendCallback(mqService::saveMQSendOperation);
+        paySuccessPublisher = new RabbitMQPublisher();
+        paySuccessPublisher.init(RISE_PAY_SUCCESS_TOPIC);
+        paySuccessPublisher.setSendCallback(mqService::saveMQSendOperation);
 
         logger.info(RISE_PAY_SUCCESS_TOPIC + ",MQ提供者初始化");
 
-        // 初始化接听mq
-        RabbitMQReceiver rabbitMQReceiver = new RabbitMQReceiver();
-        rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
-        logger.info(TOPIC + "通道建立");
-        rabbitMQReceiver.setAfterDealQueue(mqService::updateAfterDealOperation);
-        rabbitMQReceiver.listen(orderId -> {
-            String message = orderId.toString();
-            logger.info("receive message {}", message);
-            closeOrder(message);
-        });
-        logger.info(TOPIC + "开启队列监听");
+//        // 初始化接听mq
+//        RabbitMQReceiver rabbitMQReceiver = new RabbitMQReceiver();
+//        rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
+//        logger.info(TOPIC + "通道建立");
+//        rabbitMQReceiver.setAfterDealQueue(mqService::updateAfterDealOperation);
+//        rabbitMQReceiver.listen(orderId -> {
+//            String message = orderId.toString();
+//            logger.info("receive message {}", message);
+//            closeOrder(message);
+//        });
+//        logger.info(TOPIC + "开启队列监听");
 
         freshLoginUserPublisher = new RabbitMQPublisher();
-        freshLoginUserPublisher.init(LOGIN_USER_RELOAD_TOPIC, ConfigUtils.getRabbitMQIp(),
-                ConfigUtils.getRabbitMQPort());
+        freshLoginUserPublisher.init(LOGIN_USER_RELOAD_TOPIC);
         freshLoginUserPublisher.setSendCallback(mqService::saveMQSendOperation);
 
         logger.info(LOGIN_USER_RELOAD_TOPIC + ",MQ提供者初始化");
@@ -232,7 +230,7 @@ public class PayServiceImpl implements PayService{
         // 发送mq消息
         try {
             logger.info("发送支付成功message:{}", quanwaiOrder);
-            closeOrderPublisher.publish(quanwaiOrder);
+            paySuccessPublisher.publish(quanwaiOrder);
         } catch (ConnectException e) {
             logger.error("发送支付成功mq失败", e);
             messageService.sendAlarm("报名模块出错", "发送支付成功mq失败",
