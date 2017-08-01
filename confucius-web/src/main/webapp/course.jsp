@@ -62,7 +62,7 @@
                 mta('send', 'page');
             }
         })()
-        window.ENV.configUrl=window.location.href;
+//        window.ENV.configUrl=window.location.href;
     };
 </script>
 <%--性能数据js资源--%>
