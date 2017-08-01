@@ -360,9 +360,16 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 if(splits.length>1){
                     try{
                         int profileId =Integer.valueOf(splits[1]);
+                        Profile profile = accountService.getProfile(profileId);
+                        if (profile != null) {
+                            if (profile.getOpenid().equals(openid)) {
+                                return;
+                            }
+                        }
                         promotionUser.setProfileId(profileId);
                     }catch (NumberFormatException e){
                         // ignore
+                        logger.error("转换数字异常:" + splits[1]);
                     }
                 }
             }
