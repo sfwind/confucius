@@ -97,7 +97,7 @@ public class DateUtils {
         int weekDay = dateTime.getDayOfWeek();
         // 如果周内天数大于等于月内天数，则是第一个周日
         if (weekDay >= monthDay) {
-            // 从本月的第一天开始增加
+            // 从这一天开始增加
             return DateUtils.afterMonths(date, increment);
         } else {
             // 超过了第一个周日，算下个月第一天开始
