@@ -89,14 +89,21 @@ public class DateUtils {
      * @return 每月报名周期起始日期按照每月第一个周日算
      */
     public static Date afterNatureMonths(Date date,int increment) {
+        // 获取dateTime
         DateTime dateTime = new DateTime(date.getTime());
+        // 月内第几天
         int monthDay = dateTime.getDayOfMonth();
+        // 周内第几天
         int weekDay = dateTime.getDayOfWeek();
         // 如果周内天数大于等于月内天数，则是第一个周日
         if (weekDay >= monthDay) {
-            return DateUtils.afterMonths(new DateTime(DateUtils.afterMonths(date, 1)).withDayOfMonth(1).toDate(), increment);
+            // 从本月的第一天开始增加
+            return DateUtils.afterMonths(date, increment);
         } else {
-            return DateUtils.afterMonths(new DateTime().withDayOfMonth(1).toDate(), increment);
+            // 超过了第一个周日，算下个月第一天开始
+            Date firstDay = new DateTime(DateUtils.afterMonths(date, 1).getTime()).withDayOfMonth(1).toDate();
+            // 从下个月的第一天开始增加
+            return DateUtils.afterMonths(firstDay, increment);
         }
     }
 
