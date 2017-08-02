@@ -82,8 +82,22 @@ public class DateUtils {
         return new DateTime(date).plusMinutes(increment).toDate();
     }
 
+    /**
+     * 自然月增加
+     * @param date 某年某月某日
+     * @param increment 增长多少个月
+     * @return 每月报名周期起始日期按照每月第一个周日算
+     */
     public static Date afterNatureMonths(Date date,int increment) {
-        return DateUtils.afterMonths(new DateTime(DateUtils.afterMonths(date, 1)).withDayOfMonth(1).toDate(), increment);
+        DateTime dateTime = new DateTime(date.getTime());
+        int monthDay = dateTime.getDayOfMonth();
+        int weekDay = dateTime.getDayOfWeek();
+        // 如果周内天数大于等于月内天数，则是第一个周日
+        if (weekDay >= monthDay) {
+            return DateUtils.afterMonths(new DateTime(DateUtils.afterMonths(date, 1)).withDayOfMonth(1).toDate(), increment);
+        } else {
+            return DateUtils.afterMonths(new DateTime().withDayOfMonth(1).toDate(), increment);
+        }
     }
 
     public static Date startDay(Date date){
