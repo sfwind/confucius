@@ -19,7 +19,6 @@ import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
@@ -359,6 +358,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 if(splits.length>1){
                     try{
                         int profileId =Integer.valueOf(splits[1]);
+                        Profile profile = accountService.getProfile(profileId);
+                        if (profile != null) {
+                            if (profile.getOpenid().equals(openid)) {
+                                return;
+                            }
+                        }
                         promotionUser.setProfileId(profileId);
                     }catch (NumberFormatException e){
                         // ignore
