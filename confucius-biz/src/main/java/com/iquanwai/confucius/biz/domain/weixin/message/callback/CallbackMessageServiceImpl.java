@@ -19,7 +19,6 @@ import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
@@ -368,7 +367,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         promotionUser.setProfileId(profileId);
                     }catch (NumberFormatException e){
                         // ignore
-                        logger.error("转换数字异常:" + splits[1]);
                     }
                 }
             }
