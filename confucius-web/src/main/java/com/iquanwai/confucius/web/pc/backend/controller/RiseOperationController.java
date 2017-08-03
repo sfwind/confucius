@@ -242,11 +242,11 @@ public class RiseOperationController {
         // 根据 PracticeUid 获取 WarmupPractice 的总数
         Integer practiceCnt =  practiceService.loadWarmupPracticeCntByPracticeUid(warmupPractice.getPracticeUid());
         if(practiceCnt > 0) {
-            return WebUtils.error("当前 UID 巩固练习已存在，请联系管理员重试");
+            return WebUtils.error("当前 UID 选择题已存在，请联系管理员重试");
         }
         Integer knowledgeId = practiceService.insertWarmupPractice(warmupPractice);
         if(knowledgeId <= 0) {
-            return WebUtils.error("巩固练习数据插入失败，请及时练习管理员");
+            return WebUtils.error("选择题数据插入失败，请及时练习管理员");
         } else {
             practiceService.insertWarmupChoice(knowledgeId, warmupChoices);
         }
