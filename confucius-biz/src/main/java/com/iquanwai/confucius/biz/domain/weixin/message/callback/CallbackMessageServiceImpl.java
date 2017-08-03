@@ -305,6 +305,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 break;
             // 扫描事件
             case EVENT_SCAN:
+                logger.info("haha");
                 Profile profile = accountService.getProfile(openid, false);
                 //从未关注过的全新用户或者未付费的用户
                 boolean isNew = false;
