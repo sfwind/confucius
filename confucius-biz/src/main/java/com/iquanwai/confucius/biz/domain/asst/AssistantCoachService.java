@@ -33,6 +33,11 @@ public interface AssistantCoachService {
     List<RiseWorkInfoDto> getUnderCommentApplications(Integer problemId);
 
     /**
+     * 模糊查询所有应用练习
+     */
+    List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName);
+
+    /**
      * 获取待评论的应用练习数量
      * */
     Map<Integer, Integer> getUnderCommentApplicationCount();

@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.asst;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
@@ -41,6 +42,8 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private AsstCoachCommentDao asstCoachCommentDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private ProfileDao profileDao;
 
     private static final int SIZE = 50;
 
@@ -191,6 +194,33 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         });
 
         return underCommentArticles;
+    }
+
+    @Override
+    public List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName) {
+        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
+
+        List<Profile> profiles = profileDao.loadProfilesByNickName(nickName);
+        if(profiles.size() == 0) return Lists.newArrayList();
+
+        List<Integer> profileIds = Lists.newArrayList();
+        for (Profile profile : profiles) {
+            profileIds.add(profile.getId());
+        }
+
+        List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByOpenIds(problemId, profileIds);
+        List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
+        for (ApplicationSubmit submit : submits) {
+            RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
+            applicationPractices.stream().forEach(applicationPractice -> {
+                if (submit.getApplicationId().equals(applicationPractice.getId())) {
+                    riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                }
+            });
+            workInfoDtos.add(riseWorkInfoDto);
+        }
+
+        return workInfoDtos;
     }
 
     @Override

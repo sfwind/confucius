@@ -45,7 +45,7 @@ public class AssistantCoachController {
 
     @RequestMapping("/application/{problemId}")
     public ResponseEntity<Map<String, Object>> getUnderCommentApplication(PCLoginUser pcLoginUser,
-                                                                     @PathVariable Integer problemId) {
+                                                                          @PathVariable Integer problemId) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<RiseWorkInfoDto> applicationSubmit = assistantCoachService.getUnderCommentApplications(problemId);
 
@@ -58,9 +58,18 @@ public class AssistantCoachController {
         return WebUtils.result(applicationSubmit);
     }
 
+    @RequestMapping(value = "/application/{problemId}/{nickName}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> getUnderCommentApplicationByNickName(PCLoginUser pcLoginUser,
+                                                                                    @PathVariable Integer problemId,
+                                                                                    @PathVariable String nickName) {
+        Assert.notNull(pcLoginUser, "用户不能为空");
+        List<RiseWorkInfoDto> applicationSubmit = assistantCoachService.getUnderCommentApplicationsByNickName(problemId, nickName);
+        return WebUtils.result(applicationSubmit);
+    }
+
     @RequestMapping("/subject/{problemId}")
     public ResponseEntity<Map<String, Object>> getUnderCommentSubject(PCLoginUser pcLoginUser,
-                                                                     @PathVariable Integer problemId) {
+                                                                      @PathVariable Integer problemId) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<RiseWorkInfoDto> applicationSubmit = assistantCoachService.getUnderCommentArticles(problemId);
 
@@ -98,7 +107,7 @@ public class AssistantCoachController {
         Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentApplicationCount();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
-            List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
+            List<ProblemListDto> collect = problems.stream().filter(problem -> !problem.getDel())
                     .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
@@ -127,7 +136,7 @@ public class AssistantCoachController {
         Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentSubjectArticleCount();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
-            List<ProblemListDto> collect = problems.stream().filter(problem->!problem.getDel())
+            List<ProblemListDto> collect = problems.stream().filter(problem -> !problem.getDel())
                     .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
