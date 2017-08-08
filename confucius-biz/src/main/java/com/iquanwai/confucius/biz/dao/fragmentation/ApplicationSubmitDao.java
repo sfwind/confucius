@@ -44,10 +44,9 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     /**
      * 查询用户提交记录
-     *
      * @param applicationId 应用练习id
-     * @param planId        计划id
-     * @param openid        openid
+     * @param planId 计划id
+     * @param openid openid
      */
     public ApplicationSubmit load(Integer applicationId, Integer planId, String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
@@ -73,7 +72,6 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
         return Lists.newArrayList();
     }
-
 
     public List<ApplicationSubmit> load(Integer applicationId) {
         QueryRunner run = new QueryRunner(getDataSource());
@@ -125,7 +123,6 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return true;
     }
 
-
     public List<ApplicationSubmit> getPracticeSubmit(Integer practiceId, Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from ApplicationSubmit where ApplicationId=? and Content is not null order by UpdateTime desc limit "
@@ -152,7 +149,6 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
         return Lists.newArrayList();
     }
-
 
     public List<ApplicationSubmit> getHighlightSubmit(Integer practiceId) {
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -309,4 +305,20 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public List<ApplicationSubmit> loadSubmitsByProfileIds(Integer problemId, List<Integer> profileIds) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ApplicationSubmit where ProblemId = ? and ProfileId in (" + produceQuestionMark(profileIds.size()) + ")";
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        List<Object> objects = Lists.newArrayList();
+        objects.add(problemId);
+        objects.addAll(profileIds);
+        try {
+            return runner.query(sql, h, objects.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }
