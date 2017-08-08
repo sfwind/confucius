@@ -184,7 +184,6 @@ public class ProfileDao extends DBUtil {
     public List<Profile> loadProfilesByNickName(String nickName) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM Profile where NickName like ? limit 10";
-        logger.info("like sql: {}", sql);
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
         try {
             return runner.query(sql, h, "%" + nickName + "%");
