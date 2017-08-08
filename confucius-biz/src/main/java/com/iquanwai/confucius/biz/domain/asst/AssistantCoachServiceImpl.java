@@ -205,7 +205,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             profileIds.add(profile.getId());
         }
 
-        List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByOpenIds(problemId, profileIds);
+        List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByProfileIds(problemId, profileIds);
         submits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
 
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
