@@ -308,7 +308,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public List<ApplicationSubmit> loadSubmitsByOpenIds(Integer problemId, List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ApplicationSubmit where ProblemId = ? and ProfileId in (" + produceQuestionMark(profileIds.size()) + ") ORDER BY PublishTime DESC";
+        String sql = "SELECT * FROM ApplicationSubmit where ProblemId = ? and ProfileId in (" + produceQuestionMark(profileIds.size()) + ")";
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         List<Object> objects = Lists.newArrayList();
         objects.add(problemId);
