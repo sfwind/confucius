@@ -143,13 +143,13 @@ public class AccountServiceImpl implements AccountService {
             }, Date.class);
 
             BeanUtils.populate(accountNew, result);
-            if (accountNew.getSubscribe()!=null && accountNew.getSubscribe() == 0) {
+            if (accountNew.getSubscribe() != null && accountNew.getSubscribe() == 0) {
                 //未关注直接抛异常
                 throw new NotFollowingException();
             }
-            Account finalQuery = followUserDao.queryByOpenid(openid);
-            if (finalQuery == null) {
-                redisUtil.lock("lock:wx:user:insert", (lock) -> {
+            redisUtil.lock("lock:wx:user:insert", (lock) -> {
+                Account finalQuery = followUserDao.queryByOpenid(openid);
+                if (finalQuery == null) {
                     if (accountNew.getNickname() != null) {
                         logger.info("插入用户信息:{}", accountNew);
                         followUserDao.insert(accountNew);
@@ -174,13 +174,12 @@ public class AccountServiceImpl implements AccountService {
                             }
                         }
                     }
-                });
-            } else {
-                logger.info("更新用户信息:{}", accountNew);
-                if (accountNew.getNickname() != null) {
-                    followUserDao.updateMeta(accountNew);
+                } else {
+                    if (accountNew.getNickname() != null) {
+                        followUserDao.updateMeta(accountNew);
+                    }
                 }
-            }
+            });
         } catch (NotFollowingException e1) {
             throw new NotFollowingException();
         } catch (Exception e) {
@@ -302,10 +301,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void updateRiseMember(String openid, Integer riseMember) {
-        if(riseMember == Constants.RISE_MEMBER.COURSE_USER){
+        if (riseMember == Constants.RISE_MEMBER.COURSE_USER) {
             Profile profile = profileDao.queryByOpenId(openid);
             //会员的等级最高
-            if(profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP){
+            if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP) {
                 return;
             }
         }

@@ -305,7 +305,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 break;
             // 扫描事件
             case EVENT_SCAN:
-                logger.info("haha");
                 Profile profile = accountService.getProfile(openid, false);
                 //从未关注过的全新用户或者未付费的用户
                 boolean isNew = false;
@@ -329,12 +328,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 if(isNew){
                     promotionSuccess(eventKey, openid, SubscribeEvent.SCAN);
                 }
-                List<SubscribeMessage> scanMessages;
+                List<SubscribeMessage> scanMessages = Lists.newArrayList();
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
                     scanMessages = subscribeMessageDao.loadScanMessages(eventKey);
-                } else {
-                    scanMessages = subscribeMessageDao.loadScanMessages();
                 }
                 if (CollectionUtils.isNotEmpty(scanMessages)) {
                     return sendSubscribeMessage(openid, wxid, scanMessages);
