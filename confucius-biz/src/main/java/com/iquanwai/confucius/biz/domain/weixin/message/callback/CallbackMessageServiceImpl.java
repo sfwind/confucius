@@ -252,6 +252,12 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         switch (event) {
             // 关注事件
             case EVENT_SUBSCRIBE:
+                try {
+                    //更新用户信息
+                    accountService.getAccount(openid, true);
+                } catch (NotFollowingException e) {
+                    // ignore
+                }
                 List<SubscribeMessage> subscribeMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
@@ -289,12 +295,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                         .module("圈外同学")
                         .function("关注").action("扫码关注").memo(eventKey);
                 operationLogService.log(operationLog);
-                try {
-                    //更新用户信息
-                    accountService.getAccount(openid, true);
-                } catch (NotFollowingException e) {
-                    // ignore
-                }
                 if (CollectionUtils.isNotEmpty(subscribeMessages)) {
                     return sendSubscribeMessage(openid, wxid, subscribeMessages);
                 }
