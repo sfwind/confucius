@@ -101,16 +101,17 @@ public class LoginUserService {
      * @return true: 用户已关注 false: 用户未关注
      */
     public boolean userIsFollowing(PCLoginUser loginUser) {
-        Account account = null;
         try {
-            //TODO:改造成数据库查询
-            account = accountService.getAccount(loginUser.getOpenId(), true);
+            Account account = accountService.getAccount(loginUser.getOpenId(), false);
+            if(account.getSubscribe() == 1){
+                return true;
+            }
         } catch(NotFollowingException e) {
             if(loginUser.getWeixin() != null) {
                 logger.info(loginUser.getWeixin().getWeixinName() + "未关注");
             }
         }
-        return account != null;
+        return false;
     }
 
     /**
