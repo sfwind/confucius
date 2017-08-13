@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.mysql.jdbc.StringUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -183,7 +182,7 @@ public class ProfileDao extends DBUtil {
      */
     public List<Profile> loadProfilesByNickName(String nickName) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Profile where NickName like ? limit 10";
+        String sql = "SELECT * FROM Profile where NickName like ? limit 200";
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
         try {
             return runner.query(sql, h, "%" + nickName + "%");
