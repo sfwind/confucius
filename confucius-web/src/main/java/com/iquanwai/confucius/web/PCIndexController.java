@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.web;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.mq.CustomerReceiver;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -29,16 +29,14 @@ import java.util.Map;
 @Controller
 public class PCIndexController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
 
     private RabbitMQPublisher mqPublisher;
-    @Autowired
-    private MQService mqService;
 
     @PostConstruct
     public void init(){
-        mqPublisher = new RabbitMQPublisher();
-        mqPublisher.init(CustomerReceiver.TOPIC);
-        mqPublisher.setSendCallback(mqService::saveMQSendOperation);
+        mqPublisher = rabbitMQFactory.initFanoutPublisher(CustomerReceiver.TOPIC);
     }
 
     @RequestMapping(value = "/pc/static/**")

@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
-import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
@@ -16,6 +15,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
 import com.iquanwai.confucius.web.course.dto.backend.MarkDto;
@@ -71,16 +71,14 @@ public class BackendController {
     @Autowired
     private MessageService messageService;
     @Autowired
-    private MQService mqService;
+    private RabbitMQFactory rabbitMQFactory;
 
     private RabbitMQPublisher rabbitMQPublisher;
 
 
     @PostConstruct
     public void init(){
-        rabbitMQPublisher = new RabbitMQPublisher();
-        rabbitMQPublisher.init(PayService.LOGIN_USER_RELOAD_TOPIC);
-        rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
+        rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
     }
 
     @RequestMapping("/entry/{orderId}")
