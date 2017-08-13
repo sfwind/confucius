@@ -9,6 +9,7 @@ import java.util.List;
  */
 @Data
 public class NoticeMsgDto {
+    private String comment;
     private String first;
     private String remark;
     private String keyword1;

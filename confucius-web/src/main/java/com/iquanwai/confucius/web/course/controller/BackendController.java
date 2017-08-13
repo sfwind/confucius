@@ -16,9 +16,13 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.course.dto.backend.*;
+import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
+import com.iquanwai.confucius.web.course.dto.backend.MarkDto;
+import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
+import com.iquanwai.confucius.web.course.dto.backend.RefreshLoginUserDto;
+import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
+import com.iquanwai.confucius.web.course.dto.backend.SystemMsgDto;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -28,12 +32,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.ref.SoftReference;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +54,8 @@ import java.util.Set;
 @RestController
 @RequestMapping("/b")
 public class BackendController {
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private SignupService signupService;
     @Autowired
@@ -58,12 +70,11 @@ public class BackendController {
     private AccountService accountService;
     @Autowired
     private MessageService messageService;
-
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
-
-    private RabbitMQPublisher rabbitMQPublisher;
     @Autowired
     private MQService mqService;
+
+    private RabbitMQPublisher rabbitMQPublisher;
+
 
     @PostConstruct
     public void init(){
@@ -171,10 +182,11 @@ public class BackendController {
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto){
+        Date date = new Date();
         new Thread(() -> {
             try {
                 List<String> openids = noticeMsgDto.getOpenids();
-                openids.stream().forEach(openid -> {
+                openids.forEach(openid -> {
                     TemplateMessage templateMessage = new TemplateMessage();
                     templateMessage.setTouser(openid);
                     templateMessage.setTemplate_id(noticeMsgDto.getMessageId());
@@ -210,7 +222,7 @@ public class BackendController {
                         templateMessage.setUrl(noticeMsgDto.getUrl());
                     }
                     templateMessageService.sendMessage(templateMessage);
-
+                    messageService.logCustomerMessage(openid, date, noticeMsgDto.getComment());
                 });
             }catch (Exception e){
                 LOGGER.error("发送通知失败", e);
@@ -225,7 +237,7 @@ public class BackendController {
         new Thread(() -> {
             try {
                 List<Integer> profileIds = systemMsgDto.getProfileIds();
-                profileIds.stream().forEach(profileId -> {
+                profileIds.forEach(profileId -> {
                     messageService.sendMessage(systemMsgDto.getMessage(), profileId.toString(),
                             MessageService.SYSTEM_MESSAGE, systemMsgDto.getUrl());
 
@@ -297,7 +309,7 @@ public class BackendController {
         new Thread(() -> {
             try {
                 List<String> openIds = refreshLoginUserDto.getOpenIds();
-                openIds.stream().forEach(openid -> {
+                openIds.forEach(openid -> {
                     try {
                         rabbitMQPublisher.publish(openid);
                         //防止队列阻塞

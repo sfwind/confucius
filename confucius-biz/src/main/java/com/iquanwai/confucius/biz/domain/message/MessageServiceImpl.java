@@ -1,10 +1,12 @@
 package com.iquanwai.confucius.biz.domain.message;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.common.message.CustomerMessageLogDao;
 import com.iquanwai.confucius.biz.dao.common.message.NotifyMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
+import com.iquanwai.confucius.biz.po.common.message.CustomerMessageLog;
 import com.iquanwai.confucius.biz.po.common.message.NotifyMessage;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -28,11 +30,22 @@ public class MessageServiceImpl implements MessageService {
     private AccountService accountService;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private CustomerMessageLogDao customerMessageLogDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String SYSTEM_MESSAGE ="AUTO";
     private static final String SYSTEM_MESSAGE_NAME ="系统消息";
+
+    @Override
+    public void logCustomerMessage(String openId, Date publishTime, String comment) {
+        CustomerMessageLog customerMessageLog = new CustomerMessageLog();
+        customerMessageLog.setOpenid(openId);
+        customerMessageLog.setPublishTime(publishTime);
+        customerMessageLog.setComment(comment);
+        customerMessageLogDao.insert(customerMessageLog);
+    }
 
     @Override
     //TODO:改造成消息队列
