@@ -16,7 +16,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -39,10 +38,6 @@ public class RabbitMQFactory {
     private AmqpAdmin amqpAdmin;
     @Autowired
     private ConnectionFactory connectionFactory;
-    @Autowired
-    private RabbitListenerContainerFactory rabbitListenerContainerFactory;
-    @Autowired
-    private RabbitMQConverter mqConverter;
 
     public void initReceiver(String queueName, String topicName, Consumer<RabbitMQDto> consumer) {
         String receive = ConfigUtils.getValue("open.receive.mq");
