@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.biz.util.rabbitmq;
 
 import com.alibaba.fastjson.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.support.converter.MessageConversionException;
@@ -12,6 +14,8 @@ import java.io.IOException;
  * Created by nethunder on 2017/8/9.
  */
 public class RabbitMQConverter implements MessageConverter {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Override
     public Message toMessage(Object object, MessageProperties messageProperties) throws MessageConversionException {
         if (messageProperties == null) {
@@ -47,7 +51,7 @@ public class RabbitMQConverter implements MessageConverter {
     @Override
     public Object fromMessage(Message message) throws MessageConversionException {
         RabbitMQDto ob = JSON.parseObject(message.getBody(), RabbitMQDto.class);
-        System.out.println(JSON.toJSONString(ob));
+        logger.info("接收MQ消息：{}", ob);
         return ob;
     }
 }
