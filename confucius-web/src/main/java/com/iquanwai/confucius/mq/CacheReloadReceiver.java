@@ -4,7 +4,6 @@ import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
@@ -41,8 +40,6 @@ public class CacheReloadReceiver {
     @Autowired
     private CallbackMessageService callbackMessageService;
     @Autowired
-    private MQService mqService;
-    @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
 
@@ -54,7 +51,7 @@ public class CacheReloadReceiver {
 
     private Consumer<RabbitMQDto> getConsumer(){
         return queueMessage -> {
-            String message = queueMessage.toString();
+            String message = queueMessage.getMessage().toString();
             logger.info("receive message {}", message);
             switch (message) {
                 case "class":

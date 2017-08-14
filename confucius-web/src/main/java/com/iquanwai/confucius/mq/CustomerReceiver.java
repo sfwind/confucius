@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.mq;
 
-import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.web.pc.LoginUserService;
@@ -24,8 +23,6 @@ public class CustomerReceiver {
     @Autowired
     private LoginUserService loginUserService;
     @Autowired
-    private MQService mqService;
-    @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
     @PostConstruct
@@ -35,7 +32,7 @@ public class CustomerReceiver {
 
     private Consumer<RabbitMQDto> getConsumer() {
         return msg -> {
-            String message = msg.toString();
+            String message = msg.getMessage().toString();
             logger.info("receive message {}", message);
             loginUserService.logout(message);
         };
