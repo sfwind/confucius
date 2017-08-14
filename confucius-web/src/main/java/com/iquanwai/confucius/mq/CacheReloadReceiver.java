@@ -8,8 +8,8 @@ import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,20 +42,17 @@ public class CacheReloadReceiver {
     private CallbackMessageService callbackMessageService;
     @Autowired
     private MQService mqService;
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
+
 
     @PostConstruct
     public void init(){
-        RabbitMQReceiver receiver = new RabbitMQReceiver();
-        receiver.init(null, TOPIC);
-        logger.info(TOPIC + "通道建立");
-        receiver.setAfterDealQueue(mqService::updateAfterDealOperation);
-        Consumer<Object> consumer = getConsumer();
-        receiver.listen(consumer);
-        logger.info(TOPIC + "开启队列监听");
+        rabbitMQFactory.initReceiver(null, TOPIC, getConsumer());
     }
 
 
-    private Consumer<Object> getConsumer(){
+    private Consumer<RabbitMQDto> getConsumer(){
         return queueMessage -> {
             String message = queueMessage.toString();
             logger.info("receive message {}", message);

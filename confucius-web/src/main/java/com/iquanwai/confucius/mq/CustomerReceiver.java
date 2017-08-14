@@ -1,7 +1,8 @@
 package com.iquanwai.confucius.mq;
 
 import com.iquanwai.confucius.biz.domain.message.MQService;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,19 +25,15 @@ public class CustomerReceiver {
     private LoginUserService loginUserService;
     @Autowired
     private MQService mqService;
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
 
     @PostConstruct
     public void init() {
-        RabbitMQReceiver receiver = new RabbitMQReceiver();
-        receiver.init(null, TOPIC);
-        logger.info(TOPIC + "通道建立");
-        receiver.setAfterDealQueue(mqService::updateAfterDealOperation);
-        Consumer<Object> consumer = getConsumer();
-        receiver.listen(consumer);
-        logger.info(TOPIC + "开启队列监听");
+        rabbitMQFactory.initReceiver(null, TOPIC, getConsumer());
     }
 
-    private Consumer<Object> getConsumer() {
+    private Consumer<RabbitMQDto> getConsumer() {
         return msg -> {
             String message = msg.toString();
             logger.info("receive message {}", message);

@@ -21,6 +21,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +63,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private OperationLogService operationLogService;
     @Autowired
     private MQService mqService;
+    @Autowired
+    private RedisUtil redisUtil;
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
 
     private RabbitMQPublisher rabbitMQPublisher;
     //推广活动分隔符,分割活动和用户id
@@ -84,8 +89,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
     private AutoReplyMessage defaultReply;
     private Map<String, List<GraphicMessage>> newsMessageMap = Maps.newHashMap();
-    @Autowired
-    private RedisUtil redisUtil;
 
     @PostConstruct
     public void init() {
@@ -128,9 +131,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         });
         logger.info("load auto reply message complete");
         //初始化mq
-        rabbitMQPublisher = new RabbitMQPublisher();
-        rabbitMQPublisher.init(SUBSCRIBE_TOPIC);
-        rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
+        rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(SUBSCRIBE_TOPIC);
     }
 
     @Override

@@ -11,9 +11,14 @@ import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
+import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +52,8 @@ public class PayServiceImpl implements PayService{
     private MQService mqService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
 
     private RabbitMQPublisher paySuccessPublisher;
 
@@ -65,30 +72,8 @@ public class PayServiceImpl implements PayService{
     @PostConstruct
     public void init(){
         // 初始化发送mq
-        paySuccessPublisher = new RabbitMQPublisher();
-        paySuccessPublisher.init(RISE_PAY_SUCCESS_TOPIC);
-        paySuccessPublisher.setSendCallback(mqService::saveMQSendOperation);
-
-        logger.info(RISE_PAY_SUCCESS_TOPIC + ",MQ提供者初始化");
-
-//        // 初始化接听mq
-//        RabbitMQReceiver rabbitMQReceiver = new RabbitMQReceiver();
-//        rabbitMQReceiver.init(CLOSE_ORDER_QUEUE, TOPIC, ConfigUtils.getRabbitMQIp(), ConfigUtils.getRabbitMQPort());
-//        logger.info(TOPIC + "通道建立");
-//        rabbitMQReceiver.setAfterDealQueue(mqService::updateAfterDealOperation);
-//        rabbitMQReceiver.listen(orderId -> {
-//            String message = orderId.toString();
-//            logger.info("receive message {}", message);
-//            closeOrder(message);
-//        });
-//        logger.info(TOPIC + "开启队列监听");
-
-        freshLoginUserPublisher = new RabbitMQPublisher();
-        freshLoginUserPublisher.init(LOGIN_USER_RELOAD_TOPIC);
-        freshLoginUserPublisher.setSendCallback(mqService::saveMQSendOperation);
-
-        logger.info(LOGIN_USER_RELOAD_TOPIC + ",MQ提供者初始化");
-
+        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher(RISE_PAY_SUCCESS_TOPIC);
+        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(LOGIN_USER_RELOAD_TOPIC);
     }
 
     public String unifiedOrder(String orderId) {

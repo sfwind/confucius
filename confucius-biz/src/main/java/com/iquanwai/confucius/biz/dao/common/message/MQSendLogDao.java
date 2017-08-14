@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.domain.message.MQSendLog;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -24,9 +25,9 @@ public class MQSendLogDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
         try {
-            String insertSql = "INSERT INTO MQSendLog(MsgId,PublisherIp ,Topic, Message) VALUES (?,?,?,?)";
-            Future<Integer> result = asyncRun.update(insertSql, message.getMsgId(),message.getPublisherIp(),
-                    message.getTopic(),  message.getMessage());
+            String insertSql = "INSERT INTO MQSendLog(MsgId,PublisherIp ,Topic, Message,SendError) VALUES (?,?,?,?,?)";
+            Future<Integer> result = asyncRun.update(insertSql, message.getMsgId(), message.getPublisherIp(),
+                    message.getTopic(), message.getMessage(), message.getSendError());
             return result.get();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -36,5 +37,16 @@ public class MQSendLogDao extends DBUtil {
             logger.error(e.getMessage(), e);
         }
         return 0;
+    }
+
+    public MQSendLog load(String msgId){
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "Select * from MQSendLog where MsgId = ?";
+        try{
+            return run.query(sql, new BeanHandler<>(MQSendLog.class), msgId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 }

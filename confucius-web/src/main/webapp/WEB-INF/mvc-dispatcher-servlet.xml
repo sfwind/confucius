@@ -16,6 +16,10 @@
                            http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
                            http://www.springframework.org/schema/websocket
                            http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+    <import resource="classpath*:config/spring/local/appcontext-*.xml"/>
+    <import resource="classpath*:config/spring/local/dbcon/appcontext-*.xml"/>
+
     <aop:aspectj-autoproxy proxy-target-class="true"/>
     <context:annotation-config/>
     <context:component-scan base-package="com.iquanwai.confucius.web" />
