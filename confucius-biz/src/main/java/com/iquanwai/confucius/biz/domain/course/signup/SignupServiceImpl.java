@@ -391,6 +391,42 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
+    // 购买了训练营小课后续操作
+    @Override
+    public void trainCampEntry(String orderId) {
+        RiseCourseOrder riseCourseOrder = riseCourseOrderDao.loadOrder(orderId);
+        Assert.notNull(riseCourseOrder, "训练营购买订单不能为空，orderId：" + orderId);
+
+        Integer profileId = riseCourseOrder.getProfileId();
+        // 更新 profile 表中状态
+        String memberId = "testMemberId";
+        // TODO
+        profileDao.becomeTraingCampMember(profileId, memberId);
+        // 用户购买训练营小课
+        riseCourseOrderDao.entry(orderId);
+        // 检查用户是否已经学过这个小课
+        ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourseOrder.getProblemId());
+        if (plan == null) {
+            // 用户没有学习过这一门小课，生成小课
+            Integer planId = createPlan(riseCourseOrder);
+            if (planId < 0) {
+                logger.error("报名小课异常，返回的 planId 异常");
+            } else {
+                improvementPlanDao.reOpenPlan(planId, DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+            }
+        } else {
+            // 用户有这一门小课
+            if (plan.getStatus() == ImprovementPlan.TRIALCLOSE) {
+                // 使用结束，设置成正在进行，延长三十天
+                improvementPlanDao.reOpenPlan(plan.getId(), DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+            } else {
+                logger.error("报名小课异常，小课状态为：{}", plan.getStatus());
+                messageService.sendAlarm("报名模块出错", "用户小课数据异常",
+                        "高", "订单id:" + orderId, "该用户购买的小课，状态并不是使用结束");
+            }
+        }
+    }
+
     private Integer createPlan(RiseCourseOrder riseCourseOrder) {
         Callback callback = callbackDao.loadUserCallback(riseCourseOrder.getOpenid());
         if (callback == null) {
@@ -806,8 +842,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     *
-     * @param fee      总价格
+     * @param fee 总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {

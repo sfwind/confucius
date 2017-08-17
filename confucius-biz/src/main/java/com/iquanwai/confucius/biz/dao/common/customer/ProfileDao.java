@@ -165,6 +165,16 @@ public class ProfileDao extends DBUtil {
         }
     }
 
+    public void becomeTraingCampMember(Integer profileId, String memberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Profile SET RiseMember = 4, MemberId = ? WHERE Id = ?";
+        try {
+            runner.update(sql, memberId, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public Integer riseMemberCount() {
         QueryRunner runner = new QueryRunner(getDataSource());
         ScalarHandler<Long> h = new ScalarHandler<Long>();
