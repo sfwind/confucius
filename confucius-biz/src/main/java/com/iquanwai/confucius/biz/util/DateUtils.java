@@ -152,4 +152,12 @@ public class DateUtils {
         return today.equals(cmpDate);
     }
 
+    public static Integer getYear(Date date) {
+        return new DateTime(date).getYear();
+    }
+
+    public static Integer getMonth(Date date) {
+        return new DateTime(date).getMonthOfYear();
+    }
+
 }

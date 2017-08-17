@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.ClassDao;
@@ -54,10 +55,8 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.awt.*;
 import java.lang.ref.SoftReference;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by justin on 16/9/10.
@@ -104,6 +103,8 @@ public class SignupServiceImpl implements SignupService {
     private RestfulHelper restfulHelper;
     @Autowired
     private CustomerMessageService customerMessageService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     private int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
@@ -385,7 +386,9 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
-    // 购买了训练营小课后续操作
+    /**
+     * 购买了训练营小课后续操作
+     */
     @Override
     public void trainCampEntry(String orderId) {
         RiseCourseOrder riseCourseOrder = riseCourseOrderDao.loadOrder(orderId);
@@ -393,9 +396,19 @@ public class SignupServiceImpl implements SignupService {
 
         Integer profileId = riseCourseOrder.getProfileId();
         // 更新 profile 表中状态
-        String memberId = "testMemberId";
-        // TODO
-        profileDao.becomeTraingCampMember(profileId, memberId);
+        String memberId = generateMemberId();
+        profileDao.becomeTrainCampMember(profileId, memberId);
+        // 更新 RiseMember
+        riseMemberDao.updateExpiredAhead(profileId);
+        // 添加会员表
+        RiseMember riseMember = new RiseMember();
+        riseMember.setOpenId(riseCourseOrder.getOpenid());
+        riseMember.setOrderId(riseCourseOrder.getOrderId());
+        riseMember.setProfileId(riseCourseOrder.getProfileId());
+        riseMember.setMemberTypeId(riseCourseOrder.getId());
+        riseMember.setExpireDate(DateUtils.afterDays(new Date(), 30));
+        riseMemberDao.insert(riseMember);
+
         // 用户购买训练营小课
         riseCourseOrderDao.entry(orderId);
         // 检查用户是否已经学过这个小课
@@ -419,6 +432,31 @@ public class SignupServiceImpl implements SignupService {
                         "高", "订单id:" + orderId, "该用户购买的小课，状态并不是使用结束");
             }
         }
+    }
+
+    // 生成 memberId，格式 201701001 年 + 月 + 自然顺序
+    private String generateMemberId() {
+        StringBuilder targetMemberId = new StringBuilder();
+
+        String year = Integer.toString(DateUtils.getYear(new Date()));
+        String month = Integer.toString(DateUtils.getMonth(new Date()));
+        month = month.length() == 1 ? "0" + month : month;
+
+        String key = "customer:trainCamp:" + year + ":" + month;
+        String prefix = year + month;
+        redisUtil.lock("lock:memberId", (lock) -> {
+            // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
+            String memberId = redisUtil.get(key);
+            String sequence;
+            if (StringUtils.isEmpty(memberId)) {
+                sequence = "001";
+            } else {
+                sequence = Integer.toString(Integer.parseInt(memberId) + 1);
+            }
+            targetMemberId.append(prefix).append(sequence);
+            redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
+        });
+        return targetMemberId.toString();
     }
 
     private Integer createPlan(RiseCourseOrder riseCourseOrder) {
@@ -475,7 +513,6 @@ public class SignupServiceImpl implements SignupService {
 
         riseOrderDao.entry(orderId);
         String openId = riseOrder.getOpenid();
-
 
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         Date expireDate;
@@ -546,17 +583,17 @@ public class SignupServiceImpl implements SignupService {
             //发送消息给一年精英版用户
             customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
             messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
-//            sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
+            // sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
         } else if (memberType.getId() == RiseMember.HALF_ELITE) {
             // 发送消息给半年精英版用户
             customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.half.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
             messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.half.send.system.url"));
-//            sendHalfEliteWelcomeMsg(profile.getOpenid(),)
+            // sendHalfEliteWelcomeMsg(profile.getOpenid(),)
         } else {
             //发送消息给专业版用户
             messageService.sendAlarm("报名模块出错", "报名后发送消息",
                     "中", "订单id:" + riseMember.getOrderId() + "\nprofileId:" + profile.getId(), "会员类型异常");
-//            sendProfessionalWelcomeMsg(profile, memberType, riseMember);
+            // sendProfessionalWelcomeMsg(profile, memberType, riseMember);
         }
     }
 
