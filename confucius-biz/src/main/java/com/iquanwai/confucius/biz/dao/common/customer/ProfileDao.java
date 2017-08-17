@@ -165,7 +165,7 @@ public class ProfileDao extends DBUtil {
         }
     }
 
-    public void becomeTraingCampMember(Integer profileId, String memberId) {
+    public void becomeTrainCampMember(Integer profileId, String memberId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE Profile SET RiseMember = 4, MemberId = ? WHERE Id = ?";
         try {
