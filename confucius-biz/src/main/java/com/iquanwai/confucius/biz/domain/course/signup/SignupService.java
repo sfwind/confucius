@@ -97,6 +97,9 @@ public interface SignupService {
 
     void riseCourseEntry(String orderId);
 
+    // 购买了训练营小课后续操作
+    void trainCampEntry(String orderId);
+
     void riseMemberEntry(String orderId);
 
     /**

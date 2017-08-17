@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
@@ -301,14 +302,29 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void updateRiseMember(String openid, Integer riseMember) {
-        if (riseMember == Constants.RISE_MEMBER.COURSE_USER) {
-            Profile profile = profileDao.queryByOpenId(openid);
-            //会员的等级最高
-            if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP) {
+        Profile profile = profileDao.queryByOpenId(openid);
+        Assert.notNull(profile, "用户不能为空");
+        Integer currentRiseMember = profile.getRiseMember();
+
+        switch (currentRiseMember) {
+            case Constants.RISE_MEMBER.MEMBERSHIP:
+                // 如果当前人已经是会员状态，则什么状态都不需要改变
                 return;
-            }
+            case Constants.RISE_MEMBER.COURSE_USER:
+                // 如果当前人是小课购买状态，后面可以更改成会员或者训练营小课状态
+                if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP || riseMember == Constants.RISE_MEMBER.TRAIN_CAMP) {
+                    profileDao.updateRiseMember(openid, riseMember);
+                }
+                return;
+            case Constants.RISE_MEMBER.TRAIN_CAMP:
+                // 如果当前购买者是训练营小课状态，则可以主动购买成会员状态
+                if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
+                    profileDao.updateRiseMember(openid, riseMember);
+                }
+                return;
+            default:
+                profileDao.updateRiseMember(openid, riseMember);
         }
-        profileDao.updateRiseMember(openid, riseMember);
     }
 
     private Profile getProfileFromDB(String openid) {
