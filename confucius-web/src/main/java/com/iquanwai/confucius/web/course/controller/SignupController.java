@@ -477,6 +477,46 @@ public class SignupController {
 
 
     /**
+     * 小课训练营接口
+     * @param loginUser 用户信息
+     * @param request request请求
+     * @param riseCourseDto 小课id，优惠券id(可选)
+     * @return 调起H5接口的数据（如果不免费）
+     */
+    @RequestMapping(value = "/rise/train/pay")
+    public ResponseEntity<Map<String, Object>> trainingCamp(LoginUser loginUser, HttpServletRequest request, @RequestBody RiseCourseDto riseCourseDto) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("小课训练营")
+                .action("点击支付")
+                .memo(riseCourseDto.getProblemId() + "");
+
+        operationLogService.log(operationLog);
+        // 检查ip
+        String remoteIp = request.getHeader("X-Forwarded-For");
+        if (remoteIp == null) {
+            LOGGER.error("获取用户:{} 获取IP失败:ProblemId:{}", loginUser.getOpenId(), riseCourseDto);
+            remoteIp = ConfigUtils.getExternalIP();
+        }
+        // 检查是否需要支付
+        Pair<Integer, String> check = signupService.riseCourseSignupCheck(loginUser.getId(), riseCourseDto.getProblemId());
+        if (check.getLeft() != 1) {
+            return WebUtils.error(check.getRight());
+        }
+        // 检查优惠券
+        if (!costRepo.checkDiscount(loginUser.getId(), riseCourseDto.getCouponId())) {
+            return WebUtils.error("该优惠券无效");
+        }
+
+        // 创建订单
+        QuanwaiOrder quanwaiOrder = signupService.signupRiseCourse(loginUser.getId(), riseCourseDto.getProblemId(), riseCourseDto.getCouponId());
+        // 统一下单
+        SignupDto signupDto = payParam(quanwaiOrder, remoteIp);
+        return WebUtils.result(signupDto);
+    }
+
+    /**
      * 统一下单
      *
      * @param quanwaiOrder 总订单

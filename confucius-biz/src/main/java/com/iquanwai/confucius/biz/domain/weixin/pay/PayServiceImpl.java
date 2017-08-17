@@ -68,6 +68,8 @@ public class PayServiceImpl implements PayService {
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
     private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
+    private static final String RISE_TRAIN_PAY_CALLBACK_PATH = "/wx/pay/result/risetrain/callback";
+
 
     @PostConstruct
     public void init() {
@@ -415,7 +417,10 @@ public class PayServiceImpl implements PayService {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_COURSE_PAY_CALLBACK_PATH;
+        } else if (QuanwaiOrder.TRAINING_CAMP.equals(quanwaiOrder.getGoodsType())) {
+            notify_url = ConfigUtils.adapterDomainName() + RISE_TRAIN_PAY_CALLBACK_PATH;
         }
+
         Assert.notNull(notify_url, "回调地址不能为空");
         map.put("notify_url", notify_url);
         String out_trade_no = quanwaiOrder.getOrderId();
