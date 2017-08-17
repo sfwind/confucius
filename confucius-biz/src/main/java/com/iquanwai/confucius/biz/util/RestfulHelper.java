@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 /**
- * Created by justin on 8/3/16.
+ * Created by justin on 8/3/16.<br/>
+ * Description: HTTP请求封装
  */
 @Service
 public class RestfulHelper {
@@ -29,9 +30,16 @@ public class RestfulHelper {
 
     private Logger logger = LoggerFactory.getLogger(RestfulHelper.class);
 
+    /**
+     * 发起POST请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
+     * 触发WeixinException时会刷新AccessToken并重新调用
+     *
+     * @param requestUrl 请求链接
+     * @param json       请求参数
+     * @return 响应体
+     */
     public String post(String requestUrl, String json) {
-        if(StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(json)) {
-
+        if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(json)) {
             String accessToken = accessTokenService.getAccessToken();
             String url = requestUrl.replace("{access_token}", accessToken);
             Request request = new Request.Builder()
@@ -46,7 +54,7 @@ public class RestfulHelper {
                     if (CommonUtils.isError(body)) {
                         logger.error("execute {} return error, error message is {}", url, body);
                     }
-                }catch (WeixinException e){
+                } catch (WeixinException e) {
                     //refresh token and try again
                     accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
@@ -68,9 +76,16 @@ public class RestfulHelper {
         return "";
     }
 
+    /**
+     * 发起POST请求
+     *
+     * @param requestUrl 请求的url
+     * @param xml        参数
+     * @return 响应体
+     */
     public String postXML(String requestUrl, String xml) {
-        logger.info("requestUrl: {}\nxml: {}",requestUrl, xml);
-        if(StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
+        logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);
+        if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
             Request request = new Request.Builder()
                     .url(requestUrl)
                     .post(RequestBody.create(XML, xml))
@@ -92,10 +107,17 @@ public class RestfulHelper {
     }
 
 
+    /**
+     * 发起GET请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
+     * 触发WeixinException时会刷新AccessToken并重新调用
+     *
+     * @param requestUrl 请求url，参数需要手动拼接到url中
+     * @return 响应体
+     */
     public String get(String requestUrl) {
-        if(StringUtils.isNotEmpty(requestUrl)) {
+        if (StringUtils.isNotEmpty(requestUrl)) {
             String accessToken = accessTokenService.getAccessToken();
-            logger.info("accessToken is :{}",accessToken);
+            logger.info("accessToken is :{}", accessToken);
             String url = requestUrl.replace("{access_token}", accessToken);
             Request request = new Request.Builder()
                     .url(url)
@@ -108,7 +130,7 @@ public class RestfulHelper {
                     if (CommonUtils.isError(body)) {
                         logger.error("execute {} return error, error message is {}", url, body);
                     }
-                }catch (WeixinException e){
+                } catch (WeixinException e) {
                     //refresh token and try again
                     accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
@@ -130,7 +152,7 @@ public class RestfulHelper {
     }
 
     public String getPlain(String requestUrl) {
-        if(StringUtils.isNotEmpty(requestUrl)) {
+        if (StringUtils.isNotEmpty(requestUrl)) {
             Request request = new Request.Builder()
                     .url(requestUrl)
                     .build();
@@ -154,7 +176,7 @@ public class RestfulHelper {
     }
 
 
-    public String postRise(String url, String json, String cookieName,String cookieValue) {
+    public String postRise(String url, String json, String cookieName, String cookieValue) {
 //        if (callback == null || callback.getOpenid() == null) {
 //            logger.error("调用rise接口异常，没有身份信息,callbackId:{}", callback != null ? callback.getState() : null);
 //            return "";
@@ -168,7 +190,7 @@ public class RestfulHelper {
 //            cookieName = OAuthService.QUANWAI_TOKEN_COOKIE_NAME;
 //            cookieValue = callback.getPcAccessToken();
 //        }
-        String cookie = cookieName+"="+cookieValue;
+        String cookie = cookieName + "=" + cookieValue;
 
         if (StringUtils.isNotEmpty(url) && StringUtils.isNotEmpty(json)) {
             Request request = new Request.Builder()

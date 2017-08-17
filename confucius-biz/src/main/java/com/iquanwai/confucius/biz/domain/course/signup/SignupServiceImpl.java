@@ -24,6 +24,7 @@ import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
@@ -104,6 +105,8 @@ public class SignupServiceImpl implements SignupService {
     private RestfulHelper restfulHelper;
     @Autowired
     private CustomerMessageService customerMessageService;
+    @Autowired
+    private CourseReductionService courseReductionService;
 
     private int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
@@ -218,7 +221,11 @@ public class SignupServiceImpl implements SignupService {
     public QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId) {
         // 查询该openid 是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
-        Double fee = ConfigUtils.getRiseCourseFee();
+        Double fee = this.getCoursePrice(profileId, problemId);
+        CourseReductionActivity activity = courseReductionService.loadMinPriceCourseReduction(profileId, problemId);
+        if (activity != null && activity.getPrice() != null) {
+            fee = activity.getPrice();
+        }
         Problem problem = problemDao.load(Problem.class, problemId);
         Assert.notNull(problem, "小课数据异常");
         Assert.notNull(fee, "会员价格异常");
@@ -742,16 +749,17 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Double calculateCourseCoupon(Integer problemId, Integer couponId) {
+    public Double calculateCourseCoupon(Integer problemId, Integer profileId, Integer couponId) {
         Coupon coupon = costRepo.getCoupon(couponId);
         Double amount = coupon.getAmount();
-        Double fee = ConfigUtils.getRiseCourseFee();
+        Double fee = this.getCoursePrice(profileId, problemId);
         if (fee >= amount) {
             return CommonUtils.substract(fee, amount);
         } else {
             return 0D;
         }
     }
+
     @Override
     public RiseMember currentRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
@@ -834,6 +842,15 @@ public class SignupServiceImpl implements SignupService {
         quanwaiOrder.setGoodsType(goodsType);
         quanwaiOrderDao.insert(quanwaiOrder);
         return quanwaiOrder;
+    }
+
+    private Double getCoursePrice(Integer profileId, Integer problemId) {
+        Double fee = ConfigUtils.getRiseCourseFee();
+        CourseReductionActivity activity = courseReductionService.loadMinPriceCourseReduction(profileId, problemId);
+        if (activity != null && activity.getPrice() != null) {
+            fee = activity.getPrice();
+        }
+        return fee;
     }
 
 }

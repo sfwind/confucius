@@ -170,7 +170,7 @@ public interface SignupService {
      * @param problemId 小课id
      * @param couponId 优惠券id
      */
-    Double calculateCourseCoupon(Integer problemId, Integer couponId);
+    Double calculateCourseCoupon(Integer problemId,Integer profileId, Integer couponId);
 
     RiseMember currentRiseMember(Integer profileId);
 }
