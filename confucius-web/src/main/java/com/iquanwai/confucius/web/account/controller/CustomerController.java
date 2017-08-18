@@ -82,9 +82,9 @@ public class CustomerController {
         Profile account = accountService.getProfile(loginUser.getId());
 
         try {
-            BeanUtils.copyProperties(profileDto,account);
+            BeanUtils.copyProperties(profileDto, account);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.error("beanUtils copy props error",e);
+            logger.error("beanUtils copy props error", e);
             return WebUtils.error("加载个人信息失败");
         }
         // 查询id
@@ -104,11 +104,11 @@ public class CustomerController {
                 .function("个人信息")
                 .action("提交个人信息");
         operationLogService.log(operationLog);
-        Profile profile =  new Profile();
+        Profile profile = new Profile();
         try {
-            BeanUtils.copyProperties(profile,profileDto);
+            BeanUtils.copyProperties(profile, profileDto);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.error("beanUtils copy props error",e);
+            logger.error("beanUtils copy props error", e);
             return WebUtils.error("提交个人信息失败");
         }
         profile.setOpenid(loginUser.getOpenId());
@@ -190,14 +190,14 @@ public class CustomerController {
                 .stream().map(item -> {
                     CourseDto dto = new CourseDto();
                     Course course = courseProgressService.loadCourse(item.getCourseId());
-                    if(course.getType()==Course.AUDITION_COURSE){
+                    if (course.getType() == Course.AUDITION_COURSE) {
                         return null;
                     } else {
                         dto.setName(course.getName());
                         dto.setId(course.getId());
                         dto.setHasCertificateNo(item.getCertificateNo() != null);
                         dto.setHasRealName(profile.getRealName() != null);
-                        dto.setNoCertificate(course.getType()==Course.SHORT_COURSE);
+                        dto.setNoCertificate(course.getType() == Course.SHORT_COURSE);
                         dto.setGraduate(item.getGraduate());
                         return dto;
                     }
@@ -214,15 +214,15 @@ public class CustomerController {
                 .action("查询RiseId ");
         operationLogService.log(operationLog);
         Profile profile = accountService.getProfile(loginUser.getId());
-        if(profile==null){
-            logger.error("用户:{} 缺少Profile信息，进入个人中心失败",loginUser.getOpenId());
+        if (profile == null) {
+            logger.error("用户:{} 缺少Profile信息，进入个人中心失败", loginUser.getOpenId());
             return WebUtils.error("数据异常，请联系管理员");
         }
         return WebUtils.result(profile.getRiseId());
     }
 
     @RequestMapping("/rise/knowledge/{problemId}")
-    public ResponseEntity<Map<String,Object>> loadKnowledgeList(LoginUser loginUser,@PathVariable Integer problemId){
+    public ResponseEntity<Map<String, Object>> loadKnowledgeList(LoginUser loginUser, @PathVariable Integer problemId) {
         List<Knowledge> problemKnowledgeList = planService.getProblemKnowledgeList(problemId);
         // 查看该用户是否对该问题评分
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -236,7 +236,7 @@ public class CustomerController {
 
 
     @RequestMapping("/rise/get/{problemId}")
-    public ResponseEntity<Map<String, Object>> loadProblem(LoginUser loginUser, @PathVariable Integer problemId){
+    public ResponseEntity<Map<String, Object>> loadProblem(LoginUser loginUser, @PathVariable Integer problemId) {
         Assert.notNull(loginUser, "用户不能为空");
         Problem problem = problemService.getProblem(problemId);
         // 查看该用户是否对该问题评分
@@ -251,7 +251,7 @@ public class CustomerController {
 
     @RequestMapping("/rise/knowledge/load/{knowledgeId}")
     public ResponseEntity<Map<String, Object>> loadKnowledge(LoginUser loginUser,
-                                                             @PathVariable Integer knowledgeId){
+                                                             @PathVariable Integer knowledgeId) {
         Assert.notNull(loginUser, "用户不能为空");
 //        ImprovementPlan improvementPlan = planService.getRunningPlan(loginUser.getOpenId());
 //        if(improvementPlan==null){
@@ -270,7 +270,7 @@ public class CustomerController {
     }
 
     @RequestMapping("/rise/feedback/open")
-    public ResponseEntity<Map<String,Object>> openFeedBack(LoginUser loginUser){
+    public ResponseEntity<Map<String, Object>> openFeedBack(LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("个人中心")
                 .function("帮助")
@@ -281,13 +281,13 @@ public class CustomerController {
     }
 
     @RequestMapping("/rise/member")
-    public ResponseEntity<Map<String,Object>> riseMember(LoginUser loginUser){
+    public ResponseEntity<Map<String, Object>> riseMember(LoginUser loginUser) {
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("用户信息")
                 .function("RISE")
                 .action("查询rise会员信息")
-                .memo(riseMember!=null?new Gson().toJson(riseMember):"none");
+                .memo(riseMember != null ? new Gson().toJson(riseMember) : "none");
         operationLogService.log(operationLog);
         if (riseMember != null) {
             riseMember.setName(signupService.getMemberType(riseMember.getMemberTypeId()).getName());
