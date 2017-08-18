@@ -724,6 +724,8 @@ public class SignupController {
                 return WebUtils.error("会员类型异常");
             } else {
                 goodsInfoDto.setFee(memberType.getFee());
+                goodsInfoDto.setStartTime(memberType.getStartTime());
+                goodsInfoDto.setEndTime(memberType.getEndTime());
             }
         }
 

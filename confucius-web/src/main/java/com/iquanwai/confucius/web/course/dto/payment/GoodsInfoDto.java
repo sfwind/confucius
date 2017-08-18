@@ -21,6 +21,13 @@ public class GoodsInfoDto {
     private Integer goodsId;
     /** 获取优惠券 */
     private List<Coupon> coupons;
+    /** 开启时间 非DB字段 */
+    private String startTime;
+    /** 结束时间 非DB字段 */
+    private String endTime;
+
+
+
     /** 商品类型，这个主要用来判断商品类型是否正确 */
     public static final List<String> GOODS_TYPES = Lists.newArrayList();
     static {
