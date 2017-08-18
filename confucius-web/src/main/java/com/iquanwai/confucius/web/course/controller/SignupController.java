@@ -185,86 +185,6 @@ public class SignupController {
         return WebUtils.result(signupDto);
     }
 
-    /**
-     * //     * Rise创建订单，并未下单
-     * //     *
-     * //     * @param riseMemberDto
-     * //     * @return
-     * //
-     */
-//    @RequestMapping(value = "/rise/signup")
-//    public ResponseEntity<Map<String, Object>> riseMemberSignup(LoginUser loginUser, @RequestBody RiseMemberDto riseMemberDto) {
-//        Assert.notNull(loginUser, "用户不能为空");
-//        Assert.notNull(riseMemberDto, "请求参数不能为空");
-//        String openId = riseMemberDto.getOpenId();
-//        Integer memberType = riseMemberDto.getMemberType();
-//        OperationLog operationLog = OperationLog.create().openid(openId)
-//                .module("训练营")
-//                .function("RISE报名")
-//                .action("创建订单")
-//                .memo(memberType + "");
-//        operationLogService.log(operationLog);
-//        // 在这里加锁
-//
-//        // 创建订单
-//        QuanwaiOrder quanwaiOrder = null;
-//        try {
-//            quanwaiOrder = signupService.signupRiseMember(loginUser.getId(), memberType, null).getRight();
-//        } catch (Exception e) {
-//            return WebUtils.error(e.getLocalizedMessage());
-//        }
-//
-//        return WebUtils.result(quanwaiOrder);
-//    }
-
-//    @RequestMapping(value = "/info/{productId}")
-//    public ResponseEntity<Map<String, Object>> queryProductInfo(LoginUser loginUser, @PathVariable("productId") String productId, HttpServletRequest request) {
-//        Assert.notNull(loginUser, "用户不能为空");
-//        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(productId);
-//        Assert.notNull(quanwaiOrder, "订单信息不能为空");
-//        Assert.notNull(quanwaiOrder.getPrice(), "订单金额不能为空");
-//        String remoteIp = request.getHeader("X-Forwarded-For");
-//        if (remoteIp == null) {
-//            LOGGER.error("获取用户:{} 获取IP失败:quanwaiOrder:{}", loginUser.getOpenId(), quanwaiOrder);
-//            remoteIp = ConfigUtils.getExternalIP();
-//        }
-//        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-//                .module("RISE")
-//                .function("会员报名")
-//                .action("进入付费页")
-//                .memo(productId);
-//        operationLogService.log(operationLog);
-//        SignupDto signupDto = new SignupDto();
-//        if (quanwaiOrder.getPrice() != 0) {
-//            // 碎片化统一下单
-//            Map<String, String> signParams = payService.buildH5PayParam(productId, remoteIp, loginUser.getOpenId());
-//            signupDto.setSignParams(signParams);
-//            OperationLog payParamLog = OperationLog.create().openid(loginUser.getOpenId())
-//                    .module("报名")
-//                    .function("微信支付")
-//                    .action("下单")
-//                    .memo(signParams.toString());
-//            operationLogService.log(payParamLog);
-//            if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
-//                // 碎片化订单
-//                MemberType memberType = signupService.getMemberType(Integer.parseInt(quanwaiOrder.getGoodsId()));
-//                signupDto.setMemberType(memberType);
-//            } else {
-//                signupDto.setFree(true);
-//            }
-//        } else {
-//            // TODO  体系化
-//        }
-//        signupDto.setGoodsType(quanwaiOrder.getGoodsType());
-//        signupDto.setProductId(productId);
-//        if (quanwaiOrder.getDiscount() != 0.0) {
-//            signupDto.setNormal(quanwaiOrder.getTotal());
-//            signupDto.setDiscount(quanwaiOrder.getDiscount());
-//        }
-//        signupDto.setFee(quanwaiOrder.getPrice());
-//        signupDto.setProductId(productId);
-//        return WebUtils.result(signupDto);
-//    }
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
@@ -365,7 +285,6 @@ public class SignupController {
 
         return WebUtils.result(planId);
     }
-
 
     @RequestMapping(value = "/info/load", method = RequestMethod.GET)
     @Deprecated
@@ -549,7 +468,6 @@ public class SignupController {
         return WebUtils.result(signupDto);
     }
 
-
     /**
      * 小课训练营接口
      * @param loginUser 用户信息
@@ -718,7 +636,6 @@ public class SignupController {
         return WebUtils.success();
     }
 
-
     /**
      * 获取商品信息
      *
@@ -824,7 +741,6 @@ public class SignupController {
         return WebUtils.result(paymentParam);
     }
 
-
     /**
      * 计算优惠券
      *
@@ -859,7 +775,6 @@ public class SignupController {
                 return WebUtils.error("商品类型异常");
         }
     }
-
 
     /**
      * 创建订单
