@@ -26,7 +26,7 @@ public class QRServiceTest extends TestBase {
 //        qrCodeService.generatePermanentQRCode("museum_ma");
 //        qrCodeService.generateTemporaryQRCode("freeLimit_RISE_9", 2592000);
 //        qrCodeService.generateTemporaryQRCode("freeLimit8", 2592000);
-        QRResponse courseReduction_zlj = qrCodeService.generateTemporaryQRCode("courseReduction_zlj", 2592000);
+        QRResponse courseReduction_zlj = qrCodeService.generateTemporaryQRCode("courseReduction_zlj_0", 2592000);
         System.out.println(JSON.toJSONString(courseReduction_zlj));
     }
     @Test

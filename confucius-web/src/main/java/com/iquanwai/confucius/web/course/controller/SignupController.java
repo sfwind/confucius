@@ -704,7 +704,7 @@ public class SignupController {
             // 小课购买
             goodsInfoDto.setName("小课购买");
             // 查看该用户是否参加了减免优惠活动
-            CourseReductionActivity activity = courseReductionService.loadMinPriceCourseReduction(loginUser.getId(), goodsInfoDto.getGoodsId());
+            CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(loginUser.getId(), goodsInfoDto.getGoodsId());
             if (activity != null) {
                 goodsInfoDto.setFee(activity.getPrice());
             } else {

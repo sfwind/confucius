@@ -30,29 +30,12 @@ public class CourseReductionServiceImpl implements CourseReductionService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Override
-    public CourseReductionActivity loadMinPriceCourseReduction(Integer profileId,Integer problemId) {
-        List<CourseReductionActivity> courseReductionActivities = loadCourseReductions(profileId, problemId);
-        if (CollectionUtils.isEmpty(courseReductionActivities)) {
-            return null;
-        } else {
-            return courseReductionActivities.stream().filter(item -> item.getPrice() != null).max((o1, o2) -> {
-                if (o1.getPrice() > o2.getPrice()) {
-                    return -1;
-                } else if (o1.getPrice().equals(o2.getPrice())) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }).orElse(null);
-        }
-    }
 
     @Override
-    public List<CourseReductionActivity> loadCourseReductions(Integer profileId,Integer problemId) {
+    public CourseReductionActivity loadRecentCourseReduction(Integer profileId,Integer problemId) {
         List<PromotionLevel> promotionLevels = promotionLevelDao.loadByRegex(PromotionConstants.Activities.CourseReduction, profileId);
         if (CollectionUtils.isEmpty(promotionLevels)) {
-            return Lists.newArrayList();
+            return null;
         }
         List<String> activities = Lists.newArrayList();
         promotionLevels.forEach(level -> {
@@ -67,16 +50,27 @@ public class CourseReductionServiceImpl implements CourseReductionService {
                 }
             }
         });
+        List<CourseReductionActivity> list = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(activities)) {
-            return courseReductionActivityDao
+            list =  courseReductionActivityDao
                     .loadReductions(activities)
                     .stream()
                     .filter(activity -> activity.getProblemId() == null ||
                             activity.getProblemId().equals(problemId))
                     .collect(Collectors.toList());
-        } else {
-            return Lists.newArrayList();
         }
+        promotionLevels.sort((o1, o2) -> o2.getId() - o1.getId());
+        for (PromotionLevel level : promotionLevels) {
+            for (CourseReductionActivity courseReductionActivity : list) {
+                if (level.getActivity().contains(courseReductionActivity.getActivity())) {
+                    // 取出第一个匹配到的courseReduction,因为有可能扫码后活动取消了
+                    // courseReduction_zlj_02 contains courseReduction_zlj
+                    return courseReductionActivity;
+                }
+            }
+        }
+        // 上面没有return的话，则return null
+        return null;
     }
 
 }
