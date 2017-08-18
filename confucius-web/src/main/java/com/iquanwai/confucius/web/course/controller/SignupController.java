@@ -292,7 +292,6 @@ public class SignupController {
         return WebUtils.result(planId);
     }
 
-
     @RequestMapping(value = "/info/load", method = RequestMethod.GET)
     @Deprecated
     public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser) {
@@ -475,7 +474,6 @@ public class SignupController {
         return WebUtils.result(signupDto);
     }
 
-
     /**
      * 小课训练营接口
      * @param loginUser 用户信息
@@ -644,7 +642,6 @@ public class SignupController {
         return WebUtils.success();
     }
 
-
     /**
      * 获取商品信息
      *
@@ -751,7 +748,6 @@ public class SignupController {
         return WebUtils.result(paymentParam);
     }
 
-
     /**
      * 计算优惠券
      *
@@ -786,7 +782,6 @@ public class SignupController {
                 return WebUtils.error("商品类型异常");
         }
     }
-
 
     /**
      * 创建订单
