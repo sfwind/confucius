@@ -185,6 +185,13 @@ public class SignupController {
         return WebUtils.result(signupDto);
     }
 
+    /**
+     * 训练营支付成功后调用，用于处理后续操作
+     *
+     * @param loginUser 用户
+     * @param orderId   订单id
+     * @return 执行结果
+     */
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> paid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
@@ -212,17 +219,15 @@ public class SignupController {
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
         }
-
-//        signupService.entry(courseOrder.getCourseId(), courseOrder.getClassId(), courseOrder.getOpenid());
         return WebUtils.success();
     }
 
     /**
-     * 支付成功的回调
+     * rise产品支付成功的回调
      *
      * @param loginUser 用户信息
      * @param orderId   订单id
-     * @return
+     * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId) {
@@ -232,6 +237,7 @@ public class SignupController {
         Integer problemId = null;
         Integer planId = null;
         if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAGMENT_MEMBER)) {
+            // 会员购买
             RiseOrder riseOrder = signupService.getRiseOrder(orderId);
             if (riseOrder == null) {
                 LOGGER.error("{} 订单不存在", orderId);
@@ -240,6 +246,7 @@ public class SignupController {
                 entry = riseOrder.getEntry();
             }
         } else {
+            // 其他为小课购买
             RiseCourseOrder riseCourseOrder = signupService.getRiseCourse(orderId);
             if (riseCourseOrder == null) {
                 LOGGER.error("{} 订单不存在", orderId);
@@ -249,7 +256,6 @@ public class SignupController {
             }
             problemId = riseCourseOrder.getProblemId();
         }
-
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("付费完成")
@@ -422,7 +428,7 @@ public class SignupController {
                 .function("报名页面")
                 .action("计算优惠券减免")
                 .memo(riseCourseDto.getCouponId() + "");
-        Double price = signupService.calculateCourseCoupon(riseCourseDto.getProblemId(),loginUser.getId(), riseCourseDto.getCouponId());
+        Double price = signupService.calculateCourseCoupon(riseCourseDto.getProblemId(), loginUser.getId(), riseCourseDto.getCouponId());
         operationLogService.log(operationLog);
         return WebUtils.result(price);
     }
@@ -661,7 +667,7 @@ public class SignupController {
             // 小课购买
             goodsInfoDto.setName("小课购买");
             // 查看该用户是否参加了减免优惠活动
-            CourseReductionActivity activity = courseReductionService.loadMinPriceCourseReduction(loginUser.getId(), goodsInfoDto.getGoodsId());
+            CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(loginUser.getId(), goodsInfoDto.getGoodsId());
             if (activity != null) {
                 goodsInfoDto.setFee(activity.getPrice());
             } else {
@@ -681,6 +687,8 @@ public class SignupController {
                 return WebUtils.error("会员类型异常");
             } else {
                 goodsInfoDto.setFee(memberType.getFee());
+                goodsInfoDto.setStartTime(memberType.getStartTime());
+                goodsInfoDto.setEndTime(memberType.getEndTime());
             }
         }
 
@@ -760,7 +768,7 @@ public class SignupController {
         Double price;
         switch (paymentDto.getGoodsType()) {
             case GoodsInfoDto.FRAG_COURSE:
-                price = signupService.calculateCourseCoupon(paymentDto.getGoodsId(), loginUser.getId(),paymentDto.getCouponId());
+                price = signupService.calculateCourseCoupon(paymentDto.getGoodsId(), loginUser.getId(), paymentDto.getCouponId());
                 return WebUtils.result(price);
             case GoodsInfoDto.FRAG_MEMBER:
                 Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getId(), paymentDto.getGoodsId());

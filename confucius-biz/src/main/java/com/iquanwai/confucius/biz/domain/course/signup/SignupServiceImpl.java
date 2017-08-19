@@ -223,7 +223,7 @@ public class SignupServiceImpl implements SignupService {
         // 查询该openid 是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
         Double fee = this.getCoursePrice(profileId, problemId);
-        CourseReductionActivity activity = courseReductionService.loadMinPriceCourseReduction(profileId, problemId);
+        CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(profileId, problemId);
         if (activity != null && activity.getPrice() != null) {
             fee = activity.getPrice();
         }
@@ -918,7 +918,7 @@ public class SignupServiceImpl implements SignupService {
 
     private Double getCoursePrice(Integer profileId, Integer problemId) {
         Double fee = ConfigUtils.getRiseCourseFee();
-        CourseReductionActivity activity = courseReductionService.loadMinPriceCourseReduction(profileId, problemId);
+        CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(profileId, problemId);
         if (activity != null && activity.getPrice() != null) {
             fee = activity.getPrice();
         }
