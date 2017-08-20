@@ -398,6 +398,12 @@ public class PayServiceImpl implements PayService {
         return payClose;
     }
 
+    /**
+     * 根据预先生成的 order 订单数据，生成对微信的请求 url，xml 格式
+     * @param quanwaiOrder
+     * @param ip
+     * @return
+     */
     private UnifiedOrder buildJSApiOrder(QuanwaiOrder quanwaiOrder, String ip) {
         UnifiedOrder unifiedOrder = new UnifiedOrder();
         Map<String, String> map = Maps.newHashMap();

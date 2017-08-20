@@ -85,6 +85,8 @@ public class RiseMemberCountRepoImpl implements RiseMemberCountRepo {
         if(profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP){
             // 已经报名
             return new MutablePair<>(-3,"您已是圈外会员");
+        } else if(profile.getRiseMember() == Constants.RISE_MEMBER.TRAIN_CAMP){
+            return new MutablePair<>(-3, "您已是小课训练营会员");
         } else {
             // 未报名,查看是否有未关闭的订单
             Integer counts = riseOrderDao.userNotCloseOrder(profileId);
