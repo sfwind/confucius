@@ -30,12 +30,25 @@ public class GoodsInfoDto {
 
     /** 商品类型，这个主要用来判断商品类型是否正确 */
     public static final List<String> GOODS_TYPES = Lists.newArrayList();
+
+    /**
+     * 小课购买
+     */
+    public static final String FRAG_COURSE = "fragment_rise_course";
+    /**
+     * 会员购买
+     */
+    public static final String FRAG_MEMBER = "fragment_member";
+    /**
+     * 训练营小课
+     */
+    public static final String FRAG_TRAIN = "fragment_train";
+
     static {
         // 初始化商品列表，下面的常量也需要定义
-        GOODS_TYPES.add("fragment_rise_course");
-        GOODS_TYPES.add("fragment_member");
+        GOODS_TYPES.add(FRAG_COURSE);
+        GOODS_TYPES.add(FRAG_MEMBER);
+        GOODS_TYPES.add(FRAG_TRAIN);
     }
 
-    public static final String FRAG_COURSE = "fragment_rise_course";
-    public static final String FRAG_MEMBER = "fragment_member";
 }

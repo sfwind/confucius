@@ -219,6 +219,31 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
+        // 查询该openid是否是我们的用户
+        Profile profile = profileDao.load(Profile.class, profileId);
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        Pair<String, Double> orderPair = generateOrderId(memberType.getFee(), couponId);
+
+        Assert.notNull(profile, "用户信息错误");
+        Assert.notNull(memberType, "会员类型错误");
+        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
+                orderPair.getLeft(), memberType.getFee(), orderPair.getRight(),
+                memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAGMENT_MEMBER);
+
+        // rise的报名数据
+        RiseOrder riseOrder = new RiseOrder();
+        riseOrder.setOpenid(profile.getOpenid());
+        riseOrder.setEntry(false);
+        riseOrder.setIsDel(false);
+        riseOrder.setMemberType(memberTypeId);
+        riseOrder.setOrderId(orderPair.getLeft());
+        riseOrder.setProfileId(profile.getId());
+        riseOrderDao.insert(riseOrder);
+        return quanwaiOrder;
+    }
+
+    @Override
     public QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId) {
         // 查询该openid 是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
@@ -242,32 +267,6 @@ public class SignupServiceImpl implements SignupService {
         riseCourseOrder.setOpenid(profile.getOpenid());
         riseCourseOrder.setOrderId(orderPair.getLeft());
         riseCourseOrderDao.insert(riseCourseOrder);
-        return quanwaiOrder;
-    }
-
-
-    @Override
-    public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
-        // 查询该openid是否是我们的用户
-        Profile profile = profileDao.load(Profile.class, profileId);
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        Pair<String, Double> orderPair = generateOrderId(memberType.getFee(), couponId);
-
-        Assert.notNull(profile, "用户信息错误");
-        Assert.notNull(memberType, "会员类型错误");
-        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
-                orderPair.getLeft(), memberType.getFee(), orderPair.getRight(),
-                memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAGMENT_MEMBER);
-
-        // rise的报名数据
-        RiseOrder riseOrder = new RiseOrder();
-        riseOrder.setOpenid(profile.getOpenid());
-        riseOrder.setEntry(false);
-        riseOrder.setIsDel(false);
-        riseOrder.setMemberType(memberTypeId);
-        riseOrder.setOrderId(orderPair.getLeft());
-        riseOrder.setProfileId(profile.getId());
-        riseOrderDao.insert(riseOrder);
         return quanwaiOrder;
     }
 

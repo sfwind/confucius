@@ -742,7 +742,7 @@ public class SignupController {
             return WebUtils.error("该优惠券无效");
         }
 
-        // 创建订单
+        // 根据前端传进来的 param 创建订单信息
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(paymentDto, loginUser.getId());
         // 下单
         PaymentDto paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
@@ -823,6 +823,9 @@ public class SignupController {
                 // 购买会员
                 return signupService.riseCourseSignupCheck(profileId, paymentDto.getGoodsId());
             }
+            case GoodsInfoDto.FRAG_TRAIN: {
+
+            }
             default:
                 LOGGER.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
                 return new MutablePair<>(-1, "会员类型异常");
@@ -830,10 +833,9 @@ public class SignupController {
     }
 
     /**
-     * 统一下单
-     *
-     * @param quanwaiOrder 总订单
-     * @param remoteIp     ip
+     * 1. 预先在 QuanwaiOrder 表中生成了订单记录，但不是真正用来发送到微信的订单，现在要创建即将往微信发送的订单参数
+     * 2. 这个参数只能在后端生成，然后作为参数返回给前端，前端拿到了参数直接调用。
+     * 3. 备注：调用微信支付之后，微信的回调 URI 也是在这边配置
      */
     private PaymentDto createPayParam(QuanwaiOrder quanwaiOrder, String remoteIp) {
         // 下单
