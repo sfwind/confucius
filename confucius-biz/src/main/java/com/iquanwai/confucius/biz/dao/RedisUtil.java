@@ -89,17 +89,17 @@ public class RedisUtil {
      */
     public void lock(String key, Consumer<RLock> consumer) {
         RLock lock = redissonClient.getLock(key);
-        logger.info("Thread {} want the lock", Thread.currentThread().getId());
+//        logger.info("Thread {} want the lock", Thread.currentThread().getId());
         try {
             lock.tryLock(60, 10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        logger.info("Thread {} has lock :{}", Thread.currentThread().getId(), lock.isHeldByCurrentThread());
+//        logger.info("Thread {} has lock :{}", Thread.currentThread().getId(), lock.isHeldByCurrentThread());
         consumer.accept(lock);
-        logger.info("Thread {} will release the lock",Thread.currentThread().getId());
+//        logger.info("Thread {} will release the lock",Thread.currentThread().getId());
         lock.unlock();
-        logger.info("Thread {} don't have the lock :{}", Thread.currentThread().getId(), lock.isHeldByCurrentThread());
+//        logger.info("Thread {} don't have the lock :{}", Thread.currentThread().getId(), lock.isHeldByCurrentThread());
     }
 
     public boolean tryLock(String key, int wait, int release){
