@@ -41,10 +41,10 @@ public class CourseReductionServiceImpl implements CourseReductionService {
         promotionLevels.forEach(level -> {
             String activity = level.getActivity();
             String[] split = activity.split("_");
-            if (split.length < 2) {
+            if (split.length < 1) {
                 logger.error("异常，课程减免活动数据异常", level);
             } else {
-                String realActivity = split[0] + "_" + split[1];
+                String realActivity = split[0];
                 if (!activities.contains(realActivity)) {
                     activities.add(realActivity);
                 }
@@ -64,7 +64,7 @@ public class CourseReductionServiceImpl implements CourseReductionService {
             for (CourseReductionActivity courseReductionActivity : list) {
                 if (level.getActivity().contains(courseReductionActivity.getActivity())) {
                     // 取出第一个匹配到的courseReduction,因为有可能扫码后活动取消了
-                    // courseReduction_zlj_02 contains courseReduction_zlj
+                    // courseReduction-zlj_02 contains courseReduction-zlj
                     return courseReductionActivity;
                 }
             }
