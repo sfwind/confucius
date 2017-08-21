@@ -117,7 +117,6 @@ public class PromoCodeServiceImpl implements PromoCodeService {
                     couponDao.insert(coupon);
                     //发送优惠码折扣通知
                     sendCouponMsg(promoCode, activity, openid);
-                    costRepo.reloadCache();
                 }
             }
         }
