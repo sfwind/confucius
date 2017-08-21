@@ -631,13 +631,12 @@ public class SignupController {
             goodsInfoDto.setName("小课购买");
             // 查看该用户是否参加了减免优惠活动
             CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(loginUser.getId(), goodsInfoDto.getGoodsId());
+            goodsInfoDto.setFee(ConfigUtils.getRiseCourseFee());
             if (activity != null) {
-                goodsInfoDto.setFee(activity.getPrice());
-            } else {
-                goodsInfoDto.setFee(ConfigUtils.getRiseCourseFee());
+                goodsInfoDto.setActivity(activity);
             }
         } else {
-            goodsInfoDto.setName("小课购买");
+            goodsInfoDto.setName("会员购买");
             // 会员购买
             MemberType memberType = signupService
                     .getMemberTypesPayInfo()

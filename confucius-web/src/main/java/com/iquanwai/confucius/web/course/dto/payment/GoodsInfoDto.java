@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.course.dto.payment;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.po.Coupon;
+import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import lombok.Data;
 
 import java.util.List;
@@ -25,6 +26,8 @@ public class GoodsInfoDto {
     private String startTime;
     /** 结束时间 非DB字段 */
     private String endTime;
+    /** 活动状态 */
+    private CourseReductionActivity activity;
 
 
 
