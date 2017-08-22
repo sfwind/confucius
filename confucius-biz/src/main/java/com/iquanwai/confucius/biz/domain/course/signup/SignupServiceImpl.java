@@ -605,14 +605,14 @@ public class SignupServiceImpl implements SignupService {
                 //精英会员
                 expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseEliteMember(openId);
+                // 购买精英会员送 12 张线下工作坊券
+                presentOfflineCoupons(riseOrder.getProfileId());
                 break;
             }
             case 4: {
                 //精英会员
                 expireDate = DateUtils.afterNatureMonths(new Date(), 6);
                 profileDao.becomeRiseEliteMember(openId);
-                // 购买精英会员送 12 张线下工作坊券
-                presentOfflineCoupons(riseOrder.getProfileId());
                 break;
             }
             default:
