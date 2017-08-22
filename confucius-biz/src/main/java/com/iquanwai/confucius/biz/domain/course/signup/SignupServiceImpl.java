@@ -309,7 +309,8 @@ public class SignupServiceImpl implements SignupService {
         int goodsId = Constants.RISE_MEMBER.MONTHLY_CAMP;
         QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), fee, orderPair.getRight(),
-                Integer.toString(goodsId), QuanwaiOrder.FRAG_CAMP, QuanwaiOrder.FRAG_CAMP);
+                Integer.toString(goodsId), ConfigUtils.getMonthlyCampMonth() + "月小课训练营",
+                QuanwaiOrder.FRAG_CAMP);
 
         // 插入训练营小课报名数据
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
