@@ -539,6 +539,26 @@ public class SignupController {
         return WebUtils.result(dto);
     }
 
+    @RequestMapping(value = "/rise/member/check/{memberTypeId}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser, @PathVariable Integer memberTypeId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("点击RISE会员选择按钮")
+                .memo(memberTypeId + "");
+        operationLogService.log(operationLog);
+        Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getId(), memberTypeId);
+        if (result.getLeft() != 1) {
+            if (result.getLeft() == -4) {
+                return WebUtils.error(214, result.getRight());
+            } else {
+                return WebUtils.error(result.getRight());
+            }
+        } else {
+            return WebUtils.success();
+        }
+    }
+
     @RequestMapping(value = "/mark/normal/question")
     public ResponseEntity<Map<String, Object>> markNormalQuestion(LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
