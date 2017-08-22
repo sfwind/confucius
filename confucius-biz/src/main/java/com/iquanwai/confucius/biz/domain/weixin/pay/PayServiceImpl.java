@@ -189,11 +189,11 @@ public class PayServiceImpl implements PayService {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId：" + orderId);
 
-        if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+        if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
             signupService.riseMemberEntry(quanwaiOrder.getOrderId());
             accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
-        } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+        } else if (QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType())) {
             // 单独购买小课
             signupService.riseCourseEntry(quanwaiOrder.getOrderId());
             accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
@@ -206,7 +206,7 @@ public class PayServiceImpl implements PayService {
     public void payMemberSuccess(String orderId) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
-        Assert.isTrue(QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType()));
+        Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
         signupService.riseMemberEntry(quanwaiOrder.getOrderId());
         accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
@@ -218,7 +218,7 @@ public class PayServiceImpl implements PayService {
     public void payFragmentSuccess(String orderId) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
-        Assert.isTrue(QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType()));
+        Assert.isTrue(QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
         signupService.riseCourseEntry(quanwaiOrder.getOrderId());
         accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
@@ -301,10 +301,10 @@ public class PayServiceImpl implements PayService {
         if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupSignup(orderId);
         }
-        if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+        if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupRiseSignup(orderId);
         }
-        if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+        if (QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType())) {
             signupService.giveupRiseCourseSignup(orderId);
         }
     }
@@ -401,11 +401,11 @@ public class PayServiceImpl implements PayService {
         String notify_url = null;
         if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+        } else if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+        } else if (QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_COURSE_PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.FRAGMENT_MONTHLY_CAMP.equals(quanwaiOrder.getGoodsType())) {
+        } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_CAMP_PAY_CALLBACK_PATH;
         }
 

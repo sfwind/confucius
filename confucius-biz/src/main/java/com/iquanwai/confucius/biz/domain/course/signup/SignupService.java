@@ -37,6 +37,8 @@ public interface SignupService {
      */
     Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId);
 
+    Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberType);
+
     Pair<Integer, String> monthlyCampSignupCheck(Integer profileId);
 
     /**

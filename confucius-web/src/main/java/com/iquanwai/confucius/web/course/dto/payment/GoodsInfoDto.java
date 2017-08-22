@@ -42,13 +42,13 @@ public class GoodsInfoDto {
     /**
      * 训练营小课
      */
-    public static final String FRAG_TRAIN = "fragment_train";
+    public static final String FRAG_CAMP = "fragment_monthly_camp";
 
     static {
         // 初始化商品列表，下面的常量也需要定义
         GOODS_TYPES.add(FRAG_COURSE);
         GOODS_TYPES.add(FRAG_MEMBER);
-        GOODS_TYPES.add(FRAG_TRAIN);
+        GOODS_TYPES.add(FRAG_CAMP);
     }
 
 }
