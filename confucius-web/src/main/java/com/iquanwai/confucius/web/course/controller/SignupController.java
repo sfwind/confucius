@@ -183,9 +183,8 @@ public class SignupController {
 
     /**
      * 训练营支付成功后调用，用于处理后续操作
-     *
      * @param loginUser 用户
-     * @param orderId   订单id
+     * @param orderId 订单id
      * @return 执行结果
      */
     @RequestMapping(value = "/paid/{orderId}", method = RequestMethod.POST)
@@ -220,9 +219,8 @@ public class SignupController {
 
     /**
      * rise产品支付成功的回调
-     *
      * @param loginUser 用户信息
-     * @param orderId   订单id
+     * @param orderId 订单id
      * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
@@ -232,7 +230,7 @@ public class SignupController {
         Boolean entry;
         Integer problemId = null;
         Integer planId = null;
-        if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAGMENT_MEMBER)) {
+        if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_MEMBER)) {
             // 会员购买
             RiseOrder riseOrder = signupService.getRiseOrder(orderId);
             if (riseOrder == null) {
@@ -387,10 +385,7 @@ public class SignupController {
 
     /**
      * 计算优惠券
-     *
      * @param loginUser 用户信息
-     * @param memberDto
-     * @return
      */
     @RequestMapping(value = "/coupon/calculate", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> useCoupon(LoginUser loginUser, @RequestBody RiseMemberDto memberDto) {
@@ -412,7 +407,6 @@ public class SignupController {
 
     /**
      * 计算优惠券
-     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/coupon/course/calculate", method = RequestMethod.POST)
@@ -431,9 +425,8 @@ public class SignupController {
 
     /**
      * 小课单卖接口
-     *
-     * @param loginUser     用户信息
-     * @param request       request请求
+     * @param loginUser 用户信息
+     * @param request request请求
      * @param riseCourseDto 小课id，优惠券id(可选)
      * @return 调起H5接口的数据（如果不免费）
      */
@@ -471,49 +464,9 @@ public class SignupController {
     }
 
     /**
-     * 小课训练营接口
-     * @param loginUser 用户信息
-     * @param request request请求
-     * @return 调起H5接口的数据（如果不免费）
-     */
-    @RequestMapping(value = "/rise/camp/pay")
-    public ResponseEntity<Map<String, Object>> monthlyCampPay(LoginUser loginUser, HttpServletRequest request, @RequestBody MonthlyCampDto monthlyCampDto) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("小课训练营")
-                .action("点击支付")
-                .memo(ConfigUtils.getMonthlyCampMonth() + "");
-        operationLogService.log(operationLog);
-
-        // 检查ip
-        String remoteIp = request.getHeader("X-Forwarded-For");
-        if (remoteIp == null) {
-            LOGGER.error("获取用户:{} 获取IP失败:ProblemId:{}", loginUser.getOpenId(), monthlyCampDto);
-            remoteIp = ConfigUtils.getExternalIP();
-        }
-        // 检查是否需要支付
-        Pair<Integer, String> check = signupService.monthlyCampSignupCheck(loginUser.getId());
-        if (check.getLeft() != 1) {
-            return WebUtils.error(check.getRight());
-        }
-        // 检查优惠券
-        if (!costRepo.checkDiscount(loginUser.getId(), monthlyCampDto.getCouponId())) {
-            return WebUtils.error("该优惠券无效");
-        }
-
-        // 创建订单
-        QuanwaiOrder quanwaiOrder = signupService.signupMonthlyCamp(loginUser.getId(), monthlyCampDto.getCouponId());
-        // 统一下单
-        SignupDto signupDto = payParam(quanwaiOrder, remoteIp);
-        return WebUtils.result(signupDto);
-    }
-
-    /**
      * 统一下单
-     *
      * @param quanwaiOrder 总订单
-     * @param remoteIp     ip
+     * @param remoteIp ip
      */
     private SignupDto payParam(QuanwaiOrder quanwaiOrder, String remoteIp) {
         // 下单
@@ -586,26 +539,6 @@ public class SignupController {
         return WebUtils.result(dto);
     }
 
-    @RequestMapping(value = "/rise/member/check/{memberTypeId}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser, @PathVariable Integer memberTypeId) {
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("报名页面")
-                .action("点击RISE会员选择按钮")
-                .memo(memberTypeId + "");
-        operationLogService.log(operationLog);
-        Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getId(), memberTypeId);
-        if (result.getLeft() != 1) {
-            if (result.getLeft() == -4) {
-                return WebUtils.error(214, result.getRight());
-            } else {
-                return WebUtils.error(result.getRight());
-            }
-        } else {
-            return WebUtils.success();
-        }
-    }
-
     @RequestMapping(value = "/mark/normal/question")
     public ResponseEntity<Map<String, Object>> markNormalQuestion(LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -639,8 +572,7 @@ public class SignupController {
 
     /**
      * 获取商品信息
-     *
-     * @param loginUser    用户
+     * @param loginUser 用户
      * @param goodsInfoDto 商品信息
      * @return 详细的商品信息
      */
@@ -668,7 +600,11 @@ public class SignupController {
                 goodsInfoDto.setActivity(activity);
             }
         } else if(GoodsInfoDto.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            goodsInfoDto.setName("会员购买");
+            if(GoodsInfoDto.FRAG_COURSE.equals(goodsInfoDto.getGoodsType())) {
+                goodsInfoDto.setName("会员购买");
+            } else if(GoodsInfoDto.FRAG_CAMP.equals(goodsInfoDto.getGoodsType())) {
+                goodsInfoDto.setName("训练营小课购买");
+            }
             // 会员购买
             MemberType memberType = signupService
                     .getMemberTypesPayInfo()
@@ -694,9 +630,8 @@ public class SignupController {
 
     /**
      * 获取H5支付参数的接口
-     *
-     * @param loginUser  用户
-     * @param request    request对象
+     * @param loginUser 用户
+     * @param request request对象
      * @param paymentDto 商品类型以及商品id
      * @return 支付参数
      */
@@ -719,9 +654,6 @@ public class SignupController {
         // 检查ip
         String remoteIp = request.getHeader("X-Forwarded-For");
         if (remoteIp == null) {
-//            LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), paymentDto);
-//            messageService.sendAlarm("报名模块出错", "获取用户:" + loginUser.getId() + " IP失败",
-//                    "高", "报名类型:" + paymentDto.getGoodsType(), "IP获取失败");
             remoteIp = ConfigUtils.getExternalIP();
         }
 
@@ -745,7 +677,6 @@ public class SignupController {
 
     /**
      * 计算优惠券
-     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
@@ -779,10 +710,28 @@ public class SignupController {
     }
 
     /**
+     * 购买预校验
+     */
+    @RequestMapping(value = "/rise/member/check/{memberTypeId}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser, @PathVariable Integer memberTypeId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("报名")
+                .function("报名页面")
+                .action("点击RISE会员选择按钮")
+                .memo(memberTypeId + "");
+        operationLogService.log(operationLog);
+        Pair<Boolean, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
+        if (result.getLeft()) {
+            return WebUtils.success();
+        } else {
+            return WebUtils.error(result.getRight());
+        }
+    }
+
+    /**
      * 创建订单
-     *
      * @param paymentDto 支付信息
-     * @param profileId  用户id
+     * @param profileId 用户id
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
@@ -791,8 +740,10 @@ public class SignupController {
                 return signupService.signupRiseCourse(profileId, paymentDto.getGoodsId(), paymentDto.getCouponId());
             }
             case GoodsInfoDto.FRAG_MEMBER: {
-                return signupService.signupRiseMember(profileId,
-                        paymentDto.getGoodsId(), paymentDto.getCouponId());
+                return signupService.signupRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponId());
+            }
+            case GoodsInfoDto.FRAG_CAMP: {
+                return signupService.signupMonthlyCamp(profileId, paymentDto.getCouponId());
             }
             default:
                 LOGGER.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
@@ -802,9 +753,8 @@ public class SignupController {
 
     /**
      * 支付检查
-     *
      * @param paymentDto 支付信息
-     * @param profileId  用户id
+     * @param profileId 用户id
      * @return 检查结果
      */
     private Pair<Integer, String> signupCheck(PaymentDto paymentDto, Integer profileId) {
@@ -816,9 +766,6 @@ public class SignupController {
             case GoodsInfoDto.FRAG_MEMBER: {
                 // 购买会员
                 return signupService.riseCourseSignupCheck(profileId, paymentDto.getGoodsId());
-            }
-            case GoodsInfoDto.FRAG_TRAIN: {
-
             }
             default:
                 LOGGER.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);

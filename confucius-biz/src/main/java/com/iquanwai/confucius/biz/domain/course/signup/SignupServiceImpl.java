@@ -155,15 +155,6 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId) {
-//        if (!ConfigUtils.pressTestSwitch()) {
-//            ClassMember classMember = classMemberDao.classMember(profileId, courseId);
-//            if (classMember != null) {
-//                // 并且他正在进行的课程里有这门课
-//                if (DateUtils.startDay(new Date()).before(classMember.getCloseDate())) {
-//                    return new ImmutablePair<>(-3, 0);
-//                }
-//            }
-//        }
         // 还没有正式进入班级
         return classMemberCountRepo.prepareSignup(profileId, courseId);
     }
@@ -184,11 +175,37 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberType) {
+        Profile profile = accountService.getProfile(profileId);
+        Assert.notNull(profile, "用户不能为空");
+        Boolean left = false;
+        String right = "正常";
+        if (memberType == RiseMember.ELITE) {
+            // 购买会员
+            if (profile.getRiseMember() == 1) {
+                right = "您已经是 RISE 会员";
+            } else {
+                left = true;
+            }
+        } else if (memberType == RiseMember.MONTHLY_CAMP) {
+            // 购买小课训练营
+            if (profile.getRiseMember() == 1) {
+                right = "您已经是 RISE 会员";
+            } else if (profile.getRiseMember() == 3) {
+                right = "您已经是小课训练营用户";
+            } else {
+                left = true;
+            }
+        }
+        return new MutablePair<>(left, right);
+    }
+
+    @Override
     public Pair<Integer, String> monthlyCampSignupCheck(Integer profileId) {
         Profile profile = accountService.getProfile(profileId);
-        if(profile.getRiseMember() == 1) {
+        if (profile.getRiseMember() == 1) {
             return new MutablePair<>(-1, "您已经是RISE会员，无需单独购买训练营小课");
-        } else if(profile.getRiseMember() == 3) {
+        } else if (profile.getRiseMember() == 3) {
             return new MutablePair<>(-1, "您已经是训练营小课会员");
         } else {
             return new MutablePair<>(1, "");
@@ -253,7 +270,7 @@ public class SignupServiceImpl implements SignupService {
         Assert.notNull(memberType, "会员类型错误");
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), memberType.getFee(), orderPair.getRight(),
-                memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAGMENT_MEMBER);
+                memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAG_MEMBER);
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
@@ -283,7 +300,7 @@ public class SignupServiceImpl implements SignupService {
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), fee, orderPair.getRight(),
-                problemId.toString(), problem.getProblem(), QuanwaiOrder.FRAGMENT_RISE_COURSE);
+                problemId.toString(), problem.getProblem(), QuanwaiOrder.FRAG_COURSE);
         // 插入rise小课单卖的报名数据
         RiseCourseOrder riseCourseOrder = new RiseCourseOrder();
         riseCourseOrder.setProblemId(problemId);
@@ -304,7 +321,7 @@ public class SignupServiceImpl implements SignupService {
         int goodsId = Constants.RISE_MEMBER.MONTHLY_CAMP;
         QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), fee, orderPair.getRight(),
-                Integer.toString(goodsId), QuanwaiOrder.FRAGMENT_MONTHLY_CAMP, QuanwaiOrder.FRAGMENT_MONTHLY_CAMP);
+                Integer.toString(goodsId), QuanwaiOrder.FRAG_CAMP, QuanwaiOrder.FRAG_CAMP);
 
         // 插入训练营小课报名数据
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
