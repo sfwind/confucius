@@ -37,6 +37,8 @@ public interface SignupService {
      */
     Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId);
 
+    Pair<Integer, String> monthlyCampSignupCheck(Integer profileId);
+
     /**
      * 检查是否在报名中
      * @param profileId 用户id
@@ -59,6 +61,8 @@ public interface SignupService {
     QuanwaiOrder signupRiseMember(Integer profileId, Integer memberType, Integer couponId);
 
     QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId);
+
+    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer couponId);
 
     /**
      * 获取学员详情
@@ -97,8 +101,16 @@ public interface SignupService {
 
     void riseCourseEntry(String orderId);
 
-    // 购买了训练营小课后续操作
-    void trainCampEntry(String orderId);
+    /**
+     * 购买完训练营小课后续操作
+     * 1、更新 Profile RiseMember 值
+     * 2、RiseMemberClass 新增数据记录
+     * 3、更新 RiseMember 表旧数据为过期状态，并新增一条当前购买类型数据记录
+     * 4、送优惠券
+     * 5、发送 mq 通知 platon 强制开启小课
+     * 6、发送购买成功信息，开课信息（可以合并）
+     */
+    void payMonthlyCampSuccess(String orderId);
 
     void riseMemberEntry(String orderId);
 

@@ -17,6 +17,7 @@ import java.sql.SQLException;
  */
 @Repository
 public class RiseCourseOrderDao extends DBUtil {
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public int insert(RiseCourseOrder riseCourseOrder) {
@@ -66,7 +67,5 @@ public class RiseCourseOrderDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-
-
 
 }

@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.weixin;
 
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -26,6 +26,8 @@ import java.io.IOException;
 public class PayController {
     @Autowired
     private PayService payService;
+    @Autowired
+    private SignupService signupService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -122,7 +124,7 @@ public class PayController {
         try {
             payService.handlePayResult(payCallback);
             if (payCallback.getResult_code().equals("SUCCESS")) {
-                payService.payTrainSuccess(payCallback.getOut_trade_no());
+                signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
             } else {
                 LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
             }

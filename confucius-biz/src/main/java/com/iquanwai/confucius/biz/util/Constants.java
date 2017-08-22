@@ -80,6 +80,6 @@ public interface Constants {
         int FREE = 0;
         int MEMBERSHIP = 1;
         int COURSE_USER = 2;
-        int TRAIN_CAMP = 3;
+        int MONTHLY_CAMP = 3;
     }
 }

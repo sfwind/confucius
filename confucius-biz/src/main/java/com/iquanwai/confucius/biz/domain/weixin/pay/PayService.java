@@ -44,9 +44,6 @@ public interface PayService {
     // 购买小课
     void payFragmentSuccess(String orderId);
 
-    // 购买训练营小课
-    void payTrainSuccess(String orderId);
-
     /**
      * 定期关闭过期订单
      * */

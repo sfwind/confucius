@@ -68,7 +68,7 @@ public class PayServiceImpl implements PayService {
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
     private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
-    private static final String RISE_TRAIN_PAY_CALLBACK_PATH = "/wx/pay/result/risetrain/callback";
+    private static final String RISE_CAMP_PAY_CALLBACK_PATH = "/wx/pay/result/risetrain/callback";
 
 
     @PostConstruct
@@ -197,12 +197,8 @@ public class PayServiceImpl implements PayService {
             // 单独购买小课
             signupService.riseCourseEntry(quanwaiOrder.getOrderId());
             accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
-        } else if (QuanwaiOrder.FRAGMENT_TRAIN_CAMP.equals(quanwaiOrder.getGoodsType())) {
-            // 小课训练营后续数据处理
-            signupService.trainCampEntry(quanwaiOrder.getOrderId());
-            accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.TRAIN_CAMP);
         }
-        doSomethingAfterPay(quanwaiOrder, orderId);
+        refreshStatus(quanwaiOrder, orderId);
     }
 
     // 购买会员
@@ -214,7 +210,7 @@ public class PayServiceImpl implements PayService {
         // 商品是rise会员
         signupService.riseMemberEntry(quanwaiOrder.getOrderId());
         accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
-        doSomethingAfterPay(quanwaiOrder, orderId);
+        refreshStatus(quanwaiOrder, orderId);
     }
 
     // 购买小课
@@ -226,26 +222,10 @@ public class PayServiceImpl implements PayService {
         // 商品是rise会员
         signupService.riseCourseEntry(quanwaiOrder.getOrderId());
         accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
-        doSomethingAfterPay(quanwaiOrder, orderId);
+        refreshStatus(quanwaiOrder, orderId);
     }
 
-    // 购买训练营小课
-    @Override
-    public void payTrainSuccess(String orderId) {
-        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-        Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
-        Assert.isTrue(QuanwaiOrder.FRAGMENT_TRAIN_CAMP.equals(quanwaiOrder.getGoodsType()));
-        // 商品是训练营小课
-        signupService.trainCampEntry(quanwaiOrder.getOrderId());
-        accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.TRAIN_CAMP);
-        // TODO 发送消息通知
-        messageService.sendMessage("","", MessageService.SYSTEM_MESSAGE, "");
-        doSomethingAfterPay(quanwaiOrder, orderId);
-    }
-
-
-
-    private void doSomethingAfterPay(QuanwaiOrder quanwaiOrder, String orderId) {
+    private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
         // 刷新会员状态
         try {
             freshLoginUserPublisher.publish(quanwaiOrder.getOpenid());
@@ -425,8 +405,8 @@ public class PayServiceImpl implements PayService {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_COURSE_PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.FRAGMENT_TRAIN_CAMP.equals(quanwaiOrder.getGoodsType())) {
-            notify_url = ConfigUtils.adapterDomainName() + RISE_TRAIN_PAY_CALLBACK_PATH;
+        } else if (QuanwaiOrder.FRAGMENT_MONTHLY_CAMP.equals(quanwaiOrder.getGoodsType())) {
+            notify_url = ConfigUtils.adapterDomainName() + RISE_CAMP_PAY_CALLBACK_PATH;
         }
 
         Assert.notNull(notify_url, "回调地址不能为空");
