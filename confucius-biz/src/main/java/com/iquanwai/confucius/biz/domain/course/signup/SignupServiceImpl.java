@@ -487,7 +487,7 @@ public class SignupServiceImpl implements SignupService {
         coupon.setExpiredDate(DateUtils.afterYears(new Date(), 1));
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("会员抵用券");
-        couponDao.insertGroupCategory(coupon);
+        couponDao.insert(coupon);
 
         // 更新订单状态
         monthlyCampOrderDao.entry(orderId);
@@ -926,9 +926,10 @@ public class SignupServiceImpl implements SignupService {
         // 更新优惠券使用状态
         if (quanwaiOrder.getDiscount() != 0.0) {
             logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
-            costRepo.updateCoupon(Coupon.USED, orderId);
         }
-        // 发送mq消息
+        // 不管是否使用优惠券，此时都刷新优惠券信息
+        costRepo.updateCoupon(Coupon.USED, orderId);
+        // 发送支付成功 mq 消息
         try {
             logger.info("发送支付成功message:{}", quanwaiOrder);
             paySuccessPublisher.publish(quanwaiOrder);
@@ -1027,7 +1028,7 @@ public class SignupServiceImpl implements SignupService {
         for (int i = 1; i < 13; i++) {
             Coupon tempCoupon = coupon;
             tempCoupon.setDescription(i + "月线下工作坊券");
-            couponDao.insertGroupCategory(tempCoupon);
+            couponDao.insert(tempCoupon);
         }
     }
 }

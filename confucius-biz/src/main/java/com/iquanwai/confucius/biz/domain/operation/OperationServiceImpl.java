@@ -52,7 +52,7 @@ public class OperationServiceImpl implements OperationService {
         coupon.setExpiredDate(DateUtils.beforeDays(new Date(), 1));
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("精英奖学金");
-        couponDao.insertGroupCategory(coupon);
+        couponDao.insert(coupon);
         return discount;
     }
 
