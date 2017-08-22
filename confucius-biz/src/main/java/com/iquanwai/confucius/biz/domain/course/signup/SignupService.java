@@ -37,14 +37,11 @@ public interface SignupService {
      */
     Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId);
 
-    Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberType);
-
-    Pair<Integer, String> monthlyCampSignupCheck(Integer profileId);
+    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
 
     /**
      * 检查是否在报名中
      * @param profileId 用户id
-     * @param memberTypeId  会员类型
      */
     Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId);
 

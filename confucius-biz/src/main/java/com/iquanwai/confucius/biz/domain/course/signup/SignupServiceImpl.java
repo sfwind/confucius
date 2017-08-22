@@ -175,17 +175,17 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberType) {
+    public Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType) {
         Profile profile = accountService.getProfile(profileId);
         Assert.notNull(profile, "用户不能为空");
-        Boolean left = false;
+        Integer left = -1;
         String right = "正常";
         if (memberType == RiseMember.ELITE) {
             // 购买会员
             if (profile.getRiseMember() == 1) {
                 right = "您已经是 RISE 会员";
             } else {
-                left = true;
+                left = 1;
             }
         } else if (memberType == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
@@ -194,22 +194,10 @@ public class SignupServiceImpl implements SignupService {
             } else if (profile.getRiseMember() == 3) {
                 right = "您已经是小课训练营用户";
             } else {
-                left = true;
+                left = 1;
             }
         }
         return new MutablePair<>(left, right);
-    }
-
-    @Override
-    public Pair<Integer, String> monthlyCampSignupCheck(Integer profileId) {
-        Profile profile = accountService.getProfile(profileId);
-        if (profile.getRiseMember() == 1) {
-            return new MutablePair<>(-1, "您已经是RISE会员，无需单独购买训练营小课");
-        } else if (profile.getRiseMember() == 3) {
-            return new MutablePair<>(-1, "您已经是训练营小课会员");
-        } else {
-            return new MutablePair<>(1, "");
-        }
     }
 
     @Override
