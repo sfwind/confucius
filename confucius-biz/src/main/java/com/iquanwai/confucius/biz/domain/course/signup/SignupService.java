@@ -2,10 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
@@ -110,6 +107,8 @@ public interface SignupService {
      * 6、发送购买成功信息，开课信息（可以合并）
      */
     void payMonthlyCampSuccess(String orderId);
+
+    MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
     void riseMemberEntry(String orderId);
 
