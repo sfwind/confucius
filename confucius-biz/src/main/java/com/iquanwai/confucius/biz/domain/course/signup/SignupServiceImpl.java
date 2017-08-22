@@ -469,7 +469,7 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setOpenId(campOrder.getOpenId());
         riseMember.setOrderId(campOrder.getOrderId());
         riseMember.setProfileId(campOrder.getProfileId());
-        riseMember.setMemberTypeId(campOrder.getId());
+        riseMember.setMemberTypeId(RiseMember.MONTHLY_CAMP);
         riseMember.setExpireDate(DateUtils.afterDays(new Date(), 30));
         riseMemberDao.insert(riseMember);
 
