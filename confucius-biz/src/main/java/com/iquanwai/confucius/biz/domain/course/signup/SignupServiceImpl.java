@@ -457,7 +457,6 @@ public class SignupServiceImpl implements SignupService {
         String memberId = generateMemberId();
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassId(DateUtils.getYear(new Date()).toString());
-        classMember.setGroupId("01");
         classMember.setProfileId(profileId);
         classMember.setMemberId(memberId);
         classMember.setActive(1);
@@ -504,12 +503,8 @@ public class SignupServiceImpl implements SignupService {
     private String generateMemberId() {
         StringBuilder targetMemberId = new StringBuilder();
 
-        String year = Integer.toString(DateUtils.getYear(new Date()));
-        String month = Integer.toString(DateUtils.getMonth(new Date()));
-        month = month.length() == 1 ? "0" + month : month;
-
-        String key = "customer:trainCamp:" + year + ":" + month;
-        String prefix = year + month;
+        String prefix = ConfigUtils.getMonthlyCampClassId();
+        String key = "customer:trainCamp:" + prefix;
         redisUtil.lock("lock:memberId", (lock) -> {
             // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
             String memberId = redisUtil.get(key);
