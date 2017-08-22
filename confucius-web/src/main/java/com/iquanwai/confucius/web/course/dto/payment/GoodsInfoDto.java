@@ -42,7 +42,7 @@ public class GoodsInfoDto {
     /**
      * 训练营小课
      */
-    public static final String FRAG_CAMP = "fragment_monthly_camp";
+    public static final String FRAG_CAMP = "fragment_camp";
 
     static {
         // 初始化商品列表，下面的常量也需要定义
