@@ -1029,7 +1029,7 @@ public class SignupServiceImpl implements SignupService {
         for (int i = 1; i < 13; i++) {
             Coupon tempCoupon = coupon;
             tempCoupon.setDescription(i + "月线下工作坊券");
-            couponDao.insert(tempCoupon);
+            couponDao.insertGroupCategory(tempCoupon);
         }
     }
 }
