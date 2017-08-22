@@ -711,25 +711,6 @@ public class SignupController {
     }
 
     /**
-     * 购买预校验
-     */
-    @RequestMapping(value = "/rise/member/check/{memberTypeId}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser, @PathVariable Integer memberTypeId) {
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("报名页面")
-                .action("点击RISE会员选择按钮")
-                .memo(memberTypeId + "");
-        operationLogService.log(operationLog);
-        Pair<Boolean, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
-        if (result.getLeft()) {
-            return WebUtils.success();
-        } else {
-            return WebUtils.error(result.getRight());
-        }
-    }
-
-    /**
      * 创建订单
      * @param paymentDto 支付信息
      * @param profileId 用户id
@@ -767,6 +748,10 @@ public class SignupController {
             case GoodsInfoDto.FRAG_MEMBER: {
                 // 购买会员
                 return signupService.riseCourseSignupCheck(profileId, paymentDto.getGoodsId());
+            }
+            case GoodsInfoDto.FRAG_CAMP: {
+                // 购买训练营小课
+                return signupService.risePurchaseCheck(profileId, paymentDto.getGoodsId());
             }
             default:
                 LOGGER.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
