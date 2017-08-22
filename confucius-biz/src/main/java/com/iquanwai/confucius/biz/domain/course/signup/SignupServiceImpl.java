@@ -456,7 +456,7 @@ public class SignupServiceImpl implements SignupService {
         // RiseMember 新增记录
         String memberId = generateMemberId();
         RiseClassMember classMember = new RiseClassMember();
-        classMember.setClassId(DateUtils.getYear(new Date()).toString());
+        classMember.setClassId(ConfigUtils.getMonthlyCampClassId());
         classMember.setProfileId(profileId);
         classMember.setMemberId(memberId);
         classMember.setActive(1);
@@ -482,7 +482,7 @@ public class SignupServiceImpl implements SignupService {
         coupon.setExpiredDate(DateUtils.afterYears(new Date(), 1));
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("会员券");
-        couponDao.insert(coupon);
+        couponDao.insertGroupCategory(coupon);
 
         // 发送 mq 消息，通知 platon 强行开启小课
         try {
