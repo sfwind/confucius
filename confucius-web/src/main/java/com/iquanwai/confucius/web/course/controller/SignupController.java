@@ -635,7 +635,7 @@ public class SignupController {
             if (activity != null) {
                 goodsInfoDto.setActivity(activity);
             }
-        } else {
+        } else if(GoodsInfoDto.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
             goodsInfoDto.setName("会员购买");
             // 会员购买
             MemberType memberType = signupService
