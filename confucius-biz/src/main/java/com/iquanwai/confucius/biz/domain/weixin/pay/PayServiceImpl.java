@@ -68,7 +68,7 @@ public class PayServiceImpl implements PayService {
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
     private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
-    private static final String RISE_CAMP_PAY_CALLBACK_PATH = "/wx/pay/result/risetrain/callback";
+    private static final String RISE_CAMP_PAY_CALLBACK_PATH = "/wx/pay/result/risecamp/callback";
 
 
     @PostConstruct
