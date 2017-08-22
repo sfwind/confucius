@@ -20,12 +20,13 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         String sql = "INSERT INTO RiseClassMember (ClassId, GroupId, MemberId, ProfileId, Active) " +
                 "VALUES (?, ?, ?, ?, ?)";
         try {
-            return runner.insert(sql, new ScalarHandler<>(),
+            Long result = runner.insert(sql, new ScalarHandler<>(),
                     riseClassMember.getClassId(),
                     riseClassMember.getGroupId(),
                     riseClassMember.getMemberId(),
                     riseClassMember.getProfileId(),
                     riseClassMember.getActive());
+            return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
