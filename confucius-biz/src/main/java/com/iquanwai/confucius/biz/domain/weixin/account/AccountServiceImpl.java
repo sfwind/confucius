@@ -312,12 +312,6 @@ public class AccountServiceImpl implements AccountService {
                 return;
             case Constants.RISE_MEMBER.COURSE_USER:
                 // 如果当前人是小课购买状态，后面可以更改成会员或者训练营小课状态
-                if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP || riseMember == Constants.RISE_MEMBER.TRAIN_CAMP) {
-                    profileDao.updateRiseMember(openid, riseMember);
-                }
-                return;
-            case Constants.RISE_MEMBER.TRAIN_CAMP:
-                // 如果当前购买者是训练营小课状态，则可以主动购买成会员状态
                 if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
                     profileDao.updateRiseMember(openid, riseMember);
                 }
