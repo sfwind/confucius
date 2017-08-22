@@ -17,10 +17,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
@@ -64,7 +61,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/signup")
 public class SignupController {
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SignupService signupService;
     @Autowired
@@ -98,7 +95,7 @@ public class SignupController {
             Assert.notNull(loginUser, "用户不能为空");
             String remoteIp = request.getHeader("X-Forwarded-For");
             if (remoteIp == null) {
-                LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), courseId);
+                logger.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), courseId);
                 remoteIp = ConfigUtils.getExternalIP();
             }
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -171,7 +168,7 @@ public class SignupController {
                 operationLogService.log(payParamLog);
             }
         } catch (Exception e) {
-            LOGGER.error("报名失败", e);
+            logger.error("报名失败", e);
             //异常关闭订单
             if (StringUtils.isNotEmpty(productId)) {
                 signupService.giveupSignup(productId);
@@ -192,7 +189,7 @@ public class SignupController {
         Assert.notNull(loginUser, "用户不能为空");
         CourseOrder courseOrder = signupService.getOrder(orderId);
         if (courseOrder == null) {
-            LOGGER.error("{} 订单不存在", orderId);
+            logger.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -210,7 +207,7 @@ public class SignupController {
         } else {
             // 非免费，查询是否报名成功
             if (!courseOrder.getEntry()) {
-                LOGGER.error("订单:{},未支付", courseOrder.getOrderId());
+                logger.error("订单:{},未支付", courseOrder.getOrderId());
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
             }
         }
@@ -227,23 +224,37 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
         QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
-        Boolean entry;
+        Boolean entry = false;
         Integer problemId = null;
         Integer planId = null;
         if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_MEMBER)) {
             // 会员购买
             RiseOrder riseOrder = signupService.getRiseOrder(orderId);
             if (riseOrder == null) {
-                LOGGER.error("{} 订单不存在", orderId);
+                logger.error("{} 订单不存在", orderId);
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
             } else {
                 entry = riseOrder.getEntry();
+            }
+        } else if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_CAMP)) {
+            MonthlyCampOrder order = signupService.getMonthlyCampOrder(orderId);
+            if(order == null) {
+                logger.error("{} 订单不存在", orderId);
+                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+            } else {
+                if(order.getEntry() == 0) {
+                    logger.error("{} 前端回调已到达，后端回调未完成", orderId);
+                    return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+                } else if(order.getEntry() == 1) {
+                    // 后端回调成功处理完相关业务逻辑
+                    return WebUtils.success();
+                }
             }
         } else {
             // 其他为小课购买
             RiseCourseOrder riseCourseOrder = signupService.getRiseCourse(orderId);
             if (riseCourseOrder == null) {
-                LOGGER.error("{} 订单不存在", orderId);
+                logger.error("{} 订单不存在", orderId);
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
             } else {
                 entry = riseCourseOrder.getEntry();
@@ -265,7 +276,7 @@ public class SignupController {
             } else {
                 // 非免费，查询是否报名成功
                 if (!entry) {
-                    LOGGER.error("订单:{},未支付", orderId);
+                    logger.error("订单:{},未支付", orderId);
                     messageService.sendAlarm("报名模块出错", "订单未支付",
                             "高", "订单id:" + orderId, "订单未支付，却进行了支付完成操作");
                     return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
@@ -278,7 +289,7 @@ public class SignupController {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("报名出错", e);
+            logger.error("报名出错", e);
             messageService.sendAlarm("报名模块出错", "运行时异常",
                     "高", "订单id:" + orderId, e.getLocalizedMessage());
         }
@@ -300,7 +311,7 @@ public class SignupController {
         try {
             BeanUtils.copyProperties(infoSubmitDto, account);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            LOGGER.error("beanUtils copy props error", e);
+            logger.error("beanUtils copy props error", e);
             return WebUtils.error("加载个人信息失败");
         }
         return WebUtils.result(infoSubmitDto);
@@ -320,7 +331,7 @@ public class SignupController {
         try {
             BeanUtils.copyProperties(account, infoSubmitDto);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            LOGGER.error("beanUtils copy props error", e);
+            logger.error("beanUtils copy props error", e);
             return WebUtils.error("提交个人信息失败");
         }
         account.setOpenid(loginUser.getOpenId());
@@ -345,16 +356,16 @@ public class SignupController {
         operationLogService.log(operationLog);
         CourseOrder courseOrder = signupService.getOrder(orderId);
         if (courseOrder == null) {
-            LOGGER.error("{} 订单不存在", orderId);
+            logger.error("{} 订单不存在", orderId);
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
         if (courseOrder.getEntry()) {
-            LOGGER.error("订单{}未支付", courseOrder.getOrderId());
+            logger.error("订单{}未支付", courseOrder.getOrderId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.nopaid"));
         }
         ClassMember classMember = signupService.classMember(orderId);
         if (classMember == null || classMember.getMemberId() == null) {
-            LOGGER.error("{} 尚未报班", loginUser.getOpenId());
+            logger.error("{} 尚未报班", loginUser.getOpenId());
             return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
         entryDto.setMemberId(classMember.getMemberId());
@@ -443,7 +454,7 @@ public class SignupController {
         // 检查ip
         String remoteIp = request.getHeader("X-Forwarded-For");
         if (remoteIp == null) {
-            LOGGER.error("获取用户:{} 获取IP失败:ProblemId:{}", loginUser.getOpenId(), riseCourseDto);
+            logger.error("获取用户:{} 获取IP失败:ProblemId:{}", loginUser.getOpenId(), riseCourseDto);
             remoteIp = ConfigUtils.getExternalIP();
         }
         // 检查是否需要支付
@@ -499,7 +510,7 @@ public class SignupController {
         // 检查ip
         String remoteIp = request.getHeader("X-Forwarded-For");
         if (remoteIp == null) {
-            LOGGER.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), memberDto);
+            logger.error("获取用户:{} 获取IP失败:CourseId:{}", loginUser.getOpenId(), memberDto);
             messageService.sendAlarm("报名模块出错", "获取用户:" + loginUser.getId() + " IP失败",
                     "高", "会员类型:" + memberDto.getMemberType(), "IP获取失败");
             remoteIp = ConfigUtils.getExternalIP();
@@ -601,7 +612,7 @@ public class SignupController {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(goodsInfoDto, "商品信息不能为空");
         if (!GoodsInfoDto.GOODS_TYPES.contains(goodsInfoDto.getGoodsType())) {
-            LOGGER.error("获取商品信息的商品类型异常,{}", goodsInfoDto);
+            logger.error("获取商品信息的商品类型异常,{}", goodsInfoDto);
             return WebUtils.error("商品类型异常");
         }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -620,9 +631,9 @@ public class SignupController {
                 goodsInfoDto.setActivity(activity);
             }
         } else if(GoodsInfoDto.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            if(GoodsInfoDto.FRAG_COURSE.equals(goodsInfoDto.getGoodsType())) {
+            if (GoodsInfoDto.FRAG_COURSE.equals(goodsInfoDto.getGoodsType())) {
                 goodsInfoDto.setName("会员购买");
-            } else if(GoodsInfoDto.FRAG_CAMP.equals(goodsInfoDto.getGoodsType())) {
+            } else if (GoodsInfoDto.FRAG_CAMP.equals(goodsInfoDto.getGoodsType())) {
                 goodsInfoDto.setName("训练营小课购买");
             }
             // 会员购买
@@ -633,7 +644,7 @@ public class SignupController {
                     .findFirst()
                     .orElse(null);
             if (memberType == null) {
-                LOGGER.error("会员类型异常{}", goodsInfoDto);
+                logger.error("会员类型异常{}", goodsInfoDto);
                 return WebUtils.error("会员类型异常");
             } else {
                 goodsInfoDto.setFee(memberType.getFee());
@@ -660,7 +671,7 @@ public class SignupController {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(paymentDto, "支付信息不能为空");
         if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
-            LOGGER.error("获取商品信息的商品类型异常,{}", paymentDto);
+            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
             return WebUtils.error("商品类型异常");
         }
 
@@ -724,7 +735,7 @@ public class SignupController {
                 return WebUtils.result(price);
 
             default:
-                LOGGER.error("异常，用户:{}商品类型有问题:{}", loginUser.getId(), paymentDto);
+                logger.error("异常，用户:{}商品类型有问题:{}", loginUser.getId(), paymentDto);
                 return WebUtils.error("商品类型异常");
         }
     }
@@ -747,7 +758,7 @@ public class SignupController {
                 return signupService.signupMonthlyCamp(profileId, paymentDto.getCouponId());
             }
             default:
-                LOGGER.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
+                logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
                 return null;
         }
     }
@@ -773,7 +784,7 @@ public class SignupController {
                 return signupService.risePurchaseCheck(profileId, paymentDto.getGoodsId());
             }
             default:
-                LOGGER.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
+                logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
                 return new MutablePair<>(-1, "会员类型异常");
         }
     }

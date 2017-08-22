@@ -19,19 +19,23 @@ public class DateUtils {
     private static DateTimeFormatter timeFormat = DateTimeFormat.forPattern("HH:mm");
 
 
-    public static String parseDateToTimeFormat(Date date){
+    public static String parseDateToTimeFormat(Date date) {
         return timeFormat.print(new DateTime(date));
     }
-    public static String parseDateToFormat5(Date date){
+
+    public static String parseDateToFormat5(Date date) {
         return format5.print(new DateTime(date));
     }
-    public static String parseDateToFormat6(Date date){
+
+    public static String parseDateToFormat6(Date date) {
         return format6.print(new DateTime(date));
     }
+
     public static String parseDateToString(Date date) {
         return format1.print(new DateTime(date));
     }
-    public static String parseDateToStringByCommon(Date date){
+
+    public static String parseDateToStringByCommon(Date date) {
         return format4.print(new DateTime(date));
     }
 
@@ -51,10 +55,10 @@ public class DateUtils {
         long now = new Date().getTime();
         long thatTime = date.getTime();
 
-        return (int)Math.abs((now - thatTime)/1000)/60/60/24;
+        return (int) Math.abs((now - thatTime) / 1000) / 60 / 60 / 24;
     }
 
-    public static long nextDayRemainSeconds(Date tody){
+    public static long nextDayRemainSeconds(Date tody) {
         Long current = System.currentTimeMillis();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(DateUtils.afterDays(tody, 1));
@@ -63,11 +67,11 @@ public class DateUtils {
         calendar.set(Calendar.SECOND, 0);
         Date zero = calendar.getTime();
         long zeroTime = zero.getTime();
-        return (zeroTime-current)/1000;
+        return (zeroTime - current) / 1000;
     }
 
-    public static long currentTimestamp(){
-        return System.currentTimeMillis()/1000;
+    public static long currentTimestamp() {
+        return System.currentTimeMillis() / 1000;
     }
 
     public static String parseDateToString3(Date date) {
@@ -78,7 +82,7 @@ public class DateUtils {
         return format3.parseDateTime(strDate).toDate();
     }
 
-    public static Date afterMinutes(Date date, int increment){
+    public static Date afterMinutes(Date date, int increment) {
         return new DateTime(date).plusMinutes(increment).toDate();
     }
 
@@ -88,7 +92,7 @@ public class DateUtils {
      * @param increment 增长多少个月
      * @return 每月报名周期起始日期按照每月第一个周日算
      */
-    public static Date afterNatureMonths(Date date,int increment) {
+    public static Date afterNatureMonths(Date date, int increment) {
         // 获取dateTime
         DateTime dateTime = new DateTime(date.getTime());
         // 月内第几天
@@ -107,23 +111,23 @@ public class DateUtils {
         }
     }
 
-    public static Date startDay(Date date){
+    public static Date startDay(Date date) {
         return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
-    public static Date afterYears(Date date, int increment){
+    public static Date afterYears(Date date, int increment) {
         return new DateTime(date).plusYears(increment).toDate();
     }
 
-    public static Date afterMonths(Date date,int increment){
+    public static Date afterMonths(Date date, int increment) {
         return new DateTime(date).plusMonths(increment).toDate();
     }
 
-    public static Date afterDays(Date date, int increment){
+    public static Date afterDays(Date date, int increment) {
         return new DateTime(date).plusDays(increment).toDate();
     }
 
-    public static Date beforeDays(Date date, int increment){
+    public static Date beforeDays(Date date, int increment) {
         return new DateTime(date).minusDays(increment).toDate();
     }
 
@@ -158,6 +162,11 @@ public class DateUtils {
 
     public static Integer getMonth(Date date) {
         return new DateTime(date).getMonthOfYear();
+    }
+
+    public static Date endDateOfMonth(Integer month) {
+        DateTime date = new DateTime().monthOfYear().setCopy(month).dayOfMonth().withMaximumValue();
+        return date.toDate();
     }
 
 }

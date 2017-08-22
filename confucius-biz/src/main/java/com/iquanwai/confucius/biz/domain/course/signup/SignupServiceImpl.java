@@ -128,6 +128,10 @@ public class SignupServiceImpl implements SignupService {
      * 小课训练营购买之后送的优惠券
      */
     private final static double MONTHLY_CAMP_COUPON = 100;
+    /**
+     * 购买会员赠送线下工作坊券
+     */
+    private final static double RISEMEMBER_OFFLINE_COUPON = 50;
 
     /**
      * 每个班级的当前学号
@@ -470,7 +474,8 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setOrderId(campOrder.getOrderId());
         riseMember.setProfileId(campOrder.getProfileId());
         riseMember.setMemberTypeId(RiseMember.MONTHLY_CAMP);
-        riseMember.setExpireDate(DateUtils.afterDays(new Date(), 30));
+        Date endDate = ConfigUtils.getMonthlyCampEndDate();
+        riseMember.setExpireDate(endDate);
         riseMemberDao.insert(riseMember);
 
         // 送优惠券
@@ -481,8 +486,11 @@ public class SignupServiceImpl implements SignupService {
         coupon.setUsed(0);
         coupon.setExpiredDate(DateUtils.afterYears(new Date(), 1));
         coupon.setCategory("ELITE_RISE_MEMBER");
-        coupon.setDescription("会员券");
+        coupon.setDescription("会员抵用券");
         couponDao.insertGroupCategory(coupon);
+
+        // 更新订单状态
+        monthlyCampOrderDao.entry(orderId);
 
         // 发送 mq 消息，通知 platon 强行开启小课
         try {
@@ -495,6 +503,11 @@ public class SignupServiceImpl implements SignupService {
 
         // 刷新相关状态，riseMember, coupon, 发送支付消息
         refreshStatus(quanwaiOrderDao.loadOrder(orderId), orderId);
+    }
+
+    @Override
+    public MonthlyCampOrder getMonthlyCampOrder(String orderId) {
+        return monthlyCampOrderDao.loadCampOrder(orderId);
     }
 
     /**
@@ -1000,4 +1013,19 @@ public class SignupServiceImpl implements SignupService {
         return fee;
     }
 
+    private void presentOfflineCoupons(Integer profileId) {
+        Profile profile = accountService.getProfile(profileId);
+        Coupon coupon = new Coupon();
+        coupon.setOpenid(profile.getOpenid());
+        coupon.setProfileId(profileId);
+        coupon.setAmount(RISEMEMBER_OFFLINE_COUPON);
+        coupon.setUsed(0);
+        coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 13));
+
+        for (int i = 1; i < 13; i++) {
+            Coupon tempCoupon = coupon;
+            tempCoupon.setDescription(i + "月线下工作坊券");
+            couponDao.insert(tempCoupon);
+        }
+    }
 }

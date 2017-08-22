@@ -425,4 +425,8 @@ public class ConfigUtils {
         return getValue("monthly.camp.classId");
     }
 
+    public static Date getMonthlyCampEndDate() {
+        return DateUtils.parseStringToDate(getValue("monthly.camp.end.date"));
+    }
+
 }
