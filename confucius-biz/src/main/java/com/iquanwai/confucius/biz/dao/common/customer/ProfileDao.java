@@ -165,11 +165,11 @@ public class ProfileDao extends DBUtil {
         }
     }
 
-    public void becomeTrainCampMember(Integer profileId, String memberId) {
+    public void becomeMonthlyCampMember(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET RiseMember = 4, MemberId = ? WHERE Id = ?";
+        String sql = "UPDATE Profile SET RiseMember = 3 WHERE Id = ?";
         try {
-            runner.update(sql, memberId, profileId);
+            runner.update(sql, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

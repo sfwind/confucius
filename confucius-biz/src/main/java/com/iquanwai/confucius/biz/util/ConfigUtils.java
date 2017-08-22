@@ -399,4 +399,19 @@ public class ConfigUtils {
 	public static Integer getVoteScore(){
 		return getIntValue("vote.score");
 	}
+
+	/**
+	 * 获取每月训练营小课对应生效月份
+	 */
+	public static Integer getMonthlyCampMonth() {
+		return getIntValue("monthly.camp.month");
+	}
+
+	/**
+	 * 获取每月训练营小课对应的金额
+	 */
+	public static Double getMonthlyCampFee() {
+		return  getDoubleValue("monthly.camp.fee");
+	}
+
 }
