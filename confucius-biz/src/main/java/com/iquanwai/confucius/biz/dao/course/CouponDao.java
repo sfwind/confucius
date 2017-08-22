@@ -105,19 +105,6 @@ public class CouponDao extends DBUtil {
     }
 
     public void insert(Coupon coupon) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO Coupon(Openid, ProfileId, Amount, Used, ExpiredDate) " +
-                "VALUES(?, ?, ?, ?, ?)";
-        try {
-            run.insert(insertSql, new ScalarHandler<>(),
-                    coupon.getOpenid(), coupon.getProfileId(),
-                    coupon.getAmount(), coupon.getUsed(), coupon.getExpiredDate());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public void insertGroupCategory(Coupon coupon) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String insertSql = "insert into Coupon (OpenId, ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
                 "values (?, ?, ?, ?, ?, ?, ?)";
