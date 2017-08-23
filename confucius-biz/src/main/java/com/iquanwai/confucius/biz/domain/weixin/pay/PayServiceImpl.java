@@ -197,6 +197,9 @@ public class PayServiceImpl implements PayService {
             // 单独购买小课
             signupService.riseCourseEntry(quanwaiOrder.getOrderId());
             accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
+        } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
+            // 购买单月训练营
+            signupService.payMonthlyCampSuccess(orderId);
         }
         refreshStatus(quanwaiOrder, orderId);
     }

@@ -895,6 +895,8 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public Double calculateCampCoupon(Integer profileId, Integer couponId) {
+        logger.info("用户 id: {}", profileId);
+        logger.info("优惠券 id: {}", couponId);
         List<Coupon> coupons = couponDao.loadCoupons(profileId);
         Coupon usingCoupon = coupons.stream().map(coupon -> {
             if(coupon.getId() == couponId) {
@@ -908,8 +910,7 @@ public class SignupServiceImpl implements SignupService {
         if(fee >= usingCoupon.getAmount()) {
             return CommonUtils.substract(fee, usingCoupon.getAmount());
         } else {
-            // 最少不能低于一分钱
-            return 0.01D;
+            return 0D;
         }
     }
 

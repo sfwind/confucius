@@ -237,18 +237,13 @@ public class SignupController {
                 entry = riseOrder.getEntry();
             }
         } else if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_CAMP)) {
-            MonthlyCampOrder order = signupService.getMonthlyCampOrder(orderId);
-            if(order == null) {
+            // 单月训练营购买
+            MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
+            if(campOrder == null) {
                 logger.error("{} 订单不存在", orderId);
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
             } else {
-                if(order.getEntry() == 0) {
-                    logger.error("{} 前端回调已到达，后端回调未完成", orderId);
-                    return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
-                } else if(order.getEntry() == 1) {
-                    // 后端回调成功处理完相关业务逻辑
-                    return WebUtils.success();
-                }
+                entry = campOrder.getEntry();
             }
         } else {
             // 其他为小课购买
@@ -463,7 +458,7 @@ public class SignupController {
             return WebUtils.error(check.getRight());
         }
         // 检查优惠券
-        if (!costRepo.checkDiscount(loginUser.getId(), riseCourseDto.getCouponId())) {
+        if (!costRepo.checkCouponValidation(loginUser.getId(), riseCourseDto.getCouponId())) {
             return WebUtils.error("该优惠券无效");
         }
 
@@ -521,7 +516,7 @@ public class SignupController {
             return WebUtils.error(check.getRight());
         }
         // 检查优惠券
-        if (!costRepo.checkDiscount(loginUser.getId(), memberDto.getCouponId())) {
+        if (!costRepo.checkCouponValidation(loginUser.getId(), memberDto.getCouponId())) {
             return WebUtils.error("该优惠券无效");
         }
 
@@ -693,7 +688,7 @@ public class SignupController {
         }
 
         // 检查优惠券
-        if (!costRepo.checkDiscount(loginUser.getId(), paymentDto.getCouponId())) {
+        if (!costRepo.checkCouponValidation(loginUser.getId(), paymentDto.getCouponId())) {
             return WebUtils.error("该优惠券无效");
         }
 
