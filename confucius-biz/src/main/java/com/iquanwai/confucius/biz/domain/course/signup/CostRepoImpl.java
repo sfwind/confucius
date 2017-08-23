@@ -23,7 +23,7 @@ public class CostRepoImpl implements CostRepo {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public double discount(Double price, Integer profileId, String orderId) {
-        List<Coupon> coupons = couponDao.getCoupon(profileId);
+        List<Coupon> coupons = couponDao.loadCoupons(profileId);
         Double remain = price;
         for (Coupon coupon : coupons) {
             Double amount = coupon.getAmount();
@@ -83,7 +83,7 @@ public class CostRepoImpl implements CostRepo {
 
     @Override
     public List<Coupon> getCoupons(Integer profileId) {
-        return couponDao.getCoupon(profileId);
+        return couponDao.loadCoupons(profileId);
     }
 
     @Override

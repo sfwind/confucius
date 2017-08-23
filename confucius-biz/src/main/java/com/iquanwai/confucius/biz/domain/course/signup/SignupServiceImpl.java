@@ -891,6 +891,26 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public Double calculateCampCoupon(Integer profileId, Integer couponId) {
+        List<Coupon> coupons = couponDao.loadCoupons(profileId);
+        Coupon usingCoupon = coupons.stream().map(coupon -> {
+            if(coupon.getId() == couponId) {
+                return coupon;
+            } else {
+                return null;
+            }
+        }).findAny().get();
+        Assert.notNull(usingCoupon, "正在使用的优惠券不能为空");
+        Double fee = ConfigUtils.getMonthlyCampFee();
+        if(fee >= usingCoupon.getAmount()) {
+            return CommonUtils.substract(fee, usingCoupon.getAmount());
+        } else {
+            // 最少不能低于一分钱
+            return 0.01D;
+        }
+    }
+
+    @Override
     public RiseMember currentRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
         if (riseMember != null) {

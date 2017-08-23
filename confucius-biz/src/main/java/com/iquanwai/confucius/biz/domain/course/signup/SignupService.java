@@ -185,5 +185,7 @@ public interface SignupService {
      */
     Double calculateCourseCoupon(Integer problemId,Integer profileId, Integer couponId);
 
+    Double calculateCampCoupon(Integer profileId, Integer couponId);
+
     RiseMember currentRiseMember(Integer profileId);
 }
