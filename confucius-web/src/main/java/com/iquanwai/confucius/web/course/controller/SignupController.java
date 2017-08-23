@@ -731,7 +731,9 @@ public class SignupController {
                 }
                 price = signupService.calculateCoupon(paymentDto.getGoodsId(), paymentDto.getCouponId());
                 return WebUtils.result(price);
-
+            case GoodsInfoDto.FRAG_CAMP:
+                price = signupService.calculateCampCoupon(loginUser.getId(), paymentDto.getCouponId());
+                return WebUtils.result(price);
             default:
                 logger.error("异常，用户:{}商品类型有问题:{}", loginUser.getId(), paymentDto);
                 return WebUtils.error("商品类型异常");

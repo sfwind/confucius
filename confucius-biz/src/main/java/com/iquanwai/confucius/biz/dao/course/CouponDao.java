@@ -24,7 +24,7 @@ import java.util.List;
 public class CouponDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<Coupon> getCoupon(Integer profileId) {
+    public List<Coupon> loadCoupons(Integer profileId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
 
