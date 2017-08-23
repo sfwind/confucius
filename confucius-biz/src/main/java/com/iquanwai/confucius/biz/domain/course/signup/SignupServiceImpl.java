@@ -899,18 +899,11 @@ public class SignupServiceImpl implements SignupService {
     public Double calculateCampCoupon(Integer profileId, Integer couponId) {
         logger.info("用户 id: {}", profileId);
         logger.info("优惠券 id: {}", couponId);
-        List<Coupon> coupons = couponDao.loadCoupons(profileId);
-        Coupon usingCoupon = coupons.stream().map(coupon -> {
-            if (coupon.getId() == couponId) {
-                return coupon;
-            } else {
-                return null;
-            }
-        }).findAny().get();
-        Assert.notNull(usingCoupon, "正在使用的优惠券不能为空");
+        Coupon coupon = couponDao.load(Coupon.class, couponId);
+        Assert.isTrue(profileId.equals(coupon.getProfileId()), "当前尚未拥有此优惠券");
         Double fee = ConfigUtils.getMonthlyCampFee();
-        if (fee >= usingCoupon.getAmount()) {
-            return CommonUtils.substract(fee, usingCoupon.getAmount());
+        if (fee >= coupon.getAmount()) {
+            return CommonUtils.substract(fee, coupon.getAmount());
         } else {
             return 0D;
         }
