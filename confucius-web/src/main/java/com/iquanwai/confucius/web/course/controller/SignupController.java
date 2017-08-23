@@ -686,7 +686,8 @@ public class SignupController {
         }
 
         // 检查是否能够支付
-        Pair<Integer, String> check = this.signupCheck(paymentDto, loginUser.getId());
+        Pair<Integer, String> check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
+
         if (check.getLeft() != 1) {
             return WebUtils.error(check.getRight());
         }
@@ -768,11 +769,11 @@ public class SignupController {
      */
     private Pair<Integer, String> signupCheck(PaymentDto paymentDto, Integer profileId) {
         switch (paymentDto.getGoodsType()) {
-            case GoodsInfoDto.FRAG_COURSE: {
+            case GoodsInfoDto.FRAG_MEMBER:  {
                 // 购买小课
                 return signupService.riseMemberSignupCheck(profileId, paymentDto.getGoodsId());
             }
-            case GoodsInfoDto.FRAG_MEMBER: {
+            case GoodsInfoDto.FRAG_COURSE: {
                 // 购买会员
                 return signupService.riseCourseSignupCheck(profileId, paymentDto.getGoodsId());
             }
