@@ -10,7 +10,7 @@ public class MonthlyCampOrder {
     private String openId;  // 用户 openId
     private Integer profileId; // 用户 id
     private Integer month; // 月份
-    private Integer entry; // 是否已经报名
+    private Boolean entry; // 是否已经报名
     private Integer isDel; // 是否已经过期
 
 }

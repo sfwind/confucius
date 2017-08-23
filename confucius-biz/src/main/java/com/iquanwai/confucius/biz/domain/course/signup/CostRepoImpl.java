@@ -59,16 +59,13 @@ public class CostRepoImpl implements CostRepo {
     }
 
     @Override
-    public boolean checkDiscount(Integer profileId, Integer couponId) {
-        if (couponId != null) {
-            // 计算优惠
-            Coupon coupon = this.getCoupon(couponId);
-            if (coupon == null || coupon.getUsed() == Coupon.USED || coupon.getExpiredDate().before(new Date())) {
-                // 优惠券无效
-                return false;
-            }
+    public boolean checkCouponValidation(Integer profileId, Integer couponId) {
+        if(couponId != null) {
+            Coupon coupon = couponDao.load(Coupon.class, couponId);
+            return coupon.getProfileId().equals(profileId);
+        } else {
+            return true;
         }
-        return true;
     }
 
     public boolean hasCoupon(Integer profileId) {
