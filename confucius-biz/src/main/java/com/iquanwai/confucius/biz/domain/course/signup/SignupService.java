@@ -18,9 +18,8 @@ import java.util.Map;
 public interface SignupService {
     /**
      * 计算课程是否有剩余名额
-     *
      * @param profileId 用户id
-     * @param courseId  课程id
+     * @param courseId 课程id
      * @return {-1,0} 已报满，
      * {-2,0} 没有设置课程，
      * {1,*} 预报名成功,返回班级id
@@ -44,7 +43,6 @@ public interface SignupService {
 
     /**
      * 课程报名，生成预付订单
-     *
      * @return 订单
      */
     QuanwaiOrder signupCourse(String openid, Integer profileId, Integer courseId, Integer classId);
@@ -54,11 +52,11 @@ public interface SignupService {
     /**
      * 报名rise, 不生成预付订单
      */
-    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberType, Integer couponId);
+    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId);
 
     QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId);
 
-    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer couponId);
+    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
      * 获取学员详情
@@ -67,7 +65,6 @@ public interface SignupService {
 
     /**
      * 生成付款二维码
-     *
      * @return 报名二维码
      */
     String payQRCode(String productId);
@@ -89,7 +86,6 @@ public interface SignupService {
 
     /**
      * 付款成功后入学
-     *
      * @param orderId 订单id
      * @return 返回学号
      */
@@ -137,14 +133,12 @@ public interface SignupService {
 
     /**
      * 获得圈外订单
-     *
      * @param orderId 订单id
      */
     QuanwaiOrder getQuanwaiOrder(String orderId);
 
     /**
      * 获得rise订单
-     *
      * @param orderId 订单id
      */
     RiseOrder getRiseOrder(String orderId);
@@ -153,7 +147,6 @@ public interface SignupService {
 
     /**
      * 获取会员类型
-     *
      * @param memberType 会员类型Id
      * @return 会员类型
      */
@@ -171,9 +164,8 @@ public interface SignupService {
 
     /**
      * 计算优惠券
-     *
      * @param memberTypeId 会员id
-     * @param couponId     优惠券id
+     * @param couponId 优惠券id
      * @return 打的折扣是多少
      */
     Double calculateCoupon(Integer memberTypeId, Integer couponId);
@@ -183,7 +175,7 @@ public interface SignupService {
      * @param problemId 小课id
      * @param couponId 优惠券id
      */
-    Double calculateCourseCoupon(Integer problemId,Integer profileId, Integer couponId);
+    Double calculateCourseCoupon(Integer problemId, Integer profileId, Integer couponId);
 
     Double calculateCampCoupon(Integer profileId, Integer couponId);
 
