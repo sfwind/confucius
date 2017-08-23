@@ -179,19 +179,19 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType) {
+    public Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
         Profile profile = accountService.getProfile(profileId);
         Assert.notNull(profile, "用户不能为空");
         Integer left = -1;
         String right = "正常";
-        if (memberType == RiseMember.ELITE) {
+        if (memberTypeId == RiseMember.ELITE) {
             // 购买会员
             if (profile.getRiseMember() == 1) {
                 right = "您已经是 RISE 会员";
             } else {
                 left = 1;
             }
-        } else if (memberType == RiseMember.MONTHLY_CAMP) {
+        } else if (memberTypeId == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
             if (profile.getRiseMember() == 1) {
                 right = "您已经是 RISE 会员";

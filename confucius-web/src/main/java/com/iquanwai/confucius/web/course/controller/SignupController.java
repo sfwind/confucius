@@ -558,13 +558,9 @@ public class SignupController {
                 .action("点击RISE会员选择按钮")
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
-        Pair<Integer, String> result = signupService.riseMemberSignupCheckNoHold(loginUser.getId(), memberTypeId);
+        Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
         if (result.getLeft() != 1) {
-            if (result.getLeft() == -4) {
-                return WebUtils.error(214, result.getRight());
-            } else {
-                return WebUtils.error(result.getRight());
-            }
+            return WebUtils.error(result.getRight());
         } else {
             return WebUtils.success();
         }
