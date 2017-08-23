@@ -304,19 +304,20 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer couponId) {
+    public QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId) {
         // 如果是购买训练营小课，配置 zk，查看当前月份
         Profile profile = profileDao.load(Profile.class, profileId);
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Assert.notNull(profile, "用户不能为空");
+        Assert.notNull(memberType, "会员类型错误");
         Double fee = ConfigUtils.getMonthlyCampFee();
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
-        int goodsId = Constants.RISE_MEMBER.MONTHLY_CAMP;
+
         QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), fee, orderPair.getRight(),
-                Integer.toString(goodsId), ConfigUtils.getMonthlyCampMonth() + "月小课训练营",
-                QuanwaiOrder.FRAG_CAMP);
+                memberTypeId + "", ConfigUtils.getMonthlyCampMonth() + "月训练营", QuanwaiOrder.FRAG_CAMP);
 
-        // 插入训练营小课报名数据
+        // 插入单月训练营报名数据
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
         monthlyCampOrder.setOrderId(orderPair.getLeft());
         monthlyCampOrder.setOpenId(profile.getOpenid());
@@ -488,7 +489,8 @@ public class SignupServiceImpl implements SignupService {
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("会员抵用券");
         couponDao.insert(coupon);
-
+        // 刷新优惠券
+        costRepo.reloadCache();
         // 更新订单状态
         monthlyCampOrderDao.entry(orderId);
 
@@ -896,7 +898,7 @@ public class SignupServiceImpl implements SignupService {
         logger.info("优惠券 id: {}", couponId);
         List<Coupon> coupons = couponDao.loadCoupons(profileId);
         Coupon usingCoupon = coupons.stream().map(coupon -> {
-            if(coupon.getId() == couponId) {
+            if (coupon.getId() == couponId) {
                 return coupon;
             } else {
                 return null;
@@ -904,7 +906,7 @@ public class SignupServiceImpl implements SignupService {
         }).findAny().get();
         Assert.notNull(usingCoupon, "正在使用的优惠券不能为空");
         Double fee = ConfigUtils.getMonthlyCampFee();
-        if(fee >= usingCoupon.getAmount()) {
+        if (fee >= usingCoupon.getAmount()) {
             return CommonUtils.substract(fee, usingCoupon.getAmount());
         } else {
             return 0D;
@@ -938,9 +940,8 @@ public class SignupServiceImpl implements SignupService {
         // 更新优惠券使用状态
         if (quanwaiOrder.getDiscount() != 0.0) {
             logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
+            costRepo.updateCoupon(Coupon.USED, orderId);
         }
-        // 不管是否使用优惠券，此时都刷新优惠券信息
-        costRepo.updateCoupon(Coupon.USED, orderId);
         // 发送支付成功 mq 消息
         try {
             logger.info("发送支付成功message:{}", quanwaiOrder);
@@ -1042,5 +1043,6 @@ public class SignupServiceImpl implements SignupService {
             tempCoupon.setDescription(i + "月线下工作坊券");
             couponDao.insert(tempCoupon);
         }
+        costRepo.reloadCache();
     }
 }
