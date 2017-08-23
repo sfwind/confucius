@@ -499,9 +499,8 @@ public class SignupServiceImpl implements SignupService {
             logger.error(e.getLocalizedMessage(), e);
         }
 
-        // TODO 发送成功购买消息
-
-        // 刷新相关状态，riseMember, coupon, 发送支付消息
+        sendPurchaseMessage(profile, RiseMember.MONTHLY_CAMP, orderId);
+        // 刷新相关状态
         refreshStatus(quanwaiOrderDao.loadOrder(orderId), orderId);
     }
 
@@ -591,18 +590,8 @@ public class SignupServiceImpl implements SignupService {
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         Date expireDate;
         switch (memberType.getId()) {
-            case 1: {
-                expireDate = DateUtils.afterNatureMonths(new Date(), 6);
-                profileDao.becomeRiseMember(openId);
-                break;
-            }
-            case 2: {
-                expireDate = DateUtils.afterNatureMonths(new Date(), 12);
-                profileDao.becomeRiseMember(openId);
-                break;
-            }
             case 3: {
-                //精英会员
+                //精英会员一年
                 expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseEliteMember(openId);
                 // 购买精英会员送 12 张线下工作坊券
@@ -610,7 +599,7 @@ public class SignupServiceImpl implements SignupService {
                 break;
             }
             case 4: {
-                //精英会员
+                //精英会员半年啊
                 expireDate = DateUtils.afterNatureMonths(new Date(), 6);
                 profileDao.becomeRiseEliteMember(openId);
                 break;
@@ -647,29 +636,29 @@ public class SignupServiceImpl implements SignupService {
         }
         Profile profile = profileDao.queryByOpenId(openId);
         // 发送模板消息
-        sendRiseMemberMsg(profile, memberType, riseMember);
+        sendPurchaseMessage(profile, memberType.getId(), orderId);
     }
 
-
-    private void sendRiseMemberMsg(Profile profile, MemberType memberType, RiseMember riseMember) {
+    private void sendPurchaseMessage(Profile profile, Integer memberTypeId, String orderId) {
         Assert.notNull(profile, "openid不能为空");
-
         logger.info("发送欢迎消息给付费用户{}", profile.getOpenid());
-        if (memberType.getId() == RiseMember.ELITE) {
-            //发送消息给一年精英版用户
-            customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-            messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
-            // sendEliteWelcomeMsg(profile.getOpenid(), memberType, riseMember);
-        } else if (memberType.getId() == RiseMember.HALF_ELITE) {
-            // 发送消息给半年精英版用户
-            customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.half.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-            messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.half.send.system.url"));
-            // sendHalfEliteWelcomeMsg(profile.getOpenid(),)
-        } else {
-            //发送消息给专业版用户
-            messageService.sendAlarm("报名模块出错", "报名后发送消息",
-                    "中", "订单id:" + riseMember.getOrderId() + "\nprofileId:" + profile.getId(), "会员类型异常");
-            // sendProfessionalWelcomeMsg(profile, memberType, riseMember);
+
+        switch (memberTypeId) {
+            case RiseMember.ELITE: {
+                // 发送消息给一年精英版的用户
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
+                break;
+            }
+            case RiseMember.MONTHLY_CAMP: {
+                // 发送消息给小课训练营购买用户
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
+                break;
+            }
+            default: {
+                messageService.sendAlarm("报名模块出错", "报名后发送消息", "中", "订单id:" + orderId + "\nprofileId:" + profile.getId(), "会员类型异常");
+            }
         }
     }
 

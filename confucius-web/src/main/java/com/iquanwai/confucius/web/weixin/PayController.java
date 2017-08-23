@@ -101,11 +101,6 @@ public class PayController {
         response.flushBuffer();
     }
 
-    @RequestMapping(value = "/test/risemember/{orderId}")
-    public void testMember(@PathVariable String orderId) {
-        payService.payMemberSuccess(orderId);
-    }
-
     @RequestMapping(value = "/result/risecourse/callback")
     public void riseCoursePayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
         LOGGER.info("rise小课单卖微信支付回调:{}", payCallback.toString());
@@ -140,11 +135,6 @@ public class PayController {
         response.setHeader("Content-Type", "application/xml");
         response.getWriter().print(SUCCESS_RETURN);
         response.flushBuffer();
-    }
-
-    @RequestMapping(value = "/result/risecamp/{orderId}")
-    public void testTrainPayCallBack(@PathVariable String orderId) {
-        signupService.payMonthlyCampSuccess(orderId);
     }
 
 }
