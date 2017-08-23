@@ -525,7 +525,7 @@ public class SignupServiceImpl implements SignupService {
             if (StringUtils.isEmpty(memberId)) {
                 sequence = "001";
             } else {
-                sequence = Integer.toString(Integer.parseInt(memberId) + 1);
+                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
             }
             targetMemberId.append(prefix).append(sequence);
             redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
