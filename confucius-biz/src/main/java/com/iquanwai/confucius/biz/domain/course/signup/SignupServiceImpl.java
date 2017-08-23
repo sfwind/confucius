@@ -610,6 +610,8 @@ public class SignupServiceImpl implements SignupService {
                         "高", "订单id:" + orderId, "会员类型异常");
                 return;
         }
+        // 如果存在，则将已经存在的 riseMember 数据置为已过期
+        riseMemberDao.updateExpiredAhead(riseOrder.getProfileId());
         // 添加会员表
         RiseMember riseMember = new RiseMember();
         riseMember.setOpenId(riseOrder.getOpenid());
