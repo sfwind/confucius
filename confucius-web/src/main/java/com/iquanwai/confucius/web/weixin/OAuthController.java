@@ -30,6 +30,7 @@ import java.util.Map;
 @Controller
 public class OAuthController {
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
+    public static final String ERROR_STATE_SUFFIX = "#wechat_redirect";
 
     @Autowired
     private OAuthService oAuthService;
@@ -70,9 +71,9 @@ public class OAuthController {
                 return;
             }
 
-            if (state != null && state.endsWith("#wechat_redirect")) {
+            if (state != null && state.endsWith(ERROR_STATE_SUFFIX)) {
                 LOGGER.error("state has #", state);
-                state = state.replace("#wechat_redirect", "");
+                state = state.replace(ERROR_STATE_SUFFIX, "");
             }
 
             // 返回带accessToken的url
