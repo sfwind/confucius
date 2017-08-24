@@ -399,4 +399,9 @@ public class ConfigUtils {
 	public static Integer getVoteScore(){
 		return getIntValue("vote.score");
 	}
+
+	public static Integer getEditableProblem() {
+		return getIntValue("editable.problem");
+	}
+
 }
