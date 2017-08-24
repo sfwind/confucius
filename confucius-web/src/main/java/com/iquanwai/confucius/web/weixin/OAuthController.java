@@ -70,6 +70,10 @@ public class OAuthController {
                 return;
             }
 
+            if (state != null && state.endsWith("#wechat_redirect")) {
+                state = state.replace("#wechat_redirect", "");
+            }
+
             // 返回带accessToken的url
             Callback callback = oAuthService.accessToken(code, state);
             if (callback == null) {
