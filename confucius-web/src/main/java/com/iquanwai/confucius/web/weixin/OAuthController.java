@@ -71,6 +71,7 @@ public class OAuthController {
             }
 
             if (state != null && state.endsWith("#wechat_redirect")) {
+                LOGGER.error("state has #", state);
                 state = state.replace("#wechat_redirect", "");
             }
 
