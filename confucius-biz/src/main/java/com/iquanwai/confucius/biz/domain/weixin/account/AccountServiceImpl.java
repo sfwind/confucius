@@ -304,20 +304,26 @@ public class AccountServiceImpl implements AccountService {
     public void updateRiseMember(String openid, Integer riseMember) {
         Profile profile = profileDao.queryByOpenId(openid);
         Assert.notNull(profile, "用户不能为空");
-        Integer currentRiseMember = profile.getRiseMember();
 
+        Integer currentRiseMember = profile.getRiseMember();
         switch (currentRiseMember) {
             case Constants.RISE_MEMBER.MEMBERSHIP:
                 // 如果当前人已经是会员状态，则什么状态都不需要改变
-                return;
+                break;
             case Constants.RISE_MEMBER.COURSE_USER:
                 // 如果当前人是小课购买状态，后面可以更改成会员或者训练营小课状态
                 if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
                     profileDao.updateRiseMember(openid, riseMember);
                 }
-                return;
+                break;
+            case Constants.RISE_MEMBER.MONTHLY_CAMP:
+                // 当前人是小课训练营状态，则只可以升级为会员
+                if(riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
+                    profileDao.updateRiseMember(openid, riseMember);
+                }
+                break;
             default:
-                profileDao.updateRiseMember(openid, riseMember);
+                break;
         }
     }
 
