@@ -4,19 +4,23 @@ package com.iquanwai.confucius.biz.util;
  * Created by nethunder on 2016/12/21.
  */
 public interface Constants {
+
     interface Status{
         String OK = "1";
         String FAIL = "0";
     }
+
     interface AccountError{
         Integer TIME_OUT = 100001;
     }
+
     interface PracticeType{
         int CHALLENGE = 21;
         int APPLICATION_REVIEW = 12;
         int APPLICATION = 11;
         int SUBJECT = 3;
     }
+
     interface VoteType{
         int CHALLENGE = 1;
         int APPLICATION = 2;
@@ -59,10 +63,12 @@ public interface Constants {
             int MOBILE_SHOW = 4;
         }
     }
+
     interface Device{
         int PC = 1;
         int MOBILE = 2;
     }
+
     interface LabelArticleModule{
         int CHALLENGE = 1;
         int APPLICATION = 2;
@@ -82,4 +88,17 @@ public interface Constants {
         int COURSE_USER = 2;
         int MONTHLY_CAMP = 3;
     }
+
+    interface COUPON_CATEGORY {
+        /**
+         * 只能用来购买会员
+         */
+        String ONLY_MEMBERSHIP = "ELITE_RISE_MEMBER";
+
+        /**
+         * 只能用来购买线下工作坊
+         */
+        String ONLY_WORKSHOP = "OFF_LINE_WORKSHOP";
+    }
+
 }

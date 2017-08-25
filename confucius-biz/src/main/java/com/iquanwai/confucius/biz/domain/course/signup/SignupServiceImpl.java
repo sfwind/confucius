@@ -486,7 +486,7 @@ public class SignupServiceImpl implements SignupService {
         coupon.setProfileId(profileId);
         coupon.setAmount(MONTHLY_CAMP_COUPON);
         coupon.setUsed(0);
-        coupon.setExpiredDate(DateUtils.afterYears(new Date(), 1));
+        coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 2));
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("会员抵用券");
         couponDao.insert(coupon);
@@ -1027,6 +1027,7 @@ public class SignupServiceImpl implements SignupService {
         coupon.setOpenid(profile.getOpenid());
         coupon.setProfileId(profileId);
         coupon.setAmount(RISEMEMBER_OFFLINE_COUPON);
+        coupon.setCategory(Constants.COUPON_CATEGORY.ONLY_WORKSHOP);
         coupon.setUsed(0);
         coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 13));
 
