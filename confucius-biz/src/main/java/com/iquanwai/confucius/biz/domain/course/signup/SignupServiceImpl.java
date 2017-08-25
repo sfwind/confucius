@@ -111,6 +111,12 @@ public class SignupServiceImpl implements SignupService {
     private RabbitMQFactory rabbitMQFactory;
     @Autowired
     private CourseReductionService courseReductionService;
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private RedisUtil redisUtil;
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
 
     private int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
