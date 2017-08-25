@@ -23,11 +23,6 @@ public interface CostRepo {
     boolean hasCoupon(Integer profileId);
 
     /**
-     * 刷新缓存
-     */
-    void reloadCache();
-
-    /**
      * 更新优惠券状态
      */
     void updateCoupon(Integer status, String orderId);

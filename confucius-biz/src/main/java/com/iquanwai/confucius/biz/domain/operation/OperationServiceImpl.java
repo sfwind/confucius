@@ -76,7 +76,6 @@ public class OperationServiceImpl implements OperationService {
         coupon.setProfileId(profileId);
         coupon.setCategory("ELITE_RISE_MEMBER");
         Integer result = couponDao.updateExpiredDate(coupon);
-        costRepo.reloadCache();
         return result;
     }
 

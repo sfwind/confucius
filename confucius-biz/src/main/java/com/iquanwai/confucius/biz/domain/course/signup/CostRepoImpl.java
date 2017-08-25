@@ -1,15 +1,14 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 
@@ -22,16 +21,6 @@ public class CostRepoImpl implements CostRepo {
     private CouponDao couponDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    //有优惠券的名单
-    private List<Integer> couponList = Lists.newArrayList();
-
-    @PostConstruct
-    public void init() {
-        //初始化优惠券
-        reloadCoupon();
-
-        logger.info("init white list & coupon complete");
-    }
 
     public double discount(Double price, Integer profileId, String orderId) {
         List<Coupon> coupons = couponDao.loadCoupons(profileId);
@@ -52,7 +41,6 @@ public class CostRepoImpl implements CostRepo {
                 break;
             }
         }
-        reloadCoupon();
         return CommonUtils.substract(price, remain);
     }
 
@@ -67,7 +55,6 @@ public class CostRepoImpl implements CostRepo {
             remain = 0D;
             couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
         }
-        reloadCoupon();
         return CommonUtils.substract(price, remain);
     }
 
@@ -82,17 +69,13 @@ public class CostRepoImpl implements CostRepo {
     }
 
     public boolean hasCoupon(Integer profileId) {
-        return couponList.contains(profileId);
-    }
-
-    public void reloadCache() {
-        init();
+        List<Coupon> coupons = couponDao.getCoupon(profileId);
+        return CollectionUtils.isNotEmpty(coupons);
     }
 
     @Override
     public void updateCoupon(Integer status, String orderId) {
         couponDao.updateCouponByOrderId(status, orderId);
-        reloadCoupon();
     }
 
     @Override
@@ -105,11 +88,4 @@ public class CostRepoImpl implements CostRepo {
         return couponDao.load(Coupon.class, id);
     }
 
-
-    private void reloadCoupon() {
-        List<Coupon> coupons = couponDao.getUnusedCoupon();
-        couponList.clear();
-        coupons.stream().filter(coupon -> !couponList.contains(coupon.getProfileId()))
-                .forEach(coupon -> couponList.add(coupon.getProfileId()));
-    }
 }

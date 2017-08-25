@@ -815,8 +815,6 @@ public class SignupServiceImpl implements SignupService {
         init();
         //初始化班级剩余人数
         classMemberCountRepo.initClass();
-        //初始化白名单和优惠券
-        costRepo.reloadCache();
     }
 
     @Override
@@ -853,9 +851,7 @@ public class SignupServiceImpl implements SignupService {
     public List<Coupon> getCoupons(Integer profileId) {
         if (costRepo.hasCoupon(profileId)) {
             List<Coupon> coupons = costRepo.getCoupons(profileId);
-            coupons.forEach(item -> {
-                item.setExpired(DateUtils.parseDateToStringByCommon(item.getExpiredDate()));
-            });
+            coupons.forEach(item -> item.setExpired(DateUtils.parseDateToStringByCommon(item.getExpiredDate())));
             return coupons;
         }
         return Lists.newArrayList();
@@ -866,7 +862,8 @@ public class SignupServiceImpl implements SignupService {
         List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
         memberTypes.forEach(item -> {
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
+            item.setEndTime(DateUtils.parseDateToStringByCommon(
+                    DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
         });
         return memberTypes;
     }
@@ -998,7 +995,8 @@ public class SignupServiceImpl implements SignupService {
         return new MutablePair<>(orderId, discount);
     }
 
-    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId, String goodsName, String goodsType) {
+    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId,
+                                            String goodsName, String goodsType) {
         // 创建订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
         quanwaiOrder.setCreateTime(new Date());
