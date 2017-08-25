@@ -239,7 +239,7 @@ public class SignupController {
         } else if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_CAMP)) {
             // 单月训练营购买
             MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
-            if(campOrder == null) {
+            if (campOrder == null) {
                 logger.error("{} 订单不存在", orderId);
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
             } else {
@@ -612,36 +612,35 @@ public class SignupController {
                 .action("获取商品信息")
                 .memo(goodsInfoDto.getGoodsType());
         operationLogService.log(operationLog);
-        if (GoodsInfoDto.FRAG_COURSE.equals(goodsInfoDto.getGoodsType())) {
-            // 小课购买
-            goodsInfoDto.setName("小课购买");
-            // 查看该用户是否参加了减免优惠活动
-            CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(loginUser.getId(), goodsInfoDto.getGoodsId());
-            goodsInfoDto.setFee(ConfigUtils.getRiseCourseFee());
-            if (activity != null) {
-                goodsInfoDto.setActivity(activity);
-            }
-        } else if(GoodsInfoDto.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            if (GoodsInfoDto.FRAG_COURSE.equals(goodsInfoDto.getGoodsType())) {
+
+        switch (goodsInfoDto.getGoodsType()) {
+            case GoodsInfoDto.FRAG_MEMBER:
                 goodsInfoDto.setName("会员购买");
-            } else if (GoodsInfoDto.FRAG_CAMP.equals(goodsInfoDto.getGoodsType())) {
-                goodsInfoDto.setName("训练营小课购买");
-            }
-            // 会员购买
-            MemberType memberType = signupService
-                    .getMemberTypesPayInfo()
-                    .stream()
-                    .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
-                    .findFirst()
-                    .orElse(null);
-            if (memberType == null) {
-                logger.error("会员类型异常{}", goodsInfoDto);
-                return WebUtils.error("会员类型异常");
-            } else {
-                goodsInfoDto.setFee(memberType.getFee());
-                goodsInfoDto.setStartTime(memberType.getStartTime());
-                goodsInfoDto.setEndTime(memberType.getEndTime());
-            }
+                break;
+            case GoodsInfoDto.FRAG_COURSE:
+                goodsInfoDto.setName("小课购买");
+                // 查看该用户是否参加了减免优惠活动
+                CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(loginUser.getId(), goodsInfoDto.getGoodsId());
+                goodsInfoDto.setFee(ConfigUtils.getRiseCourseFee());
+                if (activity != null) {
+                    goodsInfoDto.setActivity(activity);
+                }
+                break;
+            case GoodsInfoDto.FRAG_CAMP:
+                goodsInfoDto.setName("小课训练营");
+                break;
+        }
+
+        MemberType memberType = signupService
+                .getMemberTypesPayInfo()
+                .stream()
+                .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
+                .findFirst()
+                .orElse(null);
+        if (memberType != null) {
+            goodsInfoDto.setFee(memberType.getFee());
+            goodsInfoDto.setStartTime(memberType.getStartTime());
+            goodsInfoDto.setEndTime(memberType.getEndTime());
         }
 
         // 获取优惠券
@@ -765,7 +764,7 @@ public class SignupController {
      */
     private Pair<Integer, String> signupCheck(PaymentDto paymentDto, Integer profileId) {
         switch (paymentDto.getGoodsType()) {
-            case GoodsInfoDto.FRAG_MEMBER:  {
+            case GoodsInfoDto.FRAG_MEMBER: {
                 // 购买小课
                 return signupService.riseMemberSignupCheck(profileId, paymentDto.getGoodsId());
             }
