@@ -475,7 +475,7 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setOrderId(campOrder.getOrderId());
         riseMember.setProfileId(campOrder.getProfileId());
         riseMember.setMemberTypeId(RiseMember.MONTHLY_CAMP);
-        Date endDate = ConfigUtils.getMonthlyCampEndDate();
+        Date endDate = ConfigUtils.getMonthlyCampCloseDate();
         riseMember.setExpireDate(endDate);
         riseMemberDao.insert(riseMember);
 
