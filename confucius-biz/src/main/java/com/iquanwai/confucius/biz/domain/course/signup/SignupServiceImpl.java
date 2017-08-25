@@ -171,8 +171,9 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId) {
         RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
-        // Rise会员可以直接学习，页面上应该不会调用这个接口，以防万一
-        if (riseMember != null) {
+
+        // Rise会员可以直接学习
+        if (riseMember != null && riseMember.getMemberTypeId() != RiseMember.MONTHLY_CAMP) {
             return new MutablePair<>(-1, "您已经是RISE会员，无需单独购买小课");
         }
         return new MutablePair<>(1, "");
