@@ -683,11 +683,11 @@ public class SignupController {
         switch (paymentDto.getGoodsType()) {
             case GoodsInfoDto.FRAG_MEMBER:
                 // 会员购买
-                check = signupService.riseCourseSignupCheck(loginUser.getId(), paymentDto.getGoodsId());
+                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
                 break;
             case GoodsInfoDto.FRAG_COURSE:
                 // 小课购买
-                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
+                check = signupService.riseCourseSignupCheck(loginUser.getId(), paymentDto.getGoodsId());
                 break;
             case GoodsInfoDto.FRAG_CAMP:
                 // 小课训练营购买
