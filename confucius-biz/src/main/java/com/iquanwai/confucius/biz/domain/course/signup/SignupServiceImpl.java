@@ -104,12 +104,6 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private CustomerMessageService customerMessageService;
     @Autowired
-    private AccountService accountService;
-    @Autowired
-    private RedisUtil redisUtil;
-    @Autowired
-    private RabbitMQFactory rabbitMQFactory;
-    @Autowired
     private CourseReductionService courseReductionService;
     @Autowired
     private AccountService accountService;
@@ -495,8 +489,6 @@ public class SignupServiceImpl implements SignupService {
         coupon.setCategory("ELITE_RISE_MEMBER");
         coupon.setDescription("会员抵用券");
         couponDao.insert(coupon);
-        // 刷新优惠券
-        costRepo.reloadCache();
         // 更新订单状态
         monthlyCampOrderDao.entry(orderId);
 
@@ -1042,6 +1034,5 @@ public class SignupServiceImpl implements SignupService {
             tempCoupon.setDescription(i + "月线下工作坊券");
             couponDao.insert(tempCoupon);
         }
-        costRepo.reloadCache();
     }
 }

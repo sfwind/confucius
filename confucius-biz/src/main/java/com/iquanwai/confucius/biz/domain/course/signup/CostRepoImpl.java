@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -69,7 +68,7 @@ public class CostRepoImpl implements CostRepo {
     }
 
     public boolean hasCoupon(Integer profileId) {
-        List<Coupon> coupons = couponDao.getCoupon(profileId);
+        List<Coupon> coupons = couponDao.loadCoupons(profileId);
         return CollectionUtils.isNotEmpty(coupons);
     }
 
