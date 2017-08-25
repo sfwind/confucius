@@ -678,8 +678,24 @@ public class SignupController {
             remoteIp = ConfigUtils.getExternalIP();
         }
 
+        Pair<Integer, String> check;
         // 检查是否能够支付
-        Pair<Integer, String> check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
+        switch (paymentDto.getGoodsType()) {
+            case GoodsInfoDto.FRAG_MEMBER:
+                // 会员购买
+                check = signupService.riseCourseSignupCheck(loginUser.getId(), paymentDto.getGoodsId());
+                break;
+            case GoodsInfoDto.FRAG_COURSE:
+                // 小课购买
+                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
+                break;
+            case GoodsInfoDto.FRAG_CAMP:
+                // 小课训练营购买
+                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
+                break;
+            default:
+                check = new MutablePair<>(-1, "校验失败");
+        }
 
         if (check.getLeft() != 1) {
             return WebUtils.error(check.getRight());
