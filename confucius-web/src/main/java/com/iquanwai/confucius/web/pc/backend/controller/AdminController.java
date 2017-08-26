@@ -42,6 +42,7 @@ public class AdminController {
             configDto.setProjectId(projectId);
             configDto.setKey(configNode.getKey());
             configDto.setValue(configNode.getValue());
+            configDto.setDesc(configNode.getDesc());
             configDtoList.add(configDto);
         });
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
