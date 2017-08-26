@@ -12,5 +12,6 @@ public class ConfigNode{
     private long m_time;
 
     private String key;
+    private String desc;
 
 }

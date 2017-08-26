@@ -10,6 +10,6 @@ public class ConfigDto {
     private String projectId;
     private String key;
     private String value;
-    private boolean edit = false;
+    private String desc;
     private boolean display = true;
 }

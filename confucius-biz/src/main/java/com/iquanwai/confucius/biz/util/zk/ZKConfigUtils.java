@@ -179,11 +179,12 @@ public class ZKConfigUtils {
         return null;
     }
 
-    public void updateValue(String projectId, String key, String value){
+    public void updateValue(String projectId, String key, String value, String desc){
         try {
             String json = new String(zk.getData(CONFIG_PATH.concat(projectId+"/").concat(key), false, null), "utf-8");
             ConfigNode configNode = new Gson().fromJson(json, ConfigNode.class);
             configNode.setValue(value);
+            configNode.setDesc(desc);
             configNode.setM_time(System.currentTimeMillis());
             json = new Gson().toJson(configNode);
             zk.setData(CONFIG_PATH.concat(projectId+"/").concat(key), json.getBytes("utf-8"), -1);
@@ -200,10 +201,11 @@ public class ZKConfigUtils {
         }
     }
 
-    public void createValue(String projectId, String key, String value){
+    public void createValue(String projectId, String key, String value, String desc){
         try {
             ConfigNode configNode = new ConfigNode();
             configNode.setValue(value);
+            configNode.setDesc(desc);
             configNode.setC_time(System.currentTimeMillis());
             configNode.setM_time(System.currentTimeMillis());
             String json = new Gson().toJson(configNode);
