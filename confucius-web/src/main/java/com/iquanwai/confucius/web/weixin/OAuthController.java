@@ -71,10 +71,10 @@ public class OAuthController {
                 return;
             }
 
-            if (state != null && state.endsWith(ERROR_STATE_SUFFIX)) {
-                LOGGER.error("state has #,{}", state);
-                state = state.replace(ERROR_STATE_SUFFIX, "");
-            }
+//            if (state != null && state.endsWith(ERROR_STATE_SUFFIX)) {
+//                LOGGER.error("state has #,{}", state);
+//                state = state.replace(ERROR_STATE_SUFFIX, "");
+//            }
 
             // 返回带accessToken的url
             Callback callback = oAuthService.accessToken(code, state);
