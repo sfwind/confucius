@@ -39,37 +39,6 @@ public class CouponDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public List<Coupon> getUnusedCoupon() {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
-
-        try {
-            List<Coupon> coupon = run.query("SELECT * FROM Coupon where Used in (0,2) and ExpiredDate > ?",
-                    h, new Date());
-            return coupon;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
-    }
-
-    /**
-     * 获取当前学员特定类型优惠券信息
-     */
-    public Coupon getCouponByCategory(Integer profileId, String category) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        ResultSetHandler<Coupon> h = new BeanHandler<>(Coupon.class);
-        String sql = "select * from Coupon where ProfileId = ? and category = ? and ExpiredDate > ?";
-        try {
-            Coupon coupon = runner.query(sql, h, profileId, category, new Date());
-            return coupon;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
     public void updateCoupon(Integer couponId, Integer status, String orderId, Double cost) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
@@ -93,17 +62,6 @@ public class CouponDao extends DBUtil {
         }
     }
 
-    public Integer updateExpiredDate(Coupon coupon) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        try {
-            return runner.update("update Coupon set ExpiredDate = ? where ProfileId = ? and Category = ?",
-                    ConfigUtils.getDiscountExpiredDate(), coupon.getProfileId(), coupon.getCategory());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return 0;
-    }
-
     public void insert(Coupon coupon) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO Coupon(Openid, ProfileId, Amount, Used, ExpiredDate) " +
@@ -117,17 +75,4 @@ public class CouponDao extends DBUtil {
         }
     }
 
-    public void insertGroupCategory(Coupon coupon) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String insertSql = "insert into Coupon (OpenId, ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
-                "values (?, ?, ?, ?, ?, ?, ?)";
-        try {
-            runner.insert(insertSql, new ScalarHandler<>(),
-                    coupon.getOpenid(), coupon.getProfileId(),
-                    coupon.getAmount(), coupon.getUsed(),
-                    coupon.getExpiredDate(), coupon.getCategory(), coupon.getDescription());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
 }

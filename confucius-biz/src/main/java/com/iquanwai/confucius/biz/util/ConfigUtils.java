@@ -53,20 +53,12 @@ public class ConfigUtils {
 		return getValue("token");
 	}
 
-	public static String getEncodingAESKey(){
-		return getValue("encoding.aes.key");
-	}
-
 	public static String getAppid() {
 		return getValue("appid");
 	}
 
 	public static boolean logSwitch() {
 		return getBooleanValue("open.log");
-	}
-
-	public static boolean pressTestSwitch(){
-		return getBooleanValue("press.test");
 	}
 
 	public static String getAPIKey() {
@@ -131,10 +123,6 @@ public class ConfigUtils {
 
 	public static String resourceDomainName(){
 		return getValue("resource.domain");
-	}
-
-	public static String streamResourceDomainName(){
-		return getValue("stream.resource.domain");
 	}
 
 	public static String realDomainName(){
@@ -254,10 +242,6 @@ public class ConfigUtils {
 		return getBooleanValue("development");
 	}
 
-	public static Boolean isPcMaintenance(){
-		return getBooleanValue("pc.server.maintenance");
-	}
-
 	public static String getSurveyUrl(Integer id){
         String json = getValue("wjx.survey");
         Map<String, Object> stringObjectMap = CommonUtils.jsonToMap(json);
@@ -284,10 +268,6 @@ public class ConfigUtils {
 		return getIntValue("profile.full.score");
 	}
 
-	public static String activityStartMsgKey(){
-		return getValue("activity.start.msg");
-	}
-
 	public static String getUploadDomain(){
 		return getValue("upload.image.domain");
 	}
@@ -304,20 +284,8 @@ public class ConfigUtils {
 		return getIntValue("rise.member.total.count");
 	}
 
-	public static String productPaidMsg() {
-		return getValue("product.paid.msg");
-	}
-
 	public static String getIntegratedPracticeIndex(){
 		return getValue("integrated.practice.index");
-	}
-
-	public static String getRabbitMQIp(){
-		return getValue("rabbitmq.ip");
-	}
-
-	public static int getRabbitMQPort(){
-		return getIntValue("rabbitmq.port");
 	}
 
 	public static String getRisePcAppid(){
@@ -326,10 +294,6 @@ public class ConfigUtils {
 
 	public static String getRisePcSecret() {
 		return getValue("rise.web.secret");
-	}
-
-	public static Date getDiscountExpiredDate() {
-		return DateUtils.parseStringToDateTime(getValue("operation.discount.expireddate"));
 	}
 
 	public static Integer getMinSendLimit(){
@@ -363,14 +327,6 @@ public class ConfigUtils {
 
 	public static Double getRiseCourseFee(){
 		return getDoubleValue("rise.course.fee");
-	}
-
-	public static String getRabbitMQUser() {
-		return getValue("rabbitmq.user");
-	}
-
-	public static String getRabbitMQPasswd() {
-		return getValue("rabbitmq.password");
 	}
 
 	public static SMSConfig getBizMsgConfig(){

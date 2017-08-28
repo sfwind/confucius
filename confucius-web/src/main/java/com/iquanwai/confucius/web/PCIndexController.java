@@ -120,10 +120,6 @@ public class PCIndexController {
 
     private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser, String view) {
         ModelAndView mav = new ModelAndView(view);
-        if(ConfigUtils.isPcMaintenance()) {
-            // 正在维护
-            mav = new ModelAndView("maintenance");
-        }
         if(request.getParameter("debug") != null) {
             if(ConfigUtils.isFrontDebug()) {
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
@@ -152,8 +148,8 @@ public class PCIndexController {
         }
         mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
-        mav.addObject("openFeedBack", ConfigUtils.getValue("function.status.feedback"));
-        mav.addObject("openComment", ConfigUtils.getValue("function.status.comment"));
+        mav.addObject("openFeedBack", true);
+        mav.addObject("openComment", true);
         return mav;
     }
 
