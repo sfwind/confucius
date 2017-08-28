@@ -72,7 +72,6 @@ public class OAuthController {
             }
 
             if (state != null && state.endsWith(ERROR_STATE_SUFFIX)) {
-                LOGGER.error("state has #,{}", state);
                 state = state.replace(ERROR_STATE_SUFFIX, "");
             }
 

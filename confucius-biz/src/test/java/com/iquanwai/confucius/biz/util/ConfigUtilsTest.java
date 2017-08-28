@@ -28,14 +28,6 @@ public class ConfigUtilsTest extends TestBase {
         System.out.println(ConfigUtils.getRisePayStopTime().after(new Date()));
     }
 
-    @Test
-    public void setConfig(){
-        ZKConfigUtils zkConfigUtils = new ZKConfigUtils();
-        zkConfigUtils.updateValue("course","static.resource.url","https://www.confucius.mobi/bundle.js?");
-        zkConfigUtils.updateValue("course","static.pc.resource.url","https://www.confucius.mobi/bundle.js?");
-
-    }
-
 //    线上小课生成,紧急修复代码
 //    public static void main(String[] args) {
 //         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
