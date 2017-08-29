@@ -429,4 +429,8 @@ public class ConfigUtils {
         return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
     }
 
+    public static boolean getMonthlyCampOpen() {
+        return getBooleanValue("open.monthly.camp");
+    }
+
 }

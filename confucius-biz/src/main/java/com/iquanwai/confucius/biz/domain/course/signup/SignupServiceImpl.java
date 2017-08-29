@@ -198,6 +198,8 @@ public class SignupServiceImpl implements SignupService {
                 right = "您已经是 RISE 会员";
             } else if (profile.getRiseMember() == 3) {
                 right = "您已经是小课训练营用户";
+            } else if(!ConfigUtils.getMonthlyCampOpen()) {
+                right = "当月小课训练营已关闭报名";
             } else {
                 left = 1;
             }
