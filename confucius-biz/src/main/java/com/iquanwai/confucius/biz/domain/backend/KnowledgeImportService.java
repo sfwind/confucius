@@ -17,4 +17,6 @@ public interface KnowledgeImportService {
     int addNewChapter(Integer chapter);
 
     int addNewSection(Integer chapter, Integer section);
+
+    Integer updateKnowledge(Knowledge knowledge);
 }

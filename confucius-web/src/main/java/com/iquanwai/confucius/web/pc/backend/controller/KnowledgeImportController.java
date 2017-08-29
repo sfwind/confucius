@@ -12,10 +12,7 @@ import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -65,7 +62,7 @@ public class KnowledgeImportController {
         }
     }
 
-    @RequestMapping("/post/add/chapter/{chapter}")
+    @RequestMapping(value = "/post/add/chapter/{chapter}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> addNewChapter(PCLoginUser loginUser, @PathVariable Integer chapter) {
         Assert.notNull(loginUser, "登录用户不能为空");
         OperationLog operationLog = OperationLog.create().module("后台管理").function("知识点录入").action("新增章节")
@@ -80,7 +77,7 @@ public class KnowledgeImportController {
         }
     }
 
-    @RequestMapping("/post/add/section/{chapter}/{section}")
+    @RequestMapping(value = "/post/add/section/{chapter}/{section}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> addNewSection(PCLoginUser loginUser, @PathVariable Integer chapter, @PathVariable Integer section) {
         Assert.notNull(loginUser, "登录用户不能为空");
         OperationLog operationLog = OperationLog.create().module("后台管理").function("知识点录入").action("新增小节")
@@ -92,6 +89,21 @@ public class KnowledgeImportController {
             return WebUtils.success();
         } else {
             return WebUtils.error("小节插入失败，请重试");
+        }
+    }
+
+    @RequestMapping(value = "/post/update/knowledge", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> updateKnowledge(PCLoginUser loginUser, @RequestBody Knowledge knowledge) {
+        Assert.notNull(loginUser, "登录用户不能为空");
+        OperationLog operationLog = OperationLog.create().module("后台管理").function("知识点录入").action("更新知识点")
+                .openid(loginUser.getOpenId());
+        operationLogService.log(operationLog);
+
+        int result = knowledgeImportService.updateKnowledge(knowledge);
+        if (result > 0) {
+            return WebUtils.success();
+        } else {
+            return WebUtils.error("更新失败");
         }
     }
 

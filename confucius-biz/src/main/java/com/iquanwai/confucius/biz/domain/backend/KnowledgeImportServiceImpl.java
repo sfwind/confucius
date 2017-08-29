@@ -79,12 +79,18 @@ public class KnowledgeImportServiceImpl implements KnowledgeImportService {
         return result;
     }
 
+    @Override
+    public Integer updateKnowledge(Knowledge knowledge) {
+        return knowledgeDao.updateKnowledge(knowledge.getId(), knowledge.getKnowledge(), knowledge.getStep(),
+                knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote());
+    }
+
     /**
      * 按照顺序，依次更新 problemSchedule 表的 series 值
      */
     private void reSortSeries(Integer problemId) {
         List<ProblemSchedule> schedules = problemScheduleDao.loadProblemSchedule(problemId);
-        if(schedules.size() == 0) return;
+        if (schedules.size() == 0) return;
 
         schedules = schedules.stream().sorted(Comparator.comparing(ProblemSchedule::getChapter)).collect(Collectors.toList());
         schedules = schedules.stream().sorted(Comparator.comparing(ProblemSchedule::getSection)).collect(Collectors.toList());

@@ -36,4 +36,15 @@ public class KnowledgeDao extends PracticeDBUtil {
         return -1;
     }
 
+    public Integer updateKnowledge(Integer id, String knowledge, String step, String analysis, String means, String keynote) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?, Analysis = ?, Means = ?, Keynote = ? WHERE Id = ?";
+        try {
+            return runner.update(sql, knowledge, step, analysis, means, keynote, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
 }
