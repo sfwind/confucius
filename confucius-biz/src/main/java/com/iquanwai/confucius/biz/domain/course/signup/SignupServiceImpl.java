@@ -198,7 +198,7 @@ public class SignupServiceImpl implements SignupService {
                 right = "您已经是 RISE 会员";
             } else if (profile.getRiseMember() == 3) {
                 right = "您已经是小课训练营用户";
-            } else if(!ConfigUtils.getMonthlyCampOpen()) {
+            } else if (!ConfigUtils.getMonthlyCampOpen()) {
                 right = "当月小课训练营已关闭报名";
             } else {
                 left = 1;
@@ -861,8 +861,11 @@ public class SignupServiceImpl implements SignupService {
         List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
         memberTypes.forEach(item -> {
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            item.setEndTime(DateUtils.parseDateToStringByCommon(
-                    DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
+            if (item.getId().equals(RiseMember.MONTHLY_CAMP)) {
+                item.setEndTime(DateUtils.parseDateToStringByCommon(ConfigUtils.getMonthlyCampCloseDate()));
+            } else {
+                item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
+            }
         });
         return memberTypes;
     }
