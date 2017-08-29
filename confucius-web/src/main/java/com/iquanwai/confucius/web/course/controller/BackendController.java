@@ -198,16 +198,32 @@ public class BackendController {
                         data.put("first", new TemplateMessage.Keyword(first));
                     }
                     if(noticeMsgDto.getKeyword1()!=null){
-                        data.put("keyword1", new TemplateMessage.Keyword(noticeMsgDto.getKeyword1()));
+                        String keyword1 = noticeMsgDto.getKeyword1();
+                        if(keyword1.contains("{username}")){
+                            keyword1 = replaceNickname(openid, keyword1);
+                        }
+                        data.put("keyword1", new TemplateMessage.Keyword(keyword1));
                     }
                     if(noticeMsgDto.getKeyword2()!=null) {
-                        data.put("keyword2", new TemplateMessage.Keyword(noticeMsgDto.getKeyword2()));
+                        String keyword2 = noticeMsgDto.getKeyword2();
+                        if(keyword2.contains("{username}")) {
+                            keyword2 = replaceNickname(openid, keyword2);
+                        }
+                        data.put("keyword2", new TemplateMessage.Keyword(keyword2));
                     }
                     if(noticeMsgDto.getKeyword3()!=null) {
-                        data.put("keyword3", new TemplateMessage.Keyword(noticeMsgDto.getKeyword3()));
+                        String keyword3 = noticeMsgDto.getKeyword3();
+                        if(keyword3.contains("{username}")) {
+                            keyword3 = replaceNickname(openid, keyword3);
+                        }
+                        data.put("keyword3", new TemplateMessage.Keyword(keyword3));
                     }
                     if(noticeMsgDto.getKeyword4()!=null) {
-                        data.put("keyword4", new TemplateMessage.Keyword(noticeMsgDto.getKeyword4()));
+                        String keyword4 = noticeMsgDto.getKeyword4();
+                        if(keyword4.contains("{username}")) {
+                            keyword4 = replaceNickname(openid, keyword4);
+                        }
+                        data.put("keyword4", new TemplateMessage.Keyword(keyword4));
                     }
                     if(noticeMsgDto.getRemark()!=null) {
                         String remark = noticeMsgDto.getRemark();
