@@ -181,5 +181,4 @@ public interface SignupService {
 
     RiseMember currentRiseMember(Integer profileId);
 
-    void presentOfflineCoupons(Integer profileId);
 }

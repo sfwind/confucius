@@ -1019,31 +1019,4 @@ public class SignupServiceImpl implements SignupService {
         return fee;
     }
 
-
-    /**
-     * 对于一年版精英会员，赠送12张线下工作坊券
-     */
-    @Override
-    public void presentOfflineCoupons(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        // 必须是一年版精英会员
-        Assert.isTrue(riseMember.getMemberTypeId() == RiseMember.ELITE);
-        Date expireDate = riseMember.getExpireDate();
-        Date couponExpireDate = DateUtils.afterMonths(expireDate, 1);
-
-        Profile profile = accountService.getProfile(profileId);
-        Coupon coupon = new Coupon();
-        coupon.setOpenid(profile.getOpenid());
-        coupon.setProfileId(profileId);
-        coupon.setAmount(RISEMEMBER_OFFLINE_COUPON);
-        coupon.setCategory(Constants.COUPON_CATEGORY.ONLY_WORKSHOP);
-        coupon.setUsed(0);
-        coupon.setExpiredDate(couponExpireDate);
-
-        for (int i = 1; i < 13; i++) {
-            Coupon tempCoupon = coupon;
-            tempCoupon.setDescription(i + "月线下工作坊券");
-            couponDao.insert(tempCoupon);
-        }
-    }
 }
