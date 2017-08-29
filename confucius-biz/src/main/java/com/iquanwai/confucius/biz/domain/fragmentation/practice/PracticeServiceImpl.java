@@ -412,7 +412,7 @@ public class PracticeServiceImpl implements PracticeService {
         if(improvementPlan.getRequestCommentCount() > 0) {
             return improvementPlan.getRequestCommentCount();
         } else {
-            RiseMember riseMember = riseMemberDao.validRiseMember(improvementPlan.getProfileId());
+            RiseMember riseMember = riseMemberDao.loadValidRiseMember(improvementPlan.getProfileId());
             if(riseMember == null) {
                 // 已经不是会员了就返回null
                 return null;

@@ -6,15 +6,18 @@ import java.util.Map;
  * Created by justin on 16/9/14.
  */
 public interface PayService {
+
     /**
      * 调用微信统一下单接口
      * @return 返回PrepayId
      * */
     String unifiedOrder(String orderId);
+
     /**
      * 生成微信支付回调返回
      * */
     OrderCallbackReply callbackReply(String result, String errMsg, String prepayId);
+
     /**
      * 处理支付结果
      * */
@@ -27,18 +30,19 @@ public interface PayService {
      */
     void handlePayResult(String orderId,Boolean isFree);
 
-
     /**
      * 订单付款成功
      * @param orderId 订单id
      * */
     void paySuccess(String orderId);
 
-    /**
-     * rise支付成功
-     * @param orderId 订单id
-     */
     void risePaySuccess(String orderId);
+
+    // 购买会员
+    void payMemberSuccess(String orderId);
+
+    // 购买小课
+    void payFragmentSuccess(String orderId);
 
     /**
      * 定期关闭过期订单
