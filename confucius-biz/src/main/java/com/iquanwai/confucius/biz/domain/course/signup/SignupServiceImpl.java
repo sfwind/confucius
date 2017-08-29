@@ -862,7 +862,7 @@ public class SignupServiceImpl implements SignupService {
         memberTypes.forEach(item -> {
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
             if (item.getId().equals(RiseMember.MONTHLY_CAMP)) {
-                item.setEndTime(DateUtils.parseDateToStringByCommon(ConfigUtils.getMonthlyCampCloseDate()));
+                item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(ConfigUtils.getMonthlyCampCloseDate(), 1)));
             } else {
                 item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
             }
