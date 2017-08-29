@@ -42,6 +42,7 @@ public class AdminController {
             configDto.setProjectId(projectId);
             configDto.setKey(configNode.getKey());
             configDto.setValue(configNode.getValue());
+            configDto.setDesc(configNode.getDesc());
             configDtoList.add(configDto);
         });
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
@@ -59,7 +60,8 @@ public class AdminController {
                                                             @RequestBody ConfigDto configDto) {
 
         Assert.notNull(pcLoginUser, "用户不能为空");
-        zkConfigUtils.updateValue(configDto.getProjectId(), configDto.getKey(), configDto.getValue());
+        zkConfigUtils.updateValue(configDto.getProjectId(), configDto.getKey(),
+                configDto.getValue(), configDto.getDesc());
 
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("管理员")
@@ -76,7 +78,8 @@ public class AdminController {
                                                          @RequestBody ConfigDto configDto) {
 
         Assert.notNull(pcLoginUser, "用户不能为空");
-        zkConfigUtils.createValue(configDto.getProjectId(), configDto.getKey(), configDto.getValue());
+        zkConfigUtils.createValue(configDto.getProjectId(), configDto.getKey(),
+                configDto.getValue(), configDto.getDesc());
 
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("管理员")
