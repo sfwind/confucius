@@ -180,4 +180,6 @@ public interface SignupService {
     Double calculateCampCoupon(Integer profileId, Integer couponId);
 
     RiseMember currentRiseMember(Integer profileId);
+
+    void presentOfflineCoupons(Integer profileId);
 }

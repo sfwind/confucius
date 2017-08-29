@@ -49,7 +49,7 @@ public class RiseMemberDao extends DBUtil {
         return -1;
     }
 
-    public RiseMember validRiseMember(Integer profileId) {
+    public RiseMember loadValidRiseMember(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where ProfileId = ? and expired = 0";
 

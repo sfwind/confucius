@@ -749,6 +749,14 @@ public class SignupController {
         }
     }
 
+    @RequestMapping(value = "/coupons/insert", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> batchInsertCoupons(@RequestBody List<Integer> profileIds) {
+        for (Integer profileId : profileIds) {
+            signupService.presentOfflineCoupons(profileId);
+        }
+        return WebUtils.success();
+    }
+
     /**
      * 创建订单
      * @param paymentDto 支付信息

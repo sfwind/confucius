@@ -170,7 +170,7 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId) {
-        RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
 
         // Rise会员可以直接学习
         if (riseMember != null && riseMember.getMemberTypeId() != RiseMember.MONTHLY_CAMP) {
@@ -595,8 +595,6 @@ public class SignupServiceImpl implements SignupService {
                 //精英会员一年
                 expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseEliteMember(openId);
-                // 购买精英会员送 12 张线下工作坊券
-                presentOfflineCoupons(riseOrder.getProfileId());
                 break;
             }
             case 4: {
@@ -907,7 +905,7 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public RiseMember currentRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.validRiseMember(profileId);
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember != null) {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getAddTime()));
             riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
@@ -1021,7 +1019,19 @@ public class SignupServiceImpl implements SignupService {
         return fee;
     }
 
-    private void presentOfflineCoupons(Integer profileId) {
+
+    /**
+     * 对于一年版精英会员，赠送12张线下工作坊券
+     * @param profileId
+     */
+    @Override
+    public void presentOfflineCoupons(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        // 必须是一年版精英会员
+        Assert.isTrue(riseMember.getMemberTypeId() == RiseMember.ELITE);
+        Date expireDate = riseMember.getExpireDate();
+        Date couponExpireDate = DateUtils.afterMonths(expireDate, 1);
+
         Profile profile = accountService.getProfile(profileId);
         Coupon coupon = new Coupon();
         coupon.setOpenid(profile.getOpenid());
@@ -1029,7 +1039,7 @@ public class SignupServiceImpl implements SignupService {
         coupon.setAmount(RISEMEMBER_OFFLINE_COUPON);
         coupon.setCategory(Constants.COUPON_CATEGORY.ONLY_WORKSHOP);
         coupon.setUsed(0);
-        coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 13));
+        coupon.setExpiredDate(couponExpireDate);
 
         for (int i = 1; i < 13; i++) {
             Coupon tempCoupon = coupon;
