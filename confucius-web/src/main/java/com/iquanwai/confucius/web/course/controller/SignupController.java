@@ -237,7 +237,7 @@ public class SignupController {
                 entry = riseOrder.getEntry();
             }
         } else if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_CAMP)) {
-            // 单月训练营购买
+            // 小课训练营购买
             MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
             if (campOrder == null) {
                 logger.error("{} 订单不存在", orderId);

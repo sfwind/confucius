@@ -318,7 +318,7 @@ public class SignupServiceImpl implements SignupService {
                 orderPair.getLeft(), fee, orderPair.getRight(),
                 memberTypeId + "", ConfigUtils.getMonthlyCampMonth() + "月训练营", QuanwaiOrder.FRAG_CAMP);
 
-        // 插入单月训练营报名数据
+        // 插入小课训练营报名数据
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
         monthlyCampOrder.setOrderId(orderPair.getLeft());
         monthlyCampOrder.setOpenId(profile.getOpenid());
@@ -653,8 +653,8 @@ public class SignupServiceImpl implements SignupService {
             }
             case RiseMember.MONTHLY_CAMP: {
                 // 发送消息给小课训练营购买用户
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.monthly.camp.send.system.url"));
                 break;
             }
             default: {
@@ -694,7 +694,7 @@ public class SignupServiceImpl implements SignupService {
         data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
         data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
         data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
-//        data.put("remark", new TemplateMessage.Keyword("\n想扩展人脉，和精英RISER相互勾搭？点击详情，添加小Q，获得入群邀请哦～"));
+        // data.put("remark", new TemplateMessage.Keyword("\n想扩展人脉，和精英RISER相互勾搭？点击详情，添加小Q，获得入群邀请哦～"));
         templateMessage.setUrl("https://shimo.im/doc/pwp5qEcft2sKABtL");
 
         templateMessageService.sendMessage(templateMessage);
@@ -1022,7 +1022,6 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 对于一年版精英会员，赠送12张线下工作坊券
-     * @param profileId
      */
     @Override
     public void presentOfflineCoupons(Integer profileId) {
