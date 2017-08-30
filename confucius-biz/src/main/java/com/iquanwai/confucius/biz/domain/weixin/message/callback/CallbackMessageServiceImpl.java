@@ -18,6 +18,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.PromotionUser;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.message.WechatMessage;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.XMLHelper;
@@ -47,6 +48,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String CONTENT = "Content";
     private static final String EVENT = "Event";
     private static final String EVENT_KEY = "EventKey";
+    public static final String WECHAT_MESSAGE_TOPIC = "wechat_message_reply";
+
     @Autowired
     private AccountService accountService;
     @Autowired
@@ -68,7 +71,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
+    /** 发送订阅消息 **/
     private RabbitMQPublisher rabbitMQPublisher;
+    /** 发送微信回复消息 **/
+    private RabbitMQPublisher messageMqPublisher;
     //推广活动分隔符,分割活动和用户id
     private static final String ACTIVITY_SEPERATE_CHAR = "_";
 
@@ -132,6 +138,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         logger.info("load auto reply message complete");
         //初始化mq
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(SUBSCRIBE_TOPIC);
+        messageMqPublisher = rabbitMQFactory.initFanoutPublisher(WECHAT_MESSAGE_TOPIC);
     }
 
     @Override
@@ -227,6 +234,18 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     }
                 }
             }
+        }
+
+
+        // 没有匹配到，发送mq
+        WechatMessage wechatMessage = new WechatMessage();
+        wechatMessage.setMessage(message);
+        wechatMessage.setOpenid(openid);
+        wechatMessage.setWxid(wxid);
+        try {
+            messageMqPublisher.publish(wechatMessage);
+        } catch (ConnectException e) {
+            logger.error(e.getLocalizedMessage(), e);
         }
 
         //没有匹配到任何消息时,回复默认消息
