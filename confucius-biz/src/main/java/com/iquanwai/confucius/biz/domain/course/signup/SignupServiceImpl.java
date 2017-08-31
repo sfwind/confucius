@@ -462,7 +462,7 @@ public class SignupServiceImpl implements SignupService {
         profileDao.becomeMonthlyCampMember(profileId);
 
         // RiseMember 新增记录
-        String memberId = generateMemberId();
+        String memberId = generateMonthlyCampMemberId();
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassId(ConfigUtils.getMonthlyCampClassId());
         classMember.setProfileId(profileId);
@@ -512,15 +512,35 @@ public class SignupServiceImpl implements SignupService {
         return monthlyCampOrderDao.loadCampOrder(orderId);
     }
 
+    private String generateRisememberMemberId() {
+        StringBuilder targetMemberId = new StringBuilder();
+
+        String prefix = ConfigUtils.getRisememberClassId();
+        String key = "customer:riseMember:" + prefix;
+        redisUtil.lock("lock:RiseMemberId", (lock) -> {
+            // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
+            String memberId = redisUtil.get(key);
+            String sequence;
+            if (StringUtils.isEmpty(memberId)) {
+                sequence = "001";
+            } else {
+                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
+            }
+            targetMemberId.append(prefix).append(sequence);
+            redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
+        });
+        return targetMemberId.toString();
+    }
+
     /**
      * 生成 memberId，格式 201701001 年 + 月 + 自然顺序
      */
-    private String generateMemberId() {
+    private String generateMonthlyCampMemberId() {
         StringBuilder targetMemberId = new StringBuilder();
 
         String prefix = ConfigUtils.getMonthlyCampClassId();
         String key = "customer:trainCamp:" + prefix;
-        redisUtil.lock("lock:memberId", (lock) -> {
+        redisUtil.lock("lock:trainMemberId", (lock) -> {
             // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
             String memberId = redisUtil.get(key);
             String sequence;
@@ -597,6 +617,15 @@ public class SignupServiceImpl implements SignupService {
                 //精英会员一年
                 expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseEliteMember(openId);
+
+                // RiseMember 新增记录
+                String memberId = generateRisememberMemberId();
+                RiseClassMember classMember = new RiseClassMember();
+                classMember.setClassId(ConfigUtils.getRisememberClassId());
+                classMember.setProfileId(riseOrder.getProfileId());
+                classMember.setMemberId(memberId);
+                classMember.setActive(1);
+                riseClassMemberDao.insert(classMember);
                 break;
             }
             case 4: {

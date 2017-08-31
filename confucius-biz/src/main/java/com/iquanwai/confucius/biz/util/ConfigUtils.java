@@ -425,6 +425,13 @@ public class ConfigUtils {
         return getValue("monthly.camp.classId");
     }
 
+    /**
+     * 获取当月精英训练营生成的 ClassId
+     */
+    public static String getRisememberClassId() {
+        return getValue("risemember.classId");
+    }
+
     public static Date getMonthlyCampCloseDate() {
         return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
     }
