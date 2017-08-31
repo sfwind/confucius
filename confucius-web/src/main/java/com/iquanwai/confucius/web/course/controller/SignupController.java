@@ -631,16 +631,18 @@ public class SignupController {
                 break;
         }
 
-        MemberType memberType = signupService
-                .getMemberTypesPayInfo()
-                .stream()
-                .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
-                .findFirst()
-                .orElse(null);
-        if (memberType != null) {
-            goodsInfoDto.setFee(memberType.getFee());
-            goodsInfoDto.setStartTime(memberType.getStartTime());
-            goodsInfoDto.setEndTime(memberType.getEndTime());
+        if (goodsInfoDto.getGoodsType().equals(GoodsInfoDto.FRAG_MEMBER) || goodsInfoDto.getGoodsType().equals(GoodsInfoDto.FRAG_CAMP)) {
+            MemberType memberType = signupService
+                    .getMemberTypesPayInfo()
+                    .stream()
+                    .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
+                    .findFirst()
+                    .orElse(null);
+            if (memberType != null) {
+                goodsInfoDto.setFee(memberType.getFee());
+                goodsInfoDto.setStartTime(memberType.getStartTime());
+                goodsInfoDto.setEndTime(memberType.getEndTime());
+            }
         }
 
         // 获取优惠券
