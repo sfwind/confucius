@@ -238,14 +238,17 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
 
         // 没有匹配到，发送mq
-        WechatMessage wechatMessage = new WechatMessage();
-        wechatMessage.setMessage(message);
-        wechatMessage.setOpenid(openid);
-        wechatMessage.setWxid(wxid);
-        try {
-            messageMqPublisher.publish(wechatMessage);
-        } catch (ConnectException e) {
-            logger.error(e.getLocalizedMessage(), e);
+        if (StringUtils.isNumeric(message) || "背包".equals(message)) {
+            WechatMessage wechatMessage = new WechatMessage();
+            wechatMessage.setMessage(message);
+            wechatMessage.setOpenid(openid);
+            wechatMessage.setWxid(wxid);
+            try {
+                messageMqPublisher.publish(wechatMessage);
+            } catch (ConnectException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            return null;
         }
 
         //没有匹配到任何消息时,回复默认消息
