@@ -188,14 +188,14 @@ public class SignupServiceImpl implements SignupService {
         if (memberTypeId == RiseMember.ELITE) {
             // 购买会员
             if (profile.getRiseMember() == 1) {
-                right = "您已经是 RISE 会员";
+                right = "您已经是圈外同学会员";
             } else {
                 left = 1;
             }
         } else if (memberTypeId == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
             if (profile.getRiseMember() == 1) {
-                right = "您已经是 RISE 会员";
+                right = "您已经是圈外同学会员";
             } else if (profile.getRiseMember() == 3) {
                 right = "您已经是小课训练营用户";
             } else if (!ConfigUtils.getMonthlyCampOpen()) {
