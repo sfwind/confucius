@@ -74,7 +74,7 @@ public class ConfigUtils {
 	}
 
 	public static boolean isDebug(){
-		return getBooleanValue("debug")||getBooleanValue("press.test");
+		return getBooleanValue("debug");
 	}
 
 	public static boolean isFrontDebug(){
