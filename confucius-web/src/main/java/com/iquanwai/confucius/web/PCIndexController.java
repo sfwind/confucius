@@ -126,11 +126,9 @@ public class PCIndexController {
                 mav.addObject("loginSocketUrl", "127.0.0.1:8080/session");
             } else {
                 mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
-                mav.addObject("loginSocketUrl", ConfigUtils.getLoginSocketUrl());
             }
         } else {
             mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
-            mav.addObject("loginSocketUrl", ConfigUtils.getLoginSocketUrl());
         }
         if(pcLoginUser != null && pcLoginUser.getWeixin() != null) {
             Map<String, String> userParam = Maps.newHashMap();
