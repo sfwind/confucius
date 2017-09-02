@@ -146,8 +146,6 @@ public class PCIndexController {
         }
         mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
-        mav.addObject("openFeedBack", true);
-        mav.addObject("openComment", true);
         return mav;
     }
 
