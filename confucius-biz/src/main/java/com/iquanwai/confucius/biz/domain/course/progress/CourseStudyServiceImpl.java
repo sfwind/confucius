@@ -79,7 +79,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             questionMap.put(question.getId(), question);
             //语音分析，拼接完整url
             if (question.getVoice() != null) {
-                question.setVoice(ConfigUtils.streamResourceDomainName() + "/audio/" + question.getVoice());
+                question.setVoice(ConfigUtils.resourceDomainName() + "/audio/" + question.getVoice());
             }
         }
 
@@ -114,7 +114,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
         if (m.getType() == 2) {
             m.setContent(ConfigUtils.resourceDomainName() + "/images/" + m.getContent());
         } else if (m.getType() == 3) {
-            m.setContent(ConfigUtils.streamResourceDomainName() + "/audio/" + m.getContent());
+            m.setContent(ConfigUtils.resourceDomainName() + "/audio/" + m.getContent());
             //占位符替换，当文字处理
         } else if (m.getType() == 11) {
             m.setContent(classPlaceholder(m.getContent(), chapterId, profileId));
@@ -272,7 +272,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             homework.setSubmitted(true);
         }
         if (homework.getVoice() != null) {
-            homework.setVoice(ConfigUtils.streamResourceDomainName() + homework.getVoice());
+            homework.setVoice(ConfigUtils.resourceDomainName() + homework.getVoice());
         }
         if (submit == null) {
             String url = "/static/h?id=" + CommonUtils.randomString(6);

@@ -120,21 +120,15 @@ public class PCIndexController {
 
     private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser, String view) {
         ModelAndView mav = new ModelAndView(view);
-        if(ConfigUtils.isPcMaintenance()) {
-            // 正在维护
-            mav = new ModelAndView("maintenance");
-        }
         if(request.getParameter("debug") != null) {
             if(ConfigUtils.isFrontDebug()) {
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
                 mav.addObject("loginSocketUrl", "127.0.0.1:8080/session");
             } else {
                 mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
-                mav.addObject("loginSocketUrl", ConfigUtils.getLoginSocketUrl());
             }
         } else {
             mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
-            mav.addObject("loginSocketUrl", ConfigUtils.getLoginSocketUrl());
         }
         if(pcLoginUser != null && pcLoginUser.getWeixin() != null) {
             Map<String, String> userParam = Maps.newHashMap();
@@ -152,8 +146,6 @@ public class PCIndexController {
         }
         mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
-        mav.addObject("openFeedBack", ConfigUtils.getValue("function.status.feedback"));
-        mav.addObject("openComment", ConfigUtils.getValue("function.status.comment"));
         return mav;
     }
 
