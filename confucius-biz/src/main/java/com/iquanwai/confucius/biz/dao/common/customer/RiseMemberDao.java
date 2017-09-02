@@ -20,7 +20,18 @@ import java.util.List;
  */
 @Repository
 public class RiseMemberDao extends DBUtil {
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    public void updateExpiredAhead(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE RiseMember SET Expired = 1, Memo = '提前过期' WHERE ProfileId = ? AND Expired = 0";
+        try {
+            runner.update(sql, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
 
     public int insert(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -38,7 +49,7 @@ public class RiseMemberDao extends DBUtil {
         return -1;
     }
 
-    public RiseMember validRiseMember(Integer profileId) {
+    public RiseMember loadValidRiseMember(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where ProfileId = ? and expired = 0";
 

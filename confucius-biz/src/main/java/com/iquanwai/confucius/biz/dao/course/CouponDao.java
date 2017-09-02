@@ -3,10 +3,8 @@ package com.iquanwai.confucius.biz.dao.course;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Coupon;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -24,7 +22,7 @@ import java.util.List;
 public class CouponDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<Coupon> getCoupon(Integer profileId) {
+    public List<Coupon> loadCoupons(Integer profileId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
 
@@ -63,16 +61,16 @@ public class CouponDao extends DBUtil {
     }
 
     public void insert(Coupon coupon) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO Coupon(Openid, ProfileId, Amount, Used, ExpiredDate) " +
-                "VALUES(?, ?, ?, ?, ?)";
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String insertSql = "insert into Coupon (OpenId, ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
+                "values (?, ?, ?, ?, ?, ?, ?)";
         try {
-            run.insert(insertSql, new ScalarHandler<>(),
+            runner.insert(insertSql, new ScalarHandler<>(),
                     coupon.getOpenid(), coupon.getProfileId(),
-                    coupon.getAmount(), coupon.getUsed(), coupon.getExpiredDate());
+                    coupon.getAmount(), coupon.getUsed(),
+                    coupon.getExpiredDate(), coupon.getCategory(), coupon.getDescription());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-
 }

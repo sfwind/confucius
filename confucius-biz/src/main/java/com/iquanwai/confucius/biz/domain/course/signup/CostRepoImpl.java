@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,7 +22,7 @@ public class CostRepoImpl implements CostRepo {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public double discount(Double price, Integer profileId, String orderId) {
-        List<Coupon> coupons = couponDao.getCoupon(profileId);
+        List<Coupon> coupons = couponDao.loadCoupons(profileId);
         Double remain = price;
         for (Coupon coupon : coupons) {
             Double amount = coupon.getAmount();
@@ -59,20 +58,17 @@ public class CostRepoImpl implements CostRepo {
     }
 
     @Override
-    public boolean checkDiscount(Integer profileId, Integer couponId) {
-        if (couponId != null) {
-            // 计算优惠
-            Coupon coupon = this.getCoupon(couponId);
-            if (coupon == null || coupon.getUsed() == Coupon.USED || coupon.getExpiredDate().before(new Date())) {
-                // 优惠券无效
-                return false;
-            }
+    public boolean checkCouponValidation(Integer profileId, Integer couponId) {
+        if(couponId != null) {
+            Coupon coupon = couponDao.load(Coupon.class, couponId);
+            return coupon.getProfileId().equals(profileId);
+        } else {
+            return true;
         }
-        return true;
     }
 
     public boolean hasCoupon(Integer profileId) {
-        List<Coupon> coupons = couponDao.getCoupon(profileId);
+        List<Coupon> coupons = couponDao.loadCoupons(profileId);
         return CollectionUtils.isNotEmpty(coupons);
     }
 
@@ -83,7 +79,7 @@ public class CostRepoImpl implements CostRepo {
 
     @Override
     public List<Coupon> getCoupons(Integer profileId) {
-        return couponDao.getCoupon(profileId);
+        return couponDao.loadCoupons(profileId);
     }
 
     @Override

@@ -1,18 +1,14 @@
 package com.iquanwai.confucius.biz.util;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.domain.message.SMSConfig;
 import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -240,119 +236,5 @@ public class ConfigUtils {
 
 	public static Boolean isDevelopment(){
 		return getBooleanValue("development");
-	}
-
-	public static String getSurveyUrl(Integer id){
-        String json = getValue("wjx.survey");
-        Map<String, Object> stringObjectMap = CommonUtils.jsonToMap(json);
-        if (stringObjectMap.get(id + "") != null) {
-            return (String) stringObjectMap.get(id + "");
-        } else {
-            return null;
-        }
-    }
-
-	public static Integer getFeedBackId(){
-		return getIntValue("wjx.feedback");
-	}
-
-	public static String willCloseMsgKey(){
-		return getValue("will.close.task.msg");
-	}
-
-	public static String accountChangeMsgKey(){
-		return getValue("account.change.msg");
-	}
-
-	public static Integer getProfileFullScore(){
-		return getIntValue("profile.full.score");
-	}
-
-	public static String getUploadDomain(){
-		return getValue("upload.image.domain");
-	}
-
-	public static String getPicturePrefix(){
-		return getValue("qiniu.picture.prefix");
-	}
-
-	public static Date getRisePayStopTime(){
-		return DateUtils.parseStringToDateTime(getValue("rise.member.pay.stop.time"));
-	}
-
-	public static Integer riseMemberTotal(){
-		return getIntValue("rise.member.total.count");
-	}
-
-	public static String getIntegratedPracticeIndex(){
-		return getValue("integrated.practice.index");
-	}
-
-	public static String getRisePcAppid(){
-		return getValue("rise.web.appid");
-	}
-
-	public static String getRisePcSecret() {
-		return getValue("rise.web.secret");
-	}
-
-	public static Integer getMinSendLimit(){
-		return getIntValue("sms.min.send.limit");
-	}
-
-	public static Integer getHourSendLimit(){
-		return getIntValue("sms.hour.send.limit");
-	}
-
-	public static Integer getDaySendLimit(){
-		return getIntValue("sms.day.send.limit");
-	}
-
-	public static String getBizAccount(){
-		return getValue("sms.business.account");
-	}
-	public static String getBizPassword(){
-		return getValue("sms.business.password");
-	}
-	public static String getSMSSign(){
-		return getValue("sms.sign");
-	}
-	public static String getMarketAccount(){
-		return getValue("sms.market.account");
-	}
-
-	public static String getMarketPassword(){
-		return getValue("sms.market.password");
-	}
-
-	public static Double getRiseCourseFee(){
-		return getDoubleValue("rise.course.fee");
-	}
-
-	public static SMSConfig getBizMsgConfig(){
-		SMSConfig smsConfig = new SMSConfig();
-		smsConfig.setAccount(getBizAccount());
-		smsConfig.setPassword(getBizPassword());
-		smsConfig.setSign(getSMSSign());
-		return smsConfig;
-	}
-
-	public static SMSConfig getMarketMsgConfig(){
-		SMSConfig smsConfig = new SMSConfig();
-		smsConfig.setAccount(getMarketAccount());
-		smsConfig.setPassword(getMarketPassword());
-		smsConfig.setSign(getSMSSign());
-		return smsConfig;
-	}
-
-	public static List<String> getAlarmList() {
-		List<String> list = Lists.newArrayList();
-		String[] split = getValue("sms.alarm.openids").split(",");
-		CollectionUtils.addAll(list, split);
-		return list;
-	}
-
-	public static Integer getVoteScore(){
-		return getIntValue("vote.score");
 	}
 }
