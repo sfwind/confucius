@@ -51,7 +51,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public ApplicationSubmit load(Integer applicationId, Integer planId, String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ApplicationSubmit> h = new BeanHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=? and PlanId=?";
+        String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=? and PlanId=? and Del=0";
         try {
             return run.query(sql, h, openid, applicationId, planId);
         } catch (SQLException e) {
@@ -63,7 +63,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> load(Integer applicationId, String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=?";
+        String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=? and Del=0";
         try {
             return run.query(sql, h, openid, applicationId);
         } catch (SQLException e) {
@@ -76,8 +76,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> load(Integer applicationId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        // TODO: 写死了大小
-        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Length>=15 order by UpdateTime desc limit 50";
+        String sql = "SELECT * FROM ApplicationSubmit where ApplicationId=? and Length>=15 and Del=0 order by UpdateTime desc limit 50";
         try {
             return run.query(sql, h, applicationId);
         } catch (SQLException e) {
@@ -125,7 +124,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public List<ApplicationSubmit> getPracticeSubmit(Integer practiceId, Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ApplicationSubmit where ApplicationId=? and Content is not null order by UpdateTime desc limit "
+        String sql = "select * from ApplicationSubmit where ApplicationId=? and Content is not null and Del=0 order by UpdateTime desc limit "
                 + page.getOffset() + "," + page.getLimit();
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
@@ -139,7 +138,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> loadRequestCommentApplications(Integer problemId, int size) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from ApplicationSubmit where ProblemId =? and Content is not null " +
-                "and Feedback = 0 and RequestFeedback =1 " +
+                "and Feedback = 0 and RequestFeedback =1 and Del=0 " +
                 "order by length desc limit " + size;
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
@@ -152,7 +151,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public List<ApplicationSubmit> getHighlightSubmit(Integer practiceId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ApplicationSubmit where ApplicationId=? and Priority=1 ";
+        String sql = "select * from ApplicationSubmit where ApplicationId=? and Priority=1 and Del=0";
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
             return runner.query(sql, h, practiceId);
@@ -203,7 +202,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         String questionMark = produceQuestionMark(profileIds.size());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId in (" + questionMark + ") " +
+                "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId in (" + questionMark + ") and Del=0 " +
                 "order by length desc limit " + size;
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
@@ -224,7 +223,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         String questionMark = produceQuestionMark(profileIds.size());
         if (profileIds.size() != 0) {
             String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId not in (" + questionMark + ") " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId not in (" + questionMark + ") and Del=0 " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
@@ -240,7 +239,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
             }
         } else {
             String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                    "and Feedback=0 and RequestFeedback =0 and AddTime>? " +
+                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and Del=0 " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
@@ -271,7 +270,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<UnderCommentCount> getUnderCommentCount() {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<UnderCommentCount>> h = new BeanListHandler<>(UnderCommentCount.class);
-        String sql = "select ProblemId,count(*) as count from ApplicationSubmit where RequestFeedback=1 and Feedback=0 group by ProblemId";
+        String sql = "select ProblemId,count(*) as count from ApplicationSubmit where RequestFeedback=1 and Feedback=0 and Del=0 group by ProblemId";
         try {
             return runner.query(sql, h);
         } catch (SQLException e) {
@@ -297,7 +296,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         String questionMark = produceQuestionMark(ids.size());
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "select * from ApplicationSubmit where id in (" + questionMark + ")";
+        String sql = "select * from ApplicationSubmit where id in (" + questionMark + ") and Del=0";
         try {
             return runner.query(sql, h, ids.toArray());
         } catch (SQLException e) {
@@ -308,7 +307,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public List<ApplicationSubmit> loadSubmitsByProfileIds(Integer problemId, List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ApplicationSubmit where ProblemId = ? and ProfileId in (" + produceQuestionMark(profileIds.size()) + ")";
+        String sql = "SELECT * FROM ApplicationSubmit where ProblemId = ? and ProfileId in (" + produceQuestionMark(profileIds.size()) + ") and Del=0";
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         List<Object> objects = Lists.newArrayList();
         objects.add(problemId);
