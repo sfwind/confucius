@@ -45,24 +45,16 @@ public class MobileSurveyController {
                     .module("问卷")
                     .function("问卷调查")
                     .action("手机端打开问卷")
-                    .memo(activity+"");
+                    .memo(activity + "");
             operationLogService.log(operationLog);
             // 插入问卷提交表
-            Integer submitId = surveyService.insertSurveySubmit(loginUser.getOpenId(), activity);
-            if (submitId != null && submitId > 0) {
-                // 获取url
-                String wjxUrl = ConfigUtils.getSurveyUrl(activity);
-                if (wjxUrl == null) {
-                    logger.error("问卷id：{}，没有找到问卷链接", activity);
-                    response.sendRedirect("/403.jsp");
-                } else {
-                    // 拼接url
-                    wjxUrl = wjxUrl + "?sojumpparm=" + submitId;
-                    WebUtils.wjx(request, response, wjxUrl);
-                }
-            } else {
-                logger.error("用户:{},插入问卷:{},提交记录失败", loginUser.getOpenId(), activity);
+            try {
+                String redirectUrl = surveyService.getRedirectUrl(loginUser.getOpenId(), activity);
+                WebUtils.wjx(request, response, redirectUrl);
+            } catch (Exception e) {
+                logger.error("跳转问卷星失败:", e);
                 response.sendRedirect("/403.jsp");
+
             }
         }
     }
