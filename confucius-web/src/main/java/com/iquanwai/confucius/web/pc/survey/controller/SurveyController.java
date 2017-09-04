@@ -6,7 +6,6 @@ import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
 import com.iquanwai.confucius.biz.po.common.survey.SurveySubmit;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.pc.survey.dto.SurveyResultDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -54,23 +53,8 @@ public class SurveyController {
                     .action("PC端打开问卷")
                     .memo(activity+"");
             operationLogService.log(operationLog);
-            // 插入问卷提交表
-            Integer submitId = surveyService.insertSurveySubmit(pcLoginUser.getOpenId(), activity);
-            if (submitId != null && submitId > 0) {
-                // 获取url
-                String wjxUrl = ConfigUtils.getSurveyUrl(activity);
-                if (wjxUrl == null) {
-                    logger.error("问卷id：{}，没有找到问卷链接", activity);
-                    response.sendRedirect("/403.jsp");
-                } else {
-                    // 拼接url
-                    wjxUrl = wjxUrl + "?sojumpparm=" + submitId;
-                    WebUtils.wjx(request, response, wjxUrl);
-                }
-            } else {
-                logger.error("用户:{},插入问卷:{},提交记录失败", pcLoginUser.getOpenId(), activity);
-                response.sendRedirect("/403.jsp");
-            }
+            String redirectUrl = surveyService.getRedirectUrl(pcLoginUser.getOpenId(), activity);
+            WebUtils.wjx(request, response, redirectUrl);
         } catch (Exception e) {
             logger.error("跳转到问卷页面失败",e);
             try{

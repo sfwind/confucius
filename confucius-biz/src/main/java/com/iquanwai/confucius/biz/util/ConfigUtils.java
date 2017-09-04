@@ -239,16 +239,6 @@ public class ConfigUtils {
 		return getBooleanValue("development");
 	}
 
-	public static String getSurveyUrl(Integer id) {
-		String json = getValue("wjx.survey");
-		Map<String, Object> stringObjectMap = CommonUtils.jsonToMap(json);
-		if (stringObjectMap.get(id + "") != null) {
-			return (String) stringObjectMap.get(id + "");
-		} else {
-			return null;
-		}
-	}
-
 	public static Integer getFeedBackId() {
 		return getIntValue("wjx.feedback");
 	}
