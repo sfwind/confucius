@@ -34,15 +34,15 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public Boolean submitSurvey(SurveySubmit surveySubmit){
+    public Boolean submitSurvey(SurveySubmit surveySubmit) {
         // 先查询该提交id是否是该用户的
-        logger.info("问卷:{} 提交",surveySubmit.getId());
+        logger.info("问卷:{} 提交", surveySubmit.getId());
         logger.debug("问卷信息:{}", surveySubmit);
         return surveySubmitDao.submit(surveySubmit);
     }
 
     @Override
-    public SurveySubmit load(Integer id){
+    public SurveySubmit load(Integer id) {
         return surveySubmitDao.load(SurveySubmit.class, id);
     }
 
@@ -52,17 +52,17 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public SurveyHref loadSurveyHref(Integer activity){
+    public SurveyHref loadSurveyHref(Integer activity) {
         SurveyHref surveyHref = surveyHrefDao.loadSurveyHref(activity);
-        if (surveyHref != null) {
-            surveyHref.setMobileHref(MOBILE_PREFIX + surveyHref.getActivity());
-            surveyHref.setPcHref(PC_PREFIX + surveyHref.getActivity());
+        if (surveyHref != null && surveyHref.getActivity() != null) {
+            surveyHref.setMobileHref(MOBILE_PREFIX.replace("{activity}", surveyHref.getActivity().toString()));
+            surveyHref.setPcHref(PC_PREFIX.replace("{activity}", surveyHref.getActivity().toString()));
         }
         return surveyHref;
     }
 
     @Override
-    public String getRedirectUrl(String openId,Integer activity){
+    public String getRedirectUrl(String openId, Integer activity) {
         // 插入问卷提交表
         SurveyHref surveyHref = this.loadSurveyHref(activity);
         Assert.notNull(surveyHref, "没有找到问卷链接:" + activity);

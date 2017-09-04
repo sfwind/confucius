@@ -11,8 +11,8 @@ import java.util.List;
  */
 public interface SurveyService {
 
-    String PC_PREFIX = "https://www.iquanwai.com/pc/survey/wjx?activity=";
-    String MOBILE_PREFIX = "https://www.iquanwai.com/survey/wjx?activity=";
+    String PC_PREFIX = "https://www.iquanwai.com/pc/survey/wjx?activity={activity}";
+    String MOBILE_PREFIX = "https://www.iquanwai.com/survey/wjx?activity={activity}";
 
     /**
      * 插入问卷链接
