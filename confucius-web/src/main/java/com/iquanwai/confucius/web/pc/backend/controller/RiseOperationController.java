@@ -4,9 +4,16 @@ import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.po.systematism.Choice;
+import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
+import com.iquanwai.confucius.biz.po.fragmentation.WarmupChoice;
+import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.pc.backend.dto.ProblemKnowledgesDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
@@ -18,7 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +52,8 @@ public class RiseOperationController {
     private ProblemService problemService;
     @Autowired
     private PracticeService practiceService;
+    @Autowired
+    private SurveyService surveyService;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -267,6 +281,45 @@ public class RiseOperationController {
         } else  {
             return WebUtils.error("未找到对应小课数据");
         }
+    }
+
+    @RequestMapping(value = "/survey/config/list", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadConfigList(PCLoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("问卷星")
+                .action("查看问卷配置");
+        operationLogService.log(operationLog);
+        List<SurveyHref> surveyHrefs = surveyService.loadAllSurveyHref();
+        return WebUtils.result(surveyHrefs);
+    }
+
+    @RequestMapping(value = "/survey/config", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> updateSurveyConfig(PCLoginUser loginUser,
+                                                                  SurveyHref surveyHref) {
+        Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(surveyHref, "问卷不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("问卷星")
+                .action("更新问卷配置");
+        operationLogService.log(operationLog);
+        Boolean updateStatus = surveyService.updateSurveyHref(surveyHref);
+        return WebUtils.result(updateStatus);
+    }
+
+    @RequestMapping(value = "/delete/survey/config/{id}",method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> deleteSurveyConfig(PCLoginUser loginUser,@PathVariable Integer id){
+        Assert.notNull(loginUser,"用户不能为空");
+        Assert.notNull(id, "问卷id不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("问卷星")
+                .action("删除问卷配置");
+        operationLogService.log(operationLog);
+        Boolean deleteStatus = surveyService.deleteSurveyHref(id);
+        return WebUtils.result(deleteStatus);
     }
 
 }

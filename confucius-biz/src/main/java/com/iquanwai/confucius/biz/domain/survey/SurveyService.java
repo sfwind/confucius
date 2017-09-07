@@ -48,4 +48,19 @@ public interface SurveyService {
      * 获取重定向地址
      */
     String getRedirectUrl(String openId, Integer activity);
+
+    /**
+     * 获取所有问卷星链接
+     */
+    List<SurveyHref> loadAllSurveyHref();
+
+    /**
+     * 更新链接
+     */
+    Boolean updateSurveyHref(SurveyHref href);
+
+    /**
+     * 删除问卷
+     */
+    Boolean deleteSurveyHref(Integer id);
 }
