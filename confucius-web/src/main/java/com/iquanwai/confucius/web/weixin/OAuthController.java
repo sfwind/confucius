@@ -44,7 +44,30 @@ public class OAuthController {
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
 
-            String requestUrl = oAuthService.redirectUrl(callbackUrl);
+            String requestUrl = oAuthService.redirectUrl(callbackUrl, OAuthService.OAUTH_URL);
+            if (ConfigUtils.logDetail()) {
+                LOGGER.info("ip is {},callbackUrl is {},requestUrl is {}", remoteIp, callbackUrl, requestUrl);
+            }
+            response.sendRedirect(requestUrl);
+
+        } catch (Exception e) {
+            LOGGER.error("auth failed", e);
+            try {
+                response.sendRedirect("/403.jsp");
+            } catch (IOException e1) {
+                // ignore
+            }
+        }
+    }
+
+    @RequestMapping("/auth/ask")
+    public void oauthAskCode(@RequestParam("callbackUrl") String callbackUrl,
+                             HttpServletRequest request,
+                             HttpServletResponse response) {
+        try {
+            String remoteIp = request.getHeader("X-Forwarded-For");
+
+            String requestUrl = oAuthService.redirectUrl(callbackUrl, OAuthService.OAUTH_ASK_URL);
             if (ConfigUtils.logDetail()) {
                 LOGGER.info("ip is {},callbackUrl is {},requestUrl is {}", remoteIp, callbackUrl, requestUrl);
             }
@@ -83,6 +106,42 @@ public class OAuthController {
                 LOGGER.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
                 CookieUtils.addCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME,
+                        callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
+                response.sendRedirect(callback.getCallbackUrl());
+            }
+        } catch (Exception e) {
+            LOGGER.error("code failed", e);
+            try {
+                response.sendRedirect("/403.jsp");
+            } catch (IOException e1) {
+                // ignore
+            }
+        }
+    }
+
+    @RequestMapping("/code/ask")
+    public void oauthAskCode(@RequestParam(required = false) String code,
+                             @RequestParam String state,
+                             HttpServletResponse response) {
+        try {
+            if (code == null) {
+                //用户不同意授权,跳转报错页面
+                LOGGER.error("code interface error , code  is null,state is {}", state);
+                return;
+            }
+
+            if (state != null && state.endsWith(ERROR_STATE_SUFFIX)) {
+                state = state.replace(ERROR_STATE_SUFFIX, "");
+            }
+
+            // 返回带accessToken的url
+            Callback callback = oAuthService.accessToken(code, state);
+            if (callback == null) {
+                response.sendRedirect("/403.jsp");
+            } else {
+                LOGGER.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
+                //在cookie中写入access_token
+                CookieUtils.addCookie(OAuthService.ACCESS_ASK_TOKEN_COOKIE_NAME,
                         callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
                 response.sendRedirect(callback.getCallbackUrl());
             }
