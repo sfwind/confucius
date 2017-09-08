@@ -9,7 +9,7 @@
 <style type="text/css">
     img {
         display: block;
-        margin: 58px auto;
+        margin: 116px auto;
         width:50%;
     }
 
