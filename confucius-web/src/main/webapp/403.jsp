@@ -10,6 +10,7 @@
     img {
         display: block;
         margin: 58px auto;
+        width:50%;
     }
 
 </style>
