@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Response;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -224,6 +224,12 @@ public class FragmentController {
             resultDto.setRole(loginUser.getRole());
             // resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
+
+            // 初始化教练回复的评论反馈评价
+            if (Role.isAsst(loginUser.getRole())) {
+                practiceService.initCommentEvaluation(resultDto.getId());
+            }
+
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");
@@ -275,6 +281,12 @@ public class FragmentController {
                 }
                 resultDto.setReplyContent(replyComment.getContent());
             }
+
+            // 初始化教练回复的评论反馈评价
+            if (Role.isAsst(loginUser.getRole())) {
+                practiceService.initCommentEvaluation(resultDto.getId());
+            }
+
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");

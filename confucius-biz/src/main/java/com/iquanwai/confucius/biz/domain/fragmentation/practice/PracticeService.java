@@ -145,4 +145,6 @@ public interface PracticeService {
      * 根据 PracticeUid 删除 WarmupPractice
      */
     Integer delWarmupPracticeByPracticeUid(String practiceUid);
+
+    void initCommentEvaluation(Integer commentId);
 }
