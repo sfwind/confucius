@@ -181,4 +181,5 @@ public interface SignupService {
 
     RiseMember currentRiseMember(Integer profileId);
 
+    Boolean validateCampUrl(Integer month);
 }

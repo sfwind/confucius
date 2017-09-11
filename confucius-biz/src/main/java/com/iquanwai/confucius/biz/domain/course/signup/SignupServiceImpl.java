@@ -910,6 +910,11 @@ public class SignupServiceImpl implements SignupService {
         return riseMember;
     }
 
+    @Override
+    public Boolean validateCampUrl(Integer month) {
+        return ConfigUtils.getMonthlyCampMonth().equals(month);
+    }
+
     //生成学号 2位课程号2位班级号3位学号
     private String memberId(Integer courseId, Integer classId) {
         Integer classNumber = classDao.load(QuanwaiClass.class, classId).getClassNumber();

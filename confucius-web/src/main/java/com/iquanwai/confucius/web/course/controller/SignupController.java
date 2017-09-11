@@ -751,6 +751,13 @@ public class SignupController {
         }
     }
 
+    @RequestMapping(value = "/validate/campurl/{month}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String ,Object>> validateCampUrl(LoginUser loginUser, @PathVariable Integer month) {
+        Assert.notNull(loginUser, "登录用户不能为空");
+        Boolean result = signupService.validateCampUrl(month);
+        return WebUtils.result(result);
+    }
+
     /**
      * 创建订单
      * @param paymentDto 支付信息
