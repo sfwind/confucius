@@ -911,8 +911,8 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Boolean validateCampUrl(Integer month) {
-        return ConfigUtils.getMonthlyCampMonth().equals(month);
+    public Integer loadCurrentCampMonth() {
+        return ConfigUtils.getMonthlyCampMonth();
     }
 
     //生成学号 2位课程号2位班级号3位学号

@@ -751,10 +751,10 @@ public class SignupController {
         }
     }
 
-    @RequestMapping(value = "/validate/campurl/{month}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String ,Object>> validateCampUrl(LoginUser loginUser, @PathVariable Integer month) {
+    @RequestMapping(value = "/current/camp/month", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> validateCampUrl(LoginUser loginUser) {
         Assert.notNull(loginUser, "登录用户不能为空");
-        Boolean result = signupService.validateCampUrl(month);
+        int result = signupService.loadCurrentCampMonth();
         return WebUtils.result(result);
     }
 
