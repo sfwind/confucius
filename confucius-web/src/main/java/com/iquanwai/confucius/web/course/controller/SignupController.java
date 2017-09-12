@@ -751,6 +751,16 @@ public class SignupController {
         }
     }
 
+    @RequestMapping(value = "/current/camp/month", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> validateCampUrl(LoginUser loginUser) {
+        Assert.notNull(loginUser, "登录用户不能为空");
+        MonthlyCampDto dto = new MonthlyCampDto();
+        Integer currentCampMonth = signupService.loadCurrentCampMonth();
+        dto.setCurrentCampMonth(currentCampMonth);
+        dto.setCampMonthProblemId(signupService.loadHrefProblemId(currentCampMonth));
+        return WebUtils.result(dto);
+    }
+
     /**
      * 创建订单
      * @param paymentDto 支付信息
