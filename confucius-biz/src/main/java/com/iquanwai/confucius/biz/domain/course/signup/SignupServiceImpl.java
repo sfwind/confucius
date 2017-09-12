@@ -74,6 +74,8 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ClassMemberDao classMemberDao;
     @Autowired
+    private MonthlyCampScheduleDao monthlyCampScheduleDao;
+    @Autowired
     private CostRepo costRepo;
     @Autowired
     private TemplateMessageService templateMessageService;
@@ -913,6 +915,17 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public Integer loadCurrentCampMonth() {
         return ConfigUtils.getMonthlyCampMonth();
+    }
+
+    /**
+     * 小课售卖页面，跳转小课介绍页面 problemId
+     * @return
+     */
+    @Override
+    public Integer loadHrefProblemId(Integer month) {
+        List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(month);
+        MonthlyCampSchedule schedule = schedules.stream().findFirst().get();
+        return schedule.getProblemId();
     }
 
     //生成学号 2位课程号2位班级号3位学号

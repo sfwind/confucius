@@ -754,8 +754,11 @@ public class SignupController {
     @RequestMapping(value = "/current/camp/month", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> validateCampUrl(LoginUser loginUser) {
         Assert.notNull(loginUser, "登录用户不能为空");
-        int result = signupService.loadCurrentCampMonth();
-        return WebUtils.result(result);
+        MonthlyCampDto dto = new MonthlyCampDto();
+        Integer currentCampMonth = signupService.loadCurrentCampMonth();
+        dto.setCurrentCampMonth(currentCampMonth);
+        dto.setCampMonthProblemId(signupService.loadHrefProblemId(currentCampMonth));
+        return WebUtils.result(dto);
     }
 
     /**
