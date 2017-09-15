@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -173,6 +174,23 @@ public class ProfileDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public List<Profile> queryAccounts(List<Integer> profileIds) {
+        if (CollectionUtils.isEmpty(profileIds)) {
+            return Lists.newArrayList();
+        }
+        String questionMarks = produceQuestionMark(profileIds.size());
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
+        String sql = "SELECT * FROM Profile where Id in (" + questionMarks + ")";
+        try {
+            return run.query(sql, h, profileIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
     }
 
     public Integer riseMemberCount() {

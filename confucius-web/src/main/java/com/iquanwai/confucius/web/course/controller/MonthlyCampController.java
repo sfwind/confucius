@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,10 +40,13 @@ public class MonthlyCampController {
     @RequestMapping(value = "/load", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadMonthlyCampByClassName(@PathParam("className") String className) {
         List<RiseClassMember> riseClassMembers = monthlyCampService.loadMonthlyCampByClassName(className);
+        List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
+        List<Profile> profiles = accountService.getProfiles(profileIds);
+        Assert.isTrue(riseClassMembers.size() == profiles.size(), "用户人数不匹配");
 
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
-        for (RiseClassMember riseClassMember : riseClassMembers) {
-            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMember);
+        for (int i = 0; i < riseClassMembers.size(); i++) {
+            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profiles.get(i));
             monthlyCampDtos.add(campDto);
         }
 
@@ -61,11 +65,13 @@ public class MonthlyCampController {
     @RequestMapping(value = "/load/ungroup", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp() {
         List<RiseClassMember> riseClassMembers = monthlyCampService.loadUnGroupRiseClassMember();
+        List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
+        List<Profile> profiles = accountService.getProfiles(profileIds);
+        Assert.isTrue(riseClassMembers.size() == profiles.size(), "用户人数不匹配");
 
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
-
-        for (RiseClassMember riseClassMember : riseClassMembers) {
-            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMember);
+        for (int i = 0; i < riseClassMembers.size(); i++) {
+            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profiles.get(i));
             monthlyCampDtos.add(campDto);
         }
         return WebUtils.result(monthlyCampDtos);
@@ -80,23 +86,19 @@ public class MonthlyCampController {
         riseClassMember.setGroupId(monthlyCampDto.getGroupId());
 
         RiseClassMember updatedRiseClassMember = monthlyCampService.modifyMonthlyCampByClassName(riseClassMember);
-
         if (updatedRiseClassMember != null) {
-            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(updatedRiseClassMember);
+            Profile profile = accountService.getProfile(updatedRiseClassMember.getProfileId());
+            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(updatedRiseClassMember, profile);
             return WebUtils.result(campDto);
         } else {
             return WebUtils.error("更新失败");
         }
     }
 
-
     /**
      * 将 RiseClassMember 转为 MonthlyCampDto
      */
-    private MonthlyCampDto convertRiseClassMemberToMonthlyCampDto(RiseClassMember riseClassMember) {
-        Integer profileId = riseClassMember.getProfileId();
-        Profile profile = accountService.getProfile(profileId);
-
+    private MonthlyCampDto convertRiseClassMemberToMonthlyCampDto(RiseClassMember riseClassMember, Profile profile) {
         MonthlyCampDto campDto = new MonthlyCampDto();
         campDto.setRiseClassMemberId(riseClassMember.getId());
         campDto.setHeadImgUrl(profile.getHeadimgurl());

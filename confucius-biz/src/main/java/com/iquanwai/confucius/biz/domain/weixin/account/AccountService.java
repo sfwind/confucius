@@ -26,6 +26,8 @@ public interface AccountService {
      */
     Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
+    List<Profile> getProfiles(List<Integer> profileIds);
+
     /**
      * 收集所有关注用户的信息
      */
