@@ -7,13 +7,11 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
-import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,9 +37,7 @@ public class MonthlyCampController {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @RequestMapping(value = "/load", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadMonthlyCampByClassName(LoginUser loginUser, @PathParam("className") String className) {
-        Assert.notNull(loginUser, "登录用户不能为空");
-
+    public ResponseEntity<Map<String, Object>> loadMonthlyCampByClassName(@PathParam("className") String className) {
         List<RiseClassMember> riseClassMembers = monthlyCampService.loadMonthlyCampByClassName(className);
 
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
@@ -63,9 +59,7 @@ public class MonthlyCampController {
     }
 
     @RequestMapping(value = "/load/ungroup", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp(LoginUser loginUser) {
-        Assert.notNull(loginUser, "登录用户不能为空");
-
+    public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp() {
         List<RiseClassMember> riseClassMembers = monthlyCampService.loadUnGroupRiseClassMember();
 
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
@@ -78,9 +72,7 @@ public class MonthlyCampController {
     }
 
     @RequestMapping(value = "/modify", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> modifyMonthlyCamp(LoginUser loginUser, @RequestBody MonthlyCampDto monthlyCampDto) {
-        Assert.notNull(loginUser, "登录用户不能为空");
-
+    public ResponseEntity<Map<String, Object>> modifyMonthlyCamp(@RequestBody MonthlyCampDto monthlyCampDto) {
         RiseClassMember riseClassMember = new RiseClassMember();
         riseClassMember.setId(monthlyCampDto.getRiseClassMemberId());
         riseClassMember.setClassName(monthlyCampDto.getClassName());
