@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * Created by 三十文 on 2017/9/15
  */
 @RestController
-@RequestMapping("/camp")
+@RequestMapping("/backend/camp")
 public class MonthlyCampController {
 
     @Autowired
