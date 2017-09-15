@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,11 +41,12 @@ public class MonthlyCampController {
         List<RiseClassMember> riseClassMembers = monthlyCampService.loadMonthlyCampByClassName(className);
         List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = accountService.getProfiles(profileIds);
-        Assert.isTrue(riseClassMembers.size() == profiles.size(), "用户人数不匹配");
 
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
         for (int i = 0; i < riseClassMembers.size(); i++) {
-            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profiles.get(i));
+            Integer profileId = riseClassMembers.get(i).getProfileId();
+            Profile profile = profiles.stream().filter(item -> profileId.equals(item.getId())).findFirst().get();
+            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profile);
             monthlyCampDtos.add(campDto);
         }
 
@@ -67,11 +67,12 @@ public class MonthlyCampController {
         List<RiseClassMember> riseClassMembers = monthlyCampService.loadUnGroupRiseClassMember();
         List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = accountService.getProfiles(profileIds);
-        Assert.isTrue(riseClassMembers.size() == profiles.size(), "用户人数不匹配");
 
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
         for (int i = 0; i < riseClassMembers.size(); i++) {
-            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profiles.get(i));
+            Integer profileId = riseClassMembers.get(i).getProfileId();
+            Profile profile = profiles.stream().filter(item -> profileId.equals(item.getId())).findFirst().get();
+            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profile);
             monthlyCampDtos.add(campDto);
         }
         return WebUtils.result(monthlyCampDtos);
