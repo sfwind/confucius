@@ -631,16 +631,18 @@ public class SignupController {
                 break;
         }
 
-        MemberType memberType = signupService
-                .getMemberTypesPayInfo()
-                .stream()
-                .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
-                .findFirst()
-                .orElse(null);
-        if (memberType != null) {
-            goodsInfoDto.setFee(memberType.getFee());
-            goodsInfoDto.setStartTime(memberType.getStartTime());
-            goodsInfoDto.setEndTime(memberType.getEndTime());
+        if (goodsInfoDto.getGoodsType().equals(GoodsInfoDto.FRAG_MEMBER) || goodsInfoDto.getGoodsType().equals(GoodsInfoDto.FRAG_CAMP)) {
+            MemberType memberType = signupService
+                    .getMemberTypesPayInfo()
+                    .stream()
+                    .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
+                    .findFirst()
+                    .orElse(null);
+            if (memberType != null) {
+                goodsInfoDto.setFee(memberType.getFee());
+                goodsInfoDto.setStartTime(memberType.getStartTime());
+                goodsInfoDto.setEndTime(memberType.getEndTime());
+            }
         }
 
         // 获取优惠券
@@ -747,6 +749,16 @@ public class SignupController {
                 logger.error("异常，用户:{}商品类型有问题:{}", loginUser.getId(), paymentDto);
                 return WebUtils.error("商品类型异常");
         }
+    }
+
+    @RequestMapping(value = "/current/camp/month", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> validateCampUrl(LoginUser loginUser) {
+        Assert.notNull(loginUser, "登录用户不能为空");
+        MonthlyCampDto dto = new MonthlyCampDto();
+        Integer currentCampMonth = signupService.loadCurrentCampMonth();
+        dto.setCurrentCampMonth(currentCampMonth);
+        dto.setCampMonthProblemId(signupService.loadHrefProblemId(currentCampMonth));
+        return WebUtils.result(dto);
     }
 
     /**

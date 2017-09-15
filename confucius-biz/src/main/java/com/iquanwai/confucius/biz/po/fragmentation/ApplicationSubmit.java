@@ -32,4 +32,5 @@ public class ApplicationSubmit {
     private int comment; //非db字段 是否已被当前用户评论
     private String topic; //非db字段 应用练习标题
     private String description; //非db字段 应用练习说明
+    private Integer del; //是否删除（0-否，1-是）
 }

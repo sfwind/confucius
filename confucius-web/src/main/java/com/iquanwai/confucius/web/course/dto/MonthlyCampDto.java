@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class MonthlyCampDto {
 
-    private Integer couponId; // 优惠券 id
+    private Integer currentCampMonth; // 当前小课训练营配置月份
+    private Integer campMonthProblemId; // 当前小课训练营跳转月份
 
 }

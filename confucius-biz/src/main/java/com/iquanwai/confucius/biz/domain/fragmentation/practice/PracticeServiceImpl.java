@@ -66,6 +66,8 @@ public class PracticeServiceImpl implements PracticeService {
     private WarmupPracticeDao warmupPracticeDao;
     @Autowired
     private WarmupChoiceDao warmupChoiceDao;
+    @Autowired
+    private CommentEvaluationDao commentEvaluationDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -491,6 +493,11 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Integer delWarmupPracticeByPracticeUid(String practiceUid) {
         return warmupPracticeDao.delWarmupPracticeByPracticeUid(practiceUid);
+    }
+
+    @Override
+    public void initCommentEvaluation(Integer commentId) {
+        commentEvaluationDao.initCommentEvaluation(commentId);
     }
 
 }

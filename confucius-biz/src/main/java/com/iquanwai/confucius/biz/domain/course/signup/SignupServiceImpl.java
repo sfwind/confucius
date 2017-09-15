@@ -74,6 +74,8 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ClassMemberDao classMemberDao;
     @Autowired
+    private MonthlyCampScheduleDao monthlyCampScheduleDao;
+    @Autowired
     private CostRepo costRepo;
     @Autowired
     private TemplateMessageService templateMessageService;
@@ -188,14 +190,14 @@ public class SignupServiceImpl implements SignupService {
         if (memberTypeId == RiseMember.ELITE) {
             // 购买会员
             if (profile.getRiseMember() == 1) {
-                right = "您已经是 RISE 会员";
+                right = "您已经是圈外同学会员";
             } else {
                 left = 1;
             }
         } else if (memberTypeId == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
             if (profile.getRiseMember() == 1) {
-                right = "您已经是 RISE 会员";
+                right = "您已经是圈外同学会员";
             } else if (profile.getRiseMember() == 3) {
                 right = "您已经是小课训练营用户";
             } else if (!ConfigUtils.getMonthlyCampOpen()) {
@@ -653,19 +655,20 @@ public class SignupServiceImpl implements SignupService {
 
         // 所有计划设置为会员
         List<ImprovementPlan> plans = improvementPlanDao.loadUserPlans(riseOrder.getOpenid());
-        for (ImprovementPlan plan : plans) {
-            if (!plan.getRiseMember()) {
-                // 不是会员的计划，设置一下
-                plan.setCloseDate(DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
-                if (plan.getStatus().equals(1) && (memberType.getId().equals(3) || memberType.getId().equals(4))) {
-                    // 给精英版正在进行的planid+1个求点评次数
-                    improvementPlanDao.becomeRiseEliteMember(plan);
-                } else {
-                    // 非精英版或者不是正在进行的，不加点评次数
-                    improvementPlanDao.becomeRiseMember(plan);
-                }
+        // 不是会员的计划，设置一下
+        // 给精英版正在进行的planid+1个求点评次数
+        // 非精英版或者不是正在进行的，不加点评次数
+        plans.stream().filter(plan -> !plan.getRiseMember()).forEach(plan -> {
+            // 不是会员的计划，设置一下
+            plan.setCloseDate(DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
+            if (plan.getStatus().equals(1) && (memberType.getId().equals(3) || memberType.getId().equals(4))) {
+                // 给精英版正在进行的planid+1个求点评次数
+                improvementPlanDao.becomeRiseEliteMember(plan);
+            } else {
+                // 非精英版或者不是正在进行的，不加点评次数
+                improvementPlanDao.becomeRiseMember(plan);
             }
-        }
+        });
         Profile profile = profileDao.queryByOpenId(openId);
         // 发送模板消息
         sendPurchaseMessage(profile, memberType.getId(), orderId);
@@ -674,7 +677,6 @@ public class SignupServiceImpl implements SignupService {
     private void sendPurchaseMessage(Profile profile, Integer memberTypeId, String orderId) {
         Assert.notNull(profile, "openid不能为空");
         logger.info("发送欢迎消息给付费用户{}", profile.getOpenid());
-
         switch (memberTypeId) {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
@@ -692,43 +694,6 @@ public class SignupServiceImpl implements SignupService {
                 messageService.sendAlarm("报名模块出错", "报名后发送消息", "中", "订单id:" + orderId + "\nprofileId:" + profile.getId(), "会员类型异常");
             }
         }
-    }
-
-    private void sendProfessionalWelcomeMsg(Profile profile, MemberType memberType, RiseMember riseMember) {
-        TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser(profile.getOpenid());
-        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-        templateMessage.setData(data);
-        templateMessage.setTemplate_id(ConfigUtils.productPaidMsg());
-        String first = "Hi，" + profile.getNickname() + "，欢迎使用【圈外同学】正式版！\n\n";
-        first += "所有圈外小课已为你开放，快来学习哦！\n";
-        data.put("first", new TemplateMessage.Keyword(first));
-        data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
-        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
-        data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
-        data.put("remark", new TemplateMessage.Keyword("\n想和更多优质小伙伴一起玩耍？点击详情，加入你所在地的分舵，玩转【圈外同学】吧～"));
-        templateMessage.setUrl(ConfigUtils.domainName() + "/static/quanwai/wx/group");
-        templateMessageService.sendMessage(templateMessage);
-    }
-
-    private void sendEliteWelcomeMsg(String openid, MemberType memberType, RiseMember riseMember) {
-        String key = ConfigUtils.productPaidMsg();
-        TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser(openid);
-        templateMessage.setTemplate_id(key);
-        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-        templateMessage.setData(data);
-
-        data.put("first", new TemplateMessage.Keyword("Hi，" + profileDao.queryByOpenId(openid).getNickname() + "，欢迎进入【圈外同学】的学习旅程！\n"
-                + "现在还有最后一步——加入精英社群，大部分学习交流和服务通知都要在社群里完成，请务必入坑，找到你的精英小伙伴们。\n"
-                + "方式：点击详情，添加小Q，获得入群邀请～\n"));
-        data.put("keyword1", new TemplateMessage.Keyword(memberType.getName()));
-        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
-        data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1))));
-        // data.put("remark", new TemplateMessage.Keyword("\n想扩展人脉，和精英RISER相互勾搭？点击详情，添加小Q，获得入群邀请哦～"));
-        templateMessage.setUrl("https://shimo.im/doc/pwp5qEcft2sKABtL");
-
-        templateMessageService.sendMessage(templateMessage);
     }
 
     private Date getCloseDate(Integer classId, Integer courseId) {
@@ -945,6 +910,22 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
         }
         return riseMember;
+    }
+
+    @Override
+    public Integer loadCurrentCampMonth() {
+        return ConfigUtils.getMonthlyCampMonth();
+    }
+
+    /**
+     * 小课售卖页面，跳转小课介绍页面 problemId
+     * @return
+     */
+    @Override
+    public Integer loadHrefProblemId(Integer month) {
+        List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(month);
+        MonthlyCampSchedule schedule = schedules.stream().findFirst().get();
+        return schedule.getProblemId();
     }
 
     //生成学号 2位课程号2位班级号3位学号

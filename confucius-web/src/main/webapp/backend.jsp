@@ -17,8 +17,6 @@
         loginSocketUrl:"${loginSocketUrl}",
         isDevelopment:${isDevelopment},
         feedBack:${feedBack},
-        openFeedBack:${openFeedBack},
-        openComment:${openComment},
         backend:true,
         roleId:${roleId},
         signature:"${signature}",

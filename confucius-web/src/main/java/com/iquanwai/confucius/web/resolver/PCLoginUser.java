@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.resolver;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.permission.Authority;
-import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +26,7 @@ public class PCLoginUser {
 
     public static PCLoginUser defaultUser(){
         return new PCLoginUser(ConfigUtils.getDefaultProfileId(), ConfigUtils.getDefaultOpenid(),
-                LoginUser.defaultUser(), Role.ADMIN, null, Lists.newArrayList());
+                LoginUser.defaultUser(), 5, null, Lists.newArrayList());
     }
 
 }

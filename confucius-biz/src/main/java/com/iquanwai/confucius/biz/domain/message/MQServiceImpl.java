@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.domain.message;
 
 import com.iquanwai.confucius.biz.dao.common.message.MQDealLogDao;
 import com.iquanwai.confucius.biz.dao.common.message.MQSendLogDao;
-import com.iquanwai.confucius.biz.dao.common.message.MessageQueueDao;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,49 +17,48 @@ import java.net.UnknownHostException;
 @Service
 public class MQServiceImpl implements MQService {
     @Autowired
-    private MessageQueueDao messageQueueDao;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
     private MQSendLogDao mqSendLogDao;
     @Autowired
     private MQDealLogDao mqDealLogDao;
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private String ipAddress;
 
     @Override
-    public void saveMQSendOperation(MQSendLog mqSendLog){
+    public void saveMQSendOperation(MQSendLog mqSendLog) {
         // 插入mqSendOperation
-        new Thread(() -> {
-            String ip = null;
+        if (ipAddress == null) {
             try {
                 InetAddress localHost = InetAddress.getLocalHost();
-                ip = localHost.getHostAddress();
+                ipAddress = localHost.getHostAddress();
             } catch (UnknownHostException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
-            mqSendLog.setPublisherIp(ip);
-            mqSendLogDao.insert(mqSendLog);
-        }).start();
+        }
+
+        mqSendLog.setPublisherIp(ipAddress);
+        mqSendLogDao.insert(mqSendLog);
     }
+
 
     @Override
     public void updateAfterDealOperation(RabbitMQDto dto) {
-        new Thread(() -> {
-            String msgId = dto.getMsgId();
-            String ip = null;
+        String msgId = dto.getMsgId();
+        if (ipAddress == null) {
             try {
                 InetAddress localHost = InetAddress.getLocalHost();
-                ip = localHost.getHostAddress();
+                ipAddress = localHost.getHostAddress();
             } catch (UnknownHostException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
-
-            MQDealLog mqDealLog = new MQDealLog();
-            mqDealLog.setMsgId(msgId);
-            mqDealLog.setTopic(dto.getTopic());
-            mqDealLog.setQueue(dto.getQueue());
-            mqDealLog.setConsumerIp(ip);
-            mqDealLogDao.insert(mqDealLog);
-        }).start();
+        }
+        MQDealLog mqDealLog = new MQDealLog();
+        mqDealLog.setMsgId(msgId);
+        mqDealLog.setTopic(dto.getTopic());
+        mqDealLog.setQueue(dto.getQueue());
+        mqDealLog.setConsumerIp(ipAddress);
+        mqDealLogDao.insert(mqDealLog);
     }
 
 }

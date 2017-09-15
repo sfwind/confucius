@@ -181,4 +181,7 @@ public interface SignupService {
 
     RiseMember currentRiseMember(Integer profileId);
 
+    Integer loadCurrentCampMonth();
+
+    Integer loadHrefProblemId(Integer month);
 }

@@ -39,16 +39,18 @@ public class OAuthServiceImpl implements OAuthService {
 
     private static final String REDIRECT_PATH = "/wx/oauth/code";
 
+    private static final String REDIRECT_ASK_PATH = "/wx/oauth/code";
+
     private static final String IP_REGULAR = "(\\d*\\.){3}\\d*";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public String redirectUrl(String callbackUrl) {
-        String requestUrl = OAUTH_URL;
+    public String redirectUrl(String callbackUrl, String authUrl) {
+        String requestUrl = authUrl;
         Callback callback = new Callback();
         String ip = getIPFromUrl(callbackUrl);
-        if(ip!=null){
-            callbackUrl = callbackUrl.replace("http://"+ip, ConfigUtils.domainName());
+        if (ip != null) {
+            callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
         }
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
@@ -56,10 +58,10 @@ public class OAuthServiceImpl implements OAuthService {
         logger.info("state is {}", state);
         callbackDao.insert(callback);
 
-        Map<String,String> params = Maps.newHashMap();
+        Map<String, String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         try {
-            params.put("redirect_url", URLEncoder.encode(ConfigUtils.adapterDomainName()+REDIRECT_PATH, "utf-8"));
+            params.put("redirect_url", URLEncoder.encode(ConfigUtils.adapterDomainName() + (OAUTH_URL.equals(authUrl) ? REDIRECT_PATH : REDIRECT_ASK_PATH), "utf-8"));
         } catch (UnsupportedEncodingException e) {
             // ignore
         }
@@ -177,9 +179,6 @@ public class OAuthServiceImpl implements OAuthService {
         logger.info("update callback, state:{},accessToken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
 
-        // callbackUrl增加参数access_token
-//        String callbackUrl = callback.getCallbackUrl();
-//        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
         return callback;
     }
 
