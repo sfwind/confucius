@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,23 +47,6 @@ public class IndexController {
 //        if(!checkAccessToken(request,response)){
 //            return null;
 //        }
-        return courseView(request);
-    }
-
-    @RequestMapping(value = "/introduction/my",method = RequestMethod.GET)
-    public ModelAndView getIntroductionIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        if(!checkAccessToken(request,response)){
-            return null;
-        }
-        if(ConfigUtils.isDevelopment()){
-            //如果不在白名单中,直接403报错
-            boolean result = whiteListService.isInWhiteList(WhiteList.TEST, loginUser.getId());
-            if(!result){
-                response.sendRedirect("/403.jsp");
-                return null;
-            }
-        }
-
         return courseView(request);
     }
 
@@ -97,39 +81,6 @@ public class IndexController {
             return null;
         }
         return courseView(request, loginUser);
-    }
-
-    @RequestMapping(value = "/personal/edit",method = RequestMethod.GET)
-    public ModelAndView getPersonalEditIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request,response)){
-            return null;
-        }
-        return courseView(request);
-    }
-
-
-    @RequestMapping(value = "/personal/static/**",method = RequestMethod.GET)
-    public ModelAndView getPersonalIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        if(!checkAccessToken(request,response)){
-            return null;
-        }
-        return courseView(request,loginUser);
-    }
-
-    @RequestMapping(value = "/operation/static/**",method = RequestMethod.GET)
-    public ModelAndView getOperationIndex(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser) throws Exception{
-        if(!checkAccessToken(request,response)){
-            return null;
-        }
-        return courseView(request, loginUser);
-    }
-
-    @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
-    public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request,response)){
-            return null;
-        }
-        return courseView(request);
     }
 
     private boolean checkAccessToken(HttpServletRequest request,HttpServletResponse response){
@@ -174,6 +125,10 @@ public class IndexController {
         }
     }
 
+    @RequestMapping(value = "/heartbeat",method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> heartbeat() throws Exception{
+        return WebUtils.success();
+    }
 
     private ModelAndView courseView(HttpServletRequest request){
         ModelAndView mav = new ModelAndView("course");

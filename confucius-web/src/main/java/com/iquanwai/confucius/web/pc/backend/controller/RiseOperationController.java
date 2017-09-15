@@ -6,7 +6,6 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.po.systematism.Choice;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.pc.backend.dto.ProblemKnowledgesDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;

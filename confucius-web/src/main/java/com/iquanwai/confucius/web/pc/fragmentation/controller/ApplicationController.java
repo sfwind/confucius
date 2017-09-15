@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
-import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
@@ -30,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.xml.ws.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,8 +48,6 @@ public class ApplicationController {
     private PracticeService practiceService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private PictureService pictureService;
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
