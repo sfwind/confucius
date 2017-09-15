@@ -10,7 +10,7 @@ import lombok.Data;
 public class Knowledge {
     private int id;
     private String knowledge; //知识点
-    private Integer type; //知识点分类
+    private String step;
     private String analysis; //作用
     private String means; //方法
     private String keynote; //要点
@@ -19,6 +19,11 @@ public class Knowledge {
     private String keynotePic;// 要点图片
     private String pic; //图片链接
     private String audio; //语音链接
+    private String analysisAudio;
+    private String meansAudio;
+    private String keynoteAudio;
+
+    private Integer type; //知识点分类
     private Integer appear; //非db字段,是否出现过
 
     private static String REVIEW_KNOWLEDGE = ConfigUtils.getIntegratedPracticeIndex();
