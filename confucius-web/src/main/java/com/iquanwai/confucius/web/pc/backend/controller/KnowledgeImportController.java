@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/pc/admin/knowledge")
+@RequestMapping("/pc/operation/knowledge")
 public class KnowledgeImportController {
 
     @Autowired
