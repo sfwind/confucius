@@ -238,7 +238,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
 
         // 没有匹配到，发送mq
-        if (StringUtils.isNumeric(message) || "背包".equals(message)) {
+        if (StringUtils.isNumeric(message) || "背包".equals(message) || "结束".equals(message) || "00".equals(message)) {
             WechatMessage wechatMessage = new WechatMessage();
             wechatMessage.setMessage(message);
             wechatMessage.setOpenid(openid);
