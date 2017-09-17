@@ -74,7 +74,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     /** 发送订阅消息 **/
     private RabbitMQPublisher rabbitMQPublisher;
     /** 发送微信回复消息 **/
-    private RabbitMQPublisher messageMqPublisher;
+//    private RabbitMQPublisher messageMqPublisher;
+    /** 不同的关键字分发给不同的队列 */
+    private Map<String, RabbitMQPublisher> messageMQGroup = Maps.newHashMap();
+
     //推广活动分隔符,分割活动和用户id
     private static final String ACTIVITY_SEPERATE_CHAR = "_";
 
@@ -104,6 +107,19 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         //初始化自动回复消息
         List<AutoReplyMessage> messages = autoReplyMessageDao.loadAllMessages();
         messages.forEach(autoReplyMessage -> {
+            // 分发消息初始化
+            if (autoReplyMessage.getType().equals(Constants.WEIXIN_MESSAGE_TYPE.DISTRIBUTE)) {
+                // 消息分发
+                String[] word = autoReplyMessage.getKeyword().split("\\|");
+                String topic = autoReplyMessage.getMessage();
+                RabbitMQPublisher tempPublisher = rabbitMQFactory.initFanoutPublisher(topic);
+                for (String w : word) {
+                    messageMQGroup.put(w, tempPublisher);
+                }
+                return;
+            }
+
+
             // 判断是否是默认回复
             if (autoReplyMessage.getIsDefault()) {
                 defaultReply = autoReplyMessage;
@@ -133,12 +149,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 }
                 newsMessageMap.put(keyword, graphicMessages);
             }
-
         });
         logger.info("load auto reply message complete");
         //初始化mq
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(SUBSCRIBE_TOPIC);
-        messageMqPublisher = rabbitMQFactory.initFanoutPublisher(WECHAT_MESSAGE_TOPIC);
+//        messageMqPublisher = rabbitMQFactory.initFanoutPublisher(WECHAT_MESSAGE_TOPIC);
     }
 
     @Override
@@ -238,7 +253,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
 
         // 没有匹配到，发送mq
-        if (StringUtils.isNumeric(message) || "背包".equals(message) || "结束".equals(message) || "00".equals(message)) {
+        RabbitMQPublisher messageMqPublisher = messageMQGroup.get(message);
+//        if (StringUtils.isNumeric(message) || "背包".equals(message) || "结束".equals(message) || "00".equals(message)) {
+        if (messageMqPublisher != null) {
             WechatMessage wechatMessage = new WechatMessage();
             wechatMessage.setMessage(message);
             wechatMessage.setOpenid(openid);
@@ -289,11 +306,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     Profile profile = accountService.getProfile(openid, false);
                     //从未关注过的全新用户或者未付费的用户
                     boolean isNew = false;
-                    if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
+                    if (profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE) {
                         isNew = true;
                     }
                     //加锁防止微信消息重放
-                    if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 5)){
+                    if (!redisUtil.tryLock(EVENT_SUBSCRIBE + ":" + openid, 1, 5)) {
                         return null;
                     }
                     //发送订阅消息
@@ -306,7 +323,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     } catch (ConnectException e) {
                         logger.error("rabbit mq init failed");
                     }
-                    if(isNew){
+                    if (isNew) {
                         promotionSuccess(channel, openid, SubscribeEvent.SUBSCRIBE);
                     }
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
@@ -331,11 +348,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 Profile profile = accountService.getProfile(openid, false);
                 //从未关注过的全新用户或者未付费的用户
                 boolean isNew = false;
-                if(profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE){
+                if (profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE) {
                     isNew = true;
                 }
                 //加锁防止微信消息重放
-                if(!redisUtil.tryLock(EVENT_SUBSCRIBE+":"+openid, 1, 5)){
+                if (!redisUtil.tryLock(EVENT_SUBSCRIBE + ":" + openid, 1, 5)) {
                     return null;
                 }
                 //发送订阅消息
@@ -348,7 +365,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 } catch (ConnectException e) {
                     logger.error("rabbit mq init failed");
                 }
-                if(isNew){
+                if (isNew) {
                     promotionSuccess(eventKey, openid, SubscribeEvent.SCAN);
                 }
                 List<SubscribeMessage> scanMessages = Lists.newArrayList();
@@ -374,11 +391,11 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             promotionUser.setSource(eventKey);
             promotionUser.setOpenid(openid);
             promotionUser.setAction(0);
-            if(eventKey.contains(ACTIVITY_SEPERATE_CHAR)){
+            if (eventKey.contains(ACTIVITY_SEPERATE_CHAR)) {
                 String[] splits = StringUtils.split(eventKey, ACTIVITY_SEPERATE_CHAR);
-                if(splits.length>1){
-                    try{
-                        int profileId =Integer.valueOf(splits[1]);
+                if (splits.length > 1) {
+                    try {
+                        int profileId = Integer.valueOf(splits[1]);
                         Profile profile = accountService.getProfile(profileId);
                         if (profile != null) {
                             if (profile.getOpenid().equals(openid)) {
@@ -386,7 +403,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                             }
                         }
                         promotionUser.setProfileId(profileId);
-                    }catch (NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         // ignore
                     }
                 }
