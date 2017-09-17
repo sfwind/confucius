@@ -91,7 +91,6 @@ public class RabbitMQFactory {
         Assert.notNull(topic, "交换机名字不能为null");
         FanoutExchange fanoutExchange = new FanoutExchange(topic, false, false);
         amqpAdmin.declareExchange(fanoutExchange);
-
         return new RabbitMQPublisher() {
             @Override
             public <T> void publish(T message) throws ConnectException {

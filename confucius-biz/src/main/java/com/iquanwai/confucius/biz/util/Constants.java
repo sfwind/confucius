@@ -80,6 +80,7 @@ public interface Constants {
         int IMAGE = 2;
         int VOICE = 3;
         int NEWS = 4;
+        int DISTRIBUTE = 5;
     }
 
     interface RISE_MEMBER{

@@ -102,7 +102,7 @@ public class CallbackMessageController {
                     writer.print(returnXml);
                     response.flushBuffer();
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    LOGGER.error(e1.getLocalizedMessage(),e1);
                 } finally {
                     IOUtils.closeQuietly(writer);
                 }
@@ -113,7 +113,7 @@ public class CallbackMessageController {
                     writer.print(SUCCESS);
                     response.flushBuffer();
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    LOGGER.error(e1.getLocalizedMessage(), e1);
                 } finally {
                     IOUtils.closeQuietly(writer);
                 }
