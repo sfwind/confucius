@@ -10,12 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class ConfigUtils {
 	private static Config config;
@@ -380,6 +375,11 @@ public class ConfigUtils {
 
 	public static boolean getMonthlyCampOpen() {
 		return getBooleanValue("open.monthly.camp");
+	}
+
+	public static Integer getEditableProblem() {
+		return getIntValue("editable.problem");
+
 	}
 
 }

@@ -2,14 +2,13 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
-import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.Course;
 import com.iquanwai.confucius.biz.po.systematism.CourseWeek;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.CertificateDto;
 import com.iquanwai.confucius.web.course.dto.CoursePageDto;

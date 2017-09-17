@@ -117,6 +117,23 @@ public class AccountServiceImpl implements AccountService {
         return profile;
     }
 
+    @Override
+    public List<Profile> getProfiles(List<Integer> profileIds) {
+        List<Profile> profiles = profileDao.queryAccounts(profileIds);
+        profiles.forEach(profile -> {
+            if (profile.getHeadimgurl() != null) {
+                profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
+            }
+            Integer role = userRoleMap.get(profile.getOpenid());
+            if (role == null) {
+                profile.setRole(0);
+            } else {
+                profile.setRole(role);
+            }
+        });
+        return profiles;
+    }
+
     private Account getAccountFromWeixin(String openid) throws NotFollowingException {
         //调用api查询account对象
         String url = USER_INFO_URL;
@@ -318,7 +335,7 @@ public class AccountServiceImpl implements AccountService {
                 break;
             case Constants.RISE_MEMBER.MONTHLY_CAMP:
                 // 当前人是小课训练营状态，则只可以升级为会员
-                if(riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
+                if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
                     profileDao.updateRiseMember(openid, riseMember);
                 }
                 break;

@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.pc.fragmentation.dto;
 
 import lombok.Data;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Created by nethunder on 2017/1/11.
