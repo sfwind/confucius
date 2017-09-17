@@ -255,6 +255,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         // 没有匹配到，发送mq
         RabbitMQPublisher messageMqPublisher = messageMQGroup.get(message);
 //        if (StringUtils.isNumeric(message) || "背包".equals(message) || "结束".equals(message) || "00".equals(message)) {
+        if (messageMqPublisher == null && StringUtils.isNumeric(message)) {
+            messageMqPublisher = messageMQGroup.get("数字");
+        }
         if (messageMqPublisher != null) {
             WechatMessage wechatMessage = new WechatMessage();
             wechatMessage.setMessage(message);
@@ -269,6 +272,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         }
 
         //没有匹配到任何消息时,回复默认消息
+
         return buildMessage(openid, wxid, defaultReply);
     }
 
