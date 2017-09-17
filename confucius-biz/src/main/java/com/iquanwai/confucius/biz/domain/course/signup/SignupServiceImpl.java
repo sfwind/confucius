@@ -464,9 +464,10 @@ public class SignupServiceImpl implements SignupService {
         profileDao.becomeMonthlyCampMember(profileId);
 
         // RiseMember 新增记录
-        String memberId = generateMonthlyCampMemberId();
+        String memberId = generateMemberId();
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassId(ConfigUtils.getMonthlyCampClassId());
+        classMember.setClassName(ConfigUtils.getMonthlyCampClassId());
         classMember.setProfileId(profileId);
         classMember.setMemberId(memberId);
         classMember.setActive(1);
@@ -514,42 +515,23 @@ public class SignupServiceImpl implements SignupService {
         return monthlyCampOrderDao.loadCampOrder(orderId);
     }
 
-    private String generateRisememberMemberId() {
-        StringBuilder targetMemberId = new StringBuilder();
-
-        String prefix = ConfigUtils.getRisememberClassId();
-        String key = "customer:riseMember:" + prefix;
-        redisUtil.lock("lock:RiseMemberId", (lock) -> {
-            // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
-            String memberId = redisUtil.get(key);
-            String sequence;
-            if (StringUtils.isEmpty(memberId)) {
-                sequence = "001";
-            } else {
-                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
-            }
-            targetMemberId.append(prefix).append(sequence);
-            redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
-        });
-        return targetMemberId.toString();
-    }
-
     /**
-     * 生成 memberId，格式 201701001 年 + 月 + 自然顺序
+     * 生成 memberId，格式 YYYYMM + 6位数字
      */
-    private String generateMonthlyCampMemberId() {
+    private String generateMemberId() {
         StringBuilder targetMemberId = new StringBuilder();
 
-        String prefix = ConfigUtils.getMonthlyCampClassId();
-        String key = "customer:trainCamp:" + prefix;
-        redisUtil.lock("lock:trainMemberId", (lock) -> {
+        String prefix = ConfigUtils.getMemberIdPrefix();
+
+        String key = "customer:memberId:" + prefix;
+        redisUtil.lock("lock:memberId", (lock) -> {
             // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
             String memberId = redisUtil.get(key);
             String sequence;
             if (StringUtils.isEmpty(memberId)) {
-                sequence = "001";
+                sequence = "000001";
             } else {
-                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
+                sequence = String.format("%06d", Integer.parseInt(memberId) + 1);
             }
             targetMemberId.append(prefix).append(sequence);
             redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
@@ -621,7 +603,7 @@ public class SignupServiceImpl implements SignupService {
                 profileDao.becomeRiseEliteMember(openId);
 
                 // RiseMember 新增记录
-                String memberId = generateRisememberMemberId();
+                String memberId = generateMemberId();
                 RiseClassMember classMember = new RiseClassMember();
                 classMember.setClassId(ConfigUtils.getRisememberClassId());
                 classMember.setProfileId(riseOrder.getProfileId());
@@ -680,13 +662,13 @@ public class SignupServiceImpl implements SignupService {
         switch (memberTypeId) {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                // customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
                 break;
             }
             case RiseMember.MONTHLY_CAMP: {
                 // 发送消息给小课训练营购买用户
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                // customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.monthly.camp.send.system.url"));
                 break;
             }

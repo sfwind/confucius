@@ -369,6 +369,10 @@ public class ConfigUtils {
 		return getValue("risemember.classId");
 	}
 
+	public static String getMemberIdPrefix() {
+		return getValue("monthly.camp.memberId.prefix");
+	}
+
 	public static Date getMonthlyCampCloseDate() {
 		return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
 	}
@@ -379,7 +383,6 @@ public class ConfigUtils {
 
 	public static Integer getEditableProblem() {
 		return getIntValue("editable.problem");
-
 	}
 
 }
