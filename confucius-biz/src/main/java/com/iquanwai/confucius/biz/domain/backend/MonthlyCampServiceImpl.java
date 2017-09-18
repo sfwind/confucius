@@ -21,7 +21,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public List<RiseClassMember> loadMonthlyCampByClassName(String className) {
+    public List<RiseClassMember> loadRiseClassMemberByClassName(String className) {
         return riseClassMemberDao.loadByClassName(className);
     }
 
@@ -31,13 +31,18 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     }
 
     @Override
-    public RiseClassMember modifyMonthlyCampByClassName(RiseClassMember riseClassMember) {
+    public RiseClassMember updateRiseClassMemberById(RiseClassMember riseClassMember) {
         int result = riseClassMemberDao.update(riseClassMember);
         if (result > 0) {
             return riseClassMemberDao.load(RiseClassMember.class, riseClassMember.getId());
         } else {
             return null;
         }
+    }
+
+    @Override
+    public int batchUpdateRiseClassMemberByIds(List<Integer> riseMemberIds, String groupId) {
+        return riseClassMemberDao.batchUpdateGroupId(riseMemberIds, groupId);
     }
 
 }

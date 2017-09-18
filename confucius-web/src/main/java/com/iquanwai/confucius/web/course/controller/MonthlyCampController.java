@@ -14,10 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
 import java.util.List;
@@ -42,7 +39,7 @@ public class MonthlyCampController {
 
     @RequestMapping(value = "/load", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadMonthlyCampByClassName(@PathParam("className") String className) {
-        List<RiseClassMember> riseClassMembers = monthlyCampService.loadMonthlyCampByClassName(className);
+        List<RiseClassMember> riseClassMembers = monthlyCampService.loadRiseClassMemberByClassName(className);
         List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = accountService.getProfiles(profileIds);
 
@@ -104,11 +101,22 @@ public class MonthlyCampController {
             String groupId = monthlyCampDto.getGroupId();
             riseClassMember.setGroupId(groupId.length() == 1 ? "0" + groupId : groupId);
         }
-        RiseClassMember updatedRiseClassMember = monthlyCampService.modifyMonthlyCampByClassName(riseClassMember);
+        RiseClassMember updatedRiseClassMember = monthlyCampService.updateRiseClassMemberById(riseClassMember);
         if (updatedRiseClassMember != null) {
             Profile profile = accountService.getProfile(updatedRiseClassMember.getProfileId());
             MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(updatedRiseClassMember, profile);
             return WebUtils.result(campDto);
+        } else {
+            return WebUtils.error("更新失败");
+        }
+    }
+
+    @RequestMapping(value = "/modify/batch", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId, @RequestBody List<Integer> batchRiseClassMemberIds) {
+        String formatGroupId = groupId.length() == 1 ? "0" + groupId : groupId;
+        Integer result = monthlyCampService.batchUpdateRiseClassMemberByIds(batchRiseClassMemberIds, formatGroupId);
+        if (result > 0) {
+            return WebUtils.result(result);
         } else {
             return WebUtils.error("更新失败");
         }
