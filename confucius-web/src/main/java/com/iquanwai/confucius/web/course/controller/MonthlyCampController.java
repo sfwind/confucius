@@ -84,8 +84,11 @@ public class MonthlyCampController {
         riseClassMember.setId(monthlyCampDto.getRiseClassMemberId());
         riseClassMember.setClassName(monthlyCampDto.getClassName());
         riseClassMember.setActive(monthlyCampDto.getActive());
-        riseClassMember.setGroupId(monthlyCampDto.getGroupId());
-
+        try {
+            riseClassMember.setGroupId(String.format("%02d", Integer.parseInt(monthlyCampDto.getGroupId())));
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
         RiseClassMember updatedRiseClassMember = monthlyCampService.modifyMonthlyCampByClassName(riseClassMember);
         if (updatedRiseClassMember != null) {
             Profile profile = accountService.getProfile(updatedRiseClassMember.getProfileId());
