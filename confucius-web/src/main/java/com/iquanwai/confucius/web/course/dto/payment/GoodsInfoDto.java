@@ -28,6 +28,8 @@ public class GoodsInfoDto {
     private String endTime;
     /** 活动状态 */
     private CourseReductionActivity activity;
+    /** 是否可以使用多个优惠券 */
+    private Boolean multiCoupons;
 
 
 
