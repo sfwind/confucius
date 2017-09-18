@@ -53,6 +53,20 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return -1;
     }
 
+    public int batchUpdateGroupId(List<Integer> ids, String groupId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE RiseClassMember SET GroupId = ? WHERE Id IN (" + produceQuestionMark(ids.size()) + ")";
+        List<Object> objects = Lists.newArrayList();
+        objects.add(groupId);
+        objects.addAll(ids);
+        try {
+            return runner.update(sql, objects.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
     public List<RiseClassMember> loadByClassName(String className) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND (GroupId IS NOT NULL AND GroupId != '') AND Del = 0 ORDER BY ClassName, GroupId";
