@@ -118,6 +118,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Profile getProfileByRiseId(String riseId) {
+        return profileDao.queryByRiseId(riseId);
+    }
+
+    @Override
     public List<Profile> getProfiles(List<Integer> profileIds) {
         List<Profile> profiles = profileDao.queryAccounts(profileIds);
         profiles.forEach(profile -> {

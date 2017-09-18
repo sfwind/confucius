@@ -2,7 +2,9 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
@@ -33,6 +35,8 @@ public class MonthlyCampController {
     private MonthlyCampService monthlyCampService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -80,6 +84,16 @@ public class MonthlyCampController {
 
     @RequestMapping(value = "/modify", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> modifyMonthlyCamp(@RequestBody MonthlyCampDto monthlyCampDto) {
+        String RiseId = monthlyCampDto.getRiseId();
+        if (RiseId != null) {
+            Profile profile = accountService.getProfileByRiseId(RiseId);
+            OperationLog operationLog = OperationLog.create()
+                    .memo(monthlyCampDto.getTips() + "-" + monthlyCampDto.toString())
+                    .openid(profile.getOpenid()).module("小课训练营")
+                    .function("信息修改").action("信息修改");
+            operationLogService.log(operationLog);
+        }
+
         RiseClassMember riseClassMember = new RiseClassMember();
         riseClassMember.setId(monthlyCampDto.getRiseClassMemberId());
         riseClassMember.setClassName(monthlyCampDto.getClassName());
