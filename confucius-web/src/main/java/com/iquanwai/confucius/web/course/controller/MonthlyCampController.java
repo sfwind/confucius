@@ -84,10 +84,11 @@ public class MonthlyCampController {
         riseClassMember.setId(monthlyCampDto.getRiseClassMemberId());
         riseClassMember.setClassName(monthlyCampDto.getClassName());
         riseClassMember.setActive(monthlyCampDto.getActive());
-        try {
-            riseClassMember.setGroupId(String.format("%02d", Integer.parseInt(monthlyCampDto.getGroupId())));
-        } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
+        if (monthlyCampDto.getGroupId() == null || monthlyCampDto.getGroupId().equals("")) {
+            riseClassMember.setGroupId(null);
+        } else {
+            String groupId = monthlyCampDto.getGroupId();
+            riseClassMember.setGroupId(groupId.length() == 1 ? "0" + groupId : groupId);
         }
         RiseClassMember updatedRiseClassMember = monthlyCampService.modifyMonthlyCampByClassName(riseClassMember);
         if (updatedRiseClassMember != null) {
