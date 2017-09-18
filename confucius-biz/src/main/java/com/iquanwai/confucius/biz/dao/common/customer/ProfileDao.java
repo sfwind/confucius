@@ -49,6 +49,18 @@ public class ProfileDao extends DBUtil {
         return null;
     }
 
+    public Profile queryByRiseId(String riseId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Profile WHERE RiseId = ?";
+        ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
+        try {
+            return runner.query(sql, h, riseId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public void updateMeta(Profile profile) {
         QueryRunner run = new QueryRunner(getDataSource());
         String updateSql = "Update Profile Set Nickname=?, Headimgurl=?, UnionId = ? where Openid=?";

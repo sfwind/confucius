@@ -26,6 +26,8 @@ public interface AccountService {
      */
     Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
+    Profile getProfileByRiseId(String riseId);
+
     List<Profile> getProfiles(List<Integer> profileIds);
 
     /**

@@ -19,4 +19,12 @@ public class MonthlyCampDto {
     private Integer active; // 是否有效
     private String activeStr; // 学习中
 
+
+    private String tips; // 前端编辑备注
+
+    @Override
+    public String toString() {
+        return "ClassName:" + className + ", GroupId:" + groupId + ", Active:" + active;
+    }
+
 }
