@@ -606,6 +606,7 @@ public class SignupServiceImpl implements SignupService {
                 String memberId = generateMemberId();
                 RiseClassMember classMember = new RiseClassMember();
                 classMember.setClassId(ConfigUtils.getRisememberClassId());
+                classMember.setClassName(ConfigUtils.getRisememberClassId());
                 classMember.setProfileId(riseOrder.getProfileId());
                 classMember.setMemberId(memberId);
                 classMember.setActive(1);
