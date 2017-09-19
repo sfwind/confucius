@@ -254,7 +254,9 @@ public class SignupController {
         operationLogService.log(operationLog);
         Double zero = 0d;
         try {
+            logger.info("price {}", quanwaiOrder.getPrice());
             if (zero.equals(quanwaiOrder.getPrice())) {
+                logger.info("is Enter: true");
                 // 免费，自动报名
                 payService.handlePayResult(orderId, true);
                 payService.risePaySuccess(orderId);
