@@ -56,7 +56,7 @@ public interface SignupService {
     /**
      * 报名rise, 不生成预付订单
      */
-    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId);
+    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
     QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId);
 

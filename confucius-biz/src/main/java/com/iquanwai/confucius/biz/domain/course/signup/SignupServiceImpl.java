@@ -54,6 +54,7 @@ import com.iquanwai.confucius.biz.util.QRCodeUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -71,6 +72,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/10.
@@ -277,7 +279,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
+    public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId) {
         // 查询该openid是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
@@ -1024,6 +1026,25 @@ public class SignupServiceImpl implements SignupService {
             Coupon coupon = costRepo.getCoupon(couponId);
             Assert.notNull(coupon, "优惠券无效");
             discount = costRepo.discount(fee, orderId, coupon);
+        }
+        return new MutablePair<>(orderId, discount);
+    }
+
+    /**
+     * 生成orderId以及计算优惠价格
+     *
+     * @param fee           总价格
+     * @param couponIdGroup 优惠券id 如果
+     */
+    private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {
+        //orderId 16位随机字符
+        String orderId = CommonUtils.randomString(16);
+        Double discount = 0d;
+        if (CollectionUtils.isNotEmpty(couponIdGroup)) {
+            // 计算优惠
+            List<Coupon> coupons = couponIdGroup.stream().map(couponId -> costRepo.getCoupon(couponId)).collect(Collectors.toList());
+            Assert.notEmpty(coupons, "优惠券无效");
+            discount = costRepo.discount(fee, orderId, coupons);
         }
         return new MutablePair<>(orderId, discount);
     }
