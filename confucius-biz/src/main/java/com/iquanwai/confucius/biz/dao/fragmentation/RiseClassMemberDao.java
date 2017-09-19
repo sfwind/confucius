@@ -56,7 +56,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public RiseClassMember queryByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * ROM RiseClassMember WHERE ProfileId = ? AND Del = 0";
+        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Del = 0";
         ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, profileId);

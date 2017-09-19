@@ -221,8 +221,8 @@ public class MonthlyCampController {
         campDto.setClassName(riseClassMember.getClassName());
         String className = riseClassMember.getClassName();
         try {
-            int month = Integer.parseInt(className.substring(0, 2));
-            int classStr = Integer.parseInt(className.substring(2));
+            String month = String.format("%02d", Integer.parseInt(className.substring(0, 2)));
+            String classStr = String.format("%02d", Integer.parseInt(className.substring(2)));
             campDto.setClassNameStr(month + "月" + classStr + "班");
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
