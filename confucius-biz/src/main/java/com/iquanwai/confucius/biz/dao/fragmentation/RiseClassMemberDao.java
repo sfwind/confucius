@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -53,9 +54,32 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return -1;
     }
 
+    public RiseClassMember queryByProfileId(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * ROM RiseClassMember WHERE ProfileId = ? AND Del = 0";
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    public int del(Integer riseClassMemberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE RiseClassMember SET Del = 1 WHERE Id = ?";
+        try {
+            return runner.update(sql, riseClassMemberId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
     public int batchUpdateGroupId(List<Integer> ids, String groupId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE RiseClassMember SET GroupId = ? WHERE Id IN (" + produceQuestionMark(ids.size()) + ")";
+        String sql = "UPDATE RiseClassMember SET GroupId = ? WHERE Id IN (" + produceQuestionMark(ids.size()) + ") AND Del = 0";
         List<Object> objects = Lists.newArrayList();
         objects.add(groupId);
         objects.addAll(ids);
@@ -69,7 +93,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public List<RiseClassMember> batchQueryByProfileIds(List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ")";
+        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Del = 0";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, profileIds.toArray());

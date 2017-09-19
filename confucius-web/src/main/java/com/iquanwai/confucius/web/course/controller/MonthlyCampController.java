@@ -159,6 +159,12 @@ public class MonthlyCampController {
 
     @RequestMapping(value = "/modify/batch/update", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId, @RequestBody List<Integer> batchRiseClassMemberIds) {
+        OperationLog operationLog = OperationLog.create()
+                .memo("Ids:" + batchRiseClassMemberIds.toString() + "groupId:" + groupId)
+                .openid("").module("小课训练营")
+                .function("信息修改").action("批量小组信息修改");
+        operationLogService.log(operationLog);
+
         String formatGroupId = groupId.length() == 1 ? "0" + groupId : groupId;
         Integer result = monthlyCampService.batchUpdateRiseClassMemberByIds(batchRiseClassMemberIds, formatGroupId);
         if (result > 0) {
@@ -170,26 +176,31 @@ public class MonthlyCampController {
 
     @RequestMapping(value = "/modify/add", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> modifyAddMonthlyCamp(@RequestBody MonthlyCampDto monthlyCampDto) {
+
+        Profile profile = accountService.getProfileByRiseId(monthlyCampDto.getRiseId());
+        OperationLog operationLog = OperationLog.create()
+                .memo("className:" + monthlyCampDto.getClassName() + ", groupId:" + monthlyCampDto.getGroupId())
+                .openid(profile.getOpenid()).module("小课训练营")
+                .function("信息新增").action("小课训练营用户新增");
+        operationLogService.log(operationLog);
+
         Integer riseClassMemberId = monthlyCampDto.getRiseClassMemberId();
         RiseClassMember riseClassMember = monthlyCampService.loadRiseClassMemberById(riseClassMemberId);
         if (riseClassMember == null) {
+            riseClassMember = new RiseClassMember();
             riseClassMember.setClassId(monthlyCampDto.getClassName());
             riseClassMember.setClassName(monthlyCampDto.getClassName());
             String memberId = signupService.generateMemberId();
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
-
-            String riseId = monthlyCampDto.getRiseId();
-            Profile profile = accountService.getProfileByRiseId(riseId);
-            if (profile != null) {
-                riseClassMember.setProfileId(profile.getId());
-            }
+            riseClassMember.setProfileId(profile.getId());
 
             riseClassMember.setActive(monthlyCampDto.getActive());
             int result = monthlyCampService.initRiseClassMember(riseClassMember);
             if (result > 0) {
                 riseClassMember.setId(result);
-                return WebUtils.result(riseClassMember);
+                MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMember, profile);
+                return WebUtils.result(campDto);
             } else {
                 return WebUtils.error("用户新增失败，请及时联系管理员");
             }

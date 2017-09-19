@@ -42,6 +42,11 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
 
     @Override
     public int initRiseClassMember(RiseClassMember riseClassMember) {
+        Integer profileId = riseClassMember.getProfileId();
+        RiseClassMember classMember = riseClassMemberDao.queryByProfileId(profileId);
+        if (classMember != null) {
+            riseClassMemberDao.del(classMember.getId());
+        }
         return riseClassMemberDao.insert(riseClassMember);
     }
 
