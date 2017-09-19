@@ -106,6 +106,8 @@ public interface SignupService {
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
+    String generateMemberId();
+
     void riseMemberEntry(String orderId);
 
     /**

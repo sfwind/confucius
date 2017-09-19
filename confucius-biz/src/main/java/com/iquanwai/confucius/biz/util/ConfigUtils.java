@@ -365,8 +365,12 @@ public class ConfigUtils {
 	/**
 	 * 获取当月精英训练营生成的 ClassId
 	 */
-	public static String getRisememberClassId() {
+	public static String getRiseMemberClassId() {
 		return getValue("risemember.classId");
+	}
+
+	public static String getMemberIdPrefix() {
+		return getValue("monthly.camp.memberId.prefix");
 	}
 
 	public static Date getMonthlyCampCloseDate() {
@@ -379,7 +383,6 @@ public class ConfigUtils {
 
 	public static Integer getEditableProblem() {
 		return getIntValue("editable.problem");
-
 	}
 
 }
