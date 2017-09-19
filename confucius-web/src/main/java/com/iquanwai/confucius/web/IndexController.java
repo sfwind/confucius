@@ -67,7 +67,7 @@ public class IndexController {
         String ua = request.getHeader("user-agent");
         //TODO 可以写到配置里
         if (UAUtils.isLowerAndroid(ua, 4, 4)) {
-            logger.error("openid:{},nickname;{},安卓版本过低，进入简化的付款页面", loginUser == null ? null : loginUser.getOpenId(), loginUser == null ? null : loginUser.getWeixinName());
+            logger.error("openid:{},nickName;{},安卓版本过低，进入简化的付款页面", loginUser == null ? null : loginUser.getOpenId(), loginUser == null ? null : loginUser.getWeixinName());
             response.sendRedirect("/pay/simple");
             return null;
         }

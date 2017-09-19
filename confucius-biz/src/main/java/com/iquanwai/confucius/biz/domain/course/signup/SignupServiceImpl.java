@@ -518,7 +518,8 @@ public class SignupServiceImpl implements SignupService {
     /**
      * 生成 memberId，格式 YYYYMM + 6位数字
      */
-    private String generateMemberId() {
+    @Override
+    public String generateMemberId() {
         StringBuilder targetMemberId = new StringBuilder();
 
         String prefix = ConfigUtils.getMemberIdPrefix();
@@ -605,8 +606,8 @@ public class SignupServiceImpl implements SignupService {
                 // RiseMember 新增记录
                 String memberId = generateMemberId();
                 RiseClassMember classMember = new RiseClassMember();
-                classMember.setClassId(ConfigUtils.getRisememberClassId());
-                classMember.setClassName(ConfigUtils.getRisememberClassId());
+                classMember.setClassId(ConfigUtils.getRiseMemberClassId());
+                classMember.setClassName(ConfigUtils.getRiseMemberClassId());
                 classMember.setProfileId(riseOrder.getProfileId());
                 classMember.setMemberId(memberId);
                 classMember.setActive(1);
@@ -664,12 +665,18 @@ public class SignupServiceImpl implements SignupService {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
                 // customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                String eliteMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】精英版会员，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
+                        + ConfigUtils.getValue("risemember.pay.send.system.url");
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), eliteMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
                 break;
             }
             case RiseMember.MONTHLY_CAMP: {
                 // 发送消息给小课训练营购买用户
                 // customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                String monthlyCampMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】" + ConfigUtils.getMonthlyCampMonth() + "月小课训练营，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
+                        + ConfigUtils.getValue("risemember.monthly.camp.send.system.url");
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.monthly.camp.send.system.url"));
                 break;
             }
@@ -774,7 +781,7 @@ public class SignupServiceImpl implements SignupService {
 //            templateMessage.setTouser(openid);
 //            templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
 //            data = Maps.newHashMap();
-//            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\n"));
+//            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\nickname"));
 //            data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
 //            data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
 //            data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
@@ -902,7 +909,6 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 小课售卖页面，跳转小课介绍页面 problemId
-     * @return
      */
     @Override
     public Integer loadHrefProblemId(Integer month) {

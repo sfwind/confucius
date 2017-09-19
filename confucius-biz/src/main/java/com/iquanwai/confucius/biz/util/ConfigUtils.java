@@ -365,7 +365,7 @@ public class ConfigUtils {
 	/**
 	 * 获取当月精英训练营生成的 ClassId
 	 */
-	public static String getRisememberClassId() {
+	public static String getRiseMemberClassId() {
 		return getValue("risemember.classId");
 	}
 
