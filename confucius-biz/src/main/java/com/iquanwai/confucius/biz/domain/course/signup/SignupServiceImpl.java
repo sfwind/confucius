@@ -23,17 +23,8 @@ import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.po.systematism.ClassMember;
-import com.iquanwai.confucius.biz.po.systematism.Course;
-import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.QRCodeUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.po.systematism.*;
+import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -49,8 +40,10 @@ import javax.annotation.PostConstruct;
 import java.awt.*;
 import java.lang.ref.SoftReference;
 import java.net.ConnectException;
-import java.util.*;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by justin on 16/9/10.
@@ -511,6 +504,13 @@ public class SignupServiceImpl implements SignupService {
             logger.error(e.getLocalizedMessage(), e);
         }
 
+        try {
+            // 休眠 3 秒
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
         sendPurchaseMessage(profile, RiseMember.MONTHLY_CAMP, orderId);
         // 刷新相关状态
         refreshStatus(quanwaiOrderDao.loadOrder(orderId), orderId);
@@ -676,19 +676,19 @@ public class SignupServiceImpl implements SignupService {
         switch (memberTypeId) {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
-                // customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                String eliteMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】精英版会员，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
-                        + ConfigUtils.getValue("risemember.pay.send.system.url");
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), eliteMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                // String eliteMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】精英版会员，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
+                //         + ConfigUtils.getValue("risemember.pay.send.system.url");
+                // customerMessageService.sendCustomerMessage(profile.getOpenid(), eliteMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
                 break;
             }
             case RiseMember.MONTHLY_CAMP: {
                 // 发送消息给小课训练营购买用户
-                // customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                String monthlyCampMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】" + ConfigUtils.getMonthlyCampMonth() + "月小课训练营，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
-                        + ConfigUtils.getValue("risemember.monthly.camp.send.system.url");
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                // String monthlyCampMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】" + ConfigUtils.getMonthlyCampMonth() + "月小课训练营，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
+                //         + ConfigUtils.getValue("risemember.monthly.camp.send.system.url");
+                // customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.monthly.camp.send.system.url"));
                 break;
             }
