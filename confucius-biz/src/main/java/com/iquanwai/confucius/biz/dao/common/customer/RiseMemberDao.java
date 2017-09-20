@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,14 +92,13 @@ public class RiseMemberDao extends DBUtil {
     public List<Integer> loadEliteMembersId() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT DISTINCT(ProfileId) FROM RiseMember WHERE MemberTypeId IN (3, 4) AND Expired = 0";
-        ResultSetHandler<List<Integer>> h = new BeanListHandler<>(Integer.class);
+        ColumnListHandler<Integer> handler = new ColumnListHandler<>("ProfileId");
         try {
-            return runner.query(sql, h);
+            return runner.query(sql, handler);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
-
 
 }
