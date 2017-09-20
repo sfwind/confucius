@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.domain.fragmentation.plan;
 
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
-import com.iquanwai.confucius.biz.po.fragmentation.ProblemList;
 
 import java.util.List;
 
