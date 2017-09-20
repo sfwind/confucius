@@ -6,18 +6,8 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.course.ClassDao;
-import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
-import com.iquanwai.confucius.biz.dao.course.CouponDao;
-import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
-import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseCourseOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
+import com.iquanwai.confucius.biz.dao.course.*;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
@@ -32,15 +22,7 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampSchedule;
-import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
@@ -64,8 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by justin on 16/9/10.
@@ -699,19 +679,15 @@ public class SignupServiceImpl implements SignupService {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                // String eliteMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】精英版会员，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
-                //         + ConfigUtils.getValue("risemember.pay.send.system.url");
-                // customerMessageService.sendCustomerMessage(profile.getOpenid(), eliteMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
-                messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
+                String url = ConfigUtils.domainName() + "/rise/static/customer/profile?goRise=true";
+                messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, url);
                 break;
             }
             case RiseMember.MONTHLY_CAMP: {
                 // 发送消息给小课训练营购买用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                // String monthlyCampMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】" + ConfigUtils.getMonthlyCampMonth() + "月小课训练营，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
-                //         + ConfigUtils.getValue("risemember.monthly.camp.send.system.url");
-                // customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
-                messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.monthly.camp.send.system.url"));
+                String url = ConfigUtils.domainName() + "/rise/static/customer/profile?goRise=true";
+                messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, url);
                 break;
             }
             default: {
@@ -805,26 +781,26 @@ public class SignupServiceImpl implements SignupService {
             data.put("keyword1", new TemplateMessage.Keyword("【免费体验】 " + course.getCourseName()));
             data.put("keyword2", new TemplateMessage.Keyword("7天"));
             data.put("remark", new TemplateMessage.Keyword("\n试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍"));
-//            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
+            // templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
         }
 
         templateMessageService.sendMessage(templateMessage);
         //发送直播消息
-//        if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
-//            templateMessage = new TemplateMessage();
-//            templateMessage.setTouser(openid);
-//            templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
-//            data = Maps.newHashMap();
-//            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\nickname"));
-//            data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
-//            data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
-//            data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
-//            data.put("keyword4", new TemplateMessage.Keyword("14天"));
-//            data.put("remark", new TemplateMessage.Keyword("\n如有新问题，在课程QQ群中和同学讨论哦（群号见上条报名成功消息）"));
-//            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
-//            templateMessage.setData(data);
-//            templateMessageService.sendMessage(templateMessage);
-//        }
+        // if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
+        //     templateMessage = new TemplateMessage();
+        //     templateMessage.setTouser(openid);
+        //     templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
+        //     data = Maps.newHashMap();
+        //     data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\nickname"));
+        //     data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
+        //     data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
+        //     data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
+        //     data.put("keyword4", new TemplateMessage.Keyword("14天"));
+        //     data.put("remark", new TemplateMessage.Keyword("\n如有新问题，在课程QQ群中和同学讨论哦（群号见上条报名成功消息）"));
+        //     templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
+        //     templateMessage.setData(data);
+        //     templateMessageService.sendMessage(templateMessage);
+        // }
     }
 
     @Override
@@ -942,8 +918,6 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 小课售卖页面，跳转小课介绍页面 problemId
-     *
-     * @return
      */
     @Override
     public Integer loadHrefProblemId(Integer month) {
@@ -1015,8 +989,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     *
-     * @param fee      总价格
+     * @param fee 总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -1034,8 +1007,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     *
-     * @param fee           总价格
+     * @param fee 总价格
      * @param couponIdGroup 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {

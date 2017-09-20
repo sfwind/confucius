@@ -17,27 +17,12 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
-import com.iquanwai.confucius.biz.po.systematism.Chapter;
-import com.iquanwai.confucius.biz.po.systematism.ClassMember;
-import com.iquanwai.confucius.biz.po.systematism.Course;
-import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
-import com.iquanwai.confucius.web.course.dto.EntryDto;
-import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
-import com.iquanwai.confucius.web.course.dto.MonthlyCampDto;
-import com.iquanwai.confucius.web.course.dto.RiseCourseDto;
-import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
-import com.iquanwai.confucius.web.course.dto.SignupDto;
+import com.iquanwai.confucius.web.course.dto.*;
 import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -52,12 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
@@ -88,8 +68,6 @@ public class SignupController {
     private CourseProgressService courseProgressService;
     @Autowired
     private CostRepo costRepo;
-    @Autowired
-    private RestfulHelper restfulHelper;
     @Autowired
     private MessageService messageService;
     @Autowired
@@ -305,8 +283,8 @@ public class SignupController {
         return WebUtils.result(planId);
     }
 
-    @RequestMapping(value = "/info/load", method = RequestMethod.GET)
     @Deprecated
+    @RequestMapping(value = "/info/load", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser) {
         InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
         Assert.notNull(loginUser, "用户不能为空");
@@ -325,10 +303,9 @@ public class SignupController {
         return WebUtils.result(infoSubmitDto);
     }
 
-    @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
     @Deprecated
-    public ResponseEntity<Map<String, Object>> infoSubmit(@RequestBody InfoSubmitDto infoSubmitDto,
-                                                          LoginUser loginUser) {
+    @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> infoSubmit(@RequestBody InfoSubmitDto infoSubmitDto, LoginUser loginUser) {
         Integer chapterId = null;
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -402,7 +379,6 @@ public class SignupController {
         operationLogService.log(operationLog);
         return WebUtils.result(coupons);
     }
-
 
     /**
      * 小课单卖接口
@@ -749,33 +725,6 @@ public class SignupController {
             default:
                 logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
                 return null;
-        }
-    }
-
-    /**
-     * 支付检查
-     *
-     * @param paymentDto 支付信息
-     * @param profileId  用户id
-     * @return 检查结果
-     */
-    private Pair<Integer, String> signupCheck(PaymentDto paymentDto, Integer profileId) {
-        switch (paymentDto.getGoodsType()) {
-            case GoodsInfoDto.FRAG_MEMBER: {
-                // 购买小课
-                return signupService.riseMemberSignupCheck(profileId, paymentDto.getGoodsId());
-            }
-            case GoodsInfoDto.FRAG_COURSE: {
-                // 购买会员
-                return signupService.riseCourseSignupCheck(profileId, paymentDto.getGoodsId());
-            }
-            case GoodsInfoDto.FRAG_CAMP: {
-                // 购买训练营小课
-                return signupService.risePurchaseCheck(profileId, paymentDto.getGoodsId());
-            }
-            default:
-                logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
-                return new MutablePair<>(-1, "会员类型异常");
         }
     }
 
