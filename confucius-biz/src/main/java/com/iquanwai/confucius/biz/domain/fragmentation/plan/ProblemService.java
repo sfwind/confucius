@@ -15,13 +15,10 @@ public interface ProblemService {
      * */
     List<Problem> loadProblems();
 
-    List<ProblemCatalog> loadAllCatalog();
-
     /**
-     * 获取学员的问题
-     * @param openid 学员id
+     * 获取所有工作中的问题
      * */
-    List<ProblemList> loadProblems(String openid);
+    List<ProblemCatalog> loadAllCatalog();
 
     /**
      * 根据问题id获取问题
