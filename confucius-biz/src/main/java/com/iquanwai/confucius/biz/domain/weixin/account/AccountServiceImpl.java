@@ -349,6 +349,11 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    @Override
+    public List<Profile> loadProfilesByNickName(String nickName) {
+        return profileDao.loadProfilesByNickName(nickName);
+    }
+
     private Profile getProfileFromDB(String openid) {
         Profile profile = profileDao.queryByOpenId(openid);
 

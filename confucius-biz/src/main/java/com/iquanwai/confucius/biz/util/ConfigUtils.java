@@ -376,21 +376,23 @@ public class ConfigUtils {
     /**
      * 获取当月精英训练营生成的 ClassId
      */
-    public static String getRisememberClassId() {
+    public static String getRiseMemberClassId() {
         return getValue("risemember.classId");
     }
 
-    public static Date getMonthlyCampCloseDate() {
-        return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
-    }
+	public static String getMemberIdPrefix() {
+		return getValue("monthly.camp.memberId.prefix");
+	}public static Date getMonthlyCampCloseDate() {
+		return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
+	}
 
     public static boolean getMonthlyCampOpen() {
         return getBooleanValue("open.monthly.camp");
     }
 
-    public static Integer getEditableProblem() {
-        return getIntValue("editable.problem");
+	public static Integer getEditableProblem() {
+		return getIntValue("editable.problem");
 
-    }
+	}
 
 }

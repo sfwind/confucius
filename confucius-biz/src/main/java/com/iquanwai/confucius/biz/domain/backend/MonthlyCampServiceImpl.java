@@ -16,7 +16,7 @@ import java.util.List;
 public class MonthlyCampServiceImpl implements MonthlyCampService {
 
     @Autowired
-    RiseClassMemberDao riseClassMemberDao;
+    private RiseClassMemberDao riseClassMemberDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -28,6 +28,21 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Override
     public List<RiseClassMember> loadUnGroupRiseClassMember() {
         return riseClassMemberDao.loadUnGroupMember();
+    }
+
+    @Override
+    public int initRiseClassMember(RiseClassMember riseClassMember) {
+        Integer profileId = riseClassMember.getProfileId();
+        RiseClassMember classMember = riseClassMemberDao.queryByProfileId(profileId);
+        if (classMember != null) {
+            riseClassMemberDao.del(classMember.getId());
+        }
+        return riseClassMemberDao.insert(riseClassMember);
+    }
+
+    @Override
+    public RiseClassMember loadRiseClassMemberById(Integer riseClassMemberId) {
+        return riseClassMemberDao.load(RiseClassMember.class, riseClassMemberId);
     }
 
     @Override
@@ -43,6 +58,11 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Override
     public int batchUpdateRiseClassMemberByIds(List<Integer> riseMemberIds, String groupId) {
         return riseClassMemberDao.batchUpdateGroupId(riseMemberIds, groupId);
+    }
+
+    @Override
+    public List<RiseClassMember> batchQueryRiseClassMemberByProfileIds(List<Integer> profileIds) {
+        return riseClassMemberDao.batchQueryByProfileIds(profileIds);
     }
 
 }

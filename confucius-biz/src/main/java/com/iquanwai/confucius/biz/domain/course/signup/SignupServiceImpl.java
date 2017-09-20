@@ -41,17 +41,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
-import com.iquanwai.confucius.biz.po.systematism.ClassMember;
-import com.iquanwai.confucius.biz.po.systematism.Course;
-import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.QRCodeUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.po.systematism.*;
+import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.collections.CollectionUtils;
@@ -73,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by justin on 16/9/10.
@@ -485,10 +478,17 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(profileId);
         profileDao.becomeMonthlyCampMember(profileId);
 
+        // 清除历史 RiseMember 数据
+        RiseClassMember delClassMember = riseClassMemberDao.queryByProfileId(profileId);
+        if (delClassMember != null) {
+            riseClassMemberDao.del(delClassMember.getId());
+        }
+
         // RiseMember 新增记录
-        String memberId = generateMonthlyCampMemberId();
+        String memberId = generateMemberId();
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassId(ConfigUtils.getMonthlyCampClassId());
+        classMember.setClassName(ConfigUtils.getMonthlyCampClassId());
         classMember.setProfileId(profileId);
         classMember.setMemberId(memberId);
         classMember.setActive(1);
@@ -526,6 +526,13 @@ public class SignupServiceImpl implements SignupService {
             logger.error(e.getLocalizedMessage(), e);
         }
 
+        try {
+            // 休眠 3 秒
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
         sendPurchaseMessage(profile, RiseMember.MONTHLY_CAMP, orderId);
         // 刷新相关状态
         refreshStatus(quanwaiOrderDao.loadOrder(orderId), orderId);
@@ -536,42 +543,24 @@ public class SignupServiceImpl implements SignupService {
         return monthlyCampOrderDao.loadCampOrder(orderId);
     }
 
-    private String generateRisememberMemberId() {
-        StringBuilder targetMemberId = new StringBuilder();
-
-        String prefix = ConfigUtils.getRisememberClassId();
-        String key = "customer:riseMember:" + prefix;
-        redisUtil.lock("lock:RiseMemberId", (lock) -> {
-            // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
-            String memberId = redisUtil.get(key);
-            String sequence;
-            if (StringUtils.isEmpty(memberId)) {
-                sequence = "001";
-            } else {
-                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
-            }
-            targetMemberId.append(prefix).append(sequence);
-            redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
-        });
-        return targetMemberId.toString();
-    }
-
     /**
-     * 生成 memberId，格式 201701001 年 + 月 + 自然顺序
+     * 生成 memberId，格式 YYYYMM + 6位数字
      */
-    private String generateMonthlyCampMemberId() {
+    @Override
+    public String generateMemberId() {
         StringBuilder targetMemberId = new StringBuilder();
 
-        String prefix = ConfigUtils.getMonthlyCampClassId();
-        String key = "customer:trainCamp:" + prefix;
-        redisUtil.lock("lock:trainMemberId", (lock) -> {
+        String prefix = ConfigUtils.getMemberIdPrefix();
+
+        String key = "customer:memberId:" + prefix;
+        redisUtil.lock("lock:memberId", (lock) -> {
             // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
             String memberId = redisUtil.get(key);
             String sequence;
             if (StringUtils.isEmpty(memberId)) {
-                sequence = "001";
+                sequence = "000001";
             } else {
-                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
+                sequence = String.format("%06d", Integer.parseInt(memberId) + 1);
             }
             targetMemberId.append(prefix).append(sequence);
             redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
@@ -642,10 +631,17 @@ public class SignupServiceImpl implements SignupService {
                 expireDate = DateUtils.afterNatureMonths(new Date(), 12);
                 profileDao.becomeRiseEliteMember(openId);
 
+                // 清除历史 RiseMember 数据
+                RiseClassMember delMember = riseClassMemberDao.queryByProfileId(riseOrder.getProfileId());
+                if (delMember != null) {
+                    riseClassMemberDao.del(delMember.getId());
+                }
+
                 // RiseMember 新增记录
-                String memberId = generateRisememberMemberId();
+                String memberId = generateMemberId();
                 RiseClassMember classMember = new RiseClassMember();
-                classMember.setClassId(ConfigUtils.getRisememberClassId());
+                classMember.setClassId(ConfigUtils.getRiseMemberClassId());
+                classMember.setClassName(ConfigUtils.getRiseMemberClassId());
                 classMember.setProfileId(riseOrder.getProfileId());
                 classMember.setMemberId(memberId);
                 classMember.setActive(1);
@@ -703,12 +699,18 @@ public class SignupServiceImpl implements SignupService {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                // String eliteMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】精英版会员，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
+                //         + ConfigUtils.getValue("risemember.pay.send.system.url");
+                // customerMessageService.sendCustomerMessage(profile.getOpenid(), eliteMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.pay.send.system.url"));
                 break;
             }
             case RiseMember.MONTHLY_CAMP: {
                 // 发送消息给小课训练营购买用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                // String monthlyCampMessage = profile.getNickname() + "，恭喜你成功购买【圈外同学】" + ConfigUtils.getMonthlyCampMonth() + "月小课训练营，现在请点击下方链接，添加圈外助手，获取入群信息。\n\n链接："
+                //         + ConfigUtils.getValue("risemember.monthly.camp.send.system.url");
+                // customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampMessage, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 messageService.sendMessage("圈外每月小课训练营，戳此入群", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, ConfigUtils.getValue("risemember.monthly.camp.send.system.url"));
                 break;
             }
@@ -813,7 +815,7 @@ public class SignupServiceImpl implements SignupService {
 //            templateMessage.setTouser(openid);
 //            templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
 //            data = Maps.newHashMap();
-//            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\n"));
+//            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\nickname"));
 //            data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
 //            data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
 //            data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
