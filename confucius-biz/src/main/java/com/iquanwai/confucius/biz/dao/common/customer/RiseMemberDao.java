@@ -77,7 +77,7 @@ public class RiseMemberDao extends DBUtil {
 
     public List<RiseMember> eliteMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where MemberTypeId = 3 and expired = 0";
+        String sql = "select * from RiseMember where MemberTypeId in (3,4) and expired = 0";
 
         try {
             ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
