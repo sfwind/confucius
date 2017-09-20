@@ -15,6 +15,8 @@ public interface CostRepo {
 
     double discount(Double price, String orderId, Coupon coupon);
 
+    double discount(Double price, String orderId, List<Coupon> coupon);
+
     boolean checkCouponValidation(Integer profileId, Integer couponId);
 
     /**

@@ -13,7 +13,8 @@ import java.util.List;
 public class RiseMemberDto {
     private Integer memberType;
     private String openId;
-    private Integer couponId;
+//    private Integer couponId;
+    private List<Integer> couponIdGroup;
 
     private List<MemberType> memberTypes;
     private List<Coupon> coupons;

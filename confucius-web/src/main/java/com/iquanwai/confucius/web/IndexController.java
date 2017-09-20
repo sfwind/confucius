@@ -8,7 +8,6 @@ import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.ua.UAUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -39,10 +38,13 @@ public class IndexController {
     @Autowired
     private WhiteListService whiteListService;
 
+    private static final String COURSE_VIEW = "course";
+    private static final String PAY_VIEW = "pay";
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
 
-    @RequestMapping(value = "/static/**",method = RequestMethod.GET)
+    @RequestMapping(value = "/static/**", method = RequestMethod.GET)
     public ModelAndView getIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
 //        if(!checkAccessToken(request,response)){
 //            return null;
@@ -50,9 +52,9 @@ public class IndexController {
         return courseView(request);
     }
 
-    @RequestMapping(value = "/pay/pay",method = RequestMethod.GET)
-    public ModelAndView getPayPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request,response)){
+    @RequestMapping(value = "/pay/pay", method = RequestMethod.GET)
+    public ModelAndView getPayPayIndex(LoginUser loginUser, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (!checkAccessToken(request, response)) {
             return null;
         }
         if (ConfigUtils.payPrePublish()) {
@@ -63,35 +65,27 @@ public class IndexController {
                 return null;
             }
         }
-
-        String ua = request.getHeader("user-agent");
-        //TODO 可以写到配置里
-        if (UAUtils.isLowerAndroid(ua, 4, 4)) {
-            logger.error("openid:{},nickName;{},安卓版本过低，进入简化的付款页面", loginUser == null ? null : loginUser.getOpenId(), loginUser == null ? null : loginUser.getWeixinName());
-            response.sendRedirect("/pay/simple");
-            return null;
-        }
-        return courseView(request, loginUser);
+        return courseView(request, loginUser, PAY_VIEW);
     }
 
 
-    @RequestMapping(value = "/pay/**",method = RequestMethod.GET)
-    public ModelAndView getPayIndex(LoginUser loginUser,HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request,response)){
+    @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
+    public ModelAndView getPayIndex(LoginUser loginUser, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (!checkAccessToken(request, response)) {
             return null;
         }
-        return courseView(request, loginUser);
+        return courseView(request, loginUser, PAY_VIEW);
     }
 
-    private boolean checkAccessToken(HttpServletRequest request,HttpServletResponse response){
-        if(request.getParameter("debug")!=null && ConfigUtils.isFrontDebug()){
+    private boolean checkAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
             return true;
         }
 
         String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
         String openId = oAuthService.openId(accessToken);
 
-        if(StringUtils.isEmpty(openId)){
+        if (StringUtils.isEmpty(openId)) {
             CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
             try {
                 WebUtils.auth(request, response);
@@ -125,43 +119,58 @@ public class IndexController {
         }
     }
 
-    @RequestMapping(value = "/heartbeat",method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> heartbeat() throws Exception{
+    @RequestMapping(value = "/heartbeat", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> heartbeat() throws Exception {
         return WebUtils.success();
     }
 
-    private ModelAndView courseView(HttpServletRequest request){
+    private ModelAndView courseView(HttpServletRequest request) {
         ModelAndView mav = new ModelAndView("course");
-        if(request.getParameter("debug")!=null){
-            if(ConfigUtils.isFrontDebug()){
+        if (request.getParameter("debug") != null) {
+            if (ConfigUtils.isFrontDebug()) {
                 mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
-            }else{
+            } else {
                 mav.addObject("resource", ConfigUtils.staticResourceUrl());
             }
-        }else{
+        } else {
             mav.addObject("resource", ConfigUtils.staticResourceUrl());
         }
         return mav;
     }
 
-    private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser){
-        ModelAndView mav = new ModelAndView("course");
-
-        if(request.getParameter("debug")!=null){
-            if(ConfigUtils.isFrontDebug()){
-                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
-            }else{
-                mav.addObject("resource", ConfigUtils.staticResourceUrl());
+    private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser, String viewName) {
+        ModelAndView mav = new ModelAndView(viewName);
+        String testUrl = "";
+        String resource = "";
+        switch (viewName) {
+            case COURSE_VIEW: {
+                testUrl = "http://0.0.0.0:4000/bundle.js";
+                resource = ConfigUtils.staticResourceUrl();
             }
-        }else{
-            mav.addObject("resource", ConfigUtils.staticResourceUrl());
+            break;
+            case PAY_VIEW: {
+                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
+                resource = ConfigUtils.staticPayUrl();
+            }
+            break;
+        }
+
+
+        if (request.getParameter("debug") != null) {
+            if (ConfigUtils.isFrontDebug()) {
+                mav.addObject("resource", testUrl);
+            } else {
+                mav.addObject("resource", resource);
+            }
+        } else {
+            mav.addObject("resource", resource);
         }
 
         if (loginUser != null) {
             Map<String, String> userParam = Maps.newHashMap();
             userParam.put("userName", loginUser.getWeixinName());
-            if(loginUser.getHeadimgUrl()!=null){
-                userParam.put("headImage",loginUser.getHeadimgUrl().replace("http:","https:"));
+            if (loginUser.getHeadimgUrl() != null) {
+                userParam.put("headImage", loginUser.getHeadimgUrl().replace("http:", "https:"));
             }
             mav.addAllObjects(userParam);
         }

@@ -6,8 +6,18 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.course.*;
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.dao.course.ClassDao;
+import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
+import com.iquanwai.confucius.biz.dao.course.CouponDao;
+import com.iquanwai.confucius.biz.dao.course.CourseIntroductionDao;
+import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseCourseOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
@@ -22,11 +32,20 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampSchedule;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -42,6 +61,9 @@ import java.lang.ref.SoftReference;
 import java.net.ConnectException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.Objects;
 
@@ -250,7 +272,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, Integer couponId) {
+    public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId) {
         // 查询该openid是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
@@ -867,9 +889,8 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Double calculateCoupon(Integer memberTypeId, Integer couponId) {
-        Coupon coupon = costRepo.getCoupon(couponId);
-        Double amount = coupon.getAmount();
+    public Double calculateMemberCoupon(Integer memberTypeId, List<Integer> couponIdGroup) {
+        Double amount = couponIdGroup.stream().map(couponId -> costRepo.getCoupon(couponId)).filter(Objects::nonNull).mapToDouble(Coupon::getAmount).sum();
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         if (memberType.getFee() >= amount) {
             return CommonUtils.substract(memberType.getFee(), amount);
@@ -921,6 +942,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 小课售卖页面，跳转小课介绍页面 problemId
+     *
+     * @return
      */
     @Override
     public Integer loadHrefProblemId(Integer month) {
@@ -992,7 +1015,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee      总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -1004,6 +1028,25 @@ public class SignupServiceImpl implements SignupService {
             Coupon coupon = costRepo.getCoupon(couponId);
             Assert.notNull(coupon, "优惠券无效");
             discount = costRepo.discount(fee, orderId, coupon);
+        }
+        return new MutablePair<>(orderId, discount);
+    }
+
+    /**
+     * 生成orderId以及计算优惠价格
+     *
+     * @param fee           总价格
+     * @param couponIdGroup 优惠券id 如果
+     */
+    private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {
+        //orderId 16位随机字符
+        String orderId = CommonUtils.randomString(16);
+        Double discount = 0d;
+        if (CollectionUtils.isNotEmpty(couponIdGroup)) {
+            // 计算优惠
+            List<Coupon> coupons = couponIdGroup.stream().map(couponId -> costRepo.getCoupon(couponId)).collect(Collectors.toList());
+            Assert.notEmpty(coupons, "优惠券无效");
+            discount = costRepo.discount(fee, orderId, coupons);
         }
         return new MutablePair<>(orderId, discount);
     }
