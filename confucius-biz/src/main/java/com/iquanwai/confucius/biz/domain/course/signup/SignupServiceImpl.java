@@ -675,19 +675,23 @@ public class SignupServiceImpl implements SignupService {
     private void sendPurchaseMessage(Profile profile, Integer memberTypeId, String orderId) {
         Assert.notNull(profile, "openid不能为空");
         logger.info("发送欢迎消息给付费用户{}", profile.getOpenid());
+        boolean isFull = profile.getIsFull() == 1;
+        boolean isBindMobile = profile.getMobileNo() != null;
+        String detailUrl = ConfigUtils.domainName() + "/rise/static/customer/profile?goRise=true";
+        String mobileUrl = ConfigUtils.domainName() + "/rise/static/customer/mobile/check?goRise=true";
+        String sendUrl = isFull ? isBindMobile ? null : mobileUrl : detailUrl;
+
         switch (memberTypeId) {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                String url = ConfigUtils.domainName() + "/rise/static/customer/profile?goRise=true";
-                messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, url);
+                messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
                 break;
             }
             case RiseMember.MONTHLY_CAMP: {
                 // 发送消息给小课训练营购买用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                String url = ConfigUtils.domainName() + "/rise/static/customer/profile?goRise=true";
-                messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, url);
+                messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
                 break;
             }
             default: {
