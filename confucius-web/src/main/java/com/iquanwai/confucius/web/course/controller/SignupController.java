@@ -1,11 +1,9 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.CourseReductionService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -22,7 +20,6 @@ import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.web.course.dto.*;
 import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
@@ -59,17 +56,11 @@ public class SignupController {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private CourseStudyService courseStudyService;
-    @Autowired
-    private ProfileService profileService;
-    @Autowired
     private PayService payService;
     @Autowired
     private CourseProgressService courseProgressService;
     @Autowired
     private CostRepo costRepo;
-    @Autowired
-    private RestfulHelper restfulHelper;
     @Autowired
     private MessageService messageService;
     @Autowired
@@ -300,33 +291,6 @@ public class SignupController {
             return WebUtils.error("加载个人信息失败");
         }
         return WebUtils.result(infoSubmitDto);
-    }
-
-    @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> infoSubmit(@RequestBody InfoSubmitDto infoSubmitDto,
-                                                          LoginUser loginUser) {
-        Integer chapterId = null;
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("提交个人信息")
-                .action("提交个人信息");
-        operationLogService.log(operationLog);
-        Profile account = new Profile();
-        try {
-            BeanUtils.copyProperties(account, infoSubmitDto);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.error("beanUtils copy props error", e);
-            return WebUtils.error("提交个人信息失败");
-        }
-        account.setOpenid(loginUser.getOpenId());
-        profileService.submitPersonalInfo(account, false);
-
-        Chapter chapter = courseStudyService.loadFirstChapter(infoSubmitDto.getCourseId());
-        if (chapter != null) {
-            chapterId = chapter.getId();
-        }
-        return WebUtils.result(chapterId);
     }
 
     @RequestMapping("/welcome/{orderId}")
