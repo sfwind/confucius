@@ -87,4 +87,18 @@ public class RiseMemberDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public List<Integer> loadEliteMembersId() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT DISTINCT(ProfileId) FROM RiseMember WHERE MemberTypeId IN (3, 4) AND Expired = 0";
+        ResultSetHandler<List<Integer>> h = new BeanListHandler<>(Integer.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+
 }
