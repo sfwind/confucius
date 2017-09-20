@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
-import com.iquanwai.confucius.biz.domain.backend.KnowledgeImportService;
+import com.iquanwai.confucius.biz.domain.backend.KnowledgeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class KnowledgeImportController {
 
     @Autowired
-    private KnowledgeImportService knowledgeImportService;
+    private KnowledgeService knowledgeImportService;
     @Autowired
     private OperationLogService operationLogService;
 

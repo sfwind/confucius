@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.fragmentation.plan;
+package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
@@ -24,4 +24,9 @@ public interface ProblemService {
      * @param problemId 问题id
      * */
     Problem getProblem(Integer problemId);
+
+    /**
+     * 导入小课数据
+     * */
+    void saveProblem(Problem problem);
 }

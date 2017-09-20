@@ -2,7 +2,7 @@ package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
+import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;

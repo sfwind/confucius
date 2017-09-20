@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.fragmentation.plan;
+package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemCatalogDao;
@@ -28,7 +28,7 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public List<Problem> loadProblems() {
-        if(CollectionUtils.isEmpty(problems)) {
+        if (CollectionUtils.isEmpty(problems)) {
             List<Problem> problems = problemDao.loadAll(Problem.class);
             this.problems = problems.stream().filter(problem -> !problem.getDel()).collect(Collectors.toList());
         }
@@ -36,8 +36,8 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public List<ProblemCatalog> loadAllCatalog(){
-        if(CollectionUtils.isEmpty(problemCatalogs)) {
+    public List<ProblemCatalog> loadAllCatalog() {
+        if (CollectionUtils.isEmpty(problemCatalogs)) {
             problemCatalogs = problemCatalogDao.loadAll(ProblemCatalog.class);
         }
         return problemCatalogs;
@@ -45,17 +45,26 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public Problem getProblem(Integer problemId) {
-        if(CollectionUtils.isEmpty(problems)){
+        if (CollectionUtils.isEmpty(problems)) {
             problems = loadProblems();
         }
 
-        for(Problem problem:problems){
-            if(problem.getId()==problemId){
+        for (Problem problem : problems) {
+            if (problem.getId() == problemId) {
                 return problem;
             }
         }
 
         return null;
+    }
+
+    @Override
+    public void saveProblem(Problem problem) {
+        if (problem.getId() != 0) {
+            problemDao.updateProblem(problem);
+        } else {
+            problemDao.saveProblem(problem);
+        }
     }
 
 

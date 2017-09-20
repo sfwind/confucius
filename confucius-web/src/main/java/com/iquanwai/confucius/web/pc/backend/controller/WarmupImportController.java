@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
+import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;

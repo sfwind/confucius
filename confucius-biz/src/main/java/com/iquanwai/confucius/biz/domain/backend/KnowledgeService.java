@@ -6,7 +6,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 
 import java.util.List;
 
-public interface KnowledgeImportService {
+public interface KnowledgeService {
 
     Problem loadEditableProblem();
 
