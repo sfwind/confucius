@@ -668,26 +668,30 @@ public class SignupServiceImpl implements SignupService {
                     return null;
                 case RiseMember.PROFESSIONAL:
                     fee = CommonUtils.substract(memberType.getFee(), 880d);
-                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.PROFESSIONAL);
+                    businessSchool.setInitDiscount(880d);
                     break;
                 case RiseMember.HALF_PROFESSIONAL:
                     fee = CommonUtils.substract(memberType.getFee(), 580d);
-                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.HALF_PROFESSIONAL);
+                    businessSchool.setInitDiscount(580d);
                     break;
                 case RiseMember.MONTHLY_CAMP:
                     fee = memberType.getFee();
-                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.CAMP);
                     break;
                 default:
                     fee = memberType.getFee();
-                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.OTHER);
             }
+            // 计算结束时间
+            Date endTime = DateUtils.afterNatureMonths(riseMember.getExpireDate(), 12);
+            businessSchool.setEndTime(DateUtils.parseDateToStringByCommon(endTime));
+
         } else {
             fee = memberType.getFee();
+            businessSchool.setEndTime(memberType.getEndTime());
+
         }
         businessSchool.setFee(fee);
-        businessSchool.setStartTime(memberType.getStartTime());
-        businessSchool.setEndTime(memberType.getEndTime());
+        businessSchool.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+
         return businessSchool;
     }
 

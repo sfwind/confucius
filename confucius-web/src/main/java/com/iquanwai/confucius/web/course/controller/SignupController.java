@@ -335,9 +335,19 @@ public class SignupController {
         }
         // TODO 升级商学院数据
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
-        if (bs == null && QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            return WebUtils.error("您已经是商学院用户");
+        if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
+            if (bs == null) {
+                return WebUtils.error("您已经是商学院用户");
+            } else {
+                goodsInfoDto.setFee(bs.getFee());
+                goodsInfoDto.setInitDiscount(bs.getInitDiscount());
+                goodsInfoDto.setStartTime(bs.getStartTime());
+                goodsInfoDto.setEndTime(bs.getEndTime());
+            }
+
         }
+
+
         // 获取优惠券
         List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         goodsInfoDto.setCoupons(coupons);
