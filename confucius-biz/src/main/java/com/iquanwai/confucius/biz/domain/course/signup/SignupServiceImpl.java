@@ -182,7 +182,7 @@ public class SignupServiceImpl implements SignupService {
         if (memberTypeId == RiseMember.ELITE) {
             // 购买会员
             if (profile.getRiseMember() == 1 && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                right = "您已经是圈外同学会员";
+                right = "您已经是商学院会员";
             } else {
                 // 检查权限
                 boolean check = accountService.hasPrivilegeForBusinessSchool(profileId);
@@ -194,14 +194,16 @@ public class SignupServiceImpl implements SignupService {
             }
         } else if (memberTypeId == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
-            if (profile.getRiseMember() == 1) {
-                right = "您已经是圈外同学会员";
-            } else if (profile.getRiseMember() == 3) {
-                right = "您已经是小课训练营用户";
-            } else if (!ConfigUtils.getMonthlyCampOpen()) {
-                right = "当月小课训练营已关闭报名";
+            if (profile.getRiseMember() == 1 && (RiseMember.PROFESSIONAL == riseMember.getMemberTypeId() || RiseMember.HALF_PROFESSIONAL == riseMember.getMemberTypeId())) {
+                right = "您已经是商学院会员";
             } else {
-                left = 1;
+                if (profile.getRiseMember() == 3) {
+                    right = "您已经是小课训练营用户";
+                } else if (!ConfigUtils.getMonthlyCampOpen()) {
+                    right = "当月小课训练营已关闭报名";
+                } else {
+                    left = 1;
+                }
             }
         }
         return new MutablePair<>(left, right);
