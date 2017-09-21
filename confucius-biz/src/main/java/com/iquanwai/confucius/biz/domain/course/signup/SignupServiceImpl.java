@@ -220,12 +220,20 @@ public class SignupServiceImpl implements SignupService {
         // 查询该openid是否是我们的用户
         Profile profile = profileDao.load(Profile.class, profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        Pair<String, Double> orderPair = generateOrderId(memberType.getFee(), couponId);
+        Double fee;
+        BusinessSchool bs = this.getSchoolInfoForPay(profileId);
+        if (memberTypeId == RiseMember.ELITE && bs != null) {
+            // 报名小课精英版
+            fee = bs.getFee();
+        } else {
+            fee = memberType.getFee();
+        }
+        Pair<String, Double> orderPair = generateOrderId(fee, couponId);
 
         Assert.notNull(profile, "用户信息错误");
         Assert.notNull(memberType, "会员类型错误");
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
-                orderPair.getLeft(), memberType.getFee(), orderPair.getRight(),
+                orderPair.getLeft(), fee, orderPair.getRight(),
                 memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAG_MEMBER);
 
         // rise的报名数据
@@ -606,29 +614,24 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Double calculateMemberCoupon(Integer memberTypeId, List<Integer> couponIdGroup) {
+    public Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup) {
         Double amount = couponIdGroup.stream().map(couponId -> costRepo.getCoupon(couponId)).filter(Objects::nonNull).mapToDouble(Coupon::getAmount).sum();
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        if (memberType.getFee() >= amount) {
-            return CommonUtils.substract(memberType.getFee(), amount);
+        Double fee;
+        BusinessSchool bs = this.getSchoolInfoForPay(profileId);
+        if (memberTypeId == RiseMember.ELITE && bs != null) {
+            // 报名小课精英版
+            fee = bs.getFee();
+        } else {
+            fee = memberType.getFee();
+        }
+        if (fee >= amount) {
+            return CommonUtils.substract(fee, amount);
         } else {
             return 0D;
         }
     }
 
-    @Override
-    public Double calculateCampCoupon(Integer profileId, Integer couponId) {
-        logger.info("用户 id: {}", profileId);
-        logger.info("优惠券 id: {}", couponId);
-        Coupon coupon = couponDao.load(Coupon.class, couponId);
-        Assert.isTrue(profileId.equals(coupon.getProfileId()), "当前尚未拥有此优惠券");
-        Double fee = ConfigUtils.getMonthlyCampFee();
-        if (fee >= coupon.getAmount()) {
-            return CommonUtils.substract(fee, coupon.getAmount());
-        } else {
-            return 0D;
-        }
-    }
 
     @Override
     public RiseMember currentRiseMember(Integer profileId) {

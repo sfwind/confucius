@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
@@ -208,7 +209,6 @@ public class SignupController {
     }
 
 
-
     @RequestMapping(value = "/rise/member", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> getRiseMemberPayInfo(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
@@ -329,6 +329,7 @@ public class SignupController {
             goodsInfoDto.setFee(memberType.getFee());
             goodsInfoDto.setStartTime(memberType.getStartTime());
             goodsInfoDto.setEndTime(memberType.getEndTime());
+            goodsInfoDto.setInitPrice(memberType.getFee());
         }
         // TODO 升级商学院数据
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
@@ -337,11 +338,9 @@ public class SignupController {
                 return WebUtils.error("您已经是商学院用户");
             } else {
                 goodsInfoDto.setFee(bs.getFee());
-                goodsInfoDto.setInitDiscount(bs.getInitDiscount());
                 goodsInfoDto.setStartTime(bs.getStartTime());
                 goodsInfoDto.setEndTime(bs.getEndTime());
             }
-
         }
 
 
@@ -448,10 +447,11 @@ public class SignupController {
         Double price;
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER:
-                price = signupService.calculateMemberCoupon(paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
+                price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
                 return WebUtils.result(price);
             case QuanwaiOrder.FRAG_CAMP:
-                price = signupService.calculateCampCoupon(loginUser.getId(), paymentDto.getCouponId());
+                List<Integer> campCoupons = Lists.newArrayList(paymentDto.getCouponId());
+                price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), campCoupons);
                 return WebUtils.result(price);
             default:
                 logger.error("异常，用户:{}商品类型有问题:{}", loginUser.getId(), paymentDto);

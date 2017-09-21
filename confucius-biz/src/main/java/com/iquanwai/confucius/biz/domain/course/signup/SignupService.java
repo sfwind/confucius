@@ -74,8 +74,6 @@ public interface SignupService {
     void riseMemberEntry(String orderId);
 
 
-
-
     /**
      * 重新加载班级
      */
@@ -99,7 +97,6 @@ public interface SignupService {
     RiseOrder getRiseOrder(String orderId);
 
     /**
-     *
      * @param orderId
      * @return
      */
@@ -130,13 +127,8 @@ public interface SignupService {
      * @param couponId     优惠券id
      * @return 打的折扣是多少
      */
-    Double calculateMemberCoupon(Integer memberTypeId, List<Integer> couponId);
+    Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponId);
 
-
-    /**
-     * 计算小课训练营的优惠券
-     */
-    Double calculateCampCoupon(Integer profileId, Integer couponId);
 
     /**
      * 用户当前的会员
