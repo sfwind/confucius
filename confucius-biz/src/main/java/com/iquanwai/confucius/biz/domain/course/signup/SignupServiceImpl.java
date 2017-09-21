@@ -187,7 +187,12 @@ public class SignupServiceImpl implements SignupService {
                 // 检查权限
                 boolean check = accountService.hasPrivilegeForBusinessSchool(profileId);
                 if (check) {
-                    left = 1;
+                    // 有权限，查看是否开放报名
+                    if (ConfigUtils.getRisePayStopTime().before(new Date())) {
+                        right = "Hi，谢谢你关注【圈外同学】!\n不过...本次报名已达到限额了\n记得及时关注下期开放通知哦";
+                    } else {
+                        left = 1;
+                    }
                 } else {
                     right = "您需要先申请商学院报名权限";
                 }
@@ -755,7 +760,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee      总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -773,7 +779,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee           总价格
      * @param couponIdGroup 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {
