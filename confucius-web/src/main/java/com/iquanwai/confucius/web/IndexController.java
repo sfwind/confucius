@@ -52,23 +52,6 @@ public class IndexController {
         return courseView(request);
     }
 
-    @RequestMapping(value = "/pay/pay", method = RequestMethod.GET)
-    public ModelAndView getPayPayIndex(LoginUser loginUser, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (!checkAccessToken(request, response)) {
-            return null;
-        }
-        if (ConfigUtils.payPrePublish()) {
-            // 测试状态
-            boolean inWhite = whiteListService.isInWhiteList(WhiteList.PAY_TEST, loginUser.getId());
-            if (!inWhite) {
-                response.sendRedirect("/403.jsp");
-                return null;
-            }
-        }
-        return courseView(request, loginUser, PAY_VIEW);
-    }
-
-
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
     public ModelAndView getPayIndex(LoginUser loginUser, HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!checkAccessToken(request, response)) {
