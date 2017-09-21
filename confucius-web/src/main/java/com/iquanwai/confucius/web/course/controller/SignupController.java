@@ -24,6 +24,7 @@ import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
+import com.iquanwai.confucius.web.course.dto.payment.BusinessSchoolDto;
 import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -228,9 +229,9 @@ public class SignupController {
                 .action("点击RISE会员选择按钮")
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
-        if(memberTypeId == RiseMember.ELITE){
+        if (memberTypeId == RiseMember.ELITE) {
             boolean pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-            if(!pass){
+            if (!pass) {
                 return WebUtils.error(201, "请先提交申请");
             }
         }
@@ -286,7 +287,22 @@ public class SignupController {
         operationLogService.log(operationLog);
         // 检查状态
         Boolean check = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-        return WebUtils.result(check);
+        BusinessSchoolDto dto = new BusinessSchoolDto();
+        dto.setPrivilege(check);
+        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
+        if (riseMember == null) {
+            // 其他 -1
+            dto.setRiseMember(-1);
+        } else {
+            if (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
+                // 精英版 1
+                dto.setRiseMember(1);
+            } else {
+                // 非精英版 2
+                dto.setRiseMember(2);
+            }
+        }
+        return WebUtils.result(dto);
     }
 
     /**
