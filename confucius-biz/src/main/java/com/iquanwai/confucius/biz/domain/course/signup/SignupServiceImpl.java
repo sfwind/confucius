@@ -689,6 +689,14 @@ public class SignupServiceImpl implements SignupService {
         return businessSchool;
     }
 
+    @Override
+    public RiseMember getCurrentMonthlyCampStatus() {
+        RiseMember riseMember = new RiseMember();
+        riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+        riseMember.setEndTime(DateUtils.parseDateToStringByCommon(ConfigUtils.getMonthlyCampCloseDate()));
+        return riseMember;
+    }
+
 
     //生成学号 2位课程号2位班级号3位学号
     private String memberId(Integer courseId, Integer classId) {

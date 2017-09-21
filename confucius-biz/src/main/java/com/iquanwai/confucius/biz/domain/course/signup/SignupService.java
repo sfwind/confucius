@@ -159,4 +159,6 @@ public interface SignupService {
      * @param profileId 用户id
      */
     BusinessSchool getSchoolInfoForPay(Integer profileId);
+
+    RiseMember getCurrentMonthlyCampStatus();
 }
