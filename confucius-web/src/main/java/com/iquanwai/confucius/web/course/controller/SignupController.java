@@ -328,6 +328,7 @@ public class SignupController {
             if (bs.getIsBusinessStudent()) {
                 return WebUtils.error("您已经是商学院用户");
             } else {
+            if (bs != null) {
                 goodsInfoDto.setFee(bs.getFee());
                 goodsInfoDto.setStartTime(bs.getStartTime());
                 goodsInfoDto.setEndTime(bs.getEndTime());
