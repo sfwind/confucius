@@ -13,4 +13,7 @@ public class BusinessSchool {
     /** 初始优惠金额 */
     private Double initDiscount;
 
+    /** 已经是商学院会员 */
+    private Boolean isBusinessStudent;
+
 }

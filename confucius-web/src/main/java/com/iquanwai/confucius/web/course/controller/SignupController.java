@@ -1,13 +1,11 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
-import com.iquanwai.confucius.biz.domain.course.signup.CourseReductionService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -23,10 +21,10 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
+import com.iquanwai.confucius.web.course.dto.payment.BusinessSchoolDto;
 import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -40,7 +38,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
@@ -67,15 +70,9 @@ public class SignupController {
     @Autowired
     private PayService payService;
     @Autowired
-    private CourseProgressService courseProgressService;
-    @Autowired
     private CostRepo costRepo;
     @Autowired
     private MessageService messageService;
-    @Autowired
-    private PlanService planService;
-    @Autowired
-    private CourseReductionService courseReductionService;
 
 
     /**
@@ -204,7 +201,6 @@ public class SignupController {
     }
 
 
-
     @RequestMapping(value = "/rise/member", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> getRiseMemberPayInfo(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
@@ -233,6 +229,12 @@ public class SignupController {
                 .action("点击RISE会员选择按钮")
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
+        if (memberTypeId == RiseMember.ELITE) {
+            boolean pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
+            if (!pass) {
+                return WebUtils.error(201, "请先提交申请");
+            }
+        }
         Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
         if (result.getLeft() != 1) {
             return WebUtils.error(result.getRight());
@@ -285,7 +287,22 @@ public class SignupController {
         operationLogService.log(operationLog);
         // 检查状态
         Boolean check = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-        return WebUtils.result(check);
+        BusinessSchoolDto dto = new BusinessSchoolDto();
+        dto.setPrivilege(check);
+        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
+        if (riseMember == null) {
+            // 其他 -1
+            dto.setRiseMember(-1);
+        } else {
+            if (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
+                // 精英版 1
+                dto.setRiseMember(1);
+            } else {
+                // 非精英版 2
+                dto.setRiseMember(2);
+            }
+        }
+        return WebUtils.result(dto);
     }
 
     /**
@@ -310,8 +327,6 @@ public class SignupController {
                 .memo(goodsInfoDto.getGoodsType());
         operationLogService.log(operationLog);
 
-        // setName
-        goodsInfoDto.setName(GoodsInfoDto.GOODS_NAMES.get(goodsInfoDto.getGoodsType()));
         // 是否能使用多个优惠券
         goodsInfoDto.setMultiCoupons(this.checkMultiCoupons(goodsInfoDto.getGoodsType()));
         // 计算价格/等特殊
@@ -325,19 +340,13 @@ public class SignupController {
             goodsInfoDto.setFee(memberType.getFee());
             goodsInfoDto.setStartTime(memberType.getStartTime());
             goodsInfoDto.setEndTime(memberType.getEndTime());
+            goodsInfoDto.setInitPrice(memberType.getFee());
+            goodsInfoDto.setName(memberType.getName());
         }
-        // TODO 升级商学院数据
-        BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
-        if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            if (bs == null) {
-                return WebUtils.error("您已经是商学院用户");
-            } else {
-                goodsInfoDto.setFee(bs.getFee());
-                goodsInfoDto.setInitDiscount(bs.getInitDiscount());
-                goodsInfoDto.setStartTime(bs.getStartTime());
-                goodsInfoDto.setEndTime(bs.getEndTime());
-            }
 
+        BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
+        if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType()) && !bs.getIsBusinessStudent()) {
+            goodsInfoDto.setFee(bs.getFee());
         }
 
 
@@ -444,14 +453,11 @@ public class SignupController {
         Double price;
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER:
-                Pair<Integer, String> check = signupService.riseMemberSignupCheck(loginUser.getId(), paymentDto.getGoodsId());
-                if (check.getLeft() != 1) {
-                    return WebUtils.error(check.getRight());
-                }
-                price = signupService.calculateMemberCoupon(paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
+                price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
                 return WebUtils.result(price);
             case QuanwaiOrder.FRAG_CAMP:
-                price = signupService.calculateCampCoupon(loginUser.getId(), paymentDto.getCouponId());
+                List<Integer> campCoupons = Lists.newArrayList(paymentDto.getCouponId());
+                price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), campCoupons);
                 return WebUtils.result(price);
             default:
                 logger.error("异常，用户:{}商品类型有问题:{}", loginUser.getId(), paymentDto);
