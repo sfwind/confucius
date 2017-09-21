@@ -237,7 +237,7 @@ public class SignupServiceImpl implements SignupService {
         Integer profileId = campOrder.getProfileId();
         // 更新 profile 表中状态
         Profile profile = accountService.getProfile(profileId);
-
+        RiseMember existRiseMember = this.currentRiseMember(profileId);
         // 清除历史 RiseMember 数据
         RiseClassMember delClassMember = riseClassMemberDao.queryByProfileId(profileId);
         if (delClassMember != null) {
@@ -255,16 +255,22 @@ public class SignupServiceImpl implements SignupService {
         riseClassMemberDao.insert(classMember);
 
         // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
-        riseMemberDao.updateExpiredAhead(profileId);
-        // 添加会员表
-        RiseMember riseMember = new RiseMember();
-        riseMember.setOpenId(campOrder.getOpenId());
-        riseMember.setOrderId(campOrder.getOrderId());
-        riseMember.setProfileId(campOrder.getProfileId());
-        riseMember.setMemberTypeId(RiseMember.MONTHLY_CAMP);
-        Date endDate = ConfigUtils.getMonthlyCampCloseDate();
-        riseMember.setExpireDate(endDate);
-        riseMemberDao.insert(riseMember);
+        if (existRiseMember != null && !(existRiseMember.getMemberTypeId() == RiseMember.PROFESSIONAL
+                || existRiseMember.getMemberTypeId() == RiseMember.HALF_PROFESSIONAL
+                || existRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE
+                || existRiseMember.getMemberTypeId() == RiseMember.ELITE)) {
+            riseMemberDao.updateExpiredAhead(profileId);
+            // 添加会员表
+            RiseMember riseMember = new RiseMember();
+            riseMember.setOpenId(campOrder.getOpenId());
+            riseMember.setOrderId(campOrder.getOrderId());
+            riseMember.setProfileId(campOrder.getProfileId());
+            riseMember.setMemberTypeId(RiseMember.MONTHLY_CAMP);
+            Date endDate = ConfigUtils.getMonthlyCampCloseDate();
+            riseMember.setExpireDate(endDate);
+            riseMemberDao.insert(riseMember);
+        }
+
 
         // 送优惠券
         Coupon coupon = new Coupon();
