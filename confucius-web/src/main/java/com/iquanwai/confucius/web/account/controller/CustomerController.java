@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.account.controller;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.customer.ProfileService;
@@ -270,18 +269,29 @@ public class CustomerController {
         return WebUtils.success();
     }
 
-    @RequestMapping("/rise/member")
-    public ResponseEntity<Map<String, Object>> riseMember(LoginUser loginUser) {
-        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
+    @RequestMapping("/rise/member/{memberTypeId}")
+    public ResponseEntity<Map<String, Object>> riseMember(@PathVariable Integer memberTypeId, LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("用户信息")
                 .function("RISE")
                 .action("查询rise会员信息")
-                .memo(riseMember != null ? new Gson().toJson(riseMember) : "none");
+                .memo(String.valueOf(memberTypeId));
         operationLogService.log(operationLog);
-        if (riseMember != null) {
-            riseMember.setName(signupService.getMemberType(riseMember.getMemberTypeId()).getName());
+
+        RiseMember riseMember = null;
+
+        switch (memberTypeId) {
+            case RiseMember.ELITE:
+                riseMember = signupService.currentRiseMember(loginUser.getId());
+                break;
+            case RiseMember.MONTHLY_CAMP:
+                riseMember = signupService.getCurrentMonthlyCampStatus();
+                break;
         }
-        return WebUtils.result(riseMember);
+        if(riseMember != null) {
+            return WebUtils.result(riseMember);
+        } else {
+            return WebUtils.error("会员类型校验出错");
+        }
     }
 }

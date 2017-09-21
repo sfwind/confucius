@@ -16,13 +16,7 @@ public class PayServiceTest extends TestBase {
     private SignupService signupService;
 
     @Test
-    public void testChose(){
-        signupService.riseCourseEntry("test");
-
-    }
-
-    @Test
-    public void testClosePay(){
-        payService.closeOrder();
+    public void testCheckPay(){
+        signupService.risePurchaseCheck(16442, 5);
     }
 }

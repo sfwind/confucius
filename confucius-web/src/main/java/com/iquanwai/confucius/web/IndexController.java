@@ -3,10 +3,8 @@ package com.iquanwai.confucius.web;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
-import com.iquanwai.confucius.biz.domain.whitelist.WhiteListService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -35,8 +33,6 @@ public class IndexController {
     private OAuthService oAuthService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private WhiteListService whiteListService;
 
     private static final String COURSE_VIEW = "course";
     private static final String PAY_VIEW = "pay";
@@ -45,29 +41,9 @@ public class IndexController {
 
 
     @RequestMapping(value = "/static/**", method = RequestMethod.GET)
-    public ModelAndView getIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//        if(!checkAccessToken(request,response)){
-//            return null;
-//        }
+    public ModelAndView getIndex(HttpServletRequest request) throws Exception {
         return courseView(request);
     }
-
-    @RequestMapping(value = "/pay/pay", method = RequestMethod.GET)
-    public ModelAndView getPayPayIndex(LoginUser loginUser, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (!checkAccessToken(request, response)) {
-            return null;
-        }
-        if (ConfigUtils.payPrePublish()) {
-            // 测试状态
-            boolean inWhite = whiteListService.isInWhiteList(WhiteList.PAY_TEST, loginUser.getId());
-            if (!inWhite) {
-                response.sendRedirect("/403.jsp");
-                return null;
-            }
-        }
-        return courseView(request, loginUser, PAY_VIEW);
-    }
-
 
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
     public ModelAndView getPayIndex(LoginUser loginUser, HttpServletRequest request, HttpServletResponse response) throws Exception {

@@ -115,6 +115,10 @@ public class MonthlyCampController {
         List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = accountService.getProfiles(profileIds);
 
+        if(riseClassMembers.size() != profiles.size()) {
+            return WebUtils.error("人员不匹配");
+        }
+
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
         for (int i = 0; i < riseClassMembers.size(); i++) {
             Integer profileId = riseClassMembers.get(i).getProfileId();

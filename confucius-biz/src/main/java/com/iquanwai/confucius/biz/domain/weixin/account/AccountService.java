@@ -86,4 +86,6 @@ public interface AccountService {
     void updateRiseMember(String openid, Integer riseMember);
 
     List<Profile> loadProfilesByNickName(String nickName);
+
+    Boolean hasPrivilegeForBusinessSchool(Integer profileId);
 }
