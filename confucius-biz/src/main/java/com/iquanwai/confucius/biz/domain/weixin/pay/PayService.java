@@ -30,30 +30,14 @@ public interface PayService {
      */
     void handlePayResult(String orderId,Boolean isFree);
 
-    /**
-     * 订单付款成功
-     * @param orderId 订单id
-     * */
-    void paySuccess(String orderId);
 
     void risePaySuccess(String orderId);
 
     // 购买会员
     void payMemberSuccess(String orderId);
 
-    // 购买小课
-    void payFragmentSuccess(String orderId);
 
-    /**
-     * 定期关闭过期订单
-     * */
-    void closeOrder();
 
-    /**
-     * 关闭订单
-     * @param orderId 订单号
-     * */
-    void closeOrder(String orderId);
 
     /**
      * 校验支付签名
