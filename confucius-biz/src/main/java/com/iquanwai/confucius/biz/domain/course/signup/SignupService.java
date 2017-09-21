@@ -4,13 +4,9 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
-import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
-import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -22,10 +18,6 @@ public interface SignupService {
 
 
     Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
-
-
-    Pair<Integer, String> riseMemberSignupCheck(Integer profileId, Integer memberTypeId);
-
     /**
      * 报名rise, 不生成预付订单
      */
@@ -38,22 +30,6 @@ public interface SignupService {
      * 获取学员详情
      */
     ClassMember classMember(String orderId);
-
-
-    /**
-     * 根据班级id获取班级信息
-     */
-    QuanwaiClass getCachedClass(Integer classId);
-
-    /**
-     * 根据课程id获取课程信息
-     */
-    CourseIntroduction getCachedCourse(Integer courseId);
-
-    /**
-     * 根据订单号获取订单
-     */
-    CourseOrder getOrder(String orderId);
 
 
     /**
@@ -73,16 +49,10 @@ public interface SignupService {
 
     void riseMemberEntry(String orderId);
 
-
-
-
     /**
      * 重新加载班级
      */
     void reloadClass();
-
-    String PAY_URL = "weixin://wxpay/bizpayurl?sign={sign}&appid={appid}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
-
 
     /**
      * 获得圈外订单
@@ -97,13 +67,6 @@ public interface SignupService {
      * @param orderId 订单id
      */
     RiseOrder getRiseOrder(String orderId);
-
-    /**
-     *
-     * @param orderId
-     * @return
-     */
-    RiseCourseOrder getRiseCourse(String orderId);
 
     /**
      * 获取会员类型
