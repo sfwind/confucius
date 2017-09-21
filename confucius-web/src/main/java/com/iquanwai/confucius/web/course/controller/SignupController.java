@@ -231,7 +231,7 @@ public class SignupController {
         if(memberTypeId == RiseMember.ELITE){
             boolean pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
             if(!pass){
-                WebUtils.error(201, "请先提交申请");
+                return WebUtils.error(201, "请先提交申请");
             }
         }
         Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
