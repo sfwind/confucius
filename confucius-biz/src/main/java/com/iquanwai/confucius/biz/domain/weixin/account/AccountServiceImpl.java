@@ -352,8 +352,11 @@ public class AccountServiceImpl implements AccountService {
                     profileDao.updateRiseMember(openid, riseMember);
                 }
                 break;
-            default:
+            case Constants.RISE_MEMBER.FREE:
+                profileDao.updateRiseMember(openid, riseMember);
                 break;
+            default:
+                logger.error("当前用户Profile会员信息异常:{}", profile);
         }
     }
 
