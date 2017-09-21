@@ -322,17 +322,12 @@ public class SignupController {
             goodsInfoDto.setEndTime(memberType.getEndTime());
             goodsInfoDto.setInitPrice(memberType.getFee());
         }
-        // TODO 升级商学院数据
+
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
-        if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            if (bs.getIsBusinessStudent()) {
-                return WebUtils.error("您已经是商学院用户");
-            } else {
-            if (bs != null) {
-                goodsInfoDto.setFee(bs.getFee());
-                goodsInfoDto.setStartTime(bs.getStartTime());
-                goodsInfoDto.setEndTime(bs.getEndTime());
-            }
+        if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType()) && !bs.getIsBusinessStudent()) {
+            goodsInfoDto.setFee(bs.getFee());
+            goodsInfoDto.setStartTime(bs.getStartTime());
+            goodsInfoDto.setEndTime(bs.getEndTime());
         }
 
 
