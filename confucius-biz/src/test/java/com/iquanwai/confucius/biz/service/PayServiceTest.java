@@ -15,5 +15,8 @@ public class PayServiceTest extends TestBase {
     @Autowired
     private SignupService signupService;
 
-
+    @Test
+    public void testCheckPay(){
+        signupService.risePurchaseCheck(16442, 5);
+    }
 }

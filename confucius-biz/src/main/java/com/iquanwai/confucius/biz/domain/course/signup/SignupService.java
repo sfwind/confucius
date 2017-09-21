@@ -16,14 +16,18 @@ import java.util.List;
  */
 public interface SignupService {
 
-
+    /**
+     * 商品支付资格校验
+     */
     Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
     /**
-     * 报名rise, 不生成预付订单
+     * 报名商学院, 不生成预付订单
      */
     QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
-
+    /**
+     * 报名训练营, 不生成预付订单
+     */
     QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**

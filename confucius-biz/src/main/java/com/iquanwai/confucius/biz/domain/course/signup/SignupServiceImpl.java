@@ -133,27 +133,23 @@ public class SignupServiceImpl implements SignupService {
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
                     (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
                             RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                right = "您已经是商学院会员";
+                right = "您已经是圈外商学院学员，无需重复报名\n" +
+                        "如有疑问请在学习群咨询班长";
             } else {
-                // 检查权限
-                boolean check = accountService.hasPrivilegeForBusinessSchool(profileId);
-                if (check) {
-                    // 有权限，查看是否开放报名
-                    if (ConfigUtils.getRisePayStopTime().before(new Date())) {
-                        right = "Hi，谢谢你关注【圈外同学】!\n不过...本次报名已达到限额了\n记得及时关注下期开放通知哦";
-                    } else {
-                        left = 1;
-                    }
+                // 查看是否开放报名
+                if (ConfigUtils.getRisePayStopTime().before(new Date())) {
+                    right = "Hi，谢谢你关注【圈外同学】!\n不过...本次报名已达到限额了\n记得及时关注下期开放通知哦";
                 } else {
-                    right = "您需要先申请商学院报名权限";
+                    left = 1;
                 }
             }
         } else if (memberTypeId == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
-                    (RiseMember.PROFESSIONAL == riseMember.getMemberTypeId() ||
-                            RiseMember.HALF_PROFESSIONAL == riseMember.getMemberTypeId())) {
-                right = "您已经是商学院会员";
+                    (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
+                            RiseMember.ELITE == riseMember.getMemberTypeId())) {
+                right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名\n" +
+                        "如有疑问请在学习群咨询班长";
             } else {
                 if (profile.getRiseMember() == 3) {
                     right = "您已经是小课训练营用户";

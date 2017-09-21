@@ -228,6 +228,12 @@ public class SignupController {
                 .action("点击RISE会员选择按钮")
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
+        if(memberTypeId == RiseMember.ELITE){
+            boolean pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
+            if(!pass){
+                return WebUtils.error(201, "请先提交申请");
+            }
+        }
         Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
         if (result.getLeft() != 1) {
             return WebUtils.error(result.getRight());
