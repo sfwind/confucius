@@ -237,7 +237,6 @@ public class SignupServiceImpl implements SignupService {
         Integer profileId = campOrder.getProfileId();
         // 更新 profile 表中状态
         Profile profile = accountService.getProfile(profileId);
-        profileDao.becomeMonthlyCampMember(profileId);
 
         // 清除历史 RiseMember 数据
         RiseClassMember delClassMember = riseClassMemberDao.queryByProfileId(profileId);
