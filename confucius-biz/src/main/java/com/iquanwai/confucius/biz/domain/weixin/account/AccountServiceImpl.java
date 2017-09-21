@@ -3,16 +3,20 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
+import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Region;
+import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -57,6 +61,10 @@ public class AccountServiceImpl implements AccountService {
     private UserRoleDao userRoleDao;
     @Autowired
     private PromotionUserDao promotionUserDao;
+    @Autowired
+    private CustomerStatusDao customerStatusDao;
+    @Autowired
+    private RiseMemberDao riseMemberDao;
 
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
@@ -372,4 +380,15 @@ public class AccountServiceImpl implements AccountService {
         return profile;
     }
 
+
+    @Override
+    public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        if (riseMember != null) {
+            return !riseMember.getMemberTypeId().equals(RiseMember.ELITE);
+        } else {
+            return customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
+        }
+
+    }
 }

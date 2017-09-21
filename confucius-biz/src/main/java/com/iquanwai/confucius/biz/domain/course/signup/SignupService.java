@@ -2,7 +2,11 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
@@ -10,46 +14,15 @@ import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by justin on 16/8/29.
  */
 public interface SignupService {
-    /**
-     * 计算课程是否有剩余名额
-     *
-     * @param profileId 用户id
-     * @param courseId  课程id
-     * @return {-1,0} 已报满，
-     * {-2,0} 没有设置课程，
-     * {1,*} 预报名成功,返回班级id
-     */
-    Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId);
 
-    /**
-     * 检查该用户是否可以购买该小课
-     *
-     * @param profileId 用户id
-     * @param problemId 小课id
-     */
-    Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId);
 
     Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
 
-    /**
-     * 检查是否在报名中
-     *
-     * @param profileId 用户id
-     */
-    Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId);
-
-    /**
-     * 课程报名，生成预付订单
-     *
-     * @return 订单
-     */
-    QuanwaiOrder signupCourse(String openid, Integer profileId, Integer courseId, Integer classId);
 
     Pair<Integer, String> riseMemberSignupCheck(Integer profileId, Integer memberTypeId);
 
@@ -58,7 +31,6 @@ public interface SignupService {
      */
     QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
-    QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId);
 
     QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
@@ -67,12 +39,6 @@ public interface SignupService {
      */
     ClassMember classMember(String orderId);
 
-    /**
-     * 生成付款二维码
-     *
-     * @return 报名二维码
-     */
-    String payQRCode(String productId);
 
     /**
      * 根据班级id获取班级信息
@@ -89,15 +55,6 @@ public interface SignupService {
      */
     CourseOrder getOrder(String orderId);
 
-    /**
-     * 付款成功后入学
-     *
-     * @param orderId 订单id
-     * @return 返回学号
-     */
-    String entry(String orderId);
-
-    void riseCourseEntry(String orderId);
 
     /**
      * 购买完训练营小课后续操作
@@ -116,17 +73,8 @@ public interface SignupService {
 
     void riseMemberEntry(String orderId);
 
-    /**
-     * 未及时付款，去掉预报名抢占的名额
-     */
-    void giveupSignup(String orderId);
 
-    void giveupRiseCourseSignup(String orderId);
 
-    /**
-     * 放弃rise的报名
-     */
-    void giveupRiseSignup(String orderId);
 
     /**
      * 重新加载班级
@@ -135,9 +83,6 @@ public interface SignupService {
 
     String PAY_URL = "weixin://wxpay/bizpayurl?sign={sign}&appid={appid}&mch_id={mch_id}&product_id={product_id}&time_stamp={time_stamp}&nonce_str={nonce_str}";
 
-    Map<Integer, Integer> getRemindingCount();
-
-    Integer getRiseRemindingCount();
 
     /**
      * 获得圈外订单
@@ -153,6 +98,11 @@ public interface SignupService {
      */
     RiseOrder getRiseOrder(String orderId);
 
+    /**
+     *
+     * @param orderId
+     * @return
+     */
     RiseCourseOrder getRiseCourse(String orderId);
 
     /**
@@ -182,19 +132,31 @@ public interface SignupService {
      */
     Double calculateMemberCoupon(Integer memberTypeId, List<Integer> couponId);
 
-    /**
-     * 计算小课单卖多少钱
-     *
-     * @param problemId 小课id
-     * @param couponId  优惠券id
-     */
-    Double calculateCourseCoupon(Integer problemId, Integer profileId, Integer couponId);
 
+    /**
+     * 计算小课训练营的优惠券
+     */
     Double calculateCampCoupon(Integer profileId, Integer couponId);
 
+    /**
+     * 用户当前的会员
+     */
     RiseMember currentRiseMember(Integer profileId);
 
+    /**
+     * 当月训练营
+     */
     Integer loadCurrentCampMonth();
 
+    /**
+     * 小课售卖页面，跳转小课介绍页面 problemId
+     */
     Integer loadHrefProblemId(Integer month);
+
+    /**
+     * 获取商学院数据
+     *
+     * @param profileId 用户id
+     */
+    BusinessSchool getSchoolInfoForPay(Integer profileId);
 }

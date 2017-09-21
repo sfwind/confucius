@@ -20,11 +20,9 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseCourseOrderDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
-import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Callback;
@@ -36,13 +34,19 @@ import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampSchedule;
-import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCourseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
-import com.iquanwai.confucius.biz.po.systematism.*;
-import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.po.systematism.ClassMember;
+import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
+import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
+import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
+import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.collections.CollectionUtils;
@@ -56,7 +60,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.awt.*;
 import java.lang.ref.SoftReference;
 import java.net.ConnectException;
 import java.util.Date;
@@ -64,8 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by justin on 16/9/10.
@@ -174,40 +175,32 @@ public class SignupServiceImpl implements SignupService {
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher("camp_order_topic");
     }
 
-    @Override
-    public Pair<Integer, Integer> signupCheck(Integer profileId, Integer courseId) {
-        // 还没有正式进入班级
-        return classMemberCountRepo.prepareSignup(profileId, courseId);
-    }
 
     @Override
     public Pair<Integer, String> riseMemberSignupCheck(Integer profileId, Integer memberTypeId) {
         return riseMemberCountRepo.prepareSignup(profileId);
     }
 
-    @Override
-    public Pair<Integer, String> riseCourseSignupCheck(Integer profileId, Integer problemId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-
-        // Rise会员可以直接学习
-        if (riseMember != null && riseMember.getMemberTypeId() != RiseMember.MONTHLY_CAMP) {
-            return new MutablePair<>(-1, "您已经是RISE会员，无需单独购买小课");
-        }
-        return new MutablePair<>(1, "");
-    }
 
     @Override
     public Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
         Profile profile = accountService.getProfile(profileId);
+        RiseMember riseMember = this.currentRiseMember(profileId);
         Assert.notNull(profile, "用户不能为空");
         Integer left = -1;
         String right = "正常";
         if (memberTypeId == RiseMember.ELITE) {
             // 购买会员
-            if (profile.getRiseMember() == 1) {
+            if (profile.getRiseMember() == 1 && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
                 right = "您已经是圈外同学会员";
             } else {
-                left = 1;
+                // 检查权限
+                boolean check = accountService.hasPrivilegeForBusinessSchool(profileId);
+                if (check) {
+                    left = 1;
+                } else {
+                    right = "您需要先申请商学院报名权限";
+                }
             }
         } else if (memberTypeId == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
@@ -224,52 +217,6 @@ public class SignupServiceImpl implements SignupService {
         return new MutablePair<>(left, right);
     }
 
-    @Override
-    public Pair<Integer, String> riseMemberSignupCheckNoHold(Integer profileId, Integer memberTypeId) {
-        return riseMemberCountRepo.prepareSignup(profileId, false);
-    }
-
-    @Override
-    public QuanwaiOrder signupCourse(String openid, Integer profileId, Integer courseId, Integer classId) {
-        //生成订单
-        QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
-        quanwaiOrder.setCreateTime(new Date());
-        quanwaiOrder.setOpenid(openid);
-        //orderId 16位随机字符
-        String orderId = CommonUtils.randomString(16);
-        quanwaiOrder.setOrderId(orderId);
-        CourseIntroduction course = getCachedCourse(courseId);
-        if (course == null) {
-            logger.error("courseId {} is not existed", courseId);
-            return null;
-        }
-        double discount = 0.0;
-        //计算优惠
-        if (costRepo.hasCoupon(profileId)) {
-            discount = costRepo.discount(course.getFee(), profileId, orderId);
-        }
-        quanwaiOrder.setTotal(course.getFee());
-        quanwaiOrder.setDiscount(discount);
-        quanwaiOrder.setPrice(CommonUtils.substract(course.getFee(), discount));
-        quanwaiOrder.setStatus(QuanwaiOrder.UNDER_PAY); //待支付
-        quanwaiOrder.setGoodsId(courseId + "");
-        quanwaiOrder.setGoodsName(course.getCourseName());
-        quanwaiOrder.setGoodsType(QuanwaiOrder.SYSTEMATISM);
-        quanwaiOrderDao.insert(quanwaiOrder);
-
-        //生成体系化报名数据
-        CourseOrder courseOrder = new CourseOrder();
-        courseOrder.setClassId(classId);
-        courseOrder.setCourseId(courseId);
-        courseOrder.setEntry(false);
-        courseOrder.setIsDel(false);
-        courseOrder.setOpenid(openid);
-        courseOrder.setProfileId(profileId);
-        courseOrder.setOrderId(orderId);
-        courseOrderDao.insert(courseOrder);
-
-        return quanwaiOrder;
-    }
 
     @Override
     public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId) {
@@ -293,33 +240,6 @@ public class SignupServiceImpl implements SignupService {
         riseOrder.setOrderId(orderPair.getLeft());
         riseOrder.setProfileId(profile.getId());
         riseOrderDao.insert(riseOrder);
-        return quanwaiOrder;
-    }
-
-    @Override
-    public QuanwaiOrder signupRiseCourse(Integer profileId, Integer problemId, Integer couponId) {
-        // 查询该openid 是否是我们的用户
-        Profile profile = profileDao.load(Profile.class, profileId);
-        Double fee = this.getCoursePrice(profileId, problemId);
-        CourseReductionActivity activity = courseReductionService.loadRecentCourseReduction(profileId, problemId);
-        if (activity != null && activity.getPrice() != null) {
-            fee = activity.getPrice();
-        }
-        Problem problem = problemDao.load(Problem.class, problemId);
-        Assert.notNull(problem, "小课数据异常");
-        Assert.notNull(fee, "会员价格异常");
-        Assert.notNull(profile, "用户信息不能为空");
-        Pair<String, Double> orderPair = generateOrderId(fee, couponId);
-        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
-                orderPair.getLeft(), fee, orderPair.getRight(),
-                problemId.toString(), problem.getProblem(), QuanwaiOrder.FRAG_COURSE);
-        // 插入rise小课单卖的报名数据
-        RiseCourseOrder riseCourseOrder = new RiseCourseOrder();
-        riseCourseOrder.setProblemId(problemId);
-        riseCourseOrder.setProfileId(profileId);
-        riseCourseOrder.setOpenid(profile.getOpenid());
-        riseCourseOrder.setOrderId(orderPair.getLeft());
-        riseCourseOrderDao.insert(riseCourseOrder);
         return quanwaiOrder;
     }
 
@@ -356,22 +276,6 @@ public class SignupServiceImpl implements SignupService {
         return null;
     }
 
-    @Override
-    public String payQRCode(String productId) {
-        String payUrl = payUrl(productId);
-        String path = "/data/static/images/qrcode/" + productId + ".jpg";
-        String picUrl = ConfigUtils.resourceDomainName() + "/images/qrcode/" + productId + ".jpg";
-
-        //生成二维码base64编码
-        Image image = QRCodeUtils.genQRCode(payUrl, QRCODE_WIDTH, QRCODE_HEIGHT);
-        if (image == null) {
-            logger.error("二维码生成失败");
-        } else {
-            QRCodeUtils.image2FS(image, path);
-        }
-
-        return picUrl;
-    }
 
     @Override
     public QuanwaiClass getCachedClass(Integer classId) {
@@ -398,75 +302,6 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public CourseOrder getOrder(String orderId) {
         return courseOrderDao.loadOrder(orderId);
-    }
-
-    @Override
-    public String entry(String orderId) {
-        CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
-        Integer classId = courseOrder.getClassId();
-        Integer courseId = courseOrder.getCourseId();
-        String openid = courseOrder.getOpenid();
-        Integer profileId = courseOrder.getProfileId();
-        //体系化订单标记已报名
-        courseOrderDao.entry(orderId);
-        ClassMember classMember = classMemberDao.getClassMember(classId, profileId);
-        Date closeDate = getCloseDate(classId, courseId);
-        if (classMember != null) {
-            //已经毕业或者已经超过关闭时间,重置学员数据
-            if (classMember.getGraduate() || classMember.getCloseDate().before(DateUtils.startDay(new Date()))) {
-                classMemberDao.reEntry(classMember.getId(), closeDate);
-            }
-            //发送录取消息
-            sendWelcomeMsg(courseId, openid, classId, classMember.getMemberId());
-            return classMember.getMemberId();
-        }
-        classMember = new ClassMember();
-        classMember.setClassId(classId);
-        classMember.setOpenId(openid);
-        classMember.setCourseId(courseId);
-        //只有长课程有学号
-        String memberId = "";
-        if (getCachedCourse(courseId).getType() == Course.LONG_COURSE) {
-            memberId = memberId(courseId, classId);
-            classMember.setMemberId(memberId);
-        }
-        //设置课程关闭时间
-        classMember.setCloseDate(closeDate);
-        classMember.setProfileId(profileId);
-        classMemberDao.entry(classMember);
-        //发送录取消息
-        sendWelcomeMsg(courseId, openid, classId, memberId);
-        return memberId;
-    }
-
-    @Override
-    public void riseCourseEntry(String orderId) {
-        RiseCourseOrder riseCourseOrder = riseCourseOrderDao.loadOrder(orderId);
-        // 用户购买小课逻辑
-        Integer profileId = riseCourseOrder.getProfileId();
-        riseCourseOrderDao.entry(orderId);
-        // 检查用户是不是已经学过这个小课
-        ImprovementPlan plan = improvementPlanDao.loadPlanByProblemId(profileId, riseCourseOrder.getProblemId());
-        if (plan == null) {
-            // 用户没有学过这个小课，生成他
-            // TODO 这里不能改成异步mq，因为要等待rise返回planId
-            Integer planId = createPlan(riseCourseOrder);
-            if (planId < 0) {
-                logger.error("报名小课异常，返回的planId异常");
-            } else {
-                improvementPlanDao.reOpenPlan(planId, DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
-            }
-        } else {
-            // 用户有这个小课
-            if (plan.getStatus() == ImprovementPlan.TRIALCLOSE) {
-                // 试用结束，设置成正在进行，延长三十天
-                improvementPlanDao.reOpenPlan(plan.getId(), DateUtils.afterDays(new Date(), PROBLEM_MAX_LENGTH));
-            } else {
-                logger.error("报名小课异常，小课状态为:{}", plan.getStatus());
-                messageService.sendAlarm("报名模块出错", "用户小课数据异常",
-                        "高", "订单id:" + orderId, "该用户购买的小课，状态并不是使用结束");
-            }
-        }
     }
 
     @Override
@@ -622,43 +457,40 @@ public class SignupServiceImpl implements SignupService {
 
         riseOrderDao.entry(orderId);
         String openId = riseOrder.getOpenid();
-
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         Date expireDate;
-        switch (memberType.getId()) {
-            case 3: {
-                //精英会员一年
+        if (RiseMember.ELITE == memberType.getId()) {
+            //查看有没有老的
+            RiseMember exist = riseMemberDao.loadValidRiseMember(riseOrder.getProfileId());
+            if (exist != null) {
+                // 升级
+                expireDate = DateUtils.afterNatureMonths(exist.getExpireDate(), 12);
+            } else {
                 expireDate = DateUtils.afterNatureMonths(new Date(), 12);
-                profileDao.becomeRiseEliteMember(openId);
-
-                // 清除历史 RiseMember 数据
-                RiseClassMember delMember = riseClassMemberDao.queryByProfileId(riseOrder.getProfileId());
-                if (delMember != null) {
-                    riseClassMemberDao.del(delMember.getId());
-                }
-
-                // RiseMember 新增记录
-                String memberId = generateMemberId();
-                RiseClassMember classMember = new RiseClassMember();
-                classMember.setClassId(ConfigUtils.getRiseMemberClassId());
-                classMember.setClassName(ConfigUtils.getRiseMemberClassId());
-                classMember.setProfileId(riseOrder.getProfileId());
-                classMember.setMemberId(memberId);
-                classMember.setActive(1);
-                riseClassMemberDao.insert(classMember);
-                break;
             }
-            case 4: {
-                //精英会员半年啊
-                expireDate = DateUtils.afterNatureMonths(new Date(), 6);
-                profileDao.becomeRiseEliteMember(openId);
-                break;
+            //精英会员一年
+            profileDao.becomeRiseEliteMember(openId);
+
+            // 清除历史 RiseMember 数据
+            RiseClassMember delMember = riseClassMemberDao.queryByProfileId(riseOrder.getProfileId());
+            if (delMember != null) {
+                riseClassMemberDao.del(delMember.getId());
             }
-            default:
-                logger.error("该会员ID异常{}", memberType);
-                messageService.sendAlarm("报名模块出错", "会员id异常",
-                        "高", "订单id:" + orderId, "会员类型异常");
-                return;
+
+            // RiseMember 新增记录
+            String memberId = generateMemberId();
+            RiseClassMember classMember = new RiseClassMember();
+            classMember.setClassId(ConfigUtils.getRiseMemberClassId());
+            classMember.setClassName(ConfigUtils.getRiseMemberClassId());
+            classMember.setProfileId(riseOrder.getProfileId());
+            classMember.setMemberId(memberId);
+            classMember.setActive(1);
+            riseClassMemberDao.insert(classMember);
+        } else {
+            logger.error("该会员ID异常{}", memberType);
+            messageService.sendAlarm("报名模块出错", "会员id异常",
+                    "高", "订单id:" + orderId, "会员类型异常");
+            return;
         }
         // 如果存在，则将已经存在的 riseMember 数据置为已过期
         riseMemberDao.updateExpiredAhead(riseOrder.getProfileId());
@@ -720,112 +552,6 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
-    private Date getCloseDate(Integer classId, Integer courseId) {
-        Date closeDate = null;
-        //长课程关闭时间=课程结束时间+7,短课程关闭时间=今天+课程长度+7,试听课程关闭时间为2999
-        if (getCachedCourse(courseId).getType() == Course.LONG_COURSE) {
-            Date closeTime = getCachedClass(classId).getCloseTime();
-            closeDate = DateUtils.afterDays(closeTime, CourseStudyService.EXTRA_OPEN_DAYS);
-        } else if (getCachedCourse(courseId).getType() == Course.SHORT_COURSE) {
-            int length = getCachedCourse(courseId).getLength();
-            closeDate = DateUtils.afterDays(new Date(), length + CourseStudyService.EXTRA_OPEN_DAYS);
-        } else if (getCachedCourse(courseId).getType() == Course.AUDITION_COURSE) {
-            closeDate = DateUtils.afterDays(new Date(), CourseStudyService.AUDITION_OPEN_DAYS);
-        }
-        return closeDate;
-    }
-
-    @Override
-    public void giveupSignup(String orderId) {
-        CourseOrder courseOrder = courseOrderDao.loadOrder(orderId);
-        ClassMember classMember = classMemberDao.getClassMember(courseOrder.getClassId(), courseOrder.getProfileId());
-        //未付款时退还名额
-        if (classMember == null) {
-            classMemberCountRepo.quitClass(courseOrder.getProfileId(), courseOrder.getCourseId(),
-                    courseOrder.getClassId());
-        }
-        //关闭订单
-        courseOrderDao.closeOrder(orderId);
-        quanwaiOrderDao.closeOrder(orderId);
-    }
-
-    @Override
-    public void giveupRiseCourseSignup(String orderId) {
-        //关闭订单
-        riseCourseOrderDao.closeOrder(orderId);
-        quanwaiOrderDao.closeOrder(orderId);
-    }
-
-    @Override
-    public void giveupRiseSignup(String orderId) {
-        RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
-        Profile profile = profileDao.queryByOpenId(riseOrder.getOpenid());
-        Integer count = riseOrderDao.userNotCloseOrder(riseOrder.getProfileId());
-        if (profile.getRiseMember() == Constants.RISE_MEMBER.FREE && count == 1) {
-            // 未成功报名，并且是最后一个单子,退还名额
-            riseMemberCountRepo.quitSignup(riseOrder.getProfileId(), riseOrder.getMemberType());
-        }
-
-        //关闭订单
-        riseOrderDao.closeOrder(orderId);
-        quanwaiOrderDao.closeOrder(orderId);
-    }
-
-    private void sendWelcomeMsg(Integer courseId, String openid, Integer classId, String memberId) {
-        logger.info("发送欢迎消息给{}", openid);
-        String key = ConfigUtils.signupSuccessMsgKey();
-        TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser(openid);
-        templateMessage.setTemplate_id(key);
-        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-        templateMessage.setData(data);
-
-        QuanwaiClass quanwaiClass = classDao.load(QuanwaiClass.class, classId);
-        CourseIntroduction course = courseIntroductionDao.load(CourseIntroduction.class, courseId);
-
-        if (course.getType() == Course.LONG_COURSE) {
-            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营，还差最后一步--加群。\n"));
-            data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(quanwaiClass.getOpenTime()) + "-" + DateUtils.parseDateToStringByCommon(quanwaiClass.getCloseTime())));
-            String remark = "\n到期后自动关闭\n\n你的学号是" + memberId + "\n只有加入微信群，才能顺利开始学习，点击查看二维码，长按识别即可入群。\n点开我->->->->->->";
-            data.put("remark", new TemplateMessage.Keyword(remark));
-            templateMessage.setUrl(quanwaiClass.getWeixinGroup());
-        } else if (course.getType() == Course.SHORT_COURSE) {
-            data.put("first", new TemplateMessage.Keyword("你已成功报名圈外训练营。"));
-            data.put("keyword1", new TemplateMessage.Keyword(course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToStringByCommon(new Date()) + "-" +
-                    DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), course.getLength() + 6))));
-            if (quanwaiClass.getBroadcastUrl() != null) {
-                String remark = "\n这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总";
-                data.put("remark", new TemplateMessage.Keyword(remark));
-                templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
-            }
-
-        } else if (course.getType() == Course.AUDITION_COURSE) {
-            data.put("keyword1", new TemplateMessage.Keyword("【免费体验】 " + course.getCourseName()));
-            data.put("keyword2", new TemplateMessage.Keyword("7天"));
-            data.put("remark", new TemplateMessage.Keyword("\n试听截取正式课程的第一小节，完成试听后可以查看正式课程介绍"));
-//            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
-        }
-
-        templateMessageService.sendMessage(templateMessage);
-        //发送直播消息
-//        if(course.getType()==Course.SHORT_COURSE && quanwaiClass.getBroadcastUrl()!=null){
-//            templateMessage = new TemplateMessage();
-//            templateMessage.setTouser(openid);
-//            templateMessage.setTemplate_id(ConfigUtils.qaMsgKey());
-//            data = Maps.newHashMap();
-//            data.put("first", new TemplateMessage.Keyword("这里集合了关于本课程的共性问题，点击即可查看历史答疑汇总\nickname"));
-//            data.put("keyword1", new TemplateMessage.Keyword("可随时回放"));
-//            data.put("keyword2", new TemplateMessage.Keyword(course.getCourseName()));
-//            data.put("keyword3", new TemplateMessage.Keyword("1.5小时"));
-//            data.put("keyword4", new TemplateMessage.Keyword("14天"));
-//            data.put("remark", new TemplateMessage.Keyword("\n如有新问题，在课程QQ群中和同学讨论哦（群号见上条报名成功消息）"));
-//            templateMessage.setUrl(quanwaiClass.getBroadcastUrl());
-//            templateMessage.setData(data);
-//            templateMessageService.sendMessage(templateMessage);
-//        }
-    }
 
     @Override
     public void reloadClass() {
@@ -834,15 +560,6 @@ public class SignupServiceImpl implements SignupService {
         classMemberCountRepo.initClass();
     }
 
-    @Override
-    public Map<Integer, Integer> getRemindingCount() {
-        return classMemberCountRepo.getRemainingCount();
-    }
-
-    @Override
-    public Integer getRiseRemindingCount() {
-        return riseMemberCountRepo.getRemindingCount();
-    }
 
     @Override
     public QuanwaiOrder getQuanwaiOrder(String orderId) {
@@ -899,17 +616,6 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
-    @Override
-    public Double calculateCourseCoupon(Integer problemId, Integer profileId, Integer couponId) {
-        Coupon coupon = costRepo.getCoupon(couponId);
-        Double amount = coupon.getAmount();
-        Double fee = this.getCoursePrice(profileId, problemId);
-        if (fee >= amount) {
-            return CommonUtils.substract(fee, amount);
-        } else {
-            return 0D;
-        }
-    }
 
     @Override
     public Double calculateCampCoupon(Integer profileId, Integer couponId) {
@@ -940,17 +646,51 @@ public class SignupServiceImpl implements SignupService {
         return ConfigUtils.getMonthlyCampMonth();
     }
 
-    /**
-     * 小课售卖页面，跳转小课介绍页面 problemId
-     *
-     * @return
-     */
+
     @Override
     public Integer loadHrefProblemId(Integer month) {
         List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(month);
         MonthlyCampSchedule schedule = schedules.stream().findFirst().get();
         return schedule.getProblemId();
     }
+
+
+    @Override
+    public BusinessSchool getSchoolInfoForPay(Integer profileId) {
+        BusinessSchool businessSchool = new BusinessSchool();
+        Double fee;
+        RiseMember riseMember = this.currentRiseMember(profileId);
+        MemberType memberType = this.getMemberType(RiseMember.ELITE);
+        if (riseMember != null) {
+            switch (riseMember.getMemberTypeId()) {
+                case RiseMember.ELITE:
+                case RiseMember.HALF_ELITE:
+                    return null;
+                case RiseMember.PROFESSIONAL:
+                    fee = CommonUtils.substract(memberType.getFee(), 880d);
+                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.PROFESSIONAL);
+                    break;
+                case RiseMember.HALF_PROFESSIONAL:
+                    fee = CommonUtils.substract(memberType.getFee(), 580d);
+                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.HALF_PROFESSIONAL);
+                    break;
+                case RiseMember.MONTHLY_CAMP:
+                    fee = memberType.getFee();
+                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.CAMP);
+                    break;
+                default:
+                    fee = memberType.getFee();
+                    businessSchool.setGoodsId(Constants.BUSINESS_GOODS.OTHER);
+            }
+        } else {
+            fee = memberType.getFee();
+        }
+        businessSchool.setFee(fee);
+        businessSchool.setStartTime(memberType.getStartTime());
+        businessSchool.setEndTime(memberType.getEndTime());
+        return businessSchool;
+    }
+
 
     //生成学号 2位课程号2位班级号3位学号
     private String memberId(Integer courseId, Integer classId) {
