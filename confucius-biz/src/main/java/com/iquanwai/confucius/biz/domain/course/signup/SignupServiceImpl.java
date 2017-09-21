@@ -255,7 +255,7 @@ public class SignupServiceImpl implements SignupService {
         riseClassMemberDao.insert(classMember);
 
         // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
-        if (existRiseMember != null && !(existRiseMember.getMemberTypeId() == RiseMember.PROFESSIONAL
+        if (existRiseMember == null || !(existRiseMember.getMemberTypeId() == RiseMember.PROFESSIONAL
                 || existRiseMember.getMemberTypeId() == RiseMember.HALF_PROFESSIONAL
                 || existRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE
                 || existRiseMember.getMemberTypeId() == RiseMember.ELITE)) {
