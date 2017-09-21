@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
@@ -19,7 +18,11 @@ import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.course.dto.backend.*;
+import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
+import com.iquanwai.confucius.web.course.dto.backend.MarkDto;
+import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
+import com.iquanwai.confucius.web.course.dto.backend.RefreshLoginUserDto;
+import com.iquanwai.confucius.web.course.dto.backend.SystemMsgDto;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -29,7 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -75,23 +83,6 @@ public class BackendController {
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
     }
 
-    @RequestMapping("/entry/{orderId}")
-    public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId) {
-        String result;
-        CourseOrder courseOrder = signupService.getOrder(orderId);
-        if (courseOrder != null) {
-            if (courseOrder.getEntry()) {
-                String memberId = signupService.entry(orderId);
-                result = "报名成功, 学号是" + memberId;
-            } else {
-                result = "尚未付款";
-            }
-        } else {
-            result = "订单不存在";
-        }
-
-        return WebUtils.result(result);
-    }
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> log(HttpServletRequest request, LoginUser loginUser, @RequestBody ErrorLogDto errorLogDto) {
@@ -263,26 +254,7 @@ public class BackendController {
         return message.replace("{username}", name);
     }
 
-    @RequestMapping(value = "/info/signup", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> getSignUpInfo() {
-        Map<Integer, Integer> remindingCount = signupService.getRemindingCount();
-        // 查询各班已报名人数
-        List<SignupClassDto> list = Lists.newArrayList();
-        remindingCount.keySet().forEach(item -> {
-            List<ClassMember> members = courseProgressService.loadClassMembers(item);
-            SignupClassDto dto = new SignupClassDto();
-            dto.setId(item);
-            dto.setRemainingCount(remindingCount.get(item));
-            dto.setEntryCount(members.size());
-            list.add(dto);
-        });
-        return WebUtils.result(list);
-    }
 
-    @RequestMapping(value = "/info/signup", method = RequestMethod.GET, params = "rise")
-    public ResponseEntity<Map<String, Object>> getRiseInfo() {
-        return WebUtils.result(signupService.getRiseRemindingCount());
-    }
 
     @RequestMapping(value = "/mark", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> mark(LoginUser loginUser, @RequestBody MarkDto markDto) {
