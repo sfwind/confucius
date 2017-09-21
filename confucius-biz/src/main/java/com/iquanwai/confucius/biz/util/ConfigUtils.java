@@ -321,10 +321,6 @@ public class ConfigUtils {
         return getValue("sms.market.password");
     }
 
-    public static Double getRiseCourseFee() {
-        return getDoubleValue("rise.course.fee");
-    }
-
     public static SMSConfig getBizMsgConfig() {
         SMSConfig smsConfig = new SMSConfig();
         smsConfig.setAccount(getBizAccount());

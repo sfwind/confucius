@@ -132,7 +132,7 @@ public class SignupServiceImpl implements SignupService {
             // 购买会员
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
                     (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
-                    RiseMember.ELITE == riseMember.getMemberTypeId())) {
+                            RiseMember.ELITE == riseMember.getMemberTypeId())) {
                 right = "您已经是商学院会员";
             } else {
                 // 检查权限
@@ -152,7 +152,7 @@ public class SignupServiceImpl implements SignupService {
             // 购买小课训练营
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
                     (RiseMember.PROFESSIONAL == riseMember.getMemberTypeId() ||
-                    RiseMember.HALF_PROFESSIONAL == riseMember.getMemberTypeId())) {
+                            RiseMember.HALF_PROFESSIONAL == riseMember.getMemberTypeId())) {
                 right = "您已经是商学院会员";
             } else {
                 if (profile.getRiseMember() == 3) {
@@ -175,7 +175,7 @@ public class SignupServiceImpl implements SignupService {
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Double fee;
         BusinessSchool bs = this.getSchoolInfoForPay(profileId);
-        if (memberTypeId == RiseMember.ELITE && bs != null) {
+        if (memberTypeId == RiseMember.ELITE) {
             // 报名小课精英版
             fee = bs.getFee();
         } else {
@@ -208,7 +208,7 @@ public class SignupServiceImpl implements SignupService {
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Assert.notNull(profile, "用户不能为空");
         Assert.notNull(memberType, "会员类型错误");
-        Double fee = ConfigUtils.getMonthlyCampFee();
+        Double fee = memberType.getFee();
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
 
         QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(),
@@ -502,7 +502,7 @@ public class SignupServiceImpl implements SignupService {
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Double fee;
         BusinessSchool bs = this.getSchoolInfoForPay(profileId);
-        if (memberTypeId == RiseMember.ELITE && bs != null) {
+        if (memberTypeId == RiseMember.ELITE) {
             // 报名小课精英版
             fee = bs.getFee();
         } else {
@@ -548,11 +548,14 @@ public class SignupServiceImpl implements SignupService {
         Double fee;
         RiseMember riseMember = this.currentRiseMember(profileId);
         MemberType memberType = this.getMemberType(RiseMember.ELITE);
+        businessSchool.setIsBusinessStudent(false);
         if (riseMember != null) {
             switch (riseMember.getMemberTypeId()) {
                 case RiseMember.ELITE:
                 case RiseMember.HALF_ELITE:
-                    return null;
+                    fee = memberType.getFee();
+                    businessSchool.setIsBusinessStudent(true);
+                    break;
                 case RiseMember.PROFESSIONAL:
                     fee = CommonUtils.substract(memberType.getFee(), 880d);
                     businessSchool.setInitDiscount(880d);
@@ -574,7 +577,6 @@ public class SignupServiceImpl implements SignupService {
         } else {
             fee = memberType.getFee();
             businessSchool.setEndTime(memberType.getEndTime());
-
         }
         businessSchool.setFee(fee);
         businessSchool.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));

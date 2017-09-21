@@ -70,12 +70,6 @@ public interface SignupService {
     RiseOrder getRiseOrder(String orderId);
 
     /**
-     * @param orderId
-     * @return
-     */
-    RiseCourseOrder getRiseCourse(String orderId);
-
-    /**
      * 获取会员类型
      *
      * @param memberType 会员类型Id

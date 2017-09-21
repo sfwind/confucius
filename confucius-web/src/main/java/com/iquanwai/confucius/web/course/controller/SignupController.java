@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
@@ -38,7 +37,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
@@ -321,7 +325,7 @@ public class SignupController {
         // TODO 升级商学院数据
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            if (bs == null) {
+            if (bs.getIsBusinessStudent()) {
                 return WebUtils.error("您已经是商学院用户");
             } else {
                 goodsInfoDto.setFee(bs.getFee());
