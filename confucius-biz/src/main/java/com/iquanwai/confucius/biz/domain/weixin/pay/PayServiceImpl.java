@@ -174,11 +174,9 @@ public class PayServiceImpl implements PayService {
 
         if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
-            accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
             signupService.riseMemberEntry(quanwaiOrder.getOrderId());
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             // 购买小课训练营
-            accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MONTHLY_CAMP);
             signupService.payMonthlyCampSuccess(orderId);
         }
         refreshStatus(quanwaiOrder, orderId);

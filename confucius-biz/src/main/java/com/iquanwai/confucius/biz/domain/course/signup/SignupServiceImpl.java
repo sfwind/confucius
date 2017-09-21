@@ -237,6 +237,7 @@ public class SignupServiceImpl implements SignupService {
         Integer profileId = campOrder.getProfileId();
         // 更新 profile 表中状态
         Profile profile = accountService.getProfile(profileId);
+        accountService.updateRiseMember(profile.getOpenid(), Constants.RISE_MEMBER.MONTHLY_CAMP);
         RiseMember existRiseMember = this.currentRiseMember(profileId);
         // 清除历史 RiseMember 数据
         RiseClassMember delClassMember = riseClassMemberDao.queryByProfileId(profileId);
@@ -337,6 +338,8 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public void riseMemberEntry(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
+        accountService.updateRiseMember(riseOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
+
         try {
             RiseMember exist = riseMemberDao.loadByOrderId(orderId);
             if (riseOrder.getEntry() && exist != null && !exist.getExpired() && DateUtils.isSameDate(exist.getAddTime(), new Date())) {
