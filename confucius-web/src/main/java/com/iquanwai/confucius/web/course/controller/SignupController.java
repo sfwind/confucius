@@ -305,8 +305,6 @@ public class SignupController {
                 .memo(goodsInfoDto.getGoodsType());
         operationLogService.log(operationLog);
 
-        // setName
-        goodsInfoDto.setName(GoodsInfoDto.GOODS_NAMES.get(goodsInfoDto.getGoodsType()));
         // 是否能使用多个优惠券
         goodsInfoDto.setMultiCoupons(this.checkMultiCoupons(goodsInfoDto.getGoodsType()));
         // 计算价格/等特殊
@@ -321,6 +319,7 @@ public class SignupController {
             goodsInfoDto.setStartTime(memberType.getStartTime());
             goodsInfoDto.setEndTime(memberType.getEndTime());
             goodsInfoDto.setInitPrice(memberType.getFee());
+            goodsInfoDto.setName(memberType.getName());
         }
 
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());

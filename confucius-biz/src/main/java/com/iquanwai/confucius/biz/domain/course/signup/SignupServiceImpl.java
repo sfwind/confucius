@@ -351,16 +351,8 @@ public class SignupServiceImpl implements SignupService {
         riseOrderDao.entry(orderId);
         String openId = riseOrder.getOpenid();
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
-        Date expireDate;
         if (RiseMember.ELITE == memberType.getId()) {
             //查看有没有老的
-            RiseMember exist = riseMemberDao.loadValidRiseMember(riseOrder.getProfileId());
-            if (exist != null) {
-                // 升级
-                expireDate = DateUtils.afterNatureMonths(exist.getExpireDate(), 12);
-            } else {
-                expireDate = DateUtils.afterNatureMonths(new Date(), 12);
-            }
             //精英会员一年
             profileDao.becomeRiseEliteMember(openId);
 
@@ -393,7 +385,7 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setOrderId(riseOrder.getOrderId());
         riseMember.setProfileId(riseOrder.getProfileId());
         riseMember.setMemberTypeId(memberType.getId());
-        riseMember.setExpireDate(expireDate);
+        riseMember.setExpireDate(DateUtils.afterNatureMonths(new Date(), 12));
         riseMemberDao.insert(riseMember);
 
         // 所有计划设置为会员
@@ -571,7 +563,7 @@ public class SignupServiceImpl implements SignupService {
                     fee = memberType.getFee();
             }
             // 计算结束时间
-            Date endTime = DateUtils.afterNatureMonths(riseMember.getExpireDate(), 12);
+            Date endTime = DateUtils.afterNatureMonths(new Date(), 12);
             businessSchool.setEndTime(DateUtils.parseDateToStringByCommon(endTime));
 
         } else {
@@ -580,6 +572,7 @@ public class SignupServiceImpl implements SignupService {
         }
         businessSchool.setFee(fee);
         businessSchool.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+        businessSchool.setEndTime(memberType.getEndTime());
 
         return businessSchool;
     }
