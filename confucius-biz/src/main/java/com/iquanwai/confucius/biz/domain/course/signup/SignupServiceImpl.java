@@ -133,7 +133,7 @@ public class SignupServiceImpl implements SignupService {
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
                     (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
                             RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                right = "您已经是圈外商学院学员，无需重复报名<br/>" +
+                right = "您已经是圈外商学院学员，无需重复报名\n" +
                         "如有疑问请在学习群咨询班长";
             } else {
                 // 检查权限
@@ -154,7 +154,7 @@ public class SignupServiceImpl implements SignupService {
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
                     (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
                             RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名<br/>" +
+                right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名\n" +
                         "如有疑问请在学习群咨询班长";
             } else {
                 if (profile.getRiseMember() == 3) {
