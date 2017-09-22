@@ -1,8 +1,6 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
-import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
-import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -49,10 +47,6 @@ public class SubjectArticleController {
     private PracticeService practiceService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private PictureService pictureService;
-    @Autowired
-    private ProblemService problemService;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public ResponseEntity<Map<String,Object>> loadSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId,
@@ -187,7 +181,6 @@ public class SubjectArticleController {
                 }
                 show.setIsMine(false);
             }
-            show.setDesc(problemService.getProblem(submit.getProblemId()).getSubjectDesc());
             // 查询点赞数
             Integer votesCount = practiceService.loadHomeworkVotesCount(Constants.VoteType.SUBJECT, submit.getId());
             // 查询我对它的点赞状态
@@ -278,7 +271,6 @@ public class SubjectArticleController {
         List<LabelConfig> labelConfigs = practiceService.loadProblemLabels(problemId);
         labelConfigs.forEach(item -> item.setSelected(false));
         dto.setLabelList(labelConfigs);
-        dto.setDesc(problemService.getProblem(problemId).getSubjectDesc());
         return WebUtils.result(dto);
     }
 
