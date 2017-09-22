@@ -320,4 +320,16 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<ApplicationSubmit> loadSubmitsByProfileId(Integer problemId, Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ApplicationSubmit WHERE ProblemId = ? AND ProfileId = ? AND Del = 0";
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        try {
+            return runner.query(sql, h, problemId, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }

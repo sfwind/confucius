@@ -66,6 +66,18 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return null;
     }
 
+    public RiseClassMember queryByMemberId(String memberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Del = 0";
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, memberId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public int del(Integer riseClassMemberId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE RiseClassMember SET Del = 1 WHERE Id = ?";
