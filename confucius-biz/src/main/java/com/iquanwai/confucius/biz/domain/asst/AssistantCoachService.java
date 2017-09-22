@@ -37,6 +37,8 @@ public interface AssistantCoachService {
      */
     List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName);
 
+    List<RiseWorkInfoDto> getUnderCommentApplicationsByMemberId(Integer problemId, String memberId);
+
     /**
      * 获取待评论的应用练习数量
      * */

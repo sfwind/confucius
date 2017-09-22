@@ -41,6 +41,8 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private RiseClassMemberDao riseClassMemberDao;
 
     private static final int SIZE = 50;
 
@@ -198,7 +200,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
 
         List<Profile> profiles = profileDao.loadProfilesByNickName(nickName);
-        if(profiles.size() == 0) return Lists.newArrayList();
+        if (profiles.size() == 0) return Lists.newArrayList();
 
         List<Integer> profileIds = Lists.newArrayList();
         for (Profile profile : profiles) {
@@ -219,6 +221,31 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             workInfoDtos.add(riseWorkInfoDto);
         }
 
+        return workInfoDtos;
+    }
+
+    @Override
+    public List<RiseWorkInfoDto> getUnderCommentApplicationsByMemberId(Integer problemId, String memberId) {
+        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
+        RiseClassMember riseClassMember = riseClassMemberDao.queryByMemberId(memberId);
+        if (riseClassMember != null && riseClassMember.getProfileId() != null) {
+            Profile profile = accountService.getProfile(riseClassMember.getProfileId());
+            if (profile != null) {
+                List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByProfileId(problemId, profile.getId());
+                submits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
+
+                List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
+                for (ApplicationSubmit submit : submits) {
+                    RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
+                    applicationPractices.stream().forEach(applicationPractice -> {
+                        if (submit.getApplicationId().equals(applicationPractice.getId())) {
+                            riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                        }
+                    });
+                    workInfoDtos.add(riseWorkInfoDto);
+                }
+            }
+        }
         return workInfoDtos;
     }
 

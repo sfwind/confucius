@@ -376,19 +376,33 @@ public class ConfigUtils {
         return getValue("risemember.classId");
     }
 
-	public static String getMemberIdPrefix() {
-		return getValue("monthly.camp.memberId.prefix");
-	}public static Date getMonthlyCampCloseDate() {
-		return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
-	}
+    public static String getMemberIdPrefix() {
+        return getValue("monthly.camp.memberId.prefix");
+    }
+
+    public static Date getMonthlyCampCloseDate() {
+        return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
+    }
 
     public static boolean getMonthlyCampOpen() {
         return getBooleanValue("open.monthly.camp");
     }
 
-	public static Integer getEditableProblem() {
-		return getIntValue("editable.problem");
+    public static Integer getEditableProblem() {
+        return getIntValue("editable.problem");
 
-	}
+    }
+
+    public static String getFtpUser() {
+        return getValue("ftp.username");
+    }
+
+    public static String getFtpPassword() {
+        return getValue("ftp.password");
+    }
+
+    public static String getFtpHost() {
+        return getValue("ftp.host");
+    }
 
 }

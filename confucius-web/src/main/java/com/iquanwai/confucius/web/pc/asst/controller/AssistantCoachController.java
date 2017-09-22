@@ -58,13 +58,18 @@ public class AssistantCoachController {
         return WebUtils.result(applicationSubmit);
     }
 
-    @RequestMapping(value = "/application/{problemId}/{nickName}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> getUnderCommentApplicationByNickName(PCLoginUser pcLoginUser,
-                                                                                    @PathVariable Integer problemId,
-                                                                                    @PathVariable String nickName) {
+    @RequestMapping(value = "/application/nickname/{problemId}/{nickName}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> getUnderCommentApplicationByNickName(PCLoginUser pcLoginUser, @PathVariable Integer problemId, @PathVariable String nickName) {
         Assert.notNull(pcLoginUser, "用户不能为空");
-        List<RiseWorkInfoDto> applicationSubmit = assistantCoachService.getUnderCommentApplicationsByNickName(problemId, nickName);
-        return WebUtils.result(applicationSubmit);
+        List<RiseWorkInfoDto> riseWorkInfoDtos = assistantCoachService.getUnderCommentApplicationsByNickName(problemId, nickName);
+        return WebUtils.result(riseWorkInfoDtos);
+    }
+
+    @RequestMapping(value = "/application/memberid/{problemId}/{memberId}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> getUnderCommentApplicationByMemberId(PCLoginUser pcLoginUser, @PathVariable Integer problemId, @PathVariable String memberId) {
+        Assert.notNull(pcLoginUser, "用户不能为空");
+        List<RiseWorkInfoDto> riseWorkInfoDtos = assistantCoachService.getUnderCommentApplicationsByMemberId(problemId, memberId);
+        return WebUtils.result(riseWorkInfoDtos);
     }
 
     @RequestMapping("/subject/{problemId}")
