@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.course.dto.payment;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.po.Coupon;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.CourseReductionActivity;
 import lombok.Data;
 
@@ -28,30 +29,19 @@ public class GoodsInfoDto {
     private String endTime;
     /** 活动状态 */
     private CourseReductionActivity activity;
-
+    private Double initPrice;// 原价
+    /** 是否可以使用多个优惠券 */
+    private Boolean multiCoupons;
 
 
     /** 商品类型，这个主要用来判断商品类型是否正确 */
     public static final List<String> GOODS_TYPES = Lists.newArrayList();
 
-    /**
-     * 小课购买
-     */
-    public static final String FRAG_COURSE = "fragment_rise_course";
-    /**
-     * 会员购买
-     */
-    public static final String FRAG_MEMBER = "fragment_member";
-    /**
-     * 训练营小课
-     */
-    public static final String FRAG_CAMP = "fragment_camp";
 
     static {
         // 初始化商品列表，下面的常量也需要定义
-        GOODS_TYPES.add(FRAG_COURSE);
-        GOODS_TYPES.add(FRAG_MEMBER);
-        GOODS_TYPES.add(FRAG_CAMP);
+        GOODS_TYPES.add(QuanwaiOrder.FRAG_CAMP);
+        GOODS_TYPES.add(QuanwaiOrder.FRAG_MEMBER);
     }
 
 }

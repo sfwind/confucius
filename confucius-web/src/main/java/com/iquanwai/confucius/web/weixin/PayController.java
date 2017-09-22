@@ -15,8 +15,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by justin on 16/9/14.
@@ -28,6 +33,14 @@ public class PayController {
     private PayService payService;
     @Autowired
     private SignupService signupService;
+
+    private ExecutorService executorService;
+
+    @PostConstruct
+    public void init() {
+        executorService = new ThreadPoolExecutor(5, 10, 1, TimeUnit.MINUTES,
+                new ArrayBlockingQueue<>(50, true), new ThreadPoolExecutor.CallerRunsPolicy());
+    }
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -56,30 +69,9 @@ public class PayController {
             LOGGER.info(orderCallbackReply.toString());
         } catch (Exception e) {
             //异常关闭订单
-            payService.closeOrder(orderCallback.getProduct_id());
             LOGGER.error("扫码支付回调处理失败", e);
         }
-
         return new ResponseEntity<>(orderCallbackReply, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/result/callback")
-    public void payCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
-        LOGGER.info("体系化微信支付回调:{}", payCallback.toString());
-        try {
-            payService.handlePayResult(payCallback);
-            if (payCallback.getResult_code().equals("SUCCESS")) {
-                payService.paySuccess(payCallback.getOut_trade_no());
-            } else {
-                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
-            }
-        } catch (Exception e) {
-            LOGGER.error("支付结果回调处理失败", e);
-        }
-
-        response.setHeader("Content-Type", "application/xml");
-        response.getWriter().print(SUCCESS_RETURN);
-        response.flushBuffer();
     }
 
     @RequestMapping(value = "/result/risemember/callback")
@@ -100,37 +92,26 @@ public class PayController {
         response.flushBuffer();
     }
 
-    @RequestMapping(value = "/result/risecourse/callback")
-    public void riseCoursePayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
-        LOGGER.info("rise小课单卖微信支付回调:{}", payCallback.toString());
-        try {
-            payService.handlePayResult(payCallback);
-            if (payCallback.getResult_code().equals("SUCCESS")) {
-                payService.payFragmentSuccess(payCallback.getOut_trade_no());
-            } else {
-                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
-            }
-        } catch (Exception e) {
-            LOGGER.error("小课单卖支付结果回调处理失败", e);
-        }
-        response.setHeader("Content-Type", "application/xml");
-        response.getWriter().print(SUCCESS_RETURN);
-        response.flushBuffer();
-    }
 
     @RequestMapping(value = "/result/risecamp/callback")
     public void riseTrainPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
         LOGGER.info("训练营小课单卖微信支付回调：{}", payCallback.toString());
-        try {
-            payService.handlePayResult(payCallback);
-            if (payCallback.getResult_code().equals("SUCCESS")) {
-                signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
-            } else {
-                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    payService.handlePayResult(payCallback);
+                    if (payCallback.getResult_code().equals("SUCCESS")) {
+                        signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
+                    } else {
+                        LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("小课单卖支付结果回调处理失败", e);
+                }
             }
-        } catch (Exception e) {
-            LOGGER.error("小课单卖支付结果回调处理失败", e);
-        }
+        });
+
         response.setHeader("Content-Type", "application/xml");
         response.getWriter().print(SUCCESS_RETURN);
         response.flushBuffer();

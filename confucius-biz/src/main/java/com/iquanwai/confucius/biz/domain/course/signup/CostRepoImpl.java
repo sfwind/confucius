@@ -58,8 +58,24 @@ public class CostRepoImpl implements CostRepo {
     }
 
     @Override
+    public double discount(Double price, String orderId, List<Coupon> coupons) {
+        Double remain = price;
+        Double amount = coupons.stream().mapToDouble(Coupon::getAmount).sum();
+        if (remain > amount) {
+            remain = CommonUtils.substract(remain, amount);
+            coupons.forEach(coupon -> couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount));
+        } else {
+            remain = 0D;
+            for (Coupon coupon : coupons) {
+                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
+            }
+        }
+        return CommonUtils.substract(price, remain);
+    }
+
+    @Override
     public boolean checkCouponValidation(Integer profileId, Integer couponId) {
-        if(couponId != null) {
+        if (couponId != null) {
             Coupon coupon = couponDao.load(Coupon.class, couponId);
             return coupon.getProfileId().equals(profileId);
         } else {

@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class RiseMemberDao extends DBUtil {
 
     public void updateExpiredAhead(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE RiseMember SET Expired = 1, Memo = '提前过期' WHERE ProfileId = ? AND Expired = 0";
+        String sql = "UPDATE RiseMember SET Expired = 1, Memo = '商学院提前过期' WHERE ProfileId = ? AND Expired = 0";
         try {
             runner.update(sql, profileId);
         } catch (SQLException e) {
@@ -77,7 +78,7 @@ public class RiseMemberDao extends DBUtil {
 
     public List<RiseMember> eliteMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where MemberTypeId = 3 and expired = 0";
+        String sql = "select * from RiseMember where MemberTypeId in (3,4) and expired = 0";
 
         try {
             ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
@@ -87,4 +88,17 @@ public class RiseMemberDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public List<Integer> loadEliteMembersId() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT DISTINCT(ProfileId) FROM RiseMember WHERE MemberTypeId IN (3, 4) AND Expired = 0";
+        ColumnListHandler<Integer> handler = new ColumnListHandler<>("ProfileId");
+        try {
+            return runner.query(sql, handler);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }

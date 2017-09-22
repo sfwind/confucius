@@ -84,4 +84,8 @@ public interface AccountService {
      * 更新riseMember状态
      * */
     void updateRiseMember(String openid, Integer riseMember);
+
+    List<Profile> loadProfilesByNickName(String nickName);
+
+    Boolean hasPrivilegeForBusinessSchool(Integer profileId);
 }
