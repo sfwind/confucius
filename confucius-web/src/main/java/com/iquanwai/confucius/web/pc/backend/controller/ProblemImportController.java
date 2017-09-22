@@ -4,15 +4,13 @@ import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.web.pc.backend.dto.CatalogDto;
 import com.iquanwai.confucius.web.pc.backend.dto.SimpleProblem;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -39,10 +37,25 @@ public class ProblemImportController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("选择小课")
-                .action("加载小课");
+                .action("加载所有小课");
         operationLogService.log(operationLog);
 
         return WebUtils.result(simpleProblems);
+    }
+
+    @RequestMapping("/problem/load/{id}")
+    public ResponseEntity<Map<String, Object>> getProblem(PCLoginUser loginUser,
+                                                          @PathVariable Integer id) {
+
+        Problem problem = problemService.getProblem(id);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("选择小课")
+                .action("加载小课")
+                .memo(id.toString());
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(problem);
     }
 
     @RequestMapping(value = "/problem/save", method = RequestMethod.POST)
@@ -57,5 +70,19 @@ public class ProblemImportController {
         operationLogService.log(operationLog);
 
         return WebUtils.success();
+    }
+
+    @RequestMapping("/problem/catalog/load")
+    public ResponseEntity<Map<String, Object>> getCatalogs(PCLoginUser loginUser) {
+        CatalogDto catalogDto = new CatalogDto();
+        catalogDto.setCatalogs(problemService.loadAllCatalogs());
+        catalogDto.setSubCatalogs(problemService.loadAllSubCatalogs());
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("选择小课")
+                .action("加载所有类别");
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(catalogDto);
     }
 }

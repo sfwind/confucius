@@ -103,7 +103,7 @@ public class AssistantCoachController {
     public ResponseEntity<Map<String, Object>> loadApplicationProblems(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<Problem> problems = problemService.loadProblems();
-        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
         Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentApplicationCount();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
@@ -132,7 +132,7 @@ public class AssistantCoachController {
     public ResponseEntity<Map<String, Object>> loadSubjectArticleProblems(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<Problem> problems = problemService.loadProblems();
-        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
         Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentSubjectArticleCount();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();

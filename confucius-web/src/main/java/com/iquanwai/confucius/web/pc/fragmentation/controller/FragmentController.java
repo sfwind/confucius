@@ -174,7 +174,6 @@ public class FragmentController {
                 return null;
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        ;
         Integer count = practiceService.commentCount(type, submitId);
         RiseWorkCommentListDto listDto = new RiseWorkCommentListDto();
         listDto.setCount(count);
@@ -238,7 +237,6 @@ public class FragmentController {
      * @param moduleId  评论模块
      * @param submitId  文章id
      * @param dto       评论内容，回复评论id
-     * @return
      */
     @RequestMapping(value = "/pc/fragment/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
@@ -320,7 +318,6 @@ public class FragmentController {
                     riseWorkListDto.getChallengeWorkList().add(dto);
                 }
             }
-            ;
         }
         return riseWorkListDto;
     }

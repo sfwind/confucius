@@ -3,8 +3,10 @@ package com.iquanwai.confucius.biz.domain.backend;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemCatalogDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ProblemSubCatalogDao;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemSubCatalog;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,11 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemDao problemDao;
     @Autowired
     private ProblemCatalogDao problemCatalogDao;
+    @Autowired
+    private ProblemSubCatalogDao problemSubCatalogDao;
 
     //缓存问题
     private List<Problem> problems = Lists.newArrayList();
-    private List<ProblemCatalog> problemCatalogs = Lists.newArrayList();
 
     @Override
     public List<Problem> loadProblems() {
@@ -36,11 +39,13 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public List<ProblemCatalog> loadAllCatalog() {
-        if (CollectionUtils.isEmpty(problemCatalogs)) {
-            problemCatalogs = problemCatalogDao.loadAll(ProblemCatalog.class);
-        }
-        return problemCatalogs;
+    public List<ProblemCatalog> loadAllCatalogs() {
+        return problemCatalogDao.loadAll(ProblemCatalog.class);
+    }
+
+    @Override
+    public List<ProblemSubCatalog> loadAllSubCatalogs() {
+        return problemSubCatalogDao.loadAll(ProblemSubCatalog.class);
     }
 
     @Override

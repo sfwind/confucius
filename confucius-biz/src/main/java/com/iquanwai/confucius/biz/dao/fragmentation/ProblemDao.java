@@ -34,7 +34,7 @@ public class ProblemDao extends PracticeDBUtil {
         String sql = "INSERT INTO Problem(Problem, Length, CatalogId, SubCatalogId, " +
                 "Author, AuthorPic, DifficultyScore, UsefulScore, DescPic, " +
                 "AudioId, Who, How, Why, Trial, Abbreviation) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), problem.getProblem(), problem.getLength(),
                     problem.getCatalogId(), problem.getSubCatalogId(), problem.getAuthor(),
