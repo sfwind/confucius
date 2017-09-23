@@ -405,4 +405,8 @@ public class ConfigUtils {
         return getValue("ftp.host");
     }
 
+    public static Boolean reducePriceForNotElite() {
+        return getBooleanValue("business.school.price.reduce.not.elite");
+    }
+
 }
