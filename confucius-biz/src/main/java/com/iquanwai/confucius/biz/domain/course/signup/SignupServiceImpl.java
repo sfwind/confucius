@@ -554,11 +554,9 @@ public class SignupServiceImpl implements SignupService {
                     break;
                 case RiseMember.PROFESSIONAL:
                     fee = CommonUtils.substract(memberType.getFee(), 880d);
-                    businessSchool.setInitDiscount(880d);
                     break;
                 case RiseMember.HALF_PROFESSIONAL:
                     fee = CommonUtils.substract(memberType.getFee(), 580d);
-                    businessSchool.setInitDiscount(580d);
                     break;
                 case RiseMember.MONTHLY_CAMP:
                     fee = memberType.getFee();
@@ -568,16 +566,16 @@ public class SignupServiceImpl implements SignupService {
             }
             // 计算结束时间
             Date endTime = DateUtils.afterNatureMonths(new Date(), 12);
-            businessSchool.setEndTime(DateUtils.parseDateToStringByCommon(endTime));
 
         } else {
             fee = memberType.getFee();
-            businessSchool.setEndTime(memberType.getEndTime());
         }
-        businessSchool.setFee(fee);
-        businessSchool.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-        businessSchool.setEndTime(memberType.getEndTime());
+        if (!ConfigUtils.reducePriceForNotElite()) {
+            // 关闭减价，恢复原价
+            fee = memberType.getFee();
+        }
 
+        businessSchool.setFee(fee);
         return businessSchool;
     }
 
