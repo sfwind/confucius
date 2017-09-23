@@ -215,7 +215,7 @@ public class SignupController {
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberTypes(memberTypesPayInfo);
-        dto.setElite(riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE)));
+        dto.setElite(riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)));
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
         dto.setCoupons(coupons);
         return WebUtils.result(dto);
