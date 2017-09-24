@@ -3,16 +3,17 @@ package com.iquanwai.confucius.web.course.controller;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
@@ -46,7 +47,7 @@ public class BackendController {
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private SignupService signupService;
+    private CustomerMessageService customerMessageService;
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
@@ -225,9 +226,26 @@ public class BackendController {
         new Thread(() -> {
             try {
                 List<Integer> profileIds = systemMsgDto.getProfileIds();
-                profileIds.forEach(profileId -> {
-                    messageService.sendMessage(systemMsgDto.getMessage(), profileId.toString(),
-                            MessageService.SYSTEM_MESSAGE, systemMsgDto.getUrl());
+                profileIds.forEach(profileId -> messageService.sendMessage(systemMsgDto.getMessage(),
+                        profileId.toString(), MessageService.SYSTEM_MESSAGE, systemMsgDto.getUrl()));
+            } catch (Exception e) {
+                LOGGER.error("发送通知失败", e);
+            }
+        }).start();
+        return WebUtils.result("正在运行中");
+    }
+
+    @RequestMapping(value = "/customer/msg", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> customerMsg(@RequestBody CustomerMsgDto customerMsgDto) {
+        Assert.notNull(customerMsgDto.getMessage(), "消息不能为空");
+        new Thread(() -> {
+            try {
+                List<String> openIds = customerMsgDto.getOpenids();
+                String message = customerMsgDto.getMessage();
+                openIds.forEach(openid -> {
+                    String realMessage = replaceNickname(openid, message);
+                    customerMessageService.sendCustomerMessage(openid, realMessage,
+                            Constants.WEIXIN_MESSAGE_TYPE.TEXT);
 
                 });
             } catch (Exception e) {
