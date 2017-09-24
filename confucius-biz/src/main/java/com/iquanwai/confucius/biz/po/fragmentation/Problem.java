@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.po.fragmentation;
 
 import lombok.Data;
 
+import java.util.List;
+
 
 /**
  * Created by justin on 16/12/4.
@@ -25,5 +27,7 @@ public class Problem {
     private Boolean del; //是否删除(0-否,1-是)
     private Boolean trial = true; //试用版（0-否,1-是）
     private String abbreviation; // 缩略名
+
+    private List<ProblemSchedule> schedules; //非db字段
 
 }

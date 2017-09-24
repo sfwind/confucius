@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 import com.iquanwai.confucius.web.pc.backend.dto.CatalogDto;
 import com.iquanwai.confucius.web.pc.backend.dto.SimpleProblem;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -48,6 +49,8 @@ public class ProblemImportController {
                                                           @PathVariable Integer id) {
 
         Problem problem = problemService.getProblem(id);
+        List<ProblemSchedule> schedules = problemService.loadProblemSchedules(id);
+        problem.setSchedules(schedules);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("选择小课")
