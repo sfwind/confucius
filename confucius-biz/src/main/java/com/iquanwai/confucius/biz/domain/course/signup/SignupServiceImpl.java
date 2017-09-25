@@ -41,10 +41,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.lang.ref.SoftReference;
 import java.net.ConnectException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -135,9 +132,9 @@ public class SignupServiceImpl implements SignupService {
                 right = "您已经是圈外商学院学员，无需重复报名\n如有疑问请在学习群咨询班长";
             } else if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {
                 List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
-                Integer riseClassMemberId = classMembers.stream().filter(riseClassMember -> ConfigUtils.getMonthlyCampMonth().equals(riseClassMember.getMonth())).map(RiseClassMember::getId).findFirst().get();
-                if (riseClassMemberId != null) {
-                    riseClassMemberDao.del(riseClassMemberId);
+                RiseClassMember riseClassMember = classMembers.stream().filter(classMember -> ConfigUtils.getMonthlyCampMonth().equals(classMember.getMonth())).findAny().orElse(null);
+                if (riseClassMember != null) {
+                    riseClassMemberDao.del(riseClassMember.getId());
                 }
                 left = 1;
             } else {
