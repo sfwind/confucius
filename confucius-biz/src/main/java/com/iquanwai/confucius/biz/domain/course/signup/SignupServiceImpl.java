@@ -131,10 +131,15 @@ public class SignupServiceImpl implements SignupService {
         if (memberTypeId == RiseMember.ELITE) {
             // 购买会员
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
-                    (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
-                            RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                right = "您已经是圈外商学院学员，无需重复报名\n" +
-                        "如有疑问请在学习群咨询班长";
+                    (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
+                right = "您已经是圈外商学院学员，无需重复报名\n如有疑问请在学习群咨询班长";
+            } else if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {
+                List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
+                Integer riseClassMemberId = classMembers.stream().filter(riseClassMember -> ConfigUtils.getMonthlyCampMonth().equals(riseClassMember.getMonth())).map(RiseClassMember::getId).findFirst().get();
+                if (riseClassMemberId != null) {
+                    riseClassMemberDao.del(riseClassMemberId);
+                }
+                left = 1;
             } else {
                 // 查看是否开放报名
                 if (ConfigUtils.getRisePayStopTime().before(new Date())) {
@@ -146,10 +151,8 @@ public class SignupServiceImpl implements SignupService {
         } else if (memberTypeId == RiseMember.MONTHLY_CAMP) {
             // 购买小课训练营
             if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
-                    (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
-                            RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名\n" +
-                        "如有疑问请在学习群咨询班长";
+                    (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
+                right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名\n如有疑问请在学习群咨询班长";
             } else {
                 if (profile.getRiseMember() == 3) {
                     List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
