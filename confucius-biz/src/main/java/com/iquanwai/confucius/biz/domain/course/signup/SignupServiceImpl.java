@@ -152,8 +152,9 @@ public class SignupServiceImpl implements SignupService {
                         "如有疑问请在学习群咨询班长";
             } else {
                 if (profile.getRiseMember() == 3) {
-                    RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileId(profileId);
-                    if (ConfigUtils.getMonthlyCampMonth().equals(riseClassMember.getMonth())) {
+                    List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
+                    List<Integer> months = classMembers.stream().map(RiseClassMember::getMonth).collect(Collectors.toList());
+                    if (months.contains(ConfigUtils.getMonthlyCampMonth())) {
                         right = "您已经是本月小课训练营用户";
                     } else {
                         left = 1;

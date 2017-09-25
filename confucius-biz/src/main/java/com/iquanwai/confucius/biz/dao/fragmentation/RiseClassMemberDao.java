@@ -55,17 +55,18 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return -1;
     }
 
-    public RiseClassMember queryByProfileId(Integer profileId) {
+    public  List<RiseClassMember> queryByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Active = 1 AND Del = 0";
-        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
+        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Del = 0";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        return null;
+        return Lists.newArrayList();
     }
+
 
     public RiseClassMember queryByMemberId(String memberId) {
         QueryRunner runner = new QueryRunner(getDataSource());
