@@ -155,7 +155,7 @@ public class SignupServiceImpl implements SignupService {
                     List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
                     List<Integer> months = classMembers.stream().map(RiseClassMember::getMonth).collect(Collectors.toList());
                     if (months.contains(ConfigUtils.getMonthlyCampMonth())) {
-                        right = "您已经是本月小课训练营用户";
+                        right = "您已经是" + ConfigUtils.getMonthlyCampMonth() + "月小课训练营用户";
                     } else {
                         left = 1;
                     }
