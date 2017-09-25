@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -198,6 +199,7 @@ public class MonthlyCampController {
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
+            riseClassMember.setMonth(ConfigUtils.getMonthlyCampMonth());
 
             riseClassMember.setActive(monthlyCampDto.getActive());
             int result = monthlyCampService.initRiseClassMember(riseClassMember);

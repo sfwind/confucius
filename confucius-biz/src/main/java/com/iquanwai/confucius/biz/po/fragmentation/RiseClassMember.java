@@ -15,6 +15,7 @@ public class RiseClassMember {
     private String groupId; // 班级 01
     private String memberId;
     private Integer profileId; // 用户 id
+    private Integer month; // 数据月份
     private Integer active; // 是否参与本次学习
     private Integer del; // 数据是否删除，0-未删除 1-已删除
 
