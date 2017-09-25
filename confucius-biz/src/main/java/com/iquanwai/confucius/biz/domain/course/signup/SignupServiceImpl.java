@@ -152,7 +152,12 @@ public class SignupServiceImpl implements SignupService {
                         "如有疑问请在学习群咨询班长";
             } else {
                 if (profile.getRiseMember() == 3) {
-                    right = "您已经是小课训练营用户";
+                    RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileId(profileId);
+                    if (ConfigUtils.getMonthlyCampMonth().equals(riseClassMember.getMonth())) {
+                        right = "您已经是本月小课训练营用户";
+                    } else {
+                        left = 1;
+                    }
                 } else if (!ConfigUtils.getMonthlyCampOpen()) {
                     right = "当月小课训练营已关闭报名";
                 } else {
@@ -250,9 +255,10 @@ public class SignupServiceImpl implements SignupService {
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassId(ConfigUtils.getMonthlyCampClassId());
         classMember.setClassName(ConfigUtils.getMonthlyCampClassId());
-        classMember.setProfileId(profileId);
         classMember.setMemberId(memberId);
-        classMember.setActive(1);
+        classMember.setProfileId(profileId);
+        classMember.setMonth(ConfigUtils.getMonthlyCampMonth());
+        classMember.setActive(0);
         riseClassMemberDao.insert(classMember);
 
         // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
@@ -371,9 +377,10 @@ public class SignupServiceImpl implements SignupService {
             RiseClassMember classMember = new RiseClassMember();
             classMember.setClassId(ConfigUtils.getRiseMemberClassId());
             classMember.setClassName(ConfigUtils.getRiseMemberClassId());
-            classMember.setProfileId(riseOrder.getProfileId());
             classMember.setMemberId(memberId);
-            classMember.setActive(1);
+            classMember.setProfileId(riseOrder.getProfileId());
+            classMember.setMonth(ConfigUtils.getMonthlyCampMonth());
+            classMember.setActive(0);
             riseClassMemberDao.insert(classMember);
         } else {
             logger.error("该会员ID异常{}", memberType);
@@ -615,8 +622,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     *
-     * @param fee      总价格
+     * @param fee 总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -634,8 +640,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     *
-     * @param fee           总价格
+     * @param fee 总价格
      * @param couponIdGroup 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {

@@ -200,7 +200,6 @@ public class SignupController {
         return WebUtils.result(coupons);
     }
 
-
     @RequestMapping(value = "/rise/member", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> getRiseMemberPayInfo(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");

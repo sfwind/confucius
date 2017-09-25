@@ -22,8 +22,8 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public int insert(RiseClassMember riseClassMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO RiseClassMember (ClassId, ClassName, GroupId, MemberId, ProfileId, Active) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO RiseClassMember (ClassId, ClassName, GroupId, MemberId, ProfileId, Month, Active) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     riseClassMember.getClassId(),
@@ -31,6 +31,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
                     riseClassMember.getGroupId(),
                     riseClassMember.getMemberId(),
                     riseClassMember.getProfileId(),
+                    riseClassMember.getMonth(),
                     riseClassMember.getActive());
             return result.intValue();
         } catch (SQLException e) {
@@ -56,7 +57,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public RiseClassMember queryByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Del = 0";
+        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Active = 1 AND Del = 0";
         ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, profileId);
@@ -68,7 +69,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public RiseClassMember queryByMemberId(String memberId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Del = 0";
+        String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Active = 1 AND Del = 0";
         ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, memberId);
