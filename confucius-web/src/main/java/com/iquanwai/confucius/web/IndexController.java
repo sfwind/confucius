@@ -1,10 +1,12 @@
 package com.iquanwai.confucius.web;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -33,6 +35,8 @@ public class IndexController {
     private OAuthService oAuthService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private static final String COURSE_VIEW = "course";
     private static final String PAY_VIEW = "pay";
@@ -43,6 +47,14 @@ public class IndexController {
     @RequestMapping(value = "/static/**", method = RequestMethod.GET)
     public ModelAndView getIndex(HttpServletRequest request) throws Exception {
         return courseView(request);
+    }
+
+    @RequestMapping(value = "/pay/static/**", method = RequestMethod.GET)
+    public ModelAndView getPayStaticIndex(HttpServletRequest request) throws Exception {
+        OperationLog operationLog = new OperationLog().function("打点").module("访问页面").action("游客访问")
+                .memo(request.getRequestURI());
+        operationLogService.log(operationLog);
+        return courseView(request, null, PAY_VIEW);
     }
 
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
