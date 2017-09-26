@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.AutoReplyMessage;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -80,6 +81,18 @@ public class AutoReplyMessageDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public AutoReplyMessage loadDefaultTextMessage() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM AutoReplyMessage WHERE Type = 1 AND IsDefault = 1 AND Del = 0";
+        ResultSetHandler<AutoReplyMessage> h = new BeanHandler<>(AutoReplyMessage.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     public List<AutoReplyMessage> loadAllMessages() {

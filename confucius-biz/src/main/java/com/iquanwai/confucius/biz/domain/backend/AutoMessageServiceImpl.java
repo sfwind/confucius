@@ -30,6 +30,11 @@ public class AutoMessageServiceImpl implements AutoMessageService {
     }
 
     @Override
+    public AutoReplyMessage loadDefaultTextAutoReplyMessage() {
+        return autoReplyMessageDao.loadDefaultTextMessage();
+    }
+
+    @Override
     public AutoReplyMessage insertAutoReplyMessage(AutoReplyMessage autoReplyMessage) {
         int insertResult = autoReplyMessageDao.insert(autoReplyMessage);
         return insertResult > 0 ? autoReplyMessage : null;

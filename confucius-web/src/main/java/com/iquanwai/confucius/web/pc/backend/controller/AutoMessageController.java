@@ -37,6 +37,11 @@ public class AutoMessageController {
 
     @RequestMapping(value = "/reply/add", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> insertAutoReplyMessage(@RequestBody AutoReplyMessage autoReplyMessage) {
+        AutoReplyMessage defaultMessage = autoMessageService.loadDefaultTextAutoReplyMessage();
+        if (defaultMessage != null && autoReplyMessage.getIsDefault()) {
+            return WebUtils.error("默认回复数据重复");
+        }
+
         AutoReplyMessage replyMessage = autoMessageService.insertAutoReplyMessage(autoReplyMessage);
         if (replyMessage != null) {
             return WebUtils.result(replyMessage);
@@ -47,6 +52,11 @@ public class AutoMessageController {
 
     @RequestMapping(value = "/reply/update", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> updateAutoReplyMessage(@RequestBody AutoReplyMessage autoReplyMessage) {
+        AutoReplyMessage defaultMessage = autoMessageService.loadDefaultTextAutoReplyMessage();
+        if (defaultMessage != null && autoReplyMessage.getIsDefault()) {
+            return WebUtils.error("默认回复数据重复");
+        }
+
         AutoReplyMessage replyMessage = autoMessageService.updateAutoReplyMessage(autoReplyMessage);
         if (replyMessage != null) {
             return WebUtils.result(replyMessage);

@@ -15,6 +15,11 @@ public interface AutoMessageService {
     List<AutoReplyMessage> loadTextAutoReplyMessage();
 
     /**
+     * 获取默认文字自动回复
+     */
+    AutoReplyMessage loadDefaultTextAutoReplyMessage();
+
+    /**
      * 新增自动回复记录，并将新增的记录返回
      */
     AutoReplyMessage insertAutoReplyMessage(AutoReplyMessage autoReplyMessage);
