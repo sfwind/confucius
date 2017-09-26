@@ -1,13 +1,12 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
+import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.pc.backend.dto.ProblemKnowledgesDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -99,7 +98,7 @@ public class RiseOperationController {
     public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
 
         List<Problem> problems = problemService.loadProblems();
-        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
             List<ProblemListDto> collect = problems.stream().filter(problem -> !problem.getDel())

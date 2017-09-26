@@ -3,7 +3,7 @@ package com.iquanwai.confucius.web.pc.asst.controller;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.ProblemService;
+import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
@@ -108,7 +108,7 @@ public class AssistantCoachController {
     public ResponseEntity<Map<String, Object>> loadApplicationProblems(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<Problem> problems = problemService.loadProblems();
-        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
         Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentApplicationCount();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
@@ -137,7 +137,7 @@ public class AssistantCoachController {
     public ResponseEntity<Map<String, Object>> loadSubjectArticleProblems(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
         List<Problem> problems = problemService.loadProblems();
-        List<ProblemCatalog> catalogs = problemService.loadAllCatalog();
+        List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
         Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentSubjectArticleCount();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();

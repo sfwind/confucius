@@ -3,10 +3,8 @@ package com.iquanwai.confucius.web.pc.fragmentation.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
-import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -52,11 +50,7 @@ public class FragmentController {
     @Autowired
     private PracticeService practiceService;
     @Autowired
-    private ChallengeService challengeService;
-    @Autowired
     private ApplicationService applicationService;
-    @Autowired
-    private PointRepo pointRepo;
     @Autowired
     private AccountService accountService;
     @Autowired
@@ -180,7 +174,6 @@ public class FragmentController {
                 return null;
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        ;
         Integer count = practiceService.commentCount(type, submitId);
         RiseWorkCommentListDto listDto = new RiseWorkCommentListDto();
         listDto.setCount(count);
@@ -244,7 +237,6 @@ public class FragmentController {
      * @param moduleId  评论模块
      * @param submitId  文章id
      * @param dto       评论内容，回复评论id
-     * @return
      */
     @RequestMapping(value = "/pc/fragment/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
@@ -326,7 +318,6 @@ public class FragmentController {
                     riseWorkListDto.getChallengeWorkList().add(dto);
                 }
             }
-            ;
         }
         return riseWorkListDto;
     }

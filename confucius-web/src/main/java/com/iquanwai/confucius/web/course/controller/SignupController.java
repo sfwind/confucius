@@ -1,11 +1,9 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.customer.ProfileService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -18,7 +16,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
-import com.iquanwai.confucius.biz.po.systematism.Chapter;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
@@ -38,12 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
@@ -64,10 +56,6 @@ public class SignupController {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private CourseStudyService courseStudyService;
-    @Autowired
-    private ProfileService profileService;
-    @Autowired
     private PayService payService;
     @Autowired
     private CostRepo costRepo;
@@ -86,8 +74,7 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
         QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
-        Boolean entry = false;
-        Integer planId = null;
+        Boolean entry;
         if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_MEMBER)) {
             // 会员购买
             RiseOrder riseOrder = signupService.getRiseOrder(orderId);
@@ -159,33 +146,6 @@ public class SignupController {
             return WebUtils.error("加载个人信息失败");
         }
         return WebUtils.result(infoSubmitDto);
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/info/submit", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> infoSubmit(@RequestBody InfoSubmitDto infoSubmitDto, LoginUser loginUser) {
-        Integer chapterId = null;
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("提交个人信息")
-                .action("提交个人信息");
-        operationLogService.log(operationLog);
-        Profile account = new Profile();
-        try {
-            BeanUtils.copyProperties(account, infoSubmitDto);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.error("beanUtils copy props error", e);
-            return WebUtils.error("提交个人信息失败");
-        }
-        account.setOpenid(loginUser.getOpenId());
-        profileService.submitPersonalInfo(account, false);
-
-        Chapter chapter = courseStudyService.loadFirstChapter(infoSubmitDto.getCourseId());
-        if (chapter != null) {
-            chapterId = chapter.getId();
-        }
-        return WebUtils.result(chapterId);
     }
 
     @RequestMapping(value = "/coupon/list", method = RequestMethod.GET)

@@ -14,7 +14,6 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
-import com.iquanwai.confucius.web.account.websocket.LoginEndpoint;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -42,7 +41,7 @@ public class LoginUserService {
      * 缓存已经登录的用户
      */
     public static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
-
+    public static String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
     @Autowired
     private OAuthService oAuthService;
     @Autowired
@@ -76,7 +75,8 @@ public class LoginUserService {
         if(softReference!=null){
             PCLoginUser pcLoginUser = softReference.get();
             if (pcLoginUser != null) {
-                logger.info("act:{},已登录,user:{},nickName:{}", sessionId, pcLoginUser.getOpenId(), pcLoginUser.getWeixin() != null ? pcLoginUser.getWeixin().getWeixinName() : "没有微信信息");
+                logger.info("act:{},已登录,user:{},nickName:{}", sessionId, pcLoginUser.getOpenId(),
+                        pcLoginUser.getWeixin() != null ? pcLoginUser.getWeixin().getWeixinName() : "没有微信信息");
                 return true;
             } else {
                 logger.info("act:{},softReference失效", sessionId);
@@ -152,7 +152,7 @@ public class LoginUserService {
      * 1:PCLoginUser
      */
     public Pair<Integer, PCLoginUser> getLoginUser(HttpServletRequest request) {
-        String pcToken = CookieUtils.getCookie(request, LoginEndpoint.QUANWAI_TOKEN_COOKIE_NAME);
+        String pcToken = CookieUtils.getCookie(request, QUANWAI_TOKEN_COOKIE_NAME);
         if (StringUtils.isEmpty(pcToken)) {
             return new MutablePair<>(-1, null);
         } else {

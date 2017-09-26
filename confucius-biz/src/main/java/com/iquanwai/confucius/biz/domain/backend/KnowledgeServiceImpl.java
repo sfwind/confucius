@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * 负责处理前端知识点导入功能
  */
 @Service
-public class KnowledgeImportServiceImpl implements KnowledgeImportService {
+public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Autowired
     private ProblemDao problemDao;

@@ -76,7 +76,7 @@ public class IndexController {
             account = accountService.getAccount(openId, false);
         } catch (NotFollowingException e) {
             try {
-                response.sendRedirect(ConfigUtils.adapterDomainName() + "/static/subscribe");
+                response.sendRedirect("/static/subscribe");
                 return false;
             } catch (IOException e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
