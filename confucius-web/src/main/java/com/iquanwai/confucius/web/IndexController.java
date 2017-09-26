@@ -45,6 +45,11 @@ public class IndexController {
         return courseView(request);
     }
 
+    @RequestMapping(value = "/pay/static/**", method = RequestMethod.GET)
+    public ModelAndView getPayStaticIndex(HttpServletRequest request) throws Exception {
+        return courseView(request, null, PAY_VIEW);
+    }
+
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
     public ModelAndView getPayIndex(LoginUser loginUser, HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!checkAccessToken(request, response)) {
