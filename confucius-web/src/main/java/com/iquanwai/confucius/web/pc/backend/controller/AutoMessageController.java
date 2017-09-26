@@ -21,7 +21,7 @@ import java.util.Map;
  * Created by 三十文 on 2017/9/26
  */
 @RestController
-@RequestMapping("/pc/message")
+@RequestMapping("/pc/operation/message")
 public class AutoMessageController {
 
     @Autowired
