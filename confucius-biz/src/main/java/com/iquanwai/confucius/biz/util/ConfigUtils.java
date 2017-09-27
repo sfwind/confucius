@@ -388,11 +388,6 @@ public class ConfigUtils {
         return getBooleanValue("open.monthly.camp");
     }
 
-    public static Integer getEditableProblem() {
-        return getIntValue("editable.problem");
-
-    }
-
     public static String getFtpUser() {
         return getValue("ftp.username");
     }

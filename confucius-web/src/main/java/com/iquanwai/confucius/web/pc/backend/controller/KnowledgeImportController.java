@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.domain.backend.KnowledgeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
+import com.iquanwai.confucius.web.pc.backend.dto.SimpleKnowledge;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,16 +12,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/pc/operation/knowledge")
 public class KnowledgeImportController {
 
     @Autowired
-    private KnowledgeService knowledgeImportService;
+    private KnowledgeService knowledgeService;
     @Autowired
     private OperationLogService operationLogService;
+
+    @RequestMapping("/simple/{problemId}")
+    public ResponseEntity<Map<String, Object>> getSimpleKnowledge(PCLoginUser loginUser,
+                                                                  @PathVariable Integer problemId) {
+        List<SimpleKnowledge> simpleKnowledges = knowledgeService.loadKnowledges(problemId).stream()
+                .map(knowledge -> new SimpleKnowledge(knowledge.getId(), knowledge.getKnowledge()))
+                .collect(Collectors.toList());
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("选择知识点")
+                .action("加载知识点")
+                .memo(problemId.toString());
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(simpleKnowledges);
+    }
+
 
     @RequestMapping(value = "/get/knowledge/{knowledgeId}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadKnowledgeDetail(PCLoginUser loginUser, @PathVariable Integer knowledgeId) {
@@ -29,7 +50,7 @@ public class KnowledgeImportController {
                 .openid(loginUser.getOpenId());
         operationLogService.log(operationLog);
 
-        Knowledge knowledge = knowledgeImportService.loadKnowledge(knowledgeId);
+        Knowledge knowledge = knowledgeService.loadKnowledge(knowledgeId);
         if (knowledge != null) {
             return WebUtils.result(knowledge);
         } else {
@@ -37,44 +58,16 @@ public class KnowledgeImportController {
         }
     }
 
-    @RequestMapping(value = "/post/add/chapter/{chapter}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> addNewChapter(PCLoginUser loginUser, @PathVariable Integer chapter) {
-        Assert.notNull(loginUser, "登录用户不能为空");
-        OperationLog operationLog = OperationLog.create().module("后台管理").function("知识点录入").action("新增章节")
-                .openid(loginUser.getOpenId());
-        operationLogService.log(operationLog);
-
-        int result = knowledgeImportService.addNewChapter(chapter);
-        if (result > 0) {
-            return WebUtils.success();
-        } else {
-            return WebUtils.error("章节插入失败，请重试");
-        }
-    }
-
-    @RequestMapping(value = "/post/add/section/{chapter}/{section}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> addNewSection(PCLoginUser loginUser, @PathVariable Integer chapter, @PathVariable Integer section) {
-        Assert.notNull(loginUser, "登录用户不能为空");
-        OperationLog operationLog = OperationLog.create().module("后台管理").function("知识点录入").action("新增小节")
-                .openid(loginUser.getOpenId());
-        operationLogService.log(operationLog);
-
-        int result = knowledgeImportService.addNewSection(chapter, section);
-        if (result > 0) {
-            return WebUtils.success();
-        } else {
-            return WebUtils.error("小节插入失败，请重试");
-        }
-    }
-
-    @RequestMapping(value = "/post/update/knowledge", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> updateKnowledge(PCLoginUser loginUser, @RequestBody Knowledge knowledge) {
+    @RequestMapping(value = "/post/update/knowledge/{problemId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> updateKnowledge(PCLoginUser loginUser,
+                                                               @PathVariable Integer problemId,
+                                                               @RequestBody Knowledge knowledge) {
         Assert.notNull(loginUser, "登录用户不能为空");
         OperationLog operationLog = OperationLog.create().module("后台管理").function("知识点录入").action("更新知识点")
                 .openid(loginUser.getOpenId());
         operationLogService.log(operationLog);
 
-        int result = knowledgeImportService.updateKnowledge(knowledge);
+        int result = knowledgeService.updateKnowledge(knowledge, problemId);
         if (result > 0) {
             return WebUtils.success();
         } else {

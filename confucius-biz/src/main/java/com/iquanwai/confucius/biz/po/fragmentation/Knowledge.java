@@ -23,8 +23,9 @@ public class Knowledge {
     private String meansAudio;
     private String keynoteAudio;
 
-    private Integer type; //知识点分类
     private Integer appear; //非db字段,是否出现过
+    private Integer chapter; //非db字段,章节
+    private Integer section; //非db字段,小节
 
     private static String REVIEW_KNOWLEDGE = ConfigUtils.getIntegratedPracticeIndex();
 

@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -29,6 +30,18 @@ public class ProblemScheduleDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public ProblemSchedule loadProblemScheduleByKnowledge(Integer knowledgeId) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<ProblemSchedule> h = new BeanHandler<>(ProblemSchedule.class);
+        String sql = "SELECT * FROM ProblemSchedule where KnowledgeId=?";
+        try {
+            return run.query(sql, h, knowledgeId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     public Integer insertProblemSchedule(ProblemSchedule problemSchedule) {
