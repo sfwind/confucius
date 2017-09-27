@@ -100,11 +100,12 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     }
 
     @Override
-    public void batchForceOpenCourse(Integer problemId, Date closeDate) {
+    public void batchForceOpenCourse(Integer problemId, Date startDate, Date closeDate) {
         List<Integer> profileIds = riseMemberDao.loadEliteMembersId();
 
         JSONObject json = new JSONObject();
         json.put("problemId", problemId);
+        json.put("startDate", startDate);
         json.put("closeDate", closeDate);
 
         for (Integer profileId : profileIds) {

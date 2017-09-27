@@ -245,12 +245,7 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(profileId);
         accountService.updateRiseMember(profile.getOpenid(), Constants.RISE_MEMBER.MONTHLY_CAMP);
         RiseMember existRiseMember = this.currentRiseMember(profileId);
-        // // 清除历史 RiseMember 数据
-        // RiseClassMember delClassMember = riseClassMemberDao.queryByProfileId(profileId);
-        // if (delClassMember != null) {
-        //     riseClassMemberDao.del(delClassMember.getId());
-        // }
-
+        
         // RiseMember 新增记录
         String memberId = generateMemberId();
         RiseClassMember classMember = new RiseClassMember();
@@ -366,13 +361,6 @@ public class SignupServiceImpl implements SignupService {
             //查看有没有老的
             //精英会员一年
             profileDao.becomeRiseEliteMember(openId);
-
-            // // 清除历史 RiseMember 数据
-            // RiseClassMember delMember = riseClassMemberDao.queryByProfileId(riseOrder.getProfileId());
-            // if (delMember != null) {
-            //     riseClassMemberDao.del(delMember.getId());
-            // }
-
             // RiseMember 新增记录
             String memberId = generateMemberId();
             RiseClassMember classMember = new RiseClassMember();
