@@ -55,7 +55,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return -1;
     }
 
-    public  List<RiseClassMember> queryByProfileId(Integer profileId) {
+    public List<RiseClassMember> queryByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Del = 0";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
@@ -78,6 +78,18 @@ public class RiseClassMemberDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
+    }
+
+    public List<RiseClassMember> loadActiveRiseClassMembers() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE Active = 1 AND Del = 0";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 
     public int del(Integer riseClassMemberId) {
