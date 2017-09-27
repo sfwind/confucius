@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.MonthlyCampDto;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -478,5 +480,34 @@ public class SignupController {
             operationLogService.log(payParamLog);
         }
         return paymentDto;
+    }
+
+    @RequestMapping("/rise/member/{memberTypeId}")
+    public ResponseEntity<Map<String, Object>> riseMember(@PathVariable Integer memberTypeId, LoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("用户信息")
+                .function("RISE")
+                .action("查询rise会员信息")
+                .memo(String.valueOf(memberTypeId));
+        operationLogService.log(operationLog);
+
+        RiseMember riseMember = null;
+
+        switch (memberTypeId) {
+            case RiseMember.ELITE:
+                riseMember = new RiseMember();
+                riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+                Date nextYear = DateUtils.afterYears(new Date(), 1);
+                riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(nextYear, 1)));
+                break;
+            case RiseMember.MONTHLY_CAMP:
+                riseMember = signupService.getCurrentMonthlyCampStatus();
+                break;
+        }
+        if(riseMember != null) {
+            return WebUtils.result(riseMember);
+        } else {
+            return WebUtils.error("会员类型校验出错");
+        }
     }
 }

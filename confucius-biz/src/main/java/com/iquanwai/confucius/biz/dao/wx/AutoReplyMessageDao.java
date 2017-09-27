@@ -5,7 +5,9 @@ import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.AutoReplyMessage;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -18,19 +20,90 @@ import java.util.List;
  */
 @Repository
 public class AutoReplyMessageDao extends DBUtil {
+
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    public int insert(AutoReplyMessage message) {
+        message.setDel(0);
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO AutoReplyMessage (Type, Message, Keyword, Exact, IsDefault, Del)" +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+        try {
+            Long result = runner.insert(sql, new ScalarHandler<>(),
+                    message.getType(),
+                    message.getMessage(),
+                    message.getKeyword(),
+                    message.getExact(),
+                    message.getIsDefault(),
+                    message.getDel());
+            return result.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public int update(AutoReplyMessage message) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE AutoReplyMessage SET Type = ?, Message = ?, Keyword = ?, Exact = ?, IsDefault = ? " +
+                "WHERE Id = ?";
+        try {
+            return runner.update(sql, message.getType(),
+                    message.getMessage(),
+                    message.getKeyword(),
+                    message.getExact(),
+                    message.getIsDefault(),
+                    message.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public int delete(Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE AutoReplyMessage SET Del = 1 WHERE Id = ?";
+        try {
+            return runner.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public List<AutoReplyMessage> loadAllTextMessages() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM AutoReplyMessage WHERE Type = 1 AND Del = 0";
+        ResultSetHandler<List<AutoReplyMessage>> h = new BeanListHandler<>(AutoReplyMessage.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public AutoReplyMessage loadDefaultTextMessage() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM AutoReplyMessage WHERE Type = 1 AND IsDefault = 1 AND Del = 0";
+        ResultSetHandler<AutoReplyMessage> h = new BeanHandler<>(AutoReplyMessage.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
 
     public List<AutoReplyMessage> loadAllMessages() {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<AutoReplyMessage>> h = new BeanListHandler<>(AutoReplyMessage.class);
-
         try {
-            List<AutoReplyMessage> messages = run.query("SELECT * FROM AutoReplyMessage where Del=0", h);
-            return messages;
+            return run.query("SELECT * FROM AutoReplyMessage where Del = 0", h);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-
         return Lists.newArrayList();
     }
+
 }
