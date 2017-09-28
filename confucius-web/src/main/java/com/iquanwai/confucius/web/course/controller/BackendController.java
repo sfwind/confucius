@@ -14,7 +14,6 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.*;
@@ -262,7 +261,6 @@ public class BackendController {
     }
 
 
-
     @RequestMapping(value = "/mark", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> mark(LoginUser loginUser, @RequestBody MarkDto markDto) {
         OperationLog operationLog = OperationLog.create().openid(loginUser == null ? null : loginUser.getOpenId())
@@ -321,12 +319,12 @@ public class BackendController {
 
         Integer month = batchOpenCourseDto.getMonth();
         Integer problemId = batchOpenCourseDto.getProblemId();
-        Date closeDate = batchOpenCourseDto.getCloseDate() == null ? DateUtils.afterDays(new Date(), 30) : batchOpenCourseDto.getCloseDate();
-
+        Date startDate = batchOpenCourseDto.getStartDate();
+        Date closeDate = batchOpenCourseDto.getCloseDate();
 
         boolean validation = monthlyCampService.validForceOpenCourse(month, problemId);
         if (validation) {
-            Thread thread = new Thread(() -> monthlyCampService.batchForceOpenCourse(problemId, closeDate));
+            Thread thread = new Thread(() -> monthlyCampService.batchForceOpenCourse(problemId, startDate, closeDate));
             thread.start();
             return WebUtils.result("开课进行中");
         } else {
