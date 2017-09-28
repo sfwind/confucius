@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/pc/operation/knowledge")
 public class KnowledgeImportController {
-
     @Autowired
     private KnowledgeService knowledgeService;
     @Autowired
@@ -43,7 +42,7 @@ public class KnowledgeImportController {
     }
 
 
-    @RequestMapping(value = "/get/knowledge/{knowledgeId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/get/{knowledgeId}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadKnowledgeDetail(PCLoginUser loginUser, @PathVariable Integer knowledgeId) {
         Assert.notNull(loginUser, "登录用户不能为空");
         OperationLog operationLog = OperationLog.create().module("后台管理").function("知识点录入").action("加载已有知识点信息")
@@ -58,7 +57,7 @@ public class KnowledgeImportController {
         }
     }
 
-    @RequestMapping(value = "/post/update/knowledge/{problemId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/update/{problemId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> updateKnowledge(PCLoginUser loginUser,
                                                                @PathVariable Integer problemId,
                                                                @RequestBody Knowledge knowledge) {
@@ -69,9 +68,9 @@ public class KnowledgeImportController {
 
         int result = knowledgeService.updateKnowledge(knowledge, problemId);
         if (result > 0) {
-            return WebUtils.success();
+            return WebUtils.result(result);
         } else {
-            return WebUtils.error("更新失败");
+            return WebUtils.error("设置的章节与现有章节重复");
         }
     }
 

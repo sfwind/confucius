@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
+import com.iquanwai.confucius.biz.po.fragmentation.Audio;
+
 import java.io.InputStream;
 
 /**
@@ -8,5 +10,7 @@ import java.io.InputStream;
 public interface FileUploadService {
     String uploadFtpAudioFile(String prefix, String originFileName, InputStream uploadFileStream);
 
-    int insertAudio(String name, String url, String words);
+    int uploadAudio(Integer audioId, String name, String url, String words);
+
+    Audio loadAudio(Integer audioId);
 }

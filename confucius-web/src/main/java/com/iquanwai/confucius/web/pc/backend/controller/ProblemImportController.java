@@ -65,14 +65,14 @@ public class ProblemImportController {
     public ResponseEntity<Map<String, Object>> saveProblem(PCLoginUser loginUser,
                                                            @RequestBody Problem problem) {
 
-        problemService.saveProblem(problem);
+        int problemId = problemService.saveProblem(problem);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("选择小课")
                 .action("保存小课");
         operationLogService.log(operationLog);
 
-        return WebUtils.success();
+        return WebUtils.result(problemId);
     }
 
     @RequestMapping("/catalog/load")

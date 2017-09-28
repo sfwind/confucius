@@ -46,10 +46,13 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public Integer updateKnowledge(Knowledge knowledge, Integer problemId) {
-        if(knowledge.getId()!=0){
-            return knowledgeDao.updateKnowledge(knowledge.getId(), knowledge.getKnowledge(), knowledge.getStep(),
-                    knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote());
-        }else{
+        if (knowledge.getId() != 0) {
+            return knowledgeDao.updateKnowledge(knowledge);
+        } else {
+            ProblemSchedule problemSchedule = problemScheduleDao.loadProblemSchedule(problemId, knowledge.getChapter(), knowledge.getSection());
+            if (problemSchedule != null) {
+                return -1;
+            }
             int knowledgeId = knowledgeDao.insertKnowledge(knowledge);
             knowledge.setId(knowledgeId);
             insertProblemSchedule(knowledge, problemId);
@@ -58,12 +61,17 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         }
     }
 
-    private void insertProblemSchedule(Knowledge knowledge, Integer problemId){
+    private void insertProblemSchedule(Knowledge knowledge, Integer problemId) {
         ProblemSchedule schedule = new ProblemSchedule();
+        List<ProblemSchedule> problemSchedules = problemScheduleDao.loadProblemSchedule(problemId);
+        // 不精确计算series = 现有series+1
+        int series = problemSchedules.size() + 1;
         schedule.setChapter(knowledge.getChapter());
         schedule.setSection(knowledge.getSection());
         schedule.setProblemId(problemId);
         schedule.setKnowledgeId(knowledge.getId());
+        schedule.setSeries(series);
+        problemScheduleDao.insert(schedule);
     }
 
 }

@@ -74,11 +74,12 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void saveProblem(Problem problem) {
+    public int saveProblem(Problem problem) {
         if (problem.getId() != 0) {
             problemDao.updateProblem(problem);
+            return problem.getId();
         } else {
-            problemDao.saveProblem(problem);
+            return problemDao.saveProblem(problem);
         }
     }
 

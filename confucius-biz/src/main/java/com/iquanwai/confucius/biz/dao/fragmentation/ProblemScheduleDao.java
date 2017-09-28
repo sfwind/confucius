@@ -44,32 +44,30 @@ public class ProblemScheduleDao extends PracticeDBUtil {
         return null;
     }
 
-    public Integer insertProblemSchedule(ProblemSchedule problemSchedule) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO ProblemSchedule (ProblemId, Chapter, Section, Series, KnowledgeId)" +
-                "VALUES (?, ?, ?, ?, ?)";
+    public ProblemSchedule loadProblemSchedule(Integer problemId, Integer chapter, Integer section) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<ProblemSchedule> h = new BeanHandler<>(ProblemSchedule.class);
+        String sql = "SELECT * FROM ProblemSchedule where ProblemId=? and Chapter=? and Section=?";
         try {
-            Long result = runner.insert(sql, new ScalarHandler<>(),
-                    problemSchedule.getProblemId(),
-                    problemSchedule.getChapter(),
-                    problemSchedule.getSection(),
-                    problemSchedule.getSeries(),
-                    problemSchedule.getKnowledgeId());
+            return run.query(sql, h, problemId, chapter, section);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    public int insert(ProblemSchedule problemSchedule) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO ProblemSchedule(ProblemId, KnowledgeId, Chapter, Section, Series) values(?,?,?,?,?)";
+        try {
+            Long result = run.insert(sql, new ScalarHandler<>(), problemSchedule.getProblemId(), problemSchedule.getKnowledgeId(),
+                    problemSchedule.getChapter(), problemSchedule.getSection(), problemSchedule.getSeries());
+
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
-    }
-
-    public void updateSeries(Integer problemScheduleId, Integer series) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE ProblemSchedule SET Series = ? WHERE Id = ?";
-        try {
-            runner.update(sql, series, problemScheduleId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
     }
 
 }

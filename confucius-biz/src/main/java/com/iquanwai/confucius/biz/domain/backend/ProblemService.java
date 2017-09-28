@@ -40,5 +40,5 @@ public interface ProblemService {
     /**
      * 导入小课数据
      * */
-    void saveProblem(Problem problem);
+    int saveProblem(Problem problem);
 }
