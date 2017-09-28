@@ -43,10 +43,8 @@ public class KnowledgeDao extends PracticeDBUtil {
         try {
             return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),
                     knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
-                    knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
                     knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
-                    knowledge.getKeynoteAudioId(), knowledge.getAudioId(),
-                    knowledge.getId());
+                    knowledge.getKeynoteAudioId(), knowledge.getAudioId(), knowledge.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
