@@ -3,8 +3,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +14,6 @@ import java.sql.SQLException;
 public class ProblemDao extends PracticeDBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    public Problem loadProblem(Integer problemId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Problem WHERE Id = ?";
-        ResultSetHandler<Problem> h = new BeanHandler<>(Problem.class);
-        try {
-            return runner.query(sql, h, problemId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
 
     public int saveProblem(Problem problem) {
         QueryRunner runner = new QueryRunner(getDataSource());

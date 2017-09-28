@@ -52,7 +52,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
      */
     private Map<Integer, CourseClass> signupMap = Maps.newConcurrentMap();
 
-    @PostConstruct
+//    @PostConstruct
     public void initClass() {
         List<QuanwaiClass> quanwaiClassList = classDao.openClass();
         List<Integer> openClass = Lists.newArrayList(); // 开放报名的班级id

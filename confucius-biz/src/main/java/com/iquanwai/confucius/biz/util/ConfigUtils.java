@@ -41,10 +41,6 @@ public class ConfigUtils {
         config = fileconfig.withFallback(config);
     }
 
-    public static Boolean payPrePublish() {
-        return getBooleanValue("pay.pre.publish");
-    }
-
     public static String getToken() {
         return getValue("token");
     }
@@ -91,10 +87,6 @@ public class ConfigUtils {
 
     public static Integer getBillOpenMinute() {
         return getIntValue("bill.open.minute");
-    }
-
-    public static String signupSuccessMsgKey() {
-        return getValue("signup.success.msg");
     }
 
     public static String incompleteTaskMsgKey() {
@@ -223,10 +215,6 @@ public class ConfigUtils {
         }
     }
 
-    public static String getLoginSalt() {
-        return getValue("login.salt");
-    }
-
     public static List<Integer> getWorkScoreList() {
         String scores = getValue("work.difficulty.score");
         String[] split = scores.split(",");
@@ -251,14 +239,6 @@ public class ConfigUtils {
 
     public static String willCloseMsgKey() {
         return getValue("will.close.task.msg");
-    }
-
-    public static String accountChangeMsgKey() {
-        return getValue("account.change.msg");
-    }
-
-    public static Integer getProfileFullScore() {
-        return getIntValue("profile.full.score");
     }
 
     public static String getUploadDomain() {
@@ -356,13 +336,6 @@ public class ConfigUtils {
     }
 
     /**
-     * 获取每月训练营小课对应的金额
-     */
-    public static Double getMonthlyCampFee() {
-        return getDoubleValue("monthly.camp.fee");
-    }
-
-    /**
      * 获取当前训练营小课生成的 ClassId
      */
     public static String getMonthlyCampClassId() {
@@ -386,11 +359,6 @@ public class ConfigUtils {
 
     public static boolean getMonthlyCampOpen() {
         return getBooleanValue("open.monthly.camp");
-    }
-
-    public static Integer getEditableProblem() {
-        return getIntValue("editable.problem");
-
     }
 
     public static String getFtpUser() {

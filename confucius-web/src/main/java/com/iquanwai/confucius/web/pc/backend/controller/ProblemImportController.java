@@ -21,14 +21,14 @@ import java.util.stream.Collectors;
  * Created by justin on 2017/9/18.
  */
 @RestController
-@RequestMapping("/pc/operation")
+@RequestMapping("/pc/operation/problem")
 public class ProblemImportController {
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
     private ProblemService problemService;
 
-    @RequestMapping("/problem/simple")
+    @RequestMapping("/simple")
     public ResponseEntity<Map<String, Object>> getSimpleProblem(PCLoginUser loginUser) {
         List<SimpleProblem> simpleProblems = problemService.loadProblems().stream()
                 .filter(problem -> !problem.getDel())
@@ -44,7 +44,7 @@ public class ProblemImportController {
         return WebUtils.result(simpleProblems);
     }
 
-    @RequestMapping("/problem/load/{id}")
+    @RequestMapping("/load/{id}")
     public ResponseEntity<Map<String, Object>> getProblem(PCLoginUser loginUser,
                                                           @PathVariable Integer id) {
 
@@ -61,21 +61,21 @@ public class ProblemImportController {
         return WebUtils.result(problem);
     }
 
-    @RequestMapping(value = "/problem/save", method = RequestMethod.POST)
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> saveProblem(PCLoginUser loginUser,
                                                            @RequestBody Problem problem) {
 
-        problemService.saveProblem(problem);
+        int problemId = problemService.saveProblem(problem);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("选择小课")
                 .action("保存小课");
         operationLogService.log(operationLog);
 
-        return WebUtils.success();
+        return WebUtils.result(problemId);
     }
 
-    @RequestMapping("/problem/catalog/load")
+    @RequestMapping("/catalog/load")
     public ResponseEntity<Map<String, Object>> getCatalogs(PCLoginUser loginUser) {
         CatalogDto catalogDto = new CatalogDto();
         catalogDto.setCatalogs(problemService.loadAllCatalogs());
