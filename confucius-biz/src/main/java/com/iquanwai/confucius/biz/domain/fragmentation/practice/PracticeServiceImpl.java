@@ -485,8 +485,13 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public void initCommentEvaluation(Integer commentId) {
-        commentEvaluationDao.initCommentEvaluation(commentId);
+    public void initCommentEvaluation(Integer submitId, Integer commentId) {
+        commentEvaluationDao.initCommentEvaluation(submitId, commentId);
+    }
+
+    @Override
+    public ApplicationSubmit loadApplocationSubmitById(Integer applicationSubmitId) {
+        return applicationSubmitDao.load(ApplicationSubmit.class, applicationSubmitId);
     }
 
 }

@@ -79,8 +79,7 @@ public class FragmentController {
 
     /**
      * 碎片化总任务列表加载
-     *
-     * @param problemId   问题id
+     * @param problemId 问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/pc/fragment/homework/{problemId}")
@@ -107,7 +106,6 @@ public class FragmentController {
 
     /**
      * 点赞或者取消点赞
-     *
      * @param vote 1：点赞，2：取消点赞
      */
     @RequestMapping(value = "/pc/fragment/vote", method = RequestMethod.POST)
@@ -185,11 +183,10 @@ public class FragmentController {
     /**
      * 评论
      * TODO 根据角色设置评论类型
-     *
      * @param loginUser 登陆人
-     * @param moduleId  评论模块
-     * @param submitId  文章id
-     * @param dto       评论内容
+     * @param moduleId 评论模块
+     * @param submitId 文章id
+     * @param dto 评论内容
      */
     @RequestMapping(value = "/pc/fragment/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> comment(PCLoginUser loginUser,
@@ -218,9 +215,11 @@ public class FragmentController {
             // resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
 
+            ApplicationSubmit applicationSubmit = practiceService.loadApplocationSubmitById(submitId);
+
             // 初始化教练回复的评论反馈评价
-            if (Role.isAsst(loginUser.getRole())) {
-                practiceService.initCommentEvaluation(resultDto.getId());
+            if (Role.isAsst(loginUser.getRole()) && !applicationSubmit.getProfileId().equals(loginUser.getProfileId())) {
+                practiceService.initCommentEvaluation(submitId, resultDto.getId());
             }
 
             return WebUtils.result(resultDto);
@@ -232,11 +231,10 @@ public class FragmentController {
 
     /**
      * 评论回复
-     *
      * @param loginUser 登录人
-     * @param moduleId  评论模块
-     * @param submitId  文章id
-     * @param dto       评论内容，回复评论id
+     * @param moduleId 评论模块
+     * @param submitId 文章id
+     * @param dto 评论内容，回复评论id
      */
     @RequestMapping(value = "/pc/fragment/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
@@ -274,9 +272,11 @@ public class FragmentController {
                 resultDto.setReplyContent(replyComment.getContent());
             }
 
+            ApplicationSubmit applicationSubmit = practiceService.loadApplocationSubmitById(submitId);
+
             // 初始化教练回复的评论反馈评价
-            if (Role.isAsst(loginUser.getRole())) {
-                practiceService.initCommentEvaluation(resultDto.getId());
+            if (Role.isAsst(loginUser.getRole()) && !applicationSubmit.getProfileId().equals(loginUser.getProfileId())) {
+                practiceService.initCommentEvaluation(submitId, resultDto.getId());
             }
 
             return WebUtils.result(resultDto);
