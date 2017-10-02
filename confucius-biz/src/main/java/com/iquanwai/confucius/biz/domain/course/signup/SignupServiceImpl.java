@@ -151,7 +151,7 @@ public class SignupServiceImpl implements SignupService {
                     (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
                 right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名\n如有疑问请在学习群咨询班长";
             } else {
-                if (profile.getRiseMember() == 3) {
+                if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {
                     List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
                     List<Integer> months = classMembers.stream().map(RiseClassMember::getMonth).collect(Collectors.toList());
                     if (months.contains(ConfigUtils.getMonthlyCampMonth())) {

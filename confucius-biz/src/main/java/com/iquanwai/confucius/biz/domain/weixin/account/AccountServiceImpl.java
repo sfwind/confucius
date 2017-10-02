@@ -390,12 +390,12 @@ public class AccountServiceImpl implements AccountService {
         if (riseMember != null) {
             if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
                 return false;
-            }else if(riseMember.getMemberTypeId().equals(RiseMember.MONTHLY_CAMP)){
-                // 没有获得毕业证的用户需要申请商学院
-                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-                if(riseCertificate == null){
-                    return false;
-                }
+//            }else if(riseMember.getMemberTypeId().equals(RiseMember.MONTHLY_CAMP)){
+//                // 没有获得毕业证的用户需要申请商学院
+//                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
+//                if(riseCertificate == null){
+//                    return false;
+//                }
             }
             return true;
         } else {
