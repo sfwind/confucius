@@ -66,6 +66,17 @@ public class QuanwaiOrderDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public QuanwaiOrder loadCampOrBusinessOrder(String openId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Select * from QuanwaiOrder where Openid = ? and (GoodsType = 'fragment_member' or GoodsType = 'fragment_camp')";
+        try {
+            return runner.query(sql, new BeanHandler<QuanwaiOrder>(QuanwaiOrder.class), openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public void updatePrepayId(String prepayId, String orderId){
         QueryRunner run = new QueryRunner(getDataSource());
 
