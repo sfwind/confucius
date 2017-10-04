@@ -25,5 +25,5 @@ public interface MonthlyCampService {
 
     boolean validForceOpenCourse(Integer month, Integer problemId);
 
-    void batchForceOpenCourse(Integer problemId, Date closeDate);
+    void batchForceOpenCourse(Integer problemId, Date startDate, Date closeDate);
 }

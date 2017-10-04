@@ -18,14 +18,13 @@ import java.io.InputStream;
  */
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
-
     @Autowired
     private AudioDao audioDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final String FTP_AUDIO_STORE = "/data/static/audio/";
-    private final String AUDIO_RESOURCE_PREFIX = ConfigUtils.resourceDomainName() + "/audio/";
+    private final static String FTP_AUDIO_STORE = "/data/static/audio/";
+    private final static String AUDIO_RESOURCE_PREFIX = ConfigUtils.resourceDomainName() + "/audio/";
 
     @Override
     public String uploadFtpAudioFile(String prefix, String originFileName, InputStream uploadFileStream) {
@@ -41,17 +40,34 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
         } catch (IOException e) {
             logger.error(e.getLocalizedMessage(), e);
+        } finally{
+            try {
+                ftpUtil.disconnect();
+            } catch (IOException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
         }
         return null;
     }
 
     @Override
-    public int insertAudio(String name, String ftpFileName, String words) {
+    public int uploadAudio(Integer audioId, String name, String url, String words) {
         Audio audio = new Audio();
         audio.setName(name);
-        audio.setUrl(AUDIO_RESOURCE_PREFIX + ftpFileName);
+        audio.setUrl(AUDIO_RESOURCE_PREFIX + url);
         audio.setWords(words);
-        return audioDao.insertAudio(audio);
+        if (audioId != null) {
+            audio.setId(audioId);
+            audioDao.updateAudio(audio);
+            return audioId;
+        } else {
+            return audioDao.insertAudio(audio);
+        }
+    }
+
+    @Override
+    public Audio loadAudio(Integer audioId) {
+        return audioDao.load(Audio.class, audioId);
     }
 
 }

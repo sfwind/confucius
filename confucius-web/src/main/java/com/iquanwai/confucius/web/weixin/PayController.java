@@ -92,23 +92,19 @@ public class PayController {
         response.flushBuffer();
     }
 
-
     @RequestMapping(value = "/result/risecamp/callback")
     public void riseTrainPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
         LOGGER.info("训练营小课单卖微信支付回调：{}", payCallback.toString());
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    payService.handlePayResult(payCallback);
-                    if (payCallback.getResult_code().equals("SUCCESS")) {
-                        signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
-                    } else {
-                        LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("小课单卖支付结果回调处理失败", e);
+        executorService.execute(() -> {
+            try {
+                payService.handlePayResult(payCallback);
+                if (payCallback.getResult_code().equals("SUCCESS")) {
+                    signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
+                } else {
+                    LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
                 }
+            } catch (Exception e) {
+                LOGGER.error("小课单卖支付结果回调处理失败", e);
             }
         });
 

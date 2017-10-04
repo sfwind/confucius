@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.course.ClassDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
@@ -41,7 +40,10 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.lang.ref.SoftReference;
 import java.net.ConnectException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -49,8 +51,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class SignupServiceImpl implements SignupService {
-    @Autowired
-    private ClassDao classDao;
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
@@ -151,7 +151,7 @@ public class SignupServiceImpl implements SignupService {
                     (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
                 right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名\n如有疑问请在学习群咨询班长";
             } else {
-                if (profile.getRiseMember() == 3) {
+                if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {
                     List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
                     List<Integer> months = classMembers.stream().map(RiseClassMember::getMonth).collect(Collectors.toList());
                     if (months.contains(ConfigUtils.getMonthlyCampMonth())) {
@@ -245,12 +245,7 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(profileId);
         accountService.updateRiseMember(profile.getOpenid(), Constants.RISE_MEMBER.MONTHLY_CAMP);
         RiseMember existRiseMember = this.currentRiseMember(profileId);
-        // // 清除历史 RiseMember 数据
-        // RiseClassMember delClassMember = riseClassMemberDao.queryByProfileId(profileId);
-        // if (delClassMember != null) {
-        //     riseClassMemberDao.del(delClassMember.getId());
-        // }
-
+        
         // RiseMember 新增记录
         String memberId = generateMemberId();
         RiseClassMember classMember = new RiseClassMember();
@@ -366,13 +361,6 @@ public class SignupServiceImpl implements SignupService {
             //查看有没有老的
             //精英会员一年
             profileDao.becomeRiseEliteMember(openId);
-
-            // // 清除历史 RiseMember 数据
-            // RiseClassMember delMember = riseClassMemberDao.queryByProfileId(riseOrder.getProfileId());
-            // if (delMember != null) {
-            //     riseClassMemberDao.del(delMember.getId());
-            // }
-
             // RiseMember 新增记录
             String memberId = generateMemberId();
             RiseClassMember classMember = new RiseClassMember();
@@ -489,6 +477,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public List<MemberType> getMemberTypesPayInfo() {
         List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
+        // 写入会员开始和结束时间
         memberTypes.forEach(item -> {
             item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
             if (item.getId().equals(RiseMember.MONTHLY_CAMP)) {
@@ -572,8 +561,6 @@ public class SignupServiceImpl implements SignupService {
                 default:
                     fee = memberType.getFee();
             }
-            // 计算结束时间
-            Date endTime = DateUtils.afterNatureMonths(new Date(), 12);
 
         } else {
             fee = memberType.getFee();

@@ -20,7 +20,7 @@ public class Problem {
     private Double difficultyScore = 3.0d;// 难度
     private Double usefulScore = 4.0d; // 实用度
     private String descPic; // 描述图片
-    private Integer audioId;
+    private Integer audioId; //语音id
     private String who; //适合人群
     private String how; //如何学习
     private String why; //为什么学习

@@ -12,6 +12,7 @@ public class BatchOpenCourseDto {
 
     private Integer month;
     private Integer problemId;
+    private Date startDate;
     private Date closeDate;
 
 }

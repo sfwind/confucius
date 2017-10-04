@@ -1,11 +1,12 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.iquanwai.confucius.biz.domain.backend.AutoMessageService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.AutoReplyMessage;
+import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.SubscribeMessage;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,25 +24,34 @@ import java.util.Map;
 @RestController
 @RequestMapping("/pc/operation/message")
 public class AutoMessageController {
-
     @Autowired
     private AutoMessageService autoMessageService;
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    @Autowired
+    private OperationLogService operationLogService;
 
     @RequestMapping("/reply/load/text")
-    public ResponseEntity<Map<String, Object>> loadTextAutoReplyMessage() {
+    public ResponseEntity<Map<String, Object>> loadTextAutoReplyMessage(PCLoginUser loginUser) {
         List<AutoReplyMessage> replyMessageList = autoMessageService.loadTextAutoReplyMessage();
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("运营")
+                .function("自动回复")
+                .action("加载自动回复");
+        operationLogService.log(operationLog);
         return WebUtils.result(replyMessageList);
     }
 
     @RequestMapping(value = "/reply/add", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> insertAutoReplyMessage(@RequestBody AutoReplyMessage autoReplyMessage) {
+    public ResponseEntity<Map<String, Object>> insertAutoReplyMessage(PCLoginUser loginUser,
+                                                                      @RequestBody AutoReplyMessage autoReplyMessage) {
         AutoReplyMessage defaultMessage = autoMessageService.loadDefaultTextAutoReplyMessage();
         if (defaultMessage != null && autoReplyMessage.getIsDefault()) {
             return WebUtils.error("默认回复数据重复");
         }
-
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("运营")
+                .function("自动回复")
+                .action("添加自动回复");
+        operationLogService.log(operationLog);
         AutoReplyMessage replyMessage = autoMessageService.insertAutoReplyMessage(autoReplyMessage);
         if (replyMessage != null) {
             return WebUtils.result(replyMessage);
@@ -51,12 +61,17 @@ public class AutoMessageController {
     }
 
     @RequestMapping(value = "/reply/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> updateAutoReplyMessage(@RequestBody AutoReplyMessage autoReplyMessage) {
+    public ResponseEntity<Map<String, Object>> updateAutoReplyMessage(PCLoginUser loginUser,
+                                                                      @RequestBody AutoReplyMessage autoReplyMessage) {
         AutoReplyMessage defaultMessage = autoMessageService.loadDefaultTextAutoReplyMessage();
         if (defaultMessage != null && autoReplyMessage.getIsDefault()) {
             return WebUtils.error("默认回复数据重复");
         }
-
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("运营")
+                .function("自动回复")
+                .action("更新自动回复");
+        operationLogService.log(operationLog);
         AutoReplyMessage replyMessage = autoMessageService.updateAutoReplyMessage(autoReplyMessage);
         if (replyMessage != null) {
             return WebUtils.result(replyMessage);
@@ -66,7 +81,13 @@ public class AutoMessageController {
     }
 
     @RequestMapping(value = "/reply/del", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> deleteAutoReplyMessage(@PathParam("id") Integer id) {
+    public ResponseEntity<Map<String, Object>> deleteAutoReplyMessage(PCLoginUser loginUser,
+                                                                      @PathParam("id") Integer id) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("运营")
+                .function("自动回复")
+                .action("删除自动回复");
+        operationLogService.log(operationLog);
         boolean result = autoMessageService.deleteAutoReplyMessage(id);
         if (result) {
             return WebUtils.success();
@@ -76,12 +97,23 @@ public class AutoMessageController {
     }
 
     @RequestMapping(value = "/subscribe/load")
-    public ResponseEntity<Map<String, Object>> loadSubscribeDefaultTextMessage() {
+    public ResponseEntity<Map<String, Object>> loadSubscribeDefaultTextMessage(PCLoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("运营")
+                .function("关注回复")
+                .action("加载关注回复");
+        operationLogService.log(operationLog);
         return WebUtils.result(autoMessageService.loadSubscribeDefaultTextMessages());
     }
 
     @RequestMapping(value = "/subscribe/update")
-    public ResponseEntity<Map<String, Object>> updateSubscribeDefaultTextMessage(@RequestBody SubscribeMessage subscribeMessage) {
+    public ResponseEntity<Map<String, Object>> updateSubscribeDefaultTextMessage(PCLoginUser loginUser,
+                                                                                 @RequestBody SubscribeMessage subscribeMessage) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("运营")
+                .function("关注回复")
+                .action("更新关注回复");
+        operationLogService.log(operationLog);
         SubscribeMessage message = autoMessageService.updateSubscribeDefaultTextMessage(subscribeMessage);
         if (message != null) {
             return WebUtils.result(message);

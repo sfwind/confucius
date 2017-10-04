@@ -33,4 +33,18 @@ public class AudioDao extends PracticeDBUtil {
         return -1;
     }
 
+    public void updateAudio(Audio audio) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update Audio set Name=?, Url=?, Words=? where id=?";
+        try {
+            runner.update(sql,
+                    audio.getName(),
+                    audio.getUrl(),
+                    audio.getWords(),
+                    audio.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
 }

@@ -13,22 +13,22 @@ import java.sql.SQLException;
 @Repository
 public class KnowledgeDao extends PracticeDBUtil {
 
-    Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     public Integer insertKnowledge(Knowledge knowledge) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Knowledge (" +
                 "Knowledge, Step, Analysis, Means, Keynote, " +
-                "AnalysisPic, MeansPic, KeynotePic, Pic, Audio, " +
-                "AnalysisAudio, MeansAudio, KeynoteAudio" +
+                "AnalysisPic, MeansPic, KeynotePic, Pic, " +
+                "AnalysisAudioId, MeansAudioId, KeynoteAudioId, AudioId " +
                 ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     knowledge.getKnowledge(), knowledge.getStep(), knowledge.getAnalysis(),
                     knowledge.getMeans(), knowledge.getKeynote(), knowledge.getAnalysisPic(),
                     knowledge.getMeansPic(), knowledge.getKeynotePic(), knowledge.getPic(),
-                    knowledge.getAudio(), knowledge.getAnalysisAudio(), knowledge.getMeansAudio(),
-                    knowledge.getKeynoteAudio());
+                    knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
+                    knowledge.getKeynoteAudioId(), knowledge.getAudioId());
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -36,11 +36,15 @@ public class KnowledgeDao extends PracticeDBUtil {
         return -1;
     }
 
-    public Integer updateKnowledge(Integer id, String knowledge, String step, String analysis, String means, String keynote) {
+    public Integer updateKnowledge(Knowledge knowledge) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?, Analysis = ?, Means = ?, Keynote = ? WHERE Id = ?";
+        String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?, Analysis = ?, Means = ?, Keynote = ?," +
+                "AnalysisAudioId=?, MeansAudioId=?, KeynoteAudioId=?, AudioId=? WHERE Id = ?";
         try {
-            return runner.update(sql, knowledge, step, analysis, means, keynote, id);
+            return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),
+                    knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
+                    knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
+                    knowledge.getKeynoteAudioId(), knowledge.getAudioId(), knowledge.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

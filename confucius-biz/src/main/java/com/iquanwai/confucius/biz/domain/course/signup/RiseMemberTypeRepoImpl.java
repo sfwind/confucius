@@ -3,14 +3,12 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.MemberTypeDao;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,12 +40,7 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
 
     @Override
     public List<MemberType> memberTypes() {
-        List<MemberType> collect = memberTypes.values().stream().map(MemberType::copy).collect(Collectors.toList());
-        collect.forEach(item->{
-            item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth())));
-        });
-        return collect;
+        return memberTypes.values().stream().map(MemberType::copy).collect(Collectors.toList());
     }
 
     @Override

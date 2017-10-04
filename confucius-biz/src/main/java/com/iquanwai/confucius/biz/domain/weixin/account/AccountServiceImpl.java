@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
@@ -16,6 +17,7 @@ import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -60,11 +62,11 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private UserRoleDao userRoleDao;
     @Autowired
-    private PromotionUserDao promotionUserDao;
-    @Autowired
     private CustomerStatusDao customerStatusDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private RiseCertificateDao riseCertificateDao;
 
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
@@ -386,7 +388,16 @@ public class AccountServiceImpl implements AccountService {
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember != null) {
-            return !riseMember.getMemberTypeId().equals(RiseMember.ELITE);
+            if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
+                return false;
+//            }else if(riseMember.getMemberTypeId().equals(RiseMember.MONTHLY_CAMP)){
+//                // 没有获得毕业证的用户需要申请商学院
+//                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
+//                if(riseCertificate == null){
+//                    return false;
+//                }
+            }
+            return true;
         } else {
             return customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
         }
