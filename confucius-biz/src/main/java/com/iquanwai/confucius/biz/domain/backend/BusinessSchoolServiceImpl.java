@@ -172,6 +172,14 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         return businessSchoolApplicationDao.reject(applicationId, comment) > 0;
     }
 
+    private Boolean checkCoupon(Double coupon) {
+        if (coupon != null) {
+            return coupon > 0 && coupon <= 500;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public Boolean approveApplication(Integer applicationId, Double coupon, String comment) {
         BusinessSchoolApplication application = businessSchoolApplicationDao.load(BusinessSchoolApplication.class, applicationId);
@@ -179,15 +187,18 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
             boolean result = businessSchoolApplicationDao.approve(applicationId, coupon, comment) > 0;
             if (result) {
                 // 发放优惠券，开白名单
-                Coupon couponBean = new Coupon();
-                couponBean.setAmount(coupon);
-                couponBean.setOpenid(application.getOpenid());
-                couponBean.setProfileId(application.getProfileId());
-                couponBean.setUsed(0);
-                couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 7));
-                couponBean.setCategory("ELITE_RISE_MEMBER");
-                couponBean.setDescription("商学院奖学金");
-                couponDao.insert(couponBean);
+                // 是否有优惠券
+                if (checkCoupon(coupon)) {
+                    Coupon couponBean = new Coupon();
+                    couponBean.setAmount(coupon);
+                    couponBean.setOpenid(application.getOpenid());
+                    couponBean.setProfileId(application.getProfileId());
+                    couponBean.setUsed(0);
+                    couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 7));
+                    couponBean.setCategory("ELITE_RISE_MEMBER");
+                    couponBean.setDescription("商学院奖学金");
+                    couponDao.insert(couponBean);
+                }
                 customerStatusDao.insert(application.getProfileId(), CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
             } else {
                 logger.error("申请id：{} 审核通过处理失败,comment:{},coupon:{}", applicationId, comment, coupon);
