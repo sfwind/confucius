@@ -141,5 +141,5 @@ public interface PracticeService {
 
     void initCommentEvaluation(Integer submitId, Integer commentId);
 
-    ApplicationSubmit loadApplocationSubmitById(Integer applicationSubmitId);
+    ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId);
 }

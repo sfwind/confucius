@@ -486,11 +486,18 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public void initCommentEvaluation(Integer submitId, Integer commentId) {
-        commentEvaluationDao.initCommentEvaluation(submitId, commentId);
+        Comment comment = commentDao.load(Comment.class, commentId);
+        if (comment != null && comment.getCommentProfileId() != null) {
+            // 对于一道应用题，只有一次评价
+            List<Comment> comments = commentDao.loadCommentsByProfileId(submitId, comment.getCommentProfileId());
+            if (comments.size() == 0) {
+                commentEvaluationDao.initCommentEvaluation(submitId, commentId);
+            }
+        }
     }
 
     @Override
-    public ApplicationSubmit loadApplocationSubmitById(Integer applicationSubmitId) {
+    public ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId) {
         return applicationSubmitDao.load(ApplicationSubmit.class, applicationSubmitId);
     }
 

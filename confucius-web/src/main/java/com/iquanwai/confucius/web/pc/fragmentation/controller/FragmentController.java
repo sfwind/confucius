@@ -215,7 +215,7 @@ public class FragmentController {
             // resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
 
-            ApplicationSubmit applicationSubmit = practiceService.loadApplocationSubmitById(submitId);
+            ApplicationSubmit applicationSubmit = practiceService.loadApplicationSubmitById(submitId);
 
             // 初始化教练回复的评论反馈评价
             if (Role.isAsst(loginUser.getRole()) && !applicationSubmit.getProfileId().equals(loginUser.getProfileId())) {
@@ -272,7 +272,7 @@ public class FragmentController {
                 resultDto.setReplyContent(replyComment.getContent());
             }
 
-            ApplicationSubmit applicationSubmit = practiceService.loadApplocationSubmitById(submitId);
+            ApplicationSubmit applicationSubmit = practiceService.loadApplicationSubmitById(submitId);
 
             // 初始化教练回复的评论反馈评价
             if (Role.isAsst(loginUser.getRole()) && !applicationSubmit.getProfileId().equals(loginUser.getProfileId())) {
