@@ -490,7 +490,7 @@ public class PracticeServiceImpl implements PracticeService {
         if (comment != null && comment.getCommentProfileId() != null) {
             // 对于一道应用题，只有一次评价
             List<Comment> comments = commentDao.loadCommentsByProfileId(submitId, comment.getCommentProfileId());
-            if (comments.size() == 0) {
+            if (comments.size() == 1) {
                 commentEvaluationDao.initCommentEvaluation(submitId, commentId);
             }
         }
