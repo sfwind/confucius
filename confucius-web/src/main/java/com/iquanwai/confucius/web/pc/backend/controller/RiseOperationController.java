@@ -19,6 +19,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
+import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
@@ -41,7 +43,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.net.ConnectException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,10 +70,48 @@ public class RiseOperationController {
     private BusinessSchoolService businessSchoolService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
+    private static final String SEARCH_TOPIC = "business_school_application_search";
+    private static final String NOTICE_TOPIC = "business_school_application_notice";
+
+    private RabbitMQPublisher searchPublisher;
+    private RabbitMQPublisher noticePublisher;
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private static final int APPLICATION_SUBMIT_SIZE = 20;
+
+    @PostConstruct
+    public void init() {
+        searchPublisher = rabbitMQFactory.initFanoutPublisher(SEARCH_TOPIC);
+        noticePublisher = rabbitMQFactory.initFanoutPublisher(NOTICE_TOPIC);
+    }
+
+    @RequestMapping(value = "/search/bs/application/{date}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> searchApplication(PCLoginUser loginUser, @PathVariable String date) {
+        LOGGER.info("搜索{} 申请", date);
+        try {
+            searchPublisher.publish(date);
+        } catch (ConnectException e) {
+            LOGGER.error("发送申请搜索mq失败:{}", date);
+            return WebUtils.error("发送申请搜索mq失败:" + date);
+        }
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/notice/bs/application/{date}",method = RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> noticeApplication(PCLoginUser loginUser,@PathVariable String date){
+        LOGGER.info("发送{} 提醒", date);
+        try {
+            noticePublisher.publish(date);
+        } catch (ConnectException e) {
+            LOGGER.error("发送提醒mq失败：{}", date);
+            return WebUtils.error("发送提醒mq失败:" + date);
+        }
+        return WebUtils.success();
+    }
+
 
     @RequestMapping("/application/submit/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser loginUser,
