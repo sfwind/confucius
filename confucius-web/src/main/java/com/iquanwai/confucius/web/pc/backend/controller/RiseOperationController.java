@@ -100,8 +100,8 @@ public class RiseOperationController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/notice/bs/application/{date}",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> noticeApplication(PCLoginUser loginUser,@PathVariable String date){
+    @RequestMapping(value = "/notice/bs/application/{date}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> noticeApplication(PCLoginUser loginUser, @PathVariable String date) {
         LOGGER.info("发送{} 提醒", date);
         try {
             noticePublisher.publish(date);
@@ -301,6 +301,9 @@ public class RiseOperationController {
         if (application == null) {
             return WebUtils.error("该申请不存在");
         } else {
+            if (approveDto.getCoupon() == null) {
+                approveDto.setCoupon(0d);
+            }
             boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(), approveDto.getComment());
             if (approve) {
                 return WebUtils.success();
@@ -315,13 +318,16 @@ public class RiseOperationController {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
-                .action("通过")
+                .action("私信")
                 .memo(approveDto.getId() + "");
         operationLogService.log(operationLog);
         BusinessSchoolApplication application = businessSchoolService.loadBusinessSchoolApplication(approveDto.getId());
         if (application == null) {
             return WebUtils.error("该申请不存在");
         } else {
+            if (approveDto.getCoupon() == null) {
+                application.setCoupon(0d);
+            }
             boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(), approveDto.getCoupon(), approveDto.getComment());
             if (approve) {
                 return WebUtils.success();
