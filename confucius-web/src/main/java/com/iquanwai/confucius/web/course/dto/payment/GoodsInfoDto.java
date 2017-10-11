@@ -32,6 +32,8 @@ public class GoodsInfoDto {
     private Double initPrice;// 原价
     /** 是否可以使用多个优惠券 */
     private Boolean multiCoupons;
+    /** 自动选择优惠券 */
+    private List<Coupon> autoCoupons;
 
 
     /** 商品类型，这个主要用来判断商品类型是否正确 */

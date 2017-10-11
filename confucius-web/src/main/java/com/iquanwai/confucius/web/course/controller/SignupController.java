@@ -36,7 +36,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
@@ -314,8 +319,40 @@ public class SignupController {
         // 获取优惠券
         List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         goodsInfoDto.setCoupons(coupons);
+        // 自动选择优惠券
+        List<Coupon> autoCoupons = this.autoChooseCoupon(goodsInfoDto, coupons);
+        goodsInfoDto.setAutoCoupons(autoCoupons);
         return WebUtils.result(goodsInfoDto);
     }
+
+    private List<Coupon> autoChooseCoupon(GoodsInfoDto goodsInfoDto, List<Coupon> coupons) {
+        List<Coupon> list = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(coupons)) {
+            // 有优惠券
+            switch (goodsInfoDto.getGoodsType()) {
+                case QuanwaiOrder.FRAG_MEMBER:
+                    // 商学院--按照到期时间逆序排序，从上往下选，当支付金额为0时不再继续选择
+                    coupons.sort((o1, o2) -> o1.getExpiredDate().after(o2.getExpiredDate()) ? 1 : -1);
+                    Double total = 0d;
+                    for (Coupon coupon : coupons) {
+                        list.add(coupon);
+                        total += coupon.getAmount();
+                        if (total >= goodsInfoDto.getFee()) {
+                            // 优惠券金额大于等于价格
+                            break;
+                        }
+                    }
+                    break;
+                case QuanwaiOrder.FRAG_CAMP:
+                    // 选择最大的一张
+                    Coupon maxCoupon = coupons.stream().filter(item -> item.getCategory() == null).max((o1, o2) -> o1.getAmount() - o2.getAmount() > 0 ? 1 : -1).orElse(null);
+                    list.add(maxCoupon);
+                    break;
+            }
+        }
+        return list;
+    }
+
 
     private Boolean checkMultiCoupons(String goodsType) {
         switch (goodsType) {
@@ -504,7 +541,7 @@ public class SignupController {
                 riseMember = signupService.getCurrentMonthlyCampStatus();
                 break;
         }
-        if(riseMember != null) {
+        if (riseMember != null) {
             return WebUtils.result(riseMember);
         } else {
             return WebUtils.error("会员类型校验出错");
