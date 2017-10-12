@@ -124,5 +124,7 @@ public interface SignupService {
      */
     BusinessSchool getSchoolInfoForPay(Integer profileId);
 
+    RiseMember getCurrentRiseMemberStatus(Integer profileId);
+
     RiseMember getCurrentMonthlyCampStatus();
 }

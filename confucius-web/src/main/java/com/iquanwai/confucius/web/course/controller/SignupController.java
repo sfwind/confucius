@@ -17,7 +17,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.MonthlyCampDto;
@@ -36,16 +35,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -523,10 +516,7 @@ public class SignupController {
 
         switch (memberTypeId) {
             case RiseMember.ELITE:
-                riseMember = new RiseMember();
-                riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-                Date nextYear = DateUtils.afterYears(new Date(), 1);
-                riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(nextYear, 1)));
+                riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId());
                 break;
             case RiseMember.CAMP:
                 riseMember = signupService.getCurrentMonthlyCampStatus();
