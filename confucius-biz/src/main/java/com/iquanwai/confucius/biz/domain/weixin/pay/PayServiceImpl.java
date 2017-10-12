@@ -179,7 +179,6 @@ public class PayServiceImpl implements PayService {
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
         signupService.riseMemberEntry(quanwaiOrder.getOrderId());
-//        accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
         refreshStatus(quanwaiOrder, orderId);
     }
 
@@ -259,10 +258,6 @@ public class PayServiceImpl implements PayService {
 
     /**
      * 根据预先生成的 order 订单数据，生成对微信的请求 url，xml 格式
-     *
-     * @param quanwaiOrder
-     * @param ip
-     * @return
      */
     private UnifiedOrder buildJSApiOrder(QuanwaiOrder quanwaiOrder, String ip) {
         UnifiedOrder unifiedOrder = new UnifiedOrder();

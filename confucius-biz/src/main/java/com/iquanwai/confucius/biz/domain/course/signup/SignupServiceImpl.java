@@ -364,7 +364,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public void riseMemberEntry(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
-//        accountService.updateRiseMember(riseOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
+        // accountService.updateRiseMember(riseOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
 
         try {
             RiseMember exist = riseMemberDao.loadByOrderId(orderId);
@@ -412,6 +412,8 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setMemberTypeId(memberType.getId());
         if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) || existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
             riseMember.setExpireDate(DateUtils.afterNatureMonths(existRiseMember.getExpireDate(), 12));
+        } else {
+            riseMember.setExpireDate(DateUtils.afterNatureMonths(new Date(), 12));
         }
         riseMember.setExpired(false);
         riseMemberDao.insert(riseMember);
