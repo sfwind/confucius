@@ -287,7 +287,7 @@ public class SignupServiceImpl implements SignupService {
                 Date endDate = ConfigUtils.getMonthlyCampCloseDate();
                 riseMember.setExpireDate(endDate);
                 riseMember.setExpired(true);
-                riseMember.setMemo("提前过期");
+                riseMember.setMemo("专业版购买训练营");
                 riseMemberDao.insert(riseMember);
             } else {
                 riseMemberDao.updateExpiredAhead(profileId);
