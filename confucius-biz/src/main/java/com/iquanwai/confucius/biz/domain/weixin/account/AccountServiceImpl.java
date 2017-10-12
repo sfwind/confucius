@@ -406,7 +406,7 @@ public class AccountServiceImpl implements AccountService {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember != null) {
             if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
-                return false;
+                return true;
 //            }else if(riseMember.getMemberTypeId().equals(RiseMember.CAMP)){
 //                // 没有获得毕业证的用户需要申请商学院
 //                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
