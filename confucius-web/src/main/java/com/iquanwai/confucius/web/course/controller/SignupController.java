@@ -537,7 +537,7 @@ public class SignupController {
                 Date nextYear = DateUtils.afterYears(new Date(), 1);
                 riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(nextYear, 1)));
                 break;
-            case RiseMember.MONTHLY_CAMP:
+            case RiseMember.CAMP:
                 riseMember = signupService.getCurrentMonthlyCampStatus();
                 break;
         }

@@ -26,6 +26,11 @@ public interface AccountService {
      */
     Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
+    /**
+     * 根据 ProfileId 获取 Profile 表的 RiseMember
+     */
+    Integer getRiseMember(Integer profileId);
+
     Profile getProfileByRiseId(String riseId);
 
     List<Profile> getProfiles(List<Integer> profileIds);

@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
-import com.iquanwai.confucius.biz.dao.common.customer.PromotionUserDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
@@ -17,7 +16,6 @@ import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -125,6 +123,25 @@ public class AccountServiceImpl implements AccountService {
         }
 
         return profile;
+    }
+
+    @Override
+    public Integer getRiseMember(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        if (riseMember == null) return 0;
+        Integer memberTypeId = riseMember.getMemberTypeId();
+        if (memberTypeId == null) return 0;
+        // 精英或者专业版用户
+        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL
+                || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
+            return 1;
+        } else if (memberTypeId == RiseMember.CAMP) {
+            return 3;
+        } else if (memberTypeId == RiseMember.COURSE) {
+            return 2;
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -388,9 +405,9 @@ public class AccountServiceImpl implements AccountService {
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember != null) {
-            if(riseMember.getMemberTypeId().equals(RiseMember.ELITE)){
+            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
                 return false;
-//            }else if(riseMember.getMemberTypeId().equals(RiseMember.MONTHLY_CAMP)){
+//            }else if(riseMember.getMemberTypeId().equals(RiseMember.CAMP)){
 //                // 没有获得毕业证的用户需要申请商学院
 //                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
 //                if(riseCertificate == null){

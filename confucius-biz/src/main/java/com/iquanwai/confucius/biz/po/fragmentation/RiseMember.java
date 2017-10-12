@@ -24,9 +24,10 @@ public class RiseMember {
     private String endTime; // 非DB字段，expireDate
     private String name; //非DB字段
 
-    public static final int HALF_PROFESSIONAL = 1;
-    public static final int PROFESSIONAL = 2;
+    public static final int HALF = 1;
+    public static final int ANNUAL = 2;
     public static final int ELITE = 3;//精英用户
     public static final int HALF_ELITE = 4; // 精英版半年
-    public static final int MONTHLY_CAMP = 5; // 小课训练营
+    public static final int CAMP = 5; // 小课训练营
+    public static final int COURSE = 6; // 单买小课
 }

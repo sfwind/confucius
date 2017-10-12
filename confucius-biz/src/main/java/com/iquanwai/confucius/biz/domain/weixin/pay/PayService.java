@@ -36,9 +36,6 @@ public interface PayService {
     // 购买会员
     void payMemberSuccess(String orderId);
 
-
-
-
     /**
      * 校验支付签名
      * @param prepayId 预付订单号

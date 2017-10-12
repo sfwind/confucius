@@ -53,7 +53,6 @@ public interface SignupService {
 
     void riseMemberEntry(String orderId);
 
-
     /**
      * 重新加载班级
      */
