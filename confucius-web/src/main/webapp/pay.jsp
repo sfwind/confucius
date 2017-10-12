@@ -52,6 +52,9 @@
         s.parentNode.insertBefore(j, s);
     })(window, document, 'script', '_MEIQIA');
     _MEIQIA('entId', 80143);
+
+    _MEIQIA('withoutBtn');
+    _MEIQIA('init');
 </script>
 <%--性能数据收集脚本--%>
 <script>
