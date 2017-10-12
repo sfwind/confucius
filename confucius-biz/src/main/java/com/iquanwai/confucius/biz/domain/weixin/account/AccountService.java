@@ -26,11 +26,6 @@ public interface AccountService {
      */
     Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
-    /**
-     * 根据 ProfileId 获取 Profile 表的 RiseMember
-     */
-    Integer getRiseMember(Integer profileId);
-
     Profile getProfileByRiseId(String riseId);
 
     List<Profile> getProfiles(List<Integer> profileIds);
@@ -49,26 +44,6 @@ public interface AccountService {
      * 收集关注用户的信息
      */
     void collectNext(String openid);
-
-    /**
-     * 获取所有的省份信息
-     */
-    List<Region> loadAllProvinces();
-
-    /**
-     * 获取某省份的城市信息
-     */
-    List<Region> loadCities();
-
-    /**
-     * 根据名字获取省
-     */
-    Region loadProvinceByName(String name);
-
-    /**
-     * 根据名字获取城市
-     */
-    Region loadCityByName(String name);
 
     /**
      * 根据openid获取用户详情

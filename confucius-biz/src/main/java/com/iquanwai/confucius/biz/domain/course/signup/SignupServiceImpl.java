@@ -121,7 +121,6 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
         Profile profile = accountService.getProfile(profileId);
-        profile.setRiseMember(accountService.getRiseMember(profileId));
 
         RiseMember riseMember = this.currentRiseMember(profileId);
         Assert.notNull(profile, "用户不能为空");

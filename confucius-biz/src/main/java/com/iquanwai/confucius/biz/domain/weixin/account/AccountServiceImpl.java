@@ -9,13 +9,12 @@ import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
-import com.iquanwai.confucius.biz.dao.wx.RegionDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -23,7 +22,6 @@ import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,15 +46,10 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private FollowUserDao followUserDao;
     @Autowired
-    private RegionDao regionDao;
-    @Autowired
     private ProfileDao profileDao;
     @Autowired
     private RedisUtil redisUtil;
 
-    private List<Region> provinceList;
-
-    private List<Region> cityList;
     @Autowired
     private UserRoleDao userRoleDao;
     @Autowired
@@ -72,17 +65,14 @@ public class AccountServiceImpl implements AccountService {
 
     @PostConstruct
     public void init() {
-        loadAllProvinces();
-        loadCities();
         loadUserRole();
     }
 
     private void loadUserRole() {
         List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
 
-        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole -> {
-            userRoleMap.put(userRole.getOpenid(), userRole.getRoleId());
-        });
+        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(
+                userRole -> userRoleMap.put(userRole.getOpenid(), userRole.getRoleId()));
 
         logger.info("role init complete");
     }
@@ -111,6 +101,7 @@ public class AccountServiceImpl implements AccountService {
         Profile profile = profileDao.load(Profile.class, profileId);
 
         if (profile != null) {
+            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -125,8 +116,7 @@ public class AccountServiceImpl implements AccountService {
         return profile;
     }
 
-    @Override
-    public Integer getRiseMember(Integer profileId) {
+    private Integer getRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember == null) return 0;
         Integer memberTypeId = riseMember.getMemberTypeId();
@@ -146,13 +136,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Profile getProfileByRiseId(String riseId) {
-        return profileDao.queryByRiseId(riseId);
+        Profile profile = profileDao.queryByRiseId(riseId);
+        if (profile != null) {
+            profile.setRiseMember(getRiseMember(profile.getId()));
+        }
+        return profile;
     }
 
     @Override
     public List<Profile> getProfiles(List<Integer> profileIds) {
         List<Profile> profiles = profileDao.queryAccounts(profileIds);
         profiles.forEach(profile -> {
+            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -301,50 +296,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Region> loadAllProvinces() {
-        if (provinceList == null) {
-            provinceList = regionDao.loadAllProvinces();
-        }
-        return provinceList;
-    }
-
-    @Override
-    public List<Region> loadCities() {
-        if (cityList == null) {
-            cityList = regionDao.loadAllCities();
-        }
-        return cityList;
-    }
-
-    @Override
-    public Region loadProvinceByName(String name) {
-        Region result = null;
-        if (provinceList != null) {
-            for (Region province : provinceList) {
-                if (StringUtils.equals(province.getName(), name)) {
-                    result = province;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Region loadCityByName(String name) {
-        Region result = null;
-        if (cityList != null) {
-            for (Region city : cityList) {
-                if (StringUtils.equals(city.getName(), name)) {
-                    result = city;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    @Override
     public void unfollow(String openid) {
         followUserDao.unsubscribe(openid);
     }
@@ -386,6 +337,7 @@ public class AccountServiceImpl implements AccountService {
         Profile profile = profileDao.queryByOpenId(openid);
 
         if (profile != null) {
+            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -404,20 +356,23 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        Boolean result = true;
         if (riseMember != null) {
-            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
-                return true;
-//            }else if(riseMember.getMemberTypeId().equals(RiseMember.CAMP)){
-//                // 没有获得毕业证的用户需要申请商学院
-//                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-//                if(riseCertificate == null){
-//                    return false;
-//                }
+            if (riseMember.getMemberTypeId().equals(RiseMember.CAMP)) {
+                // 没有获得毕业证的用户需要申请商学院
+                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
+                if (riseCertificate == null) {
+                    result = false;
+                }
+            } else if (riseMember.getMemberTypeId().equals(RiseMember.COURSE)) {
+                result = false;
             }
-            return true;
-        } else {
-            return customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
         }
 
+        if (!result) {
+            result = customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
+        }
+
+        return result;
     }
 }
