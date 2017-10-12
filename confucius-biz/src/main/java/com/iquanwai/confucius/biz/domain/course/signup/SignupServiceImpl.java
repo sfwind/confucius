@@ -418,6 +418,7 @@ public class SignupServiceImpl implements SignupService {
         if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) || existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
             riseMember.setExpireDate(DateUtils.afterNatureMonths(existRiseMember.getExpireDate(), 12));
         }
+        riseMember.setExpired(false);
         riseMemberDao.insert(riseMember);
 
         // 所有计划设置为会员
