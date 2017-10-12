@@ -405,6 +405,8 @@ public class SignupServiceImpl implements SignupService {
                     "高", "订单id:" + orderId, "会员类型异常");
             return;
         }
+        // 查看是否存在现成会员数据
+        RiseMember existRiseMember = riseMemberDao.loadValidRiseMember(riseOrder.getProfileId());
         // 如果存在，则将已经存在的 riseMember 数据置为已过期
         riseMemberDao.updateExpiredAhead(riseOrder.getProfileId());
         // 添加会员表
@@ -413,7 +415,9 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setOrderId(riseOrder.getOrderId());
         riseMember.setProfileId(riseOrder.getProfileId());
         riseMember.setMemberTypeId(memberType.getId());
-        riseMember.setExpireDate(DateUtils.afterNatureMonths(new Date(), 12));
+        if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) || existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+            riseMember.setExpireDate(DateUtils.afterNatureMonths(existRiseMember.getExpireDate(), 12));
+        }
         riseMemberDao.insert(riseMember);
 
         // 所有计划设置为会员

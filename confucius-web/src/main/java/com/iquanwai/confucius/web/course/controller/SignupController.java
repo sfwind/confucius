@@ -310,7 +310,6 @@ public class SignupController {
             goodsInfoDto.setFee(bs.getFee());
         }
 
-
         // 获取优惠券
         List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         goodsInfoDto.setCoupons(coupons);
