@@ -16,6 +16,8 @@ public class RiseMember {
     private Integer memberTypeId; //会员类型1-专业版半年,2-专业版一年,3-精英版,4-小课训练营
     private Date expireDate; //过期时间
     private Boolean expired; //是否过期（0-否,1-是）
+    private String memo;
+    private Integer del;
     private Date addTime; //添加时间
 
     private String startTime; // 非DB字段，addTime

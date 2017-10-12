@@ -245,7 +245,7 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(profileId);
         accountService.updateRiseMember(profile.getOpenid(), Constants.RISE_MEMBER.MONTHLY_CAMP);
         RiseMember existRiseMember = this.currentRiseMember(profileId);
-        
+
         // RiseMember 新增记录
         String memberId = generateMemberId();
         RiseClassMember classMember = new RiseClassMember();
@@ -258,11 +258,7 @@ public class SignupServiceImpl implements SignupService {
         riseClassMemberDao.insert(classMember);
 
         // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
-        if (existRiseMember == null || !(existRiseMember.getMemberTypeId() == RiseMember.PROFESSIONAL
-                || existRiseMember.getMemberTypeId() == RiseMember.HALF_PROFESSIONAL
-                || existRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE
-                || existRiseMember.getMemberTypeId() == RiseMember.ELITE)) {
-            riseMemberDao.updateExpiredAhead(profileId);
+        if (existRiseMember == null) {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
             riseMember.setOpenId(campOrder.getOpenId());
@@ -272,8 +268,36 @@ public class SignupServiceImpl implements SignupService {
             Date endDate = ConfigUtils.getMonthlyCampCloseDate();
             riseMember.setExpireDate(endDate);
             riseMemberDao.insert(riseMember);
+        } else {
+            if (existRiseMember.getMemberTypeId() == RiseMember.PROFESSIONAL
+                    || existRiseMember.getMemberTypeId() == RiseMember.HALF_PROFESSIONAL
+                    || existRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE
+                    || existRiseMember.getMemberTypeId() == RiseMember.ELITE) {
+                // 如果当前购买的人的身份是商学院会员或者专业版会员，则直接将新增的数据记录置为过期
+                // 添加会员表
+                RiseMember riseMember = new RiseMember();
+                riseMember.setOpenId(campOrder.getOpenId());
+                riseMember.setOrderId(campOrder.getOrderId());
+                riseMember.setProfileId(campOrder.getProfileId());
+                riseMember.setMemberTypeId(RiseMember.MONTHLY_CAMP);
+                Date endDate = ConfigUtils.getMonthlyCampCloseDate();
+                riseMember.setExpireDate(endDate);
+                riseMember.setExpired(true);
+                riseMember.setMemo("提前过期");
+                riseMemberDao.insert(riseMember);
+            } else {
+                riseMemberDao.updateExpiredAhead(profileId);
+                // 添加会员表
+                RiseMember riseMember = new RiseMember();
+                riseMember.setOpenId(campOrder.getOpenId());
+                riseMember.setOrderId(campOrder.getOrderId());
+                riseMember.setProfileId(campOrder.getProfileId());
+                riseMember.setMemberTypeId(RiseMember.MONTHLY_CAMP);
+                Date endDate = ConfigUtils.getMonthlyCampCloseDate();
+                riseMember.setExpireDate(endDate);
+                riseMemberDao.insert(riseMember);
+            }
         }
-
 
         // 送优惠券
         Coupon coupon = new Coupon();
