@@ -72,9 +72,8 @@ public class SignupController {
 
     /**
      * rise产品支付成功的回调
-     *
      * @param loginUser 用户信息
-     * @param orderId   订单id
+     * @param orderId 订单id
      * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
@@ -273,8 +272,7 @@ public class SignupController {
 
     /**
      * 获取商品信息
-     *
-     * @param loginUser    用户
+     * @param loginUser 用户
      * @param goodsInfoDto 商品信息
      * @return 详细的商品信息
      */
@@ -296,12 +294,9 @@ public class SignupController {
         // 是否能使用多个优惠券
         goodsInfoDto.setMultiCoupons(this.checkMultiCoupons(goodsInfoDto.getGoodsType()));
         // 计算价格/等特殊
-        MemberType memberType = signupService
-                .getMemberTypesPayInfo()
-                .stream()
+        MemberType memberType = signupService.getMemberTypesPayInfo(loginUser.getId()).stream()
                 .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
-                .findFirst()
-                .orElse(null);
+                .findFirst().orElse(null);
         if (memberType != null) {
             goodsInfoDto.setFee(memberType.getFee());
             goodsInfoDto.setStartTime(memberType.getStartTime());
@@ -367,9 +362,8 @@ public class SignupController {
 
     /**
      * 获取H5支付参数的接口
-     *
-     * @param loginUser  用户
-     * @param request    request对象
+     * @param loginUser 用户
+     * @param request request对象
      * @param paymentDto 商品类型以及商品id
      * @return 支付参数
      */
@@ -437,7 +431,6 @@ public class SignupController {
 
     /**
      * 计算优惠券
-     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
@@ -475,9 +468,8 @@ public class SignupController {
 
     /**
      * 创建订单
-     *
      * @param paymentDto 支付信息
-     * @param profileId  用户id
+     * @param profileId 用户id
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {

@@ -518,6 +518,36 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public List<MemberType> getMemberTypesPayInfo(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+
+        List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
+        // 写入会员开始和结束时间
+        for (MemberType memberType : memberTypes) {
+            if (memberType.getId().equals(RiseMember.CAMP)) {
+                // 小课训练营类型
+                memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+                memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(ConfigUtils.getMonthlyCampCloseDate(), 1)));
+            } else if (memberType.getId().equals(RiseMember.ELITE) || memberType.getId().equals(RiseMember.HALF_ELITE)) {
+                // 商学院类型（一年、半年）
+                if (riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+                    // 此时用户类型是 商学院会员
+                    memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
+                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
+                } else {
+                    // 非商学院会员
+                    memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), memberType.getOpenMonth()), 1)));
+                }
+            } else {
+                memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+                memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), memberType.getOpenMonth()), 1)));
+            }
+        }
+        return memberTypes;
+    }
+
+    @Override
     public Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup) {
         Double amount = couponIdGroup.stream().map(costRepo::getCoupon).filter(Objects::nonNull).mapToDouble(Coupon::getAmount).sum();
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);

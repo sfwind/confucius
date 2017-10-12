@@ -90,6 +90,8 @@ public interface SignupService {
      */
     List<MemberType> getMemberTypesPayInfo();
 
+    List<MemberType> getMemberTypesPayInfo(Integer profileId);
+
     /**
      * 计算优惠券
      *
