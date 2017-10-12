@@ -25,7 +25,7 @@ public interface BusinessSchoolService {
 
     Boolean approveApplication(Integer applicationId, Double coupon, String comment);
 
-    Boolean ignoreApplication(Integer applicationId, Double coupon, String comment);
+    Boolean ignoreApplication(Integer applicationId, String comment);
 
     BusinessSchoolApplication loadBusinessSchoolApplication(Integer applicationId);
 

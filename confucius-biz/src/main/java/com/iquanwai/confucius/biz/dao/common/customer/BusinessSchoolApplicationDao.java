@@ -77,11 +77,11 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         return -1;
     }
 
-    public Integer ignore(Integer id, Double coupon, String comment) {
+    public Integer ignore(Integer id, String comment) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE BusinessSchoolApplication SET Status = 3,Coupon = ?,Comment = ?,CheckTime = CURRENT_TIMESTAMP WHERE Id = ?";
+        String sql = "UPDATE BusinessSchoolApplication SET Status = 3,Comment = ?,CheckTime = CURRENT_TIMESTAMP WHERE Id = ?";
         try {
-            return runner.update(sql, coupon, comment, id);
+            return runner.update(sql, comment, id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

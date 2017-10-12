@@ -325,10 +325,7 @@ public class RiseOperationController {
         if (application == null) {
             return WebUtils.error("该申请不存在");
         } else {
-            if (approveDto.getCoupon() == null) {
-                application.setCoupon(0d);
-            }
-            boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(), approveDto.getCoupon(), approveDto.getComment());
+            boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(), approveDto.getComment());
             if (approve) {
                 return WebUtils.success();
             } else {

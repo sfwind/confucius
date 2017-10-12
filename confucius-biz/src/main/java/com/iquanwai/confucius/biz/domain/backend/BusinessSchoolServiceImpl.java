@@ -211,8 +211,8 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     }
 
     @Override
-    public Boolean ignoreApplication(Integer applicationId, Double coupon, String comment) {
-        return businessSchoolApplicationDao.ignore(applicationId, coupon, comment) > 0;
+    public Boolean ignoreApplication(Integer applicationId, String comment) {
+        return businessSchoolApplicationDao.ignore(applicationId, comment) > 0;
     }
 
     @Override
