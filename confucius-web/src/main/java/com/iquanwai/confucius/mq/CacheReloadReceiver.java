@@ -31,10 +31,6 @@ public class CacheReloadReceiver {
     @Autowired
     private PermissionService permissionService;
     @Autowired
-    private RiseMemberTypeRepo riseMemberTypeRepo;
-    @Autowired
-    private RiseMemberCountRepo riseMemberCountRepo;
-    @Autowired
     private CallbackMessageService callbackMessageService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -57,10 +53,6 @@ public class CacheReloadReceiver {
                     break;
                 case "permission":
                     permissionService.reloadPermission();
-                    break;
-                case "rise_member":
-                    riseMemberTypeRepo.reload();
-                    riseMemberCountRepo.reload();
                     break;
                 case "weixin_message":
                     callbackMessageService.reload();

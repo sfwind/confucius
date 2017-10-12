@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.domain.asst;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
@@ -17,7 +16,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -39,8 +41,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private AsstCoachCommentDao asstCoachCommentDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
-    @Autowired
-    private ProfileDao profileDao;
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
 
@@ -199,7 +199,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     public List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName) {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
 
-        List<Profile> profiles = profileDao.loadProfilesByNickName(nickName);
+        List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
         if (profiles.size() == 0) return Lists.newArrayList();
 
         List<Integer> profileIds = Lists.newArrayList();

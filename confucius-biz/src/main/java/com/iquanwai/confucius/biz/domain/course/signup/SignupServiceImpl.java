@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
-import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
@@ -67,8 +66,6 @@ public class SignupServiceImpl implements SignupService {
     private MonthlyCampScheduleDao monthlyCampScheduleDao;
     @Autowired
     private CostRepo costRepo;
-    @Autowired
-    private ProfileDao profileDao;
     @Autowired
     private RiseMemberTypeRepo riseMemberTypeRepo;
     @Autowired
@@ -176,7 +173,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId) {
         // 查询该openid是否是我们的用户
-        Profile profile = profileDao.load(Profile.class, profileId);
+        Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Double fee;
         BusinessSchool bs = this.getSchoolInfoForPay(profileId);
@@ -209,7 +206,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId) {
         // 如果是购买训练营小课，配置 zk，查看当前月份
-        Profile profile = profileDao.load(Profile.class, profileId);
+        Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Assert.notNull(profile, "用户不能为空");
         Assert.notNull(memberType, "会员类型错误");
@@ -246,7 +243,7 @@ public class SignupServiceImpl implements SignupService {
         Integer profileId = campOrder.getProfileId();
         // 更新 profile 表中状态
         Profile profile = accountService.getProfile(profileId);
-        accountService.updateRiseMember(profile.getOpenid(), Constants.RISE_MEMBER.MONTHLY_CAMP);
+//        accountService.updateRiseMember(profile.getOpenid(), Constants.RISE_MEMBER.MONTHLY_CAMP);
         RiseMember existRiseMember = this.currentRiseMember(profileId);
 
         // RiseMember 新增记录
@@ -367,7 +364,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public void riseMemberEntry(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
-        accountService.updateRiseMember(riseOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
+//        accountService.updateRiseMember(riseOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
 
         try {
             RiseMember exist = riseMemberDao.loadByOrderId(orderId);
@@ -387,7 +384,6 @@ public class SignupServiceImpl implements SignupService {
         if (RiseMember.ELITE == memberType.getId()) {
             //查看有没有老的
             //精英会员一年
-            profileDao.becomeRiseEliteMember(openId);
             // RiseClassMember 新增会员记录
             String memberId = generateMemberId();
             RiseClassMember classMember = new RiseClassMember();
@@ -436,7 +432,7 @@ public class SignupServiceImpl implements SignupService {
                 improvementPlanDao.becomeRiseMember(plan);
             }
         });
-        Profile profile = profileDao.queryByOpenId(openId);
+        Profile profile = accountService.getProfile(openId, false);
         // 发送模板消息
         sendPurchaseMessage(profile, memberType.getId(), orderId);
     }
