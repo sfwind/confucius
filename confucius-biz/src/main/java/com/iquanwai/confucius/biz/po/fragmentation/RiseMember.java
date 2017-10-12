@@ -24,6 +24,18 @@ public class RiseMember {
     private String endTime; // 非DB字段，expireDate
     private String name; //非DB字段
 
+    public RiseMember simple() {
+        RiseMember riseMember = new RiseMember();
+        riseMember.setMemberTypeId(memberTypeId);
+        riseMember.setExpireDate(expireDate);
+        riseMember.setExpired(expired);
+        riseMember.setAddTime(addTime);
+        riseMember.setStartTime(startTime);
+        riseMember.setEndTime(endTime);
+        riseMember.setName(name);
+        return riseMember;
+    }
+
     public static final int HALF = 1;
     public static final int ANNUAL = 2;
     public static final int ELITE = 3;//精英用户

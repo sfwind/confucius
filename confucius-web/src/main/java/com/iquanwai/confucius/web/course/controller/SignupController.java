@@ -523,7 +523,7 @@ public class SignupController {
                 break;
         }
         if (riseMember != null) {
-            return WebUtils.result(riseMember);
+            return WebUtils.result(riseMember.simple());
         } else {
             return WebUtils.error("会员类型校验出错");
         }
