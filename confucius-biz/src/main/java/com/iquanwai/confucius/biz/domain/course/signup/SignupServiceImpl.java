@@ -131,11 +131,11 @@ public class SignupServiceImpl implements SignupService {
                     (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
                 right = "您已经是圈外商学院学员，无需重复报名\n如有疑问请在学习群咨询班长";
             } else if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {
-                List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
-                RiseClassMember riseClassMember = classMembers.stream().filter(classMember -> ConfigUtils.getMonthlyCampMonth().equals(classMember.getMonth())).findAny().orElse(null);
-                if (riseClassMember != null) {
-                    riseClassMemberDao.del(riseClassMember.getId());
-                }
+                // List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
+                // RiseClassMember riseClassMember = classMembers.stream().filter(classMember -> ConfigUtils.getMonthlyCampMonth().equals(classMember.getMonth())).findAny().orElse(null);
+                // if (riseClassMember != null) {
+                //     riseClassMemberDao.del(riseClassMember.getId());
+                // }
                 left = 1;
             } else {
                 // 查看是否开放报名
