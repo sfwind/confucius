@@ -117,6 +117,9 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     }
 
     public List<RiseClassMember> batchQueryByProfileIds(List<Integer> profileIds) {
+        if (profileIds.size() == 0) {
+            return Lists.newArrayList();
+        }
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Del = 0";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
