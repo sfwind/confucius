@@ -637,8 +637,13 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public RiseMember getCurrentRiseMemberStatus(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+        if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
+            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(DateUtils.afterDays(DateUtils.afterNatureMonths(new Date(), -12), 1)));
+        } else {
+            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+        }
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
+
         return riseMember;
     }
 
