@@ -173,7 +173,20 @@ public class SignupController {
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberTypes(memberTypesPayInfo);
-        dto.setElite(riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)));
+
+        if (riseMember != null && riseMember.getMemberTypeId() != null) {
+            Integer memberTypeId = riseMember.getMemberTypeId();
+            if (memberTypeId.equals(RiseMember.HALF) || memberTypeId.equals(RiseMember.ANNUAL)) {
+                dto.setButtonStr("升级商学院");
+            } else if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
+                dto.setButtonStr("续费商学院");
+            } else {
+                dto.setButtonStr("立即入学");
+            }
+        } else {
+            dto.setButtonStr("立即入学");
+        }
+
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
         dto.setCoupons(coupons);
         return WebUtils.result(dto);

@@ -21,4 +21,8 @@ public class RiseMemberDto {
     private Boolean privilege;
     /** 已经是商学院会员 */
     private Boolean elite;
+    /**
+     * 报名按钮显示
+     */
+    private String buttonStr;
 }
