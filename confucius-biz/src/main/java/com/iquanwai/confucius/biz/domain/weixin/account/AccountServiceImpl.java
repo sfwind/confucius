@@ -356,16 +356,16 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        Boolean result = true;
+        Boolean result = false;
+
         if (riseMember != null) {
-            if (riseMember.getMemberTypeId().equals(RiseMember.CAMP)) {
-                // 没有获得毕业证的用户需要申请商学院
+            Integer memberTypeId = riseMember.getMemberTypeId();
+            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
+                result = true;
+            }
+            if (RiseMember.CAMP == memberTypeId) {
                 RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-                if (riseCertificate == null) {
-                    result = false;
-                }
-            } else if (riseMember.getMemberTypeId().equals(RiseMember.COURSE)) {
-                result = false;
+                result = riseCertificate != null;
             }
         }
 
