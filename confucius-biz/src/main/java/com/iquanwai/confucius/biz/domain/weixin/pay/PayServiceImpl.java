@@ -6,17 +6,11 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
-import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.slf4j.Logger;
@@ -49,8 +43,6 @@ public class PayServiceImpl implements PayService {
     @Autowired
     private MessageService messageService;
     @Autowired
-    private MQService mqService;
-    @Autowired
     private AccountService accountService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -61,9 +53,6 @@ public class PayServiceImpl implements PayService {
 
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
-
-    private static final String CLOSE_ORDER_QUEUE = "close_order_queue";
-    private static final String TOPIC = "close_quanwai_order";
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
@@ -190,7 +179,6 @@ public class PayServiceImpl implements PayService {
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
         signupService.riseMemberEntry(quanwaiOrder.getOrderId());
-        accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
         refreshStatus(quanwaiOrder, orderId);
     }
 
@@ -270,10 +258,6 @@ public class PayServiceImpl implements PayService {
 
     /**
      * 根据预先生成的 order 订单数据，生成对微信的请求 url，xml 格式
-     *
-     * @param quanwaiOrder
-     * @param ip
-     * @return
      */
     private UnifiedOrder buildJSApiOrder(QuanwaiOrder quanwaiOrder, String ip) {
         UnifiedOrder unifiedOrder = new UnifiedOrder();

@@ -53,7 +53,6 @@ public interface SignupService {
 
     void riseMemberEntry(String orderId);
 
-
     /**
      * 重新加载班级
      */
@@ -91,6 +90,8 @@ public interface SignupService {
      */
     List<MemberType> getMemberTypesPayInfo();
 
+    List<MemberType> getMemberTypesPayInfo(Integer profileId);
+
     /**
      * 计算优惠券
      *
@@ -122,6 +123,8 @@ public interface SignupService {
      * @param profileId 用户id
      */
     BusinessSchool getSchoolInfoForPay(Integer profileId);
+
+    RiseMember getCurrentRiseMemberStatus(Integer profileId);
 
     RiseMember getCurrentMonthlyCampStatus();
 }

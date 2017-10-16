@@ -67,7 +67,6 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-
     public RiseClassMember queryByMemberId(String memberId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Active = 1 AND Del = 0";

@@ -5,7 +5,6 @@ import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberCountRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
-import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
@@ -32,12 +31,6 @@ public class CacheReloadReceiver {
     @Autowired
     private PermissionService permissionService;
     @Autowired
-    private AccountService accountService;
-    @Autowired
-    private RiseMemberTypeRepo riseMemberTypeRepo;
-    @Autowired
-    private RiseMemberCountRepo riseMemberCountRepo;
-    @Autowired
     private CallbackMessageService callbackMessageService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -59,15 +52,7 @@ public class CacheReloadReceiver {
                     courseStudyService.reloadQuestion();
                     break;
                 case "permission":
-                    permissionService.initPermission();
-                    break;
-                case "region":
-                    accountService.loadAllProvinces();
-                    accountService.loadCities();
-                    break;
-                case "rise_member":
-                    riseMemberTypeRepo.reload();
-                    riseMemberCountRepo.reload();
+                    permissionService.reloadPermission();
                     break;
                 case "weixin_message":
                     callbackMessageService.reload();
