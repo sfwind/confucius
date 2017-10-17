@@ -17,7 +17,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.MonthlyCampDto;
@@ -36,16 +35,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -72,9 +65,8 @@ public class SignupController {
 
     /**
      * rise产品支付成功的回调
-     *
      * @param loginUser 用户信息
-     * @param orderId   订单id
+     * @param orderId 订单id
      * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
@@ -181,7 +173,20 @@ public class SignupController {
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberTypes(memberTypesPayInfo);
-        dto.setElite(riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)));
+
+        if (riseMember != null && riseMember.getMemberTypeId() != null) {
+            Integer memberTypeId = riseMember.getMemberTypeId();
+            if (memberTypeId.equals(RiseMember.HALF) || memberTypeId.equals(RiseMember.ANNUAL)) {
+                dto.setButtonStr("升级商学院");
+            } else if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
+                dto.setButtonStr("续费商学院");
+            } else {
+                dto.setButtonStr("立即入学");
+            }
+        } else {
+            dto.setButtonStr("立即入学");
+        }
+
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
         dto.setCoupons(coupons);
         return WebUtils.result(dto);
@@ -273,8 +278,7 @@ public class SignupController {
 
     /**
      * 获取商品信息
-     *
-     * @param loginUser    用户
+     * @param loginUser 用户
      * @param goodsInfoDto 商品信息
      * @return 详细的商品信息
      */
@@ -296,12 +300,9 @@ public class SignupController {
         // 是否能使用多个优惠券
         goodsInfoDto.setMultiCoupons(this.checkMultiCoupons(goodsInfoDto.getGoodsType()));
         // 计算价格/等特殊
-        MemberType memberType = signupService
-                .getMemberTypesPayInfo()
-                .stream()
+        MemberType memberType = signupService.getMemberTypesPayInfo(loginUser.getId()).stream()
                 .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
-                .findFirst()
-                .orElse(null);
+                .findFirst().orElse(null);
         if (memberType != null) {
             goodsInfoDto.setFee(memberType.getFee());
             goodsInfoDto.setStartTime(memberType.getStartTime());
@@ -314,7 +315,6 @@ public class SignupController {
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType()) && !bs.getIsBusinessStudent()) {
             goodsInfoDto.setFee(bs.getFee());
         }
-
 
         // 获取优惠券
         List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
@@ -367,9 +367,8 @@ public class SignupController {
 
     /**
      * 获取H5支付参数的接口
-     *
-     * @param loginUser  用户
-     * @param request    request对象
+     * @param loginUser 用户
+     * @param request request对象
      * @param paymentDto 商品类型以及商品id
      * @return 支付参数
      */
@@ -437,7 +436,6 @@ public class SignupController {
 
     /**
      * 计算优惠券
-     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
@@ -475,9 +473,8 @@ public class SignupController {
 
     /**
      * 创建订单
-     *
      * @param paymentDto 支付信息
-     * @param profileId  用户id
+     * @param profileId 用户id
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
@@ -532,17 +529,14 @@ public class SignupController {
 
         switch (memberTypeId) {
             case RiseMember.ELITE:
-                riseMember = new RiseMember();
-                riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-                Date nextYear = DateUtils.afterYears(new Date(), 1);
-                riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(nextYear, 1)));
+                riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId());
                 break;
-            case RiseMember.MONTHLY_CAMP:
+            case RiseMember.CAMP:
                 riseMember = signupService.getCurrentMonthlyCampStatus();
                 break;
         }
         if (riseMember != null) {
-            return WebUtils.result(riseMember);
+            return WebUtils.result(riseMember.simple());
         } else {
             return WebUtils.error("会员类型校验出错");
         }

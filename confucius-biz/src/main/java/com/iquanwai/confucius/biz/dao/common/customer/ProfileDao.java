@@ -61,35 +61,6 @@ public class ProfileDao extends DBUtil {
         return null;
     }
 
-    public void updateMeta(Profile profile) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String updateSql = "Update Profile Set Nickname=?, Headimgurl=?, UnionId = ? where Openid=?";
-        try {
-            run.update(updateSql,
-                    profile.getNickname(), profile.getHeadimgurl(), profile.getUnionid(), profile.getOpenid());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public boolean submitPersonalCenterProfile(Profile profile) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String updateSql = "Update Profile Set Industry=?, Function=?, WorkingLife=?, City=?, Province=? where Openid=?";
-        try {
-            run.update(updateSql,
-                    profile.getIndustry(),
-                    profile.getFunction(),
-                    profile.getWorkingLife(),
-                    profile.getCity(),
-                    profile.getProvince(),
-                    profile.getOpenid());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-            return false;
-        }
-        return true;
-    }
-
     public int insertProfile(Profile profile) throws SQLException {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Profile(Openid, Nickname, City, Country, Province, Headimgurl, MobileNo, Email, Industry, Function, WorkingLife, RealName, RiseId, UnionId)" +
@@ -130,63 +101,6 @@ public class ProfileDao extends DBUtil {
         }
     }
 
-    public void completeProfile(String openId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET IsFull = 1 where Openid = ?";
-        try {
-            runner.update(sql, openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public Boolean submitPersonalProfile(Profile account) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String updateSql = "Update Profile Set MobileNo=?, Email=?, Industry=?, Function=?, WorkingLife=?, " +
-                "RealName=?, City=?, Province=? where Openid=?";
-        try {
-            run.update(updateSql,
-                    account.getMobileNo(), account.getEmail(),
-                    account.getIndustry(), account.getFunction(),
-                    account.getWorkingLife(), account.getRealName(),
-                    account.getCity(), account.getProvince(),
-                    account.getOpenid());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-            return false;
-        }
-        return true;
-    }
-
-    public void becomeRiseMember(String openId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Profile SET RiseMember = 1 WHERE OpenId = ?";
-        try {
-            runner.update(sql, openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public void becomeRiseEliteMember(String openId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Profile SET RiseMember = 1, RequestCommentCount=1 WHERE OpenId = ?";
-        try {
-            runner.update(sql, openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public void becomeMonthlyCampMember(Integer profileId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET RiseMember = 3 WHERE Id = ?";
-        try {
-            runner.update(sql, profileId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
 
     public List<Profile> queryAccounts(List<Integer> profileIds) {
         if (CollectionUtils.isEmpty(profileIds)) {

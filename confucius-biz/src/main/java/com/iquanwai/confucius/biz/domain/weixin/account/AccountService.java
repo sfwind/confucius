@@ -46,26 +46,6 @@ public interface AccountService {
     void collectNext(String openid);
 
     /**
-     * 获取所有的省份信息
-     */
-    List<Region> loadAllProvinces();
-
-    /**
-     * 获取某省份的城市信息
-     */
-    List<Region> loadCities();
-
-    /**
-     * 根据名字获取省
-     */
-    Region loadProvinceByName(String name);
-
-    /**
-     * 根据名字获取城市
-     */
-    Region loadCityByName(String name);
-
-    /**
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);

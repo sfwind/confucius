@@ -14,8 +14,7 @@ public interface PracticeService {
 
     /**
      * 查询点赞数
-     *
-     * @param type         1：小目标，2：体系化大作业
+     * @param type 1：小目标，2：体系化大作业
      * @param referencedId 被依赖的id
      * @return 点赞数
      */
@@ -23,10 +22,9 @@ public interface PracticeService {
 
     /**
      * 点赞
-     *
-     * @param type         1：小目标，2：体系化大作业
+     * @param type 1：小目标，2：体系化大作业
      * @param referencedId 被依赖的id
-     * @param openId       点赞的人
+     * @param openId 点赞的人
      */
     boolean vote(Integer type, Integer referencedId, Integer profileId, String openId);
 
@@ -89,28 +87,24 @@ public interface PracticeService {
 
     /**
      * 根据应用id,获取练习训练
-     *
      * @param practiceId 练习id
      */
     ApplicationPractice loadApplication(Integer practiceId);
 
     /**
      * 根据小课id,获取应用练习
-     *
      * @param problemId 小课id
      */
     List<ApplicationPractice> loadApplicationByProblemId(Integer problemId);
 
     /**
      * 是否可以求点评
-     *
      * @param planId 计划id
      */
     Integer hasRequestComment(Integer planId);
 
     /**
      * 求点评
-     *
      * @param submitId 文章提交id
      * @param moduleId 模块id（2-应用练习,3-小课分享）
      */
@@ -118,7 +112,6 @@ public interface PracticeService {
 
     /**
      * 删除评论
-     *
      * @param commentId 评论id
      */
     void deleteComment(Integer commentId);
@@ -146,5 +139,7 @@ public interface PracticeService {
      */
     Integer delWarmupPracticeByPracticeUid(String practiceUid);
 
-    void initCommentEvaluation(Integer commentId);
+    void initCommentEvaluation(Integer submitId, Integer commentId);
+
+    ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId);
 }
