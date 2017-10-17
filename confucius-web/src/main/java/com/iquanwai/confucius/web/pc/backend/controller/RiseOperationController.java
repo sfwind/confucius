@@ -343,11 +343,11 @@ public class RiseOperationController {
                 return "商学院";
             case RiseMember.HALF_ELITE:
                 return "精英半年";
-            case RiseMember.HALF_PROFESSIONAL:
+            case RiseMember.HALF:
                 return "专业半年";
-            case RiseMember.PROFESSIONAL:
+            case RiseMember.ANNUAL:
                 return "专业一年";
-            case RiseMember.MONTHLY_CAMP:
+            case RiseMember.CAMP:
                 return "训练营";
             default:
                 return "异常数据";
