@@ -235,7 +235,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         } else {
             if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
                 return "已付费商学院";
-            } else if (riseMember.getMemberTypeId().equals(RiseMember.MONTHLY_CAMP)) {
+            } else if (riseMember.getMemberTypeId().equals(RiseMember.CAMP)) {
                 return "已付费训练营";
             } else {
                 if (order != null) {
