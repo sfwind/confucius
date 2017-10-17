@@ -34,13 +34,14 @@ public class FileUploadServiceImpl implements FileUploadService {
         String targetFileName = prefix + "_" + CommonUtils.randomString(8) + sufFileName;
         try {
             ftpUtil.connect();
+            ftpUtil.setBinaryType();
             boolean result = ftpUtil.storeFile(FTP_AUDIO_STORE + targetFileName, uploadFileStream);
             if (result) {
                 return targetFileName;
             }
         } catch (IOException e) {
             logger.error(e.getLocalizedMessage(), e);
-        } finally{
+        } finally {
             try {
                 ftpUtil.disconnect();
             } catch (IOException e) {
