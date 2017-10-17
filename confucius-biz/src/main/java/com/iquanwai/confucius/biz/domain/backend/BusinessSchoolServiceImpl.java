@@ -173,11 +173,12 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     }
 
     private Boolean checkCoupon(Double coupon) {
-        if (coupon != null) {
-            return coupon > 0 && coupon <= 500;
-        } else {
-            return false;
-        }
+//        if (coupon != null) {
+//            return coupon > 0 && coupon <= 500;
+//        } else {
+//            return false;
+//        }
+        return coupon != null;
     }
 
     @Override
