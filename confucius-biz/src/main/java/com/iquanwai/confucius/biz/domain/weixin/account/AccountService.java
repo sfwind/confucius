@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 
 import java.util.List;
@@ -54,6 +53,11 @@ public interface AccountService {
      * 根据openid获取用户详情
      */
     Profile getProfile(Integer profileId);
+
+    /**
+     * 根据openid获取用户详情
+     */
+    Profile getProfile(String openid);
 
     /**
      * 取消关注

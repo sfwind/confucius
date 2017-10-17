@@ -11,6 +11,12 @@ public interface TemplateMessageService {
     boolean sendMessage(TemplateMessage templateMessage);
 
     /**
+     * @param templateMessage 模板消息对象
+     * @param forwardlyPush 是否主动推送
+     */
+    boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush);
+
+    /**
      * 根据模板库中的编号获取模板真实id
      * @param templateShortId
      * 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式

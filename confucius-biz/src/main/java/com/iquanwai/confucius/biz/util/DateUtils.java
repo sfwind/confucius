@@ -86,6 +86,10 @@ public class DateUtils {
         return new DateTime(date).plusMinutes(increment).toDate();
     }
 
+    public static Date afterHours(Date date, int increment) {
+        return new DateTime(date).plusHours(increment).toDate();
+    }
+
     /**
      * 自然月增加
      * @param date 某年某月某日
@@ -108,7 +112,6 @@ public class DateUtils {
 //            // 从下个月的第一天开始增加
 //            return DateUtils.afterMonths(firstDay, increment);
 //        }
-
         return DateUtils.afterMonths(date, increment);
     }
 

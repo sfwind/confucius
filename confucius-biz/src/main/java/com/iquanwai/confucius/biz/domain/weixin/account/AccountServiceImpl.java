@@ -97,6 +97,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Profile getProfile(String openid) {
+        return getProfileFromDB(openid);
+    }
+
+    @Override
     public Profile getProfile(Integer profileId) {
         Profile profile = profileDao.load(Profile.class, profileId);
 

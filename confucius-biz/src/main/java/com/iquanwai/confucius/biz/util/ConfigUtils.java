@@ -377,4 +377,9 @@ public class ConfigUtils {
         return getBooleanValue("business.school.price.reduce.not.elite");
     }
 
+    public static List<String> getDevelopOpenIds() {
+        String openIdsStr = getValue("sms.alarm.openids");
+        return Lists.newArrayList(openIdsStr.split(","));
+    }
+
 }

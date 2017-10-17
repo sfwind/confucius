@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.template;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.util.Map;
  */
 @Data
 public class TemplateMessage {
+
     private String touser;
     private String template_id;
     private String url;
@@ -24,12 +26,16 @@ public class TemplateMessage {
             this.value = value;
         }
 
-        public Keyword(String value, String color) {
-            this.value = value;
-            this.color = color;
-        }
-
         private String value;
         private String color = "#04136d";
     }
+
+    public String getContent() {
+        JSONObject dataJson = new JSONObject();
+        for (Map.Entry entry : data.entrySet()) {
+            dataJson.put(entry.getKey().toString(), entry.getValue());
+        }
+        return dataJson.toString();
+    }
+
 }
