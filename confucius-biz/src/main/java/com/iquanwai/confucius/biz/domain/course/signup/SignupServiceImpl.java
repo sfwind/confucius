@@ -267,6 +267,7 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setMemberTypeId(RiseMember.CAMP);
             Date endDate = ConfigUtils.getMonthlyCampCloseDate();
             riseMember.setExpireDate(endDate);
+            riseMember.setExpired(false);
             riseMemberDao.insert(riseMember);
         } else {
             if (existRiseMember.getMemberTypeId() == RiseMember.ANNUAL
@@ -295,6 +296,7 @@ public class SignupServiceImpl implements SignupService {
                 riseMember.setMemberTypeId(RiseMember.CAMP);
                 Date endDate = ConfigUtils.getMonthlyCampCloseDate();
                 riseMember.setExpireDate(endDate);
+                riseMember.setExpired(false);
                 riseMemberDao.insert(riseMember);
             }
         }
@@ -681,7 +683,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee      总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -699,7 +702,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee           总价格
      * @param couponIdGroup 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {
