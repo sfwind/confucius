@@ -178,7 +178,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 //        } else {
 //            return false;
 //        }
-        return coupon != null;
+        return coupon != null &&  coupon > 0;
     }
 
     @Override
