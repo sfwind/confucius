@@ -43,6 +43,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/b")
 public class BackendController {
+
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -154,7 +155,6 @@ public class BackendController {
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
-        Date date = new Date();
         new Thread(() -> {
             try {
                 List<String> openids = noticeMsgDto.getOpenids();
@@ -209,8 +209,8 @@ public class BackendController {
                     if (noticeMsgDto.getUrl() != null) {
                         templateMessage.setUrl(noticeMsgDto.getUrl());
                     }
-                    templateMessageService.sendMessage(templateMessage);
-                    messageService.logCustomerMessage(openid, date, noticeMsgDto.getComment());
+                    templateMessage.setComment(noticeMsgDto.getComment());
+                    templateMessageService.sendMessage(templateMessage, true);
                 });
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
