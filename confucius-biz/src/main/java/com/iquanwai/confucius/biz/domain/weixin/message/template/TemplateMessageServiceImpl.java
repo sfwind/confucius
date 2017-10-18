@@ -127,6 +127,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         CustomerMessageLog customerMessageLog = new CustomerMessageLog();
         customerMessageLog.setOpenId(templateMessage.getTouser());
         customerMessageLog.setPublishTime(DateUtils.parseDateTimeToString(new Date()));
+        customerMessageLog.setComment(templateMessage.getComment());
         customerMessageLog.setContentHash(Integer.toString(templateMessage.getContent().hashCode()));
         customerMessageLog.setForwardlyPush(forwardlyPush ? 1 : 0);
         customerMessageLog.setValidPush(validPush ? 1 : 0);

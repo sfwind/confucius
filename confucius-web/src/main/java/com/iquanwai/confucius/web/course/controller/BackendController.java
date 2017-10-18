@@ -209,6 +209,7 @@ public class BackendController {
                     if (noticeMsgDto.getUrl() != null) {
                         templateMessage.setUrl(noticeMsgDto.getUrl());
                     }
+                    templateMessage.setComment(noticeMsgDto.getComment());
                     templateMessageService.sendMessage(templateMessage, true);
                 });
             } catch (Exception e) {

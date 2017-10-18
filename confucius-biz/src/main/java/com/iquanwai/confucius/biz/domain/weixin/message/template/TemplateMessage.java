@@ -15,13 +15,14 @@ public class TemplateMessage {
     private String touser;
     private String template_id;
     private String url;
+    private String comment;
 
     private Map<String, Keyword> data = Maps.newHashMap();
 
     public static final String BLACK = "#000000";
 
     @Data
-    public static class Keyword{
+    public static class Keyword {
         public Keyword(String value) {
             this.value = value;
         }
