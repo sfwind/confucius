@@ -182,6 +182,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         String openid = XMLHelper.getNode(document, FROM_USER);
         String toUser = XMLHelper.getNode(document, TO_USER);
         String content = XMLHelper.getNode(document, CONTENT);
+        logger.info("openId: {}， toUser: {}， content：{}", openid, toUser, content);
         return messageReply(content, openid, toUser);
     }
 
