@@ -71,11 +71,15 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
-    /** 发送订阅消息 **/
+    /**
+     * 发送订阅消息
+     **/
     private RabbitMQPublisher rabbitMQPublisher;
     /** 发送微信回复消息 **/
 //    private RabbitMQPublisher messageMqPublisher;
-    /** 不同的关键字分发给不同的队列 */
+    /**
+     * 不同的关键字分发给不同的队列
+     */
     private Map<String, RabbitMQPublisher> messageMQGroup = Maps.newHashMap();
 
     //推广活动分隔符,分割活动和用户id
@@ -119,7 +123,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 return;
             }
 
-
             // 判断是否是默认回复
             if (autoReplyMessage.getIsDefault()) {
                 defaultReply = autoReplyMessage;
@@ -135,6 +138,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             } else {
                 autoReplyMessageMap.put(autoReplyMessage.getKeyword(), autoReplyMessage);
             }
+
             //构造图文消息
             if (autoReplyMessage.getType().equals(Constants.WEIXIN_MESSAGE_TYPE.NEWS)) {
                 //message字段存储图文消息的id,多条图文时,用|隔开
@@ -251,13 +255,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             }
         }
 
-
         // 没有匹配到，发送mq
         RabbitMQPublisher messageMqPublisher = messageMQGroup.get(message);
-//        if (StringUtils.isNumeric(message) || "背包".equals(message) || "结束".equals(message) || "00".equals(message)) {
-        if (messageMqPublisher == null && StringUtils.isNumeric(message)) {
-            messageMqPublisher = messageMQGroup.get("数字");
-        }
+
         if (messageMqPublisher != null) {
             WechatMessage wechatMessage = new WechatMessage();
             wechatMessage.setMessage(message);
@@ -272,7 +272,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         }
 
         //没有匹配到任何消息时,回复默认消息
-
         return buildMessage(openid, wxid, defaultReply);
     }
 

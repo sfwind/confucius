@@ -5,7 +5,7 @@ package com.iquanwai.confucius.biz.domain.weixin.message.template;
  */
 public interface TemplateMessageService {
     /**
-     * 发送模板消息
+     * 发送非主动推送模板消息
      * @return 返回发送结果
      * */
     boolean sendMessage(TemplateMessage templateMessage);
