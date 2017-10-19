@@ -373,7 +373,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private void promotionSuccess(String eventKey, String openid) {
         // 插入推广数据
-        if (promotionUserDao.loadPromotion(openid) == null) {
+        if (promotionUserDao.loadPromotion(openid, eventKey) == null) {
             PromotionUser promotionUser = new PromotionUser();
             promotionUser.setSource(eventKey);
             promotionUser.setOpenid(openid);
