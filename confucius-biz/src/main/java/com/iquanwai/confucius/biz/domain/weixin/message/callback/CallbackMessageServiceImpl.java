@@ -48,7 +48,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private static final String CONTENT = "Content";
     private static final String EVENT = "Event";
     private static final String EVENT_KEY = "EventKey";
-    public static final String WECHAT_MESSAGE_TOPIC = "wechat_message_reply";
+    private static final int FRESH = 0;
+    private static final int OLD = 1;
 
     @Autowired
     private AccountService accountService;
@@ -65,8 +66,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
-    private MQService mqService;
-    @Autowired
     private RedisUtil redisUtil;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -75,8 +74,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
      * 发送订阅消息
      **/
     private RabbitMQPublisher rabbitMQPublisher;
-    /** 发送微信回复消息 **/
-//    private RabbitMQPublisher messageMqPublisher;
     /**
      * 不同的关键字分发给不同的队列
      */
@@ -96,8 +93,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
 
     private static final String TYPE_TEXT = "text";
     private static final String TYPE_EVENT = "event";
-    // 模版消息推送回调
-    private static final String TEMPLATE_SEND_JOB_FINISH = "TEMPLATESENDJOBFINISH";
 
     private Map<String, AutoReplyMessage> autoReplyMessageMap = Maps.newHashMap();
     private AutoReplyMessage defaultReply;
@@ -157,7 +152,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         logger.info("load auto reply message complete");
         //初始化mq
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(SUBSCRIBE_TOPIC);
-//        messageMqPublisher = rabbitMQFactory.initFanoutPublisher(WECHAT_MESSAGE_TOPIC);
     }
 
     @Override
@@ -320,7 +314,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     } catch (ConnectException e) {
                         logger.error("rabbit mq init failed");
                     }
-                    promotionSuccess(channel, openid);
+                    promotionSuccess(channel, FRESH, openid);
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
@@ -354,7 +348,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 } catch (ConnectException e) {
                     logger.error("rabbit mq init failed");
                 }
-                promotionSuccess(eventKey, openid);
+                promotionSuccess(eventKey, OLD, openid);
                 List<SubscribeMessage> scanMessages = Lists.newArrayList();
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
@@ -371,13 +365,13 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         return null;
     }
 
-    private void promotionSuccess(String eventKey, String openid) {
+    private void promotionSuccess(String eventKey, Integer action, String openid) {
         // 插入推广数据
         if (promotionUserDao.loadPromotion(openid, eventKey) == null) {
             PromotionUser promotionUser = new PromotionUser();
             promotionUser.setSource(eventKey);
             promotionUser.setOpenid(openid);
-            promotionUser.setAction(0);
+            promotionUser.setAction(action);
             if (eventKey.contains(ACTIVITY_SEPERATE_CHAR)) {
                 String[] splits = StringUtils.split(eventKey, ACTIVITY_SEPERATE_CHAR);
                 if (splits.length > 1) {
