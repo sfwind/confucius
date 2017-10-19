@@ -306,12 +306,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     logger.info("event key is {}", eventKey);
                     // 去掉前缀 qrscene_
                     String channel = eventKey.substring(8);
-                    Profile profile = accountService.getProfile(openid, false);
-                    //从未关注过的全新用户或者未付费的用户
-                    boolean isNew = false;
-                    if (profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE) {
-                        isNew = true;
-                    }
                     //加锁防止微信消息重放
                     if (!redisUtil.tryLock(EVENT_SUBSCRIBE + ":" + openid, 1, 5)) {
                         return null;
@@ -326,9 +320,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                     } catch (ConnectException e) {
                         logger.error("rabbit mq init failed");
                     }
-                    if (isNew) {
-                        promotionSuccess(channel, openid, SubscribeEvent.SUBSCRIBE);
-                    }
+                    promotionSuccess(channel, openid);
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages(channel);
                 } else {
                     subscribeMessages = subscribeMessageDao.loadSubscribeMessages();
@@ -348,12 +340,6 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 break;
             // 扫描事件
             case EVENT_SCAN:
-                Profile profile = accountService.getProfile(openid, false);
-                //从未关注过的全新用户或者未付费的用户
-                boolean isNew = false;
-                if (profile == null || profile.getRiseMember() == Constants.RISE_MEMBER.FREE) {
-                    isNew = true;
-                }
                 //加锁防止微信消息重放
                 if (!redisUtil.tryLock(EVENT_SUBSCRIBE + ":" + openid, 1, 5)) {
                     return null;
@@ -368,9 +354,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
                 } catch (ConnectException e) {
                     logger.error("rabbit mq init failed");
                 }
-                if (isNew) {
-                    promotionSuccess(eventKey, openid, SubscribeEvent.SCAN);
-                }
+                promotionSuccess(eventKey, openid);
                 List<SubscribeMessage> scanMessages = Lists.newArrayList();
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
@@ -387,7 +371,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         return null;
     }
 
-    private void promotionSuccess(String eventKey, String openid, String event) {
+    private void promotionSuccess(String eventKey, String openid) {
         // 插入推广数据
         if (promotionUserDao.loadPromotion(openid) == null) {
             PromotionUser promotionUser = new PromotionUser();
