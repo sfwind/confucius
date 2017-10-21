@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
-import com.iquanwai.confucius.biz.po.Region;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 
 import java.util.List;
@@ -26,6 +25,10 @@ public interface AccountService {
      */
     Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
+    Profile getProfileByRiseId(String riseId);
+
+    List<Profile> getProfiles(List<Integer> profileIds);
+
     /**
      * 收集所有关注用户的信息
      */
@@ -42,26 +45,6 @@ public interface AccountService {
     void collectNext(String openid);
 
     /**
-     * 获取所有的省份信息
-     */
-    List<Region> loadAllProvinces();
-
-    /**
-     * 获取某省份的城市信息
-     */
-    List<Region> loadCities();
-
-    /**
-     * 根据名字获取省
-     */
-    Region loadProvinceByName(String name);
-
-    /**
-     * 根据名字获取城市
-     */
-    Region loadCityByName(String name);
-
-    /**
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);
@@ -72,6 +55,11 @@ public interface AccountService {
     Profile getProfile(Integer profileId);
 
     /**
+     * 根据openid获取用户详情
+     */
+    Profile getProfile(String openid);
+
+    /**
      * 取消关注
      */
     void unfollow(String openid);
@@ -80,4 +68,8 @@ public interface AccountService {
      * 更新riseMember状态
      * */
     void updateRiseMember(String openid, Integer riseMember);
+
+    List<Profile> loadProfilesByNickName(String nickName);
+
+    Boolean hasPrivilegeForBusinessSchool(Integer profileId);
 }

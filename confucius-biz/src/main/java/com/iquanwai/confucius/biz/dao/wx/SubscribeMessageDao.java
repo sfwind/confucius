@@ -51,6 +51,18 @@ public class SubscribeMessageDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<SubscribeMessage> loadSubscribeDefaultTextMessages() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM SubscribeMessage WHERE Event = 1 AND Channel IS NULL AND Type = 1";
+        ResultSetHandler<List<SubscribeMessage>> h = new BeanListHandler<>(SubscribeMessage.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<SubscribeMessage> loadScanMessages() {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<SubscribeMessage>> h = new BeanListHandler<>(SubscribeMessage.class);
@@ -80,4 +92,19 @@ public class SubscribeMessageDao extends DBUtil {
 
         return Lists.newArrayList();
     }
+
+    public int updateSubscribeDefaultTextMessage(SubscribeMessage message) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE SubscribeMessage SET Message = ?, Del = ? " +
+                "WHERE Id = ?";
+        try {
+            return runner.update(sql, message.getMessage(),
+                    message.getDel(),
+                    message.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
 }

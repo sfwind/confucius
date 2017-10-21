@@ -6,7 +6,6 @@ import com.iquanwai.confucius.biz.dao.common.message.NotifyMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
-import com.iquanwai.confucius.biz.po.common.message.CustomerMessageLog;
 import com.iquanwai.confucius.biz.po.common.message.NotifyMessage;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -40,11 +39,11 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void logCustomerMessage(String openId, Date publishTime, String comment) {
-        CustomerMessageLog customerMessageLog = new CustomerMessageLog();
-        customerMessageLog.setOpenid(openId);
-        customerMessageLog.setPublishTime(publishTime);
-        customerMessageLog.setComment(comment);
-        customerMessageLogDao.insert(customerMessageLog);
+        // CustomerMessageLog customerMessageLog = new CustomerMessageLog();
+        // customerMessageLog.setOpenid(openId);
+        // customerMessageLog.setPublishTime(publishTime);
+        // customerMessageLog.setComment(comment);
+        // customerMessageLogDao.insert(customerMessageLog);
     }
 
     @Override

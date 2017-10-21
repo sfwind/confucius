@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.domain.asst;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
@@ -17,7 +16,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +42,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Autowired
     private RiseMemberDao riseMemberDao;
     @Autowired
-    private ProfileDao profileDao;
+    private RiseClassMemberDao riseClassMemberDao;
 
     private static final int SIZE = 50;
 
@@ -197,8 +199,8 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     public List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName) {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
 
-        List<Profile> profiles = profileDao.loadProfilesByNickName(nickName);
-        if(profiles.size() == 0) return Lists.newArrayList();
+        List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
+        if (profiles.size() == 0) return Lists.newArrayList();
 
         List<Integer> profileIds = Lists.newArrayList();
         for (Profile profile : profiles) {
@@ -219,6 +221,31 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             workInfoDtos.add(riseWorkInfoDto);
         }
 
+        return workInfoDtos;
+    }
+
+    @Override
+    public List<RiseWorkInfoDto> getUnderCommentApplicationsByMemberId(Integer problemId, String memberId) {
+        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
+        RiseClassMember riseClassMember = riseClassMemberDao.queryByMemberId(memberId);
+        if (riseClassMember != null && riseClassMember.getProfileId() != null) {
+            Profile profile = accountService.getProfile(riseClassMember.getProfileId());
+            if (profile != null) {
+                List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByProfileId(problemId, profile.getId());
+                submits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
+
+                List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
+                for (ApplicationSubmit submit : submits) {
+                    RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
+                    applicationPractices.stream().forEach(applicationPractice -> {
+                        if (submit.getApplicationId().equals(applicationPractice.getId())) {
+                            riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                        }
+                    });
+                    workInfoDtos.add(riseWorkInfoDto);
+                }
+            }
+        }
         return workInfoDtos;
     }
 

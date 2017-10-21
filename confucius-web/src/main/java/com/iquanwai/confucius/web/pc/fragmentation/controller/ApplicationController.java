@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.fragmentation.controller;
 
-import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
@@ -30,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.xml.ws.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,8 +48,6 @@ public class ApplicationController {
     private PracticeService practiceService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private PictureService pictureService;
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
@@ -230,47 +226,6 @@ public class ApplicationController {
         refreshListDto.setList(normalSubmit);
         refreshListDto.setEnd(page.isLastPage());
         return WebUtils.result(refreshListDto);
-    }
-
-
-    /**
-     * 提交应用任务
-     *
-     * @param loginUser          登陆人
-     * @param challengeSubmitDto 任务内容
-     */
-    @RequestMapping(value = "/submit/{planId}/{applicationId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> submit(PCLoginUser loginUser,
-                                                      @PathVariable("planId") Integer planId,
-                                                      @PathVariable("applicationId") Integer applicationId,
-                                                      @RequestBody ChallengeSubmitDto challengeSubmitDto) {
-        Assert.notNull(loginUser, "用户不能为空");
-        // 获取应用练习，没有则创建
-        ApplicationSubmit submit  = applicationService.loadMineApplicationPractice(planId, applicationId,
-                loginUser.getProfileId(), loginUser.getOpenId(), true);
-        // 根据应用练习id获取提交记录
-        // 继续之前的逻辑
-        Integer submitId = submit.getId();
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("训练")
-                .function("应用练习")
-                .action("PC提交应用练习答案")
-                .memo(submitId.toString());
-        operationLogService.log(operationLog);
-        Boolean result = applicationService.submit(submitId, challengeSubmitDto.getAnswer());
-        if(result) {
-            // 提升提交数
-            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SUBMIT);
-            if(submit.getPointStatus() == null || submit.getPointStatus() == 0) {
-                ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(applicationId);
-                return WebUtils.result(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
-            } else {
-                return WebUtils.success();
-            }
-
-        } else {
-            return WebUtils.error("提交失败");
-        }
     }
 
     /**

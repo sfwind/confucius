@@ -1,28 +1,22 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.systematism.ClassMember;
-import com.iquanwai.confucius.biz.po.systematism.CourseOrder;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.course.dto.backend.ErrorLogDto;
-import com.iquanwai.confucius.web.course.dto.backend.MarkDto;
-import com.iquanwai.confucius.web.course.dto.backend.NoticeMsgDto;
-import com.iquanwai.confucius.web.course.dto.backend.RefreshLoginUserDto;
-import com.iquanwai.confucius.web.course.dto.backend.SignupClassDto;
-import com.iquanwai.confucius.web.course.dto.backend.SystemMsgDto;
+import com.iquanwai.confucius.web.course.dto.backend.*;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
@@ -32,12 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -54,10 +43,11 @@ import java.util.Set;
 @RestController
 @RequestMapping("/b")
 public class BackendController {
+
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private SignupService signupService;
+    private CustomerMessageService customerMessageService;
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
@@ -71,39 +61,24 @@ public class BackendController {
     @Autowired
     private MessageService messageService;
     @Autowired
+    private MonthlyCampService monthlyCampService;
+    @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
     private RabbitMQPublisher rabbitMQPublisher;
 
 
     @PostConstruct
-    public void init(){
+    public void init() {
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
     }
 
-    @RequestMapping("/entry/{orderId}")
-    public ResponseEntity<Map<String, Object>> entry(@PathVariable("orderId") String orderId){
-        String result;
-        CourseOrder courseOrder = signupService.getOrder(orderId);
-        if(courseOrder !=null){
-            if(courseOrder.getEntry()){
-                String memberId = signupService.entry(orderId);
-                result = "报名成功, 学号是"+memberId;
-            }else{
-                result = "尚未付款";
-            }
-        }else{
-            result = "订单不存在";
-        }
-
-        return WebUtils.result(result);
-    }
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> log(HttpServletRequest request,LoginUser loginUser,@RequestBody ErrorLogDto errorLogDto){
+    public ResponseEntity<Map<String, Object>> log(HttpServletRequest request, LoginUser loginUser, @RequestBody ErrorLogDto errorLogDto) {
         String data = errorLogDto.getResult();
         StringBuilder sb = new StringBuilder();
-        if(data.length()>700){
+        if (data.length() > 700) {
             data = data.substring(0, 700);
         }
         sb.append("url:");
@@ -134,10 +109,10 @@ public class BackendController {
     }
 
     @RequestMapping("/t")
-    public ResponseEntity<Map<String, Object>> test(HttpServletRequest request){
+    public ResponseEntity<Map<String, Object>> test(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         StringBuilder sb = new StringBuilder();
-        for(Cookie cookie:cookies){
+        for (Cookie cookie : cookies) {
             sb.append(cookie.getName())
                     .append("=")
                     .append(cookie.getValue())
@@ -154,24 +129,24 @@ public class BackendController {
     }
 
     @RequestMapping("/graduate/{classId}")
-    public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId){
+    public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId) {
         LOGGER.info("classId {} graduate start", classId);
         new Thread(() -> {
             try {
                 courseProgressService.graduate(classId);
-            }catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.error("触发毕业失败", e);
             }
         }).start();
         return WebUtils.result("正在运行中");
     }
 
-    private static String getAccessTokenFromCookie(String cookieStr){
+    private static String getAccessTokenFromCookie(String cookieStr) {
         String[] cookies = cookieStr.split(";");
-        String accessToken ="";
-        for(String cookie:cookies){
-            if(cookie.startsWith(OAuthService.ACCESS_TOKEN_COOKIE_NAME+"=")){
-                accessToken = cookie.substring(OAuthService.ACCESS_TOKEN_COOKIE_NAME.length()+1);
+        String accessToken = "";
+        for (String cookie : cookies) {
+            if (cookie.startsWith(OAuthService.ACCESS_TOKEN_COOKIE_NAME + "=")) {
+                accessToken = cookie.substring(OAuthService.ACCESS_TOKEN_COOKIE_NAME.length() + 1);
                 break;
             }
         }
@@ -179,8 +154,7 @@ public class BackendController {
     }
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto){
-        Date date = new Date();
+    public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
         new Thread(() -> {
             try {
                 List<String> openids = noticeMsgDto.getOpenids();
@@ -190,55 +164,55 @@ public class BackendController {
                     templateMessage.setTemplate_id(noticeMsgDto.getMessageId());
                     Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
                     templateMessage.setData(data);
-                    if(noticeMsgDto.getFirst()!=null) {
+                    if (noticeMsgDto.getFirst() != null) {
                         String first = noticeMsgDto.getFirst();
-                        if(first.contains("{username}")){
+                        if (first.contains("{username}")) {
                             first = replaceNickname(openid, first);
                         }
                         data.put("first", new TemplateMessage.Keyword(first));
                     }
-                    if(noticeMsgDto.getKeyword1()!=null){
+                    if (noticeMsgDto.getKeyword1() != null) {
                         String keyword1 = noticeMsgDto.getKeyword1();
-                        if(keyword1.contains("{username}")){
+                        if (keyword1.contains("{username}")) {
                             keyword1 = replaceNickname(openid, keyword1);
                         }
                         data.put("keyword1", new TemplateMessage.Keyword(keyword1));
                     }
-                    if(noticeMsgDto.getKeyword2()!=null) {
+                    if (noticeMsgDto.getKeyword2() != null) {
                         String keyword2 = noticeMsgDto.getKeyword2();
-                        if(keyword2.contains("{username}")) {
+                        if (keyword2.contains("{username}")) {
                             keyword2 = replaceNickname(openid, keyword2);
                         }
                         data.put("keyword2", new TemplateMessage.Keyword(keyword2));
                     }
-                    if(noticeMsgDto.getKeyword3()!=null) {
+                    if (noticeMsgDto.getKeyword3() != null) {
                         String keyword3 = noticeMsgDto.getKeyword3();
-                        if(keyword3.contains("{username}")) {
+                        if (keyword3.contains("{username}")) {
                             keyword3 = replaceNickname(openid, keyword3);
                         }
                         data.put("keyword3", new TemplateMessage.Keyword(keyword3));
                     }
-                    if(noticeMsgDto.getKeyword4()!=null) {
+                    if (noticeMsgDto.getKeyword4() != null) {
                         String keyword4 = noticeMsgDto.getKeyword4();
-                        if(keyword4.contains("{username}")) {
+                        if (keyword4.contains("{username}")) {
                             keyword4 = replaceNickname(openid, keyword4);
                         }
                         data.put("keyword4", new TemplateMessage.Keyword(keyword4));
                     }
-                    if(noticeMsgDto.getRemark()!=null) {
+                    if (noticeMsgDto.getRemark() != null) {
                         String remark = noticeMsgDto.getRemark();
-                        if(remark.contains("{username}")){
+                        if (remark.contains("{username}")) {
                             remark = replaceNickname(openid, remark);
                         }
                         data.put("remark", new TemplateMessage.Keyword(remark));
                     }
-                    if(noticeMsgDto.getUrl()!=null){
+                    if (noticeMsgDto.getUrl() != null) {
                         templateMessage.setUrl(noticeMsgDto.getUrl());
                     }
-                    templateMessageService.sendMessage(templateMessage);
-                    messageService.logCustomerMessage(openid, date, noticeMsgDto.getComment());
+                    templateMessage.setComment(noticeMsgDto.getComment());
+                    templateMessageService.sendMessage(templateMessage, true);
                 });
-            }catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
         }).start();
@@ -246,17 +220,34 @@ public class BackendController {
     }
 
     @RequestMapping(value = "/system/msg", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> systemMsg(@RequestBody SystemMsgDto systemMsgDto){
+    public ResponseEntity<Map<String, Object>> systemMsg(@RequestBody SystemMsgDto systemMsgDto) {
         Assert.notNull(systemMsgDto.getMessage(), "消息不能为空");
         new Thread(() -> {
             try {
                 List<Integer> profileIds = systemMsgDto.getProfileIds();
-                profileIds.forEach(profileId -> {
-                    messageService.sendMessage(systemMsgDto.getMessage(), profileId.toString(),
-                            MessageService.SYSTEM_MESSAGE, systemMsgDto.getUrl());
+                profileIds.forEach(profileId -> messageService.sendMessage(systemMsgDto.getMessage(),
+                        profileId.toString(), MessageService.SYSTEM_MESSAGE, systemMsgDto.getUrl()));
+            } catch (Exception e) {
+                LOGGER.error("发送通知失败", e);
+            }
+        }).start();
+        return WebUtils.result("正在运行中");
+    }
+
+    @RequestMapping(value = "/customer/msg", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> customerMsg(@RequestBody CustomerMsgDto customerMsgDto) {
+        Assert.notNull(customerMsgDto.getMessage(), "消息不能为空");
+        new Thread(() -> {
+            try {
+                List<String> openIds = customerMsgDto.getOpenids();
+                String message = customerMsgDto.getMessage();
+                openIds.forEach(openid -> {
+                    String realMessage = replaceNickname(openid, message);
+                    customerMessageService.sendCustomerMessage(openid, realMessage,
+                            Constants.WEIXIN_MESSAGE_TYPE.TEXT);
 
                 });
-            }catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
         }).start();
@@ -265,33 +256,13 @@ public class BackendController {
 
     private String replaceNickname(String openid, String message) {
         Profile profile = accountService.getProfile(openid, false);
-        String name = profile!=null?profile.getNickname():"";
+        String name = profile != null ? profile.getNickname() : "";
         return message.replace("{username}", name);
     }
 
-    @RequestMapping(value = "/info/signup", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> getSignUpInfo(){
-        Map<Integer, Integer> remindingCount = signupService.getRemindingCount();
-        // 查询各班已报名人数
-        List<SignupClassDto> list = Lists.newArrayList();
-        remindingCount.keySet().forEach(item->{
-            List<ClassMember> members = courseProgressService.loadClassMembers(item);
-            SignupClassDto dto = new SignupClassDto();
-            dto.setId(item);
-            dto.setRemainingCount(remindingCount.get(item));
-            dto.setEntryCount(members.size());
-            list.add(dto);
-        });
-        return WebUtils.result(list);
-    }
-
-    @RequestMapping(value = "/info/signup",method=RequestMethod.GET,params = "rise")
-    public ResponseEntity<Map<String,Object>> getRiseInfo(){
-        return WebUtils.result(signupService.getRiseRemindingCount());
-    }
 
     @RequestMapping(value = "/mark", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> mark(LoginUser loginUser,@RequestBody MarkDto markDto) {
+    public ResponseEntity<Map<String, Object>> mark(LoginUser loginUser, @RequestBody MarkDto markDto) {
         OperationLog operationLog = OperationLog.create().openid(loginUser == null ? null : loginUser.getOpenId())
                 .module(markDto.getModule())
                 .function(markDto.getFunction())
@@ -305,7 +276,7 @@ public class BackendController {
     public ResponseEntity<Map<String, Object>> loginUsersList(@RequestParam(value = "qt") String qt) {
         LOGGER.info("qt:{},users:{}", qt, LoginUserService.pcLoginUserMap);
         Set<String> keys = LoginUserService.pcLoginUserMap.keySet();
-        if(keys.contains(qt)){
+        if (keys.contains(qt)) {
             SoftReference<PCLoginUser> pcLoginUserSoftReference = LoginUserService.pcLoginUserMap.get(qt);
             if (pcLoginUserSoftReference != null) {
                 return WebUtils.result(pcLoginUserSoftReference.get());
@@ -316,7 +287,6 @@ public class BackendController {
             return WebUtils.error("没有这个cookie");
         }
     }
-
 
     @RequestMapping(value = "/refresh/users", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> loginUsersList(@RequestBody RefreshLoginUserDto refreshLoginUserDto) {
@@ -332,10 +302,35 @@ public class BackendController {
                         LOGGER.error(e.getLocalizedMessage(), e);
                     }
                 });
-            }catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
         }).start();
         return WebUtils.result("正在运行中");
     }
+
+    @RequestMapping(value = "/batch/open/camp")
+    public ResponseEntity<Map<String, Object>> batchForceOpenMonthlyCamp(@RequestBody BatchOpenCourseDto batchOpenCourseDto) {
+        OperationLog operationLog = OperationLog.create().module("后台功能").function("批量开始课程")
+                .memo("月份:" + batchOpenCourseDto.getMonth()
+                        + ", 小课Id:" + batchOpenCourseDto.getProblemId()
+                        + ", 小课关闭日期:" + batchOpenCourseDto.getCloseDate());
+        operationLogService.log(operationLog);
+
+        Integer month = batchOpenCourseDto.getMonth();
+        Integer problemId = batchOpenCourseDto.getProblemId();
+        Date startDate = batchOpenCourseDto.getStartDate();
+        Date closeDate = batchOpenCourseDto.getCloseDate();
+
+        boolean validation = monthlyCampService.validForceOpenCourse(month, problemId);
+        if (validation) {
+            Thread thread = new Thread(() -> monthlyCampService.batchForceOpenCourse(problemId, startDate, closeDate));
+            thread.start();
+            return WebUtils.result("开课进行中");
+        } else {
+            return WebUtils.error("开课校验失败");
+        }
+    }
+
 }
+

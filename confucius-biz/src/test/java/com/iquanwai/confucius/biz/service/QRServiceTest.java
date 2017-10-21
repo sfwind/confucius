@@ -23,11 +23,11 @@ public class QRServiceTest extends TestBase {
      */
     @Test
     public void generateCode(){
-        qrCodeService.generatePermanentQRCode("yeji_live");
-//        qrCodeService.generateTemporaryQRCode("freeLimit_RISE_9", 2592000);
+//        qrCodeService.generatePermanentQRCode("camp_month_10");
+        QRResponse caitonglive_rise = qrCodeService.generateTemporaryQRCode("futt_live", 2592000);
 //        qrCodeService.generateTemporaryQRCode("freeLimit8", 2592000);
 //        QRResponse courseReduction_zlj = qrCodeService.generateTemporaryQRCode("courseReduction-zlj_2", 2592000);
-//        System.out.println(JSON.toJSONString(courseReduction_zlj));
+//        System.out.println(JSON.toJSONString(caitonglive_rise));
     }
     @Test
     public void sendTest(){

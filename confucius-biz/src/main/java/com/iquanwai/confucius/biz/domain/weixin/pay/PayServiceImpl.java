@@ -6,17 +6,11 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.message.MQService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
-import com.iquanwai.confucius.biz.util.XMLHelper;
+import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.slf4j.Logger;
@@ -49,8 +43,6 @@ public class PayServiceImpl implements PayService {
     @Autowired
     private MessageService messageService;
     @Autowired
-    private MQService mqService;
-    @Autowired
     private AccountService accountService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -61,9 +53,6 @@ public class PayServiceImpl implements PayService {
 
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
-
-    private static final String CLOSE_ORDER_QUEUE = "close_order_queue";
-    private static final String TOPIC = "close_quanwai_order";
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
@@ -166,23 +155,6 @@ public class PayServiceImpl implements PayService {
         quanwaiOrderDao.paySuccess(paidTime, null, orderId);
     }
 
-    @Override
-    public void paySuccess(String orderId) {
-        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-        if (quanwaiOrder == null) {
-            logger.error("订单 {} 不存在", orderId);
-            return;
-        }
-        if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.SYSTEMATISM)) {
-            signupService.entry(quanwaiOrder.getOrderId());
-        }
-
-        //使用优惠券
-        if (quanwaiOrder.getDiscount() != 0.0) {
-            logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
-            costRepo.updateCoupon(Coupon.USED, orderId);
-        }
-    }
 
     @Override
     public void risePaySuccess(String orderId) {
@@ -192,11 +164,6 @@ public class PayServiceImpl implements PayService {
         if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
             signupService.riseMemberEntry(quanwaiOrder.getOrderId());
-            accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
-        } else if (QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType())) {
-            // 单独购买小课
-            signupService.riseCourseEntry(quanwaiOrder.getOrderId());
-            accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             // 购买小课训练营
             signupService.payMonthlyCampSuccess(orderId);
@@ -212,21 +179,9 @@ public class PayServiceImpl implements PayService {
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
         signupService.riseMemberEntry(quanwaiOrder.getOrderId());
-        accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.MEMBERSHIP);
         refreshStatus(quanwaiOrder, orderId);
     }
 
-    // 购买小课
-    @Override
-    public void payFragmentSuccess(String orderId) {
-        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-        Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
-        Assert.isTrue(QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType()));
-        // 商品是rise会员
-        signupService.riseCourseEntry(quanwaiOrder.getOrderId());
-        accountService.updateRiseMember(quanwaiOrder.getOpenid(), Constants.RISE_MEMBER.COURSE_USER);
-        refreshStatus(quanwaiOrder, orderId);
-    }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
         // 刷新会员状态
@@ -251,66 +206,6 @@ public class PayServiceImpl implements PayService {
         }
     }
 
-    public void closeOrder() {
-        //点开付费的保留5分钟
-        Date date = DateUtils.afterMinutes(new Date(), 0 - ConfigUtils.getBillOpenMinute());
-        //临时的只保留3分钟
-        Date date2 = DateUtils.afterMinutes(new Date(), -3);
-        List<QuanwaiOrder> underCloseOrders = quanwaiOrderDao.queryUnderCloseOrders(date);
-        List<QuanwaiOrder> underCloseOrdersRecent = quanwaiOrderDao.queryUnderCloseOrders(date2);
-        //点报名未扫描二维码的直接close
-
-        for (QuanwaiOrder courseOrder : underCloseOrdersRecent) {
-            if (courseOrder.getPrepayId() == null) {
-                underCloseOrders.add(courseOrder);
-            }
-        }
-        for (QuanwaiOrder courseOrder : underCloseOrders) {
-            String orderId = courseOrder.getOrderId();
-            try {
-                if (courseOrder.getPrepayId() != null) {
-                    PayClose payClose = buildPayClose(orderId);
-                    String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
-                    PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
-                    if (payCloseReply != null) {
-                        if (SUCCESS_CODE.equals(payCloseReply.getReturn_code())) {
-                            if (ERROR_CODE.equals(payCloseReply.getErr_code()) && payCloseReply.getErr_code_des() != null) {
-                                logger.error(payCloseReply.getErr_code_des() + ", orderId=" + orderId);
-                            }
-                            logger.info("orderId: {} closed automatically", orderId);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("orderId: {} close failed", orderId);
-            }
-
-            // 关闭业务订单
-            closeOrder(orderId);
-            //如果有使用优惠券,还原优惠券状态
-            if (courseOrder.getDiscount() != 0.0) {
-                costRepo.updateCoupon(Coupon.UNUSED, orderId);
-            }
-        }
-    }
-
-    @Override
-    public void closeOrder(String orderId) {
-        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-        if (quanwaiOrder == null) {
-            logger.error("订单 {} 不存在", orderId);
-            return;
-        }
-        if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
-            signupService.giveupSignup(orderId);
-        }
-        if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
-            signupService.giveupRiseSignup(orderId);
-        }
-        if (QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType())) {
-            signupService.giveupRiseCourseSignup(orderId);
-        }
-    }
 
     @Override
     public Map<String, String> buildH5PayParam(String orderId, String ip, String openId) {
@@ -360,32 +255,9 @@ public class PayServiceImpl implements PayService {
         return "";
     }
 
-    private PayClose buildPayClose(String orderId) {
-        PayClose payClose = new PayClose();
-        Map<String, String> map = Maps.newHashMap();
-        map.put("out_trade_no", orderId);
-        String appid = ConfigUtils.getAppid();
-        map.put("appid", appid);
-        String mch_id = ConfigUtils.getMch_id();
-        map.put("mch_id", mch_id);
-        String nonce_str = CommonUtils.randomString(16);
-        map.put("nonce_str", nonce_str);
-        String sign = CommonUtils.sign(map);
-
-        payClose.setNonce_str(nonce_str);
-        payClose.setMch_id(mch_id);
-        payClose.setAppid(appid);
-        payClose.setOut_trade_no(orderId);
-        payClose.setSign(sign);
-
-        return payClose;
-    }
 
     /**
      * 根据预先生成的 order 订单数据，生成对微信的请求 url，xml 格式
-     * @param quanwaiOrder
-     * @param ip
-     * @return
      */
     private UnifiedOrder buildJSApiOrder(QuanwaiOrder quanwaiOrder, String ip) {
         UnifiedOrder unifiedOrder = new UnifiedOrder();
@@ -402,12 +274,8 @@ public class PayServiceImpl implements PayService {
         map.put("openid", openid);
 
         String notify_url = null;
-        if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
-            notify_url = ConfigUtils.adapterDomainName() + PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+        if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.FRAG_COURSE.equals(quanwaiOrder.getGoodsType())) {
-            notify_url = ConfigUtils.adapterDomainName() + RISE_COURSE_PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_CAMP_PAY_CALLBACK_PATH;
         }

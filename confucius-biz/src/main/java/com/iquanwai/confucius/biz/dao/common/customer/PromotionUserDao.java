@@ -35,13 +35,13 @@ public class PromotionUserDao extends DBUtil {
         return -1;
     }
 
-    public PromotionUser loadPromotion(String openid){
+    public PromotionUser loadPromotion(String openid, String source){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from PromotionUser where OpenId = ?";
+        String sql = "select * from PromotionUser where OpenId = ? and Source=?";
 
         try{
             ResultSetHandler<PromotionUser> handler = new BeanHandler<>(PromotionUser.class);
-            return runner.query(sql, handler, openid);
+            return runner.query(sql, handler, openid, source);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

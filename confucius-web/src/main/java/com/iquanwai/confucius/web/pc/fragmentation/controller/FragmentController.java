@@ -3,16 +3,15 @@ package com.iquanwai.confucius.web.pc.fragmentation.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
-import com.iquanwai.confucius.biz.domain.fragmentation.practice.ChallengeService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Response;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +50,7 @@ public class FragmentController {
     @Autowired
     private PracticeService practiceService;
     @Autowired
-    private ChallengeService challengeService;
-    @Autowired
     private ApplicationService applicationService;
-    @Autowired
-    private PointRepo pointRepo;
     @Autowired
     private AccountService accountService;
     @Autowired
@@ -85,8 +79,7 @@ public class FragmentController {
 
     /**
      * 碎片化总任务列表加载
-     *
-     * @param problemId   问题id
+     * @param problemId 问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/pc/fragment/homework/{problemId}")
@@ -113,7 +106,6 @@ public class FragmentController {
 
     /**
      * 点赞或者取消点赞
-     *
      * @param vote 1：点赞，2：取消点赞
      */
     @RequestMapping(value = "/pc/fragment/vote", method = RequestMethod.POST)
@@ -180,7 +172,6 @@ public class FragmentController {
                 return null;
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        ;
         Integer count = practiceService.commentCount(type, submitId);
         RiseWorkCommentListDto listDto = new RiseWorkCommentListDto();
         listDto.setCount(count);
@@ -192,11 +183,10 @@ public class FragmentController {
     /**
      * 评论
      * TODO 根据角色设置评论类型
-     *
      * @param loginUser 登陆人
-     * @param moduleId  评论模块
-     * @param submitId  文章id
-     * @param dto       评论内容
+     * @param moduleId 评论模块
+     * @param submitId 文章id
+     * @param dto 评论内容
      */
     @RequestMapping(value = "/pc/fragment/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> comment(PCLoginUser loginUser,
@@ -224,6 +214,14 @@ public class FragmentController {
             resultDto.setRole(loginUser.getRole());
             // resultDto.setSignature(loginUser.getSignature());
             resultDto.setIsMine(true);
+
+            ApplicationSubmit applicationSubmit = practiceService.loadApplicationSubmitById(submitId);
+
+            // 初始化教练回复的评论反馈评价
+            if (Role.isAsst(loginUser.getRole()) && !applicationSubmit.getProfileId().equals(loginUser.getProfileId())) {
+                practiceService.initCommentEvaluation(submitId, resultDto.getId());
+            }
+
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");
@@ -233,12 +231,10 @@ public class FragmentController {
 
     /**
      * 评论回复
-     *
      * @param loginUser 登录人
-     * @param moduleId  评论模块
-     * @param submitId  文章id
-     * @param dto       评论内容，回复评论id
-     * @return
+     * @param moduleId 评论模块
+     * @param submitId 文章id
+     * @param dto 评论内容，回复评论id
      */
     @RequestMapping(value = "/pc/fragment/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
@@ -275,6 +271,14 @@ public class FragmentController {
                 }
                 resultDto.setReplyContent(replyComment.getContent());
             }
+
+            ApplicationSubmit applicationSubmit = practiceService.loadApplicationSubmitById(submitId);
+
+            // 初始化教练回复的评论反馈评价
+            if (Role.isAsst(loginUser.getRole()) && !applicationSubmit.getProfileId().equals(loginUser.getProfileId())) {
+                practiceService.initCommentEvaluation(submitId, resultDto.getId());
+            }
+
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");
@@ -314,7 +318,6 @@ public class FragmentController {
                     riseWorkListDto.getChallengeWorkList().add(dto);
                 }
             }
-            ;
         }
         return riseWorkListDto;
     }
