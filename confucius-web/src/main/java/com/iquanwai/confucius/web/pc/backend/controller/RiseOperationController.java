@@ -446,7 +446,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/survey/config", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> updateSurveyConfig(PCLoginUser loginUser,
-                                                                  SurveyHref surveyHref) {
+                                                                  @RequestBody SurveyHref surveyHref) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(surveyHref, "问卷不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
