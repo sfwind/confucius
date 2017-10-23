@@ -393,7 +393,6 @@ public class SignupServiceImpl implements SignupService {
             // RiseClassMember 新增会员记录
             String memberId = generateMemberId();
             RiseClassMember classMember = new RiseClassMember();
-            classMember.setClassId(cacheService.loadMonthlyCampConfig().getRiseClassPrefix());
             classMember.setClassName(cacheService.loadMonthlyCampConfig().getRiseClassPrefix());
             classMember.setMemberId(memberId);
             classMember.setProfileId(riseOrder.getProfileId());
@@ -459,6 +458,7 @@ public class SignupServiceImpl implements SignupService {
             case RiseMember.ELITE: {
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), cacheService.loadMonthlyCampConfig().getRiseEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 if (sendUrl != null) {
                     messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
                 }
@@ -467,6 +467,7 @@ public class SignupServiceImpl implements SignupService {
             case RiseMember.CAMP: {
                 // 发送消息给小课训练营购买用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), cacheService.loadMonthlyCampConfig().getCampEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 if (sendUrl != null) {
                     messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
                 }
