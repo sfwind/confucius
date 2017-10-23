@@ -456,6 +456,7 @@ public class SignupServiceImpl implements SignupService {
 
         switch (memberTypeId) {
             case RiseMember.ELITE: {
+                logger.info("发送会员数据");
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.elite.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), cacheService.loadMonthlyCampConfig().getRiseEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
@@ -465,6 +466,7 @@ public class SignupServiceImpl implements SignupService {
                 break;
             }
             case RiseMember.CAMP: {
+                logger.info("发送小课训练营数据");
                 // 发送消息给小课训练营购买用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("risemember.monthly.camp.pay.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), cacheService.loadMonthlyCampConfig().getCampEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
