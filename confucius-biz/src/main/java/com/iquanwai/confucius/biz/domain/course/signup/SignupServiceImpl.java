@@ -256,6 +256,7 @@ public class SignupServiceImpl implements SignupService {
         classMember.setClassName(cacheService.loadMonthlyCampConfig().getCampClassPrefix());
         classMember.setMemberId(memberId);
         classMember.setProfileId(profileId);
+        classMember.setYear(cacheService.loadMonthlyCampConfig().getSellingYear());
         classMember.setMonth(cacheService.loadMonthlyCampConfig().getSellingMonth());
         classMember.setActive(0);
         riseClassMemberDao.insert(classMember);
@@ -396,6 +397,7 @@ public class SignupServiceImpl implements SignupService {
             classMember.setClassName(cacheService.loadMonthlyCampConfig().getRiseClassPrefix());
             classMember.setMemberId(memberId);
             classMember.setProfileId(riseOrder.getProfileId());
+            classMember.setYear(cacheService.loadMonthlyCampConfig().getSellingYear());
             classMember.setMonth(cacheService.loadMonthlyCampConfig().getSellingMonth());
             classMember.setActive(0);
             riseClassMemberDao.insert(classMember);

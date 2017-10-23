@@ -201,6 +201,7 @@ public class MonthlyCampController {
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
+            riseClassMember.setYear(cacheService.loadMonthlyCampConfig().getSellingYear());
             riseClassMember.setMonth(cacheService.loadMonthlyCampConfig().getSellingMonth());
 
             riseClassMember.setActive(monthlyCampDto.getActive());
