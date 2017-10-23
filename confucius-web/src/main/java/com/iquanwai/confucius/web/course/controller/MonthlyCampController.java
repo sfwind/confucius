@@ -3,12 +3,12 @@ package com.iquanwai.confucius.web.course.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -39,6 +39,8 @@ public class MonthlyCampController {
     private SignupService signupService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private CacheService cacheService;
     @Autowired
     private OperationLogService operationLogService;
 
@@ -199,7 +201,7 @@ public class MonthlyCampController {
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
-            riseClassMember.setMonth(ConfigUtils.getMonthlyCampMonth());
+            riseClassMember.setMonth(cacheService.loadMonthlyCampConfig().getSellingMonth());
 
             riseClassMember.setActive(monthlyCampDto.getActive());
             int result = monthlyCampService.initRiseClassMember(riseClassMember);
