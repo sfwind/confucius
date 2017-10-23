@@ -22,14 +22,15 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public int insert(RiseClassMember riseClassMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO RiseClassMember (ClassName, GroupId, MemberId, ProfileId, Month, Active) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO RiseClassMember (ClassName, GroupId, MemberId, ProfileId, Year, Month, Active) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     riseClassMember.getClassName(),
                     riseClassMember.getGroupId(),
                     riseClassMember.getMemberId(),
                     riseClassMember.getProfileId(),
+                    riseClassMember.getYear(),
                     riseClassMember.getMonth(),
                     riseClassMember.getActive());
             return result.intValue();
