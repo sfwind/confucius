@@ -653,7 +653,7 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         }
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
-
+        riseMember.setEntryCode(cacheService.loadMonthlyCampConfig().getRiseEntryKey());
         return riseMember;
     }
 
@@ -662,6 +662,7 @@ public class SignupServiceImpl implements SignupService {
         RiseMember riseMember = new RiseMember();
         riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(cacheService.loadMonthlyCampConfig().getCloseDate()));
+        riseMember.setEntryCode(cacheService.loadMonthlyCampConfig().getCampEntryKey());
         return riseMember;
     }
 
