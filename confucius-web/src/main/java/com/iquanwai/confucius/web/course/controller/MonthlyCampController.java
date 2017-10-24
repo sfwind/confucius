@@ -139,6 +139,14 @@ public class MonthlyCampController {
             return dto;
         }).collect(Collectors.toList());
 
+        monthlyCampDtos.addAll(profiles.stream().map(profile -> {
+            MonthlyCampDto dto = new MonthlyCampDto();
+            dto.setNickName(profile.getNickname());
+            dto.setRiseId(profile.getRiseId());
+            dto.setHeadImgUrl(profile.getHeadimgurl());
+            return dto;
+        }).collect(Collectors.toList()));
+
         return WebUtils.result(monthlyCampDtos);
     }
 
