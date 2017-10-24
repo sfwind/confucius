@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -447,6 +448,11 @@ public class SignupServiceImpl implements SignupService {
                 logger.info("发送会员数据");
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampConfig.getRiseEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 if (sendUrl != null) {
                     messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
@@ -457,6 +463,11 @@ public class SignupServiceImpl implements SignupService {
                 logger.info("发送小课训练营数据");
                 // 发送消息给小课训练营购买用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampConfig.getCampEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 if (sendUrl != null) {
                     messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
