@@ -23,6 +23,7 @@ public class RiseMember {
     private String startTime; // 非DB字段，addTime
     private String endTime; // 非DB字段，expireDate
     private String name; //非DB字段
+    private String entryCode; //入群密令
 
     public RiseMember simple() {
         RiseMember riseMember = new RiseMember();
@@ -33,6 +34,7 @@ public class RiseMember {
         riseMember.setStartTime(startTime);
         riseMember.setEndTime(endTime);
         riseMember.setName(name);
+        riseMember.setEntryCode(entryCode);
         return riseMember;
     }
 

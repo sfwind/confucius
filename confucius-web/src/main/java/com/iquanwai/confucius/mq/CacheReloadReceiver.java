@@ -1,8 +1,6 @@
 package com.iquanwai.confucius.mq;
 
 import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
-import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberCountRepo;
-import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
@@ -35,12 +33,10 @@ public class CacheReloadReceiver {
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
-
     @PostConstruct
     public void init(){
         rabbitMQFactory.initReceiver(null, TOPIC, getConsumer());
     }
-
 
     private Consumer<RabbitMQDto> getConsumer(){
         return queueMessage -> {

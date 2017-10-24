@@ -1,10 +1,12 @@
 package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,8 @@ public class PayController {
     private PayService payService;
     @Autowired
     private SignupService signupService;
+    @Autowired
+    private CacheService cacheService;
 
     private ExecutorService executorService;
 
@@ -77,10 +81,12 @@ public class PayController {
     @RequestMapping(value = "/result/risemember/callback")
     public void riseMemberPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
         LOGGER.info("rise会员微信支付回调:{}", payCallback.toString());
+        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+
         try {
             payService.handlePayResult(payCallback);
             if (payCallback.getResult_code().equals("SUCCESS")) {
-                payService.payMemberSuccess(payCallback.getOut_trade_no());
+                payService.payMemberSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
             } else {
                 LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
             }
@@ -95,11 +101,13 @@ public class PayController {
     @RequestMapping(value = "/result/risecamp/callback")
     public void riseTrainPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
         LOGGER.info("训练营小课单卖微信支付回调：{}", payCallback.toString());
+        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+
         executorService.execute(() -> {
             try {
                 payService.handlePayResult(payCallback);
                 if (payCallback.getResult_code().equals("SUCCESS")) {
-                    signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
+                    signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
                 } else {
                     LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
                 }

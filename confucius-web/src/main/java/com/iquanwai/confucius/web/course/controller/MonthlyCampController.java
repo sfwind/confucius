@@ -3,23 +3,24 @@ package com.iquanwai.confucius.web.course.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
+import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampPageDto;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
 import java.util.List;
@@ -40,7 +41,11 @@ public class MonthlyCampController {
     @Autowired
     private AccountService accountService;
     @Autowired
+    private CacheService cacheService;
+    @Autowired
     private OperationLogService operationLogService;
+
+    private static final int PAGE_SIZE = 20;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -70,13 +75,39 @@ public class MonthlyCampController {
         return WebUtils.result(monthlyCampDtoGroups);
     }
 
-    @RequestMapping(value = "/load/profile", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadProfile(@PathParam("nickName") String nickName, @PathParam("riseId") String riseId) {
+    @RequestMapping(value = "/load/profile/{type}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadProfile(@PathVariable("type") String type,
+                                                           @PathParam("nickName") String nickName,
+                                                           @PathParam("riseId") String riseId,
+                                                           @PathParam("memberId") String memberId) {
         List<Profile> profiles = Lists.newArrayList();
-        if (nickName != null && !nickName.equals("")) {
-            profiles.addAll(accountService.loadProfilesByNickName(nickName));
-        } else if (riseId != null && !riseId.equals("")) {
-            profiles.add(accountService.getProfileByRiseId(riseId));
+        switch (type) {
+            case "nickName":
+                if (!StringUtils.isEmpty(nickName)) {
+                    List<Profile> profileList = accountService.loadProfilesByNickName(nickName);
+                    if (profileList.size() > 0) {
+                        profiles.addAll(accountService.loadProfilesByNickName(nickName));
+                    }
+                }
+                break;
+            case "riseId":
+                if (!StringUtils.isEmpty(riseId)) {
+                    Profile profile = accountService.getProfileByRiseId(riseId);
+                    if (profile != null) {
+                        profiles.add(accountService.getProfileByRiseId(riseId));
+                    }
+                }
+                break;
+            case "memberId":
+                if (!StringUtils.isEmpty(memberId)) {
+                    Profile profile = accountService.loadProfileByMemberId(memberId);
+                    if (profile != null) {
+                        profiles.add(accountService.loadProfileByMemberId(memberId));
+                    }
+                }
+                break;
+            default:
+                break;
         }
 
         List<Integer> profileIds = profiles.stream().map(Profile::getId).collect(Collectors.toList());
@@ -111,23 +142,28 @@ public class MonthlyCampController {
     }
 
     @RequestMapping(value = "/load/ungroup", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp() {
-        List<RiseClassMember> riseClassMembers = monthlyCampService.loadUnGroupRiseClassMember();
+    public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp(@ModelAttribute Page page) {
+        page.setPageSize(PAGE_SIZE);
+
+        List<RiseClassMember> riseClassMembers = monthlyCampService.loadUnGroupRiseClassMember(page);
         List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = accountService.getProfiles(profileIds);
 
-        if(riseClassMembers.size() != profiles.size()) {
+        if (riseClassMembers.size() != profiles.size()) {
             return WebUtils.error("人员不匹配");
         }
 
+        MonthlyCampPageDto monthlyCampPageDto = new MonthlyCampPageDto();
         List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
         for (int i = 0; i < riseClassMembers.size(); i++) {
             Integer profileId = riseClassMembers.get(i).getProfileId();
-            Profile profile = profiles.stream().filter(item -> profileId.equals(item.getId())).findFirst().get();
+            Profile profile = profiles.stream().filter(item -> profileId.equals(item.getId())).findFirst().orElse(null);
             MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profile);
             monthlyCampDtos.add(campDto);
         }
-        return WebUtils.result(monthlyCampDtos);
+        monthlyCampPageDto.setMonthlyCampDtoList(monthlyCampDtos);
+        monthlyCampPageDto.setPage(page);
+        return WebUtils.result(monthlyCampPageDto);
     }
 
     @RequestMapping(value = "/modify/update", method = RequestMethod.POST)
@@ -188,6 +224,7 @@ public class MonthlyCampController {
                 .openid(profile.getOpenid()).module("小课训练营")
                 .function("信息新增").action("小课训练营用户新增");
         operationLogService.log(operationLog);
+        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
         Integer riseClassMemberId = monthlyCampDto.getRiseClassMemberId();
         RiseClassMember riseClassMember = monthlyCampService.loadRiseClassMemberById(riseClassMemberId);
@@ -195,11 +232,13 @@ public class MonthlyCampController {
             riseClassMember = new RiseClassMember();
             riseClassMember.setClassId(monthlyCampDto.getClassName());
             riseClassMember.setClassName(monthlyCampDto.getClassName());
-            String memberId = signupService.generateMemberId();
+            String memberId = signupService.generateMemberId(monthlyCampConfig);
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
-            riseClassMember.setMonth(ConfigUtils.getMonthlyCampMonth());
+
+            riseClassMember.setYear(monthlyCampConfig.getSellingYear());
+            riseClassMember.setMonth(monthlyCampConfig.getSellingMonth());
 
             riseClassMember.setActive(monthlyCampDto.getActive());
             int result = monthlyCampService.initRiseClassMember(riseClassMember);
