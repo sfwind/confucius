@@ -6,9 +6,7 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
-import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
@@ -44,10 +42,6 @@ public class PayServiceImpl implements PayService {
     private RestfulHelper restfulHelper;
     @Autowired
     private MessageService messageService;
-    @Autowired
-    private AccountService accountService;
-    @Autowired
-    private CacheService cacheService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
@@ -159,13 +153,11 @@ public class PayServiceImpl implements PayService {
         quanwaiOrderDao.paySuccess(paidTime, null, orderId);
     }
 
-
     @Override
-    public void risePaySuccess(String orderId) {
+    public void risePaySuccess(String orderId, MonthlyCampConfig monthlyCampConfig) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId：" + orderId);
 
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
             signupService.riseMemberEntry(quanwaiOrder.getOrderId(), monthlyCampConfig);
@@ -178,12 +170,11 @@ public class PayServiceImpl implements PayService {
 
     // 购买会员
     @Override
-    public void payMemberSuccess(String orderId) {
+    public void payMemberSuccess(String orderId, MonthlyCampConfig monthlyCampConfig) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         signupService.riseMemberEntry(quanwaiOrder.getOrderId(), monthlyCampConfig);
         refreshStatus(quanwaiOrder, orderId);
     }

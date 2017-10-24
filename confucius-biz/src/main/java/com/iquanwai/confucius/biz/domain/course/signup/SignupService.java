@@ -16,7 +16,7 @@ public interface SignupService {
     /**
      * 商品支付资格校验
      */
-    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
+    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 报名商学院, 不生成预付订单
@@ -26,7 +26,7 @@ public interface SignupService {
     /**
      * 报名训练营, 不生成预付订单
      */
-    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
+    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 获取学员详情
@@ -43,7 +43,7 @@ public interface SignupService {
      * 5、发送 mq 通知 platon 强制开启小课
      * 6、发送购买成功信息，开课信息（可以合并）
      */
-    void payMonthlyCampSuccess(String orderId);
+    void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
@@ -83,9 +83,9 @@ public interface SignupService {
     /**
      * 查询会员类型的支付信息
      */
-    List<MemberType> getMemberTypesPayInfo();
+    List<MemberType> getMemberTypesPayInfo(MonthlyCampConfig monthlyCampConfig);
 
-    List<MemberType> getMemberTypesPayInfo(Integer profileId);
+    List<MemberType> getMemberTypesPayInfo(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 计算优惠券
@@ -104,7 +104,7 @@ public interface SignupService {
     /**
      * 当月训练营
      */
-    Integer loadCurrentCampMonth();
+    Integer loadCurrentCampMonth(MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 小课售卖页面，跳转小课介绍页面 problemId
@@ -121,10 +121,10 @@ public interface SignupService {
      * 获取用户当前会员信息
      * @param profileId 用户id
      */
-    RiseMember getCurrentRiseMemberStatus(Integer profileId);
+    RiseMember getCurrentRiseMemberStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 获取当前小课训练营信息
      */
-    RiseMember getCurrentMonthlyCampStatus();
+    RiseMember getCurrentMonthlyCampStatus(MonthlyCampConfig monthlyCampConfig);
 }

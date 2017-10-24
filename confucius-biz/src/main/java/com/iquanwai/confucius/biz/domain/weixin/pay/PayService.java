@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.pay;
 
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+
 import java.util.Map;
 
 /**
@@ -31,10 +33,10 @@ public interface PayService {
     void handlePayResult(String orderId,Boolean isFree);
 
 
-    void risePaySuccess(String orderId);
+    void risePaySuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     // 购买会员
-    void payMemberSuccess(String orderId);
+    void payMemberSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 校验支付签名

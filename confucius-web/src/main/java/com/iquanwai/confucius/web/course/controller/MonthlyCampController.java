@@ -224,6 +224,7 @@ public class MonthlyCampController {
                 .openid(profile.getOpenid()).module("小课训练营")
                 .function("信息新增").action("小课训练营用户新增");
         operationLogService.log(operationLog);
+        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
         Integer riseClassMemberId = monthlyCampDto.getRiseClassMemberId();
         RiseClassMember riseClassMember = monthlyCampService.loadRiseClassMemberById(riseClassMemberId);
@@ -231,12 +232,11 @@ public class MonthlyCampController {
             riseClassMember = new RiseClassMember();
             riseClassMember.setClassId(monthlyCampDto.getClassName());
             riseClassMember.setClassName(monthlyCampDto.getClassName());
-            String memberId = signupService.generateMemberId();
+            String memberId = signupService.generateMemberId(monthlyCampConfig);
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
 
-            MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
             riseClassMember.setYear(monthlyCampConfig.getSellingYear());
             riseClassMember.setMonth(monthlyCampConfig.getSellingMonth());
 
