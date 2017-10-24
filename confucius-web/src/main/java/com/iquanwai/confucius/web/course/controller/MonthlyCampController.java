@@ -110,34 +110,35 @@ public class MonthlyCampController {
                 break;
         }
 
+        Map<Integer, Profile> profileMap = profiles.stream().collect(Collectors.toMap(Profile::getId, profile -> profile));
         List<Integer> profileIds = profiles.stream().map(Profile::getId).collect(Collectors.toList());
         List<RiseClassMember> riseClassMembers = monthlyCampService.batchQueryRiseClassMemberByProfileIds(profileIds);
-        Map<Integer, RiseClassMember> riseClassMemberMap = riseClassMembers.stream().collect(Collectors.toMap(RiseClassMember::getProfileId, classMember -> classMember));
 
-        List<MonthlyCampDto> monthlyCampDtos = profiles.stream().map(profile -> {
+        List<MonthlyCampDto> monthlyCampDtos = riseClassMembers.stream().map(riseClassMember -> {
             MonthlyCampDto dto = new MonthlyCampDto();
-            dto.setNickName(profile.getNickname());
-            dto.setRiseId(profile.getRiseId());
-            dto.setHeadImgUrl(profile.getHeadimgurl());
+            Profile profile = profileMap.get(riseClassMember.getProfileId());
+            if (profile != null) {
+                dto.setNickName(profile.getNickname());
+                dto.setRiseId(profile.getRiseId());
+                dto.setHeadImgUrl(profile.getHeadimgurl());
+            }
 
-            RiseClassMember riseClassMember = riseClassMemberMap.get(profile.getId());
-            if (riseClassMember != null) {
-                dto.setRiseClassMemberId(riseClassMember.getId());
-                String className = riseClassMember.getClassName();
-                if (className != null) {
-                    dto.setClassName(className);
-                    dto.setClassNameStr(className.substring(0, 2) + "月" + className.substring(2) + "班");
-                }
-                dto.setGroupId(riseClassMember.getGroupId());
-                dto.setMemberId(riseClassMember.getMemberId());
-                Integer active = riseClassMember.getActive();
-                if (active != null) {
-                    dto.setActive(active);
-                    dto.setActiveStr(active == 1 ? "学习中" : "已请假");
-                }
+            dto.setRiseClassMemberId(riseClassMember.getId());
+            String className = riseClassMember.getClassName();
+            if (className != null) {
+                dto.setClassName(className);
+                dto.setClassNameStr(className.substring(0, 2) + "月" + className.substring(2) + "班");
+            }
+            dto.setGroupId(riseClassMember.getGroupId());
+            dto.setMemberId(riseClassMember.getMemberId());
+            Integer active = riseClassMember.getActive();
+            if (active != null) {
+                dto.setActive(active);
+                dto.setActiveStr(active == 1 ? "学习中" : "已请假");
             }
             return dto;
         }).collect(Collectors.toList());
+
         return WebUtils.result(monthlyCampDtos);
     }
 
