@@ -413,9 +413,9 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setProfileId(riseOrder.getProfileId());
         riseMember.setMemberTypeId(memberType.getId());
         if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) || existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
-            riseMember.setExpireDate(DateUtils.beforeDays(DateUtils.afterNatureMonths(existRiseMember.getExpireDate(), 12), 1));
+            riseMember.setExpireDate(DateUtils.afterNatureMonths(existRiseMember.getExpireDate(), 12));
         } else {
-            riseMember.setExpireDate(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), 12), 1));
+            riseMember.setExpireDate(DateUtils.afterNatureMonths(new Date(), 12));
         }
         riseMember.setExpired(false);
         riseMemberDao.insert(riseMember);
@@ -640,11 +640,11 @@ public class SignupServiceImpl implements SignupService {
     public RiseMember getCurrentRiseMemberStatus(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
-            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(DateUtils.afterDays(DateUtils.afterNatureMonths(riseMember.getExpireDate(), -12), 1)));
+            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(DateUtils.afterNatureMonths(riseMember.getExpireDate(), -12)));
         } else {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         }
-        riseMember.setEndTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
+        riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
 
         return riseMember;
     }

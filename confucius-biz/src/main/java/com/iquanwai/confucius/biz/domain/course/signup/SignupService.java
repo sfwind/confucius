@@ -124,7 +124,16 @@ public interface SignupService {
      */
     BusinessSchool getSchoolInfoForPay(Integer profileId);
 
+    /**
+     * 获取用户当前会员信息
+     *
+     * @param profileId 用户id
+     */
     RiseMember getCurrentRiseMemberStatus(Integer profileId);
 
+    /**
+     * 获取当前小课训练营信息
+     *
+     */
     RiseMember getCurrentMonthlyCampStatus();
 }
