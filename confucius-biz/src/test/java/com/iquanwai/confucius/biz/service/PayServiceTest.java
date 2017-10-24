@@ -17,6 +17,6 @@ public class PayServiceTest extends TestBase {
 
     @Test
     public void testCheckPay(){
-        signupService.risePurchaseCheck(16442, 5);
+
     }
 }
