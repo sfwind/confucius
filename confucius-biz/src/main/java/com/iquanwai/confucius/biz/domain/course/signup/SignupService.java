@@ -2,10 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,6 +17,7 @@ public interface SignupService {
      * 商品支付资格校验
      */
     Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
+
     /**
      * 报名商学院, 不生成预付订单
      */
@@ -49,9 +47,9 @@ public interface SignupService {
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    String generateMemberId();
+    String generateMemberId(MonthlyCampConfig monthlyCampConfig);
 
-    void riseMemberEntry(String orderId);
+    void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 重新加载班级
@@ -60,21 +58,18 @@ public interface SignupService {
 
     /**
      * 获得圈外订单
-     *
      * @param orderId 订单id
      */
     QuanwaiOrder getQuanwaiOrder(String orderId);
 
     /**
      * 获得rise订单
-     *
      * @param orderId 订单id
      */
     RiseOrder getRiseOrder(String orderId);
 
     /**
      * 获取会员类型
-     *
      * @param memberType 会员类型Id
      * @return 会员类型
      */
@@ -94,9 +89,8 @@ public interface SignupService {
 
     /**
      * 计算优惠券
-     *
      * @param memberTypeId 会员id
-     * @param couponId     优惠券id
+     * @param couponId 优惠券id
      * @return 打的折扣是多少
      */
     Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponId);
@@ -119,21 +113,18 @@ public interface SignupService {
 
     /**
      * 获取商学院数据
-     *
      * @param profileId 用户id
      */
     BusinessSchool getSchoolInfoForPay(Integer profileId);
 
     /**
      * 获取用户当前会员信息
-     *
      * @param profileId 用户id
      */
     RiseMember getCurrentRiseMemberStatus(Integer profileId);
 
     /**
      * 获取当前小课训练营信息
-     *
      */
     RiseMember getCurrentMonthlyCampStatus();
 }
