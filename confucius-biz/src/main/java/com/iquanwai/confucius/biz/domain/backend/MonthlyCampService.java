@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.util.page.Page;
 
 import java.util.Date;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface MonthlyCampService {
     List<RiseClassMember> loadRiseClassMemberByClassName(String className);
 
-    List<RiseClassMember> loadUnGroupRiseClassMember();
+    List<RiseClassMember> loadUnGroupRiseClassMember(Page page);
 
     RiseClassMember updateRiseClassMemberById(RiseClassMember riseClassMember);
 

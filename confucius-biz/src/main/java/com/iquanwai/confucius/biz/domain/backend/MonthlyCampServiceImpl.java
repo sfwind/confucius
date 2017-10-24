@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampSchedule;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.slf4j.Logger;
@@ -52,8 +53,10 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     }
 
     @Override
-    public List<RiseClassMember> loadUnGroupRiseClassMember() {
-        return riseClassMemberDao.loadUnGroupMember();
+    public List<RiseClassMember> loadUnGroupRiseClassMember(Page page) {
+        List<RiseClassMember> unGroupRiseClassMembers = riseClassMemberDao.loadUnGroupMember();
+        page.setTotal(unGroupRiseClassMembers.size());
+        return riseClassMemberDao.loadUnGroupMemberPage(page);
     }
 
     @Override
@@ -114,7 +117,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
             try {
                 forceOpenPublisher.publish(json.toString());
             } catch (ConnectException e) {
-                logger.error(e.getMessage(), e);
+                logger.error(e.getLocalizedMessage(), e);
             }
         }
     }
