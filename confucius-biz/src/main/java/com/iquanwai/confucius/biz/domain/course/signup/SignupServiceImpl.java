@@ -338,11 +338,8 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType) {
         StringBuilder targetMemberId = new StringBuilder();
-        targetMemberId.append(classPrefix);
-        targetMemberId.append(identityType);
 
         String prefix = targetMemberId.toString();
-
         String key = "customer:memberId:" + prefix;
         redisUtil.lock("lock:memberId", (lock) -> {
             // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
