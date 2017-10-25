@@ -5,11 +5,13 @@ import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.TableDto;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
 import com.iquanwai.confucius.biz.po.common.survey.SurveySubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
@@ -66,6 +68,8 @@ public class RiseOperationController {
     private ProblemService problemService;
     @Autowired
     private PracticeService practiceService;
+    @Autowired
+    private SurveyService surveyService;
     @Autowired
     private BusinessSchoolService businessSchoolService;
     @Autowired
@@ -426,6 +430,45 @@ public class RiseOperationController {
         }
         // 答案没有匹配到，直接把content当作答案
         return content;
+    }
+
+    @RequestMapping(value = "/survey/config/list", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadConfigList(PCLoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("问卷星")
+                .action("查看问卷配置");
+        operationLogService.log(operationLog);
+        List<SurveyHref> surveyHrefs = surveyService.loadAllSurveyHref();
+        return WebUtils.result(surveyHrefs);
+    }
+
+    @RequestMapping(value = "/survey/config", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> updateSurveyConfig(PCLoginUser loginUser,
+                                                                  @RequestBody SurveyHref surveyHref) {
+        Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(surveyHref, "问卷不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("问卷星")
+                .action("更新问卷配置");
+        operationLogService.log(operationLog);
+        Boolean updateStatus = surveyService.updateSurveyHref(surveyHref);
+        return WebUtils.result(updateStatus);
+    }
+
+    @RequestMapping(value = "/delete/survey/config/{id}",method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> deleteSurveyConfig(PCLoginUser loginUser,@PathVariable Integer id){
+        Assert.notNull(loginUser,"用户不能为空");
+        Assert.notNull(id, "问卷id不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("问卷星")
+                .action("删除问卷配置");
+        operationLogService.log(operationLog);
+        Boolean deleteStatus = surveyService.deleteSurveyHref(id);
+        return WebUtils.result(deleteStatus);
     }
 
 }

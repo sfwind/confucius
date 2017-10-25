@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2017/1/17.
@@ -74,4 +75,31 @@ public class SurveyServiceImpl implements SurveyService {
         return wjxUrl;
     }
 
+    @Override
+    public List<SurveyHref> loadAllSurveyHref() {
+        return surveyHrefDao.loadAll(SurveyHref.class).stream()
+                .filter(item -> !item.getDel())
+                .peek(surveyHref -> {
+                    if (surveyHref.getActivity() != null) {
+                        surveyHref.setMobileHref(MOBILE_PREFIX.replace("{activity}", surveyHref.getActivity().toString()));
+                        surveyHref.setPcHref(PC_PREFIX.replace("{activity}", surveyHref.getActivity().toString()));
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean updateSurveyHref(SurveyHref href) {
+        if (href.getId() == null) {
+            // add
+            return surveyHrefDao.insertSurveyHref(href) > 0;
+        } else {
+            return surveyHrefDao.updateSurveyHref(href) > 0;
+        }
+    }
+
+    @Override
+    public Boolean deleteSurveyHref(Integer id) {
+        return surveyHrefDao.deleteSurveyHref(id) > 0;
+    }
 }

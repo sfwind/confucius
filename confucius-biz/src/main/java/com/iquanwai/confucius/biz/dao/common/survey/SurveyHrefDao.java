@@ -43,9 +43,20 @@ public class SurveyHrefDao extends DBUtil {
 
     public Integer updateSurveyHref(SurveyHref surveyHref) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update SurveyHref set Name = ?,RealHref = ?,Activity = ?,Del = ? where Id = ?";
+        String sql = "Update SurveyHref set Name = ?,RealHref = ?,Activity = ? where Id = ?";
         try {
-            return runner.update(sql, surveyHref.getName(), surveyHref.getRealHref(), surveyHref.getActivity(), surveyHref.getDel(), surveyHref.getId());
+            return runner.update(sql, surveyHref.getName(), surveyHref.getRealHref(), surveyHref.getActivity(), surveyHref.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public Integer deleteSurveyHref(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update SurveyHref set Del = 1 where id = ?";
+        try {
+            return runner.update(sql, id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
