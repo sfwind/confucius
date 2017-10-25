@@ -71,5 +71,10 @@ public interface AccountService {
 
     List<Profile> loadProfilesByNickName(String nickName);
 
+    /**
+     * 根据学号查询 RIseClassMember 记录，不进行 Active 字段区分
+     */
+    Profile loadProfileByMemberId(String memberId);
+
     Boolean hasPrivilegeForBusinessSchool(Integer profileId);
 }

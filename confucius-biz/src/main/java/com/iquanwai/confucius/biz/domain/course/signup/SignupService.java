@@ -2,10 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -19,7 +16,8 @@ public interface SignupService {
     /**
      * 商品支付资格校验
      */
-    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
+    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType, MonthlyCampConfig monthlyCampConfig);
+
     /**
      * 报名商学院, 不生成预付订单
      */
@@ -28,7 +26,7 @@ public interface SignupService {
     /**
      * 报名训练营, 不生成预付订单
      */
-    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
+    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 获取学员详情
@@ -45,13 +43,13 @@ public interface SignupService {
      * 5、发送 mq 通知 platon 强制开启小课
      * 6、发送购买成功信息，开课信息（可以合并）
      */
-    void payMonthlyCampSuccess(String orderId);
+    void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    String generateMemberId();
+    String generateMemberId(MonthlyCampConfig monthlyCampConfig);
 
-    void riseMemberEntry(String orderId);
+    void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 重新加载班级
@@ -60,21 +58,18 @@ public interface SignupService {
 
     /**
      * 获得圈外订单
-     *
      * @param orderId 订单id
      */
     QuanwaiOrder getQuanwaiOrder(String orderId);
 
     /**
      * 获得rise订单
-     *
      * @param orderId 订单id
      */
     RiseOrder getRiseOrder(String orderId);
 
     /**
      * 获取会员类型
-     *
      * @param memberType 会员类型Id
      * @return 会员类型
      */
@@ -88,15 +83,14 @@ public interface SignupService {
     /**
      * 查询会员类型的支付信息
      */
-    List<MemberType> getMemberTypesPayInfo();
+    List<MemberType> getMemberTypesPayInfo(MonthlyCampConfig monthlyCampConfig);
 
-    List<MemberType> getMemberTypesPayInfo(Integer profileId);
+    List<MemberType> getMemberTypesPayInfo(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 计算优惠券
-     *
      * @param memberTypeId 会员id
-     * @param couponId     优惠券id
+     * @param couponId 优惠券id
      * @return 打的折扣是多少
      */
     Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponId);
@@ -110,7 +104,7 @@ public interface SignupService {
     /**
      * 当月训练营
      */
-    Integer loadCurrentCampMonth();
+    Integer loadCurrentCampMonth(MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 小课售卖页面，跳转小课介绍页面 problemId
@@ -119,21 +113,18 @@ public interface SignupService {
 
     /**
      * 获取商学院数据
-     *
      * @param profileId 用户id
      */
     BusinessSchool getSchoolInfoForPay(Integer profileId);
 
     /**
      * 获取用户当前会员信息
-     *
      * @param profileId 用户id
      */
-    RiseMember getCurrentRiseMemberStatus(Integer profileId);
+    RiseMember getCurrentRiseMemberStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 获取当前小课训练营信息
-     *
      */
-    RiseMember getCurrentMonthlyCampStatus();
+    RiseMember getCurrentMonthlyCampStatus(MonthlyCampConfig monthlyCampConfig);
 }

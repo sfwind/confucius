@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -22,15 +23,15 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public int insert(RiseClassMember riseClassMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO RiseClassMember (ClassId, ClassName, GroupId, MemberId, ProfileId, Month, Active) " +
+        String sql = "INSERT INTO RiseClassMember (ClassName, GroupId, MemberId, ProfileId, Year, Month, Active) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
-                    riseClassMember.getClassId(),
                     riseClassMember.getClassName(),
                     riseClassMember.getGroupId(),
                     riseClassMember.getMemberId(),
                     riseClassMember.getProfileId(),
+                    riseClassMember.getYear(),
                     riseClassMember.getMonth(),
                     riseClassMember.getActive());
             return result.intValue();
@@ -70,6 +71,18 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     public RiseClassMember queryByMemberId(String memberId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Active = 1 AND Del = 0";
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, memberId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    public RiseClassMember queryValidClassMemberByMemberId(String memberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Del = 0 LIMIT 1";
         ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, memberId);
@@ -146,6 +159,19 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     public List<RiseClassMember> loadUnGroupMember() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE (GroupId IS NULL OR GroupId = '') AND Del = 0 ORDER BY ClassName";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<RiseClassMember> loadUnGroupMemberPage(Page page) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE (GroupId IS NULL OR GroupId = '') AND Del = 0  ORDER BY ClassName LIMIT "
+                + page.getOffset() + ", " + page.getPageSize();
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h);

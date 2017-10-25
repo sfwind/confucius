@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
@@ -15,6 +16,7 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.Constants;
@@ -58,6 +60,8 @@ public class AccountServiceImpl implements AccountService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private RiseCertificateDao riseCertificateDao;
+    @Autowired
+    private RiseClassMemberDao riseClassMemberDao;
 
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
@@ -336,6 +340,16 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<Profile> loadProfilesByNickName(String nickName) {
         return profileDao.loadProfilesByNickName(nickName);
+    }
+
+    @Override
+    public Profile loadProfileByMemberId(String memberId) {
+        RiseClassMember riseClassMember = riseClassMemberDao.queryValidClassMemberByMemberId(memberId);
+        if (riseClassMember != null && riseClassMember.getProfileId() != null) {
+            return getProfile(riseClassMember.getProfileId());
+        } else {
+            return null;
+        }
     }
 
     private Profile getProfileFromDB(String openid) {
