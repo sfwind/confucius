@@ -385,7 +385,19 @@ public class PayServiceImpl implements PayService {
     public void refund(String orderId, Double fee){
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         RefundOrder refundOrder = buildRefundOrder(quanwaiOrder, fee);
-        restfulHelper.sslPostXml(REFUND_ORDER_URL, XMLHelper.createXML(refundOrder));
+        String response = restfulHelper.sslPostXml(REFUND_ORDER_URL, XMLHelper.createXML(refundOrder));
+
+        RefundOrderReply reply = XMLHelper.parseXml(RefundOrderReply.class, response);
+        if (reply != null) {
+            if (reply.getReturn_code().equals("FAIL") || reply.getResult_code().equals("FAIL")) {
+                logger.error("response is------\n" + response);
+                messageService.sendAlarm("退款出错", "退款接口调用失败",
+                        "高", "订单id:" + orderId, "msg:"+reply.getReturn_msg()+", error:"+reply.getErr_code_des());
+            } else {
+                quanwaiOrderDao.refundOrder(orderId, fee, refundOrder.getOut_refund_no());
+            }
+
+        }
     }
 
     private RefundOrder buildRefundOrder(QuanwaiOrder quanwaiOrder, Double fee) {
