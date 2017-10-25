@@ -545,7 +545,7 @@ public class SignupController {
                 riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId(), monthlyCampConfig);
                 break;
             case RiseMember.CAMP:
-                riseMember = signupService.getCurrentMonthlyCampStatus(monthlyCampConfig);
+                riseMember = signupService.getCurrentMonthlyCampStatus(loginUser.getId(), monthlyCampConfig);
                 break;
         }
         if (riseMember != null) {

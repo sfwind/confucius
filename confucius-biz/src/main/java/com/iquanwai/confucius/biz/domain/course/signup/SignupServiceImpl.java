@@ -240,8 +240,8 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(profileId);
         RiseMember existRiseMember = this.currentRiseMember(profileId);
 
-        // RiseMember 新增记录
-        String memberId = generateMemberId(monthlyCampConfig);
+        // RiseClassMember 新增记录
+        String memberId = generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassName(monthlyCampConfig.getCampClassPrefix());
         classMember.setMemberId(memberId);
@@ -333,13 +333,14 @@ public class SignupServiceImpl implements SignupService {
     }
 
     /**
-     * 生成 memberId，格式 YYYYMM + 6位数字
+     * 新学号格式：六位班级号（170101）+ 一位身份信息（会员、小课、公益课、试听课） + 三位递增唯一序列（1701011001）
      */
     @Override
-    public String generateMemberId(MonthlyCampConfig monthlyCampConfig) {
+    public String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType) {
         StringBuilder targetMemberId = new StringBuilder();
-
-        String prefix = monthlyCampConfig.getMemberIdPrefix();
+        targetMemberId.append(classPrefix);
+        targetMemberId.append(identityType);
+        String prefix = targetMemberId.toString();
 
         String key = "customer:memberId:" + prefix;
         redisUtil.lock("lock:memberId", (lock) -> {
@@ -347,11 +348,11 @@ public class SignupServiceImpl implements SignupService {
             String memberId = redisUtil.get(key);
             String sequence;
             if (StringUtils.isEmpty(memberId)) {
-                sequence = "000001";
+                sequence = "001";
             } else {
-                sequence = String.format("%06d", Integer.parseInt(memberId) + 1);
+                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
             }
-            targetMemberId.append(prefix).append(sequence);
+            targetMemberId.append(sequence);
             redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
         });
         return targetMemberId.toString();
@@ -380,7 +381,7 @@ public class SignupServiceImpl implements SignupService {
             //查看有没有老的
             //精英会员一年
             // RiseClassMember 新增会员记录
-            String memberId = generateMemberId(monthlyCampConfig);
+            String memberId = generateMemberId(monthlyCampConfig, monthlyCampConfig.getRiseClassPrefix(), RiseClassMember.BUSINESS_MEMBERSHIP);
             RiseClassMember classMember = new RiseClassMember();
             classMember.setClassName(monthlyCampConfig.getRiseClassPrefix());
             classMember.setMemberId(memberId);
@@ -445,6 +446,8 @@ public class SignupServiceImpl implements SignupService {
 
         switch (memberTypeId) {
             case RiseMember.ELITE: {
+                RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
+                String entryCode = riseClassMember.getMemberId();
                 logger.info("发送会员数据");
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
@@ -453,13 +456,16 @@ public class SignupServiceImpl implements SignupService {
                 } catch (InterruptedException e) {
                     logger.error(e.getLocalizedMessage(), e);
                 }
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampConfig.getRiseEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), entryCode, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 if (sendUrl != null) {
                     messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
                 }
                 break;
             }
             case RiseMember.CAMP: {
+                RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), monthlyCampConfig.getCampClassPrefix(), monthlyCampConfig);
+                String entryCode = riseClassMember.getMemberId();
+
                 logger.info("发送小课训练营数据");
                 // 发送消息给小课训练营购买用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
@@ -468,7 +474,7 @@ public class SignupServiceImpl implements SignupService {
                 } catch (InterruptedException e) {
                     logger.error(e.getLocalizedMessage(), e);
                 }
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), monthlyCampConfig.getCampEntryKey(), Constants.WEIXIN_MESSAGE_TYPE.TEXT);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), entryCode, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 if (sendUrl != null) {
                     messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
                 }
@@ -630,7 +636,6 @@ public class SignupServiceImpl implements SignupService {
                 default:
                     fee = memberType.getFee();
             }
-
         } else {
             fee = memberType.getFee();
         }
@@ -652,16 +657,24 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         }
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
-        riseMember.setEntryCode(monthlyCampConfig.getRiseEntryKey());
+
+        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
+        if (riseClassMember != null) {
+            riseMember.setEntryCode(riseClassMember.getMemberId());
+        }
         return riseMember;
     }
 
     @Override
-    public RiseMember getCurrentMonthlyCampStatus(MonthlyCampConfig monthlyCampConfig) {
-        RiseMember riseMember = new RiseMember();
+    public RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(monthlyCampConfig.getCloseDate()));
-        riseMember.setEntryCode(monthlyCampConfig.getCampEntryKey());
+
+        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getCampClassPrefix(), monthlyCampConfig);
+        if (riseClassMember != null) {
+            riseMember.setEntryCode(riseClassMember.getMemberId());
+        }
         return riseMember;
     }
 

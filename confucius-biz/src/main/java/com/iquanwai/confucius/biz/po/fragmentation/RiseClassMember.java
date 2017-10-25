@@ -20,4 +20,13 @@ public class RiseClassMember {
     private Integer active; // 是否参与本次学习
     private Integer del; // 数据是否删除，0-未删除 1-已删除
 
+    /**
+     * 商学院会员
+     */
+    public static final int BUSINESS_MEMBERSHIP = 1;
+    /**
+     * 小课训练营
+     */
+    public static final int MONTHLY_CAMP = 2;
+
 }

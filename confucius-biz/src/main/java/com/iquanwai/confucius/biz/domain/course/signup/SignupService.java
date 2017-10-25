@@ -47,7 +47,7 @@ public interface SignupService {
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    String generateMemberId(MonthlyCampConfig monthlyCampConfig);
+    String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType);
 
     void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
 
@@ -126,5 +126,5 @@ public interface SignupService {
     /**
      * 获取当前小课训练营信息
      */
-    RiseMember getCurrentMonthlyCampStatus(MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 }
