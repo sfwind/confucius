@@ -476,7 +476,7 @@ public class SignupController {
         MonthlyCampDto dto = new MonthlyCampDto();
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         Integer currentCampMonth = signupService.loadCurrentCampMonth(monthlyCampConfig);
-        dto.setMarKSellingMemo(monthlyCampConfig.getSellingYear() + "" + monthlyCampConfig.getSellingMonth());
+        dto.setMarKSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
         dto.setCurrentCampMonth(currentCampMonth);
         dto.setCampMonthProblemId(signupService.loadHrefProblemId(currentCampMonth));
         return WebUtils.result(dto);
