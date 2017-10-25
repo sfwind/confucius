@@ -240,7 +240,7 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(profileId);
         RiseMember existRiseMember = this.currentRiseMember(profileId);
 
-        // RiseMember 新增记录
+        // RiseClassMember 新增记录
         String memberId = generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassName(monthlyCampConfig.getCampClassPrefix());
@@ -447,7 +447,7 @@ public class SignupServiceImpl implements SignupService {
         switch (memberTypeId) {
             case RiseMember.ELITE: {
                 RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
-                String entryCode = riseClassMember.getMemberId().substring(4);
+                String entryCode = riseClassMember.getMemberId();
                 logger.info("发送会员数据");
                 // 发送消息给一年精英版的用户
                 customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
@@ -464,7 +464,7 @@ public class SignupServiceImpl implements SignupService {
             }
             case RiseMember.CAMP: {
                 RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), monthlyCampConfig.getCampClassPrefix(), monthlyCampConfig);
-                String entryCode = riseClassMember.getMemberId().substring(4);
+                String entryCode = riseClassMember.getMemberId();
 
                 logger.info("发送小课训练营数据");
                 // 发送消息给小课训练营购买用户
@@ -660,7 +660,7 @@ public class SignupServiceImpl implements SignupService {
 
         RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
         if (riseClassMember != null) {
-            riseMember.setEntryCode(riseClassMember.getMemberId().substring(4));
+            riseMember.setEntryCode(riseClassMember.getMemberId());
         }
         return riseMember;
     }
@@ -673,7 +673,7 @@ public class SignupServiceImpl implements SignupService {
 
         RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getCampClassPrefix(), monthlyCampConfig);
         if (riseClassMember != null) {
-            riseMember.setEntryCode(riseClassMember.getMemberId().substring(4));
+            riseMember.setEntryCode(riseClassMember.getMemberId());
         }
         return riseMember;
     }
