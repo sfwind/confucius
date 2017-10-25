@@ -338,8 +338,10 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType) {
         StringBuilder targetMemberId = new StringBuilder();
-
+        targetMemberId.append(classPrefix);
+        targetMemberId.append(identityType);
         String prefix = targetMemberId.toString();
+
         String key = "customer:memberId:" + prefix;
         redisUtil.lock("lock:memberId", (lock) -> {
             // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
@@ -350,7 +352,7 @@ public class SignupServiceImpl implements SignupService {
             } else {
                 sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
             }
-            targetMemberId.append(prefix).append(sequence);
+            targetMemberId.append(sequence);
             redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
         });
         return targetMemberId.toString();
