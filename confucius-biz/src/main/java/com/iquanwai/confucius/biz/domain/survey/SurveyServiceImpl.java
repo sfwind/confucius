@@ -85,6 +85,7 @@ public class SurveyServiceImpl implements SurveyService {
                         surveyHref.setPcHref(PC_PREFIX.replace("{activity}", surveyHref.getActivity().toString()));
                     }
                 })
+                .sorted(((o1, o2) -> o1.getAddTime().before(o2.getAddTime()) ? 1 : -1))
                 .collect(Collectors.toList());
     }
 
