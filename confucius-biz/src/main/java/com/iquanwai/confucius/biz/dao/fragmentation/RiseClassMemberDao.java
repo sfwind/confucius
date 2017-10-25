@@ -160,11 +160,12 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     public RiseClassMember loadPurchaseRiseClassMember(Integer profileId, String className, MonthlyCampConfig monthlyCampConfig) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND ProfileId = ? AND YEAR = ? AND Month = ? AND Active = 0 AND Del = 0";
-        ResultSetHandler<RiseClassMember> h = new BeanHandler<RiseClassMember>(RiseClassMember.class);
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
-            return runner.query(sql, h, className,
+            return runner.query(sql, h,
+                    className,
                     profileId,
-                    monthlyCampConfig.getSellingMonth(),
+                    monthlyCampConfig.getSellingYear(),
                     monthlyCampConfig.getSellingMonth());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

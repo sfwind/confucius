@@ -658,7 +658,22 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         }
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
-        riseMember.setEntryCode(monthlyCampConfig.getRiseEntryKey());
+
+        Integer memberTypeId = riseMember.getMemberTypeId();
+        RiseClassMember riseClassMember;
+        if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
+            riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
+            if (riseClassMember != null) {
+                riseMember.setEntryCode(riseClassMember.getMemberId().substring(4));
+            }
+        } else if (memberTypeId.equals(RiseMember.CAMP)) {
+            riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
+        } else {
+            riseClassMember = null;
+        }
+        if (riseClassMember != null) {
+            riseMember.setEntryCode(monthlyCampConfig.getRiseEntryKey());
+        }
         return riseMember;
     }
 
