@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
@@ -154,6 +155,21 @@ public class RiseClassMemberDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public RiseClassMember loadPurchaseRiseClassMember(Integer profileId, String className, MonthlyCampConfig monthlyCampConfig) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND ProfileId = ? AND YEAR = ? AND Month = ? AND Active = 0 AND Del = 0";
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<RiseClassMember>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, className,
+                    profileId,
+                    monthlyCampConfig.getSellingMonth(),
+                    monthlyCampConfig.getSellingMonth());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     public List<RiseClassMember> loadUnGroupMember() {
