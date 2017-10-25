@@ -47,7 +47,7 @@ public interface SignupService {
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    String generateMemberId(MonthlyCampConfig monthlyCampConfig);
+    String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType);
 
     void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
 

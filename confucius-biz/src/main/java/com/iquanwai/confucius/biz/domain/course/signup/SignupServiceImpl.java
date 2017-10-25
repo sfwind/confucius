@@ -241,7 +241,7 @@ public class SignupServiceImpl implements SignupService {
         RiseMember existRiseMember = this.currentRiseMember(profileId);
 
         // RiseMember 新增记录
-        String memberId = generateMemberId(monthlyCampConfig);
+        String memberId = generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassName(monthlyCampConfig.getCampClassPrefix());
         classMember.setMemberId(memberId);
@@ -333,13 +333,15 @@ public class SignupServiceImpl implements SignupService {
     }
 
     /**
-     * 生成 memberId，格式 YYYYMM + 6位数字
+     * 新学号格式：六位班级号（170101）+ 一位身份信息（会员、小课、公益课、试听课） + 三位递增唯一序列（1701011001）
      */
     @Override
-    public String generateMemberId(MonthlyCampConfig monthlyCampConfig) {
+    public String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType) {
         StringBuilder targetMemberId = new StringBuilder();
+        targetMemberId.append(classPrefix);
+        targetMemberId.append(identityType);
 
-        String prefix = monthlyCampConfig.getMemberIdPrefix();
+        String prefix = targetMemberId.toString();
 
         String key = "customer:memberId:" + prefix;
         redisUtil.lock("lock:memberId", (lock) -> {
@@ -347,9 +349,9 @@ public class SignupServiceImpl implements SignupService {
             String memberId = redisUtil.get(key);
             String sequence;
             if (StringUtils.isEmpty(memberId)) {
-                sequence = "000001";
+                sequence = "001";
             } else {
-                sequence = String.format("%06d", Integer.parseInt(memberId) + 1);
+                sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
             }
             targetMemberId.append(prefix).append(sequence);
             redisUtil.set(key, sequence, DateUtils.afterDays(new Date(), 60).getTime());
@@ -380,7 +382,7 @@ public class SignupServiceImpl implements SignupService {
             //查看有没有老的
             //精英会员一年
             // RiseClassMember 新增会员记录
-            String memberId = generateMemberId(monthlyCampConfig);
+            String memberId = generateMemberId(monthlyCampConfig, monthlyCampConfig.getRiseClassPrefix(), RiseClassMember.BUSINESS_MEMBERSHIP);
             RiseClassMember classMember = new RiseClassMember();
             classMember.setClassName(monthlyCampConfig.getRiseClassPrefix());
             classMember.setMemberId(memberId);

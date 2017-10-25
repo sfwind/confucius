@@ -10,6 +10,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
@@ -237,11 +238,19 @@ public class MonthlyCampController {
 
         Integer riseClassMemberId = monthlyCampDto.getRiseClassMemberId();
         RiseClassMember riseClassMember = monthlyCampService.loadRiseClassMemberById(riseClassMemberId);
-        if (riseClassMember == null) {
+        RiseMember riseMember = signupService.currentRiseMember(profile.getId());
+        if (riseClassMember == null && riseMember != null) {
             riseClassMember = new RiseClassMember();
             riseClassMember.setClassId(monthlyCampDto.getClassName());
             riseClassMember.setClassName(monthlyCampDto.getClassName());
-            String memberId = signupService.generateMemberId(monthlyCampConfig);
+
+            String memberId;
+            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+                memberId = signupService.generateMemberId(monthlyCampConfig, monthlyCampConfig.getRiseClassPrefix(), RiseClassMember.BUSINESS_MEMBERSHIP);
+            } else {
+                memberId = signupService.generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
+            }
+
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
