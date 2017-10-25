@@ -42,10 +42,15 @@ public interface PayService {
      */
     Map<String,String> buildH5PayParam(String prepayId,String ip,String openId);
 
+    /**
+     * 退款
+     * @param orderId 订单号
+     * @param fee 退款金额
+     * */
+    void refund(String orderId, Double fee);
 
     String UNIFIED_ORDER_URL ="https://api.mch.weixin.qq.com/pay/unifiedorder";
-
-    String CLOSE_ORDER_URL ="https://api.mch.weixin.qq.com/pay/closeorder";
+    String REFUND_ORDER_URL ="https://api.mch.weixin.qq.com/secapi/pay/refund";
 
     String GOODS_BODY = "圈外-线上课程";
 

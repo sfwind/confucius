@@ -7,7 +7,6 @@ import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
-import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.util.*;
@@ -31,7 +30,6 @@ import java.util.Map;
 @Service
 public class PayServiceImpl implements PayService {
     private Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
@@ -42,8 +40,6 @@ public class PayServiceImpl implements PayService {
     private RestfulHelper restfulHelper;
     @Autowired
     private MessageService messageService;
-    @Autowired
-    private AccountService accountService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
@@ -383,5 +379,44 @@ public class PayServiceImpl implements PayService {
         goodsDetail.setGoods_num(1);
         goodsDetailList.add(goodsDetail);
         return new Gson().toJson(orderDetail);
+    }
+
+    @Override
+    public void refund(String orderId, Double fee){
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        RefundOrder refundOrder = buildRefundOrder(quanwaiOrder, fee);
+        restfulHelper.sslPostXml(REFUND_ORDER_URL, XMLHelper.createXML(refundOrder));
+    }
+
+    private RefundOrder buildRefundOrder(QuanwaiOrder quanwaiOrder, Double fee) {
+        RefundOrder refundOrder = new RefundOrder();
+        Map<String, String> map = Maps.newHashMap();
+        String appid = ConfigUtils.getAppid();
+        map.put("appid", appid);
+        String mch_id = ConfigUtils.getMch_id();
+        map.put("mch_id", mch_id);
+        String nonce_str = CommonUtils.randomString(16);
+        map.put("nonce_str", nonce_str);
+        String out_trade_no = quanwaiOrder.getOrderId();
+        map.put("out_trade_no", out_trade_no);
+        String out_refund_no = CommonUtils.randomString(16);
+        map.put("out_refund_no", out_refund_no);
+        Integer total_fee = (int) (quanwaiOrder.getPrice() * 100);
+        map.put("total_fee", total_fee.toString());
+        Integer refund_fee = (int) (fee * 100);
+        map.put("refund_fee", refund_fee.toString());
+
+        String sign = CommonUtils.sign(map);
+
+        refundOrder.setAppid(appid);
+        refundOrder.setMch_id(mch_id);
+        refundOrder.setNonce_str(nonce_str);
+        refundOrder.setOut_trade_no(out_trade_no);
+        refundOrder.setTotal_fee(total_fee);
+        refundOrder.setRefund_fee(refund_fee);
+        refundOrder.setOut_refund_no(out_refund_no);
+        refundOrder.setSign(sign);
+
+        return refundOrder;
     }
 }

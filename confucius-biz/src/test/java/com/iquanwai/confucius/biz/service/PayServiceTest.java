@@ -19,4 +19,9 @@ public class PayServiceTest extends TestBase {
     public void testCheckPay(){
         signupService.risePurchaseCheck(16442, 5);
     }
+
+    @Test
+    public void testRefund(){
+        payService.refund("2gxk3auktxnd5rzw", 0.01);
+    }
 }
