@@ -636,7 +636,6 @@ public class SignupServiceImpl implements SignupService {
                 default:
                     fee = memberType.getFee();
             }
-
         } else {
             fee = memberType.getFee();
         }
@@ -659,30 +658,23 @@ public class SignupServiceImpl implements SignupService {
         }
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
 
-        Integer memberTypeId = riseMember.getMemberTypeId();
-        RiseClassMember riseClassMember;
-        if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
-            riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
-            if (riseClassMember != null) {
-                riseMember.setEntryCode(riseClassMember.getMemberId().substring(4));
-            }
-        } else if (memberTypeId.equals(RiseMember.CAMP)) {
-            riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
-        } else {
-            riseClassMember = null;
-        }
+        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getRiseClassPrefix(), monthlyCampConfig);
         if (riseClassMember != null) {
-            riseMember.setEntryCode(monthlyCampConfig.getRiseEntryKey());
+            riseMember.setEntryCode(riseClassMember.getMemberId().substring(4));
         }
         return riseMember;
     }
 
     @Override
-    public RiseMember getCurrentMonthlyCampStatus(MonthlyCampConfig monthlyCampConfig) {
-        RiseMember riseMember = new RiseMember();
+    public RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(monthlyCampConfig.getCloseDate()));
-        riseMember.setEntryCode(monthlyCampConfig.getCampEntryKey());
+
+        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, monthlyCampConfig.getCampClassPrefix(), monthlyCampConfig);
+        if (riseClassMember != null) {
+            riseMember.setEntryCode(riseClassMember.getMemberId().substring(4));
+        }
         return riseMember;
     }
 

@@ -126,5 +126,5 @@ public interface SignupService {
     /**
      * 获取当前小课训练营信息
      */
-    RiseMember getCurrentMonthlyCampStatus(MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 }
