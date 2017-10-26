@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.ref.SoftReference;
@@ -347,8 +346,13 @@ public class SignupServiceImpl implements SignupService {
             // TODO 有效期 60 天，期间 redis 绝对不能重启！！！
             String memberId = redisUtil.get(key);
             String sequence;
-            if (StringUtils.isEmpty(memberId)) {
-                sequence = "001";
+            if (memberId == null) {
+                RiseClassMember riseClassMember = riseClassMemberDao.loadLatestLikeMemberIdRiseClassMember(prefix);
+                if (riseClassMember != null) {
+                    sequence = riseClassMember.getMemberId().substring(-3);
+                } else {
+                    sequence = "001";
+                }
             } else {
                 sequence = String.format("%03d", Integer.parseInt(memberId) + 1);
             }
