@@ -1,7 +1,8 @@
 package com.iquanwai.confucius.biz.util;
 
-import com.iquanwai.confucius.biz.domain.weixin.accessToken.AccessTokenService;
+import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.exception.WeixinException;
+import com.rabbitmq.client.TrustEverythingTrustManager;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.ssl.SSLContexts;
@@ -28,8 +29,8 @@ public class RestfulHelper {
 
     private static OkHttpClient client = new OkHttpClient();
 
-    private MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private MediaType XML = MediaType.parse("text/xml; charset=utf-8");
+    private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static MediaType XML = MediaType.parse("text/xml; charset=utf-8");
 
     private Logger logger = LoggerFactory.getLogger(RestfulHelper.class);
 
@@ -109,9 +110,6 @@ public class RestfulHelper {
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
-//                if(CommonUtils.isError(body)){
-//                    logger.error("execute {} return error, error message is {}", requestUrl, body);
-//                }
                 logger.info("body:{}", body);
                 return body;
             } catch (Exception e) {
@@ -224,7 +222,8 @@ public class RestfulHelper {
         // 指定TLS版本
         SSLSocketFactory sslSocketFactory = sslcontext.getSocketFactory();
         // 设置httpclient的SSLSocketFactory
-        sslClient = new OkHttpClient.Builder().sslSocketFactory(sslSocketFactory).build();
+        sslClient = new OkHttpClient.Builder().sslSocketFactory(sslSocketFactory,
+                new TrustEverythingTrustManager()).build();
 
     }
 }

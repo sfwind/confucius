@@ -49,6 +49,7 @@ public class PayServiceImpl implements PayService {
 
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
+    private static final String FAIL = "FAIL";
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
@@ -389,7 +390,7 @@ public class PayServiceImpl implements PayService {
 
         RefundOrderReply reply = XMLHelper.parseXml(RefundOrderReply.class, response);
         if (reply != null) {
-            if (reply.getReturn_code().equals("FAIL") || reply.getResult_code().equals("FAIL")) {
+            if (FAIL.equals(reply.getReturn_code()) || FAIL.equals(reply.getResult_code())) {
                 logger.error("response is------\n" + response);
                 messageService.sendAlarm("退款出错", "退款接口调用失败",
                         "高", "订单id:" + orderId, "msg:"+reply.getReturn_msg()+", error:"+reply.getErr_code_des());

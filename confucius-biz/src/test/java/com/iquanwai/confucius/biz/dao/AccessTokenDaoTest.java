@@ -3,7 +3,7 @@ package com.iquanwai.confucius.biz.dao;
 import com.iquanwai.confucius.biz.TestBase;
 import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.wx.AccessTokenDao;
-import com.iquanwai.confucius.biz.domain.weixin.accessToken.AccessTokenService;
+import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.po.fragmentation.ArticleViewInfo;
 import com.iquanwai.confucius.biz.util.Constants;
 import org.junit.Test;

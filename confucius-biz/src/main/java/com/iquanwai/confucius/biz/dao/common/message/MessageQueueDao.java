@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao.common.message;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.common.message.MessageQueue;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -23,7 +24,7 @@ public class MessageQueueDao extends DBUtil {
 
     public int insert(MessageQueue message){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(ThreadPool.createSingleThreadExecutor(), run);
         try {
             String insertSql = "INSERT INTO MessageQueue(MsgId, Topic, Queue, Message) VALUES (?,?,?,?)";
             Future<Integer> result = asyncRun.update(insertSql, message.getMsgId(),

@@ -20,22 +20,13 @@ public class ConfigUtils {
 
     private static Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
 
-
-    private static Timer timer;
-
     static {
-        loadConfig();
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                loadConfig();
-            }
-        }, 0, 1000 * 60);
+        loadLocalConfig();
         zkConfigUtils = new ZKConfigUtils();
     }
 
-    private static void loadConfig() {
+    private static void loadLocalConfig() {
+        logger.info("load local config");
         config = ConfigFactory.load("localconfig");
         fileconfig = ConfigFactory.parseFile(new File("/data/config/localconfig"));
         config = fileconfig.withFallback(config);
@@ -91,10 +82,6 @@ public class ConfigUtils {
 
     public static String incompleteTaskMsgKey() {
         return getValue("incomplete.task.msg");
-    }
-
-    public static boolean messageSwitch() {
-        return getBooleanValue("message.switch");
     }
 
     public static String coursePassMsgKey() {
@@ -251,10 +238,6 @@ public class ConfigUtils {
 
     public static Date getRisePayStopTime() {
         return DateUtils.parseStringToDateTime(getValue("rise.member.pay.stop.time"));
-    }
-
-    public static Integer riseMemberTotal() {
-        return getIntValue("rise.member.total.count");
     }
 
     public static String getIntegratedPracticeIndex() {

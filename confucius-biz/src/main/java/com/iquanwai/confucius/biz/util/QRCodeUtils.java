@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.util;
 
+import com.google.common.collect.Maps;
 import com.google.zxing.*;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
@@ -189,13 +190,6 @@ public class QRCodeUtils {
 
         } catch (Exception e) {
             logger.error(e.getMessage());
-//            logger.error("try once again:");
-//            image = zoom(image, 256, 256);
-//            try {
-//                return decodeQRCode(image);
-//            } catch (NotFoundException e1) {
-//                logger.error(e1.getMessage());
-//            }
         }
         return "";
     }
@@ -204,7 +198,7 @@ public class QRCodeUtils {
         LuminanceSource source = new BufferedImageLuminanceSource(image);
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-        Map<DecodeHintType, Object> hints = new HashMap<DecodeHintType, Object>();
+        Map<DecodeHintType, Object> hints = Maps.newHashMap();
         Vector<BarcodeFormat> decodeFormats = new Vector<BarcodeFormat>();
         decodeFormats.addAll(EnumSet.of(BarcodeFormat.QR_CODE));
         hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);

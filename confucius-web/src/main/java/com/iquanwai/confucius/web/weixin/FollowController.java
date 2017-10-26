@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -28,26 +29,24 @@ public class FollowController {
 
     @RequestMapping("/all")
     public ResponseEntity<Map<String, Object>> getAll() throws IOException {
-        new Thread(accountService::collectUsers).start();
+        ThreadPool.execute(accountService::collectUsers);
         return WebUtils.result("正在运行中");
     }
 
     @RequestMapping("/new")
     public ResponseEntity<Map<String, Object>> getNew() throws IOException {
-        new Thread(accountService::collectNewUsers).start();
+        ThreadPool.execute(accountService::collectNewUsers);
         return WebUtils.result("正在运行中");
     }
 
     @RequestMapping("/next")
     public ResponseEntity<Map<String, Object>> getNext(@RequestParam("openid") String openid) throws IOException {
-        new Thread(() -> {
-            accountService.collectNext(openid);
-        }).start();
+        ThreadPool.execute(() -> accountService.collectNext(openid));
         return WebUtils.result("正在运行中");
     }
 
     @RequestMapping("/ip")
-    public ResponseEntity<Map<String,Object>> getIp(HttpServletRequest request, LoginUser loginUser){
+    public ResponseEntity<Map<String, Object>> getIp(HttpServletRequest request, LoginUser loginUser) {
         String remoteIp = request.getHeader("X-Forwarded-For");
         LOGGER.info("用户:{},ip:{}", loginUser == null ? null : loginUser.getOpenId(), remoteIp);
         return WebUtils.result(remoteIp);
