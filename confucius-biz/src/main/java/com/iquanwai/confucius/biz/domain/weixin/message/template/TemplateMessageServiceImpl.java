@@ -108,14 +108,14 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
         // 3. 手动发送内容一样的消息，同一个用户最多只能收到一次
         {
-            Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getContentHash().equals(templateMessage.getContent().hashCode())).count();
+            Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getContentHash().equals(Integer.toString(templateMessage.getContent().hashCode()))).count();
             authority = result.intValue() < 1;
             if (!authority) return false;
         }
 
         // 4. 用户每天最多收到2条消息
         {
-            Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getPublishTime().compareTo(new Date()) > 0).count();
+            Long result = customerMessageLogs.stream().filter(messageLog -> DateUtils.isToday(messageLog.getPublishTime())).count();
             authority = result.intValue() < 2;
             if (!authority) return false;
         }
@@ -124,7 +124,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         {
             Date distanceTime = DateUtils.afterHours(new Date(), -3);
             Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getPublishTime().compareTo(distanceTime) > 0).count();
-            authority = result.intValue() < 3;
+            authority = result.intValue() < 1;
             if (!authority) return false;
         }
         return true;

@@ -43,7 +43,7 @@ public class CustomerMessageLogDao extends DBUtil {
 
     public List<CustomerMessageLog> loadByOpenId(String openId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM CustomerMessageLog WHERE OpenId = ?";
+        String sql = "SELECT * FROM CustomerMessageLog WHERE OpenId = ? AND ValidPush = 1";
         ResultSetHandler<List<CustomerMessageLog>> h = new BeanListHandler<>(CustomerMessageLog.class);
         try {
             return runner.query(sql, h, openId);
