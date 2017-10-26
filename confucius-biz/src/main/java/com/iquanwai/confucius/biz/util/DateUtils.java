@@ -156,7 +156,7 @@ public class DateUtils {
     public static boolean isToday(Date date) {
         String cmpDate = date.toString().substring(0, 10);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String today = sdf.format(new Date()).toString().substring(0, 10);
+        String today = sdf.format(new Date()).substring(0, 10);
         return today.equals(cmpDate);
     }
 

@@ -157,6 +157,21 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    /**
+     * 近似查询 MemberId 获取当前学号中最近的一个人
+     */
+    public RiseClassMember loadLatestLikeMemberIdRiseClassMember(String likeMemberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE MemberId LIKE '" + likeMemberId + "%' AND Del = 0 ORDER BY Id DESC Limit 1";
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<RiseClassMember>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public RiseClassMember loadPurchaseRiseClassMember(Integer profileId, String className, MonthlyCampConfig monthlyCampConfig) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND ProfileId = ? AND YEAR = ? AND Month = ? AND Active = 0 AND Del = 0";
