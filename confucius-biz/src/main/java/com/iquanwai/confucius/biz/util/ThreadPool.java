@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -26,8 +25,6 @@ public class ThreadPool {
     private final static int IDLE_TIME = 1;
     private final static int MAX_QUEUE_SIZE = 2000;
     private final static int SLEEP_SECONDS = 60;
-
-    private static ThreadPoolExecutor SINGLE;
 
     public static void execute(Runnable runnable) {
         if (runnable == null) {
@@ -72,14 +69,10 @@ public class ThreadPool {
                 IDLE_TIME, TimeUnit.MINUTES,
                 new ArrayBlockingQueue<>(MAX_QUEUE_SIZE, true),
                 new ThreadPoolExecutor.CallerRunsPolicy());
-        SINGLE = new ThreadPoolExecutor(1, 1,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
 
-    public static ThreadPoolExecutor createSingleThreadExecutor() {
-        return SINGLE;
+    public static ThreadPoolExecutor getThreadExecutor() {
+        return POOL;
     }
 }
