@@ -127,8 +127,85 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         return underCommentArticles;
     }
 
+
+    //每5道题能被点评一次,按时间倒序，只评论30天内
+    //1.获取未点评的作业,去掉求点评的作业
+    //2.计算需要露出的作业数量
+    //3 满足5题一次都没被点评，优先级最高
+    //4.两个月之内要过期的优先级比较高
+
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplications(Integer problemId) {
+        List<RiseWorkInfoDto> underCommentArticles = Lists.newArrayList();
+        //找出小课的所有应用练习包括删除的
+        List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
+        //只评论30天内的文章
+        Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);
+
+        int size = SIZE;
+        //获取求点评的文章
+        List<ApplicationSubmit> applicationSubmitList = Lists.newArrayList();
+        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, size);
+        applicationSubmitList.addAll(list);
+        size = size - list.size();
+
+        if (size > 0) {
+            //已评价用户id
+            List<Integer> profileIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
+                    .map(AsstCoachComment::getProfileId).collect(Collectors.toList());
+            //精英用户id
+            List<Integer> elites = riseMemberDao.eliteMembers().stream()
+                    .map(RiseMember::getProfileId).collect(Collectors.toList());
+
+            //未点评精英=精英-已点评用户
+            List<Integer> unCommentedElite = Lists.newArrayList(elites);
+            unCommentedElite.removeAll(profileIds);
+            list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, unCommentedElite);
+            applicationSubmitList.addAll(list);
+            size = size - list.size();
+            if (size > 0) {
+                //未点评普通=所有-（精英+已点评用户)
+                List<Integer> unCommentedNormal = Lists.newArrayList(elites);
+                unCommentedNormal.addAll(profileIds);
+                list = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, size, date, unCommentedNormal);
+                applicationSubmitList.addAll(list);
+                size = size - list.size();
+                if (size > 0) {
+                    //已点评精英=精英&已点评用户
+                    List<Integer> commentedElite = Lists.newArrayList(elites);
+                    commentedElite.retainAll(profileIds);
+                    list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedElite);
+                    applicationSubmitList.addAll(list);
+                    size = size - list.size();
+                    if (size > 0) {
+                        //已点评精英=已点评用户-精英
+                        List<Integer> commentedNormal = Lists.newArrayList(profileIds);
+                        commentedNormal.removeAll(elites);
+                        list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedNormal);
+                        applicationSubmitList.addAll(list);
+                    }
+                }
+            }
+        }
+
+        applicationSubmitList.stream().forEach(applicationSubmit -> {
+            RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(applicationSubmit);
+            //设置应用练习题目
+            applicationPractices.stream().forEach(applicationPractice -> {
+                if (applicationSubmit.getApplicationId().equals(applicationPractice.getId())) {
+                    riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                }
+            });
+            underCommentArticles.add(riseWorkInfoDto);
+        });
+
+        return underCommentArticles;
+    }
+
+
+
+
+    public List<RiseWorkInfoDto> getUnderCommentApplicationsTest(Integer problemId) {
         List<RiseWorkInfoDto> underCommentArticles = Lists.newArrayList();
         //找出小课的所有应用练习包括删除的
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
