@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.domain.weixin.accessToken;
+package com.iquanwai.confucius.biz.domain.weixin.accesstoken;
 
 
 public interface WeiXinAccessTokenRepo {

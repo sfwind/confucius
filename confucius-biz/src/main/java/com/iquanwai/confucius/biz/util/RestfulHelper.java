@@ -1,18 +1,22 @@
 package com.iquanwai.confucius.biz.util;
 
-import com.iquanwai.confucius.biz.domain.weixin.accessToken.AccessTokenService;
+import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.exception.WeixinException;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import com.rabbitmq.client.TrustEverythingTrustManager;
+import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+
+import javax.annotation.PostConstruct;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyStore;
 
 /**
  * Created by justin on 8/3/16.<br/>
@@ -25,10 +29,22 @@ public class RestfulHelper {
 
     private static OkHttpClient client = new OkHttpClient();
 
-    private MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private MediaType XML = MediaType.parse("text/xml; charset=utf-8");
+    private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static MediaType XML = MediaType.parse("text/xml; charset=utf-8");
 
     private Logger logger = LoggerFactory.getLogger(RestfulHelper.class);
+
+    private OkHttpClient sslClient;
+
+    @PostConstruct
+    public void init() {
+        // 初始化发送mq
+        try {
+            initCert();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
     /**
      * 发起POST请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
@@ -94,9 +110,6 @@ public class RestfulHelper {
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
-//                if(CommonUtils.isError(body)){
-//                    logger.error("execute {} return error, error message is {}", requestUrl, body);
-//                }
                 logger.info("body:{}", body);
                 return body;
             } catch (Exception e) {
@@ -169,44 +182,48 @@ public class RestfulHelper {
         return "";
     }
 
-    public String risePlanChoose(String cookieName, String cookieValue, Integer problemId) {
-        Assert.notNull(problemId);
-        String url = ConfigUtils.domainName() + "/rise/plan/choose/problem/" + problemId;
-        return postRise(url, "{\"default\":\"null\"}", cookieName, cookieValue);
-    }
-
-
-    public String postRise(String url, String json, String cookieName, String cookieValue) {
-//        if (callback == null || callback.getOpenid() == null) {
-//            logger.error("调用rise接口异常，没有身份信息,callbackId:{}", callback != null ? callback.getState() : null);
-//            return "";
-//        }
-//        String cookieName = "";
-//        String cookieValue = "";
-//        if (callback.getAccessToken() != null) {
-//            cookieName = OAuthService.ACCESS_TOKEN_COOKIE_NAME;
-//            cookieValue = callback.getAccessToken();
-//        } else {
-//            cookieName = OAuthService.QUANWAI_TOKEN_COOKIE_NAME;
-//            cookieValue = callback.getPcAccessToken();
-//        }
-        String cookie = cookieName + "=" + cookieValue;
-
-        if (StringUtils.isNotEmpty(url) && StringUtils.isNotEmpty(json)) {
+    public String sslPostXml(String requestUrl, String xml) {
+        logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);
+        if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
             Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(JSON, json))
-                    .addHeader("Cookie", cookie)
+                    .url(requestUrl)
+                    .post(RequestBody.create(XML, xml))
                     .build();
 
             try {
-                Response response = client.newCall(request).execute();
-                return response.body().string();
+                Response response = sslClient.newCall(request).execute();
+                String body = response.body().string();
+                logger.info("body:{}", body);
+                return body;
             } catch (Exception e) {
-                logger.error("execute " + url + " error", e);
+                logger.error(e.getLocalizedMessage(), e);
             }
         }
         return "";
     }
 
+    private void initCert() throws Exception {
+        // 证书密码，默认为商户ID
+        String key = ConfigUtils.getMch_id();
+        // 证书的路径
+        String path = "/data/security/apiclient_cert.p12";
+        // 指定读取证书格式为PKCS12
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        // 读取本机存放的PKCS12证书文件
+        try (FileInputStream instream = new FileInputStream(new File(path))) {
+            // 指定PKCS12的密码(商户ID)
+            keyStore.load(instream, key.toCharArray());
+        }
+        SSLContext sslcontext = SSLContexts
+                .custom()
+                .loadKeyMaterial(keyStore, key.toCharArray())
+                .useTLS()
+                .build();
+        // 指定TLS版本
+        SSLSocketFactory sslSocketFactory = sslcontext.getSocketFactory();
+        // 设置httpclient的SSLSocketFactory
+        sslClient = new OkHttpClient.Builder().sslSocketFactory(sslSocketFactory,
+                new TrustEverythingTrustManager()).build();
+
+    }
 }

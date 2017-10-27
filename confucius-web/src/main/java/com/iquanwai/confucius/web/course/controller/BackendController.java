@@ -10,12 +10,10 @@ import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessage
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
-import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.Constants;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.web.course.dto.backend.*;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -28,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.ref.SoftReference;
@@ -62,17 +59,6 @@ public class BackendController {
     private MessageService messageService;
     @Autowired
     private MonthlyCampService monthlyCampService;
-    @Autowired
-    private RabbitMQFactory rabbitMQFactory;
-
-    private RabbitMQPublisher rabbitMQPublisher;
-
-
-    @PostConstruct
-    public void init() {
-        rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
-    }
-
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> log(HttpServletRequest request, LoginUser loginUser, @RequestBody ErrorLogDto errorLogDto) {
@@ -131,13 +117,13 @@ public class BackendController {
     @RequestMapping("/graduate/{classId}")
     public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId) {
         LOGGER.info("classId {} graduate start", classId);
-        new Thread(() -> {
+        ThreadPool.execute(() -> {
             try {
                 courseProgressService.graduate(classId);
             } catch (Exception e) {
                 LOGGER.error("触发毕业失败", e);
             }
-        }).start();
+        });
         return WebUtils.result("正在运行中");
     }
 
@@ -155,7 +141,7 @@ public class BackendController {
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
-        new Thread(() -> {
+        ThreadPool.execute(() -> {
             try {
                 List<String> openids = noticeMsgDto.getOpenids();
                 openids.forEach(openid -> {
@@ -215,14 +201,14 @@ public class BackendController {
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
-        }).start();
+        });
         return WebUtils.result("正在运行中");
     }
 
     @RequestMapping(value = "/system/msg", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> systemMsg(@RequestBody SystemMsgDto systemMsgDto) {
         Assert.notNull(systemMsgDto.getMessage(), "消息不能为空");
-        new Thread(() -> {
+        ThreadPool.execute(() -> {
             try {
                 List<Integer> profileIds = systemMsgDto.getProfileIds();
                 profileIds.forEach(profileId -> messageService.sendMessage(systemMsgDto.getMessage(),
@@ -230,14 +216,14 @@ public class BackendController {
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
-        }).start();
+        });
         return WebUtils.result("正在运行中");
     }
 
     @RequestMapping(value = "/customer/msg", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> customerMsg(@RequestBody CustomerMsgDto customerMsgDto) {
         Assert.notNull(customerMsgDto.getMessage(), "消息不能为空");
-        new Thread(() -> {
+        ThreadPool.execute(() -> {
             try {
                 List<String> openIds = customerMsgDto.getOpenids();
                 String message = customerMsgDto.getMessage();
@@ -250,7 +236,7 @@ public class BackendController {
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
-        }).start();
+        });
         return WebUtils.result("正在运行中");
     }
 
@@ -288,27 +274,6 @@ public class BackendController {
         }
     }
 
-    @RequestMapping(value = "/refresh/users", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> loginUsersList(@RequestBody RefreshLoginUserDto refreshLoginUserDto) {
-        new Thread(() -> {
-            try {
-                List<String> openIds = refreshLoginUserDto.getOpenIds();
-                openIds.forEach(openid -> {
-                    try {
-                        rabbitMQPublisher.publish(openid);
-                        //防止队列阻塞
-                        Thread.sleep(50);
-                    } catch (Exception e) {
-                        LOGGER.error(e.getLocalizedMessage(), e);
-                    }
-                });
-            } catch (Exception e) {
-                LOGGER.error("发送通知失败", e);
-            }
-        }).start();
-        return WebUtils.result("正在运行中");
-    }
-
     @RequestMapping(value = "/batch/open/camp")
     public ResponseEntity<Map<String, Object>> batchForceOpenMonthlyCamp(@RequestBody BatchOpenCourseDto batchOpenCourseDto) {
         OperationLog operationLog = OperationLog.create().module("后台功能").function("批量开始课程")
@@ -324,8 +289,7 @@ public class BackendController {
 
         boolean validation = monthlyCampService.validForceOpenCourse(month, problemId);
         if (validation) {
-            Thread thread = new Thread(() -> monthlyCampService.batchForceOpenCourse(problemId, startDate, closeDate));
-            thread.start();
+            ThreadPool.execute(() -> monthlyCampService.batchForceOpenCourse(problemId, startDate, closeDate));
             return WebUtils.result("开课进行中");
         } else {
             return WebUtils.error("开课校验失败");

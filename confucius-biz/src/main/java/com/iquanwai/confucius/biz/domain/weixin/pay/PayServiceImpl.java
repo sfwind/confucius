@@ -31,7 +31,6 @@ import java.util.Map;
 @Service
 public class PayServiceImpl implements PayService {
     private Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
@@ -51,6 +50,7 @@ public class PayServiceImpl implements PayService {
 
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
+    private static final String FAIL = "FAIL";
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
@@ -380,5 +380,56 @@ public class PayServiceImpl implements PayService {
         goodsDetail.setGoods_num(1);
         goodsDetailList.add(goodsDetail);
         return new Gson().toJson(orderDetail);
+    }
+
+    @Override
+    public void refund(String orderId, Double fee){
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        RefundOrder refundOrder = buildRefundOrder(quanwaiOrder, fee);
+        String response = restfulHelper.sslPostXml(REFUND_ORDER_URL, XMLHelper.createXML(refundOrder));
+
+        RefundOrderReply reply = XMLHelper.parseXml(RefundOrderReply.class, response);
+        if (reply != null) {
+            if (FAIL.equals(reply.getReturn_code()) || FAIL.equals(reply.getResult_code())) {
+                logger.error("response is------\n" + response);
+                messageService.sendAlarm("退款出错", "退款接口调用失败",
+                        "高", "订单id:" + orderId, "msg:"+reply.getReturn_msg()+", error:"+reply.getErr_code_des());
+            } else {
+                quanwaiOrderDao.refundOrder(orderId, fee, refundOrder.getOut_refund_no());
+            }
+
+        }
+    }
+
+    private RefundOrder buildRefundOrder(QuanwaiOrder quanwaiOrder, Double fee) {
+        RefundOrder refundOrder = new RefundOrder();
+        Map<String, String> map = Maps.newHashMap();
+        String appid = ConfigUtils.getAppid();
+        map.put("appid", appid);
+        String mch_id = ConfigUtils.getMch_id();
+        map.put("mch_id", mch_id);
+        String nonce_str = CommonUtils.randomString(16);
+        map.put("nonce_str", nonce_str);
+        String out_trade_no = quanwaiOrder.getOrderId();
+        map.put("out_trade_no", out_trade_no);
+        String out_refund_no = CommonUtils.randomString(16);
+        map.put("out_refund_no", out_refund_no);
+        Integer total_fee = (int) (quanwaiOrder.getPrice() * 100);
+        map.put("total_fee", total_fee.toString());
+        Integer refund_fee = (int) (fee * 100);
+        map.put("refund_fee", refund_fee.toString());
+
+        String sign = CommonUtils.sign(map);
+
+        refundOrder.setAppid(appid);
+        refundOrder.setMch_id(mch_id);
+        refundOrder.setNonce_str(nonce_str);
+        refundOrder.setOut_trade_no(out_trade_no);
+        refundOrder.setTotal_fee(total_fee);
+        refundOrder.setRefund_fee(refund_fee);
+        refundOrder.setOut_refund_no(out_refund_no);
+        refundOrder.setSign(sign);
+
+        return refundOrder;
     }
 }
