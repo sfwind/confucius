@@ -53,19 +53,6 @@ public class QuanwaiOrderDao extends DBUtil {
         return null;
     }
 
-    public List<QuanwaiOrder> loadActiveOrders(String openId){
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler<>(QuanwaiOrder.class);
-
-        try {
-            return run.query("SELECT * FROM QuanwaiOrder where Openid=? and Status=0", h, openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
-    }
-
     public QuanwaiOrder loadCampOrBusinessOrder(String openId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "Select * from QuanwaiOrder where Openid = ? and (GoodsType = 'fragment_member' or GoodsType = 'fragment_camp')";
@@ -113,27 +100,12 @@ public class QuanwaiOrderDao extends DBUtil {
         }
     }
 
-    public List<QuanwaiOrder> queryUnderCloseOrders(Date openTime) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler<>(QuanwaiOrder.class);
-
-        try {
-            List<QuanwaiOrder> orderList = run.query("SELECT * FROM QuanwaiOrder where Status=0 and createTime<=? ",
-                    h, openTime);
-            return orderList;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
-    }
-
-    public void closeOrder(String orderId){
+    public void refundOrder(String orderId, Double refundFee, String refundOrderId){
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
-            run.update("UPDATE QuanwaiOrder SET Status=2 " +
-                    "where OrderId=?", orderId);
+            run.update("UPDATE QuanwaiOrder SET Status=3, RefundFee=?, RefundOrderId=? " +
+                    "where OrderId=?", refundFee, refundOrderId, orderId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

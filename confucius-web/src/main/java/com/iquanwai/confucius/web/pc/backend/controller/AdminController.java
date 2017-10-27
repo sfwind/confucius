@@ -2,10 +2,12 @@ package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.zk.ConfigNode;
 import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import com.iquanwai.confucius.web.pc.backend.dto.ConfigDto;
+import com.iquanwai.confucius.web.pc.backend.dto.RefundDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ import java.util.Map;
 public class AdminController {
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private PayService payService;
 
     @Autowired
     private ZKConfigUtils zkConfigUtils;
@@ -103,6 +107,23 @@ public class AdminController {
                 .function("后台配置")
                 .action("删除配置项")
                 .memo(configDto.getKey());
+        operationLogService.log(operationLog);
+
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/refund", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> refund(PCLoginUser pcLoginUser,
+                                                            @RequestBody RefundDto refundDto) {
+
+        Assert.notNull(pcLoginUser, "用户不能为空");
+        payService.refund(refundDto.getOrderId(), Double.parseDouble(refundDto.getFee()));
+
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                .module("管理员")
+                .function("退款")
+                .action("退款")
+                .memo(refundDto.getOrderId());
         operationLogService.log(operationLog);
 
         return WebUtils.success();

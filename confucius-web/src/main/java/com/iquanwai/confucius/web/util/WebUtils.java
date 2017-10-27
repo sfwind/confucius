@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.util;
 
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class WebUtils {
     private static Logger logger = LoggerFactory.getLogger(WebUtils.class);
 
     public static ResponseEntity<Map<String, Object>> success() {
-        Map<String, Object> json = new HashMap<String, Object>();
+        Map<String, Object> json = Maps.newHashMap();
         json.put("code", 200);
         json.put("msg", "ok");
 
@@ -29,7 +30,7 @@ public class WebUtils {
     }
 
     public static ResponseEntity<Map<String, Object>> result(Object result) {
-        Map<String, Object> json = new HashMap<String, Object>();
+        Map<String, Object> json = Maps.newHashMap();
         json.put("code", 200);
         json.put("msg", result);
 
@@ -37,7 +38,7 @@ public class WebUtils {
     }
 
     public static ResponseEntity<Map<String, Object>> error(Object msg) {
-        Map<String, Object> json = new HashMap<String, Object>();
+        Map<String, Object> json = Maps.newHashMap();
         json.put("code", 221);
         json.put("msg", msg);
 
@@ -45,7 +46,7 @@ public class WebUtils {
     }
 
     public static ResponseEntity<Map<String, Object>> error(int code, Object msg) {
-        Map<String, Object> json = new HashMap<String, Object>();
+        Map<String, Object> json = Maps.newHashMap();
         json.put("code", code);
         json.put("msg", msg);
 
@@ -53,7 +54,7 @@ public class WebUtils {
     }
 
     public static ResponseEntity<Map<String, Object>> error(int code, Object msg, HttpStatus status) {
-        Map<String, Object> json = new HashMap<String, Object>();
+        Map<String, Object> json = Maps.newHashMap();
         json.put("code", code);
         json.put("msg", msg);
 
