@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.TestBase;
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.FragmentAnalysisDataDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.HomeworkVoteDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nethunder on 2017/1/2.
@@ -30,6 +32,8 @@ public class ProblemDaoTest extends TestBase {
     private SurveyQuestionSubmitDao surveyQuestionSubmitDao;
     @Autowired
     private FragmentAnalysisDataDao fragmentAnalysisDataDao;
+    @Autowired
+    private ApplicationSubmitDao applicationSubmitDao;
 
     @Test
     public void timeTest(){
@@ -61,5 +65,11 @@ public class ProblemDaoTest extends TestBase {
         FragmentDailyData dailyData = fragmentAnalysisDataDao.getDailyData();
         System.out.println(dailyData);
         fragmentAnalysisDataDao.insertDailyData(dailyData);
+    }
+
+    @Test
+    public void testLoad(){
+        Map<Integer, Integer> integerIntegerMap = applicationSubmitDao.loadUserSubmitCount();
+        System.out.println(integerIntegerMap);
     }
 }

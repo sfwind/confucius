@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.domain.asst.UnderCommentCount;
+import com.iquanwai.confucius.biz.po.ProfileCount;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.collections.CollectionUtils;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nethunder on 2017/1/13.
@@ -44,9 +47,10 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     /**
      * 查询用户提交记录
+     *
      * @param applicationId 应用练习id
-     * @param planId 计划id
-     * @param openid openid
+     * @param planId        计划id
+     * @param openid        openid
      */
     public ApplicationSubmit load(Integer applicationId, Integer planId, String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
@@ -202,7 +206,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         String questionMark = produceQuestionMark(profileIds.size());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId in (" + questionMark + ") and Del=0 " +
+                "and Feedback=0 and RequestFeedback =0 and Length >= 15 and AddTime>? and ProfileId in (" + questionMark + ") and Del=0 " +
                 "order by length desc limit " + size;
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
@@ -217,13 +221,30 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<ApplicationSubmit> batchLoadApplications(List<Integer> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(ids.size());
+        String sql = "select * from ApplicationSubmit where Id in (" + questionMark + ") and Del = 0";
+        List<Object> param = Lists.newArrayList();
+        param.addAll(ids);
+        try {
+            return runner.query(sql, new BeanListHandler<ApplicationSubmit>(ApplicationSubmit.class), param.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<ApplicationSubmit> loadUnderCommentApplicationsExcludeSomeone(Integer problemId, int size, Date date,
                                                                               List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(profileIds.size());
         if (profileIds.size() != 0) {
-            String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and ProfileId not in (" + questionMark + ") and Del=0 " +
+            String sql = "select Id,Openid, ProfileId, ApplicationId, PlanId, ProblemId, PointStatus, PublishTime, LastModifiedTime, Priority, HighlightTime, RequestFeedback, Feedback, Length, Del, AddTime, UpdateTime from ApplicationSubmit where ProblemId =? " +
+                    "and Feedback=0 and RequestFeedback =0 and Length >= 15 and AddTime>? and ProfileId not in (" + questionMark + ") and Del=0 " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
@@ -238,8 +259,8 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
                 logger.error(e.getLocalizedMessage(), e);
             }
         } else {
-            String sql = "select * from ApplicationSubmit where ProblemId =? " +
-                    "and Feedback=0 and RequestFeedback =0 and AddTime>? and Del=0 " +
+            String sql = "select Id,Openid, ProfileId, ApplicationId, PlanId, ProblemId, PointStatus, PublishTime, LastModifiedTime, Priority, HighlightTime, RequestFeedback, Feedback, Length, Del, AddTime, UpdateTime from ApplicationSubmit where ProblemId =? " +
+                    "and Feedback=0 and RequestFeedback =0 and Length >= 15 and AddTime>? and Del=0 " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
 
@@ -331,5 +352,20 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public Map<Integer, Integer> loadUserSubmitCount() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT ProfileId,count(*) Count from ApplicationSubmit WHERE Del = 0 Group By ProfileId Having count(*) >= 5";
+        Map<Integer, Integer> map = Maps.newHashMap();
+        try {
+            List<ProfileCount> query = runner.query(sql, new BeanListHandler<ProfileCount>(ProfileCount.class));
+            query.forEach(item -> map.put(item.getProfileId(), item.getCount()));
+            return map;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return map;
+    }
+
 
 }
