@@ -165,9 +165,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             List<AsstCoachComment> asstCoachComments = asstCoachCommentDao.loadCommentedStudent(problemId);
             //已被教练评价用户id
             List<Integer> coachProfileIds = asstCoachComments.stream().map(AsstCoachComment::getProfileId).collect(Collectors.toList());
-            // 取出最近一个月的作业,上限1万条
+            // 取出最近一个月的作业,上限3000条
             long start = System.currentTimeMillis();
-            List<ApplicationSubmit> baseSubmits = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, 10000, date, coachProfileIds.stream().limit(5000).collect(Collectors.toList()));
+            List<ApplicationSubmit> baseSubmits = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, 3000, date, coachProfileIds
+                    .stream().limit(3000).filter(item -> !coachProfileIds.contains(item)).collect(Collectors.toList()));
             long end = System.currentTimeMillis();
             System.out.println("time:" + (end - start) / 1000);
             // 删掉内容，减轻内存压力
