@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.SubjectArticleDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.ProfileCount;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
@@ -161,9 +162,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         applicationSubmitList.addAll(list);
         if (applicationSubmitList.size() < SIZE) {
             // level2
-            List<AsstCoachComment> asstCoachComments = asstCoachCommentDao.loadCommentedStudent(problemId);
+            List<ProfileCount> asstCoachComments = asstCoachCommentDao.loadCommented();
             //已被教练评价用户id
-            List<Integer> coachProfileIds = asstCoachComments.stream().map(AsstCoachComment::getProfileId).collect(Collectors.toList());
+            List<Integer> coachProfileIds = asstCoachComments.stream().map(ProfileCount::getProfileId).collect(Collectors.toList());
             // 取出最近一个月的作业,上限3000条
             List<ApplicationSubmit> baseSubmits = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, 3000, date, coachProfileIds
                     .stream().limit(3000).filter(item -> !coachProfileIds.contains(item)).collect(Collectors.toList()));
@@ -177,7 +178,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             Map<Integer, Integer> shouldComment = Maps.newHashMap();
             userSubmitCount.keySet().forEach(item -> {
                 int shouldCount = Double.valueOf(Math.ceil(userSubmitCount.get(item) / 5.0d)).intValue();
-                Optional<AsstCoachComment> comment = asstCoachComments.stream().filter(tempItem -> tempItem.getProfileId().equals(item)).findFirst();
+                Optional<ProfileCount> comment = asstCoachComments.stream().filter(tempItem -> tempItem.getProfileId().equals(item)).findFirst();
                 int commentCount = comment.isPresent() ? comment.get().getCount() : 0;
                 if (commentCount < shouldCount) {
                     shouldComment.put(item, shouldCount - commentCount);

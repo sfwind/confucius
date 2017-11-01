@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.po.ProfileCount;
 import com.iquanwai.confucius.biz.po.fragmentation.AsstCoachComment;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -22,7 +23,7 @@ import java.util.List;
 public class AsstCoachCommentDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public List<AsstCoachComment> loadCommentedStudent(Integer problemId){
+    public List<AsstCoachComment> loadCommentedStudent(Integer problemId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<AsstCoachComment>> h = new BeanListHandler<>(AsstCoachComment.class);
         String sql = "SELECT * FROM AsstCoachComment where ProblemId=? And Del =0";
@@ -34,7 +35,19 @@ public class AsstCoachCommentDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public AsstCoachComment loadAsstCoachComment(Integer problemId, Integer profileId){
+    public List<ProfileCount> loadCommented() {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ProfileCount>> h = new BeanListHandler<>(ProfileCount.class);
+        String sql = "select ProfileId,SUM(Count) Count from AsstCoachComment where Del =0 group by ProfileId";
+        try {
+            return run.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public AsstCoachComment loadAsstCoachComment(Integer problemId, Integer profileId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<AsstCoachComment> h = new BeanHandler<>(AsstCoachComment.class);
         String sql = "SELECT * FROM AsstCoachComment where ProblemId=? and ProfileId=? And Del =0";
@@ -46,7 +59,7 @@ public class AsstCoachCommentDao extends PracticeDBUtil {
         return null;
     }
 
-    public void insert(AsstCoachComment asstCoachComment){
+    public void insert(AsstCoachComment asstCoachComment) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "insert into AsstCoachComment(Openid, ProfileId, Count, ProblemId) " +
                 "VALUES (?,?,?,?)";
@@ -59,7 +72,7 @@ public class AsstCoachCommentDao extends PracticeDBUtil {
         }
     }
 
-    public void updateCount(AsstCoachComment asstCoachComment){
+    public void updateCount(AsstCoachComment asstCoachComment) {
         QueryRunner run = new QueryRunner(getDataSource());
         String updateSql = "Update AsstCoachComment set Count=? where Id=?";
         try {
