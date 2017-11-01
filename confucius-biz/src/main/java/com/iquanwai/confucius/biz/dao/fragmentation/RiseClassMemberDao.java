@@ -93,6 +93,21 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return null;
     }
 
+    /**
+     * 获取对应年月下的所有有效数据
+     */
+    public List<RiseClassMember> loadAllByYearMonth(Integer year, Integer month) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE Year = ? AND Month = ? AND Del = 0";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, year, month);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<RiseClassMember> loadActiveRiseClassMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE Active = 1 AND Del = 0";
@@ -124,6 +139,20 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         objects.addAll(ids);
         try {
             return runner.update(sql, objects.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    /**
+     * 将对应年月下的有效人员的 Active 字段置为 1
+     */
+    public int batchUpdateActive(Integer year, Integer month, Integer active) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE RiseClassMember SET Active = ? WHERE Year = ? AND Month = ? AND Del = 0";
+        try {
+            return runner.update(sql, active, year, month);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

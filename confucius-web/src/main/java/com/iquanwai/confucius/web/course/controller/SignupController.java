@@ -17,7 +17,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
-import com.iquanwai.confucius.web.course.dto.MonthlyCampDto;
+import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
 import com.iquanwai.confucius.web.course.dto.payment.BusinessSchoolDto;
 import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
@@ -473,7 +473,7 @@ public class SignupController {
     @RequestMapping(value = "/current/camp/month", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> validateCampUrl(LoginUser loginUser) {
         Assert.notNull(loginUser, "登录用户不能为空");
-        MonthlyCampDto dto = new MonthlyCampDto();
+        MonthlyCampProcessDto dto = new MonthlyCampProcessDto();
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         Integer currentCampMonth = signupService.loadCurrentCampMonth(monthlyCampConfig);
         dto.setMarKSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
