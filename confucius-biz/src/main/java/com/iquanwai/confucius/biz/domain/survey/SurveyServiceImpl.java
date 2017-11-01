@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by nethunder on 2017/1/17.
+ * @author nethunder
+ * @version 2017/1/17
  */
 @Service
 public class SurveyServiceImpl implements SurveyService {

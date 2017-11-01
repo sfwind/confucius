@@ -3,7 +3,8 @@ package com.iquanwai.confucius.biz.domain.asst;
 import lombok.Data;
 
 /**
- * Created by justin on 17/5/8.
+ * @author justin
+ * @version 17/5/8
  */
 @Data
 public class UnderCommentCount {

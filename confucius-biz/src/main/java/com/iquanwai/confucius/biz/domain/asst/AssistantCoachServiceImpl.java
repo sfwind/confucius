@@ -35,7 +35,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Created by justin on 17/4/26.
+ * @author justin
+ * @version 17/4/26
  */
 @Service
 public class AssistantCoachServiceImpl implements AssistantCoachService {
@@ -71,9 +72,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<Comment> sortedComment = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime)).collect(Collectors.toList());
         Map<String, Comment> filterMap = Maps.newHashMap();
         sortedComment.forEach(comment -> {
-            if (filterMap.get(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString()) == null) {
-                filterMap.put(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
-            }
+            filterMap.putIfAbsent(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
         });
         Long todayCommentCnt = Lists.newArrayList(filterMap.values()).stream().filter(comment -> DateUtils.isToday(comment.getAddTime()))
                 .distinct().count();
@@ -132,7 +131,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             }
         }
 
-        subjectArticles.stream().forEach(subjectArticle -> {
+        subjectArticles.forEach(subjectArticle -> {
             RiseWorkInfoDto riseWorkInfoDto = buildSubjectArticle(subjectArticle);
             underCommentArticles.add(riseWorkInfoDto);
         });
@@ -279,7 +278,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
 
         List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
-        if (profiles.size() == 0) return Lists.newArrayList();
+        if (profiles.size() == 0) {
+            return Lists.newArrayList();
+        }
 
         List<Integer> profileIds = Lists.newArrayList();
         for (Profile profile : profiles) {
@@ -292,7 +293,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
         for (ApplicationSubmit submit : submits) {
             RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
-            applicationPractices.stream().forEach(applicationPractice -> {
+            applicationPractices.forEach(applicationPractice -> {
                 if (submit.getApplicationId().equals(applicationPractice.getId())) {
                     riseWorkInfoDto.setTitle(applicationPractice.getTopic());
                 }
@@ -316,7 +317,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                 List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
                 for (ApplicationSubmit submit : submits) {
                     RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
-                    applicationPractices.stream().forEach(applicationPractice -> {
+                    applicationPractices.forEach(applicationPractice -> {
                         if (submit.getApplicationId().equals(applicationPractice.getId())) {
                             riseWorkInfoDto.setTitle(applicationPractice.getTopic());
                         }
@@ -332,9 +333,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     public Map<Integer, Integer> getUnderCommentApplicationCount() {
         List<UnderCommentCount> underCommentCounts = applicationSubmitDao.getUnderCommentCount();
         Map<Integer, Integer> countMap = Maps.newHashMap();
-        underCommentCounts.stream().forEach(underCommentCount -> {
-            countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount());
-        });
+        underCommentCounts.forEach(underCommentCount -> countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount()));
         return countMap;
     }
 
@@ -342,9 +341,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     public Map<Integer, Integer> getUnderCommentSubjectArticleCount() {
         List<UnderCommentCount> underCommentCounts = subjectArticleDao.getUnderCommentCount();
         Map<Integer, Integer> countMap = Maps.newHashMap();
-        underCommentCounts.stream().forEach(underCommentCount -> {
-            countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount());
-        });
+        underCommentCounts.forEach(underCommentCount -> countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount()));
         return countMap;
     }
 
@@ -356,7 +353,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<Integer> subjectArticleIdsList = Lists.newArrayList();
         List<Integer> applicationSubmitIdsList = Lists.newArrayList();
 
-        comments.stream().forEach(comment -> {
+        comments.forEach(comment -> {
             if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
                 applicationSubmitIdsList.add(comment.getReferencedId());
             } else if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
@@ -368,7 +365,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.loadSubmits(applicationSubmitIdsList);
 
         //按照评论顺序,组装RiseWorkInfoDto
-        comments.stream().forEach(comment -> {
+        comments.forEach(comment -> {
             if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
                 for (SubjectArticle subjectArticle : subjectArticleList) {
                     if (subjectArticle.getId().equals(comment.getReferencedId())) {
@@ -390,11 +387,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
         //过滤重复的文章
         Map<String, RiseWorkInfoDto> filterMap = Maps.newLinkedHashMap();
-        riseWorkInfoDtos.forEach(riseWorkInfoDto -> {
-            if (filterMap.get(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString()) == null) {
-                filterMap.put(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString(), riseWorkInfoDto);
-            }
-        });
+        riseWorkInfoDtos.forEach(riseWorkInfoDto -> filterMap.putIfAbsent(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString(), riseWorkInfoDto));
 
         return Lists.newArrayList(filterMap.values());
     }

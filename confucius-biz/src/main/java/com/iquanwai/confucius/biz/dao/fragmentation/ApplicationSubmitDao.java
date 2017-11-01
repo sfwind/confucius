@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by nethunder on 2017/1/13.
+ * @author nethunder
+ * @version 2017/1/13
  */
 @Repository
 public class ApplicationSubmitDao extends PracticeDBUtil {
