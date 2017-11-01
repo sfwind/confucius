@@ -35,12 +35,12 @@ public class AsstCoachCommentDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ProfileCount> loadCommented() {
+    public List<ProfileCount> loadCommented(Integer problemId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ProfileCount>> h = new BeanListHandler<>(ProfileCount.class);
-        String sql = "select ProfileId,SUM(Count) Count from AsstCoachComment where Del =0 group by ProfileId";
+        String sql = "select ProfileId,SUM(Count) Count from AsstCoachComment where Del =0 and ProblemId = ? group by ProfileId";
         try {
-            return run.query(sql, h);
+            return run.query(sql, h, problemId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

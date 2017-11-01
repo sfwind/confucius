@@ -354,12 +354,12 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public Map<Integer, Integer> loadUserSubmitCount() {
+    public Map<Integer, Integer> loadUserSubmitCount(Integer problemId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT ProfileId,count(*) Count from ApplicationSubmit WHERE Del = 0 and Length >= 15 Group By ProfileId Having count(*) >= 5";
+        String sql = "SELECT ProfileId,count(*) Count from ApplicationSubmit WHERE Del = 0 and ProblemId = ? and Length >= 15 Group By ProfileId Having count(*) >= 5";
         Map<Integer, Integer> map = Maps.newHashMap();
         try {
-            List<ProfileCount> query = runner.query(sql, new BeanListHandler<ProfileCount>(ProfileCount.class));
+            List<ProfileCount> query = runner.query(sql, new BeanListHandler<ProfileCount>(ProfileCount.class), problemId);
             query.forEach(item -> map.put(item.getProfileId(), item.getCount()));
             return map;
         } catch (SQLException e) {

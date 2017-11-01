@@ -162,7 +162,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         applicationSubmitList.addAll(list);
         if (applicationSubmitList.size() < SIZE) {
             // level2
-            List<ProfileCount> asstCoachComments = asstCoachCommentDao.loadCommented();
+            List<ProfileCount> asstCoachComments = asstCoachCommentDao.loadCommented(problemId);
             //已被教练评价用户id
             List<Integer> coachProfileIds = asstCoachComments.stream().map(ProfileCount::getProfileId).collect(Collectors.toList());
             // 取出最近一个月的作业,上限3000条
@@ -173,7 +173,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             // 每个人提交的作业
             Map<Integer, List<ApplicationSubmit>> submitGroup = baseSubmits.stream().collect(Collectors.groupingBy(ApplicationSubmit::getProfileId));
             // 计算作业题数量，这些人是超过5个的,不超过5个按照1个算
-            Map<Integer, Integer> userSubmitCount = applicationSubmitDao.loadUserSubmitCount();
+            Map<Integer, Integer> userSubmitCount = applicationSubmitDao.loadUserSubmitCount(problemId);
             // 需要被点评的个数
             Map<Integer, Integer> shouldComment = Maps.newHashMap();
             userSubmitCount.keySet().forEach(item -> {
