@@ -356,7 +356,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public Map<Integer, Integer> loadUserSubmitCount() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT ProfileId,count(*) Count from ApplicationSubmit WHERE Del = 0 Group By ProfileId Having count(*) >= 5";
+        String sql = "SELECT ProfileId,count(*) Count from ApplicationSubmit WHERE Del = 0 and Length >= 15 Group By ProfileId Having count(*) >= 5";
         Map<Integer, Integer> map = Maps.newHashMap();
         try {
             List<ProfileCount> query = runner.query(sql, new BeanListHandler<ProfileCount>(ProfileCount.class));
