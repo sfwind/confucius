@@ -258,8 +258,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         }
 
         List<ApplicationSubmit> applicationSubmits = applicationSubmitDao.batchLoadApplications(applicationSubmitList.stream().map(ApplicationSubmit::getId).collect(Collectors.toList()));
-
-        applicationSubmits.forEach(applicationSubmit -> {
+        applicationSubmitList.forEach(applicationSubmit -> {
+            Optional<ApplicationSubmit> first = applicationSubmits.stream().filter(item -> item.getId() == applicationSubmit.getId()).findFirst();
+            first.ifPresent(applicationSubmit1 -> applicationSubmit.setContent(applicationSubmit1.getContent()));
             RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(applicationSubmit);
             //设置应用练习题目
             applicationPractices.forEach(applicationPractice -> {
