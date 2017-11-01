@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -24,7 +23,7 @@ public class MessageQueueDao extends DBUtil {
 
     public int insert(MessageQueue message){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(ThreadPool.createSingleThreadExecutor(), run);
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(ThreadPool.getThreadExecutor(), run);
         try {
             String insertSql = "INSERT INTO MessageQueue(MsgId, Topic, Queue, Message) VALUES (?,?,?,?)";
             Future<Integer> result = asyncRun.update(insertSql, message.getMsgId(),

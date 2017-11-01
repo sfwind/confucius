@@ -301,8 +301,7 @@ public class SignupServiceImpl implements SignupService {
         coupon.setAmount(MONTHLY_CAMP_COUPON);
         coupon.setUsed(0);
         coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 2));
-        coupon.setCategory("ELITE_RISE_MEMBER");
-        coupon.setDescription("会员抵用券");
+        coupon.setDescription("优惠券");
         couponDao.insert(coupon);
         // 更新订单状态
         monthlyCampOrderDao.entry(orderId);
