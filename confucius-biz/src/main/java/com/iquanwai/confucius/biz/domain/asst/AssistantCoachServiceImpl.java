@@ -3,11 +3,22 @@ package com.iquanwai.confucius.biz.domain.asst;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.AsstCoachCommentDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.SubjectArticleDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.AsstCoachComment;
+import com.iquanwai.confucius.biz.po.fragmentation.Comment;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
@@ -20,10 +31,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Created by justin on 17/4/26.
+ * @author justin
+ * @version 17/4/26
  */
 @Service
 public class AssistantCoachServiceImpl implements AssistantCoachService {
@@ -44,7 +57,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
 
-    private static final int SIZE = 50;
+    private static final int SIZE = 100;
 
     //最近30天
     private static final int PREVIOUS_DAY = 30;
@@ -59,9 +72,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<Comment> sortedComment = commentList.stream().sorted(Comparator.comparing(Comment::getAddTime)).collect(Collectors.toList());
         Map<String, Comment> filterMap = Maps.newHashMap();
         sortedComment.forEach(comment -> {
-            if (filterMap.get(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString()) == null) {
-                filterMap.put(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
-            }
+            filterMap.putIfAbsent(comment.getReferencedId().toString() + "-" + comment.getModuleId().toString(), comment);
         });
         Long todayCommentCnt = Lists.newArrayList(filterMap.values()).stream().filter(comment -> DateUtils.isToday(comment.getAddTime()))
                 .distinct().count();
@@ -120,12 +131,19 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             }
         }
 
-        subjectArticles.stream().forEach(subjectArticle -> {
+        subjectArticles.forEach(subjectArticle -> {
             RiseWorkInfoDto riseWorkInfoDto = buildSubjectArticle(subjectArticle);
             underCommentArticles.add(riseWorkInfoDto);
         });
         return underCommentArticles;
     }
+
+
+    //每5道题能被点评一次,按时间倒序，只评论30天内
+    //1.获取未点评的作业,去掉求点评的作业
+    //2.计算需要露出的作业数量
+    //3 满足5题一次都没被点评，优先级最高
+    //4.两个月之内要过期的优先级比较高
 
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplications(Integer problemId) {
@@ -135,56 +153,113 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         //只评论30天内的文章
         Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);
 
-        int size = SIZE;
         //获取求点评的文章
         List<ApplicationSubmit> applicationSubmitList = Lists.newArrayList();
-        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, size);
+        List<ApplicationSubmit> list = applicationSubmitDao.loadRequestCommentApplications(problemId, SIZE);
+        // 求点评的放在最上边
+        // level1
         applicationSubmitList.addAll(list);
-        size = size - list.size();
-
-        if (size > 0) {
-            //已评价用户id
-            List<Integer> profileIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
-                    .map(AsstCoachComment::getProfileId).collect(Collectors.toList());
-            //精英用户id
-            List<Integer> elites = riseMemberDao.eliteMembers().stream()
-                    .map(RiseMember::getProfileId).collect(Collectors.toList());
-
-            //未点评精英=精英-已点评用户
-            List<Integer> unCommentedElite = Lists.newArrayList(elites);
-            unCommentedElite.removeAll(profileIds);
-            list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, unCommentedElite);
-            applicationSubmitList.addAll(list);
-            size = size - list.size();
-            if (size > 0) {
-                //未点评普通=所有-（精英+已点评用户)
-                List<Integer> unCommentedNormal = Lists.newArrayList(elites);
-                unCommentedNormal.addAll(profileIds);
-                list = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, size, date, unCommentedNormal);
-                applicationSubmitList.addAll(list);
-                size = size - list.size();
-                if (size > 0) {
-                    //已点评精英=精英&已点评用户
-                    List<Integer> commentedElite = Lists.newArrayList(elites);
-                    commentedElite.retainAll(profileIds);
-                    list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedElite);
-                    applicationSubmitList.addAll(list);
-                    size = size - list.size();
-                    if (size > 0) {
-                        //已点评精英=已点评用户-精英
-                        List<Integer> commentedNormal = Lists.newArrayList(profileIds);
-                        commentedNormal.removeAll(elites);
-                        list = applicationSubmitDao.loadUnderCommentApplicationsIncludeSomeone(problemId, size, date, commentedNormal);
-                        applicationSubmitList.addAll(list);
+        if (applicationSubmitList.size() < SIZE) {
+            // level2
+            List<AsstCoachComment> asstCoachComments = asstCoachCommentDao.loadCommentedStudent(problemId);
+            //已被教练评价用户id
+            List<Integer> coachProfileIds = asstCoachComments.stream().map(AsstCoachComment::getProfileId).collect(Collectors.toList());
+            // 取出最近一个月的作业,上限3000条
+            List<ApplicationSubmit> baseSubmits = applicationSubmitDao.loadUnderCommentApplicationsExcludeSomeone(problemId, 3000, date, coachProfileIds
+                    .stream().limit(3000).filter(item -> !coachProfileIds.contains(item)).collect(Collectors.toList()));
+            // 删掉内容，减轻内存压力
+            baseSubmits.forEach(item -> item.setContent(null));
+            // 每个人提交的作业
+            Map<Integer, List<ApplicationSubmit>> submitGroup = baseSubmits.stream().collect(Collectors.groupingBy(ApplicationSubmit::getProfileId));
+            // 计算作业题数量，这些人是超过5个的,不超过5个按照1个算
+            Map<Integer, Integer> userSubmitCount = applicationSubmitDao.loadUserSubmitCount();
+            // 需要被点评的个数
+            Map<Integer, Integer> shouldComment = Maps.newHashMap();
+            userSubmitCount.keySet().forEach(item -> {
+                int shouldCount = Double.valueOf(Math.ceil(userSubmitCount.get(item) / 5.0d)).intValue();
+                Optional<AsstCoachComment> comment = asstCoachComments.stream().filter(tempItem -> tempItem.getProfileId().equals(item)).findFirst();
+                int commentCount = comment.isPresent() ? comment.get().getCount() : 0;
+                if (commentCount < shouldCount) {
+                    shouldComment.put(item, shouldCount - commentCount);
+                }
+            });
+            // 必须被评论的人
+            List<Integer> mustComment = Lists.newArrayList();
+            // 教练点评的人里没有这些提交超过五个，
+            mustComment.addAll(userSubmitCount.keySet().stream().filter(item -> !coachProfileIds.contains(item)).collect(Collectors.toList()));
+            // 从这些人中选作业
+            mustComment.stream()
+                    // 这个月提交了作业
+                    .filter(submitGroup::containsKey)
+                    .forEach(item -> applicationSubmitList.addAll(
+                            submitGroup.get(item)
+                                    .stream()
+                                    // 越晚提交优先级越高
+                                    .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
+                                    // 如果已经满了则空转，否则取出需要被点评的数量
+                                    .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
+                                    .collect(Collectors.toList())));
+            if (applicationSubmitList.size() < SIZE) {
+                // level3
+                // 两个月之内要过期的人
+                List<Integer> willExpired = riseMemberDao.loadByWillExpired(DateUtils.afterMonths(new Date(), 2))
+                        .stream()
+                        // 按时间排序，越早过期的优先级越高
+                        .sorted((o1, o2) -> o1.getExpireDate().equals(o2.getExpireDate()) ? 0 : (o1.getExpireDate().before(o2.getExpireDate()) ? -1 : 1))
+                        .map(RiseMember::getProfileId)
+                        // 这个快过期的人不在必须被评论的list里，这个在上面已经被排进去了
+                        .filter(item -> !mustComment.contains(item))
+                        .collect(Collectors.toList());
+                // 从这些快过期的人中选作业
+                willExpired.stream()
+                        // 他们最近一个月提交过作业
+                        .filter(submitGroup::containsKey)
+                        .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
+                                .stream()
+                                // 越晚提交被露出概率越高
+                                .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
+                                // 如果没满则取
+                                .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
+                                .collect(Collectors.toList())));
+                if (applicationSubmitList.size() < SIZE) {
+                    // level4
+                    // 如果还没满的话，再从shouldComment里取
+                    List<Integer> existProfileIds = applicationSubmitList.stream().map(ApplicationSubmit::getProfileId).distinct().collect(Collectors.toList());
+                    shouldComment.keySet().stream()
+                            // 没有露出作业 并且这个月提交了作业
+                            .filter(item -> !existProfileIds.contains(item) && submitGroup.keySet().contains(item))
+                            .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
+                                    .stream()
+                                    // 越晚提交被露出概率越高
+                                    .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
+                                    // 如果没满则取
+                                    .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
+                                    .collect(Collectors.toList())));
+                    if (applicationSubmitList.size() < SIZE) {
+                        // level5
+                        // 直接从本月的提交里取
+                        List<Integer> profileIds = applicationSubmitList.stream().map(ApplicationSubmit::getProfileId).collect(Collectors.toList());
+                        submitGroup.keySet()
+                                .stream().filter(item -> !profileIds.contains(item))
+                                .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
+                                        .stream()
+                                        // 越晚提交被露出概率越高
+                                        .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
+                                        // 如果没满则取
+                                        .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
+                                        .collect(Collectors.toList())));
                     }
                 }
             }
         }
 
-        applicationSubmitList.stream().forEach(applicationSubmit -> {
+        List<ApplicationSubmit> applicationSubmits = applicationSubmitDao.batchLoadApplications(applicationSubmitList.stream().map(ApplicationSubmit::getId).collect(Collectors.toList()));
+        applicationSubmitList.forEach(applicationSubmit -> {
+            Optional<ApplicationSubmit> first = applicationSubmits.stream().filter(item -> item.getId() == applicationSubmit.getId()).findFirst();
+            first.ifPresent(applicationSubmit1 -> applicationSubmit.setContent(applicationSubmit1.getContent()));
             RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(applicationSubmit);
             //设置应用练习题目
-            applicationPractices.stream().forEach(applicationPractice -> {
+            applicationPractices.forEach(applicationPractice -> {
                 if (applicationSubmit.getApplicationId().equals(applicationPractice.getId())) {
                     riseWorkInfoDto.setTitle(applicationPractice.getTopic());
                 }
@@ -200,7 +275,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
 
         List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
-        if (profiles.size() == 0) return Lists.newArrayList();
+        if (profiles.size() == 0) {
+            return Lists.newArrayList();
+        }
 
         List<Integer> profileIds = Lists.newArrayList();
         for (Profile profile : profiles) {
@@ -213,7 +290,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
         for (ApplicationSubmit submit : submits) {
             RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
-            applicationPractices.stream().forEach(applicationPractice -> {
+            applicationPractices.forEach(applicationPractice -> {
                 if (submit.getApplicationId().equals(applicationPractice.getId())) {
                     riseWorkInfoDto.setTitle(applicationPractice.getTopic());
                 }
@@ -237,7 +314,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                 List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
                 for (ApplicationSubmit submit : submits) {
                     RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
-                    applicationPractices.stream().forEach(applicationPractice -> {
+                    applicationPractices.forEach(applicationPractice -> {
                         if (submit.getApplicationId().equals(applicationPractice.getId())) {
                             riseWorkInfoDto.setTitle(applicationPractice.getTopic());
                         }
@@ -253,9 +330,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     public Map<Integer, Integer> getUnderCommentApplicationCount() {
         List<UnderCommentCount> underCommentCounts = applicationSubmitDao.getUnderCommentCount();
         Map<Integer, Integer> countMap = Maps.newHashMap();
-        underCommentCounts.stream().forEach(underCommentCount -> {
-            countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount());
-        });
+        underCommentCounts.forEach(underCommentCount -> countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount()));
         return countMap;
     }
 
@@ -263,9 +338,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     public Map<Integer, Integer> getUnderCommentSubjectArticleCount() {
         List<UnderCommentCount> underCommentCounts = subjectArticleDao.getUnderCommentCount();
         Map<Integer, Integer> countMap = Maps.newHashMap();
-        underCommentCounts.stream().forEach(underCommentCount -> {
-            countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount());
-        });
+        underCommentCounts.forEach(underCommentCount -> countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount()));
         return countMap;
     }
 
@@ -277,7 +350,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<Integer> subjectArticleIdsList = Lists.newArrayList();
         List<Integer> applicationSubmitIdsList = Lists.newArrayList();
 
-        comments.stream().forEach(comment -> {
+        comments.forEach(comment -> {
             if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
                 applicationSubmitIdsList.add(comment.getReferencedId());
             } else if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
@@ -289,7 +362,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.loadSubmits(applicationSubmitIdsList);
 
         //按照评论顺序,组装RiseWorkInfoDto
-        comments.stream().forEach(comment -> {
+        comments.forEach(comment -> {
             if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
                 for (SubjectArticle subjectArticle : subjectArticleList) {
                     if (subjectArticle.getId().equals(comment.getReferencedId())) {
@@ -311,11 +384,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
         //过滤重复的文章
         Map<String, RiseWorkInfoDto> filterMap = Maps.newLinkedHashMap();
-        riseWorkInfoDtos.forEach(riseWorkInfoDto -> {
-            if (filterMap.get(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString()) == null) {
-                filterMap.put(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString(), riseWorkInfoDto);
-            }
-        });
+        riseWorkInfoDtos.forEach(riseWorkInfoDto -> filterMap.putIfAbsent(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString(), riseWorkInfoDto));
 
         return Lists.newArrayList(filterMap.values());
     }

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -101,6 +102,17 @@ public class RiseMemberDao extends DBUtil {
         ColumnListHandler<Integer> handler = new ColumnListHandler<>("ProfileId");
         try {
             return runner.query(sql, handler);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<RiseMember> loadByWillExpired(Date expiredDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE Expired = 0 AND ExpireDate < ? AND Del = 0";
+        try {
+            return runner.query(sql, new BeanListHandler<RiseMember>(RiseMember.class), expiredDate);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
