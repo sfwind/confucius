@@ -38,9 +38,10 @@ public class RestfulHelper {
 
     @PostConstruct
     public void init() {
-        // 初始化发送mq
         try {
-            initCert();
+            if(!ConfigUtils.isDebug()){
+                initCert();
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
