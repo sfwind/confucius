@@ -81,6 +81,7 @@ public class AccountServiceImpl implements AccountService {
         logger.info("role init complete");
     }
 
+    @Override
     public Account getAccount(String openid, boolean realTime) throws NotFollowingException {
         if (realTime) {
             return getAccountFromWeixin(openid);
@@ -127,9 +128,13 @@ public class AccountServiceImpl implements AccountService {
 
     private Integer getRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember == null) return 0;
+        if (riseMember == null) {
+            return 0;
+        }
         Integer memberTypeId = riseMember.getMemberTypeId();
-        if (memberTypeId == null) return 0;
+        if (memberTypeId == null) {
+            return 0;
+        }
         // 精英或者专业版用户
         if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL
                 || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
@@ -242,11 +247,11 @@ public class AccountServiceImpl implements AccountService {
         return accountNew;
     }
 
+    @Override
     public void collectUsers() {
         //调用api查询account对象
-        String url = GET_USERS_URL;
 
-        String body = restfulHelper.get(url);
+        String body = restfulHelper.get(GET_USERS_URL);
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
         String lastOpenid = "";
@@ -262,11 +267,11 @@ public class AccountServiceImpl implements AccountService {
         logger.info("处理完成");
     }
 
+    @Override
     public void collectNewUsers() {
         //调用api查询account对象
-        String url = GET_USERS_URL;
 
-        String body = restfulHelper.get(url);
+        String body = restfulHelper.get(GET_USERS_URL);
 
         UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
 
