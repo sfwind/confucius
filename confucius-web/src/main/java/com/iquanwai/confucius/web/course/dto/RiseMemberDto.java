@@ -25,4 +25,8 @@ public class RiseMemberDto {
      * 报名按钮显示
      */
     private String buttonStr;
+    /**
+     * 试听课按钮显示
+     */
+    private String auditionStr;
 }
