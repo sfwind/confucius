@@ -146,4 +146,15 @@ public class ProfileDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+
+    public void initOnceRequestCommentCount(String openId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update Profile SET RequestCommentCount=1 WHERE OpenId = ?";
+        try {
+            runner.update(sql, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
 }

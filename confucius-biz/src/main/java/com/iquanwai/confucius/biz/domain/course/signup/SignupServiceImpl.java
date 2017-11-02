@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
@@ -86,6 +87,8 @@ public class SignupServiceImpl implements SignupService {
     private RedisUtil redisUtil;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
+    @Autowired
+    private ProfileDao profileDao;
 
     private int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
@@ -393,6 +396,7 @@ public class SignupServiceImpl implements SignupService {
             classMember.setMonth(monthlyCampConfig.getSellingMonth());
             classMember.setActive(0);
             riseClassMemberDao.insert(classMember);
+            profileDao.initOnceRequestCommentCount(openId);
         } else {
             logger.error("该会员ID异常{}", memberType);
             messageService.sendAlarm("报名模块出错", "会员id异常",

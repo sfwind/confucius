@@ -130,6 +130,7 @@ public class PayServiceImpl implements PayService {
         return orderCallbackReply;
     }
 
+    @Override
     public void handlePayResult(PayCallback payCallback) {
         Assert.notNull(payCallback, "支付结果不能为空");
         String orderId = payCallback.getOut_trade_no();
@@ -147,6 +148,7 @@ public class PayServiceImpl implements PayService {
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
     }
 
+    @Override
     public void handlePayResult(String orderId, Boolean isFree) {
         Assert.notNull(orderId, "支付结果不能为空");
         Date paidTime = new Date();

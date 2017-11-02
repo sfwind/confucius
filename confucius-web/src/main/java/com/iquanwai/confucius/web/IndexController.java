@@ -107,6 +107,15 @@ public class IndexController {
         }
     }
 
+    @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
+    public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        if(!checkAccessToken(request,response)){
+            return null;
+        }
+        return courseView(request);
+    }
+
+
     @RequestMapping(value = "/heartbeat", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> heartbeat() throws Exception {
         return WebUtils.success();
