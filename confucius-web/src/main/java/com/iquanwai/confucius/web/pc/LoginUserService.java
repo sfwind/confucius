@@ -180,7 +180,7 @@ public class LoginUserService {
         String openid = oAuthService.pcOpenId(accessToken);
         if (openid == null) {
             // 没有查到openid，一般是该用户没有关注服务号
-            logger.info("accessToken:{} can't find openid", accessToken);
+            logger.info("accesstoken:{} can't find openid", accessToken);
             return new MutablePair<>(-4, null);
         }
         Account account;
@@ -189,7 +189,7 @@ public class LoginUserService {
         } catch (NotFollowingException e) {
             return new MutablePair<>(-3, null);
         }
-        logger.info("accessToken:{},openId:{},account:{}", accessToken, openid, account);
+        logger.info("accesstoken:{},openId:{},account:{}", accessToken, openid, account);
         if (account == null) {
             return new MutablePair<>(-2, null);
         }

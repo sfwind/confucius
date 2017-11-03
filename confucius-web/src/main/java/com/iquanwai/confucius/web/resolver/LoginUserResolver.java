@@ -62,7 +62,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
 
         String openId = oAuthService.openId(accessToken);
         if(StringUtils.isEmpty(openId)){
-            logger.error("accessToken {} is not found in db", accessToken);
+            logger.error("accesstoken {} is not found in db", accessToken);
             return null;
         }
 

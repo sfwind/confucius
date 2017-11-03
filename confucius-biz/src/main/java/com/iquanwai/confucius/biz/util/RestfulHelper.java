@@ -131,7 +131,7 @@ public class RestfulHelper {
     public String get(String requestUrl) {
         if (StringUtils.isNotEmpty(requestUrl)) {
             String accessToken = accessTokenService.getAccessToken();
-            logger.info("accessToken is :{}", accessToken);
+            logger.info("accesstoken is :{}", accessToken);
             String url = requestUrl.replace("{access_token}", accessToken);
             Request request = new Request.Builder()
                     .url(url)

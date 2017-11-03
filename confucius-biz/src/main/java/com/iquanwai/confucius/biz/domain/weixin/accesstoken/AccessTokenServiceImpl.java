@@ -25,11 +25,11 @@ public class AccessTokenServiceImpl implements AccessTokenService {
             return accessToken;
         }
 
-        String token = redisUtil.get("accessToken");
+        String token = redisUtil.get("accesstoken");
         if(token==null){
             logger.info("insert access token");
             String accessToken = _getAccessToken();
-            redisUtil.set("accessToken", accessToken);
+            redisUtil.set("accesstoken", accessToken);
             accessTokenDao.insertOrUpdate(accessToken);
         }else {
             accessToken = token;
@@ -51,11 +51,11 @@ public class AccessTokenServiceImpl implements AccessTokenService {
         if(force) {
             forceUpdateAccessToken();
         }else{
-            String token = redisUtil.get("accessToken");
+            String token = redisUtil.get("accesstoken");
             if(token==null){
                 logger.info("insert access token");
                 String accessToken = _getAccessToken();
-                redisUtil.set("accessToken", accessToken);
+                redisUtil.set("accesstoken", accessToken);
                 accessTokenDao.insertOrUpdate(accessToken);
             }else{
                 //如果数据库的accessToken未刷新,则强制刷新
@@ -74,7 +74,7 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
     private void forceUpdateAccessToken(){
         String accessToken = _getAccessToken();
-        redisUtil.set("accessToken", accessToken);
+        redisUtil.set("accesstoken", accessToken);
         accessTokenDao.insertOrUpdate(accessToken);
     }
 }
