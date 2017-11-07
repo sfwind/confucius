@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
@@ -280,7 +281,9 @@ public class MonthlyCampController {
         Integer targetYear = campProcessDto.getTargetYear();
         Integer targetMonth = campProcessDto.getTargetMonth();
 
-        monthlyCampService.switchCampDataProcess(sourceYear, sourceMonth, targetYear, targetMonth);
+        ThreadPool.execute(() -> {
+            monthlyCampService.switchCampDataProcess(sourceYear, sourceMonth, targetYear, targetMonth);
+        });
         return WebUtils.success();
     }
 
