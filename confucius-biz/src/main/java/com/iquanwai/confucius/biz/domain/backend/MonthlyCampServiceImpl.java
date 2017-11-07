@@ -1,11 +1,13 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampSchedule;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
@@ -18,6 +20,7 @@ import javax.annotation.PostConstruct;
 import java.net.ConnectException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -119,6 +122,37 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
             } catch (ConnectException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
+        }
+    }
+
+    @Override
+    public void switchCampDataProcess(Integer sourceYear, Integer sourceMonth, Integer targetYear, Integer targetMonth) {
+        // 获取切换之前月份的所有人员
+        List<RiseClassMember> sourceRiseClassMembers = riseClassMemberDao.loadAllByYearMonth(sourceYear, sourceMonth);
+        List<RiseMember> sourceRiseMembers = riseMemberDao.loadByProfileIds(sourceRiseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList()));
+        Map<Integer, RiseMember> sourceRiseMemberMap = sourceRiseMembers.stream().collect(Collectors.toMap(RiseMember::getProfileId, riseMember -> riseMember));
+
+        sourceRiseClassMembers.forEach(riseClassMember -> {
+            // 筛选出其中的仍是商学院的人员
+            Integer profileId = riseClassMember.getProfileId();
+            RiseMember riseMember = sourceRiseMemberMap.get(profileId);
+            if (RiseMember.ELITE == riseMember.getMemberTypeId() || RiseMember.HALF_ELITE == riseMember.getMemberTypeId()) {
+                RiseClassMember existRiseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, targetYear, targetMonth);
+                if (existRiseClassMember == null) {
+                    RiseClassMember targetRiseClassMember = JSON.parseObject(JSON.toJSONString(riseClassMember), RiseClassMember.class);
+                    targetRiseClassMember.setYear(targetYear);
+                    targetRiseClassMember.setMonth(targetMonth);
+                    targetRiseClassMember.setActive(0);
+                    riseClassMemberDao.insert(targetRiseClassMember);
+                }
+            }
+        });
+
+        // 将上个月的所有数据 Active 置为 0，表示已过期
+        int updateResult = riseClassMemberDao.batchUpdateActive(sourceYear, sourceMonth, 0);
+        // 将下个月的所有数据 Active 置为 1，表示新的月份生效
+        if (updateResult > 0) {
+            riseClassMemberDao.batchUpdateActive(targetYear, targetMonth, 1);
         }
     }
 
