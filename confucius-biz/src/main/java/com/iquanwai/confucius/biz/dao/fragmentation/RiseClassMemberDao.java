@@ -94,6 +94,24 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     }
 
     /**
+     * 单笔查询
+     * @param profileId 用户 id
+     * @param year 年份
+     * @param month 月份
+     */
+    public RiseClassMember queryByProfileIdAndTime(Integer profileId, Integer year, Integer month) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Year = ? AND Month = ? AND Del = 0";
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<RiseClassMember>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, profileId, year, month);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    /**
      * 获取对应年月下的所有有效数据
      */
     public List<RiseClassMember> loadAllByYearMonth(Integer year, Integer month) {

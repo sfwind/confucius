@@ -137,11 +137,14 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
             Integer profileId = riseClassMember.getProfileId();
             RiseMember riseMember = sourceRiseMemberMap.get(profileId);
             if (RiseMember.ELITE == riseMember.getMemberTypeId() || RiseMember.HALF_ELITE == riseMember.getMemberTypeId()) {
-                RiseClassMember targetRiseClassMember = JSON.parseObject(JSON.toJSONString(riseClassMember), RiseClassMember.class);
-                targetRiseClassMember.setYear(targetYear);
-                targetRiseClassMember.setMonth(targetMonth);
-                targetRiseClassMember.setActive(0);
-                riseClassMemberDao.insert(targetRiseClassMember);
+                RiseClassMember existRiseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, targetYear, targetMonth);
+                if (existRiseClassMember == null) {
+                    RiseClassMember targetRiseClassMember = JSON.parseObject(JSON.toJSONString(riseClassMember), RiseClassMember.class);
+                    targetRiseClassMember.setYear(targetYear);
+                    targetRiseClassMember.setMonth(targetMonth);
+                    targetRiseClassMember.setActive(0);
+                    riseClassMemberDao.insert(targetRiseClassMember);
+                }
             }
         });
 
