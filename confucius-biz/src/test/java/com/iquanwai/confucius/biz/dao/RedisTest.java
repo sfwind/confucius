@@ -51,7 +51,7 @@ public class RedisTest extends TestBase {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                log("pc-token:"+redisUtil.get("accessToken:pc"));
+                log("pc-token:"+redisUtil.get("accesstoken:pc"));
                 log("线程1离开锁");
             });
         }).start();
@@ -63,7 +63,7 @@ public class RedisTest extends TestBase {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                log("pc-token:"+redisUtil.get("accessToken:pc"));
+                log("pc-token:"+redisUtil.get("accesstoken:pc"));
                 log("线程2离开锁");
             });
         }).start();

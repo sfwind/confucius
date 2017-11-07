@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.plan;
 
+import com.iquanwai.confucius.biz.po.fragmentation.AuditionClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
@@ -44,4 +45,6 @@ public interface PlanService {
     Knowledge getKnowledge(Integer knowledgeId);
 
     List<Knowledge> getProblemKnowledgeList(Integer problemId);
+
+    AuditionClassMember getAuditionClassMember(Integer profileId);
 }

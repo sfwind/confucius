@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -61,6 +62,8 @@ public class SignupController {
     private MessageService messageService;
     @Autowired
     private CacheService cacheService;
+    @Autowired
+    private PlanService planService;
 
 
     /**
@@ -189,6 +192,13 @@ public class SignupController {
             }
         } else {
             dto.setButtonStr("立即入学");
+        }
+        AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
+
+        if (classMember != null) {
+            dto.setAuditionStr("试听课");
+        } else {
+            dto.setAuditionStr("预约试听");
         }
 
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));

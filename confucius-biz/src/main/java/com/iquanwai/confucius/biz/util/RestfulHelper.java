@@ -38,9 +38,10 @@ public class RestfulHelper {
 
     @PostConstruct
     public void init() {
-        // 初始化发送mq
         try {
-            initCert();
+            if(!ConfigUtils.isDebug()){
+                initCert();
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -130,7 +131,7 @@ public class RestfulHelper {
     public String get(String requestUrl) {
         if (StringUtils.isNotEmpty(requestUrl)) {
             String accessToken = accessTokenService.getAccessToken();
-            logger.info("accessToken is :{}", accessToken);
+            logger.info("accesstoken is :{}", accessToken);
             String url = requestUrl.replace("{access_token}", accessToken);
             Request request = new Request.Builder()
                     .url(url)

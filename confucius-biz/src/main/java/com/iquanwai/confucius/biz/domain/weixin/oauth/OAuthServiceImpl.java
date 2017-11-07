@@ -76,7 +76,7 @@ public class OAuthServiceImpl implements OAuthService {
         }
         Callback callback = callbackDao.queryByAccessToken(accessToken);
         if(callback==null){
-            logger.error("accessToken {} is invalid", accessToken);
+            logger.error("accesstoken {} is invalid", accessToken);
             return null;
         }
         return callback.getOpenid();
@@ -98,7 +98,7 @@ public class OAuthServiceImpl implements OAuthService {
     public String refresh(String accessToken) {
         Callback callback = callbackDao.queryByAccessToken(accessToken);
         if(callback==null){
-            logger.error("accessToken {} is invalid", accessToken);
+            logger.error("accesstoken {} is invalid", accessToken);
             return null;
         }
         String requestUrl = REFRESH_TOKEN_URL;
@@ -149,7 +149,7 @@ public class OAuthServiceImpl implements OAuthService {
 
         // callbackUrl增加参数access_token
 //        String callbackUrl = callback.getCallbackUrl();
-//        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accessToken);
+//        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accesstoken);
         return callback;
     }
 
@@ -176,7 +176,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setOpenid(openid);
         callback.setRefreshToken(refreshToken);
         callback.setAccessToken(accessToken);
-        logger.info("update callback, state:{},accessToken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
+        logger.info("update callback, state:{},accesstoken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
 
         return callback;
