@@ -136,7 +136,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
             // 筛选出其中的仍是商学院的人员
             Integer profileId = riseClassMember.getProfileId();
             RiseMember riseMember = sourceRiseMemberMap.get(profileId);
-            if (RiseMember.ELITE == riseMember.getMemberTypeId() || RiseMember.HALF_ELITE == riseMember.getMemberTypeId()) {
+            if (riseMember != null && (RiseMember.ELITE == riseMember.getMemberTypeId() || RiseMember.HALF_ELITE == riseMember.getMemberTypeId())) {
                 RiseClassMember existRiseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, targetYear, targetMonth);
                 if (existRiseClassMember == null) {
                     RiseClassMember targetRiseClassMember = JSON.parseObject(JSON.toJSONString(riseClassMember), RiseClassMember.class);
