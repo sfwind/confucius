@@ -119,4 +119,18 @@ public class RiseMemberDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<RiseMember> loadByProfileIds(List<Integer> profileIds) {
+        if (profileIds.size() == 0) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId IN (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, profileIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }

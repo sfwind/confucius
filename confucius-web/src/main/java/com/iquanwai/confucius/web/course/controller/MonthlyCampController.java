@@ -15,6 +15,7 @@ import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampPageDto;
+import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -270,6 +271,17 @@ public class MonthlyCampController {
         } else {
             return WebUtils.error("当前用户已经是小课训练营用户");
         }
+    }
+
+    @RequestMapping(value = "/switch")
+    public ResponseEntity<Map<String, Object>> switchCampAndProcessData(@RequestBody MonthlyCampProcessDto campProcessDto) {
+        Integer sourceYear = campProcessDto.getSourceYear();
+        Integer sourceMonth = campProcessDto.getSourceMonth();
+        Integer targetYear = campProcessDto.getTargetYear();
+        Integer targetMonth = campProcessDto.getTargetMonth();
+
+        monthlyCampService.switchCampDataProcess(sourceYear, sourceMonth, targetYear, targetMonth);
+        return WebUtils.success();
     }
 
     /**
