@@ -5,6 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampSchedule;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
@@ -30,12 +34,17 @@ import java.util.stream.Collectors;
 public class MonthlyCampServiceImpl implements MonthlyCampService {
 
     @Autowired
+    private AccountService accountService;
+    @Autowired
+    private SignupService signupService;
+    @Autowired
+    private CacheService cacheService;
+    @Autowired
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private MonthlyCampScheduleDao monthlyCampScheduleDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
-
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
@@ -154,6 +163,12 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
         if (updateResult > 0) {
             riseClassMemberDao.batchUpdateActive(targetYear, targetMonth, 1);
         }
+    }
+
+    @Override
+    public void unlockMonthlyCampAuthority(String riseId) {
+        Profile profile = accountService.getProfileByRiseId(riseId);
+        signupService.unlockMonthlyCamp(profile.getId(), cacheService.loadMonthlyCampConfig());
     }
 
 }

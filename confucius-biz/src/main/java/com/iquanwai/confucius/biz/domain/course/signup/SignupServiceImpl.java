@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
@@ -104,6 +105,7 @@ public class SignupServiceImpl implements SignupService {
     private RabbitMQPublisher rabbitMQPublisher;
     private RabbitMQPublisher paySuccessPublisher;
     private RabbitMQPublisher freshLoginUserPublisher;
+    private RabbitMQPublisher openProblemPublisher;
 
     /**
      * 初始化缓存
@@ -115,6 +117,7 @@ public class SignupServiceImpl implements SignupService {
         paySuccessPublisher = rabbitMQFactory.initFanoutPublisher("rise_pay_success_topic");
         freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher("login_user_reload");
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher("camp_order_topic");
+        openProblemPublisher = rabbitMQFactory.initFanoutPublisher("monthly_camp_force_open_topic");
     }
 
 
@@ -240,72 +243,16 @@ public class SignupServiceImpl implements SignupService {
         Integer profileId = campOrder.getProfileId();
         // 更新 profile 表中状态
         Profile profile = accountService.getProfile(profileId);
-        RiseMember existRiseMember = this.currentRiseMember(profileId);
 
         // RiseClassMember 新增记录
-        String memberId = generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
-        RiseClassMember classMember = new RiseClassMember();
-        classMember.setClassName(monthlyCampConfig.getCampClassPrefix());
-        classMember.setMemberId(memberId);
-        classMember.setProfileId(profileId);
-        classMember.setYear(monthlyCampConfig.getSellingYear());
-        classMember.setMonth(monthlyCampConfig.getSellingMonth());
-        classMember.setActive(0);
-        riseClassMemberDao.insert(classMember);
+        insertRiseClassMember(profile, monthlyCampConfig);
 
-        // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
-        if (existRiseMember == null) {
-            // 添加会员表
-            RiseMember riseMember = new RiseMember();
-            riseMember.setOpenId(campOrder.getOpenId());
-            riseMember.setOrderId(campOrder.getOrderId());
-            riseMember.setProfileId(campOrder.getProfileId());
-            riseMember.setMemberTypeId(RiseMember.CAMP);
-            Date endDate = monthlyCampConfig.getCloseDate();
-            riseMember.setExpireDate(endDate);
-            riseMember.setExpired(false);
-            riseMemberDao.insert(riseMember);
-        } else {
-            if (existRiseMember.getMemberTypeId() == RiseMember.ANNUAL
-                    || existRiseMember.getMemberTypeId() == RiseMember.HALF
-                    || existRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE
-                    || existRiseMember.getMemberTypeId() == RiseMember.ELITE) {
-                // 如果当前购买的人的身份是商学院会员或者专业版会员，则直接将新增的数据记录置为过期
-                // 添加会员表
-                RiseMember riseMember = new RiseMember();
-                riseMember.setOpenId(campOrder.getOpenId());
-                riseMember.setOrderId(campOrder.getOrderId());
-                riseMember.setProfileId(campOrder.getProfileId());
-                riseMember.setMemberTypeId(RiseMember.CAMP);
-                Date endDate = monthlyCampConfig.getCloseDate();
-                riseMember.setExpireDate(endDate);
-                riseMember.setExpired(true);
-                riseMember.setMemo("专业版购买训练营");
-                riseMemberDao.insert(riseMember);
-            } else {
-                riseMemberDao.updateExpiredAhead(profileId);
-                // 添加会员表
-                RiseMember riseMember = new RiseMember();
-                riseMember.setOpenId(campOrder.getOpenId());
-                riseMember.setOrderId(campOrder.getOrderId());
-                riseMember.setProfileId(campOrder.getProfileId());
-                riseMember.setMemberTypeId(RiseMember.CAMP);
-                Date endDate = monthlyCampConfig.getCloseDate();
-                riseMember.setExpireDate(endDate);
-                riseMember.setExpired(false);
-                riseMemberDao.insert(riseMember);
-            }
-        }
+        // 更新 RiseMember 表中信息
+        updateRiseMemberStatus(profile, monthlyCampConfig);
 
         // 送优惠券
-        Coupon coupon = new Coupon();
-        coupon.setOpenid(profile.getOpenid());
-        coupon.setProfileId(profileId);
-        coupon.setAmount(MONTHLY_CAMP_COUPON);
-        coupon.setUsed(0);
-        coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 2));
-        coupon.setDescription("优惠券");
-        couponDao.insert(coupon);
+        insertCampCoupon(profile);
+
         // 更新订单状态
         monthlyCampOrderDao.entry(orderId);
 
@@ -326,6 +273,131 @@ public class SignupServiceImpl implements SignupService {
         sendPurchaseMessage(profile, RiseMember.CAMP, orderId, monthlyCampConfig);
         // 刷新相关状态
         refreshStatus(quanwaiOrderDao.loadOrder(orderId), orderId);
+    }
+
+    @Override
+    public void unlockMonthlyCamp(Integer profileId, MonthlyCampConfig monthlyCampConfig) {
+        Assert.notNull(profileId, "开课用户不能为空");
+        Assert.notNull(monthlyCampConfig, "训练营开课配置不能为空");
+
+        Profile profile = accountService.getProfile(profileId);
+
+        // RiseClassMember 新增记录
+        insertRiseClassMember(profile, monthlyCampConfig);
+
+        // 更新 RiseMember 表中信息
+        updateRiseMemberStatus(profile, monthlyCampConfig);
+
+        // 赠送优惠券
+        insertCampCoupon(profile);
+
+        // 强开小课
+        List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(monthlyCampConfig.getSellingMonth());
+        schedules.forEach(schedule -> {
+            JSONObject json = new JSONObject();
+            json.put("profileId", profileId);
+            json.put("startDate", monthlyCampConfig.getOpenDate());
+            json.put("closeDate", monthlyCampConfig.getCloseDate());
+            json.put("problemId", schedule.getProblemId());
+            try {
+                openProblemPublisher.publish(json.toJSONString());
+            } catch (ConnectException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        });
+
+        // 刷新用户的会员状态
+        try {
+            freshLoginUserPublisher.publish(profile.getOpenid());
+        } catch (ConnectException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
+     * 数据库新增 RIseClassMember 记录
+     * @param profile 用户 Profile
+     * @param monthlyCampConfig 小课训练营配置
+     */
+    private void insertRiseClassMember(Profile profile, MonthlyCampConfig monthlyCampConfig) {
+        // RiseClassMember 新增记录
+        String memberId = generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
+        RiseClassMember classMember = new RiseClassMember();
+        classMember.setClassName(monthlyCampConfig.getCampClassPrefix());
+        classMember.setMemberId(memberId);
+        classMember.setProfileId(profile.getId());
+        classMember.setYear(monthlyCampConfig.getSellingYear());
+        classMember.setMonth(monthlyCampConfig.getSellingMonth());
+        classMember.setActive(0);
+        riseClassMemberDao.insert(classMember);
+    }
+
+    /**
+     * 购买完小课训练之后，更新 RiseMember 表中的数据
+     * @param profile 用户 Profile
+     * @param monthlyCampConfig 小课训练营配置
+     */
+    private void updateRiseMemberStatus(Profile profile, MonthlyCampConfig monthlyCampConfig) {
+        // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
+        RiseMember existRiseMember = this.currentRiseMember(profile.getId());
+        if (existRiseMember == null) {
+            // 添加会员表
+            RiseMember riseMember = new RiseMember();
+            riseMember.setOpenId(profile.getOpenid());
+            riseMember.setOrderId("manual");
+            riseMember.setProfileId(profile.getId());
+            riseMember.setMemberTypeId(RiseMember.CAMP);
+            Date endDate = monthlyCampConfig.getCloseDate();
+            riseMember.setExpireDate(endDate);
+            riseMember.setExpired(false);
+            riseMemberDao.insert(riseMember);
+        } else {
+            if (existRiseMember.getMemberTypeId() == RiseMember.ANNUAL
+                    || existRiseMember.getMemberTypeId() == RiseMember.HALF
+                    || existRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE
+                    || existRiseMember.getMemberTypeId() == RiseMember.ELITE) {
+                // 如果当前购买的人的身份是商学院会员或者专业版会员，则直接将新增的数据记录置为过期
+                // 添加会员表
+                RiseMember riseMember = new RiseMember();
+                riseMember.setOpenId(profile.getOpenid());
+                riseMember.setOrderId("manual");
+                riseMember.setProfileId(profile.getId());
+                riseMember.setMemberTypeId(RiseMember.CAMP);
+                Date endDate = monthlyCampConfig.getCloseDate();
+                riseMember.setExpireDate(endDate);
+                riseMember.setExpired(true);
+                riseMember.setMemo("专业版购买训练营");
+                riseMemberDao.insert(riseMember);
+            } else {
+                riseMemberDao.updateExpiredAhead(profile.getId());
+                // 添加会员表
+                RiseMember riseMember = new RiseMember();
+                riseMember.setOpenId(profile.getOpenid());
+                riseMember.setOrderId("manual");
+                riseMember.setProfileId(profile.getId());
+                riseMember.setMemberTypeId(RiseMember.CAMP);
+                Date endDate = monthlyCampConfig.getCloseDate();
+                riseMember.setExpireDate(endDate);
+                riseMember.setExpired(false);
+                riseMemberDao.insert(riseMember);
+            }
+        }
+    }
+
+    /**
+     * 放入小课训练营优惠券，金额 100，自购买起，两个月内过期
+     * @param profile 用户 Profile
+     */
+    private void insertCampCoupon(Profile profile) {
+        // 送优惠券
+        Coupon coupon = new Coupon();
+        coupon.setOpenid(profile.getOpenid());
+        coupon.setProfileId(profile.getId());
+        coupon.setAmount(MONTHLY_CAMP_COUPON);
+        coupon.setUsed(0);
+        coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 2));
+        coupon.setDescription("优惠券");
+        couponDao.insert(coupon);
     }
 
     @Override

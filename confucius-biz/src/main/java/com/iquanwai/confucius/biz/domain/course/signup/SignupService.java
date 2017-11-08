@@ -45,6 +45,13 @@ public interface SignupService {
      */
     void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
+    /**
+     * 后台解锁小课训练营全新啊
+     * @param profileId
+     * @param monthlyCampConfig
+     */
+    void unlockMonthlyCamp(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
     String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType);

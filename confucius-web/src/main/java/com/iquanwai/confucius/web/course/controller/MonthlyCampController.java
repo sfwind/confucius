@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
@@ -272,6 +273,18 @@ public class MonthlyCampController {
         } else {
             return WebUtils.error("当前用户已经是小课训练营用户");
         }
+    }
+
+    @RequestMapping(value = "/unlock/{riseId}")
+    public ResponseEntity<Map<String, Object>> unlockMonthlyCampAuthority(@PathVariable String riseId) {
+        Assert.notNull(riseId, "解锁用户的 RiseId 不能为空");
+        Profile profile = accountService.getProfileByRiseId(riseId);
+        OperationLog operationLog = OperationLog.create()
+                .openid(profile.getOpenid()).module("小课训练营")
+                .function("开启训练营").action("后台增加小课训练营身份");
+        operationLogService.log(operationLog);
+        monthlyCampService.unlockMonthlyCampAuthority(riseId);
+        return WebUtils.success();
     }
 
     @RequestMapping(value = "/switch")
