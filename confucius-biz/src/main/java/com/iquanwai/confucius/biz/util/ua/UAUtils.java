@@ -41,7 +41,7 @@ public class UAUtils {
                 String family = os.family.toLowerCase();
                 Integer tempMajor = Double.valueOf(os.major).intValue();
                 Integer tempMinor = Double.valueOf(os.minor).intValue();
-                return family.equals("android") && (tempMajor < major || (tempMajor.equals(major) && tempMinor < minor));
+                return "android".equals(family) && (tempMajor < major || (tempMajor.equals(major) && tempMinor < minor));
             } else {
                 return false;
             }

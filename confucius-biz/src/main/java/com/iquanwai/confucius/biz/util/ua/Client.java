@@ -34,8 +34,12 @@ public class Client {
 
   @Override
   public boolean equals(Object other) {
-    if (other == this) return true;
-    if (!(other instanceof Client)) return false;
+    if (other == this) {
+        return true;
+    }
+    if (!(other instanceof Client)) {
+        return false;
+    }
 
     Client o = (Client) other;
     return ((this.userAgent != null && this.userAgent.equals(o.userAgent)) || this.userAgent == o.userAgent) &&

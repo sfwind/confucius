@@ -45,6 +45,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Override
     public String redirectUrl(String callbackUrl, String authUrl) {
         String requestUrl = authUrl;
         Callback callback = new Callback();
@@ -70,6 +71,7 @@ public class OAuthServiceImpl implements OAuthService {
         return requestUrl;
     }
 
+    @Override
     public String openId(String accessToken) {
         if(accessToken==null){
             return null;
@@ -95,6 +97,7 @@ public class OAuthServiceImpl implements OAuthService {
         return callback.getOpenid();
     }
 
+    @Override
     public String refresh(String accessToken) {
         Callback callback = callbackDao.queryByAccessToken(accessToken);
         if(callback==null){
@@ -153,6 +156,7 @@ public class OAuthServiceImpl implements OAuthService {
         return callback;
     }
 
+    @Override
     public Callback accessToken(String code, String state) {
         Callback callback = callbackDao.queryByState(state);
         if(callback==null){

@@ -40,8 +40,12 @@ public class OS {
 
   @Override
   public boolean equals(Object other) {
-    if (other == this) return true;
-    if (!(other instanceof OS)) return false;
+    if (other == this) {
+        return true;
+    }
+    if (!(other instanceof OS)) {
+        return false;
+    }
 
     OS o = (OS) other;
     return ((this.family != null && this.family.equals(o.family)) || this.family == o.family) &&

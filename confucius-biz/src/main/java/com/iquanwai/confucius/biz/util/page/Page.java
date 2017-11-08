@@ -152,6 +152,7 @@ public class Page implements Serializable {
         return true;
     }
 
+    @Override
     public String toString() {
         return new Gson().toJson(this);
     }

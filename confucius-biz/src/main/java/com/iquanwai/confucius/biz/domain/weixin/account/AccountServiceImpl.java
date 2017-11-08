@@ -189,8 +189,9 @@ public class AccountServiceImpl implements AccountService {
         Account accountNew = new Account();
         try {
             ConvertUtils.register((aClass, value) -> {
-                if (value == null)
+                if (value == null) {
                     return null;
+                }
 
                 if (!(value instanceof Double)) {
                     logger.error("不是日期类型");
