@@ -85,7 +85,7 @@ public class PayController {
 
         try {
             payService.handlePayResult(payCallback);
-            if (payCallback.getResult_code().equals("SUCCESS")) {
+            if ("SUCCESS".equals(payCallback.getResult_code())) {
                 payService.payMemberSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
             } else {
                 LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
@@ -106,7 +106,7 @@ public class PayController {
         executorService.execute(() -> {
             try {
                 payService.handlePayResult(payCallback);
-                if (payCallback.getResult_code().equals("SUCCESS")) {
+                if ("SUCCESS".equals(payCallback.getResult_code())) {
                     signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
                 } else {
                     LOGGER.error("{}付费失败", payCallback.getOut_trade_no());

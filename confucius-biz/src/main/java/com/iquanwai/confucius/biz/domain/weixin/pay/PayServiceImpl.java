@@ -65,6 +65,7 @@ public class PayServiceImpl implements PayService {
         freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(LOGIN_USER_RELOAD_TOPIC);
     }
 
+    @Override
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
         QuanwaiOrder courseOrder = quanwaiOrderDao.loadOrder(orderId);
@@ -99,6 +100,7 @@ public class PayServiceImpl implements PayService {
         return SYSTEM_ERROR.equals(err_code) || DUP_PAID.equals(err_code) || ORDER_CLOSE.equals(err_code);
     }
 
+    @Override
     public OrderCallbackReply callbackReply(String result, String errMsg, String prepayId) {
         Assert.notNull(result, "支付结果不能为空");
         Assert.notNull(errMsg, "描述不能为空");
