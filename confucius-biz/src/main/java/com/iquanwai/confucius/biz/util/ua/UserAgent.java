@@ -39,8 +39,12 @@ public class UserAgent {
 
   @Override
   public boolean equals(Object other) {
-    if (other == this) return true;
-    if (!(other instanceof UserAgent)) return false;
+    if (other == this) {
+        return true;
+    }
+    if (!(other instanceof UserAgent)) {
+        return false;
+    }
 
     UserAgent o = (UserAgent) other;
     return ((this.family != null && this.family.equals(o.family)) || this.family == o.family) &&

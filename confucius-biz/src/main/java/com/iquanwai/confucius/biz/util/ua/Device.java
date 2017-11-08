@@ -36,8 +36,12 @@ public class Device {
 
   @Override
   public boolean equals(Object other) {
-    if (other == this) return true;
-    if (!(other instanceof Device)) return false;
+    if (other == this) {
+        return true;
+    }
+    if (!(other instanceof Device)) {
+        return false;
+    }
 
     Device o = (Device) other;
     return (this.family != null && this.family.equals(o.family)) || this.family == o.family;

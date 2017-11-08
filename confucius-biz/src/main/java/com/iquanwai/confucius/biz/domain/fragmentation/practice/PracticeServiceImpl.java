@@ -454,6 +454,7 @@ public class PracticeServiceImpl implements PracticeService {
         return false;
     }
 
+    @Override
     public void deleteComment(Integer commentId) {
         commentDao.deleteComment(commentId);
     }

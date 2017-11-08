@@ -22,6 +22,7 @@ public class CourseIntroductionServiceImpl implements CourseIntroductionService 
     @Autowired
     private CourseIntroductionDao courseIntroductionDao;
 
+    @Override
     public List<CourseIntroduction> loadAll() {
         List<CourseIntroduction> courses = courseIntroductionDao.loadAll(CourseIntroduction.class);
 
@@ -31,10 +32,12 @@ public class CourseIntroductionServiceImpl implements CourseIntroductionService 
         }).collect(Collectors.toList());
     }
 
+    @Override
     public CourseIntroduction loadCourse(int courseId) {
         return courseIntroductionDao.getByCourseId(courseId);
     }
 
+    @Override
     public List<CourseIntroduction> loadNotEntryCourses(List<ClassMember> classMemberList) {
         Assert.notNull(classMemberList, "学员信息不能为空");
         List<CourseIntroduction> courseList = loadAll();

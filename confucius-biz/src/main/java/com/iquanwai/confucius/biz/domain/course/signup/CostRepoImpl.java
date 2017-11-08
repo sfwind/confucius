@@ -21,6 +21,7 @@ public class CostRepoImpl implements CostRepo {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Override
     public double discount(Double price, Integer profileId, String orderId) {
         List<Coupon> coupons = couponDao.loadCoupons(profileId);
         Double remain = price;
@@ -83,6 +84,7 @@ public class CostRepoImpl implements CostRepo {
         }
     }
 
+    @Override
     public boolean hasCoupon(Integer profileId) {
         List<Coupon> coupons = couponDao.loadCoupons(profileId);
         return CollectionUtils.isNotEmpty(coupons);
