@@ -472,7 +472,7 @@ public class SignupServiceImpl implements SignupService {
                 String entryCode = riseClassMember.getMemberId();
                 logger.info("发送会员数据");
                 // 发送消息给一年精英版的用户
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.risemember.reply.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                 try {
                     TimeUnit.SECONDS.sleep(2);
                 } catch (InterruptedException e) {
@@ -490,7 +490,7 @@ public class SignupServiceImpl implements SignupService {
 
                 logger.info("发送小课训练营数据");
                 // 发送消息给小课训练营购买用户
-                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.send.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.camp.reply.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                 try {
                     TimeUnit.SECONDS.sleep(2);
                 } catch (InterruptedException e) {
