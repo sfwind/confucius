@@ -249,7 +249,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public List<RiseClassMember> loadUnGroupMemberPage(Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE (GroupId IS NULL OR GroupId = '') AND Del = 0  ORDER BY ClassName LIMIT "
+        String sql = "SELECT * FROM RiseClassMember WHERE (GroupId IS NULL OR GroupId = '') AND Del = 0 ORDER BY MemberId ASC LIMIT "
                 + page.getOffset() + ", " + page.getPageSize();
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {

@@ -194,7 +194,7 @@ public class MonthlyCampController {
         riseClassMember.setId(monthlyCampDto.getRiseClassMemberId());
         riseClassMember.setClassName(monthlyCampDto.getClassName());
         riseClassMember.setActive(monthlyCampDto.getActive());
-        if (monthlyCampDto.getGroupId() == null || monthlyCampDto.getGroupId().equals("")) {
+        if (monthlyCampDto.getGroupId() == null || "".equals(monthlyCampDto.getGroupId())) {
             riseClassMember.setGroupId(null);
         } else {
             String groupId = monthlyCampDto.getGroupId();

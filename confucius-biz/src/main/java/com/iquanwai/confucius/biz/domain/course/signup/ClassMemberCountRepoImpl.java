@@ -53,6 +53,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     private Map<Integer, CourseClass> signupMap = Maps.newConcurrentMap();
 
 //    @PostConstruct
+    @Override
     public void initClass() {
         List<QuanwaiClass> quanwaiClassList = classDao.openClass();
         List<Integer> openClass = Lists.newArrayList(); // 开放报名的班级id
@@ -122,6 +123,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
         logger.info("init class sign up number complete");
     }
 
+    @Override
     public Pair<Integer, Integer> prepareSignup(Integer profileId, Integer courseId) {
         //计算剩余人数
         synchronized (lock) {
@@ -165,6 +167,7 @@ public class ClassMemberCountRepoImpl implements ClassMemberCountRepo {
     }
 
     //如果用户未报名,则直接退名额
+    @Override
     public void quitClass(Integer profileId, Integer courseId, Integer orderClassId) {
         CourseClass classes = signupMap.get(profileId);
 
