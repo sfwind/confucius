@@ -34,10 +34,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter methodParameter) {
-        if (LoginUser.class.isAssignableFrom(methodParameter.getParameterType())) {
-            return true;
-        }
-        return false;
+        return LoginUser.class.isAssignableFrom(methodParameter.getParameterType());
     }
 
     @Override

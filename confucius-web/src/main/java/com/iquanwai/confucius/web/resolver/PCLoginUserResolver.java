@@ -32,10 +32,7 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        if (PCLoginUser.class.isAssignableFrom(parameter.getParameterType())) {
-            return true;
-        }
-        return false;
+        return PCLoginUser.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override
@@ -53,7 +50,7 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         if (loginUser.getLeft() < 1) {
             String remoteIp = request.getHeader("X-Forwarded-For");
             String value = CookieUtils.getCookie(request, LoginUserService.QUANWAI_TOKEN_COOKIE_NAME);
-            logger.error("没有找到用户,ip:{},_qt:{}", remoteIp, value);
+            logger.error("没有找到用户,uri:{},ip:{},_qt:{}", request.getRequestURI(), remoteIp, value);
         }
         return loginUser.getRight();
     }
