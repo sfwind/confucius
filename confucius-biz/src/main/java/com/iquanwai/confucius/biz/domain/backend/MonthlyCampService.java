@@ -40,4 +40,6 @@ public interface MonthlyCampService {
      * @param targetMonth 切换后月份
      */
     void switchCampDataProcess(Integer sourceYear, Integer sourceMonth, Integer targetYear, Integer targetMonth);
+
+    void unlockMonthlyCampAuthority(String riseId);
 }
