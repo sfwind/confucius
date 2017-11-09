@@ -17,7 +17,7 @@
     }
 </script>
 
-<div id="loading"><img src="//static.iqycamp.com/images/loading_page2.gif" style="width:300px;display: block;margin: 0 auto;"/></div>
+<div id="loading"><img src="//static.iqycamp.com/images/dribz.gif" style="width:300px;display: block;margin: 0 auto;"/></div>
 <div id="react-app"></div>
 <script type='text/javascript'>
     (function(m, ei, q, i, a, j, s) {
