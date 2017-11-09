@@ -46,7 +46,7 @@ public interface SignupService {
     void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     /**
-     * 后台解锁小课训练营全新啊
+     * 后台解锁小课训练营
      * @param profileId
      * @param monthlyCampConfig
      */
