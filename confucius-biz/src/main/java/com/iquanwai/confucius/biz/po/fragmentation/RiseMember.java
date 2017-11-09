@@ -19,6 +19,10 @@ public class RiseMember {
     private String memo;
     private Integer del;
     private Date addTime; //添加时间
+    /**
+     * 开营时间
+     */
+    private Date openDate;
 
     private String startTime; // 非DB字段，addTime
     private String endTime; // 非DB字段，expireDate

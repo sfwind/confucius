@@ -186,7 +186,7 @@ public class SignupController {
             if (memberTypeId.equals(RiseMember.HALF) || memberTypeId.equals(RiseMember.ANNUAL)) {
                 dto.setButtonStr("升级商学院");
             } else if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
-                dto.setButtonStr("续费商学院");
+                dto.setButtonStr("入学商学院");
             } else {
                 dto.setButtonStr("立即入学");
             }
