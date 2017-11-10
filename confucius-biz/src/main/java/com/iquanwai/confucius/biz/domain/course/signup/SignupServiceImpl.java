@@ -358,8 +358,8 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setOrderId("manual");
             riseMember.setProfileId(profile.getId());
             riseMember.setMemberTypeId(RiseMember.CAMP);
-            Date endDate = monthlyCampConfig.getCloseDate();
-            riseMember.setExpireDate(endDate);
+            riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
+            riseMember.setExpireDate(monthlyCampConfig.getCloseDate());
             riseMember.setExpired(false);
             riseMemberDao.insert(riseMember);
         } else {
@@ -374,8 +374,8 @@ public class SignupServiceImpl implements SignupService {
                 riseMember.setOrderId("manual");
                 riseMember.setProfileId(profile.getId());
                 riseMember.setMemberTypeId(RiseMember.CAMP);
-                Date endDate = monthlyCampConfig.getCloseDate();
-                riseMember.setExpireDate(endDate);
+                riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
+                riseMember.setExpireDate(monthlyCampConfig.getCloseDate());
                 riseMember.setExpired(true);
                 riseMember.setMemo("专业版购买训练营");
                 riseMemberDao.insert(riseMember);
@@ -387,8 +387,8 @@ public class SignupServiceImpl implements SignupService {
                 riseMember.setOrderId("manual");
                 riseMember.setProfileId(profile.getId());
                 riseMember.setMemberTypeId(RiseMember.CAMP);
-                Date endDate = monthlyCampConfig.getCloseDate();
-                riseMember.setExpireDate(endDate);
+                riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
+                riseMember.setExpireDate(monthlyCampConfig.getCloseDate());
                 riseMember.setExpired(false);
                 riseMemberDao.insert(riseMember);
             }
