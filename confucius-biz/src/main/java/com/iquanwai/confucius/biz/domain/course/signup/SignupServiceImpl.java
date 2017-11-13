@@ -259,7 +259,7 @@ public class SignupServiceImpl implements SignupService {
         insertRiseClassMember(profile, monthlyCampConfig);
 
         // 更新 RiseMember 表中信息
-        updateRiseMemberStatus(profile, monthlyCampConfig);
+        updateRiseMemberStatus(profile, monthlyCampConfig, orderId);
 
         // 送优惠券
         insertCampCoupon(profile);
@@ -297,7 +297,7 @@ public class SignupServiceImpl implements SignupService {
         insertRiseClassMember(profile, monthlyCampConfig);
 
         // 更新 RiseMember 表中信息
-        updateRiseMemberStatus(profile, monthlyCampConfig);
+        updateRiseMemberStatus(profile, monthlyCampConfig, null);
 
         // 赠送优惠券
         insertCampCoupon(profile);
@@ -348,14 +348,18 @@ public class SignupServiceImpl implements SignupService {
      * @param profile 用户 Profile
      * @param monthlyCampConfig 小课训练营配置
      */
-    private void updateRiseMemberStatus(Profile profile, MonthlyCampConfig monthlyCampConfig) {
+    private void updateRiseMemberStatus(Profile profile, MonthlyCampConfig monthlyCampConfig, String orderId) {
         // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
         RiseMember existRiseMember = this.currentRiseMember(profile.getId());
         if (existRiseMember == null) {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
             riseMember.setOpenId(profile.getOpenid());
-            riseMember.setOrderId("manual");
+            if (orderId != null) {
+                riseMember.setOrderId(orderId);
+            } else {
+                riseMember.setOrderId("manual");
+            }
             riseMember.setProfileId(profile.getId());
             riseMember.setMemberTypeId(RiseMember.CAMP);
             riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
