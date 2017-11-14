@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by justin on 16/9/14.
@@ -37,14 +33,6 @@ public class PayController {
     private SignupService signupService;
     @Autowired
     private CacheService cacheService;
-
-    private ExecutorService executorService;
-
-    @PostConstruct
-    public void init() {
-        executorService = new ThreadPoolExecutor(5, 10, 1, TimeUnit.MINUTES,
-                new ArrayBlockingQueue<>(50, true), new ThreadPoolExecutor.CallerRunsPolicy());
-    }
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -83,16 +71,19 @@ public class PayController {
         LOGGER.info("rise会员微信支付回调:{}", payCallback.toString());
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
-        try {
-            payService.handlePayResult(payCallback);
-            if ("SUCCESS".equals(payCallback.getResult_code())) {
-                payService.payMemberSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
-            } else {
-                LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+        ThreadPool.execute(() -> {
+            try {
+                payService.handlePayResult(payCallback);
+                if ("SUCCESS".equals(payCallback.getResult_code())) {
+                    payService.payMemberSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
+                } else {
+                    LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+                }
+            } catch (Exception e) {
+                LOGGER.error("rise会员支付结果回调处理失败", e);
             }
-        } catch (Exception e) {
-            LOGGER.error("rise会员支付结果回调处理失败", e);
-        }
+        });
+
         response.setHeader("Content-Type", "application/xml");
         response.getWriter().print(SUCCESS_RETURN);
         response.flushBuffer();
@@ -103,7 +94,7 @@ public class PayController {
         LOGGER.info("训练营小课单卖微信支付回调：{}", payCallback.toString());
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
-        executorService.execute(() -> {
+        ThreadPool.execute(() -> {
             try {
                 payService.handlePayResult(payCallback);
                 if ("SUCCESS".equals(payCallback.getResult_code())) {
