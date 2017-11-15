@@ -18,8 +18,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
-import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
+import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.course.dto.payment.BusinessSchoolDto;
 import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
@@ -199,6 +199,15 @@ public class SignupController {
             dto.setAuditionStr("试听课");
         } else {
             dto.setAuditionStr("预约试听");
+        }
+
+        List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
+        // 用户层级是商学院用户或者层级是小课训练营用户，则不显示试听课入口
+        Long count = riseMembers.stream()
+                .filter(member -> member.getMemberTypeId() == RiseMember.ELITE || member.getMemberTypeId() == RiseMember.CAMP)
+                .count();
+        if (count > 0) {
+            dto.setAuditionStr(null);
         }
 
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));

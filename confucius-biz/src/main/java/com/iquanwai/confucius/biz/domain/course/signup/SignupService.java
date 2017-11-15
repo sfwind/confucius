@@ -134,4 +134,6 @@ public interface SignupService {
      * 获取当前小课训练营信息
      */
     RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+
+    List<RiseMember> loadPersonalAllRiseMembers(Integer profileId);
 }

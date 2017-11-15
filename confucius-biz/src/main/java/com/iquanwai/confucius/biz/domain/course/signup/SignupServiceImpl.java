@@ -681,7 +681,6 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
-
     @Override
     public RiseMember currentRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
@@ -706,7 +705,6 @@ public class SignupServiceImpl implements SignupService {
         MonthlyCampSchedule schedule = schedules.stream().findFirst().get();
         return schedule.getProblemId();
     }
-
 
     @Override
     public BusinessSchool getSchoolInfoForPay(Integer profileId) {
@@ -776,6 +774,10 @@ public class SignupServiceImpl implements SignupService {
         return riseMember;
     }
 
+    @Override
+    public List<RiseMember> loadPersonalAllRiseMembers(Integer profileId) {
+        return riseMemberDao.loadPersonalAll(profileId);
+    }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
         // 刷新会员状态
