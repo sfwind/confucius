@@ -19,4 +19,7 @@ public class NoticeMsgDto {
     private String messageId;
     private List<String> openids;
     private String url;
+
+
+    private Boolean forcePush;
 }
