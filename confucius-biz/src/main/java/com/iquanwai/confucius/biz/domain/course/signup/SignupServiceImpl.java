@@ -375,7 +375,11 @@ public class SignupServiceImpl implements SignupService {
                 // 添加会员表
                 RiseMember riseMember = new RiseMember();
                 riseMember.setOpenId(profile.getOpenid());
-                riseMember.setOrderId("manual");
+                if (orderId != null) {
+                    riseMember.setOrderId(orderId);
+                } else {
+                    riseMember.setOrderId("manual");
+                }
                 riseMember.setProfileId(profile.getId());
                 riseMember.setMemberTypeId(RiseMember.CAMP);
                 riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
@@ -388,7 +392,11 @@ public class SignupServiceImpl implements SignupService {
                 // 添加会员表
                 RiseMember riseMember = new RiseMember();
                 riseMember.setOpenId(profile.getOpenid());
-                riseMember.setOrderId("manual");
+                if (orderId != null) {
+                    riseMember.setOrderId(orderId);
+                } else {
+                    riseMember.setOrderId("manual");
+                }
                 riseMember.setProfileId(profile.getId());
                 riseMember.setMemberTypeId(RiseMember.CAMP);
                 riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
@@ -500,14 +508,15 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setOrderId(riseOrder.getOrderId());
         riseMember.setProfileId(riseOrder.getProfileId());
         riseMember.setMemberTypeId(memberType.getId());
-        if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) || existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
-            riseMember.setExpireDate(DateUtils.afterNatureMonths(existRiseMember.getExpireDate(), 12));
+        if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) ||
+                existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+            riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 12));
             // 续费，继承OpenDate
             riseMember.setOpenDate(existRiseMember.getOpenDate());
         } else {
-            riseMember.setExpireDate(DateUtils.afterNatureMonths(new Date(), 12));
             // 非续费，查询本次开营时间
             riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
+            riseMember.setExpireDate(DateUtils.afterMonths(monthlyCampConfig.getOpenDate(), 12));
         }
         riseMember.setExpired(false);
         riseMemberDao.insert(riseMember);
@@ -626,7 +635,7 @@ public class SignupServiceImpl implements SignupService {
             if (item.getId().equals(RiseMember.CAMP)) {
                 item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(monthlyCampConfig.getCloseDate(), 1)));
             } else {
-                item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), item.getOpenMonth()), 1)));
+                item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), item.getOpenMonth()), 1)));
             }
         });
         return memberTypes;
@@ -648,15 +657,15 @@ public class SignupServiceImpl implements SignupService {
                 if (riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
                     // 此时用户类型是 商学院会员
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
-                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
+                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
                 } else {
                     // 非商学院会员
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), memberType.getOpenMonth()), 1)));
+                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), memberType.getOpenMonth()), 1)));
                 }
             } else {
                 memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-                memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterNatureMonths(new Date(), memberType.getOpenMonth()), 1)));
+                memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), memberType.getOpenMonth()), 1)));
             }
         }
         return memberTypes;
@@ -748,7 +757,7 @@ public class SignupServiceImpl implements SignupService {
     public RiseMember getCurrentRiseMemberStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
-            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(DateUtils.afterNatureMonths(riseMember.getExpireDate(), -12)));
+            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(DateUtils.afterMonths(riseMember.getExpireDate(), -12)));
         } else {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         }
