@@ -113,7 +113,7 @@ public class RiseMemberDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseMember WHERE Expired = 0 AND ExpireDate < ? AND Del = 0";
         try {
-            return runner.query(sql, new BeanListHandler<RiseMember>(RiseMember.class), expiredDate);
+            return runner.query(sql, new BeanListHandler<>(RiseMember.class), expiredDate);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -138,7 +138,7 @@ public class RiseMemberDao extends DBUtil {
     public List<RiseMember> loadPersonalAll(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND Del = 0";
-        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<RiseMember>(RiseMember.class);
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
         try {
             return runner.query(sql, h, profileId);
         } catch (SQLException e) {

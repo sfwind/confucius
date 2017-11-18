@@ -293,13 +293,6 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public void fragmentDailyPracticeData() {
-        logger.info("search fragment daily practice data");
-        FragmentDailyData dailyData = fragmentAnalysisDataDao.getDailyData();
-        fragmentAnalysisDataDao.insertDailyData(dailyData);
-    }
-
-    @Override
     public Integer riseArticleViewCount(Integer module, Integer id, Integer type) {
         return fragmentAnalysisDataDao.riseArticleViewCount(module, id, type);
     }

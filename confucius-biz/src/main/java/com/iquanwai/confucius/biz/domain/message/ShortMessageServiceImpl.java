@@ -2,7 +2,7 @@ package com.iquanwai.confucius.biz.domain.message;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageRedisDao;
+import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageSubmitDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.message.ShortMessageSubmit;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,9 +31,8 @@ import java.util.Map;
 public class ShortMessageServiceImpl implements ShortMessageService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-
     @Autowired
-    private ShortMessageRedisDao shortMessageRedisDao;
+    private RedisUtil redisUtil;
     @Autowired
     private RestfulHelper restfulHelper;
     @Autowired
@@ -41,6 +41,10 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     private ShortMessageSubmitDao shortMessageSubmitDao;
     @Autowired
     private TemplateMessageService templateMessageService;
+
+    private static final String MIN_SEND_KEY = "short:min:{key}";
+    private static final String HOUR_SEND_KEY = "short:hour:{key}";
+    private static final String DAY_SEND_KEY = "short:day:{key}";
 
     @Override
     public Pair<Integer, String> checkSendAble(ShortMessage shortMessage) {
@@ -52,7 +56,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         }
 
         // 2.发送条数限制
-        SendLimit limit = shortMessageRedisDao.getUserSendLimit(shortMessage.getProfileId());
+        SendLimit limit = getUserSendLimit(shortMessage.getProfileId());
         if (limit.getMinSend() >= ConfigUtils.getMinSendLimit()) {
             return new MutablePair<>(-1, "操作过于频繁，请稍后再试");
         }
@@ -146,7 +150,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
 
     @Override
     public void raiseSendCount(Integer profileId){
-        shortMessageRedisDao.addSendCount(profileId);
+        addSendCount(profileId);
     }
 
     @Override
@@ -168,6 +172,54 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         data.put("keyword2", new TemplateMessage.Keyword("高"));
         data.put("remark", new TemplateMessage.Keyword(message));
         templateMessageService.sendMessage(templateMessage);
+    }
+
+
+
+    private SendLimit getUserSendLimit(Integer profileId){
+        if (profileId == null) {
+            return null;
+        }
+        Integer minSend = redisUtil.getInt(MIN_SEND_KEY.replace("{key}", profileId.toString()), 0);
+        Integer hourSend = redisUtil.getInt(HOUR_SEND_KEY.replace("{key}", profileId.toString()), 0);
+        Integer daySend = redisUtil.getInt(DAY_SEND_KEY.replace("{key}", profileId.toString()), 0);
+
+        SendLimit limit = new SendLimit();
+        limit.setProfileId(profileId);
+        limit.setMinSend(minSend);
+        limit.setHourSend(hourSend);
+        limit.setDaySend(daySend);
+        return limit;
+    }
+
+
+    private void addSendCount(Integer profileId) {
+        SendLimit userSendLimit = getUserSendLimit(profileId);
+        String minKey = MIN_SEND_KEY.replace("{key}", profileId.toString());
+        String hourKey = HOUR_SEND_KEY.replace("{key}", profileId.toString());
+        String dayKey = DAY_SEND_KEY.replace("{key}", profileId.toString());
+        Long minExpired;
+        Long hourExpired;
+        Long dayExpired;
+        if (userSendLimit.getMinSend() == 0) {
+            minExpired = 60L;
+        } else {
+            minExpired = redisUtil.getRemainTime(minKey);
+        }
+        if (userSendLimit.getHourSend() == 0) {
+            hourExpired = 60 * 60L;
+        } else {
+            hourExpired = redisUtil.getRemainTime(hourKey);
+        }
+        if (userSendLimit.getDaySend() == 0) {
+            dayExpired = DateUtils.nextDayRemainSeconds(new Date());
+        } else {
+            dayExpired = redisUtil.getRemainTime(dayKey);
+        }
+
+        redisUtil.set(minKey, userSendLimit.getMinSend() + 1, minExpired);
+        redisUtil.set(hourKey, userSendLimit.getHourSend() + 1, hourExpired);
+        redisUtil.set(dayKey, userSendLimit.getDaySend() + 1, dayExpired);
     }
 
 }

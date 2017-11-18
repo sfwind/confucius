@@ -24,7 +24,7 @@ public class PracticePlanDao extends PracticeDBUtil {
     public List<PracticePlan> loadPracticePlan(Integer planId){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<PracticePlan>> h = new BeanListHandler<>(PracticePlan.class);
-        String sql = "SELECT * FROM PracticePlan where PlanId=? Order by Series";
+        String sql = "SELECT * FROM PracticePlan where PlanId=? and Del=0 Order by Series";
         try {
             List<PracticePlan> practicePlans = run.query(sql, h,
                     planId);
@@ -39,7 +39,7 @@ public class PracticePlanDao extends PracticeDBUtil {
     public PracticePlan loadPracticePlan(Integer planId, Integer practiceId, Integer type){
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<PracticePlan> h = new BeanHandler<>(PracticePlan.class);
-        String sql = "SELECT * FROM PracticePlan where PlanId=? and PracticeId=? and Type=?";
+        String sql = "SELECT * FROM PracticePlan where PlanId=? and PracticeId=? and Type=? and Del=0";
         try {
             PracticePlan practicePlan = run.query(sql, h,
                     planId, practiceId, type);

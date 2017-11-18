@@ -194,7 +194,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
                     couponBean.setAmount(coupon);
                     couponBean.setOpenid(application.getOpenid());
                     couponBean.setProfileId(application.getProfileId());
-                    couponBean.setUsed(0);
+                    couponBean.setUsed(Coupon.UNUSED);
                     couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 7));
                     couponBean.setCategory("ELITE_RISE_MEMBER");
                     couponBean.setDescription("商学院奖学金");

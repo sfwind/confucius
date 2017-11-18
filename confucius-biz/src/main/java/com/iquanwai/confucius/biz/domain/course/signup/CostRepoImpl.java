@@ -22,38 +22,15 @@ public class CostRepoImpl implements CostRepo {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public double discount(Double price, Integer profileId, String orderId) {
-        List<Coupon> coupons = couponDao.loadCoupons(profileId);
-        Double remain = price;
-        for (Coupon coupon : coupons) {
-            Double amount = coupon.getAmount();
-            if (remain > amount) {
-                remain = CommonUtils.substract(remain, amount);
-                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
-                //余额为0时,仍然付0.01元
-            } else if (remain.equals(amount)) {
-                remain = 0d;
-                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
-                break;
-            } else {
-                remain = 0d;
-                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
-                break;
-            }
-        }
-        return CommonUtils.substract(price, remain);
-    }
-
-    @Override
     public double discount(Double price, String orderId, Coupon coupon) {
         Double remain = price;
         Double amount = coupon.getAmount();
         if (remain > amount) {
             remain = CommonUtils.substract(remain, amount);
-            couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount);
+            couponDao.updateCoupon(coupon.getId(), orderId, amount);
         } else {
             remain = 0D;
-            couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
+            couponDao.updateCoupon(coupon.getId(), orderId, CommonUtils.substract(amount, remain));
         }
         return CommonUtils.substract(price, remain);
     }
@@ -64,11 +41,11 @@ public class CostRepoImpl implements CostRepo {
         Double amount = coupons.stream().mapToDouble(Coupon::getAmount).sum();
         if (remain > amount) {
             remain = CommonUtils.substract(remain, amount);
-            coupons.forEach(coupon -> couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, amount));
+            coupons.forEach(coupon -> couponDao.updateCoupon(coupon.getId(), orderId, amount));
         } else {
             remain = 0D;
             for (Coupon coupon : coupons) {
-                couponDao.updateCoupon(coupon.getId(), Coupon.USING, orderId, CommonUtils.substract(amount, remain));
+                couponDao.updateCoupon(coupon.getId(), orderId, CommonUtils.substract(amount, remain));
             }
         }
         return CommonUtils.substract(price, remain);

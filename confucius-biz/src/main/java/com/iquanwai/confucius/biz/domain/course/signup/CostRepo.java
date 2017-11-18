@@ -8,11 +8,6 @@ import java.util.List;
  * Created by justin on 16/10/13.
  */
 public interface CostRepo {
-    /**
-     * 用户使用折扣后的实际金额
-     */
-    double discount(Double price, Integer profileId, String orderId);
-
     double discount(Double price, String orderId, Coupon coupon);
 
     double discount(Double price, String orderId, List<Coupon> coupon);

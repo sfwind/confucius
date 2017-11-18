@@ -60,11 +60,6 @@ public interface PracticeService {
                                        Integer profileId, String content, Integer replyId);
 
     /**
-     * 碎片化每日数据
-     */
-    void fragmentDailyPracticeData();
-
-    /**
      * 增加浏览量
      */
     Integer riseArticleViewCount(Integer module, Integer id, Integer type);

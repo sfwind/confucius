@@ -102,7 +102,7 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ProfileDao profileDao;
 
-    private int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
+    private final static int PROBLEM_MAX_LENGTH = 30; //小课最长开放时间
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     /**
@@ -417,7 +417,7 @@ public class SignupServiceImpl implements SignupService {
         coupon.setOpenid(profile.getOpenid());
         coupon.setProfileId(profile.getId());
         coupon.setAmount(MONTHLY_CAMP_COUPON);
-        coupon.setUsed(0);
+        coupon.setUsed(Coupon.UNUSED);
         coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 2));
         coupon.setDescription("优惠券");
         couponDao.insert(coupon);

@@ -26,7 +26,7 @@ public class WarmupChoiceDao extends PracticeDBUtil {
     public List<WarmupChoice> loadChoices(Integer practiceId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<WarmupChoice>> h = new BeanListHandler<>(WarmupChoice.class);
-        String sql = "SELECT * FROM Choice where QuestionId = ?";
+        String sql = "SELECT * FROM Choice where QuestionId = ? and Del=0";
         try {
             return run.query(sql, h, practiceId);
         } catch(SQLException e) {
@@ -43,20 +43,6 @@ public class WarmupChoiceDao extends PracticeDBUtil {
         } catch(SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-    }
-
-    // 插入选择题数据
-    public Integer insertChoice(WarmupChoice choice) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into Choice (QuestionId, Sequence, Subject, IsRight) VALUES (?, ?, ?, ?)";
-        try {
-            Long result = runner.insert(sql, new ScalarHandler<>(), choice.getQuestionId(), choice.getSequence(),
-                    choice.getSubject(), choice.getIsRight());
-            return result.intValue();
-        } catch(SQLException e) {
-            logger.error(e.getLocalizedMessage());
-        }
-        return -1;
     }
 
     // 批量插入数据

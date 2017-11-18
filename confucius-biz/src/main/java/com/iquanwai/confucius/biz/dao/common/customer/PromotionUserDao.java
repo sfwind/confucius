@@ -37,7 +37,7 @@ public class PromotionUserDao extends DBUtil {
 
     public PromotionUser loadPromotion(String openid, String source){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from PromotionUser where OpenId = ? and Source=?";
+        String sql = "select * from PromotionUser where OpenId = ? and Source=? and Del=0";
 
         try{
             ResultSetHandler<PromotionUser> handler = new BeanHandler<>(PromotionUser.class);
