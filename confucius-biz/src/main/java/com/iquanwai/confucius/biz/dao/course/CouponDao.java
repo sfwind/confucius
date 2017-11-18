@@ -27,9 +27,8 @@ public class CouponDao extends DBUtil {
         ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
 
         try {
-            List<Coupon> coupon = run.query("SELECT * FROM Coupon where ProfileId=? and Used in (0,2) and ExpiredDate>?",
+            return run.query("SELECT * FROM Coupon where ProfileId=? and Used in (0,2) and ExpiredDate>? and Del=0",
                     h, profileId, new Date());
-            return coupon;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
