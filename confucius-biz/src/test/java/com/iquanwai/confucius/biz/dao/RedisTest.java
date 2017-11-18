@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.dao;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.TestBase;
-import com.iquanwai.confucius.biz.dao.common.customer.ShortMessageRedisDao;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import org.junit.Test;
@@ -21,8 +20,6 @@ public class RedisTest extends TestBase {
     private RedisUtil redisUtil;
     @Autowired
     private ShortMessageService shortMessageService;
-    @Autowired
-    private ShortMessageRedisDao shortMessageRedisDao;
 
     /**
      * 测试
