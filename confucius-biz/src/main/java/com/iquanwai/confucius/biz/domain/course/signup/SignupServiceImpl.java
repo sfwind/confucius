@@ -662,7 +662,7 @@ public class SignupServiceImpl implements SignupService {
                     // 商学院报名
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
                     memberType.setEndTime(DateUtils.parseDateToStringByCommon(
-                            DateUtils.beforeDays(DateUtils.afterMonths(monthlyCampConfig.getCloseDate(),
+                            DateUtils.beforeDays(DateUtils.afterMonths(monthlyCampConfig.getOpenDate(),
                                     memberType.getOpenMonth()), 1)));
                 }
             } else {
