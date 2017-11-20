@@ -29,4 +29,8 @@ public class RiseMemberDto {
      * 试听课按钮显示
      */
     private String auditionStr;
+    /** 订单关闭剩余小时 */
+    private int remainHour;
+    /** 订单关闭剩余分钟 */
+    private int remainMinute;
 }

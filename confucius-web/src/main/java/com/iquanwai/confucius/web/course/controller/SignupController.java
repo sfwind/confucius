@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
+import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
@@ -16,6 +18,7 @@ import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
@@ -25,10 +28,10 @@ import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +40,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +67,8 @@ public class SignupController {
     private CacheService cacheService;
     @Autowired
     private PlanService planService;
+    @Autowired
+    private BusinessSchoolService businessSchoolService;
 
 
     /**
@@ -79,27 +84,30 @@ public class SignupController {
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
         Boolean entry;
-        if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_MEMBER)) {
-            // 会员购买
-            RiseOrder riseOrder = signupService.getRiseOrder(orderId);
-            if (riseOrder == null) {
-                logger.error("{} 订单不存在", orderId);
+        switch (quanwaiOrder.getGoodsType()) {
+            case QuanwaiOrder.FRAG_MEMBER:
+                // 会员购买
+                RiseOrder riseOrder = signupService.getRiseOrder(orderId);
+                if (riseOrder == null) {
+                    logger.error("{} 订单不存在", orderId);
+                    return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+                } else {
+                    entry = riseOrder.getEntry();
+                }
+                break;
+            case QuanwaiOrder.FRAG_CAMP:
+                // 小课训练营购买
+                MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
+                if (campOrder == null) {
+                    logger.error("{} 订单不存在", orderId);
+                    return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+                } else {
+                    entry = campOrder.getEntry();
+                }
+                break;
+            default:
+                logger.error("{} 订单类型异常", orderId);
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
-            } else {
-                entry = riseOrder.getEntry();
-            }
-        } else if (quanwaiOrder.getGoodsType().equals(QuanwaiOrder.FRAG_CAMP)) {
-            // 小课训练营购买
-            MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
-            if (campOrder == null) {
-                logger.error("{} 订单不存在", orderId);
-                return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
-            } else {
-                entry = campOrder.getEntry();
-            }
-        } else {
-            logger.error("{} 订单类型异常", orderId);
-            return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
         }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
@@ -135,7 +143,6 @@ public class SignupController {
     @Deprecated
     @RequestMapping(value = "/info/load", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser) {
-        InfoSubmitDto infoSubmitDto = new InfoSubmitDto();
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
@@ -143,12 +150,8 @@ public class SignupController {
                 .action("加载个人信息");
         operationLogService.log(operationLog);
         Profile account = accountService.getProfile(loginUser.getId());
-        try {
-            BeanUtils.copyProperties(infoSubmitDto, account);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.error("beanUtils copy props error", e);
-            return WebUtils.error("加载个人信息失败");
-        }
+        ModelMapper modelMapper = new ModelMapper();
+        InfoSubmitDto infoSubmitDto = modelMapper.map(account, InfoSubmitDto.class);
         return WebUtils.result(infoSubmitDto);
     }
 
@@ -197,10 +200,9 @@ public class SignupController {
 
         if (classMember != null) {
             dto.setAuditionStr("试听课");
-        } else {
-            dto.setAuditionStr("预约试听");
         }
-
+        Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
+        calcDealTime(dealTime, dto, loginUser.getId());
         List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
         // 用户层级是商学院用户或者层级是小课训练营用户，则不显示试听课入口
         Long count = riseMembers.stream()
@@ -213,6 +215,24 @@ public class SignupController {
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
         dto.setCoupons(coupons);
         return WebUtils.result(dto);
+    }
+
+    private void calcDealTime(Date dealTime, RiseMemberDto dto, Integer profileId) {
+        // 默认订单开放时间是48小时
+        if(dealTime == null){
+            dto.setRemainHour(48);
+            dto.setRemainMinute(0);
+        }else{
+            int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 48));
+            if(time<=0){
+                businessSchoolService.expireApplication(profileId);
+                dto.setRemainHour(0);
+                dto.setRemainMinute(0);
+            }else{
+                dto.setRemainHour(time/60);
+                dto.setRemainMinute(time % 60);
+            }
+        }
     }
 
     @RequestMapping(value = "/rise/member/check/{memberTypeId}", method = RequestMethod.GET)
@@ -374,6 +394,8 @@ public class SignupController {
                     // 选择最大的一张
                     Coupon maxCoupon = coupons.stream().filter(item -> item.getCategory() == null).max((o1, o2) -> o1.getAmount() - o2.getAmount() > 0 ? 1 : -1).orElse(null);
                     list.add(maxCoupon);
+                    break;
+                default:
                     break;
             }
         }
@@ -565,6 +587,8 @@ public class SignupController {
                 break;
             case RiseMember.CAMP:
                 riseMember = signupService.getCurrentMonthlyCampStatus(loginUser.getId(), monthlyCampConfig);
+                break;
+            default:
                 break;
         }
         if (riseMember != null) {

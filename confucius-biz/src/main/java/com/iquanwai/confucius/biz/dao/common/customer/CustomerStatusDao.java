@@ -40,6 +40,16 @@ public class CustomerStatusDao extends DBUtil {
         return -1;
     }
 
+    public void delStatus(Integer profileId, Integer statusId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update CustomerStatus set Del=1 where ProfileId=? and StatusId=?";
+        try {
+            runner.update(sql, profileId, statusId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
 }
 
 

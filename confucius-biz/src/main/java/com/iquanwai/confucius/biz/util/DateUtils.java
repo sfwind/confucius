@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.biz.util;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Minutes;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -52,16 +54,17 @@ public class DateUtils {
     }
 
     public static int interval(Date date) {
-        long now = System.currentTimeMillis();
-        long thatTime = date.getTime();
-
-        return (int) Math.abs((now - thatTime) / 1000) / 60 / 60 / 24;
+        return Math.abs(Days.daysBetween(new DateTime(date), new DateTime()).getDays());
     }
 
-    public static long nextDayRemainSeconds(Date tody) {
+    public static int intervalMinute(Date date) {
+        return Minutes.minutesBetween(new DateTime(), new DateTime(date)).getMinutes();
+    }
+
+    public static long nextDayRemainSeconds(Date today) {
         Long current = System.currentTimeMillis();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(DateUtils.afterDays(tody, 1));
+        calendar.setTime(DateUtils.afterDays(today, 1));
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);

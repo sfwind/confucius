@@ -26,7 +26,18 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM BusinessSchoolApplication WHERE Openid = ? AND Del = 0";
         try {
-            return runner.query(sql, new BeanHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), openId);
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 1 Order by Id desc";
+        try {
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -37,7 +48,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM BusinessSchoolApplication WHERE Status = 0 AND Del =0 LIMIT " + page.getOffset() + "," + page.getLimit();
         try {
-            return runner.query(sql, new BeanListHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class));
+            return runner.query(sql, new BeanListHandler<>(BusinessSchoolApplication.class));
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
