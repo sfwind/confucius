@@ -195,7 +195,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
                     couponBean.setOpenid(application.getOpenid());
                     couponBean.setProfileId(application.getProfileId());
                     couponBean.setUsed(Coupon.UNUSED);
-                    couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 7));
+                    couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
                     couponBean.setCategory("ELITE_RISE_MEMBER");
                     couponBean.setDescription("商学院奖学金");
                     couponDao.insert(couponBean);
@@ -266,5 +266,27 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         SurveySubmit submit = surveySubmitDao.load(SurveySubmit.class, submitId);
         List<SurveyQuestionSubmit> list = surveyQuestionSubmitDao.loadSubmitQuestions(submitId);
         return new MutablePair<>(submit, list);
+    }
+
+    @Override
+    public Date loadLastApplicationDealTime(Integer profileId) {
+        BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao
+                .loadLastApproveApplication(profileId);
+        if(businessSchoolApplication !=null){
+            Date dealTime = businessSchoolApplication.getDealTime();
+            //如果申请通过通知还未发,则返回通过时间,反之则返回通知时间
+            if(dealTime==null){
+                return businessSchoolApplication.getCheckTime();
+            } else{
+                return dealTime;
+            }
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public void expireApplication(Integer profileId) {
+        customerStatusDao.delStatus(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
     }
 }
