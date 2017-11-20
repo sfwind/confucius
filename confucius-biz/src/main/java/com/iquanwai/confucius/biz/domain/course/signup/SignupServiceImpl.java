@@ -655,13 +655,15 @@ public class SignupServiceImpl implements SignupService {
             } else if (memberType.getId().equals(RiseMember.ELITE) || memberType.getId().equals(RiseMember.HALF_ELITE)) {
                 // 商学院类型（一年、半年）
                 if (riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
-                    // 此时用户类型是 商学院会员
+                    // 商学院会员续费
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
                     memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
                 } else {
-                    // 非商学院会员
+                    // 商学院报名
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), memberType.getOpenMonth()), 1)));
+                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(
+                            DateUtils.beforeDays(DateUtils.afterMonths(monthlyCampConfig.getCloseDate(),
+                                    memberType.getOpenMonth()), 1)));
                 }
             } else {
                 memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
