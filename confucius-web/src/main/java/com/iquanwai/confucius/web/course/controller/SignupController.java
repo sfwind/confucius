@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
@@ -16,7 +15,12 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.AuditionClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
@@ -37,7 +41,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -199,8 +208,13 @@ public class SignupController {
         AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
 
         if (classMember != null) {
+            // 有试听课
             dto.setAuditionStr("试听课");
+        } else {
+            // 没有试听课
+            dto.setAuditionStr("预约试听");
         }
+
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
         List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
@@ -209,6 +223,7 @@ public class SignupController {
                 .filter(member -> member.getMemberTypeId() == RiseMember.ELITE || member.getMemberTypeId() == RiseMember.CAMP)
                 .count();
         if (count > 0) {
+            // 商学院和训练营不显示试听课按钮
             dto.setAuditionStr(null);
         }
 
