@@ -612,4 +612,19 @@ public class SignupController {
             return WebUtils.error("会员类型校验出错");
         }
     }
+
+    @RequestMapping("/rise/audition/button")
+    public ResponseEntity<Map<String,Object>> loadAuditions(LoginUser loginUser){
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("用户信息")
+                .function("RISE")
+                .action("查询试听课信息");
+        operationLogService.log(operationLog);
+        AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
+        String auditionStr = "";
+        if (classMember != null) {
+            auditionStr = "试听课";
+        }
+        return WebUtils.result(auditionStr);
+    }
 }
