@@ -9,7 +9,7 @@ import lombok.Data;
 public class CustomerStatus {
     private Integer profileId;
     private Integer statusId;
-    private Boolean Del;
+    private Boolean del;
 
     public static final Integer OPEN_BIBLE = 1; //开bible
     public static final Integer EDIT_TAG = 2; //选择tag
