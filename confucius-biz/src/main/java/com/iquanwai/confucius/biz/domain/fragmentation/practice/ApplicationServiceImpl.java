@@ -147,5 +147,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         return applicationPracticeDao.updateApplicationPracticeById(id, topic, description);
     }
 
+    @Override
+    public int insertApplicationPractice(ApplicationPractice applicationPractice) {
+        return applicationPracticeDao.insertApplicationPractice(applicationPractice);
+    }
+
 
 }
