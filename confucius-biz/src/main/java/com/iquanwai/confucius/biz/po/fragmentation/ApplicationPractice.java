@@ -15,4 +15,8 @@ public class ApplicationPractice {
     private Integer difficulty; //难易度（1-容易，2-普通，3-困难）
     private Integer problemId; //小课id
 
+    //新增字段（2017/11/22）
+    private  Integer sequence;//顺序
+    private String pic;//图片链接
+    private String practiceUid;//任务编号
 }

@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,7 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
         String sql = "SELECT * FROM ApplicationPractice where ProblemId=? and Del=0";
         try {
             return run.query(sql, h, problemId);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
@@ -38,7 +39,7 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
         String sql = "SELECT * FROM ApplicationPractice where ProblemId=?";
         try {
             return run.query(sql, h, problemId);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
@@ -49,11 +50,30 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
         String sql = "update ApplicationPractice set topic = ?, description = ?, updated = 1 where id = ?";
         try {
             return runner.update(sql, topic, description, id);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }
 
+    /**
+     * 插入应用题
+     *
+     * @param applicationPractice
+     * @return:返回插入后的id
+     */
+    public int insertApplicationPractice(ApplicationPractice applicationPractice) {
 
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "insert into ApplicationPractice(topic,description,difficulty,knowledgeId,sceneId,sequence,problemId,pic,practiceUid) values(?,?,?,?,?,?,?,?,?)";
+
+        try {
+            Long result = runner.insert(sql, new ScalarHandler<>(), applicationPractice.getTopic(), applicationPractice.getDescription(), applicationPractice.getDifficulty(), applicationPractice.getKnowledgeId()
+                    , applicationPractice.getSceneId(), applicationPractice.getSequence(), applicationPractice.getProblemId(), applicationPractice.getPic(), applicationPractice.getPracticeUid());
+            return result.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
 }

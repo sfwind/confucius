@@ -65,4 +65,10 @@ public interface ApplicationService {
      */
     Integer updateApplicationPractice(Integer applicationId, String topic, String description);
 
+    /**
+     * 插入应用题
+     * @param applicationPractice
+     * @return
+     */
+    int insertApplicationPractice(ApplicationPractice applicationPractice);
 }
