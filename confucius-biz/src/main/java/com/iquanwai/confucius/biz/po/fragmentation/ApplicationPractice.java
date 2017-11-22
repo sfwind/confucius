@@ -19,4 +19,5 @@ public class ApplicationPractice {
     private  Integer sequence;//顺序
     private String pic;//图片链接
     private String practiceUid;//任务编号
+    private int updated;//是否修改
 }
