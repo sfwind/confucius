@@ -26,11 +26,11 @@ public class AccessTokenServiceImpl implements AccessTokenService {
             return accessToken;
         }
 
-        String token = redisUtil.get("accesstoken");
+        String token = redisUtil.get("accessToken");
         if(token==null){
             logger.info("insert access token");
             String accessToken = _getAccessToken();
-            redisUtil.set("accesstoken", accessToken);
+            redisUtil.set("accessToken", accessToken);
             accessTokenDao.insertOrUpdate(accessToken);
         }else {
             accessToken = token;
