@@ -1,14 +1,19 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 public class KnowledgeDao extends PracticeDBUtil {
@@ -49,6 +54,23 @@ public class KnowledgeDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    /**
+     * 查询所有知识点
+     * @return
+     */
+    public List<Knowledge> queryAllKnowledges(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+
+        ResultSetHandler<List<Knowledge>> h = new BeanListHandler<>(Knowledge.class);
+        String sql = "SELECT * FROM Knowledge";
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 
 }

@@ -61,6 +61,11 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         }
     }
 
+    @Override
+    public List<Knowledge> queryAllKnowLedges() {
+        return knowledgeDao.queryAllKnowledges();
+    }
+
     private void insertProblemSchedule(Knowledge knowledge, Integer problemId) {
         ProblemSchedule schedule = new ProblemSchedule();
         List<ProblemSchedule> problemSchedules = problemScheduleDao.loadProblemSchedule(problemId);

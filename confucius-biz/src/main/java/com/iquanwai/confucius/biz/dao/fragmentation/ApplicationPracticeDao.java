@@ -45,11 +45,11 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public Integer updateApplicationPracticeById(Integer id, String topic, String description) {
+    public Integer updateApplicationPracticeById(Integer id, String topic, String description,int difficulty) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ApplicationPractice set topic = ?, description = ?, updated = 1 where id = ?";
+        String sql = "update ApplicationPractice set topic = ?, description = ?,difficulty = ?, updated = 1 where id = ?";
         try {
-            return runner.update(sql, topic, description, id);
+            return runner.update(sql, topic, description, difficulty,id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -65,7 +65,7 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
     public int insertApplicationPractice(ApplicationPractice applicationPractice) {
 
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into ApplicationPractice(topic,description,difficulty,knowledgeId,sceneId,sequence,problemId,pic,practiceUid,updated) values(?,?,?,?,?,?,?,?,?,?)";
+            String sql = "insert into ApplicationPractice(topic,description,difficulty,knowledgeId,sceneId,sequence,problemId,pic,practiceUid,updated) values(?,?,?,?,?,?,?,?,?,?)";
 
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), applicationPractice.getTopic(), applicationPractice.getDescription(), applicationPractice.getDifficulty(), applicationPractice.getKnowledgeId()

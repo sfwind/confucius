@@ -62,8 +62,9 @@ public interface ApplicationService {
      * @param applicationId id
      * @param topic 主题
      * @param description 描述
+     * @param difficulty 难易度
      */
-    Integer updateApplicationPractice(Integer applicationId, String topic, String description);
+    Integer updateApplicationPractice(Integer applicationId, String topic, String description,int difficulty);
 
     /**
      * 插入应用题
