@@ -11,4 +11,6 @@ public interface KnowledgeService {
     List<Knowledge> loadKnowledges(Integer problemId);
 
     Integer updateKnowledge(Knowledge knowledge, Integer problemId);
+
+    List<Knowledge> queryAllKnowLedges();
 }

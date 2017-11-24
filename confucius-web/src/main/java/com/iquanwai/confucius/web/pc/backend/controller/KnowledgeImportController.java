@@ -74,4 +74,17 @@ public class KnowledgeImportController {
         }
     }
 
+    @RequestMapping(value = "/query/knowledges",method = RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> queryKnowledges(PCLoginUser loginUser){
+        Assert.notNull(loginUser, "登录用户不能为空");
+        OperationLog operationLog = OperationLog.create().module("后台管理").function("查询知识点").action("查询知识点")
+                .openid(loginUser.getOpenId());
+
+        operationLogService.log(operationLog);
+
+        List<Knowledge> result = knowledgeService.queryAllKnowLedges();
+
+        return WebUtils.result(result);
+    }
+
 }

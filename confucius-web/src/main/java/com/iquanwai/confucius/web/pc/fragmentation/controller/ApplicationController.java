@@ -321,7 +321,7 @@ public class ApplicationController {
     public ResponseEntity<Map<String, Object>> saveApplicationPractice(PCLoginUser loginUser,
                                                                        @PathVariable Integer applicationId,
                                                                        @RequestBody ApplicationDto applicationDto) {
-        Integer result = applicationService.updateApplicationPractice(applicationId, applicationDto.getTopic(), applicationDto.getDescription());
+        Integer result = applicationService.updateApplicationPractice(applicationId, applicationDto.getTopic(), applicationDto.getDescription(),applicationDto.getDifficulty());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习管理")
