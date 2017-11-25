@@ -192,6 +192,21 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<RiseClassMember> loadByMemberIds(List<String> memberIds) {
+        if (memberIds.size() == 0) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE Active = 1 AND Del = 0 AND MemberId In (" + produceQuestionMark(memberIds.size()) + ")";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, memberIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<RiseClassMember> loadByClassName(String className) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND (GroupId IS NOT NULL AND GroupId != '') AND Del = 0 ORDER BY ClassName, GroupId";

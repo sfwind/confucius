@@ -2,19 +2,18 @@ package com.iquanwai.confucius.biz.domain.backend;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampSchedule;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,13 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Autowired
     private MonthlyCampScheduleDao monthlyCampScheduleDao;
     @Autowired
+    private RiseCertificateDao riseCertificateDao;
+    @Autowired
+    private CourseScheduleDefaultDao courseScheduleDefaultDao;
+    @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private ProblemDao problemDao;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
@@ -169,6 +174,70 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     public void unlockMonthlyCampAuthority(String riseId) {
         Profile profile = accountService.getProfileByRiseId(riseId);
         signupService.unlockMonthlyCamp(profile.getId(), cacheService.loadMonthlyCampConfig());
+    }
+
+    @Override
+    public void insertRiseCertificate(Integer type, List<String> memberIds) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.loadByMemberIds(memberIds);
+
+        List<Integer> certificateNoSequence = Lists.newArrayList();
+        certificateNoSequence.add(1);
+
+        riseClassMembers.forEach(riseClassMember -> {
+            logger.info("正在添加：" + riseClassMember.getMemberId());
+            Integer profileId = riseClassMember.getProfileId();
+            Integer year = riseClassMember.getYear();
+            Integer month = riseClassMember.getMonth();
+
+            List<RiseCertificate> riseCertificates = riseCertificateDao.loadRiseCertificatesByProfileId(profileId);
+            RiseCertificate existRiseCertificate = riseCertificates.stream()
+                    .filter(riseCertificate -> riseCertificate.getType().equals(type)
+                            && riseCertificate.getYear().equals(year)
+                            && riseCertificate.getMonth().equals(month))
+                    .findAny().orElse(null);
+
+            // 如果该类型的证书已经添加过，则不再添加
+            if (existRiseCertificate == null) {
+                String groupNo = riseClassMember.getGroupId();
+                Integer category = accountService.loadUserScheduleCategory(profileId);
+                List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadByCategory(category);
+                CourseScheduleDefault courseScheduleDefault = courseScheduleDefaults.stream()
+                        .filter(scheduleDefault -> scheduleDefault.getType() == CourseScheduleDefault.Type.MAJOR)
+                        .filter(scheduleDefault -> scheduleDefault.getMonth().equals(month)).findAny().orElse(null);
+                String problemName = "";
+                if (courseScheduleDefault != null) {
+                    Integer problemId = courseScheduleDefault.getProblemId();
+                    Problem problem = problemDao.load(Problem.class, problemId);
+                    if (problem != null) {
+                        problemName = problem.getProblem();
+                    }
+                }
+
+                StringBuilder certificateNoBuilder = new StringBuilder("IQW");
+                certificateNoBuilder.append(String.format("%02d", type));
+                certificateNoBuilder.append(riseClassMember.getMemberId());
+                certificateNoBuilder.append(String.format("%02d", month));
+                Integer noSequence = certificateNoSequence.get(0);
+                certificateNoSequence.clear();
+                certificateNoSequence.add(noSequence + 1);
+                certificateNoBuilder.append(String.format("%03d", noSequence));
+                certificateNoBuilder.append(String.format("%02d", RandomUtils.nextInt(0, 100)));
+
+                RiseCertificate riseCertificate = new RiseCertificate();
+                riseCertificate.setProfileId(profileId);
+                riseCertificate.setType(type);
+                riseCertificate.setCertificateNo(certificateNoBuilder.toString());
+                riseCertificate.setYear(year);
+                riseCertificate.setMonth(month);
+                try {
+                    riseCertificate.setGroupNo(Integer.parseInt(groupNo));
+                } catch (Exception e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+                riseCertificate.setProblemName(problemName);
+                riseCertificateDao.insert(riseCertificate);
+            }
+        });
     }
 
 }
