@@ -343,8 +343,6 @@
                style="text-decoration: none; color: rgb(204, 204, 204);">沪ICP备15006409号</a></div>
     </div>
 </div>
-</body>
-</html>
 
 <script>
     var display = '<%=ConfigUtils.domainName()%>'
