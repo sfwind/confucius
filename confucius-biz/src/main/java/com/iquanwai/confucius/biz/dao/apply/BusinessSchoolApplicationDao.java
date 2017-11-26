@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.dao.common.customer;
+package com.iquanwai.confucius.biz.dao.apply;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;

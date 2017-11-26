@@ -1,7 +1,11 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.common.customer.BusinessSchoolApplicationDao;
+import com.iquanwai.confucius.biz.dao.apply.AuditionRewardDao;
+import com.iquanwai.confucius.biz.dao.apply.BusinessApplyChoiceDao;
+import com.iquanwai.confucius.biz.dao.apply.BusinessApplyQuestionDao;
+import com.iquanwai.confucius.biz.dao.apply.BusinessApplySubmitDao;
+import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.MemberTypeDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
@@ -13,6 +17,9 @@ import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.apply.AuditionReward;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -35,6 +42,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2017/9/27.
@@ -63,6 +71,15 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     private CouponDao couponDao;
     @Autowired
     private CustomerStatusDao customerStatusDao;
+    @Autowired
+    private BusinessApplyQuestionDao businessApplyQuestionDao;
+    @Autowired
+    private BusinessApplyChoiceDao businessApplyChoiceDao;
+    @Autowired
+    private BusinessApplySubmitDao businessApplySubmitDao;
+    @Autowired
+    private AuditionRewardDao auditionRewardDao;
+
 
     private Map<String, Map<String, String>> mappings;
 
@@ -178,7 +195,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 //        } else {
 //            return false;
 //        }
-        return coupon != null &&  coupon > 0;
+        return coupon != null && coupon > 0;
     }
 
     @Override
@@ -272,15 +289,15 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     public Date loadLastApplicationDealTime(Integer profileId) {
         BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao
                 .loadLastApproveApplication(profileId);
-        if(businessSchoolApplication !=null){
+        if (businessSchoolApplication != null) {
             Date dealTime = businessSchoolApplication.getDealTime();
             //如果申请通过通知还未发,则返回通过时间,反之则返回通知时间
-            if(dealTime==null){
+            if (dealTime == null) {
                 return businessSchoolApplication.getCheckTime();
-            } else{
+            } else {
                 return dealTime;
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -288,5 +305,42 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     @Override
     public void expireApplication(Integer profileId) {
         customerStatusDao.delStatus(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+    }
+
+    @Override
+    public List<BusinessApplyQuestion> loadUserQuestions(Integer applyId) {
+        List<BusinessApplySubmit> submits = businessApplySubmitDao.loadByApplyId(applyId);
+        return businessApplyQuestionDao.loadAll(BusinessApplyQuestion.class)
+                .stream()
+                .filter(item -> submits
+                        .stream()
+                        .anyMatch(submit -> submit.getQuestionId().equals(item.getId()))
+                )
+                .peek(item -> submits
+                        .stream()
+                        .filter(submit -> submit.getQuestionId().equals(item.getId()))
+                        .findFirst()
+                        .ifPresent(userSubmit -> {
+                            if (userSubmit.getChoiceText() != null) {
+                                item.setAnswer(userSubmit.getChoiceText());
+                            } else {
+                                item.setAnswer(userSubmit.getUserValue());
+                            }
+                        })
+                )
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String loadUserAuditionReward(Integer profileId) {
+        AuditionReward auditionReward = auditionRewardDao.loadByProfileId(profileId);
+        if (auditionReward != null) {
+            if (auditionReward.getIdentity().equals(AuditionReward.Identity.COMMITTEE)) {
+                return "班委";
+            } else if (auditionReward.getIdentity().equals(AuditionReward.Identity.WINNINGGROUP)) {
+                return "优秀学员";
+            }
+        }
+        return "否";
     }
 }

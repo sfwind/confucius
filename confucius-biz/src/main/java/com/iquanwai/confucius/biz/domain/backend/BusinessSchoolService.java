@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
 import com.iquanwai.confucius.biz.po.common.survey.SurveySubmit;
@@ -43,4 +44,14 @@ public interface BusinessSchoolService {
      * 申请作废
      * */
     void expireApplication(Integer profileId);
+
+    /**
+     * 获取用户申请信息
+     *
+     * @param applyId 申请id
+     * @return 申请信息
+     */
+    List<BusinessApplyQuestion> loadUserQuestions(Integer applyId);
+
+    String loadUserAuditionReward(Integer profileId);
 }
