@@ -266,7 +266,7 @@ public class RiseOperationController {
             dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
-            dto.setReward(businessSchoolService.loadUserAuditionReward(loginUser.getId()));
+            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
             dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
             return dto;
         }).collect(Collectors.toList());
