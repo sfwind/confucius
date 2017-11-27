@@ -214,11 +214,15 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         Assert.notNull(warmupPractice, "待保存的练习不能为空");
         WarmupPractice origin = warmupPracticeDao.load(WarmupPractice.class, warmupPractice.getId());
         if(origin != null) {
+
             //解析或者题干有修改时,更新题目
             if(!warmupPractice.getAnalysis().equals(origin.getAnalysis()) ||
                     !warmupPractice.getQuestion().equals(origin.getQuestion())) {
                 warmupPracticeDao.updateWarmupPractice(warmupPractice);
             }
+
+            //更新额外信息
+            warmupPracticeDao.updateExtraWarmupPractice(warmupPractice);
 
             //选项或者正确性有修改时,更新选项
             List<WarmupChoice> originChoices = warmupChoiceDao.loadChoices(origin.getId());
