@@ -15,6 +15,7 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
@@ -377,7 +378,6 @@ public class AccountServiceImpl implements AccountService {
         return profile;
     }
 
-
     @Override
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
@@ -399,5 +399,16 @@ public class AccountServiceImpl implements AccountService {
         }
 
         return result;
+    }
+
+    @Override
+    public Integer loadUserScheduleCategory(Integer profileId) {
+        // 老用户
+        CustomerStatus status = customerStatusDao.load(profileId, CustomerStatus.SCHEDULE_LESS);
+        if (status != null) {
+            return CourseScheduleDefault.CategoryType.OLD_STUDENT;
+        } else {
+            return CourseScheduleDefault.CategoryType.NEW_STUDENT;
+        }
     }
 }
