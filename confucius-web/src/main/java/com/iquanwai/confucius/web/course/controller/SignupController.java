@@ -274,16 +274,6 @@ public class SignupController {
         }
     }
 
-    @RequestMapping(value = "/mark/normal/question")
-    public ResponseEntity<Map<String, Object>> markNormalQuestion(LoginUser loginUser) {
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("打点")
-                .action("打开常见问题");
-        operationLogService.log(operationLog);
-        return WebUtils.success();
-    }
-
     @RequestMapping(value = "/mark/pay/{function}/{action}")
     public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser, @PathVariable(value = "function") String function, @PathVariable(value = "action") String action, @RequestParam(required = false) String param) {
         String memo = "";
@@ -375,7 +365,7 @@ public class SignupController {
 
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType()) && !bs.getIsBusinessStudent()) {
-            goodsInfoDto.setFee(bs.getFee());
+            goodsInfoDto.setInitPrice(bs.getFee());
         }
 
         // 获取优惠券
@@ -399,7 +389,7 @@ public class SignupController {
                     for (Coupon coupon : coupons) {
                         list.add(coupon);
                         total += coupon.getAmount();
-                        if (total >= goodsInfoDto.getFee()) {
+                        if (total >= goodsInfoDto.getInitPrice()) {
                             // 优惠券金额大于等于价格
                             break;
                         }
@@ -479,11 +469,11 @@ public class SignupController {
         }
 
         // 检查优惠券
-        if (paymentDto.getCouponId() != null) {
-            if (!costRepo.checkCouponValidation(loginUser.getId(), paymentDto.getCouponId())) {
-                return WebUtils.error("该优惠券无效");
-            }
-        }
+//        if (paymentDto.getCouponId() != null) {
+//            if (!costRepo.checkCouponValidation(loginUser.getId(), paymentDto.getCouponId())) {
+//                return WebUtils.error("该优惠券无效");
+//            }
+//        }
         if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
             for (Integer coupon : paymentDto.getCouponsIdGroup()) {
                 if (!costRepo.checkCouponValidation(loginUser.getId(), coupon)) {
@@ -517,7 +507,7 @@ public class SignupController {
                 price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
                 return WebUtils.result(price);
             case QuanwaiOrder.FRAG_CAMP:
-                List<Integer> campCoupons = Lists.newArrayList(paymentDto.getCouponId());
+                List<Integer> campCoupons = paymentDto.getCouponsIdGroup();
                 price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), campCoupons);
                 return WebUtils.result(price);
             default:
@@ -550,7 +540,8 @@ public class SignupController {
                 return signupService.signupRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
             }
             case QuanwaiOrder.FRAG_CAMP: {
-                return signupService.signupMonthlyCamp(profileId, paymentDto.getGoodsId(), paymentDto.getCouponId(), monthlyCampConfig);
+                return signupService.signupMonthlyCamp(profileId, paymentDto.getGoodsId(),
+                        paymentDto.getCouponsIdGroup().get(0), monthlyCampConfig);
             }
             default:
                 logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
