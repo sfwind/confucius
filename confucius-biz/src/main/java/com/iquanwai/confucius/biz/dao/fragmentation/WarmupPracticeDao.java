@@ -55,7 +55,13 @@ public class WarmupPracticeDao extends PracticeDBUtil {
 
     public void updateWarmupPractice(WarmupPractice warmupPractice) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update WarmupPractice set Updated=1, Question=?, Analysis=? where Id=?";
+        String sql;
+        if(isOriginUpdatedEquals2(warmupPractice.getId())){
+            sql = "update WarmupPractice set Question=?, Analysis=? where Id=?";
+        }
+        else{
+            sql = "update WarmupPractice set Updated=1, Question=?, Analysis=? where Id=?";
+        }
         try {
             runner.update(sql, warmupPractice.getQuestion(), warmupPractice.getAnalysis(), warmupPractice.getId());
         } catch (SQLException e) {
@@ -80,12 +86,12 @@ public class WarmupPracticeDao extends PracticeDBUtil {
     public Integer insertWarmupPractice(WarmupPractice practice) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "insert into WarmupPractice (Question, Type, Analysis, Pic, Difficulty, " +
-                "KnowledgeId, SceneId, ProblemId, Sequence, PracticeUid, Example) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "KnowledgeId, SceneId, ProblemId, Sequence, PracticeUid, Example,Updated) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), practice.getQuestion(), practice.getType(), practice.getAnalysis(),
                     practice.getPic(), practice.getDifficulty(), practice.getKnowledgeId(), 1, practice.getProblemId(),
-                    practice.getSequence(), practice.getPracticeUid(), practice.getExample() ? 1 : 0);
+                    practice.getSequence(), practice.getPracticeUid(), practice.getExample() ? 1 : 0, 2);
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage());
@@ -136,12 +142,34 @@ public class WarmupPracticeDao extends PracticeDBUtil {
     public void updateExtraWarmupPractice(WarmupPractice warmupPractice) {
         QueryRunner runner = new QueryRunner(getDataSource());
 
-        String sql = "update WarmupPractice set Updated = 1,Type = ?,Difficulty=?,Example=? where Id = ?";
+        String sql;
+        if (isOriginUpdatedEquals2(warmupPractice.getId())) {
+            sql = "update WarmupPractice set Type = ?,Difficulty=?,Example=? where Id = ?";
+        } else {
+            sql = "update WarmupPractice set Updated = 1,Type = ?,Difficulty=?,Example=? where Id = ?";
+        }
+
 
         try {
             runner.update(sql, warmupPractice.getType(), warmupPractice.getDifficulty(), warmupPractice.getExample(), warmupPractice.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage());
         }
+    }
+
+
+    private boolean isOriginUpdatedEquals2(Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<WarmupPractice> h = new BeanHandler<>(WarmupPractice.class);
+        String sql = "select Updated from WarmupPractice where id = ?";
+        try {
+            WarmupPractice warmupPractice = runner.query(sql, h, id);
+            if (warmupPractice.getUpdated() == 2) {
+                return true;
+            }
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+        return false;
     }
 }
