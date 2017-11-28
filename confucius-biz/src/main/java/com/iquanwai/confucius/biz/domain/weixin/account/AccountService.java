@@ -77,4 +77,6 @@ public interface AccountService {
     Profile loadProfileByMemberId(String memberId);
 
     Boolean hasPrivilegeForBusinessSchool(Integer profileId);
+
+    Integer loadUserScheduleCategory(Integer profileId);
 }
