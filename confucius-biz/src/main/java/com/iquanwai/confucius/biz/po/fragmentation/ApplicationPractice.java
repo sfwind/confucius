@@ -13,7 +13,7 @@ public class ApplicationPractice {
     private Integer knowledgeId; //知识点id
     private Integer sceneId; //子场景id
     private Integer difficulty; //难易度（1-容易，2-普通，3-困难）
-    private Integer problemId; //小课id
+    private Integer problemId; //课程id
 
     //新增字段（2017/11/22）
     private  Integer sequence;//顺序

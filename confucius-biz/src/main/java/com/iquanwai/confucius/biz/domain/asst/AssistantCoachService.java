@@ -21,14 +21,14 @@ public interface AssistantCoachService {
 
     /**
      * 获取待评论的小课分享
-     * @param problemId 小课id
+     * @param problemId 课程id
      * */
     List<RiseWorkInfoDto> getUnderCommentArticles(Integer problemId);
 
 
     /**
      * 获取待评论的应用练习
-     * @param problemId 小课id
+     * @param problemId 课程id
      * */
     List<RiseWorkInfoDto> getUnderCommentApplications(Integer problemId);
 

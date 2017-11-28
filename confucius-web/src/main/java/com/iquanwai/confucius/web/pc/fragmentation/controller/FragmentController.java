@@ -95,10 +95,10 @@ public class FragmentController {
         // 查询该用户有没有购买过这个问题的计划
         ImprovementPlan matchPlan = planService.loadUserPlan(pcLoginUser.getOpenId(), problemId);
         if (matchPlan == null) {
-            logger.error("用户:{} 未购买小课:{}", pcLoginUser.getOpenId(), problemId);
-            return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT, "没找到进行中的小课");
+            logger.error("用户:{} 未购买课程:{}", pcLoginUser.getOpenId(), problemId);
+            return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT, "没找到进行中的课程");
         } else {
-            // 购买过小课
+            // 购买过课程
             RiseWorkListDto riseHomework = loadUserRiseWork(matchPlan);
             return WebUtils.result(riseHomework);
         }
@@ -340,7 +340,7 @@ public class FragmentController {
         if (result) {
             return WebUtils.success();
         } else {
-            return WebUtils.error("本小课求点评次数已用完");
+            return WebUtils.error("本课程求点评次数已用完");
         }
     }
 

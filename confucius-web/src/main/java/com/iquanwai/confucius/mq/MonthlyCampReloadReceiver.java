@@ -27,7 +27,7 @@ public class MonthlyCampReloadReceiver {
             String message = messageQueue.getMessage().toString();
             if ("campConfigReload".equals(message)) {
                 cacheService.reloadMonthlyCampConfig();
-                logger.info("小课训练营配置刷新成功");
+                logger.info("训练营配置刷新成功");
             }
         });
     }

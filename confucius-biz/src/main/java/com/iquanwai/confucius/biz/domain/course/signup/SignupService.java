@@ -35,18 +35,18 @@ public interface SignupService {
 
 
     /**
-     * 购买完训练营小课后续操作
+     * 购买完训练营后续操作
      * 1、更新 Profile RiseMember 值
      * 2、RiseMemberClass 新增数据记录
      * 3、更新 RiseMember 表旧数据为过期状态，并新增一条当前购买类型数据记录
      * 4、送优惠券
-     * 5、发送 mq 通知 platon 强制开启小课
+     * 5、发送 mq 通知 platon 强制开启课程
      * 6、发送购买成功信息，开课信息（可以合并）
      */
     void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     /**
-     * 后台解锁小课训练营
+     * 后台解锁训练营
      * @param profileId
      * @param monthlyCampConfig
      */
@@ -114,7 +114,7 @@ public interface SignupService {
     Integer loadCurrentCampMonth(MonthlyCampConfig monthlyCampConfig);
 
     /**
-     * 小课售卖页面，跳转小课介绍页面 problemId
+     * 课程售卖页面，跳转课程介绍页面 problemId
      */
     Integer loadHrefProblemId(Integer month);
 
@@ -131,7 +131,7 @@ public interface SignupService {
     RiseMember getCurrentRiseMemberStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 
     /**
-     * 获取当前小课训练营信息
+     * 获取当前训练营信息
      */
     RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 

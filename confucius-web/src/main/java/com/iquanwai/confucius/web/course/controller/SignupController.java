@@ -105,7 +105,7 @@ public class SignupController {
                 }
                 break;
             case QuanwaiOrder.FRAG_CAMP:
-                // 小课训练营购买
+                // 训练营购买
                 MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
                 if (campOrder == null) {
                     logger.error("{} 订单不存在", orderId);
@@ -218,7 +218,7 @@ public class SignupController {
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
         List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
-        // 用户层级是商学院用户或者层级是小课训练营用户，则不显示试听课入口
+        // 用户层级是商学院用户或者层级是训练营用户，则不显示试听课入口
         Long count = riseMembers.stream()
                 .filter(member -> member.getMemberTypeId() == RiseMember.ELITE || member.getMemberTypeId() == RiseMember.CAMP)
                 .count();
@@ -457,7 +457,7 @@ public class SignupController {
                 check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
                 break;
             case QuanwaiOrder.FRAG_CAMP:
-                // 小课训练营购买
+                // 训练营购买
                 check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
                 break;
             default:

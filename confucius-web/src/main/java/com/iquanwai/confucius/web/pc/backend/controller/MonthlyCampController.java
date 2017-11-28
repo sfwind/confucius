@@ -213,7 +213,8 @@ public class MonthlyCampController {
     }
 
     @RequestMapping(value = "/modify/batch/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId, @RequestBody List<Integer> batchRiseClassMemberIds) {
+    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId,
+                                                                             @RequestBody List<Integer> batchRiseClassMemberIds) {
         OperationLog operationLog = OperationLog.create()
                 .memo("Ids:" + batchRiseClassMemberIds.toString() + "groupId:" + groupId)
                 .openid("").module("小课训练营")
@@ -272,7 +273,7 @@ public class MonthlyCampController {
                 return WebUtils.error("用户新增失败，请及时联系管理员");
             }
         } else {
-            return WebUtils.error("当前用户已经是小课训练营用户");
+            return WebUtils.error("当前用户已经是训练营用户");
         }
     }
 

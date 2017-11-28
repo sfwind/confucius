@@ -93,7 +93,7 @@ public class WarmupImportController {
             dto.setKnowledges(knowledges);
             return WebUtils.result(dto);
         }
-        return WebUtils.error("未找到小课与知识点关联信息");
+        return WebUtils.error("未找到课程与知识点关联信息");
     }
 
     @RequestMapping(value = "/warmup/insert/practice", method = RequestMethod.POST)
@@ -133,7 +133,7 @@ public class WarmupImportController {
         if(warmupPractice != null) {
             return WebUtils.result(warmupPractice);
         } else  {
-            return WebUtils.error("未找到对应小课数据");
+            return WebUtils.error("未找到对应课程数据");
         }
     }
 }

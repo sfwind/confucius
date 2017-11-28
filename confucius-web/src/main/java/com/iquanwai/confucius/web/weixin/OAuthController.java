@@ -218,14 +218,14 @@ public class OAuthController {
             // 根据openid，accessToken换取unionid，根据unionid来获取
             Pair<Integer, Callback> pair = oAuthService.initOpenId(callback);
             if (pair.getLeft() == -1) {
-                // 提示关注并选择小课
+                // 提示关注并选择课程
                 CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
                         response);
                 response.sendRedirect("/servercode");
             } else {
                 Role userRole = loginUserService.getUserRole(callback.getOpenid());
                 if (userRole.getLevel().equals(0)) {
-                    // 选择小课
+                    // 选择课程
                     LOGGER.info("state:{},openid:{},提示开始训练", state, callback.getOpenid());
                     CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
                             response);

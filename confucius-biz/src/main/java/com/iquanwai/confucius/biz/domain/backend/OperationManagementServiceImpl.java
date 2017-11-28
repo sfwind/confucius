@@ -280,16 +280,16 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         List<Knowledge> knowledges = knowledgeDao.loadAll(Knowledge.class);
         Map<Integer, Knowledge> knowledgeMap = Maps.newHashMap();
         knowledges.forEach(knowledge -> knowledgeMap.put(knowledge.getId(), knowledge));
-        // 过滤出未被删除的小课列表
+        // 过滤出未被删除的课程列表
         List<Problem> validProblems = problems.stream().filter(problem -> !problem.getDel()).collect(Collectors.toList());
-        // 逐个便利小课，并将该小课，与该小课对应的所有知识点合并成一个对象进行返回
+        // 逐个遍历课程，并将该课程，与该课程对应的所有知识点合并成一个对象进行返回
         List<ProblemSchedule> problemAndKnowledges = validProblems.stream().map(problem -> {
             ProblemSchedule targetProblemSchedule = new ProblemSchedule();
-            // 取出该小课的 id
+            // 取出该课程的 id
             Integer problemId = problem.getId();
             targetProblemSchedule.setId(problemId);
             targetProblemSchedule.setProblemId(problemId);
-            // 根据取出的小课 id，遍历 problemSchedules 列表，取出二者 problemId 相同对象，并返回该所有对象的相关 KnowledgeId 的集合
+            // 根据取出的课程 id，遍历 problemSchedules 列表，取出二者 problemId 相同对象，并返回该所有对象的相关 KnowledgeId 的集合
             List<Integer> relatedKnowledgeIds = problemSchedules.stream().filter(problemSchedule -> problemId.equals(problemSchedule.getProblemId()))
                     .map(ProblemSchedule::getKnowledgeId).collect(Collectors.toList());
             List<Knowledge> targetKnowledges = Lists.newArrayList();
