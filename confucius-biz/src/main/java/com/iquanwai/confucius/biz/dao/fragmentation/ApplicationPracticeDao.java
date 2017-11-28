@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -47,7 +48,15 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
 
     public Integer updateApplicationPracticeById(Integer id, String topic, String description,int difficulty) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update ApplicationPractice set topic = ?, description = ?,difficulty = ?, updated = 1 where id = ?";
+
+        String sql;
+        if(isOriginUpdatedEquals2(id)){
+            sql = "update ApplicationPractice set topic = ?, description = ?,difficulty = ? where id = ?";
+        }
+        else {
+            sql = "update ApplicationPractice set topic = ?, description = ?,difficulty = ?, updated = 1 where id = ?";
+        }
+
         try {
             return runner.update(sql, topic, description, difficulty,id);
         } catch (SQLException e) {
@@ -75,5 +84,27 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+
+    /**
+     * 判断之前Updated字段的值是否是2
+     * @param id
+     * @return
+     */
+    private boolean isOriginUpdatedEquals2 (int id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<ApplicationPractice> h = new BeanHandler<>(ApplicationPractice.class);
+        String sql = "select updated from ApplicationPractice where id = ?";
+        try {
+            ApplicationPractice applicationPractice = runner.query(sql,h,id);
+
+            if(applicationPractice.getUpdated()==2){
+                return true;
+            }
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return false;
     }
 }
