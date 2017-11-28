@@ -732,10 +732,8 @@ public class SignupServiceImpl implements SignupService {
                     businessSchool.setIsBusinessStudent(true);
                     break;
                 case RiseMember.ANNUAL:
-                    fee = CommonUtils.substract(memberType.getFee(), 880d);
-                    break;
                 case RiseMember.HALF:
-                    fee = CommonUtils.substract(memberType.getFee(), 580d);
+                    fee = normalMemberDiscount(riseMember, memberType.getFee());
                     break;
                 case RiseMember.CAMP:
                     fee = memberType.getFee();
@@ -865,6 +863,26 @@ public class SignupServiceImpl implements SignupService {
         quanwaiOrder.setGoodsType(goodsType);
         quanwaiOrderDao.insert(quanwaiOrder);
         return quanwaiOrder;
+    }
+
+    private Double normalMemberDiscount(RiseMember riseMember, Double price){
+        if(riseMember != null){
+            if(riseMember.getMemberTypeId() == RiseMember.ANNUAL){
+                // 半年版升级价格公式 = 商学院价格 - 一年版剩余天数/365*一年版原价
+                Date expireDate = riseMember.getExpireDate();
+                int remain = DateUtils.interval(expireDate);
+                price = CommonUtils.substract(price, remain/365.0*880);
+            }else if(riseMember.getMemberTypeId() == RiseMember.HALF){
+                // 半年版升级价格公式 = 商学院价格 - 半年版剩余天数/182.5*半年版原价
+                Date expireDate = riseMember.getExpireDate();
+                int remain = DateUtils.interval(expireDate);
+                price = CommonUtils.substract(price, remain/182.5*580);
+            }
+        }
+        //取整
+        price = price.intValue() + 0.0d;
+
+        return price;
     }
 
 }
