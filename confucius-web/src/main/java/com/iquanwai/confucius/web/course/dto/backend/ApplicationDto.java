@@ -1,6 +1,9 @@
 package com.iquanwai.confucius.web.course.dto.backend;
 
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/9/28.
@@ -37,6 +40,8 @@ public class ApplicationDto {
     private String q14Answer;     // 12. 请输入您的手机号码（仅用于重要申请消息通知，不会泄露给第三方或用于其他商业用途）：
     private String q15Answer;     // 13. 您的微信号（非微信昵称，而是微信ID）：
 
+    List<BusinessApplyQuestion> questionList;
+
 
     private Integer submitId;
     private Integer profileId;
@@ -44,6 +49,7 @@ public class ApplicationDto {
     private Boolean deal; // 技术是否处理
     private Integer originMemberType; // 申请时的会员类型
     private String originMemberTypeName;
+    private String reward;
     private Boolean del;
 
 
