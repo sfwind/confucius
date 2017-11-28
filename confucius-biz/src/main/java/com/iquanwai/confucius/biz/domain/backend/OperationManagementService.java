@@ -90,7 +90,7 @@ public interface OperationManagementService {
     Integer deleteAsstWarmupDiscuss(Integer discussId);
 
     /**
-     * 获取所有小课列表对应的知识点集合
+     * 获取所有课程列表对应的知识点集合
      */
     List<ProblemSchedule> loadKnowledgesGroupByProblem();
 

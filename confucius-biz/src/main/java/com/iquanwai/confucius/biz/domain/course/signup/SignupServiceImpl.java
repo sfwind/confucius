@@ -429,7 +429,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     /**
-     * 新学号格式：六位班级号（170101）+ 一位身份信息（会员、小课、公益课、试听课） + 三位递增唯一序列（1701011001）
+     * 新学号格式：六位班级号（170101）+ 一位身份信息（会员、课程、公益课、试听课） + 三位递增唯一序列（1701011001）
      */
     @Override
     public String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType) {
