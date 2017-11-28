@@ -53,5 +53,10 @@ public interface BusinessSchoolService {
      */
     List<BusinessApplyQuestion> loadUserQuestions(Integer applyId);
 
+    /**
+     * 查询用户是否是试听课优秀学员
+     * @param profileId 用户id
+     * @return 身份信息
+     */
     String loadUserAuditionReward(Integer profileId);
 }
