@@ -42,4 +42,6 @@ public interface MonthlyCampService {
     void switchCampDataProcess(Integer sourceYear, Integer sourceMonth, Integer targetYear, Integer targetMonth);
 
     void unlockMonthlyCampAuthority(String riseId);
+
+    void insertRiseCertificate(Integer type, List<String> memberIds);
 }

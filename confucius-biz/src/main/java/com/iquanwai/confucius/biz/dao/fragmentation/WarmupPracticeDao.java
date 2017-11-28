@@ -24,7 +24,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public List<WarmupPractice> loadPractices(List<Integer> practiceIds) {
-        if(practiceIds.size() == 0) {
+        if (practiceIds.size() == 0) {
             return Lists.newArrayList();
         }
         QueryRunner run = new QueryRunner(getDataSource());
@@ -33,7 +33,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         String sql = "SELECT * FROM WarmupPractice where Id in (" + questionMark + ")";
         try {
             return run.query(sql, h, practiceIds.toArray());
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
@@ -46,7 +46,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         String sql = "SELECT * FROM WarmupPractice where ProblemId=? and Del=0";
         try {
             return run.query(sql, h, problemId);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
@@ -58,7 +58,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         String sql = "update WarmupPractice set Updated=1, Question=?, Analysis=? where Id=?";
         try {
             runner.update(sql, warmupPractice.getQuestion(), warmupPractice.getAnalysis(), warmupPractice.getId());
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
@@ -69,7 +69,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         String sql = "SELECT * FROM WarmupPractice where ProblemId=? and Del=0 and Id>?";
         try {
             return run.query(sql, h, problemId, practiceId);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
@@ -87,7 +87,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
                     practice.getPic(), practice.getDifficulty(), practice.getKnowledgeId(), 1, practice.getProblemId(),
                     practice.getSequence(), practice.getPracticeUid(), practice.getExample() ? 1 : 0);
             return result.intValue();
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage());
         }
         return -1;
@@ -100,7 +100,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         String sql = "select * from WarmupPractice where PracticeUid = ? order by updateTime desc";
         try {
             return runner.query(sql, h, practiceUid);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage());
         }
         return null;
@@ -113,7 +113,7 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         try {
             Long result = runner.query(sql, new ScalarHandler<>(), practiceUid);
             return result.intValue();
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage());
         }
         return -1;
@@ -126,10 +126,22 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         String sql = "update WarmupPractice set del = 1 where PracticeUid = ?";
         try {
             return runner.update(sql, practiceUid);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage());
         }
         return -1;
     }
 
+    //更新额外的信息
+    public void updateExtraWarmupPractice(WarmupPractice warmupPractice) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+
+        String sql = "update WarmupPractice set Updated = 1,Type = ?,Difficulty=?,Example=? where Id = ?";
+
+        try {
+            runner.update(sql, warmupPractice.getType(), warmupPractice.getDifficulty(), warmupPractice.getExample(), warmupPractice.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+    }
 }
