@@ -186,12 +186,12 @@ public class SignupController {
         operationLogService.log(operationLog);
 
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
+//        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
         // 查看优惠券信息
-        List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
+//        List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
-        dto.setMemberTypes(memberTypesPayInfo);
+//        dto.setMemberTypes(memberTypesPayInfo);
 
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
@@ -228,7 +228,7 @@ public class SignupController {
         }
 
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
-        dto.setCoupons(coupons);
+//        dto.setCoupons(coupons);
         return WebUtils.result(dto);
     }
 

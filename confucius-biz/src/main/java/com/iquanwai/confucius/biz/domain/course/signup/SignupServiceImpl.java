@@ -871,12 +871,12 @@ public class SignupServiceImpl implements SignupService {
                 // 半年版升级价格公式 = 商学院价格 - 一年版剩余天数/365*一年版原价
                 Date expireDate = riseMember.getExpireDate();
                 int remain = DateUtils.interval(expireDate);
-                price = CommonUtils.substract(price, remain/365.0*880);
+                price = CommonUtils.substract(price, remain/365.0*880 - 299);
             }else if(riseMember.getMemberTypeId() == RiseMember.HALF){
                 // 半年版升级价格公式 = 商学院价格 - 半年版剩余天数/182.5*半年版原价
                 Date expireDate = riseMember.getExpireDate();
                 int remain = DateUtils.interval(expireDate);
-                price = CommonUtils.substract(price, remain/182.5*580);
+                price = CommonUtils.substract(price, remain/182.5*580 - 299);
             }
         }
         //取整
