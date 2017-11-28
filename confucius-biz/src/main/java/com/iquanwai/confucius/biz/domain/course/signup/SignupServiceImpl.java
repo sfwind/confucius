@@ -327,7 +327,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 数据库新增 RIseClassMember 记录
-     * @param profile 用户 Profile
+     *
+     * @param profile           用户 Profile
      * @param monthlyCampConfig 训练营配置
      */
     private void insertRiseClassMember(Profile profile, MonthlyCampConfig monthlyCampConfig) {
@@ -345,7 +346,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 购买完训练营之后，更新 RiseMember 表中的数据
-     * @param profile 用户 Profile
+     *
+     * @param profile           用户 Profile
      * @param monthlyCampConfig 训练营配置
      */
     private void updateRiseMemberStatus(Profile profile, MonthlyCampConfig monthlyCampConfig, String orderId) {
@@ -409,6 +411,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 放入训练营优惠券，金额 100，自购买起，两个月内过期
+     *
      * @param profile 用户 Profile
      */
     private void insertCampCoupon(Profile profile) {
@@ -813,7 +816,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee      总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -831,7 +835,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee           总价格
      * @param couponIdGroup 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {
@@ -865,18 +870,18 @@ public class SignupServiceImpl implements SignupService {
         return quanwaiOrder;
     }
 
-    private Double normalMemberDiscount(RiseMember riseMember, Double price){
-        if(riseMember != null){
-            if(riseMember.getMemberTypeId() == RiseMember.ANNUAL){
+    private Double normalMemberDiscount(RiseMember riseMember, Double price) {
+        if (riseMember != null) {
+            if (riseMember.getMemberTypeId() == RiseMember.ANNUAL) {
                 // 半年版升级价格公式 = 商学院价格 - 一年版剩余天数/365*一年版原价
                 Date expireDate = riseMember.getExpireDate();
                 int remain = DateUtils.interval(expireDate);
-                price = CommonUtils.substract(price, remain/365.0*880 - 299);
-            }else if(riseMember.getMemberTypeId() == RiseMember.HALF){
+                price = CommonUtils.substract(price, remain / 365.0 * 880 + 299);
+            } else if (riseMember.getMemberTypeId() == RiseMember.HALF) {
                 // 半年版升级价格公式 = 商学院价格 - 半年版剩余天数/182.5*半年版原价
                 Date expireDate = riseMember.getExpireDate();
                 int remain = DateUtils.interval(expireDate);
-                price = CommonUtils.substract(price, remain/182.5*580 - 299);
+                price = CommonUtils.substract(price, remain / 182.5 * 580 + 299);
             }
         }
         //取整
