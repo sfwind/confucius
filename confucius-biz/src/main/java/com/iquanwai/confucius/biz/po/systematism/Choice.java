@@ -12,5 +12,4 @@ public class Choice {
     private String subject; //题干
     private Integer sequence; //选项序号
     private Boolean right; //是否正确（1-是，0-否）
-    private Integer Updated;
 }

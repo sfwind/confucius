@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupChoice;
-import com.iquanwai.confucius.biz.po.systematism.Choice;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -73,11 +72,11 @@ public class WarmupChoiceDao extends PracticeDBUtil {
     private boolean isOriginUpdatedEquals2(Integer id) {
 
         QueryRunner runner = new QueryRunner(getDataSource());
-        ResultSetHandler<Choice> h = new BeanHandler<Choice>(Choice.class);
+        ResultSetHandler<WarmupChoice> h = new BeanHandler<>(WarmupChoice.class);
         String sql = "select Updated from Choice where id = ?";
 
         try {
-            Choice choice = runner.query(sql, h, id);
+            WarmupChoice choice = runner.query(sql, h, id);
             if (choice.getUpdated() == 2) {
                 return true;
             }
