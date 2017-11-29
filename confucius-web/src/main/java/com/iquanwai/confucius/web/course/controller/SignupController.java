@@ -541,8 +541,12 @@ public class SignupController {
                 return signupService.signupRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
             }
             case QuanwaiOrder.FRAG_CAMP: {
+                Integer couponId = null;
+                if(CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())){
+                    couponId = paymentDto.getCouponsIdGroup().get(0);
+                }
                 return signupService.signupMonthlyCamp(profileId, paymentDto.getGoodsId(),
-                        paymentDto.getCouponsIdGroup().get(0), monthlyCampConfig);
+                        couponId, monthlyCampConfig);
             }
             default:
                 logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
