@@ -21,7 +21,7 @@ public interface PromotionConstants {
         int InitState = 10; // 初始状态
         int ScanCode = 11; // 扫码关注
         int FinishEvaluate = 12; // 完成测评
-        int AccessTrial = 13; // 完成推广人数要求，获得学习限免小课资格
+        int AccessTrial = 13; // 完成推广人数要求，获得学习限免课程资格
     }
 
     interface CourseReductionAction {

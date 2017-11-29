@@ -19,7 +19,7 @@ public class GoodsInfoDto {
     private Double fee;
     /** 商品名 */
     private String name;
-    /** 商品的Id，如果是会员，则对应memberTypeId，如果是小课，则对应ProblemID */
+    /** 商品的Id，如果是会员，则对应memberTypeId，如果是课程，则对应ProblemID */
     private Integer goodsId;
     /** 获取优惠券 */
     private List<Coupon> coupons;

@@ -327,11 +327,11 @@ public class AccountServiceImpl implements AccountService {
                 // 如果当前人已经是会员状态，则什么状态都不需要改变
                 break;
             case Constants.RISE_MEMBER.COURSE_USER:
-                // 如果当前人是小课购买状态，后面可以更改成会员或者训练营小课状态
+                // 如果当前人是课程购买状态，后面可以更改成会员或者训练营状态
                 profileDao.updateRiseMember(openid, riseMember);
                 break;
             case Constants.RISE_MEMBER.MONTHLY_CAMP:
-                // 当前人是小课训练营状态，则只可以升级为会员
+                // 当前人是训练营状态，则只可以升级为会员
                 if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
                     profileDao.updateRiseMember(openid, riseMember);
                 }

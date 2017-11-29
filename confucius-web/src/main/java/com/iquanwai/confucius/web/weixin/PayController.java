@@ -91,7 +91,7 @@ public class PayController {
 
     @RequestMapping(value = "/result/risecamp/callback")
     public void riseTrainPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
-        LOGGER.info("训练营小课单卖微信支付回调：{}", payCallback.toString());
+        LOGGER.info("训练营单卖微信支付回调：{}", payCallback.toString());
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
         ThreadPool.execute(() -> {
@@ -103,7 +103,7 @@ public class PayController {
                     LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
                 }
             } catch (Exception e) {
-                LOGGER.error("小课单卖支付结果回调处理失败", e);
+                LOGGER.error("训练营支付结果回调处理失败", e);
             }
         });
 

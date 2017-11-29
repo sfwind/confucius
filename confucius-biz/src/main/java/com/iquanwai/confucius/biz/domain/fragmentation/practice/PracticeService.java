@@ -87,8 +87,8 @@ public interface PracticeService {
     ApplicationPractice loadApplication(Integer practiceId);
 
     /**
-     * 根据小课id,获取应用练习
-     * @param problemId 小课id
+     * 根据课程id,获取应用练习
+     * @param problemId 课程id
      */
     List<ApplicationPractice> loadApplicationByProblemId(Integer problemId);
 

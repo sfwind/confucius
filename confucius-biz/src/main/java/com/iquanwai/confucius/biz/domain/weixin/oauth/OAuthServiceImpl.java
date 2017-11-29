@@ -251,7 +251,7 @@ public class OAuthServiceImpl implements OAuthService {
         Profile profile = profileDao.queryByUnionId(account.getUnionid());
         if (profile == null) {
             // 提示关注并选择rise
-            logger.info("未关注，请先关注并选择小课,callback:{}", callback);
+            logger.info("未关注，请先关注并选择课程,callback:{}", callback);
             return new MutablePair<>(-1, null);
         } else {
             // 查到了

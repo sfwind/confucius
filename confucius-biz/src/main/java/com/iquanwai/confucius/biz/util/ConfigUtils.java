@@ -312,14 +312,14 @@ public class ConfigUtils {
     }
 
     /**
-     * 获取每月训练营小课对应生效月份
+     * 获取每月训练营对应生效月份
      */
     public static Integer getMonthlyCampMonth() {
         return getIntValue("monthly.camp.month");
     }
 
     /**
-     * 获取当前训练营小课生成的 ClassId
+     * 获取当前训练营生成的 ClassId
      */
     public static String getMonthlyCampClassId() {
         return getValue("monthly.camp.classId");
