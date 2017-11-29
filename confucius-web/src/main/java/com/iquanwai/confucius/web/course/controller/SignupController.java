@@ -576,32 +576,56 @@ public class SignupController {
 
     @RequestMapping("/rise/member/{memberTypeId}")
     public ResponseEntity<Map<String, Object>> riseMember(@PathVariable Integer memberTypeId, LoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("用户信息")
-                .function("RISE")
-                .action("查询rise会员信息")
-                .memo(String.valueOf(memberTypeId));
+                .module("报名")
+                .function("报名页面")
+                .action("加载Rise会员信息");
         operationLogService.log(operationLog);
 
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
 
-        RiseMember riseMember = null;
+        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
+        RiseMemberDto dto = new RiseMemberDto();
+        dto.setMemberTypes(memberTypesPayInfo);
+        dto.setTip("每天给自己投资7元，获得全年36次职场加速机会");
 
-        switch (memberTypeId) {
-            case RiseMember.ELITE:
-                riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId(), monthlyCampConfig);
-                break;
-            case RiseMember.CAMP:
-                riseMember = signupService.getCurrentMonthlyCampStatus(loginUser.getId(), monthlyCampConfig);
-                break;
-            default:
-                break;
-        }
-        if (riseMember != null) {
-            return WebUtils.result(riseMember.simple());
+        if (riseMember != null && riseMember.getMemberTypeId() != null) {
+            if (memberTypeId.equals(RiseMember.HALF) || memberTypeId.equals(RiseMember.ANNUAL)) {
+                dto.setButtonStr("升级商学院");
+            } else if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
+                dto.setButtonStr("入学商学院");
+            } else {
+                dto.setButtonStr("立即入学");
+            }
         } else {
-            return WebUtils.error("会员类型校验出错");
+            dto.setButtonStr("立即入学");
         }
+        AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
+
+        if (classMember != null) {
+            // 有试听课
+            dto.setAuditionStr("试听课");
+        } else {
+            // 没有试听课
+            dto.setAuditionStr("预约试听");
+        }
+
+        Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
+        calcDealTime(dealTime, dto, loginUser.getId());
+        List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
+        // 用户层级是商学院用户或者层级是训练营用户，则不显示试听课入口
+        Long count = riseMembers.stream()
+                .filter(member -> member.getMemberTypeId() == RiseMember.ELITE || member.getMemberTypeId() == RiseMember.CAMP)
+                .count();
+        if (count > 0) {
+            // 商学院和训练营不显示试听课按钮
+            dto.setAuditionStr(null);
+        }
+
+        dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
+        return WebUtils.result(dto);
     }
 
     @RequestMapping("/rise/audition/button")

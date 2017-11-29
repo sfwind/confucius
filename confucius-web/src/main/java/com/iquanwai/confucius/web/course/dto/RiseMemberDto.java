@@ -16,7 +16,7 @@ public class RiseMemberDto {
     private List<Integer> couponIdGroup;
 
     private List<MemberType> memberTypes;
-//    private List<Coupon> coupons;
+    private String tip;
     /** 是否有报名权限 */
     private Boolean privilege;
     /** 已经是商学院会员 */
