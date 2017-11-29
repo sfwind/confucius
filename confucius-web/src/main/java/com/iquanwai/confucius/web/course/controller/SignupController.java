@@ -367,6 +367,7 @@ public class SignupController {
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType()) && !bs.getIsBusinessStudent()) {
             goodsInfoDto.setInitPrice(bs.getFee());
+            goodsInfoDto.setFee(bs.getFee());
         }
 
         // 获取优惠券
