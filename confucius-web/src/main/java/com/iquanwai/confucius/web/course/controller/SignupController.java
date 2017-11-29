@@ -391,7 +391,7 @@ public class SignupController {
                     for (Coupon coupon : coupons) {
                         list.add(coupon);
                         total += coupon.getAmount();
-                        if (total >= goodsInfoDto.getInitPrice()) {
+                        if (total >= goodsInfoDto.getFee()) {
                             // 优惠券金额大于等于价格
                             break;
                         }
