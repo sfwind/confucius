@@ -11,11 +11,11 @@ import java.util.List;
  */
 @Data
 public class RiseMemberDto {
-    private Integer memberType;
     private String openId;
     private List<Integer> couponIdGroup;
 
     private List<MemberType> memberTypes;
+    private MemberType memberType;
     private String tip;
     /** 是否有报名权限 */
     private Boolean privilege;

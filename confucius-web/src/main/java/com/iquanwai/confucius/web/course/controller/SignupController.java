@@ -177,6 +177,7 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/rise/member", method = RequestMethod.GET)
+    @Deprecated
     public ResponseEntity<Map<String, Object>> getRiseMemberPayInfo(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -585,10 +586,12 @@ public class SignupController {
 
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
+        MemberType m = memberTypesPayInfo.stream().filter(memberType -> memberType.getId().equals(memberTypeId))
+                .findAny().orElse(null);
 
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
-        dto.setMemberTypes(memberTypesPayInfo);
+        dto.setMemberType(m);
         dto.setTip("每天给自己投资7元，获得全年36次职场加速机会");
 
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
@@ -626,6 +629,36 @@ public class SignupController {
 
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
         return WebUtils.result(dto);
+    }
+
+    @RequestMapping("/rise/member/entry/{memberTypeId}")
+    public ResponseEntity<Map<String, Object>> entryRiseMember(@PathVariable Integer memberTypeId, LoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("用户信息")
+                .function("RISE")
+                .action("查询rise会员信息")
+                .memo(String.valueOf(memberTypeId));
+        operationLogService.log(operationLog);
+
+        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+
+        RiseMember riseMember = null;
+
+        switch (memberTypeId) {
+            case RiseMember.ELITE:
+                riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId(), monthlyCampConfig);
+                break;
+            case RiseMember.CAMP:
+                riseMember = signupService.getCurrentMonthlyCampStatus(loginUser.getId(), monthlyCampConfig);
+                break;
+            default:
+                break;
+        }
+        if (riseMember != null) {
+            return WebUtils.result(riseMember.simple());
+        } else {
+            return WebUtils.error("会员类型校验出错");
+        }
     }
 
     @RequestMapping("/rise/audition/button")
