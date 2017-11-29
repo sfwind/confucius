@@ -599,10 +599,12 @@ public class SignupController {
         dto.setTip("每天给自己投资7元，获得全年36次职场加速机会");
 
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
-            if (memberTypeId.equals(RiseMember.HALF) || memberTypeId.equals(RiseMember.ANNUAL)) {
+            if (riseMember.getMemberTypeId().equals(RiseMember.HALF) ||
+                    riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
                 dto.setButtonStr("升级商学院");
                 dto.setTip("优秀学员学费已减免，一键升级商学院");
-            } else if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
+            } else if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) ||
+                    riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                 dto.setButtonStr("入学商学院");
             } else {
                 dto.setButtonStr("立即入学");
