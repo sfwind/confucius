@@ -601,6 +601,7 @@ public class SignupController {
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
             if (memberTypeId.equals(RiseMember.HALF) || memberTypeId.equals(RiseMember.ANNUAL)) {
                 dto.setButtonStr("升级商学院");
+                dto.setTip("优秀学员学费已减免，一键升级商学院");
             } else if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
                 dto.setButtonStr("入学商学院");
             } else {
