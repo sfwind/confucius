@@ -246,14 +246,13 @@ public class MonthlyCampController {
         RiseMember riseMember = signupService.currentRiseMember(profile.getId());
         if (riseClassMember == null && riseMember != null) {
             riseClassMember = new RiseClassMember();
-            riseClassMember.setClassId(monthlyCampDto.getClassName());
             riseClassMember.setClassName(monthlyCampDto.getClassName());
 
             String memberId;
             if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                memberId = signupService.generateMemberId(monthlyCampConfig, monthlyCampConfig.getRiseClassPrefix(), RiseClassMember.BUSINESS_MEMBERSHIP);
+                memberId = signupService.generateMemberId(monthlyCampConfig.getRiseClassPrefix(), RiseClassMember.BUSINESS_MEMBERSHIP);
             } else {
-                memberId = signupService.generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
+                memberId = signupService.generateMemberId(monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
             }
 
             riseClassMember.setMemberId(memberId);

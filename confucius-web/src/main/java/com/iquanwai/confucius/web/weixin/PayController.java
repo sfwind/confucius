@@ -1,12 +1,10 @@
 package com.iquanwai.confucius.web.weixin;
 
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,10 +29,8 @@ public class PayController {
     private PayService payService;
     @Autowired
     private SignupService signupService;
-    @Autowired
-    private CacheService cacheService;
 
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String SUCCESS_RETURN = "<xml>\n" +
             "  <return_code><![CDATA[SUCCESS]]></return_code>\n" +
@@ -43,12 +39,12 @@ public class PayController {
 
     @RequestMapping(value = "/order/callback", produces = "application/xml")
     public ResponseEntity<OrderCallbackReply> orderCallback(@RequestBody OrderCallback orderCallback) {
-        LOGGER.info(orderCallback.toString());
+        logger.info(orderCallback.toString());
         OrderCallbackReply orderCallbackReply = null;
         try {
             //未关注用户先提示关注
             if ("N".equals(orderCallback.getIs_subscribe())) {
-                LOGGER.info("{}还没关注服务号", orderCallback.getOpenid());
+                logger.info("{}还没关注服务号", orderCallback.getOpenid());
                 orderCallbackReply = payService.callbackReply(PayService.ERROR_CODE, "请先关注圈外服务号", "");
                 return new ResponseEntity<>(orderCallbackReply, HttpStatus.OK);
             }
@@ -58,29 +54,28 @@ public class PayController {
             } else {
                 orderCallbackReply = payService.callbackReply(PayService.SUCCESS_CODE, "下单成功", prepayId);
             }
-            LOGGER.info(orderCallbackReply.toString());
+            logger.info(orderCallbackReply.toString());
         } catch (Exception e) {
             //异常关闭订单
-            LOGGER.error("扫码支付回调处理失败", e);
+            logger.error("扫码支付回调处理失败", e);
         }
         return new ResponseEntity<>(orderCallbackReply, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/result/risemember/callback")
     public void riseMemberPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
-        LOGGER.info("rise会员微信支付回调:{}", payCallback.toString());
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+        logger.info("rise会员微信支付回调:{}", payCallback.toString());
 
         ThreadPool.execute(() -> {
             try {
                 payService.handlePayResult(payCallback);
                 if ("SUCCESS".equals(payCallback.getResult_code())) {
-                    payService.payMemberSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
+                    payService.payMemberSuccess(payCallback.getOut_trade_no());
                 } else {
-                    LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+                    logger.error("{}付费失败", payCallback.getOut_trade_no());
                 }
             } catch (Exception e) {
-                LOGGER.error("rise会员支付结果回调处理失败", e);
+                logger.error("rise会员支付结果回调处理失败", e);
             }
         });
 
@@ -91,19 +86,18 @@ public class PayController {
 
     @RequestMapping(value = "/result/risecamp/callback")
     public void riseTrainPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
-        LOGGER.info("训练营单卖微信支付回调：{}", payCallback.toString());
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+        logger.info("训练营单卖微信支付回调：{}", payCallback.toString());
 
         ThreadPool.execute(() -> {
             try {
                 payService.handlePayResult(payCallback);
                 if ("SUCCESS".equals(payCallback.getResult_code())) {
-                    signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no(), monthlyCampConfig);
+                    signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
                 } else {
-                    LOGGER.error("{}付费失败", payCallback.getOut_trade_no());
+                    logger.error("{}付费失败", payCallback.getOut_trade_no());
                 }
             } catch (Exception e) {
-                LOGGER.error("训练营支付结果回调处理失败", e);
+                logger.error("训练营支付结果回调处理失败", e);
             }
         });
 

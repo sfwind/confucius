@@ -21,12 +21,12 @@ public interface SignupService {
     /**
      * 报名商学院, 不生成预付订单
      */
-    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
+    QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
     /**
      * 报名训练营, 不生成预付订单
      */
-    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, MonthlyCampConfig monthlyCampConfig);
+    QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 获取学员详情
@@ -43,7 +43,7 @@ public interface SignupService {
      * 5、发送 mq 通知 platon 强制开启课程
      * 6、发送购买成功信息，开课信息（可以合并）
      */
-    void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
+    void payMonthlyCampSuccess(String orderId);
 
     /**
      * 后台解锁训练营
@@ -54,9 +54,9 @@ public interface SignupService {
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType);
+    String generateMemberId(String classPrefix, Integer identityType);
 
-    void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
+    void riseMemberEntry(String orderId);
 
     /**
      * 重新加载班级
@@ -128,12 +128,12 @@ public interface SignupService {
      * 获取用户当前会员信息
      * @param profileId 用户id
      */
-    RiseMember getCurrentRiseMemberStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentRiseMemberStatus(Integer profileId);
 
     /**
      * 获取当前训练营信息
      */
-    RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentMonthlyCampStatus(Integer profileId);
 
     List<RiseMember> loadPersonalAllRiseMembers(Integer profileId);
 }

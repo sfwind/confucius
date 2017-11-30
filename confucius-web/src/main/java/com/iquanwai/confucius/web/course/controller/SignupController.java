@@ -90,7 +90,6 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> riseMemberPaid(LoginUser loginUser, @PathVariable String orderId) {
         Assert.notNull(loginUser, "用户不能为空");
         QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
         Boolean entry;
         switch (quanwaiOrder.getGoodsType()) {
@@ -129,7 +128,7 @@ public class SignupController {
             if (zero.equals(quanwaiOrder.getPrice())) {
                 // 免费，自动报名
                 payService.handlePayResult(orderId, true);
-                payService.risePaySuccess(orderId, monthlyCampConfig);
+                payService.paySuccess(orderId);
             } else {
                 // 非免费，查询是否报名成功
                 if (!entry) {
@@ -189,7 +188,6 @@ public class SignupController {
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
         // 查看优惠券信息
-//        List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberTypes(memberTypesPayInfo);
@@ -229,23 +227,22 @@ public class SignupController {
         }
 
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
-//        dto.setCoupons(coupons);
         return WebUtils.result(dto);
     }
 
     private void calcDealTime(Date dealTime, RiseMemberDto dto, Integer profileId) {
         // 默认订单开放时间是48小时
-        if(dealTime == null){
+        if (dealTime == null) {
             dto.setRemainHour(48);
             dto.setRemainMinute(0);
-        }else{
+        } else {
             int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 48));
-            if(time<=0){
+            if (time <= 0) {
                 businessSchoolService.expireApplication(profileId);
                 dto.setRemainHour(0);
                 dto.setRemainMinute(0);
-            }else{
-                dto.setRemainHour(time/60);
+            } else {
+                dto.setRemainHour(time / 60);
                 dto.setRemainMinute(time % 60);
             }
         }
@@ -366,7 +363,6 @@ public class SignupController {
 
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType()) && !bs.getIsBusinessStudent()) {
-//            goodsInfoDto.setInitPrice(bs.getFee());
             goodsInfoDto.setFee(bs.getFee());
         }
 
@@ -408,7 +404,6 @@ public class SignupController {
         }
         return list;
     }
-
 
     private Boolean checkMultiCoupons(String goodsType) {
         switch (goodsType) {
@@ -470,12 +465,6 @@ public class SignupController {
             return WebUtils.error(check.getRight());
         }
 
-        // 检查优惠券
-//        if (paymentDto.getCouponId() != null) {
-//            if (!costRepo.checkCouponValidation(loginUser.getId(), paymentDto.getCouponId())) {
-//                return WebUtils.error("该优惠券无效");
-//            }
-//        }
         if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
             for (Integer coupon : paymentDto.getCouponsIdGroup()) {
                 if (!costRepo.checkCouponValidation(loginUser.getId(), coupon)) {
@@ -539,14 +528,14 @@ public class SignupController {
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId, MonthlyCampConfig monthlyCampConfig) {
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER: {
-                return signupService.signupRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
+                return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
             }
             case QuanwaiOrder.FRAG_CAMP: {
                 Integer couponId = null;
-                if(CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())){
+                if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
-                return signupService.signupMonthlyCamp(profileId, paymentDto.getGoodsId(),
+                return signupService.signUpMonthlyCamp(profileId, paymentDto.getGoodsId(),
                         couponId, monthlyCampConfig);
             }
             default:
@@ -554,7 +543,6 @@ public class SignupController {
                 return null;
         }
     }
-
 
     /**
      * 1. 预先在 QuanwaiOrder 表中生成了订单记录，但不是真正用来发送到微信的订单，现在要创建即将往微信发送的订单参数
@@ -648,16 +636,14 @@ public class SignupController {
                 .memo(String.valueOf(memberTypeId));
         operationLogService.log(operationLog);
 
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-
         RiseMember riseMember = null;
 
         switch (memberTypeId) {
             case RiseMember.ELITE:
-                riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId(), monthlyCampConfig);
+                riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId());
                 break;
             case RiseMember.CAMP:
-                riseMember = signupService.getCurrentMonthlyCampStatus(loginUser.getId(), monthlyCampConfig);
+                riseMember = signupService.getCurrentMonthlyCampStatus(loginUser.getId());
                 break;
             default:
                 break;
@@ -670,7 +656,7 @@ public class SignupController {
     }
 
     @RequestMapping("/rise/audition/button")
-    public ResponseEntity<Map<String,Object>> loadAuditions(LoginUser loginUser){
+    public ResponseEntity<Map<String, Object>> loadAuditions(LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("用户信息")
                 .function("RISE")
