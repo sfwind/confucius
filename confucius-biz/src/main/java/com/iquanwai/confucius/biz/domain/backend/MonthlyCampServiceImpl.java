@@ -200,20 +200,19 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
             if (existRiseCertificate == null) {
                 String groupNo = riseClassMember.getGroupId();
 
-                // TODO 临时注释 ProblemName 的获取
-                // Integer category = accountService.loadUserScheduleCategory(profileId);
-                // List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadByCategory(category);
-                // CourseScheduleDefault courseScheduleDefault = courseScheduleDefaults.stream()
-                //         .filter(scheduleDefault -> scheduleDefault.getType() == CourseScheduleDefault.Type.MAJOR)
-                //         .filter(scheduleDefault -> scheduleDefault.getMonth().equals(month)).findAny().orElse(null);
-                // String problemName = "";
-                // if (courseScheduleDefault != null) {
-                //     Integer problemId = courseScheduleDefault.getProblemId();
-                //     Problem problem = problemDao.load(Problem.class, problemId);
-                //     if (problem != null) {
-                //         problemName = problem.getProblem();
-                //     }
-                // }
+                Integer category = accountService.loadUserScheduleCategory(profileId);
+                List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadByCategory(category);
+                CourseScheduleDefault courseScheduleDefault = courseScheduleDefaults.stream()
+                        .filter(scheduleDefault -> scheduleDefault.getType() == CourseScheduleDefault.Type.MAJOR)
+                        .filter(scheduleDefault -> scheduleDefault.getMonth().equals(month)).findAny().orElse(null);
+                String problemName = "";
+                if (courseScheduleDefault != null) {
+                    Integer problemId = courseScheduleDefault.getProblemId();
+                    Problem problem = problemDao.load(Problem.class, problemId);
+                    if (problem != null) {
+                        problemName = problem.getProblem();
+                    }
+                }
 
                 StringBuilder certificateNoBuilder = new StringBuilder("IQW");
                 certificateNoBuilder.append(String.format("%02d", type));
@@ -236,7 +235,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
                 } catch (Exception e) {
                     logger.error(e.getLocalizedMessage(), e);
                 }
-                // riseCertificate.setProblemName(problemName);
+                riseCertificate.setProblemName(problemName);
                 riseCertificateDao.insert(riseCertificate);
             }
         });
