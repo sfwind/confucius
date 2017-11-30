@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -309,26 +308,10 @@ public class BackendController {
         return WebUtils.result("正在运行中");
     }
 
+    @Deprecated
     @RequestMapping(value = "/batch/open/camp")
     public ResponseEntity<Map<String, Object>> batchForceOpenMonthlyCamp(@RequestBody BatchOpenCourseDto batchOpenCourseDto) {
-        OperationLog operationLog = OperationLog.create().module("后台功能").function("批量开始课程")
-                .memo("月份:" + batchOpenCourseDto.getMonth()
-                        + ", 小课Id:" + batchOpenCourseDto.getProblemId()
-                        + ", 小课关闭日期:" + batchOpenCourseDto.getCloseDate());
-        operationLogService.log(operationLog);
-
-        Integer month = batchOpenCourseDto.getMonth();
-        Integer problemId = batchOpenCourseDto.getProblemId();
-        Date startDate = batchOpenCourseDto.getStartDate();
-        Date closeDate = batchOpenCourseDto.getCloseDate();
-
-        boolean validation = monthlyCampService.validForceOpenCourse(month, problemId);
-        if (validation) {
-            ThreadPool.execute(() -> monthlyCampService.batchForceOpenCourse(problemId, startDate, closeDate));
-            return WebUtils.result("开课进行中");
-        } else {
-            return WebUtils.error("开课校验失败");
-        }
+        return WebUtils.result("已废弃");
     }
 
 }

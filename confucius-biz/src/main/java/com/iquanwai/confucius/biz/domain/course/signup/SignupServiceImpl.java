@@ -9,11 +9,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.course.CourseOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -84,6 +80,8 @@ public class SignupServiceImpl implements SignupService {
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private MonthlyCampOrderDao monthlyCampOrderDao;
+    @Autowired
+    private CourseScheduleDefaultDao courseScheduleDefaultDao;
     @Autowired
     private MessageService messageService;
     @Autowired
@@ -306,6 +304,11 @@ public class SignupServiceImpl implements SignupService {
 
         // 强开课程
         List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(monthlyCampConfig.getSellingMonth());
+
+        Integer category = accountService.loadUserScheduleCategory(profileId);
+        List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadMajorCourseScheduleDefaultByCategory(category);
+
+        待办 TODO
         schedules.forEach(schedule -> {
             JSONObject json = new JSONObject();
             json.put("profileId", profileId);
