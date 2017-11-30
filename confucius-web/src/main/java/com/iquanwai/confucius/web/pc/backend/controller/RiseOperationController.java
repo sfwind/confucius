@@ -187,11 +187,13 @@ public class RiseOperationController {
             return dto;
         }).collect(Collectors.toList());
 
+
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习")
                 .action("获取问题列表");
         operationLogService.log(operationLog);
+
         return WebUtils.result(result);
     }
 
@@ -249,6 +251,14 @@ public class RiseOperationController {
         page.setPageSize(20);
 
         List<BusinessSchoolApplication> applications = businessSchoolService.loadBusinessSchoolList(page);
+        final List<String> openidList;
+        if (applications != null && applications.size() > 0) {
+            //获取黑名单用户
+            openidList = accountService.getBlackList();
+        } else {
+            openidList = null;
+        }
+
         List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
             Profile profile = accountService.getProfile(application.getProfileId());
             ApplicationDto dto = this.initApplicationDto(application);
@@ -264,6 +274,14 @@ public class RiseOperationController {
             dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
+            dto.setIsBlack("否");
+
+            if (openidList != null && (openidList.size() > 0)) {
+                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+                    dto.setIsBlack("是");
+                }
+            }
+
             return dto;
         }).collect(Collectors.toList());
         TableDto<ApplicationDto> result = new TableDto<>();
@@ -458,9 +476,9 @@ public class RiseOperationController {
         return WebUtils.result(updateStatus);
     }
 
-    @RequestMapping(value = "/delete/survey/config/{id}",method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> deleteSurveyConfig(PCLoginUser loginUser,@PathVariable Integer id){
-        Assert.notNull(loginUser,"用户不能为空");
+    @RequestMapping(value = "/delete/survey/config/{id}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> deleteSurveyConfig(PCLoginUser loginUser, @PathVariable Integer id) {
+        Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(id, "问卷id不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理")

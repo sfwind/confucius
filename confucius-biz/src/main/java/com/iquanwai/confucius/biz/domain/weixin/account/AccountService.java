@@ -20,6 +20,10 @@ public interface AccountService {
 
     String PC_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN";
 
+    String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
+    String BATCH_BALCKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchblacklist?access_token={access_token}";
+    String UNBATCH_BACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchunblacklist?access_token={access_token}";
+
     /**
      * 根据openid获取用户的详细信息
      */
@@ -66,7 +70,7 @@ public interface AccountService {
 
     /**
      * 更新riseMember状态
-     * */
+     */
     void updateRiseMember(String openid, Integer riseMember);
 
     List<Profile> loadProfilesByNickName(String nickName);
@@ -77,4 +81,27 @@ public interface AccountService {
     Profile loadProfileByMemberId(String memberId);
 
     Boolean hasPrivilegeForBusinessSchool(Integer profileId);
+
+    /**
+     * 获取黑名单列表
+     * (该接口一次最多返回10000条数据)
+     *
+     */
+    List<String> getBlackList();
+
+    /**
+     * 批量拉黑用户
+     *
+     * @param openidList:拉黑用户列表
+     */
+    boolean batchBlackList(List<String> openidList);
+
+    /**
+     * 取消拉黑用户
+     *
+     * @param openidList:取消拉黑用户列表
+     */
+    boolean batchUnBlackList(List<String> openidList);
+
+
 }
