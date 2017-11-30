@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -12,19 +12,22 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 
+/**
+ * Created by justin on 2017/11/30.
+ */
 @Repository
-public class MonthlyCampOrderDao extends DBUtil {
+public class BusinessSchoolApplicationOrderDao extends DBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public int insert(MonthlyCampOrder monthlyCampOrder) {
+    public int insert(BusinessSchoolApplicationOrder businessSchoolApplicationOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO MonthlyCampOrder (OrderId, Openid, ProfileId, Month) " +
-                "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO BusinessSchoolApplicationOrder (OrderId, Openid, ProfileId) " +
+                "VALUES (?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
-                    monthlyCampOrder.getOrderId(), monthlyCampOrder.getOpenId(),
-                    monthlyCampOrder.getProfileId(), monthlyCampOrder.getMonth());
+                    businessSchoolApplicationOrder.getOrderId(), businessSchoolApplicationOrder.getOpenid(),
+                    businessSchoolApplicationOrder.getProfileId());
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -32,10 +35,10 @@ public class MonthlyCampOrderDao extends DBUtil {
         return -1;
     }
 
-    public MonthlyCampOrder loadCampOrder(String orderId) {
+    public BusinessSchoolApplicationOrder loadBusinessSchoolApplicationOrder(String orderId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM MonthlyCampOrder WHERE OrderId = ?";
-        ResultSetHandler<MonthlyCampOrder> h = new BeanHandler<>(MonthlyCampOrder.class);
+        String sql = "SELECT * FROM BusinessSchoolApplicationOrder WHERE OrderId = ?";
+        ResultSetHandler<BusinessSchoolApplicationOrder> h = new BeanHandler<>(BusinessSchoolApplicationOrder.class);
         try {
             return runner.query(sql, h, orderId);
         } catch (SQLException e) {
@@ -44,14 +47,13 @@ public class MonthlyCampOrderDao extends DBUtil {
         return null;
     }
 
-    public void entry(String orderId) {
+    public void paid(String orderId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update MonthlyCampOrder SET Entry = 1 WHERE OrderId = ?";
+        String sql = "Update BusinessSchoolApplicationOrder SET Paid = 1 WHERE OrderId = ?";
         try {
             runner.update(sql, orderId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-
 }

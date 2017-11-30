@@ -14,17 +14,10 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.AuditionClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.web.course.dto.InfoSubmitDto;
 import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.course.dto.payment.BusinessSchoolDto;
@@ -35,18 +28,12 @@ import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -149,21 +136,6 @@ public class SignupController {
         return WebUtils.success();
     }
 
-    @Deprecated
-    @RequestMapping(value = "/info/load", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadInfo(LoginUser loginUser) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("提交个人信息")
-                .action("加载个人信息");
-        operationLogService.log(operationLog);
-        Profile account = accountService.getProfile(loginUser.getId());
-        ModelMapper modelMapper = new ModelMapper();
-        InfoSubmitDto infoSubmitDto = modelMapper.map(account, InfoSubmitDto.class);
-        return WebUtils.result(infoSubmitDto);
-    }
-
     @RequestMapping(value = "/coupon/list", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> listCoupon(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
@@ -174,63 +146,6 @@ public class SignupController {
                 .action("加载优惠券");
         operationLogService.log(operationLog);
         return WebUtils.result(coupons);
-    }
-
-    @RequestMapping(value = "/rise/member", method = RequestMethod.GET)
-    @Deprecated
-    public ResponseEntity<Map<String, Object>> getRiseMemberPayInfo(LoginUser loginUser) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("报名页面")
-                .action("加载Rise会员信息");
-        operationLogService.log(operationLog);
-
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
-        // 查看优惠券信息
-//        List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
-        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
-        RiseMemberDto dto = new RiseMemberDto();
-        dto.setMemberTypes(memberTypesPayInfo);
-
-        if (riseMember != null && riseMember.getMemberTypeId() != null) {
-            Integer memberTypeId = riseMember.getMemberTypeId();
-            if (memberTypeId.equals(RiseMember.HALF) || memberTypeId.equals(RiseMember.ANNUAL)) {
-                dto.setButtonStr("升级商学院");
-            } else if (memberTypeId.equals(RiseMember.ELITE) || memberTypeId.equals(RiseMember.HALF_ELITE)) {
-                dto.setButtonStr("入学商学院");
-            } else {
-                dto.setButtonStr("立即入学");
-            }
-        } else {
-            dto.setButtonStr("立即入学");
-        }
-        AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
-
-        if (classMember != null) {
-            // 有试听课
-            dto.setAuditionStr("试听课");
-        } else {
-            // 没有试听课
-            dto.setAuditionStr("预约试听");
-        }
-
-        Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
-        calcDealTime(dealTime, dto, loginUser.getId());
-        List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
-        // 用户层级是商学院用户或者层级是训练营用户，则不显示试听课入口
-        Long count = riseMembers.stream()
-                .filter(member -> member.getMemberTypeId() == RiseMember.ELITE || member.getMemberTypeId() == RiseMember.CAMP)
-                .count();
-        if (count > 0) {
-            // 商学院和训练营不显示试听课按钮
-            dto.setAuditionStr(null);
-        }
-
-        dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
-//        dto.setCoupons(coupons);
-        return WebUtils.result(dto);
     }
 
     private void calcDealTime(Date dealTime, RiseMemberDto dto, Integer profileId) {
@@ -303,7 +218,7 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> checkBusinessSchoolPrivilege(LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("后端")
+                .module("报名")
                 .function("商学院")
                 .action("检查商学院报名权限");
         operationLogService.log(operationLog);
@@ -342,7 +257,7 @@ public class SignupController {
             return WebUtils.error("商品类型异常");
         }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("后端")
+                .module("报名")
                 .function("报名页面")
                 .action("获取商品信息")
                 .memo(goodsInfoDto.getGoodsType());
@@ -366,7 +281,6 @@ public class SignupController {
 
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType()) && !bs.getIsBusinessStudent()) {
-//            goodsInfoDto.setInitPrice(bs.getFee());
             goodsInfoDto.setFee(bs.getFee());
         }
 
@@ -398,6 +312,7 @@ public class SignupController {
                     }
                     break;
                 case QuanwaiOrder.FRAG_CAMP:
+                case QuanwaiOrder.BS_APPLICATION:
                     // 选择最大的一张
                     Coupon maxCoupon = coupons.stream().filter(item -> item.getCategory() == null).max((o1, o2) -> o1.getAmount() - o2.getAmount() > 0 ? 1 : -1).orElse(null);
                     list.add(maxCoupon);
@@ -414,8 +329,6 @@ public class SignupController {
         switch (goodsType) {
             case QuanwaiOrder.FRAG_MEMBER:
                 return true;
-            case QuanwaiOrder.FRAG_CAMP:
-                return false;
             default:
                 return false;
         }
@@ -438,7 +351,7 @@ public class SignupController {
         }
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("后端")
+                .module("报名")
                 .function("报名页面")
                 .action("点击支付")
                 .memo(paymentDto.getGoodsType());
@@ -455,11 +368,8 @@ public class SignupController {
         // 检查是否能够支付
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER:
-                // 会员购买
-                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
-                break;
             case QuanwaiOrder.FRAG_CAMP:
-                // 训练营购买
+            case QuanwaiOrder.BS_APPLICATION:
                 check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
                 break;
             default:
@@ -470,12 +380,6 @@ public class SignupController {
             return WebUtils.error(check.getRight());
         }
 
-        // 检查优惠券
-//        if (paymentDto.getCouponId() != null) {
-//            if (!costRepo.checkCouponValidation(loginUser.getId(), paymentDto.getCouponId())) {
-//                return WebUtils.error("该优惠券无效");
-//            }
-//        }
         if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
             for (Integer coupon : paymentDto.getCouponsIdGroup()) {
                 if (!costRepo.checkCouponValidation(loginUser.getId(), coupon)) {
@@ -548,6 +452,13 @@ public class SignupController {
                 }
                 return signupService.signupMonthlyCamp(profileId, paymentDto.getGoodsId(),
                         couponId, monthlyCampConfig);
+            }
+            case QuanwaiOrder.BS_APPLICATION: {
+                Integer couponId = null;
+                if(CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())){
+                    couponId = paymentDto.getCouponsIdGroup().get(0);
+                }
+                return signupService.signupBusinessSchoolApplication(profileId, paymentDto.getGoodsId(), couponId);
             }
             default:
                 logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
@@ -643,8 +554,8 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> entryRiseMember(@PathVariable Integer memberTypeId, LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("用户信息")
-                .function("RISE")
-                .action("查询rise会员信息")
+                .function("报名页面")
+                .action("查询用户报名信息")
                 .memo(String.valueOf(memberTypeId));
         operationLogService.log(operationLog);
 
