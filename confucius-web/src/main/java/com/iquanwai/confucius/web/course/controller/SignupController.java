@@ -82,8 +82,9 @@ public class SignupController {
 
     /**
      * rise产品支付成功的回调
+     *
      * @param loginUser 用户信息
-     * @param orderId 订单id
+     * @param orderId   订单id
      * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
@@ -235,17 +236,17 @@ public class SignupController {
 
     private void calcDealTime(Date dealTime, RiseMemberDto dto, Integer profileId) {
         // 默认订单开放时间是48小时
-        if(dealTime == null){
+        if (dealTime == null) {
             dto.setRemainHour(48);
             dto.setRemainMinute(0);
-        }else{
+        } else {
             int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 48));
-            if(time<=0){
+            if (time <= 0) {
                 businessSchoolService.expireApplication(profileId);
                 dto.setRemainHour(0);
                 dto.setRemainMinute(0);
-            }else{
-                dto.setRemainHour(time/60);
+            } else {
+                dto.setRemainHour(time / 60);
                 dto.setRemainMinute(time % 60);
             }
         }
@@ -329,7 +330,8 @@ public class SignupController {
 
     /**
      * 获取商品信息
-     * @param loginUser 用户
+     *
+     * @param loginUser    用户
      * @param goodsInfoDto 商品信息
      * @return 详细的商品信息
      */
@@ -399,8 +401,13 @@ public class SignupController {
                     break;
                 case QuanwaiOrder.FRAG_CAMP:
                     // 选择最大的一张
-                    Coupon maxCoupon = coupons.stream().filter(item -> item.getCategory() == null).max((o1, o2) -> o1.getAmount() - o2.getAmount() > 0 ? 1 : -1).orElse(null);
-                    list.add(maxCoupon);
+                    Coupon maxCoupon = coupons.stream()
+                            .filter(item -> item.getCategory() == null)
+                            .max((o1, o2) -> o1.getAmount() - o2.getAmount() > 0 ? 1 : -1)
+                            .orElse(null);
+                    if (maxCoupon != null) {
+                        list.add(maxCoupon);
+                    }
                     break;
                 default:
                     break;
@@ -423,8 +430,9 @@ public class SignupController {
 
     /**
      * 获取H5支付参数的接口
-     * @param loginUser 用户
-     * @param request request对象
+     *
+     * @param loginUser  用户
+     * @param request    request对象
      * @param paymentDto 商品类型以及商品id
      * @return 支付参数
      */
@@ -493,6 +501,7 @@ public class SignupController {
 
     /**
      * 计算优惠券
+     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
@@ -532,8 +541,9 @@ public class SignupController {
 
     /**
      * 创建订单
+     *
      * @param paymentDto 支付信息
-     * @param profileId 用户id
+     * @param profileId  用户id
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId, MonthlyCampConfig monthlyCampConfig) {
@@ -543,7 +553,7 @@ public class SignupController {
             }
             case QuanwaiOrder.FRAG_CAMP: {
                 Integer couponId = null;
-                if(CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())){
+                if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
                 return signupService.signupMonthlyCamp(profileId, paymentDto.getGoodsId(),
@@ -670,7 +680,7 @@ public class SignupController {
     }
 
     @RequestMapping("/rise/audition/button")
-    public ResponseEntity<Map<String,Object>> loadAuditions(LoginUser loginUser){
+    public ResponseEntity<Map<String, Object>> loadAuditions(LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("用户信息")
                 .function("RISE")
