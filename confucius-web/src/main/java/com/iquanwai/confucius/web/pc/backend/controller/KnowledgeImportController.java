@@ -73,9 +73,6 @@ public class KnowledgeImportController {
         } else if(result == KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getCode()){
             return WebUtils.error(KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getMsg());
         }
-        else if(result == KnowledgeEnums.KNOWLEDGE_REVIEW_ERROR.getCode()){
-            return WebUtils.error(KnowledgeEnums.KNOWLEDGE_REVIEW_ERROR.getMsg());
-        }
         else{
             return WebUtils.error(KnowledgeEnums.UNKNOWN_ERROR.getMsg());
         }
