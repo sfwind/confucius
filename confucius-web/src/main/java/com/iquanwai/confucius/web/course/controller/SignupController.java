@@ -185,8 +185,7 @@ public class SignupController {
                 .action("加载Rise会员信息");
         operationLogService.log(operationLog);
 
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
+        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
         // 查看优惠券信息
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
@@ -256,7 +255,6 @@ public class SignupController {
                 .action("点击RISE会员选择按钮")
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
         if (memberTypeId == RiseMember.ELITE) {
             boolean pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
@@ -264,7 +262,7 @@ public class SignupController {
                 return WebUtils.error(201, "请先提交申请");
             }
         }
-        Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId, monthlyCampConfig);
+        Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
         if (result.getLeft() != 1) {
             return WebUtils.error(result.getRight());
         } else {
@@ -345,12 +343,10 @@ public class SignupController {
                 .memo(goodsInfoDto.getGoodsType());
         operationLogService.log(operationLog);
 
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-
         // 是否能使用多个优惠券
         goodsInfoDto.setMultiCoupons(this.checkMultiCoupons(goodsInfoDto.getGoodsType()));
         // 计算价格/等特殊
-        MemberType memberType = signupService.getMemberTypesPayInfo(loginUser.getId(), monthlyCampConfig).stream()
+        MemberType memberType = signupService.getMemberTypesPayInfo(loginUser.getId()).stream()
                 .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
                 .findFirst().orElse(null);
         if (memberType != null) {
@@ -438,7 +434,6 @@ public class SignupController {
                 .action("点击支付")
                 .memo(paymentDto.getGoodsType());
         operationLogService.log(operationLog);
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
         // 检查ip
         String remoteIp = request.getHeader("X-Forwarded-For");
@@ -451,11 +446,11 @@ public class SignupController {
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER:
                 // 会员购买
-                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
+                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
                 break;
             case QuanwaiOrder.FRAG_CAMP:
                 // 训练营购买
-                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
+                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
                 break;
             default:
                 check = new MutablePair<>(-1, "校验失败");
@@ -474,7 +469,7 @@ public class SignupController {
         }
 
         // 根据前端传进来的 param 创建订单信息
-        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(paymentDto, loginUser.getId(), monthlyCampConfig);
+        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(paymentDto, loginUser.getId());
         // 下单
         PaymentDto paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
         return WebUtils.result(paymentParam);
@@ -525,7 +520,7 @@ public class SignupController {
      * @param profileId 用户id
      * @return 订单对象
      */
-    private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId, MonthlyCampConfig monthlyCampConfig) {
+    private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER: {
                 return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
@@ -535,8 +530,7 @@ public class SignupController {
                 if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
-                return signupService.signUpMonthlyCamp(profileId, paymentDto.getGoodsId(),
-                        couponId, monthlyCampConfig);
+                return signupService.signUpMonthlyCamp(profileId, paymentDto.getGoodsId(), couponId);
             }
             default:
                 logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
@@ -577,8 +571,7 @@ public class SignupController {
                 .action("加载Rise会员信息");
         operationLogService.log(operationLog);
 
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo(monthlyCampConfig);
+        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
         MemberType m = memberTypesPayInfo.stream().filter(memberType -> memberType.getId().equals(memberTypeId))
                 .findAny().orElse(null);
 

@@ -126,7 +126,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Override
     public void unlockMonthlyCampAuthority(String riseId) {
         Profile profile = accountService.getProfileByRiseId(riseId);
-        signupService.unlockMonthlyCamp(profile.getId(), cacheService.loadMonthlyCampConfig());
+        signupService.unlockMonthlyCamp(profile.getId());
     }
 
     @Override

@@ -16,7 +16,7 @@ public interface SignupService {
     /**
      * 商品支付资格校验
      */
-    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType, MonthlyCampConfig monthlyCampConfig);
+    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
 
     /**
      * 报名商学院, 不生成预付订单
@@ -26,7 +26,7 @@ public interface SignupService {
     /**
      * 报名训练营, 不生成预付订单
      */
-    QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, MonthlyCampConfig monthlyCampConfig);
+    QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
      * 获取学员详情
@@ -48,7 +48,7 @@ public interface SignupService {
     /**
      * 后台解锁训练营
      */
-    void unlockMonthlyCamp(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    void unlockMonthlyCamp(Integer profileId);
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
@@ -88,9 +88,9 @@ public interface SignupService {
     /**
      * 查询会员类型的支付信息
      */
-    List<MemberType> getMemberTypesPayInfo(MonthlyCampConfig monthlyCampConfig);
+    List<MemberType> getMemberTypesPayInfo();
 
-    List<MemberType> getMemberTypesPayInfo(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    List<MemberType> getMemberTypesPayInfo(Integer profileId);
 
     /**
      * 计算优惠券

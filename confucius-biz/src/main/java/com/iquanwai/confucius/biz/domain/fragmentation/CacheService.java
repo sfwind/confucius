@@ -4,9 +4,9 @@ import com.iquanwai.confucius.biz.po.fragmentation.BusinessCollegeConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 
 public interface CacheService {
-    BusinessCollegeConfig loadBusinessCollegeConfig();
-
     void reload();
+
+    BusinessCollegeConfig loadBusinessCollegeConfig();
 
     MonthlyCampConfig loadMonthlyCampConfig();
 
