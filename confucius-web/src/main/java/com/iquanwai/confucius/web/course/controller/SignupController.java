@@ -607,7 +607,10 @@ public class SignupController {
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberType(m);
-        dto.setTip("每天给自己投资8元，获得全年36次职场加速机会");
+        if (m.getId() == RiseMember.ELITE) {
+            int dailyFee = (int) (m.getFee() / 365);
+            dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
+        }
 
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
             if (riseMember.getMemberTypeId().equals(RiseMember.HALF) ||
