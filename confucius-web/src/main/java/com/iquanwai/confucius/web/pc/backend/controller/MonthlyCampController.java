@@ -249,7 +249,6 @@ public class MonthlyCampController {
         RiseMember riseMember = signupService.currentRiseMember(profile.getId());
         if (riseClassMember == null && riseMember != null) {
             riseClassMember = new RiseClassMember();
-            riseClassMember.setClassName(monthlyCampDto.getClassName());
 
             String memberId;
             if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
@@ -257,6 +256,8 @@ public class MonthlyCampController {
             } else {
                 memberId = signupService.generateMemberId(sellingYear, sellingMonth, RiseClassMember.MONTHLY_CAMP);
             }
+
+            riseClassMember.setClassName(monthlyCampDto.getClassName());
 
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());

@@ -478,7 +478,11 @@ public class SignupServiceImpl implements SignupService {
             redisUtil.set(key, sequence, TimeUnit.DAYS.toSeconds(60));
             int sequenceInt = Integer.parseInt(sequence);
             targetMemberId.append(classPrefix);
-            targetMemberId.append(String.format("%02d", sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1));
+            if (RiseClassMember.BUSINESS_MEMBERSHIP == identityType) {
+                targetMemberId.append(String.format("%02d", (sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1) * 2 - 1));
+            } else if (RiseClassMember.MONTHLY_CAMP == identityType) {
+                targetMemberId.append(String.format("%02d", (sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1) * 2 - 1));
+            }
             targetMemberId.append(identityType);
             targetMemberId.append(String.format("%03d", sequenceInt % 200 == 0 ? 1 : sequenceInt % 200));
         });
