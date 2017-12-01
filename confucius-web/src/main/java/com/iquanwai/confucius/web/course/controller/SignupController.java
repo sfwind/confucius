@@ -619,7 +619,8 @@ public class SignupController {
                 dto.setTip("优秀学员学费已减免，一键升级商学院");
             } else if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) ||
                     riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                dto.setButtonStr("入学商学院");
+                //商学院用户不显示按钮
+                return WebUtils.success();
             } else {
                 dto.setButtonStr("立即入学");
             }
