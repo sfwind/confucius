@@ -149,7 +149,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplications(Integer problemId) {
         List<RiseWorkInfoDto> underCommentArticles = Lists.newArrayList();
-        //找出小课的所有应用练习包括删除的
+        //找出课程的所有应用练习包括删除的
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
         //只评论30天内的文章
         Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);

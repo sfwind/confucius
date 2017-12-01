@@ -13,7 +13,7 @@ public class RiseMember {
     private String orderId; //订单id
     private String openId; //openid
     private Integer profileId; //用户id
-    private Integer memberTypeId; //会员类型1-专业版半年,2-专业版一年,3-精英版,4-小课训练营
+    private Integer memberTypeId; //会员类型1-专业版半年,2-专业版一年,3-精英版,4-训练营
     private Date expireDate; //过期时间
     private Boolean expired; //是否过期（0-否,1-是）
     private String memo;
@@ -46,6 +46,6 @@ public class RiseMember {
     public static final int ANNUAL = 2;
     public static final int ELITE = 3;//精英用户
     public static final int HALF_ELITE = 4; // 精英版半年
-    public static final int CAMP = 5; // 小课训练营
-    public static final int COURSE = 6; // 单买小课
+    public static final int CAMP = 5; // 训练营
+    public static final int COURSE = 6; // 单买课程
 }

@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.TableDto;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
@@ -32,7 +33,6 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -262,8 +262,10 @@ public class RiseOperationController {
         List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
             Profile profile = accountService.getProfile(application.getProfileId());
             ApplicationDto dto = this.initApplicationDto(application);
-            Pair<SurveySubmit, List<SurveyQuestionSubmit>> submitPair = businessSchoolService.loadSubmit(application.getSubmitId());
-            this.initSurveyInfo(dto, submitPair.getLeft(), submitPair.getRight());
+//            Pair<SurveySubmit, List<SurveyQuestionSubmit>> submitPair = businessSchoolService.loadSubmit(application.getSubmitId());
+//            this.initSurveyInfo(dto, submitPair.getLeft(), submitPair.getRight());
+            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId());
+            dto.setQuestionList(questions);
             // 查询是否会员
             RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
             if (riseMember != null) {
@@ -281,6 +283,8 @@ public class RiseOperationController {
                     dto.setIsBlack("是");
                 }
             }
+            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
+            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
 
             return dto;
         }).collect(Collectors.toList());

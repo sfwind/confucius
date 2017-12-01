@@ -17,17 +17,17 @@ public interface ProblemService {
     List<Problem> loadProblems();
 
     /**
-     * 获取小课主分类
+     * 获取课程主分类
      * */
     List<ProblemCatalog> loadAllCatalogs();
 
     /**
-     * 获取小课次级分类
+     * 获取课程次级分类
      * */
     List<ProblemSubCatalog> loadAllSubCatalogs();
 
     /**
-     * 获取小课课程表
+     * 获取课程表
      * */
     List<ProblemSchedule> loadProblemSchedules(Integer problemId);
 
@@ -38,7 +38,7 @@ public interface ProblemService {
     Problem getProblem(Integer problemId);
 
     /**
-     * 导入小课数据
+     * 导入课程数据
      * */
     int saveProblem(Problem problem);
 }

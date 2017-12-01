@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
@@ -328,11 +329,11 @@ public class AccountServiceImpl implements AccountService {
                 // 如果当前人已经是会员状态，则什么状态都不需要改变
                 break;
             case Constants.RISE_MEMBER.COURSE_USER:
-                // 如果当前人是小课购买状态，后面可以更改成会员或者训练营小课状态
+                // 如果当前人是课程购买状态，后面可以更改成会员或者训练营状态
                 profileDao.updateRiseMember(openid, riseMember);
                 break;
             case Constants.RISE_MEMBER.MONTHLY_CAMP:
-                // 当前人是小课训练营状态，则只可以升级为会员
+                // 当前人是训练营状态，则只可以升级为会员
                 if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
                     profileDao.updateRiseMember(openid, riseMember);
                 }
@@ -378,7 +379,6 @@ public class AccountServiceImpl implements AccountService {
 
         return profile;
     }
-
 
     @Override
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
@@ -487,4 +487,14 @@ public class AccountServiceImpl implements AccountService {
         return body;
     }
 
+    @Override
+    public Integer loadUserScheduleCategory(Integer profileId) {
+        // 老用户
+        CustomerStatus status = customerStatusDao.load(profileId, CustomerStatus.SCHEDULE_LESS);
+        if (status != null) {
+            return CourseScheduleDefault.CategoryType.OLD_STUDENT;
+        } else {
+            return CourseScheduleDefault.CategoryType.NEW_STUDENT;
+        }
+    }
 }

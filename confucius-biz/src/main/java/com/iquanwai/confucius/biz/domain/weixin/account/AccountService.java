@@ -103,5 +103,5 @@ public interface AccountService {
      */
     boolean batchUnBlackList(List<String> openidList);
 
-
+    Integer loadUserScheduleCategory(Integer profileId);
 }

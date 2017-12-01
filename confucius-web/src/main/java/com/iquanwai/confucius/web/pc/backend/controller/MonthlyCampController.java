@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.controller;
+package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
@@ -17,6 +17,7 @@ import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampPageDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
+import com.iquanwai.confucius.web.pc.backend.dto.CampRiseCertificateDao;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -212,7 +213,8 @@ public class MonthlyCampController {
     }
 
     @RequestMapping(value = "/modify/batch/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId, @RequestBody List<Integer> batchRiseClassMemberIds) {
+    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId,
+                                                                             @RequestBody List<Integer> batchRiseClassMemberIds) {
         OperationLog operationLog = OperationLog.create()
                 .memo("Ids:" + batchRiseClassMemberIds.toString() + "groupId:" + groupId)
                 .openid("").module("小课训练营")
@@ -271,7 +273,7 @@ public class MonthlyCampController {
                 return WebUtils.error("用户新增失败，请及时联系管理员");
             }
         } else {
-            return WebUtils.error("当前用户已经是小课训练营用户");
+            return WebUtils.error("当前用户已经是训练营用户");
         }
     }
 
@@ -297,6 +299,16 @@ public class MonthlyCampController {
         ThreadPool.execute(() -> {
             monthlyCampService.switchCampDataProcess(sourceYear, sourceMonth, targetYear, targetMonth);
         });
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/add/certificate", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> addCampRiseCertificate(@RequestBody CampRiseCertificateDao campRiseCertificateDao) {
+        Integer type = campRiseCertificateDao.getType();
+        List<String> memberIds = campRiseCertificateDao.getMemberIds();
+        logger.info("开始添加获得证书人员");
+        monthlyCampService.insertRiseCertificate(type, memberIds);
+        logger.info("证书人员添加结束");
         return WebUtils.success();
     }
 

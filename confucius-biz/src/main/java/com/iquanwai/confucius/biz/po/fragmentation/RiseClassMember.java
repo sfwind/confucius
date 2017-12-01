@@ -25,7 +25,7 @@ public class RiseClassMember {
      */
     public static final int BUSINESS_MEMBERSHIP = 1;
     /**
-     * 小课训练营
+     * 训练营
      */
     public static final int MONTHLY_CAMP = 2;
 
