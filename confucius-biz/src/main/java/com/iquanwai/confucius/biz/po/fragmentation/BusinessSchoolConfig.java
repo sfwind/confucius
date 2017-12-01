@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class BusinessCollegeConfig {
+public class BusinessSchoolConfig {
 
     private Integer id;
     private Boolean purchaseSwitch; // 商学院购买开关

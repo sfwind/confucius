@@ -135,8 +135,8 @@ public class SignupServiceImpl implements SignupService {
         String right = "正常";
         if (memberTypeId == RiseMember.ELITE) {
             // 购买会员
-            BusinessCollegeConfig businessCollegeConfig = cacheService.loadBusinessCollegeConfig();
-            if (!businessCollegeConfig.getPurchaseSwitch()) {
+            BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig();
+            if (!businessSchoolConfig.getPurchaseSwitch()) {
                 right = "商学院报名临时关闭\n记得及时关注开放时间哦";
             } else if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP
                     && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
@@ -361,11 +361,11 @@ public class SignupServiceImpl implements SignupService {
      * 新增商学院用户 RiseClassMember 记录
      */
     private void insertBusinessCollegeRiseClassMember(Integer profileId) {
-        BusinessCollegeConfig businessCollegeConfig = cacheService.loadBusinessCollegeConfig();
+        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig();
 
         // 查看当月是否有训练营的其他记录，如果有则删除
-        Integer sellingYear = businessCollegeConfig.getSellingYear();
-        Integer sellingMonth = businessCollegeConfig.getSellingMonth();
+        Integer sellingYear = businessSchoolConfig.getSellingYear();
+        Integer sellingMonth = businessSchoolConfig.getSellingMonth();
         RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, sellingYear, sellingMonth);
         if (riseClassMember != null) {
             riseClassMemberDao.del(riseClassMember.getId());
@@ -378,8 +378,8 @@ public class SignupServiceImpl implements SignupService {
         classMember.setClassName(generateClassName(memberId));
         classMember.setMemberId(memberId);
         classMember.setProfileId(profileId);
-        classMember.setYear(businessCollegeConfig.getSellingYear());
-        classMember.setMonth(businessCollegeConfig.getSellingMonth());
+        classMember.setYear(businessSchoolConfig.getSellingYear());
+        classMember.setMonth(businessSchoolConfig.getSellingMonth());
         classMember.setActive(0);
         riseClassMemberDao.insert(classMember);
     }
@@ -498,7 +498,7 @@ public class SignupServiceImpl implements SignupService {
     public void riseMemberEntry(String orderId) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
 
-        BusinessCollegeConfig businessCollegeConfig = cacheService.loadBusinessCollegeConfig();
+        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig();
 
         try {
             RiseMember exist = riseMemberDao.loadByOrderId(orderId);
@@ -538,8 +538,8 @@ public class SignupServiceImpl implements SignupService {
                 riseMember.setOpenDate(existRiseMember.getOpenDate());
             } else {
                 // 非续费，查询本次开营时间
-                riseMember.setOpenDate(businessCollegeConfig.getOpenDate());
-                riseMember.setExpireDate(DateUtils.afterMonths(businessCollegeConfig.getOpenDate(), 12));
+                riseMember.setOpenDate(businessSchoolConfig.getOpenDate());
+                riseMember.setExpireDate(DateUtils.afterMonths(businessSchoolConfig.getOpenDate(), 12));
             }
             riseMember.setExpired(false);
             riseMemberDao.insert(riseMember);
@@ -562,7 +562,7 @@ public class SignupServiceImpl implements SignupService {
             });
             Profile profile = accountService.getProfile(openId, false);
             // 发送模板消息
-            sendPurchaseMessage(profile, memberType.getId(), orderId, businessCollegeConfig.getSellingYear(), businessCollegeConfig.getSellingMonth());
+            sendPurchaseMessage(profile, memberType.getId(), orderId, businessSchoolConfig.getSellingYear(), businessSchoolConfig.getSellingMonth());
         } else {
             logger.error("该会员ID异常{}", memberType);
             messageService.sendAlarm("报名模块出错", "会员id异常", "高", "订单id:" + orderId, "会员类型异常");
@@ -788,7 +788,7 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public RiseMember getCurrentRiseMemberStatus(Integer profileId) {
-        BusinessCollegeConfig businessCollegeConfig = cacheService.loadBusinessCollegeConfig();
+        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig();
 
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
@@ -798,8 +798,8 @@ public class SignupServiceImpl implements SignupService {
         }
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
 
-        Integer year = businessCollegeConfig.getSellingYear();
-        Integer month = businessCollegeConfig.getSellingMonth();
+        Integer year = businessSchoolConfig.getSellingYear();
+        Integer month = businessSchoolConfig.getSellingMonth();
 
         RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, year, month);
         if (riseClassMember != null) {

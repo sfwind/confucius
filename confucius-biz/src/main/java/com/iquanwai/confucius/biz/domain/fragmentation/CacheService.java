@@ -1,12 +1,12 @@
 package com.iquanwai.confucius.biz.domain.fragmentation;
 
-import com.iquanwai.confucius.biz.po.fragmentation.BusinessCollegeConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 
 public interface CacheService {
     void reload();
 
-    BusinessCollegeConfig loadBusinessCollegeConfig();
+    BusinessSchoolConfig loadBusinessCollegeConfig();
 
     MonthlyCampConfig loadMonthlyCampConfig();
 
