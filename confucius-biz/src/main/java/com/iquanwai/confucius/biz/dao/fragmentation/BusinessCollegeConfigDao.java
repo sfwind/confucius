@@ -21,7 +21,7 @@ public class BusinessCollegeConfigDao extends PracticeDBUtil {
         String sql = "SELECT * FROM BusinessCollegeConfig WHERE Active = 1";
         ResultSetHandler<BusinessCollegeConfig> h = new BeanHandler<>(BusinessCollegeConfig.class);
         try {
-            runner.query(sql, h);
+            return runner.query(sql, h);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
