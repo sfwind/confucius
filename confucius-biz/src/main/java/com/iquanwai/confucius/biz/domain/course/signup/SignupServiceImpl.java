@@ -470,7 +470,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig) {
+    public void paySuccess(String orderId, MonthlyCampConfig monthlyCampConfig) {
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
 
         try {
@@ -797,6 +797,11 @@ public class SignupServiceImpl implements SignupService {
 
         // 更新订单状态
         businessSchoolApplicationOrderDao.paid(orderId);
+    }
+
+    @Override
+    public BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId) {
+        return businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(orderId);
     }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {

@@ -102,6 +102,16 @@ public class SignupController {
                     entry = campOrder.getEntry();
                 }
                 break;
+            case QuanwaiOrder.BS_APPLICATION:
+                // 训练营购买
+                BusinessSchoolApplicationOrder bsOrder = signupService.getBusinessSchoolOrder(orderId);
+                if (bsOrder == null) {
+                    logger.error("{} 订单不存在", orderId);
+                    return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
+                } else {
+                    entry = bsOrder.getPaid();
+                }
+                break;
             default:
                 logger.error("{} 订单类型异常", orderId);
                 return WebUtils.error(ErrorMessageUtils.getErrmsg("signup.fail"));
@@ -192,7 +202,8 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/mark/pay/{function}/{action}")
-    public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser, @PathVariable(value = "function") String function, @PathVariable(value = "action") String action, @RequestParam(required = false) String param) {
+    public ResponseEntity<Map<String, Object>> markPayErr(LoginUser loginUser, @PathVariable(value = "function") String function,
+                                                          @PathVariable(value = "action") String action, @RequestParam(required = false) String param) {
         String memo = "";
         if (param != null) {
             if (param.length() > 1024) {
@@ -372,17 +383,7 @@ public class SignupController {
             remoteIp = ConfigUtils.getExternalIP();
         }
 
-        Pair<Integer, String> check;
-        // 检查是否能够支付
-        switch (paymentDto.getGoodsType()) {
-            case QuanwaiOrder.FRAG_MEMBER:
-            case QuanwaiOrder.FRAG_CAMP:
-            case QuanwaiOrder.BS_APPLICATION:
-                check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
-                break;
-            default:
-                check = new MutablePair<>(-1, "校验失败");
-        }
+        Pair<Integer, String> check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId(), monthlyCampConfig);
 
         if (check.getLeft() != 1) {
             return WebUtils.error(check.getRight());
@@ -411,24 +412,18 @@ public class SignupController {
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> calculateCoupons(LoginUser loginUser, @RequestBody PaymentDto paymentDto) {
         Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(paymentDto, "支付信息不能为空");
+        if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
+            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
+            return WebUtils.error("商品类型异常");
+        }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
                 .action("计算优惠券减免");
         operationLogService.log(operationLog);
-        Double price;
-        switch (paymentDto.getGoodsType()) {
-            case QuanwaiOrder.FRAG_MEMBER:
-                price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
-                return WebUtils.result(price);
-            case QuanwaiOrder.FRAG_CAMP:
-                List<Integer> campCoupons = paymentDto.getCouponsIdGroup();
-                price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), campCoupons);
-                return WebUtils.result(price);
-            default:
-                logger.error("异常，用户:{}商品类型有问题:{}", loginUser.getId(), paymentDto);
-                return WebUtils.error("商品类型异常");
-        }
+        Double price = signupService.calculateMemberCoupon(loginUser.getId(), paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
+        return WebUtils.result(price);
     }
 
     @RequestMapping(value = "/current/camp/month", method = RequestMethod.GET)

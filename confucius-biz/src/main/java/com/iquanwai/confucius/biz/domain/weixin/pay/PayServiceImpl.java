@@ -56,6 +56,7 @@ public class PayServiceImpl implements PayService {
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
     private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
     private static final String RISE_CAMP_PAY_CALLBACK_PATH = "/wx/pay/result/risecamp/callback";
+    private static final String BS_APPLICATION_PAY_CALLBACK_PATH = "/wx/pay/result/application/callback";
 
 
     @PostConstruct
@@ -164,10 +165,13 @@ public class PayServiceImpl implements PayService {
 
         if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
-            signupService.riseMemberEntry(quanwaiOrder.getOrderId(), monthlyCampConfig);
+            signupService.paySuccess(quanwaiOrder.getOrderId(), monthlyCampConfig);
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             // 购买训练营
             signupService.payMonthlyCampSuccess(orderId, monthlyCampConfig);
+        } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
+            // 购买训练营
+            signupService.payApplicationSuccess(orderId);
         }
         refreshStatus(quanwaiOrder, orderId);
     }
@@ -179,7 +183,7 @@ public class PayServiceImpl implements PayService {
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
-        signupService.riseMemberEntry(quanwaiOrder.getOrderId(), monthlyCampConfig);
+        signupService.paySuccess(quanwaiOrder.getOrderId(), monthlyCampConfig);
         refreshStatus(quanwaiOrder, orderId);
     }
 
@@ -279,6 +283,8 @@ public class PayServiceImpl implements PayService {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_CAMP_PAY_CALLBACK_PATH;
+        } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())){
+            notify_url = ConfigUtils.adapterDomainName() + BS_APPLICATION_PAY_CALLBACK_PATH;
         }
 
         Assert.notNull(notify_url, "回调地址不能为空");

@@ -61,7 +61,10 @@ public interface SignupService {
      * */
     String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType);
 
-    void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
+    /**
+     * 购买成功处理
+     * */
+    void paySuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 获得圈外订单
@@ -147,4 +150,9 @@ public interface SignupService {
      * 申请商学院付费后
      */
     void payApplicationSuccess(String orderId);
+
+    /**
+     * 获取训练营订单
+     * */
+    BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
 }
