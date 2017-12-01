@@ -47,8 +47,6 @@ public interface SignupService {
 
     /**
      * 后台解锁训练营
-     * @param profileId
-     * @param monthlyCampConfig
      */
     void unlockMonthlyCamp(Integer profileId, MonthlyCampConfig monthlyCampConfig);
 
@@ -116,7 +114,7 @@ public interface SignupService {
     /**
      * 课程售卖页面，跳转课程介绍页面 problemId
      */
-    Integer loadHrefProblemId(Integer month);
+    Integer loadHrefProblemId(Integer profileId, Integer month);
 
     /**
      * 获取商学院数据

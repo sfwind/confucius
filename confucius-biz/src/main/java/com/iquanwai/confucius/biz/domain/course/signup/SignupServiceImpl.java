@@ -67,8 +67,6 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private ClassMemberDao classMemberDao;
     @Autowired
-    private MonthlyCampScheduleDao monthlyCampScheduleDao;
-    @Autowired
     private CostRepo costRepo;
     @Autowired
     private RiseMemberTypeRepo riseMemberTypeRepo;
@@ -303,18 +301,20 @@ public class SignupServiceImpl implements SignupService {
         insertCampCoupon(profile);
 
         // 强开课程
-        List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(monthlyCampConfig.getSellingMonth());
-
+        Integer monthlyCampSellingMonth = monthlyCampConfig.getSellingMonth();
         Integer category = accountService.loadUserScheduleCategory(profileId);
         List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadMajorCourseScheduleDefaultByCategory(category);
+        List<Integer> problemIds = courseScheduleDefaults.stream()
+                .filter(scheduleDefault -> monthlyCampSellingMonth.equals(scheduleDefault.getMonth()))
+                .map(CourseScheduleDefault::getProblemId)
+                .collect(Collectors.toList());
 
-        待办 TODO
-        schedules.forEach(schedule -> {
+        problemIds.forEach(problemId -> {
             JSONObject json = new JSONObject();
             json.put("profileId", profileId);
             json.put("startDate", monthlyCampConfig.getOpenDate());
             json.put("closeDate", monthlyCampConfig.getCloseDate());
-            json.put("problemId", schedule.getProblemId());
+            json.put("problemId", problemId);
             try {
                 openProblemPublisher.publish(json.toJSONString());
             } catch (ConnectException e) {
@@ -721,10 +721,14 @@ public class SignupServiceImpl implements SignupService {
      * 课程售卖页面，跳转课程介绍页面 problemId
      */
     @Override
-    public Integer loadHrefProblemId(Integer month) {
-        List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(month);
-        MonthlyCampSchedule schedule = schedules.stream().findFirst().orElse(null);
-        return schedule.getProblemId();
+    public Integer loadHrefProblemId(Integer profileId, Integer month) {
+        Integer category = accountService.loadUserScheduleCategory(profileId);
+        List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadMajorCourseScheduleDefaultByCategory(category);
+
+        return courseScheduleDefaults.stream()
+                .filter(scheduleDefault -> month.equals(scheduleDefault.getMonth()))
+                .map(CourseScheduleDefault::getProblemId)
+                .findAny().orElse(null);
     }
 
     @Override

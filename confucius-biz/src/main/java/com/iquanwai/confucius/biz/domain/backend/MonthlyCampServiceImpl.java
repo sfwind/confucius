@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.backend;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampScheduleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
@@ -39,15 +38,11 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
-    private MonthlyCampScheduleDao monthlyCampScheduleDao;
-    @Autowired
     private RiseCertificateDao riseCertificateDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    private static final String FORCE_OPEN = "monthly_camp_force_open_topic";
 
     @Override
     public List<RiseClassMember> loadRiseClassMemberByClassName(String className) {
