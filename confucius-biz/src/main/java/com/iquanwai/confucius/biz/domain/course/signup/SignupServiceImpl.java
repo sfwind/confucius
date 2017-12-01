@@ -481,7 +481,7 @@ public class SignupServiceImpl implements SignupService {
             if (RiseClassMember.BUSINESS_MEMBERSHIP == identityType) {
                 targetMemberId.append(String.format("%02d", (sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1) * 2 - 1));
             } else if (RiseClassMember.MONTHLY_CAMP == identityType) {
-                targetMemberId.append(String.format("%02d", (sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1) * 2 - 1));
+                targetMemberId.append(String.format("%02d", (sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1) * 2));
             }
             targetMemberId.append(identityType);
             targetMemberId.append(String.format("%03d", sequenceInt % 200 == 0 ? 1 : sequenceInt % 200));
