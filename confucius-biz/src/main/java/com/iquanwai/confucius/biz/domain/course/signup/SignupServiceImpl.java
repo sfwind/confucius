@@ -480,7 +480,7 @@ public class SignupServiceImpl implements SignupService {
             targetMemberId.append(classPrefix);
             targetMemberId.append(String.format("%02d", sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1));
             targetMemberId.append(identityType);
-            targetMemberId.append(String.format("%02d", sequenceInt % 200 == 0 ? 1 : sequenceInt % 200));
+            targetMemberId.append(String.format("%03d", sequenceInt % 200 == 0 ? 1 : sequenceInt % 200));
         });
 
         return targetMemberId.toString();
