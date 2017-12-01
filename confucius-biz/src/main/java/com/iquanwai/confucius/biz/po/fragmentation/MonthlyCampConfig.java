@@ -29,10 +29,6 @@ public class MonthlyCampConfig {
      */
     private Integer sellingMonth;
     /**
-     * 训练营用户所在前缀
-     */
-    private String campClassPrefix;
-    /**
      * 该条数据记录是否生效
      */
     private Integer active;

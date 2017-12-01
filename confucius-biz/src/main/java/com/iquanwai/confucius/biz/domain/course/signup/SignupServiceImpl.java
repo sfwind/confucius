@@ -336,7 +336,10 @@ public class SignupServiceImpl implements SignupService {
     private void insertMonthlyCampRiseClassMember(Integer profileId) {
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
-        String memberId = generateMemberId(monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
+        int sellingYear = monthlyCampConfig.getSellingYear();
+        int sellingMonth = monthlyCampConfig.getSellingMonth();
+
+        String memberId = generateMemberId(sellingYear, sellingMonth, RiseClassMember.MONTHLY_CAMP);
         RiseClassMember riseClassMember = new RiseClassMember();
         riseClassMember.setClassName(generateClassName(memberId));
         riseClassMember.setMemberId(memberId);
@@ -354,15 +357,15 @@ public class SignupServiceImpl implements SignupService {
         BusinessCollegeConfig businessCollegeConfig = cacheService.loadBusinessCollegeConfig();
 
         // 查看当月是否有训练营的其他记录，如果有则删除
-        Integer year = businessCollegeConfig.getSellingYear();
-        Integer month = businessCollegeConfig.getSellingMonth();
-        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, year, month);
+        Integer sellingYear = businessCollegeConfig.getSellingYear();
+        Integer sellingMonth = businessCollegeConfig.getSellingMonth();
+        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, sellingYear, sellingMonth);
         if (riseClassMember != null) {
             riseClassMemberDao.del(riseClassMember.getId());
         }
 
         // RiseClassMember 新增记录
-        String memberId = generateMemberId(businessCollegeConfig.getRiseClassPrefix(), RiseClassMember.BUSINESS_MEMBERSHIP);
+        String memberId = generateMemberId(sellingYear, sellingMonth, RiseClassMember.BUSINESS_MEMBERSHIP);
 
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassName(generateClassName(memberId));
@@ -450,8 +453,10 @@ public class SignupServiceImpl implements SignupService {
      * 新学号格式：四位班级号（1701）+ 两位随着人数自增的值 + 一位身份信息（会员、课程、公益课、试听课） + 三位递增唯一序列（1701011001）
      */
     @Override
-    public String generateMemberId(String classPrefix, Integer identityType) {
+    public String generateMemberId(Integer year, Integer month, Integer identityType) {
         StringBuilder targetMemberId = new StringBuilder();
+
+        String classPrefix = String.format("%02d", year % 2000) + String.format("%02d", month);
 
         String prefix = classPrefix + identityType;
         String key = "customer:memberId:" + prefix;

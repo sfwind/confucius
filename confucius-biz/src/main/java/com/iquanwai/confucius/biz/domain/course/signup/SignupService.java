@@ -52,7 +52,7 @@ public interface SignupService {
 
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    String generateMemberId(String classPrefix, Integer identityType);
+    String generateMemberId(Integer year, Integer month, Integer identityType);
 
     void riseMemberEntry(String orderId);
 
