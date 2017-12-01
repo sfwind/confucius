@@ -3,15 +3,14 @@ package com.iquanwai.confucius.biz.domain.backend;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
@@ -34,13 +33,15 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Autowired
     private SignupService signupService;
     @Autowired
-    private CacheService cacheService;
-    @Autowired
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private RiseCertificateDao riseCertificateDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private ProblemDao problemDao;
+    @Autowired
+    private CourseScheduleDefaultDao courseScheduleDefaultDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -154,7 +155,8 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
                 String groupNo = riseClassMember.getGroupId();
 
                 Integer category = accountService.loadUserScheduleCategory(profileId);
-                List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadByCategory(category);
+                List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao
+                        .loadMajorCourseScheduleDefaultByCategory(category);
                 CourseScheduleDefault courseScheduleDefault = courseScheduleDefaults.stream()
                         .filter(scheduleDefault -> scheduleDefault.getType() == CourseScheduleDefault.Type.MAJOR)
                         .filter(scheduleDefault -> scheduleDefault.getMonth().equals(month)).findAny().orElse(null);
