@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.backend;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,10 +22,6 @@ public interface MonthlyCampService {
     int batchUpdateRiseClassMemberByIds(List<Integer> riseMemberIds, String groupId);
 
     List<RiseClassMember> batchQueryRiseClassMemberByProfileIds(List<Integer> profileIds);
-
-    boolean validForceOpenCourse(Integer month, Integer problemId);
-
-    void batchForceOpenCourse(Integer problemId, Date startDate, Date closeDate);
 
     /**
      * 训练营切换人员数据处理<br/>

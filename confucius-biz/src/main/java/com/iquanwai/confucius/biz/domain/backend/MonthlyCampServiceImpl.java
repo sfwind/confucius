@@ -1,27 +1,24 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.net.ConnectException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,28 +38,11 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
-    private MonthlyCampScheduleDao monthlyCampScheduleDao;
-    @Autowired
     private RiseCertificateDao riseCertificateDao;
     @Autowired
-    private CourseScheduleDefaultDao courseScheduleDefaultDao;
-    @Autowired
     private RiseMemberDao riseMemberDao;
-    @Autowired
-    private ProblemDao problemDao;
-    @Autowired
-    private RabbitMQFactory rabbitMQFactory;
-
-    private RabbitMQPublisher forceOpenPublisher;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    private static final String FORCE_OPEN = "monthly_camp_force_open_topic";
-
-    @PostConstruct
-    public void init() {
-        forceOpenPublisher = rabbitMQFactory.initFanoutPublisher(FORCE_OPEN);
-    }
 
     @Override
     public List<RiseClassMember> loadRiseClassMemberByClassName(String className) {
@@ -113,33 +93,6 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     }
 
     @Override
-    public boolean validForceOpenCourse(Integer month, Integer problemId) {
-        List<MonthlyCampSchedule> schedules = monthlyCampScheduleDao.loadByMonth(month);
-        List<Integer> problemIds = schedules.stream().map(MonthlyCampSchedule::getProblemId).collect(Collectors.toList());
-        return problemIds.contains(problemId);
-    }
-
-    @Override
-    public void batchForceOpenCourse(Integer problemId, Date startDate, Date closeDate) {
-        List<RiseClassMember> riseClassMembers = riseClassMemberDao.loadActiveRiseClassMembers();
-        List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
-
-        JSONObject json = new JSONObject();
-        json.put("problemId", problemId);
-        json.put("startDate", startDate);
-        json.put("closeDate", closeDate);
-
-        for (Integer profileId : profileIds) {
-            json.put("profileId", profileId);
-            try {
-                forceOpenPublisher.publish(json.toString());
-            } catch (ConnectException e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-        }
-    }
-
-    @Override
     public void switchCampDataProcess(Integer sourceYear, Integer sourceMonth, Integer targetYear, Integer targetMonth) {
         // 获取切换之前月份的所有人员
         List<RiseClassMember> sourceRiseClassMembers = riseClassMemberDao.loadAllByYearMonth(sourceYear, sourceMonth);
@@ -173,7 +126,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Override
     public void unlockMonthlyCampAuthority(String riseId) {
         Profile profile = accountService.getProfileByRiseId(riseId);
-        signupService.unlockMonthlyCamp(profile.getId(), cacheService.loadMonthlyCampConfig());
+        signupService.unlockMonthlyCamp(profile.getId());
     }
 
     @Override

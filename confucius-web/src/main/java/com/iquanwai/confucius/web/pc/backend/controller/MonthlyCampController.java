@@ -240,28 +240,31 @@ public class MonthlyCampController {
                 .function("信息新增").action("小课训练营用户新增");
         operationLogService.log(operationLog);
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+        int sellingYear = monthlyCampConfig.getSellingYear();
+        int sellingMonth = monthlyCampConfig.getSellingMonth();
+
 
         Integer riseClassMemberId = monthlyCampDto.getRiseClassMemberId();
         RiseClassMember riseClassMember = monthlyCampService.loadRiseClassMemberById(riseClassMemberId);
         RiseMember riseMember = signupService.currentRiseMember(profile.getId());
         if (riseClassMember == null && riseMember != null) {
             riseClassMember = new RiseClassMember();
-            riseClassMember.setClassId(monthlyCampDto.getClassName());
-            riseClassMember.setClassName(monthlyCampDto.getClassName());
 
             String memberId;
             if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                memberId = signupService.generateMemberId(monthlyCampConfig, monthlyCampConfig.getRiseClassPrefix(), RiseClassMember.BUSINESS_MEMBERSHIP);
+                memberId = signupService.generateMemberId(sellingYear, sellingMonth, RiseClassMember.BUSINESS_MEMBERSHIP);
             } else {
-                memberId = signupService.generateMemberId(monthlyCampConfig, monthlyCampConfig.getCampClassPrefix(), RiseClassMember.MONTHLY_CAMP);
+                memberId = signupService.generateMemberId(sellingYear, sellingMonth, RiseClassMember.MONTHLY_CAMP);
             }
+
+            riseClassMember.setClassName(monthlyCampDto.getClassName());
 
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
 
-            riseClassMember.setYear(monthlyCampConfig.getSellingYear());
-            riseClassMember.setMonth(monthlyCampConfig.getSellingMonth());
+            riseClassMember.setYear(sellingYear);
+            riseClassMember.setMonth(sellingMonth);
 
             riseClassMember.setActive(monthlyCampDto.getActive());
             int result = monthlyCampService.initRiseClassMember(riseClassMember);
