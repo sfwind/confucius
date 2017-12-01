@@ -34,6 +34,8 @@ public class ProblemServiceImpl implements ProblemService {
     //缓存问题
     private List<Problem> problems = Lists.newArrayList();
 
+    private int review_knowledgeId = 59;
+
     @Override
     public List<Problem> loadProblems() {
         if (CollectionUtils.isEmpty(problems)) {
@@ -75,6 +77,8 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public int saveProblem(Problem problem) {
+        //清除缓存
+        problems.clear();
         if (problem.getId() != 0) {
             problemDao.updateProblem(problem);
             return problem.getId();
@@ -83,5 +87,23 @@ public class ProblemServiceImpl implements ProblemService {
         }
     }
 
+    @Override
+    public int insertProblemScehdule(Integer problemId) {
+        ProblemSchedule problemSchedule = new ProblemSchedule();
+        problemSchedule.setProblemId(problemId);
+        problemSchedule.setKnowledgeId(review_knowledgeId);
+        problemSchedule.setChapter(1);
+        problemSchedule.setSection(1);
+        problemSchedule.setSeries(1);
 
+       return problemScheduleDao.insert(problemSchedule);
+    }
+
+    @Override
+    public boolean isHasReviewProblemSchedule(Integer problemId) {
+        if(problemScheduleDao.getMaxProblemSchedule(problemId) == null){
+            return false;
+        }
+        return true;
+    }
 }

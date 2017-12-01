@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.domain.backend.KnowledgeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
+import com.iquanwai.confucius.web.enums.KnowledgeEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.SimpleKnowledge;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -69,8 +70,14 @@ public class KnowledgeImportController {
         int result = knowledgeService.updateKnowledge(knowledge, problemId);
         if (result > 0) {
             return WebUtils.result(result);
-        } else {
-            return WebUtils.error("设置的章节与现有章节重复");
+        } else if(result == KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getCode()){
+            return WebUtils.error(KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getMsg());
+        }
+        else if(result == KnowledgeEnums.KNOWLEDGE_REVIEW_ERROR.getCode()){
+            return WebUtils.error(KnowledgeEnums.KNOWLEDGE_REVIEW_ERROR.getMsg());
+        }
+        else{
+            return WebUtils.error(KnowledgeEnums.UNKNOWN_ERROR.getMsg());
         }
     }
 

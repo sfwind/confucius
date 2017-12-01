@@ -11,6 +11,7 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,8 @@ public class ProblemImportController {
     private OperationLogService operationLogService;
     @Autowired
     private ProblemService problemService;
+
+
 
     @RequestMapping("/simple")
     public ResponseEntity<Map<String, Object>> getSimpleProblem(PCLoginUser loginUser) {
@@ -61,11 +64,23 @@ public class ProblemImportController {
         return WebUtils.result(problem);
     }
 
+    /**
+     * 添加和更新小课功能
+     * @param loginUser
+     * @param problem
+     * @return
+     */
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> saveProblem(PCLoginUser loginUser,
                                                            @RequestBody Problem problem) {
-
+        //save包含插入和更新操作
         int problemId = problemService.saveProblem(problem);
+
+
+        //判断是否已经有复习Schedule,没有则需要添加
+        if(!problemService.isHasReviewProblemSchedule(problemId)){
+            problemService.insertProblemScehdule(problemId);
+        }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("选择小课")
@@ -87,5 +102,32 @@ public class ProblemImportController {
         operationLogService.log(operationLog);
 
         return WebUtils.result(catalogDto);
+    }
+
+    /**
+     * 添加小课的时候在ProblemSchedule中添加一条复习记录
+     *
+     * @param loginUser
+     * @param problem
+     * @return
+     */
+    @RequestMapping(value = "/schedule/save", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> saveProblemAndSchedule(PCLoginUser loginUser, @RequestBody Problem problem) {
+        Assert.notNull(loginUser, "登录用户不能为空");
+
+
+
+        int problemId = problemService.saveProblem(problem);
+
+        int scheduleId = problemService.insertProblemScehdule(problemId);
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("内容运营").function("选择小课").action("添加小课");
+        operationLogService.log(operationLog);
+
+        if (scheduleId == -1) {
+            return WebUtils.error("添加失败");
+        } else {
+            return WebUtils.success();
+        }
     }
 }

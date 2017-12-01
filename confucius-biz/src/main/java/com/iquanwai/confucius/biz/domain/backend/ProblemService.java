@@ -41,4 +41,20 @@ public interface ProblemService {
      * 导入小课数据
      * */
     int saveProblem(Problem problem);
+
+
+    /**
+     * 插入ProblemSchedule表
+     * @param problemId
+     * @return
+     */
+    int insertProblemScehdule(Integer problemId);
+
+    /**
+     * 判断是否有复习ProblemSchedule
+     * @param problemId
+     * @return
+     */
+    boolean isHasReviewProblemSchedule(Integer problemId);
+
 }
