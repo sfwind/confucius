@@ -15,7 +15,6 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.AuditionClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
@@ -35,6 +34,7 @@ import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,16 +204,8 @@ public class SignupController {
         } else {
             dto.setButtonStr("立即入学");
         }
-        AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
 
-        if (classMember != null) {
-            // 有试听课
-            dto.setAuditionStr("试听课");
-        } else {
-            // 没有试听课
-            dto.setAuditionStr("预约试听");
-        }
-
+        dto.setAuditionStr("宣讲课");
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
         List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
@@ -608,15 +600,8 @@ public class SignupController {
         } else {
             dto.setButtonStr("立即入学");
         }
-        AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
 
-        if (classMember != null) {
-            // 有试听课
-            dto.setAuditionStr("试听课");
-        } else {
-            // 没有试听课
-            dto.setAuditionStr("预约试听");
-        }
+        dto.setAuditionStr("宣讲课");
 
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
@@ -662,18 +647,14 @@ public class SignupController {
         }
     }
 
-    @RequestMapping("/rise/audition/button")
-    public ResponseEntity<Map<String, Object>> loadAuditions(LoginUser loginUser) {
+    @RequestMapping("/rise/preacher/number")
+    public ResponseEntity<Map<String, Object>> getRisePreacherNumber(LoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("用户信息")
+                .module("课程信息")
                 .function("RISE")
-                .action("查询试听课信息");
+                .action("宣讲课数字");
         operationLogService.log(operationLog);
-        AuditionClassMember classMember = planService.getAuditionClassMember(loginUser.getId());
-        String auditionStr = "";
-        if (classMember != null) {
-            auditionStr = "试听课";
-        }
-        return WebUtils.result(auditionStr);
+        Date date = new DateTime().withDayOfMonth(1).toDate();
+        return WebUtils.result(DateUtils.parseDateToFormat7(date));
     }
 }
