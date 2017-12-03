@@ -17,6 +17,7 @@ public class DateUtils {
     private static DateTimeFormatter format4 = DateTimeFormat.forPattern("yyyy.MM.dd");
     private static DateTimeFormatter format5 = DateTimeFormat.forPattern("yyyy年MM月dd日");
     private static DateTimeFormatter format6 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+    private static DateTimeFormatter format7 = DateTimeFormat.forPattern("yyyyMMdd");
 
     private static DateTimeFormatter timeFormat = DateTimeFormat.forPattern("HH:mm");
 
@@ -25,12 +26,16 @@ public class DateUtils {
         return timeFormat.print(new DateTime(date));
     }
 
+
     public static String parseDateToFormat5(Date date) {
         return format5.print(new DateTime(date));
     }
 
     public static String parseDateToFormat6(Date date) {
         return format6.print(new DateTime(date));
+    }
+    public static String parseDateToFormat7(Date date) {
+        return format7.print(new DateTime(date));
     }
 
     public static String parseDateToString(Date date) {
