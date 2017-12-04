@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.KnowledgeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemScheduleDao;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +59,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             List<ProblemSchedule> reviewSchedules = problemScheduleDao.getReviewProblemSchedule(problemId);
 
             //当插入知识点的时候需要判断是否需要插入复习Schedule
-            if (reviewSchedules == null || reviewSchedules.size() == 0) {
+            if (CollectionUtils.isEmpty(reviewSchedules)) {
                 insertProblemScehdule(problemId);
                 reviewSchedules = problemScheduleDao.getReviewProblemSchedule(problemId);
             }

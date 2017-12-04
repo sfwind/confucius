@@ -108,7 +108,7 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public boolean isHasReviewProblemSchedule(Integer problemId) {
         List<ProblemSchedule> reviewProblemSchedule = problemScheduleDao.getReviewProblemSchedule(problemId);
-        if (reviewProblemSchedule == null || reviewProblemSchedule.size() == 0) {
+        if (CollectionUtils.isEmpty(reviewProblemSchedule)) {
             return false;
         }
         return true;
