@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
@@ -35,9 +37,7 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by justin on 16/8/10.
@@ -67,6 +67,8 @@ public class AccountServiceImpl implements AccountService {
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    private final int WX_BLACKLIST_DEFAULT_PAGESIZE = 10000;
 
     @PostConstruct
     public void init() {
@@ -399,6 +401,90 @@ public class AccountServiceImpl implements AccountService {
         }
 
         return result;
+    }
+
+    /**
+     * 获取黑名单的列表(所有名单)
+     */
+    @Override
+    public List<String> getBlackList() {
+        String url = LIST_BLACKLIST_URL;
+        int count = 0;
+        List<String> blackList = new ArrayList<>();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("begin_openid", "");
+        String body = restfulHelper.post(url, jsonObject.toJSONString());
+        String data = JSON.parseObject(body).getString("data");
+        //获取data中的openidList
+        if (data != null) {
+            JSONObject dataJSON = JSON.parseObject(data);
+            String openidList = dataJSON.getString("openid");
+            blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+            String nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+            int total = Integer.valueOf(JSON.parseObject(body).getString("total"));
+            //取出所有的openid
+            while ((total - 1) / WX_BLACKLIST_DEFAULT_PAGESIZE > count) {
+                jsonObject = new JSONObject();
+                jsonObject.put("begin_openid", nextOpenid);
+                body = restfulHelper.post(url, jsonObject.toJSONString());
+                data = JSON.parseObject(body).getString("data");
+
+                dataJSON = JSON.parseObject(data);
+                openidList = dataJSON.getString("openid");
+                blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+                nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+                count++;
+            }
+        }
+        return blackList;
+    }
+
+    /**
+     * 批量拉黑用户
+     *
+     * @param openidList:拉黑用户列表
+     */
+    @Override
+    public boolean batchBlackList(List<String> openidList) {
+        String url = BATCH_BALCKLIST_URL;
+
+        String body = queryWXBlackListInterface(url, openidList);
+        return checkIsSuccess(body);
+    }
+
+    /**
+     * 批量取消拉黑用户
+     *
+     * @param openidList:取消拉黑用户列表
+     */
+    @Override
+    public boolean batchUnBlackList(List<String> openidList) {
+        String url = UNBATCH_BACKLIST_URL;
+
+        String body = queryWXBlackListInterface(url, openidList);
+        return checkIsSuccess(body);
+    }
+
+
+    private boolean checkIsSuccess(String body) {
+        JSONObject resultJSON = JSON.parseObject(body);
+        if ((Integer) resultJSON.get("errcode") == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private String queryWXBlackListInterface(String url, List<String> openidList) {
+        //拼装JSON数据
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("openid_list", openidList);
+        String body = restfulHelper.post(url, jsonObject.toJSONString());
+        logger.info(body);
+        return body;
     }
 
     @Override

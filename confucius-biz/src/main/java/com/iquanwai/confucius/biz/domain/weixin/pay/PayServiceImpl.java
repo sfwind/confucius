@@ -9,7 +9,6 @@ import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.util.*;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
@@ -159,34 +158,33 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public void risePaySuccess(String orderId, MonthlyCampConfig monthlyCampConfig) {
+    public void paySuccess(String orderId) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId：" + orderId);
 
         if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
-            signupService.paySuccess(quanwaiOrder.getOrderId(), monthlyCampConfig);
-        } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
-            // 购买训练营
-            signupService.payMonthlyCampSuccess(orderId, monthlyCampConfig);
+            signupService.payRiseSuccess(quanwaiOrder.getOrderId());
         } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
             // 购买训练营
             signupService.payApplicationSuccess(orderId);
+        } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
+            // 购买训练营
+            signupService.payMonthlyCampSuccess(orderId);
         }
         refreshStatus(quanwaiOrder, orderId);
     }
 
     // 购买会员
     @Override
-    public void payMemberSuccess(String orderId, MonthlyCampConfig monthlyCampConfig) {
+    public void payMemberSuccess(String orderId) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         // 商品是rise会员
-        signupService.paySuccess(quanwaiOrder.getOrderId(), monthlyCampConfig);
+        signupService.payRiseSuccess(quanwaiOrder.getOrderId());
         refreshStatus(quanwaiOrder, orderId);
     }
-
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
         // 刷新会员状态
@@ -206,11 +204,9 @@ public class PayServiceImpl implements PayService {
             paySuccessPublisher.publish(quanwaiOrder);
         } catch (ConnectException e) {
             logger.error("发送支付成功mq失败", e);
-            messageService.sendAlarm("报名模块出错", "发送支付成功mq失败",
-                    "高", "订单id:" + orderId, e.getLocalizedMessage());
+            messageService.sendAlarm("报名模块出错", "发送支付成功mq失败", "高", "订单id:" + orderId, e.getLocalizedMessage());
         }
     }
-
 
     @Override
     public Map<String, String> buildH5PayParam(String orderId, String ip, String openId) {
@@ -259,7 +255,6 @@ public class PayServiceImpl implements PayService {
         }
         return "";
     }
-
 
     /**
      * 根据预先生成的 order 订单数据，生成对微信的请求 url，xml 格式
@@ -393,7 +388,7 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public void refund(String orderId, Double fee){
+    public void refund(String orderId, Double fee) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         RefundOrder refundOrder = buildRefundOrder(quanwaiOrder, fee);
         String response = restfulHelper.sslPostXml(REFUND_ORDER_URL, XMLHelper.createXML(refundOrder));
@@ -403,7 +398,7 @@ public class PayServiceImpl implements PayService {
             if (FAIL.equals(reply.getReturn_code()) || FAIL.equals(reply.getResult_code())) {
                 logger.error("response is------\n" + response);
                 messageService.sendAlarm("退款出错", "退款接口调用失败",
-                        "高", "订单id:" + orderId, "msg:"+reply.getReturn_msg()+", error:"+reply.getErr_code_des());
+                        "高", "订单id:" + orderId, "msg:" + reply.getReturn_msg() + ", error:" + reply.getErr_code_des());
             } else {
                 quanwaiOrderDao.refundOrder(orderId, fee, refundOrder.getOut_refund_no());
             }

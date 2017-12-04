@@ -18,6 +18,7 @@ public class ApplicationDto {
     private String nickname; // 昵称
     private String isDuplicate; // 是否重复提交
     private String isAsst;
+    private String isBlack;//是否是黑名单用户
     private Integer memberTypeId;
     private String memberType; // 会员类型
     private String submitTime; //提交答卷时间

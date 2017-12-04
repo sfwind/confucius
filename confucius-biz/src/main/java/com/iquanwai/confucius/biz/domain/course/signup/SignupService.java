@@ -16,17 +16,17 @@ public interface SignupService {
     /**
      * 商品支付资格校验
      */
-    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType, MonthlyCampConfig monthlyCampConfig);
+    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
 
     /**
      * 报名商学院, 不生成预付订单
      */
-    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
+    QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
     /**
      * 报名训练营, 不生成预付订单
      */
-    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, MonthlyCampConfig monthlyCampConfig);
+    QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
      * 商学院申请, 不生成预付订单
@@ -42,14 +42,12 @@ public interface SignupService {
      * 5、发送 mq 通知 platon 强制开启课程
      * 6、发送购买成功信息，开课信息（可以合并）
      */
-    void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
+    void payMonthlyCampSuccess(String orderId);
 
     /**
      * 后台解锁训练营
-     * @param profileId
-     * @param monthlyCampConfig
      */
-    void unlockMonthlyCamp(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    void unlockMonthlyCamp(Integer profileId);
 
     /**
      * 获取训练营订单
@@ -59,12 +57,12 @@ public interface SignupService {
     /**
      * 生成学号
      * */
-    String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType);
+    String generateMemberId(Integer year, Integer month, Integer identityType);
 
     /**
-     * 购买成功处理
+     * 商学院购买成功处理
      * */
-    void paySuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
+    void payRiseSuccess(String orderId);
 
     /**
      * 获得圈外订单
@@ -93,11 +91,11 @@ public interface SignupService {
     /**
      * 查询会员类型的支付信息
      */
-    List<MemberType> getMemberTypesPayInfo(MonthlyCampConfig monthlyCampConfig);
+    List<MemberType> getMemberTypesPayInfo();
     /**
      * 查询会员类型的支付信息
      */
-    List<MemberType> getMemberTypesPayInfo(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    List<MemberType> getMemberTypesPayInfo(Integer profileId);
 
     /**
      * 计算优惠券
@@ -121,7 +119,7 @@ public interface SignupService {
     /**
      * 课程售卖页面，跳转课程介绍页面 problemId
      */
-    Integer loadHrefProblemId(Integer month);
+    Integer loadHrefProblemId(Integer profileId, Integer month);
 
     /**
      * 获取商学院数据
@@ -133,12 +131,12 @@ public interface SignupService {
      * 获取用户当前会员信息
      * @param profileId 用户id
      */
-    RiseMember getCurrentRiseMemberStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentRiseMemberStatus(Integer profileId);
 
     /**
      * 获取当前训练营信息
      */
-    RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentMonthlyCampStatus(Integer profileId);
 
     /**
      * 获取用户所有的用户信息
