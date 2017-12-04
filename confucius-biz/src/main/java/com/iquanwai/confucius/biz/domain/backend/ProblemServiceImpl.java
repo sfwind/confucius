@@ -96,12 +96,19 @@ public class ProblemServiceImpl implements ProblemService {
         problemSchedule.setSection(1);
         problemSchedule.setSeries(1);
 
-       return problemScheduleDao.insert(problemSchedule);
+        return problemScheduleDao.insert(problemSchedule);
     }
 
+    /**
+     * 判断是否有复习章节
+     *
+     * @param problemId
+     * @return
+     */
     @Override
     public boolean isHasReviewProblemSchedule(Integer problemId) {
-        if(problemScheduleDao.getMaxProblemSchedule(problemId) == null){
+        List<ProblemSchedule> reviewProblemSchedule = problemScheduleDao.getReviewProblemSchedule(problemId);
+        if (reviewProblemSchedule == null || reviewProblemSchedule.size() == 0) {
             return false;
         }
         return true;

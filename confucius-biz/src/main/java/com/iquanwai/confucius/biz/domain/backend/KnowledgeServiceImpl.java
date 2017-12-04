@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -54,35 +55,36 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         } else {
             ProblemSchedule problemSchedule = problemScheduleDao.loadProblemSchedule(problemId, knowledge.getChapter(), knowledge.getSection());
 
-            ProblemSchedule reviewSchedule = problemScheduleDao.getMaxProblemSchedule(problemId);
+            List<ProblemSchedule> reviewSchedules = problemScheduleDao.getReviewProblemSchedule(problemId);
 
             //当插入知识点的时候需要判断是否需要插入复习Schedule
-            if(reviewSchedule == null){
+            if (reviewSchedules == null || reviewSchedules.size() == 0) {
                 insertProblemScehdule(problemId);
-                reviewSchedule = problemScheduleDao.getMaxProblemSchedule(problemId);
+                reviewSchedules = problemScheduleDao.getReviewProblemSchedule(problemId);
             }
             //判断是否重复
             if (problemSchedule != null) {
                 //如果正好为复习，则不认为章节重复
-                if(problemSchedule.getChapter().intValue()==reviewSchedule.getChapter().intValue()&& problemSchedule.getSection().intValue()==reviewSchedule.getSection().intValue()){
+                if (problemSchedule.getChapter().intValue() == reviewSchedules.get(0).getChapter().intValue()) {
 
-                }
-                else{
+                } else {
                     return -1;
                 }
             }
 
             int knowledgeId = knowledgeDao.insertKnowledge(knowledge);
             knowledge.setId(knowledgeId);
+            //插入目标知识点对应的Schedule
             insertProblemSchedule(knowledge, problemId);
 
             //当新增知识点章节大于目前最大章节时，进行更新操作
-            if (knowledge.getChapter() >= reviewSchedule.getChapter()) {
-                updateProblemSchedule(reviewSchedule.getId(), knowledge.getChapter() + 1, problemId);
-            }
-            else{
-                updateProblemSchedule(reviewSchedule.getId(),reviewSchedule.getChapter(),problemId);
-            }
+            reviewSchedules.stream().forEach(reviewSchedule -> {
+                if (knowledge.getChapter() >= reviewSchedule.getChapter()) {
+                    updateProblemSchedule(reviewSchedule.getId(), knowledge.getChapter() + 1, reviewSchedule.getSeries(), problemId);
+                } else {
+                    updateProblemSchedule(reviewSchedule.getId(), reviewSchedule.getChapter(), reviewSchedule.getSeries(), problemId);
+                }
+            });
             return knowledgeId;
         }
     }
@@ -92,15 +94,25 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         return knowledgeDao.queryAllKnowledges();
     }
 
+    /**
+     * 插入目标ProblemSchedule
+     *
+     * @param knowledge
+     * @param problemId
+     */
     private void insertProblemSchedule(Knowledge knowledge, Integer problemId) {
         ProblemSchedule schedule = new ProblemSchedule();
         List<ProblemSchedule> problemSchedules = problemScheduleDao.loadProblemSchedule(problemId);
-        int series = problemSchedules.size();
+        List<ProblemSchedule> unReviewdProblemSchedules = problemSchedules.stream().filter(problemSchedule ->
+                (problemSchedule.getKnowledgeId() != 57 && problemSchedule.getKnowledgeId() != 58 && problemSchedule.getKnowledgeId() != 59)
+        ).collect(Collectors.toList());
+
+        int series = unReviewdProblemSchedules.size();
         schedule.setChapter(knowledge.getChapter());
         schedule.setSection(knowledge.getSection());
         schedule.setProblemId(problemId);
         schedule.setKnowledgeId(knowledge.getId());
-        schedule.setSeries(series);
+        schedule.setSeries(series + 1);
         problemScheduleDao.insert(schedule);
     }
 
@@ -110,14 +122,12 @@ public class KnowledgeServiceImpl implements KnowledgeService {
      * @param id
      * @param chapter
      */
-    private void updateProblemSchedule(Integer id, Integer chapter, Integer problemId) {
+    private void updateProblemSchedule(Integer id, Integer chapter, Integer series, Integer problemId) {
         ProblemSchedule schedule = new ProblemSchedule();
-        List<ProblemSchedule> problemSchedules = problemScheduleDao.loadProblemSchedule(problemId);
 
-        int series = problemSchedules.size();
         schedule.setId(id);
         schedule.setChapter(chapter);
-        schedule.setSeries(series);
+        schedule.setSeries(series + 1);
 
         problemScheduleDao.update(schedule);
     }

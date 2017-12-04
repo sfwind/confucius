@@ -13,9 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class ProblemScheduleDao extends PracticeDBUtil {
@@ -79,9 +77,7 @@ public class ProblemScheduleDao extends PracticeDBUtil {
      */
     public void update(ProblemSchedule problemSchedule) {
         QueryRunner runner = new QueryRunner(getDataSource());
-
         String sql = "update ProblemSchedule set chapter = ?,series = ? where id = ?";
-
         try {
             runner.update(sql, problemSchedule.getChapter(), problemSchedule.getSeries(), problemSchedule.getId());
         } catch (SQLException e) {
@@ -92,26 +88,18 @@ public class ProblemScheduleDao extends PracticeDBUtil {
     }
 
     /**
-     * 根据problemId查看最大章节的记录
+     * 获得对应的复习ProblemSchedule
      *
      * @param problemId
      * @return
      */
-    public ProblemSchedule getMaxProblemSchedule(Integer problemId) {
+    public List<ProblemSchedule> getReviewProblemSchedule(Integer problemId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<ProblemSchedule>> h = new BeanListHandler<>(ProblemSchedule.class);
-
-        String sql = "select * from ProblemSchedule where problemId = ? and del = 0";
-
+        String sql = "select * from ProblemSchedule where problemId = ? and del = 0 and knowledgeId in (57,58,59)";
         try {
             List<ProblemSchedule> problemScheduleList = runner.query(sql, h, problemId);
-            //获得最大值
-            if (problemScheduleList != null && problemScheduleList.size() == 1) {
-                return problemScheduleList.get(0);
-            } else if (problemScheduleList.size() > 1) {
-                ProblemSchedule problemSchedule = problemScheduleList.stream().sorted(Comparator.comparing(ProblemSchedule::getSeries).reversed()).collect(Collectors.toList()).get(0);
-                return problemSchedule;
-            }
+            return problemScheduleList;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
