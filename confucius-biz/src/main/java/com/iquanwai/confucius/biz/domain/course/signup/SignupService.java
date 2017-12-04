@@ -150,7 +150,12 @@ public interface SignupService {
     void payApplicationSuccess(String orderId);
 
     /**
-     * 获取训练营订单
+     * 获取商学院申请订单
      * */
     BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
+
+    /**
+     * 获取商学院申请订单
+     * */
+    BusinessSchoolApplicationOrder getBusinessSchoolOrder(Integer profileId);
 }

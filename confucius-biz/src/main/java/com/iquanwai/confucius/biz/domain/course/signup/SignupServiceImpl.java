@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.course.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
@@ -57,8 +56,6 @@ public class SignupServiceImpl implements SignupService {
     private CouponDao couponDao;
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
-    @Autowired
-    private ClassMemberDao classMemberDao;
     @Autowired
     private CostRepo costRepo;
     @Autowired
@@ -849,6 +846,11 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId) {
         return businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(orderId);
+    }
+
+    @Override
+    public BusinessSchoolApplicationOrder getBusinessSchoolOrder(Integer profileId) {
+        return businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(profileId);
     }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {

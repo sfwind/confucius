@@ -6,7 +6,6 @@ import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -15,11 +14,6 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
@@ -66,8 +60,6 @@ public class SignupController {
     private MessageService messageService;
     @Autowired
     private CacheService cacheService;
-    @Autowired
-    private PlanService planService;
     @Autowired
     private BusinessSchoolService businessSchoolService;
 
@@ -458,7 +450,7 @@ public class SignupController {
             }
             case QuanwaiOrder.BS_APPLICATION: {
                 Integer couponId = null;
-                if(CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())){
+                if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
                 return signupService.signupBusinessSchoolApplication(profileId, paymentDto.getGoodsId(), couponId);
@@ -512,6 +504,8 @@ public class SignupController {
         if (m.getId() == RiseMember.ELITE) {
             int dailyFee = (int) (m.getFee() / 365);
             dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
+        } else if (m.getId() == RiseMember.BS_APPLICATION) {
+            dto.setEntry(signupService.getBusinessSchoolOrder(loginUser.getId()) != null);
         }
 
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
