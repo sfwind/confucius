@@ -65,10 +65,8 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             }
             //判断是否重复
             if (problemSchedule != null) {
-                //如果正好为复习，则不认为章节重复
-                if (problemSchedule.getChapter().intValue() == reviewSchedules.get(0).getChapter().intValue()) {
-
-                } else {
+                //如果正好不是复习，则认为章节重复
+                if (problemSchedule.getChapter().intValue() != reviewSchedules.get(0).getChapter().intValue()) {
                     return -1;
                 }
             }

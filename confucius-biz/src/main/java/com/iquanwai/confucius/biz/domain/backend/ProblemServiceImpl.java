@@ -77,8 +77,6 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public int saveProblem(Problem problem) {
-        //清除缓存
-        problems.clear();
         if (problem.getId() != 0) {
             problemDao.updateProblem(problem);
             return problem.getId();
@@ -108,9 +106,6 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public boolean isHasReviewProblemSchedule(Integer problemId) {
         List<ProblemSchedule> reviewProblemSchedule = problemScheduleDao.getReviewProblemSchedule(problemId);
-        if (CollectionUtils.isEmpty(reviewProblemSchedule)) {
-            return false;
-        }
-        return true;
+        return !CollectionUtils.isEmpty(reviewProblemSchedule);
     }
 }

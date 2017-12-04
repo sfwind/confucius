@@ -101,27 +101,4 @@ public class ProblemImportController {
 
         return WebUtils.result(catalogDto);
     }
-
-    /**
-     * 添加小课的时候在ProblemSchedule中添加一条复习记录
-     *
-     * @param loginUser
-     * @param problem
-     * @return
-     */
-    @RequestMapping(value = "/schedule/save", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> saveProblemAndSchedule(PCLoginUser loginUser, @RequestBody Problem problem) {
-        Assert.notNull(loginUser, "登录用户不能为空");
-
-        int problemId = problemService.saveProblem(problem);
-        int scheduleId = problemService.insertProblemScehdule(problemId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("内容运营").function("选择小课").action("添加小课");
-        operationLogService.log(operationLog);
-
-        if (scheduleId == -1) {
-            return WebUtils.error("添加失败");
-        } else {
-            return WebUtils.success();
-        }
-    }
 }
