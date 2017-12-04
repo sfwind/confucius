@@ -157,5 +157,5 @@ public interface SignupService {
     /**
      * 获取商学院申请订单
      * */
-    BusinessSchoolApplicationOrder getBusinessSchoolOrder(Integer profileId);
+    boolean isAppliedBefore(Integer profileId);
 }

@@ -505,7 +505,7 @@ public class SignupController {
             int dailyFee = (int) (m.getFee() / 365);
             dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
         } else if (m.getId() == RiseMember.BS_APPLICATION) {
-            dto.setEntry(signupService.getBusinessSchoolOrder(loginUser.getId()) != null);
+            dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
         }
 
         if (riseMember != null && riseMember.getMemberTypeId() != null) {

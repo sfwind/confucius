@@ -849,8 +849,9 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public BusinessSchoolApplicationOrder getBusinessSchoolOrder(Integer profileId) {
-        return businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(profileId);
+    public boolean isAppliedBefore(Integer profileId) {
+        BusinessSchoolApplicationOrder businessSchoolApplicationOrder = businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(profileId);
+        return businessSchoolApplicationOrder != null;
     }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
