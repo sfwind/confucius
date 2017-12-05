@@ -158,4 +158,9 @@ public interface SignupService {
      * 获取商学院申请订单
      * */
     boolean isAppliedBefore(Integer profileId);
+
+    /**
+     * 根据商品类型和售价智能选择优惠券
+     * */
+    List<Coupon> autoChooseCoupon(String goodsType, Double fee, List<Coupon> coupons);
 }

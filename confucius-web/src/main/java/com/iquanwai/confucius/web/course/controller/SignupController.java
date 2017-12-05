@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
@@ -291,48 +290,16 @@ public class SignupController {
         }
 
         // 获取优惠券
-        List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
-        goodsInfoDto.setCoupons(coupons);
-        // 自动选择优惠券
-        List<Coupon> autoCoupons = this.autoChooseCoupon(goodsInfoDto, coupons);
-        goodsInfoDto.setAutoCoupons(autoCoupons);
-        return WebUtils.result(goodsInfoDto);
-    }
-
-    private List<Coupon> autoChooseCoupon(GoodsInfoDto goodsInfoDto, List<Coupon> coupons) {
-        List<Coupon> list = Lists.newArrayList();
-        if (!CollectionUtils.isEmpty(coupons)) {
-            // 有优惠券
-            switch (goodsInfoDto.getGoodsType()) {
-                case QuanwaiOrder.FRAG_MEMBER:
-                    // 商学院--按照到期时间逆序排序，从上往下选，当支付金额为0时不再继续选择
-                    coupons.sort((o1, o2) -> o1.getExpiredDate().after(o2.getExpiredDate()) ? 1 : -1);
-                    Double total = 0d;
-                    for (Coupon coupon : coupons) {
-                        list.add(coupon);
-                        total += coupon.getAmount();
-                        if (total >= goodsInfoDto.getFee()) {
-                            // 优惠券金额大于等于价格
-                            break;
-                        }
-                    }
-                    break;
-                case QuanwaiOrder.FRAG_CAMP:
-                case QuanwaiOrder.BS_APPLICATION:
-                    // 选择最大的一张
-                    Coupon maxCoupon = coupons.stream()
-                            .filter(item -> item.getCategory() == null)
-                            .max((o1, o2) -> o1.getAmount() - o2.getAmount() > 0 ? 1 : -1)
-                            .orElse(null);
-                    if (maxCoupon != null) {
-                        list.add(maxCoupon);
-                    }
-                    break;
-                default:
-                    break;
-            }
+        if(canUseCoupon(goodsInfoDto)){
+            List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
+            goodsInfoDto.setCoupons(coupons);
+            // 自动选择优惠券
+            List<Coupon> autoCoupons = signupService.autoChooseCoupon(
+                    goodsInfoDto.getGoodsType(), goodsInfoDto.getFee(), coupons);
+            goodsInfoDto.setAutoCoupons(autoCoupons);
         }
-        return list;
+
+        return WebUtils.result(goodsInfoDto);
     }
 
     private Boolean checkMultiCoupons(String goodsType) {
@@ -501,6 +468,7 @@ public class SignupController {
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberType(m);
+        // 不同商品的特殊逻辑
         if (m.getId() == RiseMember.ELITE) {
             int dailyFee = (int) (m.getFee() / 365);
             dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
@@ -579,5 +547,15 @@ public class SignupController {
         operationLogService.log(operationLog);
         Date date = new DateTime().withDayOfMonth(1).toDate();
         return WebUtils.result(DateUtils.parseDateToFormat7(date));
+    }
+
+
+    private boolean canUseCoupon(GoodsInfoDto goodsInfoDto){
+        //申请商学院不能用优惠券
+        if(goodsInfoDto.getGoodsType().equals(QuanwaiOrder.BS_APPLICATION)){
+            return false;
+        }
+
+        return true;
     }
 }

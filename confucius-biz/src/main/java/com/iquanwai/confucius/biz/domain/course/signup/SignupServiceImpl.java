@@ -951,4 +951,39 @@ public class SignupServiceImpl implements SignupService {
         return price;
     }
 
+    @Override
+    public List<Coupon> autoChooseCoupon(String goodsType, Double fee, List<Coupon> coupons) {
+        List<Coupon> list = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(coupons)) {
+            // 有优惠券
+            switch (goodsType) {
+                case QuanwaiOrder.FRAG_MEMBER:
+                    // 商学院--按照到期时间逆序排序，从上往下选，当支付金额为0时不再继续选择
+                    coupons.sort((o1, o2) -> o1.getExpiredDate().after(o2.getExpiredDate()) ? 1 : -1);
+                    Double total = 0d;
+                    for (Coupon coupon : coupons) {
+                        list.add(coupon);
+                        total += coupon.getAmount();
+                        if (total >= fee) {
+                            // 优惠券金额大于等于价格
+                            break;
+                        }
+                    }
+                    break;
+                case QuanwaiOrder.FRAG_CAMP:
+                    // 选择最大的一张
+                    Coupon maxCoupon = coupons.stream()
+                            .filter(item -> item.getCategory() == null)
+                            .max((o1, o2) -> o1.getAmount() - o2.getAmount() > 0 ? 1 : -1)
+                            .orElse(null);
+                    if (maxCoupon != null) {
+                        list.add(maxCoupon);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return list;
+    }
 }
