@@ -218,6 +218,25 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
                     couponDao.insert(couponBean);
                 }
                 customerStatusDao.insert(application.getProfileId(), CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+                // 添加一张优惠券
+                String orderId = application.getOrderId();
+                if (orderId != null) {
+                    QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
+                    if (order != null) {
+                        if (order.getStatus().equals(QuanwaiOrder.PAID)) {
+                            // 添加优惠券
+                            Coupon couponBean = new Coupon();
+                            couponBean.setAmount(coupon);
+                            couponBean.setOpenid(application.getOpenid());
+                            couponBean.setProfileId(application.getProfileId());
+                            couponBean.setUsed(Coupon.UNUSED);
+                            couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 3));
+                            couponBean.setCategory("ELITE_RISE_MEMBER");
+                            couponBean.setDescription("商学院抵用券");
+                            couponDao.insert(couponBean);
+                        }
+                    }
+                }
             } else {
                 logger.error("申请id：{} 审核通过处理失败,comment:{},coupon:{}", applicationId, comment, coupon);
             }

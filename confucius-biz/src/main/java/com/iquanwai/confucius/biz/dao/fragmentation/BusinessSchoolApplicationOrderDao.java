@@ -68,4 +68,16 @@ public class BusinessSchoolApplicationOrderDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
+    public BusinessSchoolApplicationOrder loadUnAppliedOrder(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM BusinessSchoolApplicationOrder WHERE ProfileId = ? and Paid=1 and Del = 0 and Applied = 0";
+        ResultSetHandler<BusinessSchoolApplicationOrder> h = new BeanHandler<>(BusinessSchoolApplicationOrder.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
 }
