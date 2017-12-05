@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
@@ -297,6 +298,9 @@ public class SignupController {
             List<Coupon> autoCoupons = signupService.autoChooseCoupon(
                     goodsInfoDto.getGoodsType(), goodsInfoDto.getFee(), coupons);
             goodsInfoDto.setAutoCoupons(autoCoupons);
+        } else {
+            goodsInfoDto.setCoupons(Lists.newArrayList());
+            goodsInfoDto.setAutoCoupons(Lists.newArrayList());
         }
 
         return WebUtils.result(goodsInfoDto);
