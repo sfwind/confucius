@@ -23,6 +23,7 @@ public class BusinessSchoolApplication {
     private String comment;
     private Date dealTime;
     private Date addTime;
+    private String orderId;
 
     private String originMemberTypeName;
 

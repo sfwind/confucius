@@ -259,11 +259,10 @@ public class RiseOperationController {
             openidList = null;
         }
 
+        Assert.notNull(applications);
         List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
             Profile profile = accountService.getProfile(application.getProfileId());
             ApplicationDto dto = this.initApplicationDto(application);
-//            Pair<SurveySubmit, List<SurveyQuestionSubmit>> submitPair = businessSchoolService.loadSubmit(application.getSubmitId());
-//            this.initSurveyInfo(dto, submitPair.getLeft(), submitPair.getRight());
             List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId());
             dto.setQuestionList(questions);
             // 查询是否会员

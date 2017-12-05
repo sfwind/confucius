@@ -11,19 +11,60 @@ import java.util.List;
 @Data
 public class ApplicationDto {
     private Integer id;
-    private String finalPayStatus; // 最终支付状态
-    private Integer status; // 审核状态
-    private String coupon; // 奖学金金额
-    private String openid; // openid
-    private String nickname; // 昵称
-    private String isDuplicate; // 是否重复提交
+    /**
+     * 最终支付状态
+     */
+    private String finalPayStatus;
+    /**
+     *  审核状态
+     *  1-通过，2-拒绝，3-私信
+     */
+    private Integer status;
+    /**
+     * 奖学金金额
+     */
+    private String coupon;
+    private String openid;
+    /**
+     * 昵称
+     */
+    private String nickname;
+    /**
+     * 是否重复提交
+     */
+    private String isDuplicate;
+    /**
+     * 是否是助教
+     */
     private String isAsst;
-    private String isBlack;//是否是黑名单用户
+    /**
+     * 是否是黑名单用户
+     */
+    private String isBlack;
+    /**
+     * 会员类型id
+     */
     private Integer memberTypeId;
-    private String memberType; // 会员类型
-    private String submitTime; //提交答卷时间
-    private String timeTaken; // 	所用时间
+    /**
+     * 会员类型
+     */
+    private String memberType;
+    /**
+     * 提交答卷时间
+     */
+    private String submitTime;
+    /**
+     * 所用时间
+     */
+    private String timeTaken;
+    /**
+     * 备注
+     */
     private String comment;
+    /**
+     * 订单id
+     */
+    private String orderId;
 
     private String q1Answer; // 1. 请选择您目前从事的行业
     private String q2Answer; // 2. 请选择您目前从事的职业：
