@@ -15,7 +15,7 @@ import java.sql.SQLException;
 @Repository
 public class MonthlyCampOrderDao extends DBUtil {
 
-    Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     public int insert(MonthlyCampOrder monthlyCampOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -42,16 +42,6 @@ public class MonthlyCampOrderDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
-    }
-
-    public void closeOrder(String orderId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE MonthlyCampOrder set IsDel = 1 WHERE OrderId = ?";
-        try {
-            runner.update(sql, orderId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
     }
 
     public void entry(String orderId) {

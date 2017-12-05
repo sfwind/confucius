@@ -29,6 +29,8 @@ public class QuanwaiOrder {
     public static final String FRAG_MEMBER = "fragment_member";
     /** 训练营 */
     public static final String FRAG_CAMP = "fragment_camp";
+    /** 商学院申请 */
+    public static final String BS_APPLICATION = "bs_application";
 
     public static final int UNDER_PAY = 0;
     public static final int PAID = 1;

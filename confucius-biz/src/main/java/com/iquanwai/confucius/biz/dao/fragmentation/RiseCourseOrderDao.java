@@ -22,8 +22,8 @@ public class RiseCourseOrderDao extends DBUtil {
 
     public int insert(RiseCourseOrder riseCourseOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into RiseCourseOrder(ProfileId, Openid, ProblemId, OrderId,Entry,IsDel) " +
-                " VALUES (?, ?, ?, ?,0,0)";
+        String sql = "insert into RiseCourseOrder(ProfileId, Openid, ProblemId, OrderId) " +
+                " VALUES (?, ?, ?, ?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
                     riseCourseOrder.getProfileId(), riseCourseOrder.getOpenid(), riseCourseOrder.getProblemId(), riseCourseOrder.getOrderId());
@@ -46,16 +46,6 @@ public class RiseCourseOrderDao extends DBUtil {
         }
 
         return null;
-    }
-
-    public void closeOrder(String orderId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "Update RiseCourseOrder set IsDel=1 where OrderId=?";
-        try {
-            run.update(sql, orderId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
     }
 
     public void entry(String orderId) {

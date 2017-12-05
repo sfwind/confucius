@@ -1,19 +1,16 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Created by nethunder on 2017/4/6.
@@ -24,27 +21,17 @@ public class RiseOrderDao extends DBUtil {
 
     public int insert(RiseOrder riseOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into RiseOrder(OrderId, ProfileId, Openid, MemberType, Entry, IsDel) " +
-                " VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "insert into RiseOrder(OrderId, ProfileId, Openid, MemberType, Entry) " +
+                " VALUES (?, ?, ?, ?, ?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
                     riseOrder.getOrderId(), riseOrder.getProfileId(), riseOrder.getOpenid(),
-                    riseOrder.getMemberType(), riseOrder.getEntry(), riseOrder.getIsDel());
+                    riseOrder.getMemberType(), riseOrder.getEntry());
             return insertRs.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
-    }
-
-    public void closeOrder(String orderId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "Update RiseOrder set IsDel=1 where OrderId=?";
-        try {
-            run.update(sql, orderId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
     }
 
 
@@ -70,42 +57,6 @@ public class RiseOrderDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-    }
-
-    public Integer loadHolderCount() {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ScalarHandler<Long> h = new ScalarHandler<Long>();
-        String sql = "Select count(distinct OpenId) from RiseOrder where Entry = 0 and IsDel = 0";
-        try {
-            return run.query(sql, h).intValue();
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return -1;
-    }
-
-    public List<RiseOrder> loadActiveOrder() {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<RiseOrder>> h = new BeanListHandler<RiseOrder>(RiseOrder.class);
-        String sql = "Select * from RiseOrder  where Entry = 0 and IsDel = 0";
-        try {
-            return run.query(sql, h);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public Integer userNotCloseOrder(Integer profileId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ScalarHandler<Long> h = new ScalarHandler<Long>();
-        String sql = "select count(1) from RiseOrder where ProfileId = ? and Entry = 0 and IsDel = 0";
-        try {
-            return run.query(sql, h, profileId).intValue();
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return -1;
     }
 
 }
