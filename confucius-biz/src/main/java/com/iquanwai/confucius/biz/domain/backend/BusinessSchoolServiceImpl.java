@@ -226,7 +226,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
                         if (order.getStatus().equals(QuanwaiOrder.PAID)) {
                             // 添加优惠券
                             Coupon couponBean = new Coupon();
-                            couponBean.setAmount(coupon);
+                            couponBean.setAmount(order.getPrice());
                             couponBean.setOpenid(application.getOpenid());
                             couponBean.setProfileId(application.getProfileId());
                             couponBean.setUsed(Coupon.UNUSED);
