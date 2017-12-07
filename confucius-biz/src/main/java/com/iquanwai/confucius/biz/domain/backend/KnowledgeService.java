@@ -13,4 +13,11 @@ public interface KnowledgeService {
     Integer updateKnowledge(Knowledge knowledge, Integer problemId);
 
     List<Knowledge> queryAllKnowLedges();
+
+    /**
+     * 插入ProblemSchedule表
+     * @param problemId
+     * @return
+     */
+    int insertProblemScehdule(Integer problemId);
 }

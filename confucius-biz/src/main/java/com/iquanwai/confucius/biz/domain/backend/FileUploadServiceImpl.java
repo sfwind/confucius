@@ -51,15 +51,22 @@ public class FileUploadServiceImpl implements FileUploadService {
         return null;
     }
 
+
     @Override
     public int uploadAudio(Integer audioId, String name, String url, String words) {
         Audio audio = new Audio();
         audio.setName(name);
         audio.setUrl(AUDIO_RESOURCE_PREFIX + url);
         audio.setWords(words);
-        if (audioId != null) {
+        if (audioId > 0) {
             audio.setId(audioId);
-            audioDao.updateAudio(audio);
+            //判断是否需要更新文件路径
+            if(url.equals("")){
+                audioDao.updateAudio(audio);
+            }
+            else{
+                audioDao.updateAudioContainsUrl(audio);
+            }
             return audioId;
         } else {
             return audioDao.insertAudio(audio);

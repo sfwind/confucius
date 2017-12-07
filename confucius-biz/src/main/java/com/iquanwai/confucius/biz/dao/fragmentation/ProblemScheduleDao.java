@@ -70,4 +70,39 @@ public class ProblemScheduleDao extends PracticeDBUtil {
         return -1;
     }
 
+    /**
+     * 更新
+     *
+     * @param problemSchedule
+     */
+    public void update(ProblemSchedule problemSchedule) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update ProblemSchedule set chapter = ?,series = ? where id = ?";
+        try {
+            runner.update(sql, problemSchedule.getChapter(), problemSchedule.getSeries(), problemSchedule.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return;
+    }
+
+    /**
+     * 获得对应的复习ProblemSchedule
+     *
+     * @param problemId
+     * @return
+     */
+    public List<ProblemSchedule> getReviewProblemSchedule(Integer problemId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ProblemSchedule>> h = new BeanListHandler<>(ProblemSchedule.class);
+        String sql = "select * from ProblemSchedule where problemId = ? and del = 0 and knowledgeId in (57,58,59)";
+        try {
+            List<ProblemSchedule> problemScheduleList = runner.query(sql, h, problemId);
+            return problemScheduleList;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
 }
