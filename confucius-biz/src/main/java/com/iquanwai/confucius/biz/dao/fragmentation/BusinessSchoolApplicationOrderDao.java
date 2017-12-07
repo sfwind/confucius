@@ -47,9 +47,9 @@ public class BusinessSchoolApplicationOrderDao extends DBUtil {
         return null;
     }
 
-    public BusinessSchoolApplicationOrder loadBusinessSchoolApplicationOrder(Integer profileId) {
+    public BusinessSchoolApplicationOrder loadBusinessSchoolApplicationNoAppliedOrder(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplicationOrder WHERE ProfileId = ? and Paid=1 and Del = 0";
+        String sql = "SELECT * FROM BusinessSchoolApplicationOrder WHERE ProfileId = ? and Paid=1 and Applied = 0 and Del = 0";
         ResultSetHandler<BusinessSchoolApplicationOrder> h = new BeanHandler<>(BusinessSchoolApplicationOrder.class);
         try {
             return runner.query(sql, h, profileId);

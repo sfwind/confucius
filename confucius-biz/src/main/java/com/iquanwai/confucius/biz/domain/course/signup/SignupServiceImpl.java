@@ -850,7 +850,7 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public boolean isAppliedBefore(Integer profileId) {
-        BusinessSchoolApplicationOrder businessSchoolApplicationOrder = businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(profileId);
+        BusinessSchoolApplicationOrder businessSchoolApplicationOrder = businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationNoAppliedOrder(profileId);
         return businessSchoolApplicationOrder != null;
     }
 
