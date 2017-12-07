@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -186,6 +187,11 @@ public class SignupController {
             boolean pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
             if (!pass) {
                 return WebUtils.error(201, "请先提交申请");
+            }
+        } else if (memberTypeId == RiseMember.BS_APPLICATION) {
+            BusinessSchoolApplication bs = businessSchoolService.loadBusinessSchoolApplication(loginUser.getId());
+            if (bs != null) {
+                return WebUtils.error(201, "您有正在审核的申请记录");
             }
         }
         Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
@@ -473,6 +479,7 @@ public class SignupController {
         RiseMemberDto dto = new RiseMemberDto();
         dto.setMemberType(m);
         // 不同商品的特殊逻辑
+        Assert.notNull(m);
         if (m.getId() == RiseMember.ELITE) {
             int dailyFee = (int) (m.getFee() / 365);
             dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");

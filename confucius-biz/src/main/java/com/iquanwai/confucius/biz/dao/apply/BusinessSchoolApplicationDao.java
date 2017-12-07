@@ -98,4 +98,15 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         }
         return -1;
     }
+
+    public BusinessSchoolApplication loadCheckingApplication(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 0 Order by Id desc";
+        try {
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
 }

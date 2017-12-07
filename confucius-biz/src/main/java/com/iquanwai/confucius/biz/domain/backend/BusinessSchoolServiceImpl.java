@@ -362,4 +362,9 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         }
         return "否";
     }
+
+    @Override
+    public BusinessSchoolApplication loadCheckingApply(Integer profileId) {
+        return businessSchoolApplicationDao.loadCheckingApplication(profileId);
+    }
 }

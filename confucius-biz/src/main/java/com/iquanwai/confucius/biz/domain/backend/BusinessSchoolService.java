@@ -59,4 +59,11 @@ public interface BusinessSchoolService {
      * @return 身份信息
      */
     String loadUserAuditionReward(Integer profileId);
+
+    /**
+     * 获取正在检查中的记录
+     * @param profileId 用户id
+     * @return
+     */
+    BusinessSchoolApplication loadCheckingApply(Integer profileId);
 }
