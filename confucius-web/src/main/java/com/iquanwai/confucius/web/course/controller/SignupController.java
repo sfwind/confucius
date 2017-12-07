@@ -189,7 +189,7 @@ public class SignupController {
                 return WebUtils.error(201, "请先提交申请");
             }
         } else if (memberTypeId == RiseMember.BS_APPLICATION) {
-            BusinessSchoolApplication bs = businessSchoolService.loadBusinessSchoolApplication(loginUser.getId());
+            BusinessSchoolApplication bs = businessSchoolService.loadCheckingApply(loginUser.getId());
             if (bs != null) {
                 return WebUtils.error(201, "您有正在审核的申请记录");
             }
