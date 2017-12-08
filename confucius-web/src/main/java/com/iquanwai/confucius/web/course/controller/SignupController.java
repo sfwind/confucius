@@ -285,8 +285,11 @@ public class SignupController {
                 .findFirst().orElse(null);
         if (memberType != null) {
             goodsInfoDto.setFee(memberType.getFee());
-            goodsInfoDto.setStartTime(memberType.getStartTime());
-            goodsInfoDto.setEndTime(memberType.getEndTime());
+            // 申请付费不填写时间
+            if (!QuanwaiOrder.BS_APPLICATION.equals(goodsInfoDto.getGoodsType())) {
+                goodsInfoDto.setStartTime(memberType.getStartTime());
+                goodsInfoDto.setEndTime(memberType.getEndTime());
+            }
             goodsInfoDto.setInitPrice(memberType.getFee());
             goodsInfoDto.setName(memberType.getName());
         }
@@ -297,7 +300,7 @@ public class SignupController {
         }
 
         // 获取优惠券
-        if(canUseCoupon(goodsInfoDto)){
+        if (canUseCoupon(goodsInfoDto)) {
             List<Coupon> coupons = signupService.getCoupons(loginUser.getId());
             goodsInfoDto.setCoupons(coupons);
             // 自动选择优惠券
@@ -308,6 +311,7 @@ public class SignupController {
             goodsInfoDto.setCoupons(Lists.newArrayList());
             goodsInfoDto.setAutoCoupons(Lists.newArrayList());
         }
+
 
         return WebUtils.result(goodsInfoDto);
     }
@@ -561,9 +565,9 @@ public class SignupController {
     }
 
 
-    private boolean canUseCoupon(GoodsInfoDto goodsInfoDto){
+    private boolean canUseCoupon(GoodsInfoDto goodsInfoDto) {
         //申请商学院不能用优惠券
-        if(goodsInfoDto.getGoodsType().equals(QuanwaiOrder.BS_APPLICATION)){
+        if (goodsInfoDto.getGoodsType().equals(QuanwaiOrder.BS_APPLICATION)) {
             return false;
         }
 
