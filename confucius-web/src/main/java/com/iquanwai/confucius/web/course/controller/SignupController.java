@@ -503,7 +503,7 @@ public class SignupController {
             dto.setButtonStr("立即入学");
         }
 
-        dto.setAuditionStr("宣讲课");
+        dto.setAuditionStr("抢先了解");
 
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
