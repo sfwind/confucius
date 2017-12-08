@@ -510,10 +510,10 @@ public class SignupController {
         List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
         // 用户层级是商学院用户或者层级是训练营用户，则不显示试听课入口
         Long count = riseMembers.stream()
-                .filter(member -> member.getMemberTypeId() == RiseMember.ELITE || member.getMemberTypeId() == RiseMember.CAMP)
+                .filter(member -> member.getMemberTypeId() == RiseMember.ELITE)
                 .count();
         if (count > 0) {
-            // 商学院和训练营不显示试听课按钮
+            // 商学院不显示试听课按钮
             dto.setAuditionStr(null);
         }
 
