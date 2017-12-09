@@ -20,7 +20,7 @@ public class AudioDao extends PracticeDBUtil {
 
     public int insertAudio(Audio audio) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Audio (Name, Url, Words) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Audio (Name, Url, Words,Updated) VALUES (?, ?, ?,2)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     audio.getName(),
@@ -39,7 +39,7 @@ public class AudioDao extends PracticeDBUtil {
      */
     public void updateAudioContainsUrl(Audio audio) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Audio set Name=?, Url=?, Words=? where id=?";
+        String sql = "Update Audio set Name=?, Url=?, Words=?,Updated = 1 where id=?";
         try {
             runner.update(sql,
                     audio.getName(),
@@ -57,7 +57,7 @@ public class AudioDao extends PracticeDBUtil {
      */
     public void updateAudio(Audio audio){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update Audio set Name = ?,Words = ? where id = ?";
+        String sql = "update Audio set Name = ?,Words = ?,Updated = 1 where id = ?";
         try {
             runner.update(sql,audio.getName(),audio.getWords(),audio.getId());
         } catch (SQLException e) {
