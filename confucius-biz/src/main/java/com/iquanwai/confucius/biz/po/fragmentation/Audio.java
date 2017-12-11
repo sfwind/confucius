@@ -13,5 +13,6 @@ public class Audio {
     private String url;
     private String words;
     private Integer del;
+    private Integer updated;
 
 }
