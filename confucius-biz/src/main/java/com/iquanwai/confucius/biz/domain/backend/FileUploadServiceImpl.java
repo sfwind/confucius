@@ -61,10 +61,16 @@ public class FileUploadServiceImpl implements FileUploadService {
         if (audioId > 0) {
             audio.setId(audioId);
             //判断是否需要更新文件路径
-            if(url.equals("")){
-                audioDao.updateAudio(audio);
+            Audio originAudio = audioDao.load(Audio.class, audioId);
+            //如果原来是插入，则不修改Updated字段
+            if (originAudio.getUpdated() == 2) {
+                audio.setUpdated(originAudio.getUpdated());
+            } else {
+                audio.setUpdated(1);
             }
-            else{
+            if (url.equals("")) {
+                audioDao.updateAudio(audio);
+            } else {
                 audioDao.updateAudioContainsUrl(audio);
             }
             return audioId;

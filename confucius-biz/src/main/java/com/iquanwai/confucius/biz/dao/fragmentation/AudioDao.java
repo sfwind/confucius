@@ -35,16 +35,18 @@ public class AudioDao extends PracticeDBUtil {
 
     /**
      * 修改带文件路径的Audio
+     *
      * @param audio
      */
     public void updateAudioContainsUrl(Audio audio) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Audio set Name=?, Url=?, Words=?,Updated = 1 where id=?";
+        String sql = "Update Audio set Name=?, Url=?, Words=?,Updated = ? where id=?";
         try {
             runner.update(sql,
                     audio.getName(),
                     audio.getUrl(),
                     audio.getWords(),
+                    audio.getUpdated(),
                     audio.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -53,15 +55,16 @@ public class AudioDao extends PracticeDBUtil {
 
     /**
      * 修改不带文件路径的Audio
+     *
      * @param audio
      */
-    public void updateAudio(Audio audio){
+    public void updateAudio(Audio audio) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update Audio set Name = ?,Words = ?,Updated = 1 where id = ?";
+        String sql = "update Audio set Name = ?,Words = ?,Updated = ? where id = ?";
         try {
-            runner.update(sql,audio.getName(),audio.getWords(),audio.getId());
+            runner.update(sql, audio.getName(), audio.getWords(), audio.getUpdated(), audio.getId());
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
     }
 
