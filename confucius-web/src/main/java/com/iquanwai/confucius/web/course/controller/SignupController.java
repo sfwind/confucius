@@ -191,7 +191,7 @@ public class SignupController {
         } else if (memberTypeId == RiseMember.BS_APPLICATION) {
             BusinessSchoolApplication bs = businessSchoolService.loadCheckingApply(loginUser.getId());
             if (bs != null) {
-                return WebUtils.error(201, "您有正在审核的申请记录");
+                return WebUtils.error(201, "申请审核中，请耐心等待");
             }
         }
         Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
