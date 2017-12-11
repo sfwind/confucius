@@ -507,7 +507,7 @@ public class SignupController {
             dto.setButtonStr("立即入学");
         }
 
-        dto.setAuditionStr("抢先了解");
+        dto.setAuditionStr("预约直播");
 
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
