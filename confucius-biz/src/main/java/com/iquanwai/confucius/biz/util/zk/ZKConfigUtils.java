@@ -39,7 +39,7 @@ public class ZKConfigUtils {
 
     /* 每个项目的path不同 */
     private static final String CONFIG_PATH = "/quanwai/config/";
-    /* 体喜欢path */
+    /* 体系化path */
     private static final String COURSE_CONFIG_PATH = "/quanwai/config/course/";
     /* 架构类型的path */
     private static final String ARCH_PATH = "/quanwai/config/arch/";
@@ -130,17 +130,6 @@ public class ZKConfigUtils {
             logger.error("zk " + zkAddress + " get value", e);
         }
 
-        return null;
-    }
-
-    public List<Integer> getIntList(String key){
-        String value = getValue(key);
-        try{
-            Assert.notNull(value);
-
-        } catch (Exception e){
-            logger.error("zk" + zkAddress + " get int {}", value);
-        }
         return null;
     }
 
