@@ -29,10 +29,9 @@ public interface SignupService {
     QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
-     * 获取学员详情
+     * 商学院申请, 不生成预付订单
      */
-    ClassMember classMember(String orderId);
-
+    QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
      * 购买完训练营后续操作
@@ -50,16 +49,20 @@ public interface SignupService {
      */
     void unlockMonthlyCamp(Integer profileId);
 
+    /**
+     * 获取训练营订单
+     * */
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
+    /**
+     * 生成学号
+     * */
     String generateMemberId(Integer year, Integer month, Integer identityType);
 
-    void riseMemberEntry(String orderId);
-
     /**
-     * 重新加载班级
-     */
-    void reloadClass();
+     * 商学院购买成功处理
+     * */
+    void payRiseSuccess(String orderId);
 
     /**
      * 获得圈外订单
@@ -89,7 +92,9 @@ public interface SignupService {
      * 查询会员类型的支付信息
      */
     List<MemberType> getMemberTypesPayInfo();
-
+    /**
+     * 查询会员类型的支付信息
+     */
     List<MemberType> getMemberTypesPayInfo(Integer profileId);
 
     /**
@@ -133,5 +138,29 @@ public interface SignupService {
      */
     RiseMember getCurrentMonthlyCampStatus(Integer profileId);
 
+    /**
+     * 获取用户所有的用户信息
+     */
     List<RiseMember> loadPersonalAllRiseMembers(Integer profileId);
+
+
+    /**
+     * 申请商学院付费后
+     */
+    void payApplicationSuccess(String orderId);
+
+    /**
+     * 获取商学院申请订单
+     * */
+    BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
+
+    /**
+     * 获取商学院申请订单
+     * */
+    boolean isAppliedBefore(Integer profileId);
+
+    /**
+     * 根据商品类型和售价智能选择优惠券
+     * */
+    List<Coupon> autoChooseCoupon(String goodsType, Double fee, List<Coupon> coupons);
 }

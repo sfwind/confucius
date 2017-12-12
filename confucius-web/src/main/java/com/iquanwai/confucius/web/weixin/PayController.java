@@ -106,4 +106,26 @@ public class PayController {
         response.flushBuffer();
     }
 
+    @RequestMapping(value = "/result/application/callback")
+    public void applicationPayCallback(@RequestBody PayCallback payCallback, HttpServletResponse response) throws IOException {
+        logger.info("商学院申请微信支付回调：{}", payCallback.toString());
+
+        ThreadPool.execute(() -> {
+            try {
+                payService.handlePayResult(payCallback);
+                if ("SUCCESS".equals(payCallback.getResult_code())) {
+                    signupService.payApplicationSuccess(payCallback.getOut_trade_no());
+                } else {
+                    logger.error("{}付费失败", payCallback.getOut_trade_no());
+                }
+            } catch (Exception e) {
+                logger.error("商学院申请支付结果回调处理失败", e);
+            }
+        });
+
+        response.setHeader("Content-Type", "application/xml");
+        response.getWriter().print(SUCCESS_RETURN);
+        response.flushBuffer();
+    }
+
 }

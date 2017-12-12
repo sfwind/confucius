@@ -32,17 +32,6 @@ public class CacheReloadController {
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(CacheReloadReceiver.TOPIC);
     }
 
-    @RequestMapping("/class/reload")
-    public ResponseEntity<Map<String, Object>> classReload() {
-        try {
-            rabbitMQPublisher.publish("class");
-            return WebUtils.success();
-        }catch (Exception e){
-            LOGGER.error("reload class", e);
-        }
-        return WebUtils.error("reload class");
-    }
-
     @RequestMapping("/permission/reload")
     public ResponseEntity<Map<String,Object>> reloadPermission(){
         try {

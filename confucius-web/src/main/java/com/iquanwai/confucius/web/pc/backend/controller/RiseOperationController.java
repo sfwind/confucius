@@ -3,11 +3,14 @@ package com.iquanwai.confucius.web.pc.backend.controller;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.TableDto;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
@@ -48,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.net.ConnectException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,6 +80,12 @@ public class RiseOperationController {
     private AccountService accountService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
+    @Autowired
+    private SignupService signupService;
+    @Autowired
+    private PayService payService;
+
+
     private static final String SEARCH_TOPIC = "business_school_application_search";
     private static final String NOTICE_TOPIC = "business_school_application_notice";
 
@@ -259,12 +269,11 @@ public class RiseOperationController {
             openidList = null;
         }
 
+        Assert.notNull(applications);
         List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
             Profile profile = accountService.getProfile(application.getProfileId());
             ApplicationDto dto = this.initApplicationDto(application);
-//            Pair<SurveySubmit, List<SurveyQuestionSubmit>> submitPair = businessSchoolService.loadSubmit(application.getSubmitId());
-//            this.initSurveyInfo(dto, submitPair.getLeft(), submitPair.getRight());
-            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId());
+            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
             dto.setQuestionList(questions);
             // 查询是否会员
             RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
@@ -285,6 +294,7 @@ public class RiseOperationController {
             }
             dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
             dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
+            dto.setOrderId(application.getOrderId());
 
             return dto;
         }).collect(Collectors.toList());
@@ -308,6 +318,16 @@ public class RiseOperationController {
         } else {
             boolean reject = businessSchoolService.rejectApplication(application.getId(), approveDto.getComment());
             if (reject) {
+                String orderId = application.getOrderId();
+                if (orderId != null) {
+                    QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+                    if (quanwaiOrder != null) {
+                        if (quanwaiOrder.getStatus().equals(QuanwaiOrder.PAID) || quanwaiOrder.getStatus().equals(QuanwaiOrder.REFUND_FAILED)) {
+                            // 开始退款
+                            payService.refund(orderId, quanwaiOrder.getPrice());
+                        }
+                    }
+                }
                 return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");

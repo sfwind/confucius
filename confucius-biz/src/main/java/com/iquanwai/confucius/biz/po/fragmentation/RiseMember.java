@@ -48,4 +48,5 @@ public class RiseMember {
     public static final int HALF_ELITE = 4; // 精英版半年
     public static final int CAMP = 5; // 训练营
     public static final int COURSE = 6; // 单买课程
+    public static final int BS_APPLICATION = 7; // 商学院申请
 }
