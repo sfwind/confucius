@@ -4,7 +4,6 @@ import com.iquanwai.confucius.biz.domain.fragmentation.recommedation.Recommedati
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.web.resolver.LoginUser;
-import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

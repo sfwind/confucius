@@ -2,7 +2,10 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.po.fragmentation.UserRecommedation;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,5 +34,24 @@ public class UserRecommedationDao extends PracticeDBUtil{
             logger.error(e.getLocalizedMessage(),e);
         }
         return -1;
+    }
+
+
+    /**
+     * 加载UserRecommedation
+     * @param profileId
+     * @param openId
+     * @return
+     */
+    public UserRecommedation loadRecommedationByProfileIdOpenId(Integer profileId,String openId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<UserRecommedation> h = new BeanHandler<>(UserRecommedation.class);
+        String sql = "select * from UserRecommendation where profileId = ? and FriendOpenId = ? and del = 0 ";
+        try {
+            return runner.query(sql,h,profileId,openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return null;
     }
 }
