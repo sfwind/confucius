@@ -66,24 +66,23 @@ public class AccountController {
         }
     }
 
-    /**
-     * 获得当前用户的riseId
-     * @param loginUser
-     * @return
-     */
-    @RequestMapping("/get/rise")
-    public ResponseEntity<Map<String,Object>> getRise(PCLoginUser loginUser){
-        Assert.notNull(loginUser,"用户不能为空");
-        Profile profile = accountService.getProfile(loginUser.getOpenId());
-
-        return WebUtils.result(profile.getRiseId());
-    }
-
-    @RequestMapping("/add/user/recommendation/{riseId}")
-    public ResponseEntity<Map<String,Object>> addUserRecommendation(PCLoginUser loginUser,@PathVariable String riseId){
-        Assert.notNull(loginUser,"用户不能为空");
-        String openId = loginUser.getOpenId();
-        return WebUtils.result(recommedationService.addUserRecommedation(openId,riseId));
-    }
+//    /**
+//     * 获得当前用户的riseId
+//     * @param loginUser
+//     * @return
+//     */
+//    @RequestMapping("/get/rise")
+//    public ResponseEntity<Map<String,Object>> getRise(PCLoginUser loginUser){
+//        Assert.notNull(loginUser,"用户不能为空");
+//        Profile profile = accountService.getProfile(loginUser.getOpenId());
+//        return WebUtils.result(profile.getRiseId());
+//    }
+//
+//    @RequestMapping("/add/user/recommendation/{riseId}")
+//    public ResponseEntity<Map<String,Object>> addUserRecommendation(PCLoginUser loginUser,@PathVariable String riseId){
+//        Assert.notNull(loginUser,"用户不能为空");
+//        String openId = loginUser.getOpenId();
+//        return WebUtils.result(recommedationService.addUserRecommedation(openId,riseId));
+//    }
 }
 
