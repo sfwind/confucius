@@ -333,11 +333,11 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
                 .stream()
                 .filter(item -> submits
                         .stream()
-                        .anyMatch(submit -> submit.getQuestionId().equals(item.getId()))
+                        .anyMatch(submit -> item.getId().equals(submit.getQuestionId()))
                 )
                 .peek(item -> submits
                         .stream()
-                        .filter(submit -> submit.getQuestionId().equals(item.getId()))
+                        .filter(submit -> item.getId().equals(submit.getQuestionId()))
                         .findFirst()
                         .ifPresent(userSubmit -> {
                             if (userSubmit.getChoiceText() != null) {
