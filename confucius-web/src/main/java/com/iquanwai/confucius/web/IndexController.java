@@ -104,6 +104,8 @@ public class IndexController {
                     // 未关注
                     response.sendRedirect(SUBSCRIBE_URL + "?scene=" + subscribeRouterConfig.getScene());
                     return false;
+                } else {
+                    response.sendRedirect(SUBSCRIBE_URL);
                 }
             } catch (IOException e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
