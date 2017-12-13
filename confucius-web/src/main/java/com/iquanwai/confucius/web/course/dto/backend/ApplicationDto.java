@@ -93,6 +93,5 @@ public class ApplicationDto {
     private String originMemberTypeName;
     private String reward;
     private Boolean del;
-
-
+    private String lastVerified;
 }

@@ -28,6 +28,7 @@ import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
+import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
@@ -286,6 +287,24 @@ public class RiseOperationController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
+
+            int lastVerifiedCode = application.getLastVerified();
+
+            if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()){
+                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
+            }
+            else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()){
+                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
+            }
+            else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()){
+                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
+            }
+            else if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()){
+                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
+            }
+            else{
+                dto.setLastVerified("未知");
+            }
 
             if (openidList != null && (openidList.size() > 0)) {
                 if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
