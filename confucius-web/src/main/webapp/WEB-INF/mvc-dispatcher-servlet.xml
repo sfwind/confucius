@@ -69,7 +69,6 @@
         <mvc:interceptor>
             <mvc:mapping path="/**" />
             <mvc:exclude-mapping path="/"/>
-            <mvc:exclude-mapping path="/subscribe"/>
             <mvc:exclude-mapping path="/signup/rise/signup"/>
             <mvc:exclude-mapping path="/wx/**" />
             <mvc:exclude-mapping path="/b/**" />

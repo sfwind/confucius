@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@RestController("/subscribe")
+@RestController()
+@RequestMapping("/subscribe")
 public class SubscribeController {
 
     @Autowired
