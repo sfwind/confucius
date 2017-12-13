@@ -291,19 +291,19 @@ public class RiseOperationController {
             int lastVerifiedCode = application.getLastVerified();
 
             if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()){
-                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
             }
             else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()){
-                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
             }
             else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()){
-                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
             }
             else if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()){
-                dto.setLastVerified(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
             }
             else{
-                dto.setLastVerified("未知");
+                dto.setVerifiedResult("未知");
             }
 
             if (openidList != null && (openidList.size() > 0)) {
