@@ -39,7 +39,7 @@ public class RestfulHelper {
     @PostConstruct
     public void init() {
         try {
-            if(!ConfigUtils.isDebug()){
+            if (!ConfigUtils.isDebug()) {
                 initCert();
             }
         } catch (Exception e) {
@@ -50,9 +50,8 @@ public class RestfulHelper {
     /**
      * 发起POST请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
-     *
      * @param requestUrl 请求链接
-     * @param json       请求参数
+     * @param json 请求参数
      * @return 响应体
      */
     public String post(String requestUrl, String json) {
@@ -95,9 +94,8 @@ public class RestfulHelper {
 
     /**
      * 发起POST请求
-     *
      * @param requestUrl 请求的url
-     * @param xml        参数
+     * @param xml 参数
      * @return 响应体
      */
     public String postXML(String requestUrl, String xml) {
@@ -124,7 +122,6 @@ public class RestfulHelper {
     /**
      * 发起GET请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
-     *
      * @param requestUrl 请求url，参数需要手动拼接到url中
      * @return 响应体
      */
@@ -165,23 +162,21 @@ public class RestfulHelper {
         return "";
     }
 
-    public String getPlain(String requestUrl) {
+    public ResponseBody getPlain(String requestUrl) {
         if (StringUtils.isNotEmpty(requestUrl)) {
             Request request = new Request.Builder()
                     .url(requestUrl)
                     .build();
-
             try {
                 Response response = client.newCall(request).execute();
-                String body = response.body().string();
-
-                return body;
+                return response.body();
             } catch (Exception e) {
                 logger.error("execute " + requestUrl + " error", e);
             }
         }
-        return "";
+        return null;
     }
+
 
     public String sslPostXml(String requestUrl, String xml) {
         logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);

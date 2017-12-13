@@ -110,4 +110,8 @@ public interface Constants {
         int OTHER = 4;
     }
 
+    interface HTTP_TIMEOUT {
+        int CONNECTION_TIMEOUT = 3;
+        int READ_TIMEOUT = 60;
+    }
 }
