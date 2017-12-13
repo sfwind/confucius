@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 
-import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.fragmentation.UserRecommedation;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 
 @Repository
-public class UserRecommedationDao extends PracticeDBUtil{
+public class UserRecommedationDao extends DBUtil{
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -23,12 +23,12 @@ public class UserRecommedationDao extends PracticeDBUtil{
      * 插入用户推荐表
      * @return
      */
-    public int insert(Integer profileId,String openId){
+    public int insert(Integer profileId,String openId,Integer action){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into UserRecommendation(profileId,FriendOpenId) values (?,?)";
+        String sql = "insert into UserRecommendation(profileId,FriendOpenId,action) values (?,?,?)";
 
         try {
-           Long result = runner.insert(sql,new ScalarHandler<>(),profileId,openId);
+           Long result = runner.insert(sql,new ScalarHandler<>(),profileId,openId,action);
            return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);
