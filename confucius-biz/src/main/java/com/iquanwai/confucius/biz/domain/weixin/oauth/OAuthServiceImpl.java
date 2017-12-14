@@ -46,17 +46,12 @@ public class OAuthServiceImpl implements OAuthService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public String redirectUrl(String callbackUrl, String authUrl, String domainName) {
+    public String redirectUrl(String callbackUrl, String authUrl) {
         String requestUrl = authUrl;
         Callback callback = new Callback();
         String ip = getIPFromUrl(callbackUrl);
         if (ip != null) {
-            if (domainName == null) {
-                callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.adapterDomainName());
-            } else {
-                logger.info("domain name is {}", domainName);
-                callbackUrl = callbackUrl.replace("http://" + ip, "http://" + domainName);
-            }
+            callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
         }
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
@@ -78,19 +73,18 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Override
     public String openId(String accessToken) {
-        if (accessToken == null) {
+        if(accessToken==null){
             return null;
         }
         Callback callback = callbackDao.queryByAccessToken(accessToken);
-        if (callback == null) {
+        if(callback==null){
             logger.error("accesstoken {} is invalid", accessToken);
             return null;
         }
         return callback.getOpenid();
     }
-
     @Override
-    public String pcOpenId(String act) {
+    public String pcOpenId(String act){
         if (act == null) {
             logger.info("error，pc _qt is null");
             return null;
@@ -106,19 +100,19 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public String refresh(String accessToken) {
         Callback callback = callbackDao.queryByAccessToken(accessToken);
-        if (callback == null) {
+        if(callback==null){
             logger.error("accesstoken {} is invalid", accessToken);
             return null;
         }
         String requestUrl = REFRESH_TOKEN_URL;
 
-        Map<String, String> params = Maps.newHashMap();
+        Map<String,String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         params.put("refresh_token", callback.getRefreshToken());
         requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
         String body = restfulHelper.get(requestUrl);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
-        String newAccessToken = (String) result.get("access_token");
+        String newAccessToken = (String)result.get("access_token");
 
         //刷新accessToken
         callbackDao.refreshToken(callback.getState(), newAccessToken);
@@ -165,13 +159,13 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public Callback accessToken(String code, String state) {
         Callback callback = callbackDao.queryByState(state);
-        if (callback == null) {
+        if(callback==null){
             logger.error("state {} is not found", state);
             return null;
         }
         String requestUrl = ACCESS_TOKEN_URL;
 
-        Map<String, String> params = Maps.newHashMap();
+        Map<String,String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         params.put("secret", ConfigUtils.getSecret());
         params.put("code", code);
@@ -179,9 +173,9 @@ public class OAuthServiceImpl implements OAuthService {
         String body = restfulHelper.get(requestUrl);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
 
-        String accessToken = (String) result.get("access_token");
-        String openid = (String) result.get("openid");
-        String refreshToken = (String) result.get("refresh_token");
+        String accessToken = (String)result.get("access_token");
+        String openid = (String)result.get("openid");
+        String refreshToken = (String)result.get("refresh_token");
         //更新accessToken，refreshToken，openid
         callback.setOpenid(openid);
         callback.setRefreshToken(refreshToken);
@@ -192,7 +186,7 @@ public class OAuthServiceImpl implements OAuthService {
         return callback;
     }
 
-    public static String getIPFromUrl(String url) {
+    public static String getIPFromUrl(String url){
         Pattern ipPattern = Pattern.compile(IP_REGULAR);
         Matcher matcher = ipPattern.matcher(url);
         if (matcher.find()) {
@@ -206,7 +200,7 @@ public class OAuthServiceImpl implements OAuthService {
      * 根据请求中的回调 URI，拼凑出用于生成微信二维码的参数
      */
     @Override
-    public Map<String, String> pcRedirectUrl(String callbackUrl) {
+    public Map<String,String> pcRedirectUrl(String callbackUrl){
         Callback callback = new Callback();
         try {
             callbackUrl = URLDecoder.decode(callbackUrl, "utf-8");
@@ -214,21 +208,21 @@ public class OAuthServiceImpl implements OAuthService {
             logger.error(e.getLocalizedMessage(), e);
         }
         String ip = getIPFromUrl(callbackUrl);
-        if (ip != null) {
-            callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
+        if(ip!=null){
+            callbackUrl = callbackUrl.replace("http://"+ip, ConfigUtils.domainName());
         }
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
         callback.setState(state);
         logger.info("state is {}", state);
         callbackDao.insert(callback);
-        Map<String, String> param = Maps.newHashMap();
-        param.put("appid", ConfigUtils.getRisePcAppid());
+        Map<String,String> param = Maps.newHashMap();
+        param.put("appid",ConfigUtils.getRisePcAppid());
         param.put("scope", "snsapi_login");
-        param.put("redirect_uri", RISE_PC_OAUTH_URL);
-        param.put("state", state);
+        param.put("redirect_uri",RISE_PC_OAUTH_URL);
+        param.put("state",state);
         param.put("style", "");
-        param.put("href", "");
+        param.put("href","");
         return param;
     }
 

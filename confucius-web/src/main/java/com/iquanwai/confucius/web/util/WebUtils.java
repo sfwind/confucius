@@ -61,20 +61,44 @@ public class WebUtils {
         return new ResponseEntity<Map<String, Object>>(json, status);
     }
 
+    /**
+     * 默认授权方式，静默授权
+     */
     public static void auth(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String url = request.getRequestURL().toString();
+        String domainName = request.getHeader("Domain-Name");
+        String url;
+        if(domainName != null){
+            url = "http://" + domainName + request.getRequestURI();
+        }else{
+            url = ConfigUtils.adapterDomainName() + request.getRequestURI();
+        }
+
         if (!StringUtils.isEmpty(request.getQueryString())) {
             url = url + "?" + request.getQueryString();
         }
         url = URLEncoder.encode(url, "UTF-8");
 
-        String domainName = request.getHeader("Domain-Name");
+        response.sendRedirect(ConfigUtils.adapterDomainName() + "/wx/oauth/auth?callbackUrl=" + url);
+    }
 
-        if (domainName != null) {
-            response.sendRedirect("http://" + domainName + "/wx/oauth/auth?callbackUrl=" + url);
-        } else {
-            response.sendRedirect(ConfigUtils.adapterDomainName() + "/wx/oauth/auth?callbackUrl=" + url);
+    /**
+     * 提示性授权
+     */
+    public static void askAuth(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String domainName = request.getHeader("Domain-Name");
+        String url;
+        if(domainName != null){
+            url = "http://" + domainName + request.getRequestURI();
+        }else{
+            url = ConfigUtils.adapterDomainName() + request.getRequestURI();
         }
+
+        if (!StringUtils.isEmpty(request.getQueryString())) {
+            url = url + "?" + request.getQueryString();
+        }
+        url = URLEncoder.encode(url, "UTF-8");
+
+        response.sendRedirect(ConfigUtils.adapterDomainName() + "/wx/oauth/auth/ask?callbackUrl=" + url);
     }
 
     /**
