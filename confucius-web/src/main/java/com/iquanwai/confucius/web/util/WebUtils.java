@@ -68,7 +68,13 @@ public class WebUtils {
         }
         url = URLEncoder.encode(url, "UTF-8");
 
-        response.sendRedirect(ConfigUtils.adapterDomainName() + "/wx/oauth/auth?callbackUrl=" + url);
+        String domainName = request.getHeader("Domain-Name");
+
+        if (domainName != null) {
+            response.sendRedirect("http://" + domainName + "/wx/oauth/auth?callbackUrl=" + url);
+        } else {
+            response.sendRedirect(ConfigUtils.adapterDomainName() + "/wx/oauth/auth?callbackUrl=" + url);
+        }
     }
 
     /**
