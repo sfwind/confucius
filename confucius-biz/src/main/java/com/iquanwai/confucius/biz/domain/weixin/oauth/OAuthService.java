@@ -19,7 +19,7 @@ public interface OAuthService {
     /**
      * 组装微信授权页的url，记录回调url
      */
-    String redirectUrl(String callbackUrl, String authUrl);
+    String redirectUrl(String callbackUrl, String authUrl, String domainName);
 
     Callback pcAccessToken(String code, String state);
 

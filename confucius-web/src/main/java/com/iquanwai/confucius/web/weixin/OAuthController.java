@@ -43,8 +43,9 @@ public class OAuthController {
                           HttpServletResponse response) {
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
+            String domainName = request.getHeader("Domain-Name");
 
-            String requestUrl = oAuthService.redirectUrl(callbackUrl, OAuthService.OAUTH_URL);
+            String requestUrl = oAuthService.redirectUrl(callbackUrl, OAuthService.OAUTH_URL, domainName);
             if (ConfigUtils.logDetail()) {
                 LOGGER.info("ip is {},callbackUrl is {},requestUrl is {}", remoteIp, callbackUrl, requestUrl);
             }
@@ -66,8 +67,9 @@ public class OAuthController {
                              HttpServletResponse response) {
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
+            String domainName = request.getHeader("Domain-Name");
 
-            String requestUrl = oAuthService.redirectUrl(callbackUrl, OAuthService.OAUTH_ASK_URL);
+            String requestUrl = oAuthService.redirectUrl(callbackUrl, OAuthService.OAUTH_ASK_URL, domainName);
             if (ConfigUtils.logDetail()) {
                 LOGGER.info("ip is {},callbackUrl is {},requestUrl is {}", remoteIp, callbackUrl, requestUrl);
             }
