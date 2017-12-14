@@ -55,6 +55,7 @@ public class OAuthServiceImpl implements OAuthService {
                 domainName = ConfigUtils.realDomainName();
                 callbackUrl = callbackUrl.replace("http://" + ip, "https://" + domainName);
             } else {
+                logger.info("domain name is {}", domainName);
                 callbackUrl = callbackUrl.replace("http://" + ip, "http://" + domainName);
             }
         }
