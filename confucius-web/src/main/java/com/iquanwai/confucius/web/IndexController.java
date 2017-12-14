@@ -123,45 +123,30 @@ public class IndexController {
 
     private ModelAndView courseView(HttpServletRequest request) {
         ModelAndView mav = new ModelAndView("course");
-        if (request.getParameter("debug") != null) {
-            if (ConfigUtils.isFrontDebug()) {
-                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
-            } else {
-                mav.addObject("resource", ConfigUtils.staticResourceUrl());
-            }
-        } else {
-            mav.addObject("resource", ConfigUtils.staticResourceUrl());
-        }
+        String domainName = request.getHeader("Host-Test");
+        mav.addObject("resource", ConfigUtils.staticResourceUrl(domainName));
         return mav;
     }
 
     private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser, String viewName) {
         ModelAndView mav = new ModelAndView(viewName);
-        String testUrl = "";
-        String resource = "";
+        String resource;
+        String domainName = request.getHeader("Host-Test");
+
         switch (viewName) {
             case COURSE_VIEW: {
-                testUrl = "http://0.0.0.0:4000/bundle.js";
-                resource = ConfigUtils.staticResourceUrl();
+                resource = ConfigUtils.staticResourceUrl(domainName);
             }
             break;
             case PAY_VIEW: {
-                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
-                resource = ConfigUtils.staticPayUrl();
+                resource = ConfigUtils.staticPayUrl(domainName);
             }
             break;
+            default:
+                resource = ConfigUtils.staticResourceUrl(domainName);
         }
 
-
-        if (request.getParameter("debug") != null) {
-            if (ConfigUtils.isFrontDebug()) {
-                mav.addObject("resource", testUrl);
-            } else {
-                mav.addObject("resource", resource);
-            }
-        } else {
-            mav.addObject("resource", resource);
-        }
+        mav.addObject("resource", resource);
 
         if (loginUser != null) {
             Map<String, String> userParam = Maps.newHashMap();

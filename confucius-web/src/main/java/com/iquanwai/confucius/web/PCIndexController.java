@@ -125,10 +125,10 @@ public class PCIndexController {
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
                 mav.addObject("loginSocketUrl", "127.0.0.1:8080/session");
             } else {
-                mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
+                mav.addObject("resource", ConfigUtils.staticPcResourceUrl(null));
             }
         } else {
-            mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
+            mav.addObject("resource", ConfigUtils.staticPcResourceUrl(null));
         }
         if(pcLoginUser != null && pcLoginUser.getWeixin() != null) {
             Map<String, String> userParam = Maps.newHashMap();
