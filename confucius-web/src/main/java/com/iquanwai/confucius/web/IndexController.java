@@ -123,7 +123,7 @@ public class IndexController {
 
     private ModelAndView courseView(HttpServletRequest request) {
         ModelAndView mav = new ModelAndView("course");
-        String domainName = request.getHeader("Domain-Name");
+        String domainName = request.getHeader("Host-Test");
         mav.addObject("resource", ConfigUtils.staticResourceUrl(domainName));
         return mav;
     }
@@ -131,7 +131,7 @@ public class IndexController {
     private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser, String viewName) {
         ModelAndView mav = new ModelAndView(viewName);
         String resource;
-        String domainName = request.getHeader("Domain-Name");
+        String domainName = request.getHeader("Host-Test");
 
         switch (viewName) {
             case COURSE_VIEW: {
