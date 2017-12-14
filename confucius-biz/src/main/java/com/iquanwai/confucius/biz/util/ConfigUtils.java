@@ -8,6 +8,7 @@ import com.typesafe.config.ConfigFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.Date;
@@ -113,7 +114,7 @@ public class ConfigUtils {
             url = url.concat("_t=").concat(new Random().nextInt() + "");
         }
 
-        if (domainName != null) {
+        if (!StringUtils.isEmpty(domainName)) {
             url = replaceDomainName(url, domainName);
         }
 
@@ -127,7 +128,7 @@ public class ConfigUtils {
             url = url.concat("_t=").concat(new Random().nextInt() + "");
         }
 
-        if (domainName != null) {
+        if (!StringUtils.isEmpty(domainName)) {
             url = replaceDomainName(url, domainName);
         }
 
@@ -142,9 +143,10 @@ public class ConfigUtils {
             url = url.concat("_t=").concat(new Random().nextInt() + "");
         }
 
-        if (domainName != null) {
+        if (!StringUtils.isEmpty(domainName)) {
             url = replaceDomainName(url, domainName);
         }
+
         return url;
     }
 
