@@ -92,6 +92,10 @@ public class AccountServiceImpl implements AccountService {
             //先从数据库查询account对象
             Account account = followUserDao.queryByOpenid(openid);
             if (account != null) {
+                if (account.getSubscribe() == 0) {
+                    // 曾经关注，现在取关的人
+                    throw new NotFollowingException();
+                }
                 return account;
             }
             //从微信处获取
@@ -444,8 +448,6 @@ public class AccountServiceImpl implements AccountService {
 
     /**
      * 批量拉黑用户
-     *
-     * @param openidList:拉黑用户列表
      */
     @Override
     public boolean batchBlackList(List<String> openidList) {
@@ -457,8 +459,6 @@ public class AccountServiceImpl implements AccountService {
 
     /**
      * 批量取消拉黑用户
-     *
-     * @param openidList:取消拉黑用户列表
      */
     @Override
     public boolean batchUnBlackList(List<String> openidList) {

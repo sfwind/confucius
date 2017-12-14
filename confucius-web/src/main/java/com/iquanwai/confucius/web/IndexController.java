@@ -2,11 +2,13 @@ package com.iquanwai.confucius.web;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.subscribe.SubscribeRouterService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.common.customer.SubscribeRouterConfig;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -37,12 +39,21 @@ public class IndexController {
     private AccountService accountService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private SubscribeRouterService subscribeRouterService;
+
+    private static final String SUBSCRIBE_URL = "/subscribe";
 
     private static final String COURSE_VIEW = "course";
     private static final String PAY_VIEW = "pay";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    @RequestMapping(value = "/subscribe")
+    public ModelAndView goSubscribe(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        logger.info("用户未关注，跳转关注页面：{}", request.getRequestURI());
+        return courseView(request, null, PAY_VIEW);
+    }
 
     @RequestMapping(value = "/static/**", method = RequestMethod.GET)
     public ModelAndView getIndex(HttpServletRequest request) throws Exception {
@@ -65,7 +76,7 @@ public class IndexController {
         return courseView(request, loginUser, PAY_VIEW);
     }
 
-    private boolean checkAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    private boolean checkAccessToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
             return true;
         }
@@ -88,8 +99,14 @@ public class IndexController {
             account = accountService.getAccount(openId, false);
         } catch (NotFollowingException e) {
             try {
-                response.sendRedirect("/static/subscribe");
-                return false;
+                SubscribeRouterConfig subscribeRouterConfig = subscribeRouterService.loadUnSubscribeRouterConfig(request.getRequestURI());
+                if (subscribeRouterConfig != null) {
+                    // 未关注
+                    response.sendRedirect(SUBSCRIBE_URL + "?scene=" + subscribeRouterConfig.getScene());
+                    return false;
+                } else {
+                    response.sendRedirect(SUBSCRIBE_URL);
+                }
             } catch (IOException e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
             }
@@ -107,14 +124,13 @@ public class IndexController {
         }
     }
 
-    @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
-    public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request,response)){
+    @RequestMapping(value = "/certificate/**", method = RequestMethod.GET)
+    public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (!checkAccessToken(request, response)) {
             return null;
         }
         return courseView(request);
     }
-
 
     @RequestMapping(value = "/heartbeat", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> heartbeat() throws Exception {
