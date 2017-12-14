@@ -351,6 +351,6 @@ public class ConfigUtils {
     public static String replaceDomainName(String url, String domainName) {
         String urlPattern = "^((http://)|(https://))?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}(/)";
         //替换
-        return url.replaceAll(urlPattern, "http://" + domainName);
+        return url.replaceAll(urlPattern, "http://" + domainName+"/");
     }
 }

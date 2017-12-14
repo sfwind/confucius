@@ -149,6 +149,7 @@ public class IndexController {
         ModelAndView mav = new ModelAndView(viewName);
         String resource;
         String domainName = request.getHeader("Host-Test");
+        logger.info("domain name:{}",domainName);
 
         switch (viewName) {
             case COURSE_VIEW: {
