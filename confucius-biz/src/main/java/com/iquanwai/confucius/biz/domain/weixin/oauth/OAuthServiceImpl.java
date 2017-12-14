@@ -53,8 +53,10 @@ public class OAuthServiceImpl implements OAuthService {
         if (ip != null) {
             if (domainName == null) {
                 domainName = ConfigUtils.realDomainName();
+                callbackUrl = callbackUrl.replace("http://" + ip, "https://" + domainName);
+            } else {
+                callbackUrl = callbackUrl.replace("http://" + ip, "http://" + domainName);
             }
-            callbackUrl = callbackUrl.replace("http://" + ip, "https://"+domainName);
         }
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
