@@ -6,9 +6,9 @@ import lombok.Data;
 public class SubscribeRouterConfig {
 
     private Integer id;
-    private String url;
-    private String scene;
-    private Integer sequence;
+    private String url; // 正则匹配 url
+    private String scene; // 场景号
+    private Integer sequence; // 正则匹配优先级
     private Boolean del;
 
 }
