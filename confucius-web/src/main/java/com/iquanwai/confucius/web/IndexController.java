@@ -106,6 +106,7 @@ public class IndexController {
                     return false;
                 } else {
                     response.sendRedirect(SUBSCRIBE_URL);
+                    return false;
                 }
             } catch (IOException e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
