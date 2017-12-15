@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.account.dto;
+package com.iquanwai.confucius.web.internal.dto;
 
 import lombok.Data;
 

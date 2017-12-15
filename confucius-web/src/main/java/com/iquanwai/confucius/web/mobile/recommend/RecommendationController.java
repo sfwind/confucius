@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.recommend;
+package com.iquanwai.confucius.web.mobile.recommend;
 
 import com.iquanwai.confucius.biz.domain.fragmentation.recommedation.RecommedationService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
