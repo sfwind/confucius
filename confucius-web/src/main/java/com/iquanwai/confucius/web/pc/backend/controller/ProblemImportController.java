@@ -39,8 +39,8 @@ public class ProblemImportController {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("选择小课")
-                .action("加载所有小课");
+                .function("选择课程")
+                .action("加载所有课程");
         operationLogService.log(operationLog);
 
         return WebUtils.result(simpleProblems);
@@ -54,8 +54,8 @@ public class ProblemImportController {
         problem.setSchedules(schedules);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("选择小课")
-                .action("加载小课")
+                .function("选择课程")
+                .action("加载课程")
                 .memo(id.toString());
         operationLogService.log(operationLog);
 
@@ -63,7 +63,7 @@ public class ProblemImportController {
     }
 
     /**
-     * 添加和更新小课功能
+     * 添加和更新课程功能
      *
      * @param loginUser
      * @param problem
@@ -81,8 +81,8 @@ public class ProblemImportController {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("选择小课")
-                .action("保存小课");
+                .function("选择课程")
+                .action("保存课程");
         operationLogService.log(operationLog);
 
         return WebUtils.result(problemId);
@@ -95,7 +95,7 @@ public class ProblemImportController {
         catalogDto.setSubCatalogs(problemService.loadAllSubCatalogs());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
-                .function("选择小课")
+                .function("选择课程")
                 .action("加载所有类别");
         operationLogService.log(operationLog);
 

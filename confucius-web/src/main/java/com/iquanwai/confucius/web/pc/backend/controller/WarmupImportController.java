@@ -43,7 +43,7 @@ public class WarmupImportController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习编辑")
-                .action("加载小课的巩固练习");
+                .action("加载课程的巩固练习");
         operationLogService.log(operationLog);
 
         return WebUtils.result(warmupPractices);
@@ -127,7 +127,7 @@ public class WarmupImportController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理")
                 .function("巩固练习新增")
-                .action("获取默认小课信息");
+                .action("获取默认课程信息");
         operationLogService.log(operationLog);
         WarmupPractice warmupPractice = practiceService.loadWarmupPracticeByPracticeUid(practiceUid);
         if(warmupPractice != null) {
