@@ -265,7 +265,7 @@ public class RiseOperationController {
         final List<String> openidList;
         if (applications != null && applications.size() > 0) {
             //获取黑名单用户
-            openidList = accountService.getBlackList();
+            openidList = accountService.loadBlackListOpenIds();
         } else {
             openidList = null;
         }

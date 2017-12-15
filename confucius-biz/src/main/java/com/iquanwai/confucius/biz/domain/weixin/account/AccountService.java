@@ -91,7 +91,7 @@ public interface AccountService {
      * (该接口一次最多返回10000条数据)
      *
      */
-    List<String> getBlackList();
+    List<String> loadBlackListOpenIds();
 
     /**
      * 批量拉黑用户
