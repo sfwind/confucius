@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -39,6 +40,9 @@ public interface AssistantCoachService {
 
     List<RiseWorkInfoDto> getUnderCommentApplicationsByMemberId(Integer problemId, String memberId);
 
+    List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId,String className,String groupId);
+
+
     /**
      * 获取待评论的应用练习数量
      * */
@@ -54,4 +58,19 @@ public interface AssistantCoachService {
      * @param profileId 助教id
      * */
     List<RiseWorkInfoDto> getCommentedSubmit(Integer profileId);
+
+
+    /**
+     * 获取RiseClassMember中的ClassName和GroupId
+     * @return
+     */
+    List<RiseClassMember> loadClassNameAndGroupId();
+
+
+
+
+
+
+
+
 }

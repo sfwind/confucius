@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.asst.controller;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
@@ -9,8 +10,11 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.pc.asst.dto.ClassNameGroups;
+import com.iquanwai.confucius.web.pc.asst.dto.Group;
 import com.iquanwai.confucius.web.pc.backend.dto.DiscussDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
@@ -22,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -229,5 +232,54 @@ public class AssistantCoachController {
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
+    /**
+     * 获得RiseMember的班级和小组
+     *
+     * @param loginUser
+     * @return
+     */
+    @RequestMapping(value = "/load/classname/group", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadClassNameAndGroup(PCLoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("助教管理")
+                .action("加载班级和小组");
+        operationLogService.log(operationLog);
 
+        List<RiseClassMember> riseClassMembers = assistantCoachService.loadClassNameAndGroupId();
+        ClassNameGroups classNameGroups = new ClassNameGroups();
+
+        List<String> classNames =  riseClassMembers.stream().map(RiseClassMember::getClassName).distinct().collect(Collectors.toList());
+        List<Group> groupIds = Lists.newArrayList();
+        riseClassMembers.stream().forEach(riseClassMember -> {
+            Group group = new Group();
+            group.setClassName(riseClassMember.getClassName());
+            group.setGroupId(riseClassMember.getGroupId());
+            groupIds.add(group);
+        });
+        classNameGroups.setClassName(classNames);
+        classNameGroups.setGroupIds(groupIds);
+
+        return WebUtils.result(classNameGroups);
+    }
+
+
+    /**
+     * 根据班级和小组搜索求点评
+     * @param loginUser
+     * @param problemId
+     * @param className
+     * @param groupId
+     * @return
+     */
+    @RequestMapping(value = "/application/{problemId}/{className}/{groupId}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadSubmitsByProblemIdClassNameGroup(PCLoginUser loginUser, @PathVariable Integer problemId, @PathVariable String className, @PathVariable String groupId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("助教管理")
+                .action("根据班级和小组搜索求点评");
+        operationLogService.log(operationLog);
+
+       return WebUtils.result(assistantCoachService.getUnderCommentApplicationsByClassNameAndGroup(problemId,className,groupId));
+    }
 }

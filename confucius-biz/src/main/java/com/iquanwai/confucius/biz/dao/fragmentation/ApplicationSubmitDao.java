@@ -368,5 +368,21 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return map;
     }
 
-
+    /**
+     * 获得需要求点评的提交
+     * @param problemId
+     * @param profileId
+     * @return
+     */
+    public List<ApplicationSubmit> loadRequestFeedBackSubmitsByProfileId(Integer problemId,Integer profileId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ApplicationSubmit WHERE ProblemId = ? AND ProfileId = ? AND RequestFeedback = 1 AND Del = 0";
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        try {
+          return   runner.query(sql,h,problemId,profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
 }

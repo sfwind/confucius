@@ -327,6 +327,36 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         return workInfoDtos;
     }
 
+    /**
+     * 根据班级和小组查询所有待点评的应用题
+     * @param className
+     * @param groupId
+     * @return
+     */
+    @Override
+    public List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId,String className, String groupId) {
+        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className,groupId);
+
+        riseClassMembers.stream().forEach(riseClassMember -> {
+            Integer profileId = riseClassMember.getProfileId();
+            List<ApplicationSubmit> applicationSubmits = applicationSubmitDao.loadRequestFeedBackSubmitsByProfileId(problemId,profileId);
+            applicationSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
+
+            List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
+            for (ApplicationSubmit submit : applicationSubmits) {
+                RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
+                applicationPractices.forEach(applicationPractice -> {
+                    if (submit.getApplicationId().equals(applicationPractice.getId())) {
+                        riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                    }
+                });
+                workInfoDtos.add(riseWorkInfoDto);
+            }
+        });
+        return workInfoDtos;
+    }
+
     @Override
     public Map<Integer, Integer> getUnderCommentApplicationCount() {
         List<UnderCommentCount> underCommentCounts = applicationSubmitDao.getUnderCommentCount();
@@ -426,5 +456,16 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
         return riseWorkInfoDto;
     }
+
+
+    /**
+     * 获得RiseClassMember中的ClassName和GroupId
+     * @return
+     */
+    @Override
+    public List<RiseClassMember> loadClassNameAndGroupId() {
+        return riseClassMemberDao.loadAllClassNameAndGroup();
+    }
+
 
 }

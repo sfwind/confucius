@@ -259,4 +259,40 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    /**
+     * 获得所有的班级和小组
+     * @return
+     */
+    public List<RiseClassMember> loadAllClassNameAndGroup(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = " select ClassName,GroupId from RiseClassMember where Active = 1 and Del = 0 group by ClassName,GroupId order by ClassName";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+
+        try {
+           return runner.query(sql,h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+    /**
+     * 根据班级和小组获得用户
+     * @param className
+     * @param groupId
+     * @return
+     */
+    public List<RiseClassMember> getRiseClassMemberByClassNameGroupId(String className,String groupId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from RiseClassMember where ClassName = ? and GroupId = ? and Active = 1 and Del = 0";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+
+        try {
+            return runner.query(sql,h,className,groupId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
 }
