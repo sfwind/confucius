@@ -768,8 +768,12 @@ public class SignupServiceImpl implements SignupService {
         if (riseMember != null) {
             switch (riseMember.getMemberTypeId()) {
                 case RiseMember.ELITE:
-                case RiseMember.HALF_ELITE:
                     fee = memberType.getFee();
+                    businessSchool.setIsBusinessStudent(true);
+                    break;
+                case RiseMember.HALF_ELITE:
+                    // TODO 对于专业版的学员，金额更改为 1800
+                    fee = 1800.0;
                     businessSchool.setIsBusinessStudent(true);
                     break;
                 case RiseMember.ANNUAL:
