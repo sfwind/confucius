@@ -187,7 +187,7 @@ public class MonthlyCampController {
             Profile profile = accountService.getProfileByRiseId(RiseId);
             OperationLog operationLog = OperationLog.create()
                     .memo(monthlyCampDto.getTips() + "-" + monthlyCampDto.toString())
-                    .openid(profile.getOpenid()).module("小课训练营")
+                    .openid(profile.getOpenid()).module("训练营")
                     .function("信息修改").action("信息修改");
             operationLogService.log(operationLog);
         }
@@ -217,7 +217,7 @@ public class MonthlyCampController {
                                                                              @RequestBody List<Integer> batchRiseClassMemberIds) {
         OperationLog operationLog = OperationLog.create()
                 .memo("Ids:" + batchRiseClassMemberIds.toString() + "groupId:" + groupId)
-                .openid("").module("小课训练营")
+                .openid("").module("训练营")
                 .function("信息修改").action("批量小组信息修改");
         operationLogService.log(operationLog);
 
@@ -236,8 +236,8 @@ public class MonthlyCampController {
         Profile profile = accountService.getProfileByRiseId(monthlyCampDto.getRiseId());
         OperationLog operationLog = OperationLog.create()
                 .memo("className:" + monthlyCampDto.getClassName() + ", groupId:" + monthlyCampDto.getGroupId())
-                .openid(profile.getOpenid()).module("小课训练营")
-                .function("信息新增").action("小课训练营用户新增");
+                .openid(profile.getOpenid()).module("训练营")
+                .function("信息新增").action("训练营用户新增");
         operationLogService.log(operationLog);
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         int sellingYear = monthlyCampConfig.getSellingYear();
@@ -285,8 +285,8 @@ public class MonthlyCampController {
         Assert.notNull(riseId, "解锁用户的 RiseId 不能为空");
         Profile profile = accountService.getProfileByRiseId(riseId);
         OperationLog operationLog = OperationLog.create()
-                .openid(profile.getOpenid()).module("小课训练营")
-                .function("开启训练营").action("后台增加小课训练营身份");
+                .openid(profile.getOpenid()).module("训练营")
+                .function("开启训练营").action("后台增加训练营身份");
         operationLogService.log(operationLog);
         monthlyCampService.unlockMonthlyCampAuthority(riseId);
         return WebUtils.success();

@@ -16,7 +16,7 @@ public class ConfigUtilsTest extends TestBase {
         System.out.println(ConfigUtils.getRisePayStopTime().after(new Date()));
     }
 
-//    线上小课生成,紧急修复代码
+//    线上课程生成,紧急修复代码
 //    public static void main(String[] args) {
 //         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 //

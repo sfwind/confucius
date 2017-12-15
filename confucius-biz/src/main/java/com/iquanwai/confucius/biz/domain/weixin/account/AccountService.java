@@ -29,8 +29,14 @@ public interface AccountService {
      */
     Account getAccount(String openid, boolean realTime) throws NotFollowingException;
 
+    /**
+     * 根据riseid获取用户的详细信息
+     */
     Profile getProfileByRiseId(String riseId);
 
+    /**
+     * 根据profile id 列表获取用户的详细信息
+     */
     List<Profile> getProfiles(List<Integer> profileIds);
 
     /**
@@ -69,10 +75,8 @@ public interface AccountService {
     void unfollow(String openid);
 
     /**
-     * 更新riseMember状态
+     * 根据昵称模糊查询用户的详细信息
      */
-    void updateRiseMember(String openid, Integer riseMember);
-
     List<Profile> loadProfilesByNickName(String nickName);
 
     /**
@@ -92,16 +96,21 @@ public interface AccountService {
     /**
      * 批量拉黑用户
      *
-     * @param openidList:拉黑用户列表
+     * @param openidList 拉黑用户列表
      */
     boolean batchBlackList(List<String> openidList);
 
     /**
      * 取消拉黑用户
      *
-     * @param openidList:取消拉黑用户列表
+     * @param openidList 取消拉黑用户列表
      */
     boolean batchUnBlackList(List<String> openidList);
 
     Integer loadUserScheduleCategory(Integer profileId);
+
+    /**
+     * 根据unionId获取用户详情
+     */
+    Profile queryByUnionId(String unionid);
 }

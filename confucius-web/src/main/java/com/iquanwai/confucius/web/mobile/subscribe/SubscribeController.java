@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.subscribe;
+package com.iquanwai.confucius.web.mobile.subscribe;
 
 import com.iquanwai.confucius.biz.domain.subscribe.SubscribeRouterService;
 import com.iquanwai.confucius.web.util.WebUtils;

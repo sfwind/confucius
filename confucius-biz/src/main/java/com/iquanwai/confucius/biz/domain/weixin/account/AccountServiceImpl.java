@@ -22,7 +22,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
@@ -32,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
@@ -323,34 +321,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void updateRiseMember(String openid, Integer riseMember) {
-        Profile profile = profileDao.queryByOpenId(openid);
-        Assert.notNull(profile, "用户不能为空");
-
-        Integer currentRiseMember = profile.getRiseMember();
-        switch (currentRiseMember) {
-            case Constants.RISE_MEMBER.MEMBERSHIP:
-                // 如果当前人已经是会员状态，则什么状态都不需要改变
-                break;
-            case Constants.RISE_MEMBER.COURSE_USER:
-                // 如果当前人是课程购买状态，后面可以更改成会员或者训练营状态
-                profileDao.updateRiseMember(openid, riseMember);
-                break;
-            case Constants.RISE_MEMBER.MONTHLY_CAMP:
-                // 当前人是训练营状态，则只可以升级为会员
-                if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
-                    profileDao.updateRiseMember(openid, riseMember);
-                }
-                break;
-            case Constants.RISE_MEMBER.FREE:
-                profileDao.updateRiseMember(openid, riseMember);
-                break;
-            default:
-                logger.error("当前用户Profile会员信息异常:{}", profile);
-        }
-    }
-
-    @Override
     public List<Profile> loadProfilesByNickName(String nickName) {
         return profileDao.loadProfilesByNickName(nickName);
     }
@@ -496,5 +466,10 @@ public class AccountServiceImpl implements AccountService {
         } else {
             return CourseScheduleDefault.CategoryType.NEW_STUDENT;
         }
+    }
+
+    @Override
+    public Profile queryByUnionId(String unionid) {
+        return profileDao.queryByUnionId(unionid);
     }
 }

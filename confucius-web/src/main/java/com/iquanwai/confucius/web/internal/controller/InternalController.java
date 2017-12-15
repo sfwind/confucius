@@ -1,10 +1,10 @@
-package com.iquanwai.confucius.web.internal;
+package com.iquanwai.confucius.web.internal.controller;
 
 import com.iquanwai.confucius.biz.domain.message.SMSSendResult;
 import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.web.account.dto.SMSDto;
+import com.iquanwai.confucius.web.internal.dto.SMSDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;

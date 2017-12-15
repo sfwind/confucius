@@ -95,15 +95,12 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
 
     @Override
     public void switchCampDataProcess(Integer sourceYear, Integer sourceMonth, Integer targetYear, Integer targetMonth) {
-        logger.info("开启切换小课训练营数据");
+        logger.info("开启切换训练营数据");
 
         // 获取切换之前月份的所有人员
         List<RiseClassMember> sourceRiseClassMembers = riseClassMemberDao.loadAllByYearMonth(sourceYear, sourceMonth);
-        logger.info("point1");
         List<RiseMember> sourceRiseMembers = riseMemberDao.loadByProfileIds(sourceRiseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList()));
-        logger.info("point2");
         Map<Integer, RiseMember> sourceRiseMemberMap = sourceRiseMembers.stream().collect(Collectors.toMap(RiseMember::getProfileId, riseMember -> riseMember));
-        logger.info("point3");
 
         sourceRiseClassMembers.forEach(riseClassMember -> {
             logger.info("正在处理:" + riseClassMember.getMemberId());
@@ -128,7 +125,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
         if (updateResult > 0) {
             riseClassMemberDao.batchUpdateActive(targetYear, targetMonth, 1);
         }
-        logger.info("小课训练营数据切换完毕");
+        logger.info("训练营数据切换完毕");
     }
 
     @Override

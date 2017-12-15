@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Created by justin on 16/8/26.
  */
-public class CourseHandlerInterceptor extends HandlerInterceptorAdapter {
+public class WeixinHandlerInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

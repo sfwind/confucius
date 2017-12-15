@@ -348,7 +348,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     /**
-     * 新增小课训练营用户 RiseClassMember 记录
+     * 新增训练营用户 RiseClassMember 记录
      */
     private void insertMonthlyCampRiseClassMember(Integer profileId) {
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();

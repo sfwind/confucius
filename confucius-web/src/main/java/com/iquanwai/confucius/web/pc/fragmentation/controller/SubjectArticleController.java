@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 /**
  * Created by justin on 17/5/3.
- * 小课分享controller
+ * 课程分享controller
  */
 @RestController
 @RequestMapping("/pc/fragment/subject")
@@ -52,7 +52,7 @@ public class SubjectArticleController {
     public ResponseEntity<Map<String,Object>> loadSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId,
                                                               @ModelAttribute Page page){
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(problemId, "小课id不能为空");
+        Assert.notNull(problemId, "课程id不能为空");
         page.setPageSize(20);
         List<RiseWorkInfoDto> list = practiceService.loadSubjectArticles(problemId,page)
                 .stream().map(item -> {
@@ -87,7 +87,7 @@ public class SubjectArticleController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("PC端加载小课论坛")
+                .action("PC端加载课程论坛")
                 .memo(problemId + "");
         operationLogService.log(operationLog);
         RefreshListDto<RiseWorkInfoDto> result = new RefreshListDto<>();
@@ -99,7 +99,7 @@ public class SubjectArticleController {
     @RequestMapping(value = "/list/mine",method = RequestMethod.GET)
     public ResponseEntity<Map<String,Object>> loadMineSubjectList(PCLoginUser loginUser, @RequestParam Integer problemId){
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(problemId, "小课id不能为空");
+        Assert.notNull(problemId, "课程id不能为空");
         List<RiseWorkInfoDto> list = practiceService.loadUserSubjectArticles(problemId,loginUser.getOpenId())
                 .stream().map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto(item);
@@ -129,7 +129,7 @@ public class SubjectArticleController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("PC端加载小课论坛")
+                .action("PC端加载课程论坛")
                 .memo(problemId + "");
         operationLogService.log(operationLog);
         return WebUtils.result(list);
@@ -144,7 +144,7 @@ public class SubjectArticleController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("应用任务")
-                .action("PC查看小课论坛内容")
+                .action("PC查看课程论坛内容")
                 .memo(loginUser.getOpenId() + " look " + submitId);
         operationLogService.log(operationLog);
         SubjectArticle submit = practiceService.loadSubjectArticle(submitId);
@@ -226,7 +226,7 @@ public class SubjectArticleController {
         Assert.notNull(problemId, "难题不能为空");
         boolean b = planService.hasProblemPlan(loginUser.getOpenId(), problemId);
         if(!b){
-            return WebUtils.error("您并没有该小课，无法提交");
+            return WebUtils.error("您并没有该课程，无法提交");
         }
         Integer submitId = practiceService.submitSubjectArticle(new SubjectArticle(
                 workInfoDto.getSubmitId(),
@@ -246,7 +246,7 @@ public class SubjectArticleController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("碎片化")
-                .action("PC小课论坛提交")
+                .action("PC课程论坛提交")
                 .memo(submitId + "");
         operationLogService.log(operationLog);
         if(submitId==-1){
@@ -260,11 +260,11 @@ public class SubjectArticleController {
     @RequestMapping(value = "/label/{problemId}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadLabels(PCLoginUser loginUser, @PathVariable Integer problemId) {
         Assert.notNull(loginUser, "用户不能为空");
-        Assert.notNull(problemId, "小课不能为空");
+        Assert.notNull(problemId, "课程不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("训练")
                 .function("标签")
-                .action("加载小课标签")
+                .action("加载课程标签")
                 .memo(problemId.toString());
         operationLogService.log(operationLog);
         RiseWorkShowDto dto = new RiseWorkShowDto();
