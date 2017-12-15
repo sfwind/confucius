@@ -32,6 +32,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/10/8.
@@ -152,8 +153,14 @@ public class BackendController {
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
         ThreadPool.execute(() -> {
             try {
-                List<String> openids = noticeMsgDto.getOpenids();
-                openids.forEach(openid -> {
+                // 所有待发人员名单
+                List<String> openIds = noticeMsgDto.getOpenids();
+                // 获取黑名单人员
+                List<String> blackListOpenIds = accountService.loadBlackListOpenIds();
+                // 过滤调黑名单人员
+                openIds = openIds.stream().filter(openId -> !blackListOpenIds.contains(openId)).collect(Collectors.toList());
+
+                openIds.forEach(openid -> {
                     TemplateMessage templateMessage = new TemplateMessage();
                     templateMessage.setTouser(openid);
                     templateMessage.setTemplate_id(noticeMsgDto.getMessageId());

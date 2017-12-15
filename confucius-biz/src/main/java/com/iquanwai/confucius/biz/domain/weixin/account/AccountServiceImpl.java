@@ -381,7 +381,7 @@ public class AccountServiceImpl implements AccountService {
      * 获取黑名单的列表(所有名单)
      */
     @Override
-    public List<String> getBlackList() {
+    public List<String> loadBlackListOpenIds() {
         String url = LIST_BLACKLIST_URL;
         int count = 0;
         List<String> blackList = new ArrayList<>();
