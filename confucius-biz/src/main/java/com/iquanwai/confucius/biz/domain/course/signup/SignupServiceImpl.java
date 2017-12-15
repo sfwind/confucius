@@ -541,9 +541,14 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setOrderId(riseOrder.getOrderId());
             riseMember.setProfileId(riseOrder.getProfileId());
             riseMember.setMemberTypeId(memberType.getId());
-            if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) ||
-                    existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+
+            if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
                 riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 12));
+                // 续费，继承OpenDate
+                riseMember.setOpenDate(existRiseMember.getOpenDate());
+            } else if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+                // TODO 特殊处理 查看当前身份，商学院会员升级方式保留，但是精英版半年只增加半年时间
+                riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 6));
                 // 续费，继承OpenDate
                 riseMember.setOpenDate(existRiseMember.getOpenDate());
             } else {
