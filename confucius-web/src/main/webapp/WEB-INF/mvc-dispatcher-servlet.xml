@@ -69,31 +69,24 @@
         <mvc:interceptor>
             <mvc:mapping path="/**" />
             <mvc:exclude-mapping path="/"/>
-            <mvc:exclude-mapping path="/signup/rise/signup"/>
             <mvc:exclude-mapping path="/wx/**" />
             <mvc:exclude-mapping path="/b/**" />
             <mvc:exclude-mapping path="/image/**" />
             <mvc:exclude-mapping path="/js/**" />
-            <mvc:exclude-mapping path="/homework/**" />
-            <mvc:exclude-mapping path="/share/**" />
-            <mvc:exclude-mapping path="/static/**" />
+            <!--<mvc:exclude-mapping path="/homework/**" />-->
+            <!--<mvc:exclude-mapping path="/static/**" />-->
             <mvc:exclude-mapping path="/cache/**" />
             <mvc:exclude-mapping path="/file/image/**" />
-            <mvc:exclude-mapping path="/account/login/**"/>
-            <mvc:exclude-mapping path="/account/get"/>
-            <mvc:exclude-mapping path="/session/**"/>
+            <mvc:exclude-mapping path="/account/**"/>
             <mvc:exclude-mapping path="/login" />
             <mvc:exclude-mapping path="/logout" />
-            <mvc:exclude-mapping path="/account/check/follow" />
             <mvc:exclude-mapping path="/pc/**"/>
-            <mvc:exclude-mapping path="/home/**" />
+            <mvc:exclude-mapping path="/home" />
             <mvc:exclude-mapping path="/fragment/**"/>
             <mvc:exclude-mapping path="/servercode"/>
             <mvc:exclude-mapping path="/community"/>
             <mvc:exclude-mapping path="/backend/**"/>
             <mvc:exclude-mapping path="/asst/**"/>
-            <mvc:exclude-mapping path="/operation/promoCode/**"/>
-            <mvc:exclude-mapping path="/operation/send/message"/>
             <mvc:exclude-mapping path="/performance/**"/>
             <mvc:exclude-mapping path="/internal/**"/>
             <mvc:exclude-mapping path="/heartbeat"/>
@@ -102,8 +95,6 @@
         <mvc:interceptor>
             <mvc:mapping path="/pc/**"/>
             <mvc:mapping path="/account/get"/>
-            <mvc:mapping path="/operation/send/message"/>
-            <!--<mvc:mapping path="/image/upload/**"/>-->
             <mvc:exclude-mapping path="/pc/static/**"/>
             <mvc:exclude-mapping path="/pc/fragment/problem/list"/>
             <mvc:exclude-mapping path="/pc/survey/wjx"/>

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -35,7 +36,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Autowired
     private CallbackDao callbackDao;
     @Autowired
-    private ProfileDao profileDao;
+    private AccountService accountService;
 
     private static final String REDIRECT_PATH = "/wx/oauth/code";
 
@@ -248,12 +249,21 @@ public class OAuthServiceImpl implements OAuthService {
             return null;
         }
         //根据unionId查询
-        Profile profile = profileDao.queryByUnionId(account.getUnionid());
+        Profile profile = accountService.queryByUnionId(account.getUnionid());
         if (profile == null) {
             // 提示关注并选择rise
             logger.info("未关注，请先关注并选择课程,callback:{}", callback);
             return new MutablePair<>(-1, null);
         } else {
+            // 是否曾经关注过,现已取关
+            String weixinOpenid = profile.getOpenid();
+            try {
+                accountService.getAccount(weixinOpenid, false);
+            } catch (NotFollowingException e) {
+                logger.info("未关注，请先关注并选择课程,callback:{}", callback);
+                return new MutablePair<>(-1, null);
+            }
+
             // 查到了
             // 更新数据库
             logger.info("更新数据库,account:{}", profile);

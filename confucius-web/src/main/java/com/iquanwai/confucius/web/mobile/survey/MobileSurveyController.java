@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.mobile.controller;
+package com.iquanwai.confucius.web.mobile.survey;
 
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
