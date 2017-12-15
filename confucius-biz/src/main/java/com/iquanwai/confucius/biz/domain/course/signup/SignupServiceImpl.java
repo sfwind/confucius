@@ -772,13 +772,17 @@ public class SignupServiceImpl implements SignupService {
                     businessSchool.setIsBusinessStudent(true);
                     break;
                 case RiseMember.HALF_ELITE:
-                    // TODO 对于专业版的学员，金额更改为 1800
+                    // TODO 对于精英版半年版的学员，金额更改为 1800
                     fee = 1800.0;
                     businessSchool.setIsBusinessStudent(true);
                     break;
                 case RiseMember.ANNUAL:
                 case RiseMember.HALF:
                     fee = normalMemberDiscount(riseMember, memberType.getFee());
+                    if (!ConfigUtils.reducePriceForNotElite()) {
+                        // 关闭减价，恢复原价
+                        fee = memberType.getFee();
+                    }
                     break;
                 case RiseMember.CAMP:
                     fee = memberType.getFee();
@@ -787,10 +791,6 @@ public class SignupServiceImpl implements SignupService {
                     fee = memberType.getFee();
             }
         } else {
-            fee = memberType.getFee();
-        }
-        if (!ConfigUtils.reducePriceForNotElite()) {
-            // 关闭减价，恢复原价
             fee = memberType.getFee();
         }
 
