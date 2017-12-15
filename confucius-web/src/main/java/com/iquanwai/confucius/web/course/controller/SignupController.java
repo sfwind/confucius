@@ -67,9 +67,8 @@ public class SignupController {
 
     /**
      * rise产品支付成功的回调
-     *
      * @param loginUser 用户信息
-     * @param orderId   订单id
+     * @param orderId 订单id
      * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
@@ -257,8 +256,7 @@ public class SignupController {
 
     /**
      * 获取商品信息
-     *
-     * @param loginUser    用户
+     * @param loginUser 用户
      * @param goodsInfoDto 商品信息
      * @return 详细的商品信息
      */
@@ -327,9 +325,8 @@ public class SignupController {
 
     /**
      * 获取H5支付参数的接口
-     *
-     * @param loginUser  用户
-     * @param request    request对象
+     * @param loginUser 用户
+     * @param request request对象
      * @param paymentDto 商品类型以及商品id
      * @return 支付参数
      */
@@ -378,7 +375,6 @@ public class SignupController {
 
     /**
      * 计算优惠券
-     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
@@ -412,9 +408,8 @@ public class SignupController {
 
     /**
      * 创建订单
-     *
      * @param paymentDto 支付信息
-     * @param profileId  用户id
+     * @param profileId 用户id
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
@@ -476,28 +471,30 @@ public class SignupController {
         operationLogService.log(operationLog);
 
         List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
-        MemberType m = memberTypesPayInfo.stream().filter(memberType -> memberType.getId().equals(memberTypeId))
+        MemberType memberType = memberTypesPayInfo.stream().filter(item -> item.getId().equals(memberTypeId))
                 .findAny().orElse(null);
 
         RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
         RiseMemberDto dto = new RiseMemberDto();
-        dto.setMemberType(m);
+        dto.setMemberType(memberType);
         // 不同商品的特殊逻辑
-        Assert.notNull(m);
-        if (m.getId() == RiseMember.ELITE) {
-            int dailyFee = (int) (m.getFee() / 365);
+        Assert.notNull(memberType);
+        if (memberType.getId() == RiseMember.ELITE) {
+            int dailyFee = (int) (memberType.getFee() / 365);
             dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
-        } else if (m.getId() == RiseMember.BS_APPLICATION) {
+        } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
             dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
         }
 
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
-            if (riseMember.getMemberTypeId().equals(RiseMember.HALF) ||
-                    riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
+            if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
                 dto.setButtonStr("升级商学院");
                 dto.setTip("优秀学员学费已减免，一键升级商学院");
-            } else if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) ||
-                    riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+                dto.setAuditionStr("预约直播");
+            } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+                // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
+                dto.setButtonStr("续费商学院");
+            } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
                 //商学院用户不显示按钮
                 return WebUtils.success();
             } else {
@@ -505,17 +502,14 @@ public class SignupController {
             }
         } else {
             dto.setButtonStr("立即入学");
+            dto.setAuditionStr("预约直播");
         }
-
-        dto.setAuditionStr("预约直播");
 
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
         List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
-        // 用户层级是商学院用户或者层级是训练营用户，则不显示试听课入口
-        Long count = riseMembers.stream()
-                .filter(member -> member.getMemberTypeId() == RiseMember.ELITE)
-                .count();
+        // 用户层级是商学院用户或者曾经是训练营用户，则不显示试听课入口
+        Long count = riseMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
         if (count > 0) {
             // 商学院不显示试听课按钮
             dto.setAuditionStr(null);
