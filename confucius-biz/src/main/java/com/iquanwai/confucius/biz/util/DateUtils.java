@@ -60,7 +60,8 @@ public class DateUtils {
     }
 
     public static int interval(Date date) {
-        return Math.abs(Days.daysBetween(new DateTime(date), new DateTime()).getDays());
+        Date now = new Date();
+        return Math.abs(Days.daysBetween(new DateTime(date), new DateTime(now)).getDays());
     }
 
     public static int intervalMinute(Date date) {
