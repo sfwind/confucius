@@ -282,7 +282,15 @@ public class SignupController {
                 .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
                 .findFirst().orElse(null);
         if (memberType != null) {
-            goodsInfoDto.setFee(memberType.getFee());
+            // TODO 填写金额，临时增加精英版半年升级商学院
+            // 如果购买的是商学院，并且当前购买人是精英版半年用户，则将金额更改为1800元
+            // 获取当前用户身份
+            RiseMember userRiseMember = signupService.currentRiseMember(loginUser.getId());
+            if (userRiseMember != null && memberType.getId() == RiseMember.ELITE && userRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
+                goodsInfoDto.setFee(1800.0);
+            } else {
+                goodsInfoDto.setFee(memberType.getFee());
+            }
             // 申请付费不填写时间
             if (!QuanwaiOrder.BS_APPLICATION.equals(goodsInfoDto.getGoodsType())) {
                 goodsInfoDto.setStartTime(memberType.getStartTime());
