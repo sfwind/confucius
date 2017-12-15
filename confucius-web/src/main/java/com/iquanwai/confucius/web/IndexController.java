@@ -145,25 +145,25 @@ public class IndexController {
         String resource;
         String domainName = request.getHeader("Host-Test");
         switch (viewName) {
-            case COURSE_VIEW: {
-                testUrl = "http://0.0.0.0:4000/bundle.js";
-                resource = ConfigUtils.staticResourceUrl(domainName);
-            }
-            break;
+//            case COURSE_VIEW: {
+//                testUrl = "http://0.0.0.0:4000/bundle.js";
+//                resource = ConfigUtils.staticResourceUrl(domainName);
+//            }
+//            break;
             case PAY_VIEW: {
-                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
+//                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
                 resource = ConfigUtils.staticPayUrl(domainName);
             }
             break;
             default:
-                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
+//                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
                 resource = ConfigUtils.staticResourceUrl(domainName);
         }
 
 
         if (request.getParameter("debug") != null) {
             if (ConfigUtils.isFrontDebug()) {
-                mav.addObject("resource", testUrl);
+                mav.addObject("resource", "http://0.0.0.0:4000/pay_bundle.js");
             } else {
                 mav.addObject("resource", resource);
             }
