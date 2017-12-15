@@ -161,8 +161,8 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             // 短课程,试听课程不需要修改progress
             if (course != null && course.getType() != Course.SHORT_COURSE && course.getType() != Course.AUDITION_COURSE) {
                 Integer courseId = clazz.getCourseId();
-                //开课天数=今天-开课日期+1
-                int startDay = DateUtils.interval(clazz.getOpenTime()) + 1;
+                //开课天数=今天-开课日期
+                int startDay = DateUtils.interval(clazz.getOpenTime());
                 Chapter chapter = chapterDao.getChapterByStartDay(courseId, startDay);
                 if (chapter != null) {
                     Integer sequence = chapter.getSequence();
