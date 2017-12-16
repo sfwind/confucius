@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
  * 课程分享controller
  */
 @RestController
+@Deprecated
 @RequestMapping("/pc/fragment/subject")
 public class SubjectArticleController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());

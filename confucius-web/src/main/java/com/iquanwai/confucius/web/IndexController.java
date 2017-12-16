@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.SubscribeRouterConfig;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,10 +45,18 @@ public class IndexController {
 
     private static final String SUBSCRIBE_URL = "/subscribe";
 
-    private static final String COURSE_VIEW = "course";
+//    private static final String COURSE_VIEW = "course";
     private static final String PAY_VIEW = "pay";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 点击圈外同学菜单后，确定需要跳转到的位置
+     */
+    @RequestMapping(value = "/community", method = RequestMethod.GET)
+    public void fragmentGoWhere(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        response.sendRedirect("/fragment/rise");
+    }
 
     @RequestMapping(value = "/subscribe")
     public ModelAndView goSubscribe(HttpServletRequest request, HttpServletResponse response) throws Exception {
