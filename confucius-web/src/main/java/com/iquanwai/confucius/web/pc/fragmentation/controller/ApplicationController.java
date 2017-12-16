@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
  * Created by nethunder on 2017/1/14.
  */
 @RestController
+@Deprecated
 @RequestMapping("/pc/fragment/application")
 public class ApplicationController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());

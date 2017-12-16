@@ -24,7 +24,7 @@ import java.util.Map;
  * Created by justin on 2017/9/15.
  */
 @RestController
-@RequestMapping("/pc/operation")
+@RequestMapping("/pc/operation/warmup")
 public class WarmupImportController {
     @Autowired
     private OperationManagementService operationManagementService;
@@ -35,7 +35,7 @@ public class WarmupImportController {
     @Autowired
     private PracticeService practiceService;
 
-    @RequestMapping("/warmup/list/{problemId}")
+    @RequestMapping("/list/{problemId}")
     public ResponseEntity<Map<String, Object>> getProblemWarmupPractice(PCLoginUser loginUser,
                                                                         @PathVariable Integer problemId) {
         List<WarmupPractice> warmupPractices = operationManagementService.getPracticeByProblemId(problemId);
@@ -49,7 +49,7 @@ public class WarmupImportController {
         return WebUtils.result(warmupPractices);
     }
 
-    @RequestMapping(value = "/warmup/save", method = RequestMethod.POST)
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> savePractice(PCLoginUser loginUser,
                                                             @RequestBody WarmupPractice warmupPractice) {
 
@@ -64,7 +64,7 @@ public class WarmupImportController {
         return WebUtils.success();
     }
 
-    @RequestMapping("/warmup/next/{problemId}/{practiceId}")
+    @RequestMapping("/next/{problemId}/{practiceId}")
     public ResponseEntity<Map<String, Object>> getNextPractice(PCLoginUser loginUser,
                                                                @PathVariable Integer problemId,
                                                                @PathVariable Integer practiceId) {
@@ -79,24 +79,7 @@ public class WarmupImportController {
         return WebUtils.result(warmupPractice);
     }
 
-    @RequestMapping(value = "/warmup/load/knowledges", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadKnowledgesGroupByProblem(PCLoginUser loginUser) {
-        Assert.notNull(loginUser, "用户信息不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("后台管理").function("巩固练习新增").action("加载问题与知识点");
-        operationLogService.log(operationLog);
-        List<Problem> problems = problemService.loadProblems();
-        List<ProblemSchedule> knowledges = operationManagementService.loadKnowledgesGroupByProblem();
-        if(problems != null && knowledges != null) {
-            ProblemKnowledgesDto dto = new ProblemKnowledgesDto();
-            dto.setProblems(problems);
-            dto.setKnowledges(knowledges);
-            return WebUtils.result(dto);
-        }
-        return WebUtils.error("未找到课程与知识点关联信息");
-    }
-
-    @RequestMapping(value = "/warmup/insert/practice", method = RequestMethod.POST)
+    @RequestMapping(value = "/insert/practice", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> insertWarmupPractice(PCLoginUser loginUser, @RequestBody WarmupPractice warmupPractice) {
         Assert.notNull(loginUser, "用户不能为空");
         List<WarmupChoice> warmupChoices = warmupPractice.getChoices();
@@ -121,7 +104,7 @@ public class WarmupImportController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/warmup/load/problem/{practiceUid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/load/problem/{practiceUid}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadProblemByPracticeUid(PCLoginUser loginUser, @PathVariable String practiceUid) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())

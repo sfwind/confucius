@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.pc.fragmentation.controller;
+package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
@@ -40,9 +40,8 @@ import java.util.stream.Collectors;
  * Created by nethunder on 2016/12/29.
  */
 @RestController
-@Deprecated
-@RequestMapping("/pc/fragment")
-public class FragmentController {
+@RequestMapping
+public class RiseController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private OperationLogService operationLogService;
@@ -58,37 +57,10 @@ public class FragmentController {
     private CommentDao commentDao;
 
     /**
-     * 碎片化总任务列表加载
-     * @param problemId 问题id
-     * @param pcLoginUser 登陆人
-     */
-    @RequestMapping("/homework/{problemId}")
-    public ResponseEntity<Map<String, Object>> getProblemHomeworkList(@PathVariable Integer problemId, PCLoginUser pcLoginUser) {
-        Assert.notNull(problemId, "问题id不能为空");
-        Assert.notNull(pcLoginUser, "用户信息能不能为空");
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                .module("训练")
-                .function("碎片化")
-                .action("总任务列表加载")
-                .memo(problemId.toString());
-        operationLogService.log(operationLog);
-        // 查询该用户有没有购买过这个问题的计划
-        ImprovementPlan matchPlan = planService.loadUserPlan(pcLoginUser.getOpenId(), problemId);
-        if (matchPlan == null) {
-            logger.error("用户:{} 未购买课程:{}", pcLoginUser.getOpenId(), problemId);
-            return WebUtils.error(ErrorConstants.NOT_PAY_FRAGMENT, "没找到进行中的课程");
-        } else {
-            // 购买过课程
-            RiseWorkListDto riseHomework = loadUserRiseWork(matchPlan);
-            return WebUtils.result(riseHomework);
-        }
-    }
-
-    /**
      * 点赞或者取消点赞
      * @param vote 1：点赞，2：取消点赞
      */
-    @RequestMapping(value = "/vote", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/operation/vote", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> vote(PCLoginUser loginUser, @RequestBody HomeworkVoteDto vote) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.isTrue(vote.getStatus() == 1 || vote.getStatus() == 2, "点赞状态异常");
@@ -115,7 +87,7 @@ public class FragmentController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/comment/{type}/{submitId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/pc/operation/comment/{type}/{submitId}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadComments(PCLoginUser loginUser,
                                                             @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
                                                             @ModelAttribute Page page) {
@@ -168,7 +140,7 @@ public class FragmentController {
      * @param submitId 文章id
      * @param dto 评论内容
      */
-    @RequestMapping(value = "/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/operation/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> comment(PCLoginUser loginUser,
                                                        @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
                                                        @RequestBody RiseWorkCommentDto dto) {
@@ -216,7 +188,7 @@ public class FragmentController {
      * @param submitId 文章id
      * @param dto 评论内容，回复评论id
      */
-    @RequestMapping(value = "/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/operation/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
                                                             @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
                                                             @RequestBody RiseWorkCommentDto dto) {
@@ -302,7 +274,7 @@ public class FragmentController {
         return riseWorkListDto;
     }
 
-    @RequestMapping(value = "/request/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/operation/request/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> requestComment(PCLoginUser loginUser,
                                                               @PathVariable Integer moduleId,
                                                               @PathVariable Integer submitId) {
@@ -324,7 +296,7 @@ public class FragmentController {
         }
     }
 
-    @RequestMapping("/delete/comment/{commentId}")
+    @RequestMapping("/pc/operation/delete/comment/{commentId}")
     public ResponseEntity<Map<String, Object>> deleteComment(PCLoginUser loginUser,
                                                              @PathVariable Integer commentId) {
 
@@ -340,5 +312,4 @@ public class FragmentController {
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
-
 }
