@@ -272,37 +272,4 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         }
     }
 
-    @Override
-    public List<ProblemSchedule> loadKnowledgesGroupByProblem() {
-        List<Problem> problems = problemDao.loadAll(Problem.class);
-        List<ProblemSchedule> problemSchedules = problemScheduleDao.loadAll(ProblemSchedule.class);
-        // 取出所有知识点列表，并且将知识点列表转换成键值对
-        List<Knowledge> knowledges = knowledgeDao.loadAll(Knowledge.class);
-        Map<Integer, Knowledge> knowledgeMap = Maps.newHashMap();
-        knowledges.forEach(knowledge -> knowledgeMap.put(knowledge.getId(), knowledge));
-        // 过滤出未被删除的课程列表
-        List<Problem> validProblems = problems.stream().filter(problem -> !problem.getDel()).collect(Collectors.toList());
-        // 逐个遍历课程，并将该课程，与该课程对应的所有知识点合并成一个对象进行返回
-        List<ProblemSchedule> problemAndKnowledges = validProblems.stream().map(problem -> {
-            ProblemSchedule targetProblemSchedule = new ProblemSchedule();
-            // 取出该课程的 id
-            Integer problemId = problem.getId();
-            targetProblemSchedule.setId(problemId);
-            targetProblemSchedule.setProblemId(problemId);
-            // 根据取出的课程 id，遍历 problemSchedules 列表，取出二者 problemId 相同对象，并返回该所有对象的相关 KnowledgeId 的集合
-            List<Integer> relatedKnowledgeIds = problemSchedules.stream().filter(problemSchedule -> problemId.equals(problemSchedule.getProblemId()))
-                    .map(ProblemSchedule::getKnowledgeId).collect(Collectors.toList());
-            List<Knowledge> targetKnowledges = Lists.newArrayList();
-            relatedKnowledgeIds.forEach(relatedKnowledgeId -> {
-                Knowledge targetKnowledge = knowledgeMap.get(relatedKnowledgeId);
-                if(targetKnowledge != null) {
-                    targetKnowledges.add(targetKnowledge);
-                }
-            });
-            targetProblemSchedule.setKnowledges(targetKnowledges);
-            return targetProblemSchedule;
-        }).collect(Collectors.toList());
-        return problemAndKnowledges;
-    }
-
 }
