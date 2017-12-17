@@ -1,23 +1,25 @@
-package com.iquanwai.confucius.web.pc.backend.controller;
+package com.iquanwai.confucius.web.pc.asst.controller;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
-import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Comment;
+import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
+import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.*;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.HomeworkVoteDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkCommentListDto;
+import com.iquanwai.confucius.web.pc.fragmentation.dto.RiseWorkShowDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,8 +30,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,26 +41,24 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping
-public class RiseController {
+public class AssistantApplicationController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
-    private PlanService planService;
-    @Autowired
     private PracticeService practiceService;
-    @Autowired
-    private ApplicationService applicationService;
     @Autowired
     private AccountService accountService;
     @Autowired
     private CommentDao commentDao;
+    @Autowired
+    private ApplicationService applicationService;
 
     /**
      * 点赞或者取消点赞
      * @param vote 1：点赞，2：取消点赞
      */
-    @RequestMapping(value = "/pc/operation/vote", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/asst/vote", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> vote(PCLoginUser loginUser, @RequestBody HomeworkVoteDto vote) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.isTrue(vote.getStatus() == 1 || vote.getStatus() == 2, "点赞状态异常");
@@ -87,7 +85,7 @@ public class RiseController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/pc/operation/comment/{type}/{submitId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/pc/asst/comment/{type}/{submitId}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadComments(PCLoginUser loginUser,
                                                             @PathVariable("type") Integer type, @PathVariable("submitId") Integer submitId,
                                                             @ModelAttribute Page page) {
@@ -140,7 +138,7 @@ public class RiseController {
      * @param submitId 文章id
      * @param dto 评论内容
      */
-    @RequestMapping(value = "/pc/operation/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/asst/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> comment(PCLoginUser loginUser,
                                                        @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
                                                        @RequestBody RiseWorkCommentDto dto) {
@@ -188,7 +186,7 @@ public class RiseController {
      * @param submitId 文章id
      * @param dto 评论内容，回复评论id
      */
-    @RequestMapping(value = "/pc/operation/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/asst/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
                                                             @PathVariable("moduleId") Integer moduleId, @PathVariable("submitId") Integer submitId,
                                                             @RequestBody RiseWorkCommentDto dto) {
@@ -238,43 +236,7 @@ public class RiseController {
     }
 
 
-    private RiseWorkListDto loadUserRiseWork(ImprovementPlan plan) {
-        RiseWorkListDto riseWorkListDto = new RiseWorkListDto();
-        riseWorkListDto.setApplicationWorkList(Lists.newArrayList());
-        riseWorkListDto.setChallengeWorkList(Lists.newArrayList());
-
-        if (plan != null) {
-            // 查询该plan的任务列表
-            List<PracticePlan> practicePlans = planService.loadWorkPlanList(plan.getId());
-            for (PracticePlan item : practicePlans) {
-                RiseWorkItemDto dto = new RiseWorkItemDto();
-                dto.setPlanId(plan.getId());
-                dto.setType(item.getType());
-                dto.setUnlocked(item.getUnlocked());
-                dto.setWorkId(Integer.parseInt(item.getPracticeId()));
-                dto.setStatus(item.getStatus());
-                if (item.getType() == Constants.PracticeType.APPLICATION ||
-                        item.getType() == Constants.PracticeType.APPLICATION_REVIEW) {
-                    ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(Integer.parseInt(item.getPracticeId()));
-                    if (applicationPractice == null) {
-                        logger.error("查询应用练习失败,训练计划:{}", item);
-                    } else {
-                        dto.setTitle(applicationPractice.getTopic());
-                        dto.setScore(PointRepoImpl.score.get(applicationPractice.getDifficulty()));
-                        riseWorkListDto.getApplicationWorkList().add(dto);
-                    }
-                } else if (item.getType() == Constants.PracticeType.CHALLENGE) {
-//                    ChallengePractice challengePractice = challengeService.loadChallengePractice(Integer.parseInt(item.getPracticeId()));
-                    dto.setTitle("设定目标、记录进展、总结心得");
-                    dto.setScore(ConfigUtils.getChallengeScore());
-                    riseWorkListDto.getChallengeWorkList().add(dto);
-                }
-            }
-        }
-        return riseWorkListDto;
-    }
-
-    @RequestMapping(value = "/pc/operation/request/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/pc/asst/request/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> requestComment(PCLoginUser loginUser,
                                                               @PathVariable Integer moduleId,
                                                               @PathVariable Integer submitId) {
@@ -296,7 +258,7 @@ public class RiseController {
         }
     }
 
-    @RequestMapping("/pc/operation/delete/comment/{commentId}")
+    @RequestMapping("/pc/asst/delete/comment/{commentId}")
     public ResponseEntity<Map<String, Object>> deleteComment(PCLoginUser loginUser,
                                                              @PathVariable Integer commentId) {
 
@@ -312,4 +274,79 @@ public class RiseController {
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
+
+    /**
+     * 展示应用任务
+     *
+     * @param loginUser 登陆人
+     * @param submitId  提交id
+     */
+    @RequestMapping("/pc/asst/application/show/{submitId}")
+    public ResponseEntity<Map<String, Object>> show(PCLoginUser loginUser, @PathVariable Integer submitId) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("训练")
+                .function("应用任务")
+                .action("PC查看应用任务内容")
+                .memo(loginUser.getOpenId() + " look " + submitId);
+        operationLogService.log(operationLog);
+        ApplicationSubmit submit = applicationService.loadSubmit(submitId);
+        if(submit == null) {
+            logger.error("{} has no application submit", loginUser.getOpenId());
+            return WebUtils.error(404, "无该提交记录");
+        } else {
+            // 查到了
+            String openId = submit.getOpenid();
+            RiseWorkShowDto show = new RiseWorkShowDto();
+            show.setSubmitId(submit.getId());
+            show.setUpTime(DateUtils.parseDateToFormat5(submit.getPublishTime()));
+            show.setContent(submit.getContent());
+            show.setType("application");
+            show.setRequest(submit.getRequestFeedback());
+            // 查询这个openid的数据
+            if(loginUser.getOpenId().equals(openId)) {
+                // 是自己的
+                show.setIsMine(true);
+                show.setUpName(loginUser.getWeixin().getWeixinName());
+                show.setHeadImg(loginUser.getWeixin().getHeadimgUrl());
+                show.setPlanId(submit.getPlanId());
+                show.setWorkId(submit.getApplicationId());
+                show.setRequestCommentCount(practiceService.hasRequestComment(submit.getPlanId()));
+            } else {
+                Profile account = accountService.getProfile(openId, false);
+                if(account != null) {
+                    show.setUpName(account.getNickname());
+                    show.setHeadImg(account.getHeadimgurl());
+                    show.setSignature(account.getSignature());
+                    show.setRole(account.getRole());
+                }
+                show.setIsMine(false);
+            }
+            // 查询点赞数
+            Integer votesCount = practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, submit.getId());
+            // 查询我对它的点赞状态
+            HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.APPLICATION, submit.getId(), loginUser.getOpenId());
+            if(myVote != null && myVote.getDel() == 0) {
+                // 点赞中
+                show.setVoteStatus(1);
+            } else {
+                show.setVoteStatus(0);
+            }
+            show.setVoteCount(votesCount);
+            ApplicationPractice applicationPractice = applicationService.loadApplicationPractice(submit.getApplicationId());
+            show.setTitle(applicationPractice.getTopic());
+            show.setDesc(applicationPractice.getDescription());
+            boolean integrated = Knowledge.isReview(applicationPractice.getKnowledgeId());
+            if(!integrated) {
+                show.setKnowledgeId(applicationPractice.getKnowledgeId());
+            }
+            // 查询照片
+//            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
+//            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
+            // 提升浏览量
+            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SHOW);
+            return WebUtils.result(show);
+        }
+    }
+
 }
