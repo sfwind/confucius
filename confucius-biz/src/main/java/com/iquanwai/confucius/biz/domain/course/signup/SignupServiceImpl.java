@@ -526,11 +526,6 @@ public class SignupServiceImpl implements SignupService {
         String openId = riseOrder.getOpenid();
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         if (RiseMember.ELITE == memberType.getId()) {
-            // 精英会员一年
-            // RiseClassMember 新增会员记录
-            insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
-            profileDao.initOnceRequestCommentCount(openId);
-
             // 查看是否存在现成会员数据
             RiseMember existRiseMember = riseMemberDao.loadValidRiseMember(riseOrder.getProfileId());
             // 如果存在，则将已经存在的 riseMember 数据置为已过期
@@ -546,6 +541,12 @@ public class SignupServiceImpl implements SignupService {
                 riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 12));
                 // 续费，继承OpenDate
                 riseMember.setOpenDate(existRiseMember.getOpenDate());
+
+                // 精英会员一年
+                // RiseClassMember 新增会员记录
+                insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
+                profileDao.initOnceRequestCommentCount(openId);
+
             } else if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                 // TODO 特殊处理 查看当前身份，商学院会员升级方式保留，但是精英版半年只增加半年时间
                 riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 6));
