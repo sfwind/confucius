@@ -546,7 +546,6 @@ public class SignupServiceImpl implements SignupService {
                 // RiseClassMember 新增会员记录
                 insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
                 profileDao.initOnceRequestCommentCount(openId);
-
             } else if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                 // TODO 特殊处理 查看当前身份，商学院会员升级方式保留，但是精英版半年只增加半年时间
                 riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 6));
@@ -556,6 +555,12 @@ public class SignupServiceImpl implements SignupService {
                 // 非续费，查询本次开营时间
                 riseMember.setOpenDate(businessSchoolConfig.getOpenDate());
                 riseMember.setExpireDate(DateUtils.afterMonths(businessSchoolConfig.getOpenDate(), 12));
+
+
+                // 精英会员一年
+                // RiseClassMember 新增会员记录
+                insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
+                profileDao.initOnceRequestCommentCount(openId);
             }
             riseMember.setExpired(false);
             riseMemberDao.insert(riseMember);
@@ -778,7 +783,7 @@ public class SignupServiceImpl implements SignupService {
                     businessSchool.setIsBusinessStudent(true);
                     break;
                 case RiseMember.HALF_ELITE:
-                    // TODO 精英版半年升级商学院，金额更改为 1800
+                    // TODO 对于精英版半年版的学员，金额更改为 1800
                     fee = 1800.0;
                     businessSchool.setIsBusinessStudent(true);
                     break;
