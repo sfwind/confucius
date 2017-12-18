@@ -493,7 +493,9 @@ public class SignupController {
                 dto.setTip("优秀学员学费已减免，一键升级商学院");
             } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                 // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
+                dto.setTip(null);
                 dto.setButtonStr("续费商学院");
+                // TODO 精英版半年升级商学院
                 return WebUtils.success();
             } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
                 //商学院用户不显示按钮
@@ -517,12 +519,6 @@ public class SignupController {
         }
 
         dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
-
-        // TODO 精英版半年升级商学院
-        RiseMember currentRiseMember = signupService.currentRiseMember(loginUser.getId());
-        if (currentRiseMember != null && currentRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
-            dto.setTip(null);
-        }
 
         return WebUtils.result(dto);
     }
