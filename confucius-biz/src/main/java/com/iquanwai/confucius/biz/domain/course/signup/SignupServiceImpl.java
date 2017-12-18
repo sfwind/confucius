@@ -696,7 +696,7 @@ public class SignupServiceImpl implements SignupService {
                 if (riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
                     // 商学院会员续费
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
-                    // TODO 静音版半年续费时间半年
+                    // TODO 精英版半年升级商学院
                     if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                         memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), 6), 1)));
                     } else {
@@ -778,7 +778,7 @@ public class SignupServiceImpl implements SignupService {
                     businessSchool.setIsBusinessStudent(true);
                     break;
                 case RiseMember.HALF_ELITE:
-                    // TODO 对于精英版半年版的学员，金额更改为 1800
+                    // TODO 精英版半年升级商学院，金额更改为 1800
                     fee = 1800.0;
                     businessSchool.setIsBusinessStudent(true);
                     break;

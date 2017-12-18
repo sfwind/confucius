@@ -520,7 +520,7 @@ public class SignupController {
 
         // TODO 精英版半年升级商学院
         RiseMember currentRiseMember = signupService.currentRiseMember(loginUser.getId());
-        if (currentRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
+        if (currentRiseMember != null && currentRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
             dto.setTip(null);
         }
 
