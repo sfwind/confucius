@@ -487,17 +487,37 @@ public class SignupController {
             dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
         }
 
+        // if (riseMember != null && riseMember.getMemberTypeId() != null) {
+        //     if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
+        //         dto.setButtonStr("升级商学院");
+        //         dto.setTip("优秀学员学费已减免，一键升级商学院");
+        //     } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+        //         // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
+        //         dto.setTip(null);
+        //         dto.setAuditionStr("续费商学院");
+        //         dto.setButtonStr("续费商学院");
+        //         // TODO 精英版半年升级商学院
+        //         return WebUtils.success();
+        //     } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
+        //         //商学院用户不显示按钮
+        //         return WebUtils.success();
+        //     } else {
+        //         dto.setButtonStr("立即入学");
+        //     }
+        // } else {
+        //     dto.setButtonStr("立即入学");
+        // }
+        // dto.setAuditionStr("预约直播");
+
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
             if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
                 dto.setButtonStr("升级商学院");
                 dto.setTip("优秀学员学费已减免，一键升级商学院");
+                dto.setAuditionStr("预约直播");
             } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                 // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
                 dto.setTip(null);
-                dto.setAuditionStr("续费商学院");
                 dto.setButtonStr("续费商学院");
-                // TODO 精英版半年升级商学院
-                return WebUtils.success();
             } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
                 //商学院用户不显示按钮
                 return WebUtils.success();
@@ -506,8 +526,8 @@ public class SignupController {
             }
         } else {
             dto.setButtonStr("立即入学");
+            dto.setAuditionStr("预约直播");
         }
-        dto.setAuditionStr("预约直播");
 
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
