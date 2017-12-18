@@ -494,7 +494,7 @@ public class SignupController {
             } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                 // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
                 dto.setTip(null);
-                dto.setAuditionStr("");
+                dto.setAuditionStr("续费商学院");
                 dto.setButtonStr("续费商学院");
                 // TODO 精英版半年升级商学院
                 return WebUtils.success();
