@@ -526,11 +526,6 @@ public class SignupServiceImpl implements SignupService {
         String openId = riseOrder.getOpenid();
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         if (RiseMember.ELITE == memberType.getId()) {
-            // 精英会员一年
-            // RiseClassMember 新增会员记录
-            insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
-            profileDao.initOnceRequestCommentCount(openId);
-
             // 查看是否存在现成会员数据
             RiseMember existRiseMember = riseMemberDao.loadValidRiseMember(riseOrder.getProfileId());
             // 如果存在，则将已经存在的 riseMember 数据置为已过期
@@ -541,15 +536,25 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setOrderId(riseOrder.getOrderId());
             riseMember.setProfileId(riseOrder.getProfileId());
             riseMember.setMemberTypeId(memberType.getId());
-            if (existRiseMember != null && (existRiseMember.getMemberTypeId().equals(RiseMember.ELITE) ||
-                    existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+
+            if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
                 riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 12));
+                // 续费，继承OpenDate
+                riseMember.setOpenDate(existRiseMember.getOpenDate());
+            } else if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+                // TODO 特殊处理 查看当前身份，商学院会员升级方式保留，但是精英版半年只增加半年时间
+                riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 6));
                 // 续费，继承OpenDate
                 riseMember.setOpenDate(existRiseMember.getOpenDate());
             } else {
                 // 非续费，查询本次开营时间
                 riseMember.setOpenDate(businessSchoolConfig.getOpenDate());
                 riseMember.setExpireDate(DateUtils.afterMonths(businessSchoolConfig.getOpenDate(), 12));
+
+                // 精英会员一年
+                // RiseClassMember 新增会员记录
+                insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
+                profileDao.initOnceRequestCommentCount(openId);
             }
             riseMember.setExpired(false);
             riseMemberDao.insert(riseMember);
@@ -690,7 +695,12 @@ public class SignupServiceImpl implements SignupService {
                 if (riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
                     // 商学院会员续费
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
-                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
+                    // TODO 精英版半年升级商学院
+                    if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+                        memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), 6), 1)));
+                    } else {
+                        memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
+                    }
                 } else {
                     // 商学院报名
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
@@ -763,13 +773,21 @@ public class SignupServiceImpl implements SignupService {
         if (riseMember != null) {
             switch (riseMember.getMemberTypeId()) {
                 case RiseMember.ELITE:
-                case RiseMember.HALF_ELITE:
                     fee = memberType.getFee();
+                    businessSchool.setIsBusinessStudent(true);
+                    break;
+                case RiseMember.HALF_ELITE:
+                    // TODO 对于精英版半年版的学员，金额更改为 1800
+                    fee = 1800.0;
                     businessSchool.setIsBusinessStudent(true);
                     break;
                 case RiseMember.ANNUAL:
                 case RiseMember.HALF:
                     fee = normalMemberDiscount(riseMember, memberType.getFee());
+                    if (!ConfigUtils.reducePriceForNotElite()) {
+                        // 关闭减价，恢复原价
+                        fee = memberType.getFee();
+                    }
                     break;
                 case RiseMember.CAMP:
                     fee = memberType.getFee();
@@ -778,10 +796,6 @@ public class SignupServiceImpl implements SignupService {
                     fee = memberType.getFee();
             }
         } else {
-            fee = memberType.getFee();
-        }
-        if (!ConfigUtils.reducePriceForNotElite()) {
-            // 关闭减价，恢复原价
             fee = memberType.getFee();
         }
 
