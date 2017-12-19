@@ -468,7 +468,8 @@ public class SignupController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
-                .action("加载Rise会员信息");
+                .action("加载Rise会员信息")
+                .memo(memberTypeId.toString());
         operationLogService.log(operationLog);
 
         List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
@@ -490,7 +491,6 @@ public class SignupController {
         if (riseMember != null && riseMember.getMemberTypeId() != null) {
             if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
                 dto.setButtonStr("升级商学院");
-//                dto.setAuditionStr("预约直播");
                 dto.setTip("优秀学员学费已减免，一键升级商学院");
             } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                 // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
@@ -515,11 +515,15 @@ public class SignupController {
         // 用户层级是商学院用户或者曾经是商学院用户，则不显示试听课入口
         Long count = riseMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
         if (count > 0) {
-            // 商学院不显示试听课按钮
+            // 不显示宣讲会按钮
             dto.setAuditionStr(null);
         }
-
-        dto.setPrivilege(accountService.hasPrivilegeForBusinessSchool(loginUser.getId()));
+        boolean privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
+        dto.setPrivilege(privilege);
+        if(privilege){
+            // 有付费权限不显示宣讲会按钮
+            dto.setAuditionStr(null);
+        }
 
         return WebUtils.result(dto);
     }
