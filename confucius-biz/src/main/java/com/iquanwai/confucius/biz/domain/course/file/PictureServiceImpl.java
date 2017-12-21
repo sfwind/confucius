@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.course.file;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
+import com.iquanwai.confucius.biz.exception.UploadException;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,9 @@ public class PictureServiceImpl implements PictureService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Map<Integer, PictureModule> moduleMap = Maps.newConcurrentMap();
     private Map<Integer, String> prefixMap = Maps.newConcurrentMap();
+
+    private static final Long MAX_PIC_SIZE = 10485760L;
+
 
     @Autowired
     private PictureDao pictureDao;
@@ -118,8 +123,9 @@ public class PictureServiceImpl implements PictureService {
         pictureDao.upload(picture);
         return picture;
     }
+
     @Override
-    public Pair<Boolean,String> uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception {
+    public Pair<Boolean, String> uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception {
         String suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
         Date today = new Date();
         String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + suffix;
@@ -130,8 +136,26 @@ public class PictureServiceImpl implements PictureService {
             logger.error(e.getLocalizedMessage(), e);
             throw e;
         }
-        return new MutablePair<Boolean,String>(result,realName);
+        return new MutablePair<Boolean, String>(result, realName);
     }
+
+    @Override
+    public String uploadPic(MultipartFile file) throws UploadException{
+        String realName = CommonUtils.randomString(32);
+        Long fileSize = file.getSize();
+        if (fileSize > MAX_PIC_SIZE) {
+            throw new UploadException("图片文件过大，请压缩后上传");
+        }
+        try {
+            QiNiuUtils.uploadFile(realName, file.getInputStream());
+        } catch (IOException e) {
+            logger.error(e.getLocalizedMessage(), e);
+            throw new UploadException("图片上传失败,请调整网络后重新上传");
+        }
+        return ConfigUtils.getPicturePrefix() + realName;
+    }
+
+
     @Override
     public String getModulePrefix(Integer moduleId) {
         String prefix = prefixMap.get(moduleId);
