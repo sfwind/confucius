@@ -11,7 +11,6 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.SubscribeRouterConfig;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
-import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +44,6 @@ public class IndexController {
 
     private static final String SUBSCRIBE_URL = "/subscribe";
 
-//    private static final String COURSE_VIEW = "course";
     private static final String PAY_VIEW = "pay";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -61,20 +59,15 @@ public class IndexController {
     @RequestMapping(value = "/subscribe")
     public ModelAndView goSubscribe(HttpServletRequest request, HttpServletResponse response) throws Exception {
         logger.info("用户未关注，跳转关注页面：{}", request.getRequestURI());
-        return courseView(request, null, PAY_VIEW);
+        return payView(request, null, PAY_VIEW);
     }
-
-//    @RequestMapping(value = "/static/**", method = RequestMethod.GET)
-//    public ModelAndView getIndex(HttpServletRequest request) throws Exception {
-//        return courseView(request);
-//    }
 
     @RequestMapping(value = "/pay/static/**", method = RequestMethod.GET)
     public ModelAndView getPayStaticIndex(HttpServletRequest request) throws Exception {
         OperationLog operationLog = new OperationLog().function("打点").module("访问页面").action("游客访问")
                 .memo(request.getRequestURI());
         operationLogService.log(operationLog);
-        return courseView(request, null, PAY_VIEW);
+        return payView(request, null, PAY_VIEW);
     }
 
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
@@ -82,7 +75,7 @@ public class IndexController {
         if (!checkAccessToken(request, response)) {
             return null;
         }
-        return courseView(request, loginUser, PAY_VIEW);
+        return payView(request, loginUser, PAY_VIEW);
     }
 
     private boolean checkAccessToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -134,41 +127,16 @@ public class IndexController {
         }
     }
 
-//    @RequestMapping(value = "/certificate/**", method = RequestMethod.GET)
-//    public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//        if (!checkAccessToken(request, response)) {
-//            return null;
-//        }
-//        return courseView(request);
-//    }
-
     @RequestMapping(value = "/heartbeat", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> heartbeat() throws Exception {
         return WebUtils.success();
     }
 
 
-    private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser, String viewName) {
+    private ModelAndView payView(HttpServletRequest request, LoginUser loginUser, String viewName) {
         ModelAndView mav = new ModelAndView(viewName);
-        String testUrl = "";
-        String resource;
         String domainName = request.getHeader("Host-Test");
-        switch (viewName) {
-//            case COURSE_VIEW: {
-//                testUrl = "http://0.0.0.0:4000/bundle.js";
-//                resource = ConfigUtils.staticResourceUrl(domainName);
-//            }
-//            break;
-            case PAY_VIEW: {
-//                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
-                resource = ConfigUtils.staticPayUrl(domainName);
-            }
-            break;
-            default:
-//                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
-                resource = ConfigUtils.staticResourceUrl(domainName);
-        }
-
+        String resource = ConfigUtils.staticPayUrl(domainName);
 
         if (request.getParameter("debug") != null) {
             if (ConfigUtils.isFrontDebug()) {

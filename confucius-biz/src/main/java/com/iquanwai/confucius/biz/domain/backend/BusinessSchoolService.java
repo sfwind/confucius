@@ -2,11 +2,8 @@ package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
-import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
-import com.iquanwai.confucius.biz.po.common.survey.SurveySubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Date;
 import java.util.List;
@@ -15,25 +12,38 @@ import java.util.List;
  * Created by nethunder on 2017/9/27.
  */
 public interface BusinessSchoolService {
-    String queryAnswerContentMapping(String label, String content);
-
+    /**
+     * 获取商学院申请提交列表
+     * */
     List<BusinessSchoolApplication> loadBusinessSchoolList(Page page);
-
+    /**
+     * 判断是否是助教
+     * */
     Boolean checkIsAsst(Integer profileId);
-
+    /**
+     * 拒绝申请
+     * */
     Boolean rejectApplication(Integer applicationId,String comment);
-
+    /**
+     * 同意申请
+     * */
     Boolean approveApplication(Integer applicationId, Double coupon, String comment);
-
+    /**
+     * 忽略申请
+     * */
     Boolean ignoreApplication(Integer applicationId, String comment);
-
+    /**
+     * 获取某个申请
+     * */
     BusinessSchoolApplication loadBusinessSchoolApplication(Integer applicationId);
-
+    /**
+     * 查询支付状态
+     * */
     String queryFinalPayStatus(Integer profileId);
-
+    /**
+     * 查询会员状态
+     * */
     RiseMember getUserRiseMember(Integer profileId);
-
-    Pair<SurveySubmit, List<SurveyQuestionSubmit>> loadSubmit(Integer submitId);
 
     /**
      * 获取用户最后一次审批通过的商学院申请的通过时间
