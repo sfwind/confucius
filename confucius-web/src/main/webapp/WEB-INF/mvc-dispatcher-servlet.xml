@@ -92,7 +92,6 @@
             <mvc:exclude-mapping path="/performance/**"/>
             <mvc:exclude-mapping path="/internal/**"/>
             <mvc:exclude-mapping path="/heartbeat"/>
-            <mvc:exclude-mapping path="/pay/camp"/>
             <bean class="com.iquanwai.confucius.web.interceptor.WeixinHandlerInterceptor"></bean>
         </mvc:interceptor>
         <mvc:interceptor>
