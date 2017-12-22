@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.file;
 
+import com.iquanwai.confucius.biz.exception.UploadException;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,6 +50,15 @@ public interface PictureService {
      * */
     Picture uploadPicture(PictureModule pictureModule, Integer referId, String remoteIp, String fileName, Long fileSize, String contentType, MultipartFile file) throws Exception;
     Pair<Boolean,String> uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception;
+
+    /**
+     * 上传图片
+     * @param file 图片文件
+     * @return 文件地址url
+     * @throws UploadException
+     */
+    String uploadPic(MultipartFile file) throws UploadException;
+
     /**
      * 获得模块的url前缀
      * @param moduleId 模块id
