@@ -443,59 +443,6 @@ public class RiseOperationController {
         return dto;
     }
 
-    private void initSurveyInfo(ApplicationDto dto, SurveySubmit submit, List<SurveyQuestionSubmit> questions) {
-        if (submit == null || CollectionUtils.isEmpty(questions)) {
-            LOGGER.error("问卷信息为空");
-            return;
-        }
-        /* 初始化题目信息，注意两点：  1.4_5，第四题选择题，如果选择选项5（其他）会出现填空，数据库多出4_5的答案 */
-        Map<String, SurveyQuestionSubmit> questionGroup = questions.stream().collect(Collectors.toMap(SurveyQuestionSubmit::getQuestionLabel, (p) -> p));
-        dto.setQ1Answer(queryQuestionField(questionGroup, "q1"));
-        dto.setQ2Answer(queryQuestionField(questionGroup, "q2"));
-        dto.setQ3Answer(queryQuestionField(questionGroup, "q3"));
-        dto.setQ4Answer(queryQuestionField(questionGroup, "q4"));
-        dto.setQ5Answer(queryQuestionField(questionGroup, "q5"));
-        dto.setQ6Answer(queryQuestionField(questionGroup, "q6"));
-        dto.setQ7Answer(queryQuestionField(questionGroup, "q7"));
-        dto.setQ8Answer(queryQuestionField(questionGroup, "q8"));
-        dto.setQ9Answer(queryQuestionField(questionGroup, "q9"));
-        dto.setQ10Answer(queryQuestionField(questionGroup, "q10"));
-        dto.setQ11Answer(queryQuestionField(questionGroup, "q11"));
-        dto.setQ12Answer(queryQuestionField(questionGroup, "q12"));
-        dto.setQ13Answer(queryQuestionField(questionGroup, "q13"));
-        dto.setQ14Answer(queryQuestionField(questionGroup, "q14"));
-        dto.setQ15Answer(queryQuestionField(questionGroup, "q15"));
-
-        dto.setSubmitTime(DateUtils.parseDateToString(submit.getSubmitTime()));
-        dto.setTimeTaken(submit.getTimeTaken() + "");
-    }
-
-
-    private String queryQuestionField(Map<String, SurveyQuestionSubmit> map, String label) {
-        SurveyQuestionSubmit submit = map.get(label);
-        String content = submit == null ? null : submit.getContent().trim();
-        if (content == null) {
-            return null;
-        }
-        if ("q4".equals(label)) {
-            // 特殊处理q4
-            if ("5".equals(content)) {
-                // 选了其他
-                SurveyQuestionSubmit q4_5 = map.get("q4_5");
-                return q4_5 != null ? q4_5.getContent() : null;
-            }
-        }
-
-        if (StringUtils.isNumeric(content)) {
-            String mappingValue = businessSchoolService.queryAnswerContentMapping(label, content);
-            if (mappingValue != null) {
-                return mappingValue;
-            }
-        }
-        // 答案没有匹配到，直接把content当作答案
-        return content;
-    }
-
     @RequestMapping(value = "/survey/config/list", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadConfigList(PCLoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
