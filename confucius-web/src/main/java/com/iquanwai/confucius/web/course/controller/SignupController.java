@@ -156,12 +156,12 @@ public class SignupController {
     }
 
     private void calcDealTime(Date dealTime, RiseMemberDto dto, Integer profileId) {
-        // 默认订单开放时间是48小时
+        // 默认订单开放时间是24小时
         if (dealTime == null) {
-            dto.setRemainHour(48);
+            dto.setRemainHour(24);
             dto.setRemainMinute(0);
         } else {
-            int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 48));
+            int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
             if (time <= 0) {
                 businessSchoolService.expireApplication(profileId);
                 dto.setRemainHour(0);

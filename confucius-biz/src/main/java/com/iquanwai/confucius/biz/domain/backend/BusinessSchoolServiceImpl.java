@@ -144,13 +144,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao
                 .loadLastApproveApplication(profileId);
         if (businessSchoolApplication != null) {
-            Date dealTime = businessSchoolApplication.getDealTime();
-            //如果申请通过通知还未发,则返回通过时间,反之则返回通知时间
-            if (dealTime == null) {
-                return businessSchoolApplication.getCheckTime();
-            } else {
-                return dealTime;
-            }
+            return businessSchoolApplication.getDealTime();
         } else {
             return null;
         }
