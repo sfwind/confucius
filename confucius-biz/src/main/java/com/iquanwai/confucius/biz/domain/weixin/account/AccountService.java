@@ -75,9 +75,16 @@ public interface AccountService {
     void unfollow(String openid);
 
     /**
-     * 根据昵称模糊查询用户的详细信息
+     * 根据昵称模糊查询用户的详细信息(200条)
      */
     List<Profile> loadProfilesByNickName(String nickName);
+
+    /**
+     * 根据昵称模糊查询用户的详细信息(所有)
+     * @param nickName
+     * @return
+     */
+    List<Profile> loadAllProfilesByNickName(String nickName);
 
     /**
      * 根据学号查询 RIseClassMember 记录，不进行 Active 字段区分
@@ -113,4 +120,5 @@ public interface AccountService {
      * 根据unionId获取用户详情
      */
     Profile queryByUnionId(String unionid);
+
 }
