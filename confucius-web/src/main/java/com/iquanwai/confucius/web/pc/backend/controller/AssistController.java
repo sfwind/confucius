@@ -119,4 +119,45 @@ public class AssistController {
     }
 
 
+    /**
+     * 根据NickName加载非教练人员
+     * @param loginUser
+     * @param nickName
+     * @return
+     */
+    @RequestMapping("load/unassist/{nickName}")
+    public ResponseEntity<Map<String,Object>> loadUnAssistByNickName(PCLoginUser loginUser,@PathVariable String nickName){
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("加载非教练人员").action("加载非教练人员");
+        operationLogService.log(operationLog);
+
+        List<Profile> profiles =  assistantCoachService.loadUnAssistByNickName(nickName);
+
+        List<AssistDto> assistDtos = Lists.newArrayList();
+
+        profiles.stream().forEach(profile -> {
+            AssistDto assistDto = new AssistDto();
+            assistDto.setId(-1);
+            assistDto.setHeadImageUrl(profile.getHeadimgurl());
+            assistDto.setRiseId(profile.getRiseId());
+            assistDto.setNickName(profile.getNickname());
+
+            assistDtos.add(assistDto);
+        });
+
+        return WebUtils.result(assistDtos);
+    }
+
+    @RequestMapping("add/{riseId}/{assistCatalog}")
+    public ResponseEntity<Map<String,Object>> addAssist(PCLoginUser loginUser,@PathVariable String riseId,@PathVariable Integer assistCatalog){
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("铰链管理").function("添加教练").action("添加教练");
+        operationLogService.log(operationLog);
+
+       return WebUtils.result(assistantCoachService.addAssist(assistCatalog,riseId));
+    }
+
+
+
+
+
+
 }

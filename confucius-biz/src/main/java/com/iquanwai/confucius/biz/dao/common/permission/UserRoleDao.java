@@ -6,7 +6,9 @@ import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -117,5 +119,43 @@ public class UserRoleDao extends DBUtil {
             logger.error(e.getLocalizedMessage(),e);
         }
         return 0;
+    }
+
+    /**
+     * 加载
+     * @param profileId
+     * @return
+     */
+    public UserRole loadAssist(Integer profileId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<UserRole> h = new BeanHandler<>(UserRole.class);
+        String sql = " select * from UserRole where profileId = ? And RoleId in (3,4,11) And del = 0";
+
+        try {
+           return runner.query(sql,h,profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return null;
+    }
+
+    /**
+     * 添加教练
+     * @param roleId
+     * @param openId
+     * @param profileId
+     * @return
+     */
+    public Integer insertAssist(Integer roleId,String openId,Integer profileId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = " insert into UserRole(RoleId,OpenId,ProfileId) values(?,?,?)";
+
+        try {
+          Long result = runner.insert(sql,new ScalarHandler<>(),roleId,openId,profileId);
+          return result.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return -1;
     }
 }

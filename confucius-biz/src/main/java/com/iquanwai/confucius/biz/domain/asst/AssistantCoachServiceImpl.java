@@ -501,5 +501,37 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         return userRoleDao.deleteAssist(id);
     }
 
+    @Override
+    public List<Profile> loadUnAssistByNickName(String nickName) {
+        List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
+        if(profiles.size()==0){
+            return profiles;
+        }
+        List<Profile> unAssistProfiles = Lists.newArrayList();
+        profiles.stream().forEach(profile -> {
+           if(userRoleDao.loadAssist(profile.getId())==null){
+                unAssistProfiles.add(profile);
+           }
+        });
+        return unAssistProfiles;
+    }
 
+    /**
+     * 添加教练
+     * @param roleId
+     * @param riseId
+     * @return
+     */
+    @Override
+    public Integer addAssist(Integer roleId, String riseId) {
+        Profile profile = accountService.getProfileByRiseId(riseId);
+        if(profile==null){
+            return -1;
+        }
+        //判断是否已经是教练
+       if(userRoleDao.loadAssist(profile.getId())!=null){
+            return -1;
+       }
+        return userRoleDao.insertAssist(roleId,profile.getOpenid(),profile.getId());
+    }
 }
