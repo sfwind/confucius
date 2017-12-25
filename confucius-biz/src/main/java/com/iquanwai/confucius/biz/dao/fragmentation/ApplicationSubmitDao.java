@@ -385,4 +385,48 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
         return Lists.newArrayList();
     }
+
+
+    /**
+     * 根据profileIdS获得需要求点评的提交
+     * @param problemId
+     * @param profileIds
+     * @return
+     */
+    public List<ApplicationSubmit> loadRequestByProfileIds(Integer problemId,List<Integer> profileIds){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( " + produceQuestionMark(profileIds.size()) + " ) AND  RequestFeedback = 1 AND Del = 0";
+        List<Object> param = Lists.newArrayList();
+        param.add(problemId);
+        param.addAll(profileIds);
+        try {
+          return   runner.query(sql,h,param.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+    /**
+     *
+     * @param problemId
+     * @param profileIds
+     * @return
+     */
+     public List<ApplicationSubmit> loadUnRequestByProfileIds(Integer problemId,List<Integer> profileIds){
+         QueryRunner runner = new QueryRunner(getDataSource());
+         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+         String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( " + produceQuestionMark(profileIds.size()) + " )  AND RequestFeedback = 0 AND Del = 0";
+         List<Object> param = Lists.newArrayList();
+         param.add(problemId);
+         param.addAll(profileIds);
+         try {
+             return   runner.query(sql,h,param.toArray());
+         } catch (SQLException e) {
+             logger.error(e.getLocalizedMessage(),e);
+         }
+         return Lists.newArrayList();
+     }
 }

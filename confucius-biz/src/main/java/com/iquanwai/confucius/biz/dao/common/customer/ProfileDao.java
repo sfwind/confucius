@@ -157,4 +157,20 @@ public class ProfileDao extends DBUtil {
         }
     }
 
+    /**
+     * 根据昵称模糊匹配所有的Profile
+     * @param nickName
+     * @return
+     */
+    public List<Profile> loadAllProfilesByNickName(String nickName){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
+        String sql = " select * from Profile where NickName like ?";
+        try {
+            return runner.query(sql, h, "%" + nickName + "%");
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }

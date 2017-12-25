@@ -326,6 +326,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Profile> loadAllProfilesByNickName(String nickName) {
+        return profileDao.loadAllProfilesByNickName(nickName);
+    }
+
+    @Override
     public Profile loadProfileByMemberId(String memberId) {
         RiseClassMember riseClassMember = riseClassMemberDao.queryValidClassMemberByMemberId(memberId);
         if (riseClassMember != null && riseClassMember.getProfileId() != null) {
