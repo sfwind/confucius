@@ -49,8 +49,8 @@ public class AliPayController {
 
 
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();//创建API对应的request
-        alipayRequest.setReturnUrl("http://zhenzk.confucius.mobi/ali/pay/callback/return");
-        alipayRequest.setNotifyUrl("http://zhenzk.confucius.mobi/ali/pay/callback/notify");//在公共参数中设置回跳和通知地址
+        alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
+        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");//在公共参数中设置回跳和通知地址
         alipayRequest.setBizContent("{" +
                 " \"out_trade_no\":\"" + CommonUtils.randomString(32) + "\"," +
                 " \"total_amount\":\"88.88\"," +
