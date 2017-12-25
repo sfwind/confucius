@@ -104,7 +104,7 @@ public class AliPayController {
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
             boolean verify_result = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", "RSA2");
-            logger.info("进入回调,{},{},{}", out_trade_no, trade_no, trade_status);
+            logger.info("进入回调,{},{},{}", out_trade_no, trade_no, trade_status, verify_result);
 
             if (verify_result) {//验证成功
                 //////////////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +133,7 @@ public class AliPayController {
                 //——请根据您的业务逻辑来编写程序（以上代码仅作参考）——
                 try {
                     response.setHeader("Content-Type", "text/plain");
+                    logger.info("return success");
                     out.println("success");    //请不要修改或删除
                     response.flushBuffer();
                 } catch (IOException e1) {
@@ -144,6 +145,7 @@ public class AliPayController {
             } else {//验证失败
                 try {
                     response.setHeader("Content-Type", "text/plain");
+                    logger.info("return fail");
                     out.println("fail");
                     response.flushBuffer();
                 } catch (IOException e1) {
