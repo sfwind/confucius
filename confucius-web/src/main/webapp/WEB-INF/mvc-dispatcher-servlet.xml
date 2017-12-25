@@ -72,7 +72,7 @@
             <mvc:mapping path="/**"/>
             <mvc:exclude-mapping path="/"/>
             <mvc:exclude-mapping path="/wx/**"/>
-            <mvc:exclude-mapping path="/ali/pay/callback/**"/>
+            <mvc:exclude-mapping path="/ali/pay/**"/>
             <mvc:exclude-mapping path="/b/**"/>
             <mvc:exclude-mapping path="/image/**"/>
             <mvc:exclude-mapping path="/js/**"/>
