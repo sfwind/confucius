@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -66,10 +68,38 @@ public interface AssistantCoachService {
      */
     List<RiseClassMember> loadClassNameAndGroupId();
 
+    /**
+     * 加载教练
+     * @return
+     */
+    List<UserRole> loadAssists();
 
+    /**
+     * 对教练进行升降级
+     */
 
+    Integer updateAssist(Integer id,Integer roleId);
 
+    /**
+     * 教练过期
+     */
 
+    Integer deleteAssist(Integer id);
+
+    /**
+     * 根据NickName加载非教练人员
+     * @param nickName
+     * @return
+     */
+    List<Profile> loadUnAssistByNickName(String nickName);
+
+    /**
+     * 添加教练
+     * @param roleId
+     * @param riseId
+     * @return
+     */
+    Integer addAssist(Integer roleId,String riseId);
 
 
 
