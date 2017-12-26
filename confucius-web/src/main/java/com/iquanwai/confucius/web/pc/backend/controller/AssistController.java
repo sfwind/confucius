@@ -138,6 +138,7 @@ public class AssistController {
             AssistDto assistDto = new AssistDto();
             assistDto.setId(-1);
             assistDto.setHeadImageUrl(profile.getHeadimgurl());
+            assistDto.setRoleId(11);
             assistDto.setRiseId(profile.getRiseId());
             assistDto.setNickName(profile.getNickname());
 
