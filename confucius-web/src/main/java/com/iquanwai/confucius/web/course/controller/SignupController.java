@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
@@ -67,8 +68,9 @@ public class SignupController {
 
     /**
      * rise产品支付成功的回调
+     *
      * @param loginUser 用户信息
-     * @param orderId 订单id
+     * @param orderId   订单id
      * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
@@ -256,7 +258,8 @@ public class SignupController {
 
     /**
      * 获取商品信息
-     * @param loginUser 用户
+     *
+     * @param loginUser    用户
      * @param goodsInfoDto 商品信息
      * @return 详细的商品信息
      */
@@ -326,8 +329,9 @@ public class SignupController {
 
     /**
      * 获取H5支付参数的接口
-     * @param loginUser 用户
-     * @param request request对象
+     *
+     * @param loginUser  用户
+     * @param request    request对象
      * @param paymentDto 商品类型以及商品id
      * @return 支付参数
      */
@@ -370,12 +374,20 @@ public class SignupController {
         // 根据前端传进来的 param 创建订单信息
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(paymentDto, loginUser.getId());
         // 下单
-        PaymentDto paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
+        PaymentDto paymentParam;
+        if (paymentDto.getPayType() == 1) {
+            paymentParam = this.createPayParam(quanwaiOrder, remoteIp)
+        } else if (paymentDto.getPayType() == 2) {
+            paymentParam = this.createAlipay(quanwaiOrder, remoteIp);
+        } else {
+            return WebUtils.error("支付方式异常");
+        }
         return WebUtils.result(paymentParam);
     }
 
     /**
      * 计算优惠券
+     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
@@ -409,8 +421,9 @@ public class SignupController {
 
     /**
      * 创建订单
+     *
      * @param paymentDto 支付信息
-     * @param profileId 用户id
+     * @param profileId  用户id
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
@@ -461,6 +474,33 @@ public class SignupController {
         }
         return paymentDto;
     }
+
+    /**
+     * @param quanwaiOrder
+     * @param remoteIp
+     * @return
+     */
+    private PaymentDto createAlipay(QuanwaiOrder quanwaiOrder, String remoteIp) {
+        // 下单
+        PaymentDto paymentDto = new PaymentDto();
+        paymentDto.setFee(quanwaiOrder.getPrice());
+        paymentDto.setFree(Double.valueOf(0d).equals(quanwaiOrder.getPrice()));
+        paymentDto.setProductId(quanwaiOrder.getOrderId());
+        if (!Double.valueOf(0).equals(quanwaiOrder.getPrice())) {
+            String postPayString = payService.buildAlipayParam(quanwaiOrder.getOrderId(), remoteIp, quanwaiOrder.getOpenid());
+            Map<String,String> signParams = Maps.newHashMap();
+            signParams.put("alipayUrl", postPayString);
+            paymentDto.setSignParams(signParams);
+            OperationLog payParamLog = OperationLog.create().openid(quanwaiOrder.getOpenid())
+                    .module("报名")
+                    .function("支付宝支付")
+                    .action("下单")
+                    .memo(signParams.toString());
+            operationLogService.log(payParamLog);
+        }
+        return paymentDto;
+    }
+
 
     @RequestMapping("/rise/member/{memberTypeId}")
     public ResponseEntity<Map<String, Object>> riseMember(@PathVariable Integer memberTypeId, LoginUser loginUser) {
@@ -520,7 +560,7 @@ public class SignupController {
         }
         boolean privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
         dto.setPrivilege(privilege);
-        if(privilege){
+        if (privilege) {
             // 有付费权限不显示宣讲会按钮
             dto.setAuditionStr(null);
         }

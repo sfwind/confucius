@@ -16,6 +16,12 @@ public class PaymentDto {
     private boolean isFree = false; //是否免费
     private String productId; //订单id,即orderId
     private Map<String, String> signParams;
+    /**
+     * 支付类型，默认是微信h5支付<br/>
+     * 1-微信h5支付<br/>
+     * 2-支付宝手机支付<br/>
+     */
+    private Integer payType=1;
 
     private Integer goodsId;
     private String goodsType;

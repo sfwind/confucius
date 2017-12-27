@@ -1,5 +1,9 @@
 package com.iquanwai.confucius.biz.domain.weixin.pay;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -9,7 +13,11 @@ import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.slf4j.Logger;
@@ -404,6 +412,39 @@ public class PayServiceImpl implements PayService {
             }
 
         }
+    }
+
+    @Override
+    public String buildAlipayParam(String orderId, String remoteIp, String openid) {
+        AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
+                ConfigUtils.getValue("alipay.appid"),
+                ConfigUtils.getValue("alipay.private.key"),
+                "json",
+                "UTF-8",
+                ConfigUtils.getValue("alipay.public.key"),
+                "RSA2"); //获得初始化的AlipayClient
+
+
+        AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();//创建API对应的request
+        alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
+        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");//在公共参数中设置回跳和通知地址
+        alipayRequest.setBizContent("{" +
+                " \"out_trade_no\":\"" + CommonUtils.randomString(32) + "\"," +
+                " \"total_amount\":\"88.88\"," +
+                " \"subject\":\"圈外商学院\"," +
+                " \"product_code\":\"QUICK_WAP_PAY\"" +
+                " }");//填充业务参数
+        String form = "";
+        try {
+            form = alipayClient.pageExecute(alipayRequest).getBody(); //调用SDK生成表单
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        httpResponse.setContentType("text/html;charset=" + "UTF-8");
+        httpResponse.getWriter().write(form);//直接将完整的表单html输出到页面
+        httpResponse.getWriter().flush();
+        httpResponse.getWriter().close();
+
     }
 
     private RefundOrder buildRefundOrder(QuanwaiOrder quanwaiOrder, Double fee) {

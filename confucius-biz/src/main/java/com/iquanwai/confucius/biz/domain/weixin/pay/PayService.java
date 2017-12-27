@@ -64,4 +64,5 @@ public interface PayService {
     String LOGIN_USER_RELOAD_TOPIC ="login_user_reload";
 
 
+    String buildAlipayParam(String orderId, String remoteIp, String openid);
 }
