@@ -376,7 +376,7 @@ public class SignupController {
         // 下单
         PaymentDto paymentParam;
         if (paymentDto.getPayType() == 1) {
-            paymentParam = this.createPayParam(quanwaiOrder, remoteIp)
+            paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
         } else if (paymentDto.getPayType() == 2) {
             paymentParam = this.createAlipay(quanwaiOrder, remoteIp);
         } else {
