@@ -130,10 +130,10 @@ public class SignupServiceImpl implements SignupService {
             BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig();
             if (!businessSchoolConfig.getPurchaseSwitch()) {
                 right = "商学院报名临时关闭\n记得及时关注开放时间哦";
-            } else if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP
-                    && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                left = 1;
-            } else if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {
+            } else if (riseMember != null && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
+                    RiseMember.ELITE == riseMember.getMemberTypeId() ||
+                    RiseMember.HALF == riseMember.getMemberTypeId() ||
+                    RiseMember.ANNUAL == riseMember.getMemberTypeId())) {
                 left = 1;
             } else {
                 // 查看是否开放报名
@@ -146,8 +146,8 @@ public class SignupServiceImpl implements SignupService {
         } else if (memberTypeId == RiseMember.CAMP) {
             MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
             // 购买训练营
-            if (profile.getRiseMember() == Constants.RISE_MEMBER.MEMBERSHIP &&
-                    (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() || RiseMember.ELITE == riseMember.getMemberTypeId())) {
+            if (riseMember != null && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
+                    RiseMember.ELITE == riseMember.getMemberTypeId())) {
                 right = "您已经是圈外商学院学员，拥有主题训练营，无需重复报名\n如有疑问请在学习群咨询班长";
             } else {
                 if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {

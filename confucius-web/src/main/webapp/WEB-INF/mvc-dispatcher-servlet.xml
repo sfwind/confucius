@@ -19,15 +19,16 @@
 
     <aop:aspectj-autoproxy proxy-target-class="true"/>
     <context:annotation-config/>
-    <context:component-scan base-package="com.iquanwai.confucius.web" />
-    <context:component-scan base-package="com.iquanwai.confucius.mq" />
+    <context:component-scan base-package="com.iquanwai.confucius.web"/>
+    <context:component-scan base-package="com.iquanwai.confucius.mq"/>
     <mvc:resources location="/image/" mapping="/image/**"/>
     <mvc:resources location="/js/" mapping="/js/**"/>
 
     <mvc:annotation-driven>
         <mvc:message-converters register-defaults="false">
             <!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
-            <bean id="fastJsonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+            <bean id="fastJsonHttpMessageConverter"
+                  class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                 <property name="supportedMediaTypes">
                     <list>
                         <value>text/html;charset=UTF-8</value>
@@ -35,7 +36,8 @@
                     </list>
                 </property>
             </bean>
-            <bean id="jaxbHttpMessageConverter" class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter">
+            <bean id="jaxbHttpMessageConverter"
+                  class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter">
                 <property name="supportedMediaTypes">
                     <list>
                         <value>text/xml;charset=UTF-8</value>
@@ -57,31 +59,31 @@
           p:prefix="/" p:suffix=".jsp" p:order="1"/>
 
     <!--<websocket:handlers allowed-origins="*">-->
-        <!--<websocket:mapping path="/session" handler="sessionHandler"/>-->
-        <!--<websocket:handshake-interceptors>-->
-            <!--<bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>-->
-        <!--</websocket:handshake-interceptors>-->
+    <!--<websocket:mapping path="/session" handler="sessionHandler"/>-->
+    <!--<websocket:handshake-interceptors>-->
+    <!--<bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>-->
+    <!--</websocket:handshake-interceptors>-->
     <!--</websocket:handlers>-->
     <!--<bean id="sessionHandler" class="com.iquanwai.confucius.web.account.websocket.SessionSocketHandler"/>-->
 
 
     <mvc:interceptors>
         <mvc:interceptor>
-            <mvc:mapping path="/**" />
+            <mvc:mapping path="/**"/>
             <mvc:exclude-mapping path="/"/>
-            <mvc:exclude-mapping path="/wx/**" />
-            <mvc:exclude-mapping path="/b/**" />
-            <mvc:exclude-mapping path="/image/**" />
-            <mvc:exclude-mapping path="/js/**" />
+            <mvc:exclude-mapping path="/wx/**"/>
+            <mvc:exclude-mapping path="/b/**"/>
+            <mvc:exclude-mapping path="/image/**"/>
+            <mvc:exclude-mapping path="/js/**"/>
             <!--<mvc:exclude-mapping path="/homework/**" />-->
             <!--<mvc:exclude-mapping path="/static/**" />-->
-            <mvc:exclude-mapping path="/cache/**" />
-            <mvc:exclude-mapping path="/file/image/**" />
+            <mvc:exclude-mapping path="/cache/**"/>
+            <mvc:exclude-mapping path="/file/image/**"/>
             <mvc:exclude-mapping path="/account/**"/>
-            <mvc:exclude-mapping path="/login" />
-            <mvc:exclude-mapping path="/logout" />
+            <mvc:exclude-mapping path="/login"/>
+            <mvc:exclude-mapping path="/logout"/>
             <mvc:exclude-mapping path="/pc/**"/>
-            <mvc:exclude-mapping path="/home" />
+            <mvc:exclude-mapping path="/home"/>
             <mvc:exclude-mapping path="/fragment/**"/>
             <mvc:exclude-mapping path="/servercode"/>
             <mvc:exclude-mapping path="/community"/>
