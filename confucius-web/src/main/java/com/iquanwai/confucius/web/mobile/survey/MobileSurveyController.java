@@ -37,9 +37,7 @@ public class MobileSurveyController {
                                  HttpServletResponse response,
                                  @RequestParam("activity") Integer activity) throws IOException {
         if (loginUser == null) {
-            response.sendRedirect(ConfigUtils.adapterDomainName() +
-                    "/static/login/result?err=" +
-                    URLEncoder.encode("您还未关注公众号", "UTF-8"));
+            response.sendRedirect("/subscribe");
         } else {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("问卷")
