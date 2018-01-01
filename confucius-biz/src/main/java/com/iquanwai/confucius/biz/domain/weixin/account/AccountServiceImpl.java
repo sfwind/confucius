@@ -366,15 +366,20 @@ public class AccountServiceImpl implements AccountService {
 
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
-            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
+            //如果用户是专业版或者精英版,则无需申请
+            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId
+                    || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
                 result = true;
-            }
-            if (RiseMember.CAMP == memberTypeId) {
-                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-                result = riseCertificate != null;
             }
         }
 
+        //如果用户曾经获得证书,则无需申请
+        if(!result){
+            RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
+            result = riseCertificate != null;
+        }
+
+        //如果用户已经通过申请,则无需再次申请
         if (!result) {
             result = customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
         }
