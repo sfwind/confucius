@@ -75,8 +75,6 @@
             <mvc:exclude-mapping path="/b/**"/>
             <mvc:exclude-mapping path="/image/**"/>
             <mvc:exclude-mapping path="/js/**"/>
-            <!--<mvc:exclude-mapping path="/homework/**" />-->
-            <!--<mvc:exclude-mapping path="/static/**" />-->
             <mvc:exclude-mapping path="/cache/**"/>
             <mvc:exclude-mapping path="/file/image/**"/>
             <mvc:exclude-mapping path="/account/**"/>

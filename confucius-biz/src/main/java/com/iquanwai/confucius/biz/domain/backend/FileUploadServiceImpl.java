@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.Audio;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.FTPUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +69,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             } else {
                 audio.setUpdated(1);
             }
-            if (url.equals("")) {
+            if (StringUtils.isEmpty(url)) {
                 audioDao.updateAudio(audio);
             } else {
                 audioDao.updateAudioContainsUrl(audio);

@@ -1,8 +1,6 @@
-package com.iquanwai.confucius.web.pc.fragmentation.dto;
+package com.iquanwai.confucius.web.pc.backend.dto;
 
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * Created by nethunder on 2016/12/27.
