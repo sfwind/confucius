@@ -27,6 +27,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.joda.time.DateTime;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,7 @@ public class AccountServiceImpl implements AccountService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final int WX_BLACKLIST_DEFAULT_PAGESIZE = 10000;
+    private static final int WX_BLACKLIST_DEFAULT_PAGE_SIZE = 10000;
 
     @PostConstruct
     public void init() {
@@ -221,14 +222,12 @@ public class AccountServiceImpl implements AccountService {
                         // 插入profile表
                         Profile profile = getProfileFromDB(accountNew.getOpenid());
                         if (profile == null) {
-                            profile = new Profile();
                             try {
-                                BeanUtils.copyProperties(profile, accountNew);
+                                ModelMapper modelMapper = new ModelMapper();
+                                profile = modelMapper.map(accountNew, Profile.class);
                                 logger.info("插入Profile表信息:{}", profile);
                                 profile.setRiseId(CommonUtils.randomString(7));
                                 profileDao.insertProfile(profile);
-                            } catch (IllegalAccessException | InvocationTargetException e) {
-                                logger.error("beanUtils copy props error", e);
                             } catch (SQLException err) {
                                 profile.setRiseId(CommonUtils.randomString(7));
                                 try {
@@ -409,7 +408,7 @@ public class AccountServiceImpl implements AccountService {
 
             int total = Integer.valueOf(JSON.parseObject(body).getString("total"));
             //取出所有的openid
-            while ((total - 1) / WX_BLACKLIST_DEFAULT_PAGESIZE > count) {
+            while ((total - 1) / WX_BLACKLIST_DEFAULT_PAGE_SIZE > count) {
                 jsonObject = new JSONObject();
                 jsonObject.put("begin_openid", nextOpenid);
                 body = restfulHelper.post(url, jsonObject.toJSONString());

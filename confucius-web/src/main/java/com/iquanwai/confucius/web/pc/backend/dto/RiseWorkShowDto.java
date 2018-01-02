@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.pc.fragmentation.dto;
+package com.iquanwai.confucius.web.pc.backend.dto;
 
 import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
 import lombok.Data;

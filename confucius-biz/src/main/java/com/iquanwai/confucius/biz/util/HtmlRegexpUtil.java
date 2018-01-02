@@ -97,6 +97,8 @@ public class HtmlRegexpUtil {
                     case '&':
                         flag = true;
                         break;
+                    default:
+                        break;
                 }
             }
         }

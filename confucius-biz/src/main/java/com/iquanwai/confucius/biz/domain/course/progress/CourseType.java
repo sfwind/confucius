@@ -19,9 +19,9 @@ public class CourseType {
 
     public static final String PICURL_PREFIX = ConfigUtils.resourceDomainName()+"/images/";
 
-    public static final Map<Integer, String> iconLockMap = Maps.newHashMap();
-    public static final Map<Integer, String> iconUnLockMap = Maps.newHashMap();
-    public static final Map<Integer, String> iconCompleteMap = Maps.newHashMap();
+    public static Map<Integer, String> iconLockMap = Maps.newHashMap();
+    public static Map<Integer, String> iconUnLockMap = Maps.newHashMap();
+    public static Map<Integer, String> iconCompleteMap = Maps.newHashMap();
 
     static{
         iconLockMap.put(CHALLENGE, PICURL_PREFIX+"course_locked.png");
