@@ -375,9 +375,9 @@ public class SignupController {
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(paymentDto, loginUser.getId());
         // 下单
         PaymentDto paymentParam;
-        if (paymentDto.getPayType() == 1) {
+        if (paymentDto.getPayType() == QuanwaiOrder.PAY_WECHAT) {
             paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
-        } else if (paymentDto.getPayType() == 2) {
+        } else if (paymentDto.getPayType() == QuanwaiOrder.PAY_ALI) {
             paymentParam = this.createAlipay(quanwaiOrder, remoteIp);
         } else {
             return WebUtils.error("支付方式异常");
@@ -429,21 +429,21 @@ public class SignupController {
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER: {
-                return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
+                return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup(), paymentDto.getPayType());
             }
             case QuanwaiOrder.FRAG_CAMP: {
                 Integer couponId = null;
                 if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
-                return signupService.signUpMonthlyCamp(profileId, paymentDto.getGoodsId(), couponId);
+                return signupService.signUpMonthlyCamp(profileId, paymentDto.getGoodsId(), couponId, paymentDto.getPayType());
             }
             case QuanwaiOrder.BS_APPLICATION: {
                 Integer couponId = null;
                 if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
-                return signupService.signupBusinessSchoolApplication(profileId, paymentDto.getGoodsId(), couponId);
+                return signupService.signupBusinessSchoolApplication(profileId, paymentDto.getGoodsId(), couponId, paymentDto.getPayType());
             }
             default:
                 logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
@@ -476,9 +476,10 @@ public class SignupController {
     }
 
     /**
-     * @param quanwaiOrder
-     * @param remoteIp
-     * @return
+     * 阿里支付
+     * @param quanwaiOrder 订单对象
+     * @param remoteIp ip
+     * @return 支付参数
      */
     private PaymentDto createAlipay(QuanwaiOrder quanwaiOrder, String remoteIp) {
         // 下单
@@ -488,7 +489,7 @@ public class SignupController {
         paymentDto.setProductId(quanwaiOrder.getOrderId());
         if (!Double.valueOf(0).equals(quanwaiOrder.getPrice())) {
             String postPayString = payService.buildAlipayParam(quanwaiOrder.getOrderId(), remoteIp, quanwaiOrder.getOpenid());
-            Map<String,String> signParams = Maps.newHashMap();
+            Map<String, String> signParams = Maps.newHashMap();
             signParams.put("alipayUrl", postPayString);
             paymentDto.setSignParams(signParams);
             OperationLog payParamLog = OperationLog.create().openid(quanwaiOrder.getOpenid())

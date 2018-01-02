@@ -53,7 +53,7 @@ public class AliPayController {
         alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");//在公共参数中设置回跳和通知地址
         alipayRequest.setBizContent("{" +
                 " \"out_trade_no\":\"" + CommonUtils.randomString(32) + "\"," +
-                " \"total_amount\":\"88.88\"," +
+                " \"total_amount\":\"0.08\"," +
                 " \"subject\":\"圈外商学院\"," +
                 " \"product_code\":\"QUICK_WAP_PAY\"" +
                 " }");//填充业务参数
@@ -88,6 +88,8 @@ public class AliPayController {
                 //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
                 params.put(name, valueStr);
             }
+            logger.info("notify requestParams:{}", requestParams);
+            logger.info("notify param:{}", params);
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
             //商户订单号
 
@@ -104,7 +106,7 @@ public class AliPayController {
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
             boolean verify_result = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", "RSA2");
-            logger.info("进入回调,{},{},{}", out_trade_no, trade_no, trade_status, verify_result);
+            logger.info("进入回调,{},{},{},{}", out_trade_no, trade_no, trade_status, verify_result);
 
             if (verify_result) {//验证成功
                 //////////////////////////////////////////////////////////////////////////////////////////

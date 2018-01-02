@@ -286,7 +286,7 @@ public class PayServiceImpl implements PayService {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_CAMP_PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())){
+        } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + BS_APPLICATION_PAY_CALLBACK_PATH;
         }
 
@@ -434,17 +434,14 @@ public class PayServiceImpl implements PayService {
                 " \"subject\":\"圈外商学院\"," +
                 " \"product_code\":\"QUICK_WAP_PAY\"" +
                 " }");//填充业务参数
-        String form = "";
+        String redirectParam = "";
         try {
-            form = alipayClient.pageExecute(alipayRequest).getBody(); //调用SDK生成表单
+            redirectParam = alipayClient.pageExecute(alipayRequest, "GET").getBody(); //调用SDK生成表单
         } catch (AlipayApiException e) {
             e.printStackTrace();
         }
-        httpResponse.setContentType("text/html;charset=" + "UTF-8");
-        httpResponse.getWriter().write(form);//直接将完整的表单html输出到页面
-        httpResponse.getWriter().flush();
-        httpResponse.getWriter().close();
-
+        logger.info("redirect " + redirectParam);
+        return redirectParam;
     }
 
     private RefundOrder buildRefundOrder(QuanwaiOrder quanwaiOrder, Double fee) {
