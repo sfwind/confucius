@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
@@ -14,13 +15,19 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
 import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.course.dto.payment.BusinessSchoolDto;
+import com.iquanwai.confucius.web.course.dto.payment.CampInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
 import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -33,7 +40,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -67,8 +79,9 @@ public class SignupController {
 
     /**
      * rise产品支付成功的回调
+     *
      * @param loginUser 用户信息
-     * @param orderId 订单id
+     * @param orderId   订单id
      * @return 处理结果
      */
     @RequestMapping(value = "/paid/rise/{orderId}", method = RequestMethod.POST)
@@ -256,7 +269,8 @@ public class SignupController {
 
     /**
      * 获取商品信息
-     * @param loginUser 用户
+     *
+     * @param loginUser    用户
      * @param goodsInfoDto 商品信息
      * @return 详细的商品信息
      */
@@ -326,8 +340,9 @@ public class SignupController {
 
     /**
      * 获取H5支付参数的接口
-     * @param loginUser 用户
-     * @param request request对象
+     *
+     * @param loginUser  用户
+     * @param request    request对象
      * @param paymentDto 商品类型以及商品id
      * @return 支付参数
      */
@@ -376,6 +391,7 @@ public class SignupController {
 
     /**
      * 计算优惠券
+     *
      * @param loginUser 用户信息
      */
     @RequestMapping(value = "/payment/coupon/calculate", method = RequestMethod.POST)
@@ -401,7 +417,7 @@ public class SignupController {
         MonthlyCampProcessDto dto = new MonthlyCampProcessDto();
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         Integer currentSellingMonth = signupService.loadCurrentCampMonth(monthlyCampConfig);
-        dto.setMarKSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
+        dto.setMarkSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
         dto.setCurrentCampMonth(currentSellingMonth);
         dto.setCampMonthProblemId(signupService.loadHrefProblemId(loginUser.getId(), currentSellingMonth));
         return WebUtils.result(dto);
@@ -409,8 +425,9 @@ public class SignupController {
 
     /**
      * 创建订单
+     *
      * @param paymentDto 支付信息
-     * @param profileId 用户id
+     * @param profileId  用户id
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
@@ -520,7 +537,7 @@ public class SignupController {
         }
         boolean privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
         dto.setPrivilege(privilege);
-        if(privilege){
+        if (privilege) {
             // 有付费权限不显示宣讲会按钮
             dto.setAuditionStr(null);
         }
@@ -565,6 +582,21 @@ public class SignupController {
         operationLogService.log(operationLog);
         Date date = new DateTime().withDayOfMonth(1).toDate();
         return WebUtils.result(DateUtils.parseDateToFormat7(date));
+    }
+
+    @RequestMapping(value = "/guest/camp/sell/info", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> getCampSellInfo() {
+        logger.info("查询训练营售卖也信息");
+        String json = ConfigUtils.getCampPayInfo();
+        if (json == null) {
+            return WebUtils.error("配置异常");
+        } else {
+            MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+            CampInfoDto dto = JSONObject.parseObject(json, CampInfoDto.class);
+            dto.setMarkSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
+
+            return WebUtils.result(dto);
+        }
     }
 
 

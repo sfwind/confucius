@@ -353,4 +353,10 @@ public class ConfigUtils {
         //替换
         return url.replaceAll(urlPattern, "http://" + domainName+"/");
     }
+
+    public static String getCampPayInfo(){
+        return getValue("camp.pay.json.info");
+    }
+
+
 }
