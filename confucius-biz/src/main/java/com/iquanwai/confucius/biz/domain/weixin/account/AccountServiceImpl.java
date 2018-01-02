@@ -222,10 +222,9 @@ public class AccountServiceImpl implements AccountService {
                         // 插入profile表
                         Profile profile = getProfileFromDB(accountNew.getOpenid());
                         if (profile == null) {
-                            profile = new Profile();
                             try {
                                 ModelMapper modelMapper = new ModelMapper();
-                                modelMapper.map(accountNew, profile);
+                                profile = modelMapper.map(accountNew, Profile.class);
                                 logger.info("插入Profile表信息:{}", profile);
                                 profile.setRiseId(CommonUtils.randomString(7));
                                 profileDao.insertProfile(profile);
