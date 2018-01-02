@@ -69,12 +69,17 @@ public class IndexController {
 
     @RequestMapping(value = "/pay/redirect/camp/pay", method = RequestMethod.GET)
     public void getGuestPayCampPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (checkFollow(request, response)) {
-            // 关注
-            response.sendRedirect(PAY_CAMP);
-        } else {
-            // 未关注
-            response.sendRedirect(PAY_GUEST_CAMP);
+        try {
+            if (checkFollow(request, response)) {
+                // 关注
+                response.sendRedirect(PAY_CAMP);
+            } else {
+                // 未关注
+                response.sendRedirect(PAY_GUEST_CAMP);
+            }
+        } catch (WeixinException e) {
+            // ignore WeixinException
+            logger.error("微信 Exception");
         }
     }
 
