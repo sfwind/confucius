@@ -9,7 +9,6 @@ public class SubscribeRouterConfig {
     private String url; // 正则匹配 url
     private String scene; // 场景号
     private Integer sequence; // 正则匹配优先级
-    private String followKey; //导致关注的key
     private Boolean del;
 
     public static final String QUERY_KEY="_fk";

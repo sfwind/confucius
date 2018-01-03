@@ -34,7 +34,7 @@ public class SubscribeRouterServiceImpl implements SubscribeRouterService {
                 String urlRegex = routerConfig.getUrl();
                 logger.info("开始解析：" + urlRegex);
                 boolean isMatchUri = Pattern.matches(urlRegex, currentPatchName);
-                boolean isMatchKey = followKey == null || followKey.equals(routerConfig.getFollowKey());
+                boolean isMatchKey = followKey == null || followKey.equals(routerConfig.getScene());
                 if (isMatchUri && isMatchKey) {
                     // uri和key都匹配到，则返回
                     targetSubscribeRouterConfig = routerConfig;
