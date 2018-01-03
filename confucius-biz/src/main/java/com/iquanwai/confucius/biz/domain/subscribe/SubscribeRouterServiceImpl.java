@@ -23,7 +23,7 @@ public class SubscribeRouterServiceImpl implements SubscribeRouterService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public SubscribeRouterConfig loadUnSubscribeRouterConfig(String currentPatchName, String subscribeKey) {
+    public SubscribeRouterConfig loadUnSubscribeRouterConfig(String currentPatchName, String followKey) {
 
         List<SubscribeRouterConfig> routerConfigs = subscribeRouterConfigDao.loadAll();
 
@@ -34,7 +34,7 @@ public class SubscribeRouterServiceImpl implements SubscribeRouterService {
                 String urlRegex = routerConfig.getUrl();
                 logger.info("开始解析：" + urlRegex);
                 boolean isMatchUri = Pattern.matches(urlRegex, currentPatchName);
-                boolean isMatchKey = subscribeKey == null || subscribeKey.equals(routerConfig.getKey());
+                boolean isMatchKey = followKey == null || followKey.equals(routerConfig.getFollowKey());
                 if (isMatchUri && isMatchKey) {
                     // uri和key都匹配到，则返回
                     targetSubscribeRouterConfig = routerConfig;
