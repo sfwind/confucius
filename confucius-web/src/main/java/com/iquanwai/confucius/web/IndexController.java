@@ -154,7 +154,8 @@ public class IndexController {
             account = accountService.getAccount(openId, false);
         } catch (NotFollowingException e) {
             try {
-                SubscribeRouterConfig subscribeRouterConfig = subscribeRouterService.loadUnSubscribeRouterConfig(request.getRequestURI());
+                String subscribeKey = request.getParameter("_ws");
+                SubscribeRouterConfig subscribeRouterConfig = subscribeRouterService.loadUnSubscribeRouterConfig(request.getRequestURI(), subscribeKey);
                 if (subscribeRouterConfig != null) {
                     // 未关注
                     response.sendRedirect(SUBSCRIBE_URL + "?scene=" + subscribeRouterConfig.getScene());
