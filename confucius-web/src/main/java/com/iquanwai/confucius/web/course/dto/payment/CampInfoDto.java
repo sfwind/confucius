@@ -10,5 +10,6 @@ import lombok.Data;
 public class CampInfoDto {
     private String campPaymentImage;
     private String markSellingMemo; // 打点用到的，2017-10
+    private Integer currentCampMonth;
 
 }

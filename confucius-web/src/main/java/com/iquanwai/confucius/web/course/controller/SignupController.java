@@ -594,7 +594,7 @@ public class SignupController {
             MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
             CampInfoDto dto = JSONObject.parseObject(json, CampInfoDto.class);
             dto.setMarkSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
-
+            dto.setCurrentCampMonth(signupService.loadCurrentCampMonth(monthlyCampConfig));
             return WebUtils.result(dto);
         }
     }
