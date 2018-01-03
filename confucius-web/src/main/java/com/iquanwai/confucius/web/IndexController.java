@@ -24,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import reactor.core.support.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,10 +73,22 @@ public class IndexController {
         try {
             if (checkFollow(request, response)) {
                 // 关注
+                String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+                String openId = oAuthService.openId(accessToken);
+                // openid在checkFollow里检查了
+                Assert.notNull(openId);
+                OperationLog operationLog = new OperationLog().openid(openId).module("训练营").function("售卖页").action("redirect")
+                        .memo(request.getParameter(SubscribeRouterConfig.QUERY_KEY));
+                operationLogService.log(operationLog);
                 response.sendRedirect(PAY_CAMP);
             } else {
                 // 未关注
-                response.sendRedirect(PAY_GUEST_CAMP);
+                String url = PAY_GUEST_CAMP;
+                if (request.getQueryString() != null) {
+                    url += "?" + request.getQueryString();
+                }
+                logger.info("redirect :{}", url);
+                response.sendRedirect(url);
             }
         } catch (WeixinException e) {
             // ignore WeixinException
@@ -154,7 +167,7 @@ public class IndexController {
             account = accountService.getAccount(openId, false);
         } catch (NotFollowingException e) {
             try {
-                String followKey = request.getParameter("_fk");
+                String followKey = request.getParameter(SubscribeRouterConfig.QUERY_KEY);
                 SubscribeRouterConfig subscribeRouterConfig = subscribeRouterService.loadUnSubscribeRouterConfig(request.getRequestURI(), followKey);
                 if (subscribeRouterConfig != null) {
                     // 未关注

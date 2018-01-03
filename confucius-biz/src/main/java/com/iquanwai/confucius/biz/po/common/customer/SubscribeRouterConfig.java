@@ -12,4 +12,5 @@ public class SubscribeRouterConfig {
     private String followKey; //导致关注的key
     private Boolean del;
 
+    public static final String QUERY_KEY="_fk";
 }
