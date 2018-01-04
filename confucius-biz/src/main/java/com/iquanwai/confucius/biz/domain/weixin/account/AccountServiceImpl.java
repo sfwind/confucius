@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -77,8 +76,7 @@ public class AccountServiceImpl implements AccountService {
     private void loadUserRole() {
         List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
 
-        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(
-                userRole -> userRoleMap.put(userRole.getOpenid(), userRole.getRoleId()));
+        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole -> userRoleMap.put(userRole.getOpenid(), userRole.getRoleId()));
 
         logger.info("role init complete");
     }
@@ -115,7 +113,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Profile getProfile(Integer profileId) {
         Profile profile = profileDao.load(Profile.class, profileId);
-
         if (profile != null) {
             profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
@@ -128,30 +125,8 @@ public class AccountServiceImpl implements AccountService {
                 profile.setRole(role);
             }
         }
-
+        // TODO 处理头像问题
         return profile;
-    }
-
-    private Integer getRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember == null) {
-            return 0;
-        }
-        Integer memberTypeId = riseMember.getMemberTypeId();
-        if (memberTypeId == null) {
-            return 0;
-        }
-        // 精英或者专业版用户
-        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL
-                || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
-            return 1;
-        } else if (memberTypeId == RiseMember.CAMP) {
-            return 3;
-        } else if (memberTypeId == RiseMember.COURSE) {
-            return 2;
-        } else {
-            return 0;
-        }
     }
 
     @Override
@@ -177,8 +152,30 @@ public class AccountServiceImpl implements AccountService {
             } else {
                 profile.setRole(role);
             }
+            // TODO 处理头像问题
         });
         return profiles;
+    }
+
+    private Integer getRiseMember(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        if (riseMember == null) {
+            return 0;
+        }
+        Integer memberTypeId = riseMember.getMemberTypeId();
+        if (memberTypeId == null) {
+            return 0;
+        }
+        // 精英或者专业版用户
+        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
+            return 1;
+        } else if (memberTypeId == RiseMember.CAMP) {
+            return 3;
+        } else if (memberTypeId == RiseMember.COURSE) {
+            return 2;
+        } else {
+            return 0;
+        }
     }
 
     private Account getAccountFromWeixin(String openid) throws NotFollowingException {
@@ -250,6 +247,46 @@ public class AccountServiceImpl implements AccountService {
             logger.error(e.getMessage(), e);
         }
         return accountNew;
+    }
+
+    @Override
+    public String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException {
+        // 调用api查询account对象
+        String url = USER_INFO_URL;
+        Map<String, String> map = Maps.newHashMap();
+        map.put("openid", openId);
+        logger.info("请求用户信息:{}", openId);
+        url = CommonUtils.placeholderReplace(url, map);
+        String body = restfulHelper.get(url);
+        logger.info("请求用户信息结果:{}", body);
+        Map<String, Object> result = CommonUtils.jsonToMap(body);
+        Account accountNew = new Account();
+        try {
+            ConvertUtils.register((aClass, value) -> {
+                if (value == null) {
+                    return null;
+                }
+                if (!(value instanceof Double)) {
+                    logger.error("不是日期类型");
+                    throw new ConversionException("不是日期类型");
+                }
+                Double time = (Double) value * 1000;
+                return new DateTime(time.longValue()).toDate();
+            }, Date.class);
+
+            BeanUtils.populate(accountNew, result);
+            if (accountNew.getSubscribe() != null && accountNew.getSubscribe() == 0) {
+                //未关注直接抛异常
+                throw new NotFollowingException();
+            } else {
+                return accountNew.getHeadimgurl();
+            }
+        } catch (NotFollowingException e1) {
+            throw new NotFollowingException();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
     }
 
     @Override
@@ -341,7 +378,6 @@ public class AccountServiceImpl implements AccountService {
 
     private Profile getProfileFromDB(String openid) {
         Profile profile = profileDao.queryByOpenId(openid);
-
         if (profile != null) {
             profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
@@ -354,7 +390,7 @@ public class AccountServiceImpl implements AccountService {
                 profile.setRole(role);
             }
         }
-
+        // TODO 处理头像问题
         return profile;
     }
 
@@ -366,14 +402,13 @@ public class AccountServiceImpl implements AccountService {
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
             //如果用户是专业版或者精英版,则无需申请
-            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId
-                    || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
+            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
                 result = true;
             }
         }
 
         //如果用户曾经获得证书,则无需申请
-        if(!result){
+        if (!result) {
             RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
             result = riseCertificate != null;
         }
@@ -447,7 +482,6 @@ public class AccountServiceImpl implements AccountService {
         return checkIsSuccess(body);
     }
 
-
     private boolean checkIsSuccess(String body) {
         JSONObject resultJSON = JSON.parseObject(body);
         if ((Integer) resultJSON.get("errcode") == 0) {
@@ -478,7 +512,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Profile queryByUnionId(String unionid) {
-        return profileDao.queryByUnionId(unionid);
+    public Profile queryByUnionId(String unionId) {
+        return profileDao.queryByUnionId(unionId);
     }
+
+    @Override
+    public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
+        return profileDao.updateHeadImgUrl(profileId, headImgUrl);
+    }
+
 }
