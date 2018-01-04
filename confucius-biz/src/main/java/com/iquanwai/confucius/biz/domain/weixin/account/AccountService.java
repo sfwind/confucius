@@ -40,6 +40,11 @@ public interface AccountService {
     List<Profile> getProfiles(List<Integer> profileIds);
 
     /**
+     *  从微信实时获取头像信息
+     */
+    String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException;
+
+    /**
      * 收集所有关注用户的信息
      */
     void collectUsers();
@@ -121,4 +126,5 @@ public interface AccountService {
      */
     Profile queryByUnionId(String unionid);
 
+    int updateHeadImageUrl(Integer profileId, String headImgUrl);
 }
