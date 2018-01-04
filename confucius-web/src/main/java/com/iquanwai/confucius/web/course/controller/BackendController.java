@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
@@ -156,7 +157,7 @@ public class BackendController {
             try {
                 // 所有待发人员名单
                 List<String> openIds = noticeMsgDto.getOpenids();
-                List<String> excludeOpenIds = noticeMsgDto.getExcludes();
+                List<String> excludeOpenIds = noticeMsgDto.getExcludes() == null ? Lists.newArrayList() : noticeMsgDto.getExcludes();
 
                 // 获取黑名单人员
                 List<String> blackListOpenIds = accountService.loadBlackListOpenIds();
