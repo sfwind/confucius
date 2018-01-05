@@ -612,10 +612,12 @@ public class SignupServiceImpl implements SignupService {
                     String riseMemberIndexStr = redisUtil.get(riseMemberKey);
                     int riseMemberIndex = riseMemberIndexStr == null ? 1 : Integer.parseInt(riseMemberIndexStr);
                     redisUtil.set(riseMemberKey, riseMemberIndex + 1);
+                    logger.info("riseMemberIndex: {}", riseMemberIndex);
                     int sequence = riseMemberIndex % CODEROTATE_SWITCH_SIZE == 0 ? riseMemberIndex / CODEROTATE_SWITCH_SIZE : riseMemberIndex / CODEROTATE_SWITCH_SIZE + 1;
+                    logger.info("sequence: {}", sequence);
                     CodeRotate codeRotate = riseMemberCodeRotates.get(sequence % riseMemberCodeRotates.size() == 0 ? riseMemberCodeRotates.size() - 1 : sequence % riseMemberCodeRotates.size() - 1);
                     Assert.notNull(codeRotate);
-
+                    logger.info("codeRotate mediaId: {}", codeRotate.getMediaId());
                     RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), year, month);
                     String entryCode = riseClassMember.getMemberId();
                     logger.info("发送会员数据");
