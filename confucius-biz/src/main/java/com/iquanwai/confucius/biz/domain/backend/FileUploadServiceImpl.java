@@ -29,7 +29,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public String uploadFtpAudioFile(String prefix, String originFileName, InputStream uploadFileStream) {
-        FTPUtil ftpUtil = new FTPUtil();
+        FTPUtil ftpUtil = new FTPUtil(true);
         int dotIndex = originFileName.lastIndexOf(".");
         String sufFileName = originFileName.substring(dotIndex);
         String targetFileName = prefix + "_" + CommonUtils.randomString(8) + sufFileName;
