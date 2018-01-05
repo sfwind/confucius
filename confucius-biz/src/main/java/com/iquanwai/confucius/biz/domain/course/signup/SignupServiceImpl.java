@@ -13,7 +13,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
-import com.iquanwai.confucius.biz.po.CodeRotate;
+import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -67,7 +67,7 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private MonthlyCampOrderDao monthlyCampOrderDao;
     @Autowired
-    private CodeRotateDao codeRotateDao;
+    private OperateRotateDao operateRotateDao;
     @Autowired
     private CourseScheduleDefaultDao courseScheduleDefaultDao;
     @Autowired
@@ -103,9 +103,9 @@ public class SignupServiceImpl implements SignupService {
     private RabbitMQPublisher freshLoginUserPublisher;
     private RabbitMQPublisher openProblemPublisher;
 
-    private static final String RISEMEMBER_CODEROTATE_SCENE_CODE = "rise_member_pay_success";
-    private static final String MONTHLYCAMP_CODEROTATE_SCENE_CODE = "monthly_camp_pay_success";
-    private static final int CODEROTATE_SWITCH_SIZE = 200;
+    private static final String RISEMEMBER_OPERATEROTATE_SCENE_CODE = "rise_member_pay_success";
+    private static final String MONTHLYCAMP_OPERATEROTATE_SCENE_CODE = "monthly_camp_pay_success";
+    private static final int OPERATEROTATE_SWITCH_SIZE = 200;
 
     /**
      * 初始化缓存
@@ -598,31 +598,31 @@ public class SignupServiceImpl implements SignupService {
         String mobileUrl = ConfigUtils.domainName() + "/rise/static/customer/mobile/check?goRise=true";
         String sendUrl = isFull ? isBindMobile ? null : mobileUrl : detailUrl;
 
-        List<CodeRotate> codeRotates = codeRotateDao.loadAllCodeRotates();
+        List<OperateRotate> operateRotates = operateRotateDao.loadAllOperateRotates();
 
         switch (memberTypeId) {
             case RiseMember.ELITE: {
-                List<CodeRotate> riseMemberCodeRotates = codeRotates.stream()
-                        .filter(codeRotate -> RISEMEMBER_CODEROTATE_SCENE_CODE.equals(codeRotate.getSceneCode()))
-                        .sorted(Comparator.comparingInt(CodeRotate::getSequence))
+                List<OperateRotate> riseMemberOperateRotates = operateRotates.stream()
+                        .filter(operateRotate -> RISEMEMBER_OPERATEROTATE_SCENE_CODE.equals(operateRotate.getSceneCode()))
+                        .sorted(Comparator.comparingInt(OperateRotate::getSequence))
                         .collect(Collectors.toList());
 
-                redisUtil.lock("codeRotate:riseMember:paySuccess", lock -> {
-                    String riseMemberKey = "codeRotate:" + RISEMEMBER_CODEROTATE_SCENE_CODE + ":index";
+                redisUtil.lock("operateRotate:riseMember:paySuccess", lock -> {
+                    String riseMemberKey = "operateRotate:" + RISEMEMBER_OPERATEROTATE_SCENE_CODE + ":index";
                     String riseMemberIndexStr = redisUtil.get(riseMemberKey);
                     int riseMemberIndex = riseMemberIndexStr == null ? 1 : Integer.parseInt(riseMemberIndexStr);
                     redisUtil.set(riseMemberKey, riseMemberIndex + 1);
                     logger.info("riseMemberIndex: {}", riseMemberIndex);
-                    int sequence = riseMemberIndex % CODEROTATE_SWITCH_SIZE == 0 ? riseMemberIndex / CODEROTATE_SWITCH_SIZE : riseMemberIndex / CODEROTATE_SWITCH_SIZE + 1;
+                    int sequence = riseMemberIndex % OPERATEROTATE_SWITCH_SIZE == 0 ? riseMemberIndex / OPERATEROTATE_SWITCH_SIZE : riseMemberIndex / OPERATEROTATE_SWITCH_SIZE + 1;
                     logger.info("sequence: {}", sequence);
-                    CodeRotate codeRotate = riseMemberCodeRotates.get(sequence % riseMemberCodeRotates.size() == 0 ? riseMemberCodeRotates.size() - 1 : sequence % riseMemberCodeRotates.size() - 1);
-                    Assert.notNull(codeRotate);
-                    logger.info("codeRotate mediaId: {}", codeRotate.getMediaId());
+                    OperateRotate operateRotate = riseMemberOperateRotates.get(sequence % riseMemberOperateRotates.size() == 0 ? riseMemberOperateRotates.size() - 1 : sequence % riseMemberOperateRotates.size() - 1);
+                    Assert.notNull(operateRotate);
+                    logger.info("operateRotate mediaId: {}", operateRotate.getMediaId());
                     RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), year, month);
                     String entryCode = riseClassMember.getMemberId();
                     logger.info("发送会员数据");
                     // 发送消息给一年精英版的用户
-                    customerMessageService.sendCustomerMessage(profile.getOpenid(), codeRotate.getMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                    customerMessageService.sendCustomerMessage(profile.getOpenid(), operateRotate.getMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                     try {
                         TimeUnit.SECONDS.sleep(2);
                     } catch (InterruptedException e) {
@@ -636,26 +636,26 @@ public class SignupServiceImpl implements SignupService {
                 break;
             }
             case RiseMember.CAMP: {
-                List<CodeRotate> monthlyCampCodeRotates = codeRotates.stream()
-                        .filter(codeRotate -> MONTHLYCAMP_CODEROTATE_SCENE_CODE.equals(codeRotate.getSceneCode()))
-                        .sorted(Comparator.comparingInt(CodeRotate::getSequence))
+                List<OperateRotate> monthlyCampOperateRotates = operateRotates.stream()
+                        .filter(operateRotate -> MONTHLYCAMP_OPERATEROTATE_SCENE_CODE.equals(operateRotate.getSceneCode()))
+                        .sorted(Comparator.comparingInt(OperateRotate::getSequence))
                         .collect(Collectors.toList());
 
-                redisUtil.lock("codeRotate:monthlyCamp:paySuccess", lock -> {
-                    String monthlyCampKey = "codeRotate:" + MONTHLYCAMP_CODEROTATE_SCENE_CODE + ":index";
+                redisUtil.lock("operateRotate:monthlyCamp:paySuccess", lock -> {
+                    String monthlyCampKey = "operateRotate:" + MONTHLYCAMP_OPERATEROTATE_SCENE_CODE + ":index";
                     String monthlyCampIndexStr = redisUtil.get(monthlyCampKey);
                     int monthlyCampIndex = monthlyCampIndexStr == null ? 1 : Integer.parseInt(monthlyCampIndexStr);
                     redisUtil.set(monthlyCampKey, monthlyCampIndex + 1);
-                    int sequence = monthlyCampIndex % CODEROTATE_SWITCH_SIZE == 0 ? monthlyCampIndex / CODEROTATE_SWITCH_SIZE : monthlyCampIndex / CODEROTATE_SWITCH_SIZE + 1;
-                    CodeRotate codeRotate = monthlyCampCodeRotates.get(sequence % monthlyCampCodeRotates.size() == 0 ? monthlyCampCodeRotates.size() - 1 : sequence % monthlyCampCodeRotates.size() - 1);
-                    Assert.notNull(codeRotate);
+                    int sequence = monthlyCampIndex % OPERATEROTATE_SWITCH_SIZE == 0 ? monthlyCampIndex / OPERATEROTATE_SWITCH_SIZE : monthlyCampIndex / OPERATEROTATE_SWITCH_SIZE + 1;
+                    OperateRotate operateRotate = monthlyCampOperateRotates.get(sequence % monthlyCampOperateRotates.size() == 0 ? monthlyCampOperateRotates.size() - 1 : sequence % monthlyCampOperateRotates.size() - 1);
+                    Assert.notNull(operateRotate);
 
                     RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), year, month);
                     String entryCode = riseClassMember.getMemberId();
 
                     logger.info("发送训练营数据");
                     // 发送消息给训练营购买用户
-                    customerMessageService.sendCustomerMessage(profile.getOpenid(), codeRotate.getMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                    customerMessageService.sendCustomerMessage(profile.getOpenid(), operateRotate.getMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                     try {
                         TimeUnit.SECONDS.sleep(2);
                     } catch (InterruptedException e) {

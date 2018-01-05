@@ -1,8 +1,8 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
-import com.iquanwai.confucius.biz.po.CodeRotate;
+import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.po.OperateRotate;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -14,14 +14,14 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Repository
-public class CodeRotateDao extends PracticeDBUtil {
+public class OperateRotateDao extends DBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<CodeRotate> loadAllCodeRotates() {
+    public List<OperateRotate> loadAllOperateRotates() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM CodeRotate WHERE Del = 0";
-        ResultSetHandler<List<CodeRotate>> h = new BeanListHandler<>(CodeRotate.class);
+        String sql = "SELECT * FROM OperateRotate WHERE Del = 0";
+        ResultSetHandler<List<OperateRotate>> h = new BeanListHandler<>(OperateRotate.class);
         try {
             return runner.query(sql, h);
         } catch (SQLException e) {
@@ -30,10 +30,10 @@ public class CodeRotateDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<CodeRotate> loadBySceneCode(String sceneCode) {
+    public List<OperateRotate> loadBySceneCode(String sceneCode) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM CodeRotate WHERE SceneCode = ? AND Del = 0";
-        ResultSetHandler<List<CodeRotate>> h = new BeanListHandler<>(CodeRotate.class);
+        String sql = "SELECT * FROM OperateRotate WHERE SceneCode = ? AND Del = 0";
+        ResultSetHandler<List<OperateRotate>> h = new BeanListHandler<>(OperateRotate.class);
         try {
             return runner.query(sql, h, sceneCode);
         } catch (SQLException e) {

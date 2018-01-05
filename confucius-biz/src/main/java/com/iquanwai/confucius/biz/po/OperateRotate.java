@@ -3,7 +3,7 @@ package com.iquanwai.confucius.biz.po;
 import lombok.Data;
 
 @Data
-public class CodeRotate {
+public class OperateRotate {
 
     private Integer id;
     private String sceneCode; // 场景号
