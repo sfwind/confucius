@@ -2,11 +2,15 @@ package com.iquanwai.confucius.web;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.subscribe.SubscribeRouterService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
+import com.iquanwai.confucius.biz.exception.WeixinException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.common.customer.SubscribeRouterConfig;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import reactor.core.support.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,16 +42,58 @@ public class IndexController {
     private AccountService accountService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private SubscribeRouterService subscribeRouterService;
 
-    private static final String COURSE_VIEW = "course";
+    private static final String SUBSCRIBE_URL = "/subscribe";
+
     private static final String PAY_VIEW = "pay";
 
+    private static final String PAY_CAMP = "/pay/camp";
+
+    private static final String PAY_GUEST_CAMP = "/pay/static/camp";
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * 点击圈外同学菜单后，确定需要跳转到的位置
+     */
+    @RequestMapping(value = "/community", method = RequestMethod.GET)
+    public void fragmentGoWhere(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.sendRedirect("/fragment/rise");
+    }
 
-    @RequestMapping(value = "/static/**", method = RequestMethod.GET)
-    public ModelAndView getIndex(HttpServletRequest request) throws Exception {
-        return courseView(request);
+    @RequestMapping(value = "/subscribe")
+    public ModelAndView goSubscribe(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        logger.info("用户未关注，跳转关注页面：{}", request.getRequestURI());
+        return payView(request, null, PAY_VIEW);
+    }
+
+    @RequestMapping(value = "/pay/redirect/camp/pay", method = RequestMethod.GET)
+    public void getGuestPayCampPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        try {
+            if (checkFollow(request, response)) {
+                // 关注
+                String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+                String openId = oAuthService.openId(accessToken);
+                // openid在checkFollow里检查了
+                Assert.notNull(openId);
+                OperationLog operationLog = new OperationLog().openid(openId).module("训练营").function("售卖页").action("redirect")
+                        .memo(request.getParameter(SubscribeRouterConfig.QUERY_KEY));
+                operationLogService.log(operationLog);
+                response.sendRedirect(PAY_CAMP);
+            } else {
+                // 未关注
+                String url = PAY_GUEST_CAMP;
+                if (request.getQueryString() != null) {
+                    url += "?" + request.getQueryString();
+                }
+                logger.info("redirect :{}", url);
+                response.sendRedirect(url);
+            }
+        } catch (WeixinException e) {
+            // ignore WeixinException
+            logger.error("微信 Exception");
+        }
     }
 
     @RequestMapping(value = "/pay/static/**", method = RequestMethod.GET)
@@ -54,7 +101,7 @@ public class IndexController {
         OperationLog operationLog = new OperationLog().function("打点").module("访问页面").action("游客访问")
                 .memo(request.getRequestURI());
         operationLogService.log(operationLog);
-        return courseView(request, null, PAY_VIEW);
+        return payView(request, null, PAY_VIEW);
     }
 
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
@@ -62,10 +109,42 @@ public class IndexController {
         if (!checkAccessToken(request, response)) {
             return null;
         }
-        return courseView(request, loginUser, PAY_VIEW);
+        return payView(request, loginUser, PAY_VIEW);
     }
 
-    private boolean checkAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    private boolean checkFollow(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
+            return true;
+        }
+
+        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+        String openId = oAuthService.openId(accessToken);
+
+        if (StringUtils.isEmpty(openId)) {
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            try {
+                WebUtils.auth(request, response);
+            } catch (Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            throw new WeixinException(ErrorConstants.ACCESS_TOKEN_INVALID, "cookie无效");
+        }
+
+        Account account = null;
+        try {
+            account = accountService.getAccount(openId, false);
+        } catch (NotFollowingException e) {
+            return false;
+        }
+        if (account != null) {
+            return true;
+        } else {
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            return false;
+        }
+    }
+
+    private boolean checkAccessToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
             return true;
         }
@@ -88,8 +167,16 @@ public class IndexController {
             account = accountService.getAccount(openId, false);
         } catch (NotFollowingException e) {
             try {
-                response.sendRedirect("/static/subscribe");
-                return false;
+                String followKey = request.getParameter(SubscribeRouterConfig.QUERY_KEY);
+                SubscribeRouterConfig subscribeRouterConfig = subscribeRouterService.loadUnSubscribeRouterConfig(request.getRequestURI(), followKey);
+                if (subscribeRouterConfig != null) {
+                    // 未关注
+                    response.sendRedirect(SUBSCRIBE_URL + "?scene=" + subscribeRouterConfig.getScene());
+                    return false;
+                } else {
+                    response.sendRedirect(SUBSCRIBE_URL);
+                    return false;
+                }
             } catch (IOException e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
             }
@@ -107,55 +194,20 @@ public class IndexController {
         }
     }
 
-    @RequestMapping(value = "/certificate/**",method = RequestMethod.GET)
-    public ModelAndView getCertificateIndex(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkAccessToken(request,response)){
-            return null;
-        }
-        return courseView(request);
-    }
-
-
     @RequestMapping(value = "/heartbeat", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> heartbeat() throws Exception {
         return WebUtils.success();
     }
 
-    private ModelAndView courseView(HttpServletRequest request) {
-        ModelAndView mav = new ModelAndView("course");
-        if (request.getParameter("debug") != null) {
-            if (ConfigUtils.isFrontDebug()) {
-                mav.addObject("resource", "http://0.0.0.0:4000/bundle.js");
-            } else {
-                mav.addObject("resource", ConfigUtils.staticResourceUrl());
-            }
-        } else {
-            mav.addObject("resource", ConfigUtils.staticResourceUrl());
-        }
-        return mav;
-    }
 
-    private ModelAndView courseView(HttpServletRequest request, LoginUser loginUser, String viewName) {
+    private ModelAndView payView(HttpServletRequest request, LoginUser loginUser, String viewName) {
         ModelAndView mav = new ModelAndView(viewName);
-        String testUrl = "";
-        String resource = "";
-        switch (viewName) {
-            case COURSE_VIEW: {
-                testUrl = "http://0.0.0.0:4000/bundle.js";
-                resource = ConfigUtils.staticResourceUrl();
-            }
-            break;
-            case PAY_VIEW: {
-                testUrl = "http://0.0.0.0:4000/pay_bundle.js";
-                resource = ConfigUtils.staticPayUrl();
-            }
-            break;
-        }
-
+        String domainName = request.getHeader("Host-Test");
+        String resource = ConfigUtils.staticPayUrl(domainName);
 
         if (request.getParameter("debug") != null) {
             if (ConfigUtils.isFrontDebug()) {
-                mav.addObject("resource", testUrl);
+                mav.addObject("resource", "http://0.0.0.0:4000/pay_bundle.js");
             } else {
                 mav.addObject("resource", resource);
             }

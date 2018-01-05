@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.course.controller;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
@@ -25,14 +26,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/10/8.
@@ -153,8 +155,20 @@ public class BackendController {
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
         ThreadPool.execute(() -> {
             try {
-                List<String> openids = noticeMsgDto.getOpenids();
-                openids.forEach(openid -> {
+                // 所有待发人员名单
+                List<String> openIds = noticeMsgDto.getOpenids();
+                List<String> excludeOpenIds = noticeMsgDto.getExcludes() == null ? Lists.newArrayList() : noticeMsgDto.getExcludes();
+
+                // 获取黑名单人员
+                List<String> blackListOpenIds = accountService.loadBlackListOpenIds();
+                // 过滤调黑名单人员
+                openIds = openIds.stream()
+                        .distinct()
+                        .filter(openId -> !blackListOpenIds.contains(openId))
+                        .filter(openId -> !excludeOpenIds.contains(openId))
+                        .collect(Collectors.toList());
+
+                openIds.forEach(openid -> {
                     TemplateMessage templateMessage = new TemplateMessage();
                     templateMessage.setTouser(openid);
                     templateMessage.setTemplate_id(noticeMsgDto.getMessageId());
@@ -200,7 +214,11 @@ public class BackendController {
                         if (remark.contains("{username}")) {
                             remark = replaceNickname(openid, remark);
                         }
-                        data.put("remark", new TemplateMessage.Keyword(remark));
+                        if (!StringUtils.isEmpty(noticeMsgDto.getRemarkColor())) {
+                            data.put("remark", new TemplateMessage.Keyword(remark, noticeMsgDto.getRemarkColor()));
+                        } else {
+                            data.put("remark", new TemplateMessage.Keyword(remark));
+                        }
                     }
                     if (noticeMsgDto.getUrl() != null) {
                         templateMessage.setUrl(noticeMsgDto.getUrl());
@@ -245,7 +263,6 @@ public class BackendController {
                     String realMessage = replaceNickname(openid, message);
                     customerMessageService.sendCustomerMessage(openid, realMessage,
                             Constants.WEIXIN_MESSAGE_TYPE.TEXT);
-
                 });
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
@@ -260,7 +277,6 @@ public class BackendController {
         return message.replace("{username}", name);
     }
 
-
     @RequestMapping(value = "/mark", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> mark(LoginUser loginUser, @RequestBody MarkDto markDto) {
         OperationLog operationLog = OperationLog.create().openid(loginUser == null ? null : loginUser.getOpenId())
@@ -271,22 +287,6 @@ public class BackendController {
         operationLogService.log(operationLog);
         return WebUtils.success();
     }
-
-//    @RequestMapping(value = "/login/users", method = RequestMethod.GET)
-//    public ResponseEntity<Map<String, Object>> loginUsersList(@RequestParam(value = "qt") String qt) {
-//        LOGGER.info("qt:{},users:{}", qt, LoginUserService.pcLoginUserMap);
-//        Set<String> keys = LoginUserService.pcLoginUserMap.keySet();
-//        if (keys.contains(qt)) {
-//            SoftReference<PCLoginUser> pcLoginUserSoftReference = LoginUserService.pcLoginUserMap.get(qt);
-//            if (pcLoginUserSoftReference != null) {
-//                return WebUtils.result(pcLoginUserSoftReference.get());
-//            } else {
-//                return WebUtils.error("有cookie但是没有引用");
-//            }
-//        } else {
-//            return WebUtils.error("没有这个cookie");
-//        }
-//    }
 
     @RequestMapping(value = "/refresh/users", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> loginUsersList(@RequestBody RefreshLoginUserDto refreshLoginUserDto) {
@@ -309,26 +309,10 @@ public class BackendController {
         return WebUtils.result("正在运行中");
     }
 
+    @Deprecated
     @RequestMapping(value = "/batch/open/camp")
     public ResponseEntity<Map<String, Object>> batchForceOpenMonthlyCamp(@RequestBody BatchOpenCourseDto batchOpenCourseDto) {
-        OperationLog operationLog = OperationLog.create().module("后台功能").function("批量开始课程")
-                .memo("月份:" + batchOpenCourseDto.getMonth()
-                        + ", 小课Id:" + batchOpenCourseDto.getProblemId()
-                        + ", 小课关闭日期:" + batchOpenCourseDto.getCloseDate());
-        operationLogService.log(operationLog);
-
-        Integer month = batchOpenCourseDto.getMonth();
-        Integer problemId = batchOpenCourseDto.getProblemId();
-        Date startDate = batchOpenCourseDto.getStartDate();
-        Date closeDate = batchOpenCourseDto.getCloseDate();
-
-        boolean validation = monthlyCampService.validForceOpenCourse(month, problemId);
-        if (validation) {
-            ThreadPool.execute(() -> monthlyCampService.batchForceOpenCourse(problemId, startDate, closeDate));
-            return WebUtils.result("开课进行中");
-        } else {
-            return WebUtils.error("开课校验失败");
-        }
+        return WebUtils.result("已废弃");
     }
 
 }

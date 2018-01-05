@@ -8,9 +8,12 @@ import com.typesafe.config.ConfigFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 public class ConfigUtils {
     private static Config config;
@@ -104,33 +107,46 @@ public class ConfigUtils {
         return getValue("app.domainname");
     }
 
-    public static String staticResourceUrl() {
+    public static String staticResourceUrl(String domainName) {
         String url = getValue("static.resource.url");
         //测试环境防浏览器缓存，添加随机参数
         if (url.endsWith("?")) {
             url = url.concat("_t=").concat(new Random().nextInt() + "");
         }
 
+        if (!StringUtils.isEmpty(domainName)) {
+            url = replaceDomainName(url, domainName);
+        }
+
         return url;
     }
 
-    public static String staticPayUrl() {
+    public static String staticPayUrl(String domainName) {
         String url = getValue("static.pay.resource.url");
         //测试环境防浏览器缓存，添加随机参数
         if (url.endsWith("?")) {
             url = url.concat("_t=").concat(new Random().nextInt() + "");
         }
 
+        if (!StringUtils.isEmpty(domainName)) {
+            url = replaceDomainName(url, domainName);
+        }
+
         return url;
     }
 
 
-    public static String staticPcResourceUrl() {
+    public static String staticPcResourceUrl(String domainName) {
         String url = getValue("static.pc.resource.url");
         //测试环境防浏览器缓存，添加随机参数
         if (url.endsWith("?")) {
             url = url.concat("_t=").concat(new Random().nextInt() + "");
         }
+
+        if (!StringUtils.isEmpty(domainName)) {
+            url = replaceDomainName(url, domainName);
+        }
+
         return url;
     }
 
@@ -311,39 +327,6 @@ public class ConfigUtils {
         return getIntValue("vote.score");
     }
 
-    /**
-     * 获取每月训练营小课对应生效月份
-     */
-    public static Integer getMonthlyCampMonth() {
-        return getIntValue("monthly.camp.month");
-    }
-
-    /**
-     * 获取当前训练营小课生成的 ClassId
-     */
-    public static String getMonthlyCampClassId() {
-        return getValue("monthly.camp.classId");
-    }
-
-    /**
-     * 获取当月精英训练营生成的 ClassId
-     */
-    public static String getRiseMemberClassId() {
-        return getValue("risemember.classId");
-    }
-
-    public static String getMemberIdPrefix() {
-        return getValue("monthly.camp.memberId.prefix");
-    }
-
-    public static Date getMonthlyCampCloseDate() {
-        return DateUtils.parseStringToDate(getValue("monthly.camp.close.date"));
-    }
-
-    public static boolean getMonthlyCampOpen() {
-        return getBooleanValue("open.monthly.camp");
-    }
-
     public static String getFtpUser() {
         return getValue("ftp.username");
     }
@@ -364,5 +347,16 @@ public class ConfigUtils {
         String openIdsStr = getValue("sms.alarm.openids");
         return Lists.newArrayList(openIdsStr.split(","));
     }
+
+    public static String replaceDomainName(String url, String domainName) {
+        String urlPattern = "^((http://)|(https://))?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}(/)";
+        //替换
+        return url.replaceAll(urlPattern, "http://" + domainName+"/");
+    }
+
+    public static String getCampPayInfo(){
+        return getValue("camp.pay.json.info");
+    }
+
 
 }

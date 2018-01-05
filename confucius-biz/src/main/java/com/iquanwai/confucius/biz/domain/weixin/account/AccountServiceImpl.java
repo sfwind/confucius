@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
@@ -15,28 +17,25 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.joda.time.DateTime;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by justin on 16/8/10.
@@ -67,6 +66,8 @@ public class AccountServiceImpl implements AccountService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final int WX_BLACKLIST_DEFAULT_PAGE_SIZE = 10000;
+
     @PostConstruct
     public void init() {
         loadUserRole();
@@ -75,8 +76,7 @@ public class AccountServiceImpl implements AccountService {
     private void loadUserRole() {
         List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
 
-        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(
-                userRole -> userRoleMap.put(userRole.getOpenid(), userRole.getRoleId()));
+        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole -> userRoleMap.put(userRole.getOpenid(), userRole.getRoleId()));
 
         logger.info("role init complete");
     }
@@ -89,6 +89,10 @@ public class AccountServiceImpl implements AccountService {
             //先从数据库查询account对象
             Account account = followUserDao.queryByOpenid(openid);
             if (account != null) {
+                if (account.getSubscribe() == 0) {
+                    // 曾经关注，现在取关的人
+                    throw new NotFollowingException();
+                }
                 return account;
             }
             //从微信处获取
@@ -109,7 +113,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Profile getProfile(Integer profileId) {
         Profile profile = profileDao.load(Profile.class, profileId);
-
         if (profile != null) {
             profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
@@ -122,30 +125,8 @@ public class AccountServiceImpl implements AccountService {
                 profile.setRole(role);
             }
         }
-
+        // TODO 处理头像问题
         return profile;
-    }
-
-    private Integer getRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember == null) {
-            return 0;
-        }
-        Integer memberTypeId = riseMember.getMemberTypeId();
-        if (memberTypeId == null) {
-            return 0;
-        }
-        // 精英或者专业版用户
-        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL
-                || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
-            return 1;
-        } else if (memberTypeId == RiseMember.CAMP) {
-            return 3;
-        } else if (memberTypeId == RiseMember.COURSE) {
-            return 2;
-        } else {
-            return 0;
-        }
     }
 
     @Override
@@ -171,8 +152,30 @@ public class AccountServiceImpl implements AccountService {
             } else {
                 profile.setRole(role);
             }
+            // TODO 处理头像问题
         });
         return profiles;
+    }
+
+    private Integer getRiseMember(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        if (riseMember == null) {
+            return 0;
+        }
+        Integer memberTypeId = riseMember.getMemberTypeId();
+        if (memberTypeId == null) {
+            return 0;
+        }
+        // 精英或者专业版用户
+        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
+            return 1;
+        } else if (memberTypeId == RiseMember.CAMP) {
+            return 3;
+        } else if (memberTypeId == RiseMember.COURSE) {
+            return 2;
+        } else {
+            return 0;
+        }
     }
 
     private Account getAccountFromWeixin(String openid) throws NotFollowingException {
@@ -216,14 +219,12 @@ public class AccountServiceImpl implements AccountService {
                         // 插入profile表
                         Profile profile = getProfileFromDB(accountNew.getOpenid());
                         if (profile == null) {
-                            profile = new Profile();
                             try {
-                                BeanUtils.copyProperties(profile, accountNew);
+                                ModelMapper modelMapper = new ModelMapper();
+                                profile = modelMapper.map(accountNew, Profile.class);
                                 logger.info("插入Profile表信息:{}", profile);
                                 profile.setRiseId(CommonUtils.randomString(7));
                                 profileDao.insertProfile(profile);
-                            } catch (IllegalAccessException | InvocationTargetException e) {
-                                logger.error("beanUtils copy props error", e);
                             } catch (SQLException err) {
                                 profile.setRiseId(CommonUtils.randomString(7));
                                 try {
@@ -246,6 +247,46 @@ public class AccountServiceImpl implements AccountService {
             logger.error(e.getMessage(), e);
         }
         return accountNew;
+    }
+
+    @Override
+    public String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException {
+        // 调用api查询account对象
+        String url = USER_INFO_URL;
+        Map<String, String> map = Maps.newHashMap();
+        map.put("openid", openId);
+        logger.info("请求用户信息:{}", openId);
+        url = CommonUtils.placeholderReplace(url, map);
+        String body = restfulHelper.get(url);
+        logger.info("请求用户信息结果:{}", body);
+        Map<String, Object> result = CommonUtils.jsonToMap(body);
+        Account accountNew = new Account();
+        try {
+            ConvertUtils.register((aClass, value) -> {
+                if (value == null) {
+                    return null;
+                }
+                if (!(value instanceof Double)) {
+                    logger.error("不是日期类型");
+                    throw new ConversionException("不是日期类型");
+                }
+                Double time = (Double) value * 1000;
+                return new DateTime(time.longValue()).toDate();
+            }, Date.class);
+
+            BeanUtils.populate(accountNew, result);
+            if (accountNew.getSubscribe() != null && accountNew.getSubscribe() == 0) {
+                //未关注直接抛异常
+                throw new NotFollowingException();
+            } else {
+                return accountNew.getHeadimgurl();
+            }
+        } catch (NotFollowingException e1) {
+            throw new NotFollowingException();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
     }
 
     @Override
@@ -316,36 +357,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void updateRiseMember(String openid, Integer riseMember) {
-        Profile profile = profileDao.queryByOpenId(openid);
-        Assert.notNull(profile, "用户不能为空");
-
-        Integer currentRiseMember = profile.getRiseMember();
-        switch (currentRiseMember) {
-            case Constants.RISE_MEMBER.MEMBERSHIP:
-                // 如果当前人已经是会员状态，则什么状态都不需要改变
-                break;
-            case Constants.RISE_MEMBER.COURSE_USER:
-                // 如果当前人是小课购买状态，后面可以更改成会员或者训练营小课状态
-                profileDao.updateRiseMember(openid, riseMember);
-                break;
-            case Constants.RISE_MEMBER.MONTHLY_CAMP:
-                // 当前人是小课训练营状态，则只可以升级为会员
-                if (riseMember == Constants.RISE_MEMBER.MEMBERSHIP) {
-                    profileDao.updateRiseMember(openid, riseMember);
-                }
-                break;
-            case Constants.RISE_MEMBER.FREE:
-                profileDao.updateRiseMember(openid, riseMember);
-                break;
-            default:
-                logger.error("当前用户Profile会员信息异常:{}", profile);
-        }
+    public List<Profile> loadProfilesByNickName(String nickName) {
+        return profileDao.loadProfilesByNickName(nickName);
     }
 
     @Override
-    public List<Profile> loadProfilesByNickName(String nickName) {
-        return profileDao.loadProfilesByNickName(nickName);
+    public List<Profile> loadAllProfilesByNickName(String nickName) {
+        return profileDao.loadAllProfilesByNickName(nickName);
     }
 
     @Override
@@ -360,7 +378,6 @@ public class AccountServiceImpl implements AccountService {
 
     private Profile getProfileFromDB(String openid) {
         Profile profile = profileDao.queryByOpenId(openid);
-
         if (profile != null) {
             profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
@@ -373,10 +390,9 @@ public class AccountServiceImpl implements AccountService {
                 profile.setRole(role);
             }
         }
-
+        // TODO 处理头像问题
         return profile;
     }
-
 
     @Override
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
@@ -385,19 +401,124 @@ public class AccountServiceImpl implements AccountService {
 
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
+            //如果用户是专业版或者精英版,则无需申请
             if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
                 result = true;
             }
-            if (RiseMember.CAMP == memberTypeId) {
-                RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-                result = riseCertificate != null;
-            }
         }
 
+        //如果用户曾经获得证书,则无需申请
+        if (!result) {
+            RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
+            result = riseCertificate != null;
+        }
+
+        //如果用户已经通过申请,则无需再次申请
         if (!result) {
             result = customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
         }
 
         return result;
     }
+
+    /**
+     * 获取黑名单的列表(所有名单)
+     */
+    @Override
+    public List<String> loadBlackListOpenIds() {
+        String url = LIST_BLACKLIST_URL;
+        int count = 0;
+        List<String> blackList = new ArrayList<>();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("begin_openid", "");
+        String body = restfulHelper.post(url, jsonObject.toJSONString());
+        String data = JSON.parseObject(body).getString("data");
+        //获取data中的openidList
+        if (data != null) {
+            JSONObject dataJSON = JSON.parseObject(data);
+            String openidList = dataJSON.getString("openid");
+            blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+            String nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+            int total = Integer.valueOf(JSON.parseObject(body).getString("total"));
+            //取出所有的openid
+            while ((total - 1) / WX_BLACKLIST_DEFAULT_PAGE_SIZE > count) {
+                jsonObject = new JSONObject();
+                jsonObject.put("begin_openid", nextOpenid);
+                body = restfulHelper.post(url, jsonObject.toJSONString());
+                data = JSON.parseObject(body).getString("data");
+
+                dataJSON = JSON.parseObject(data);
+                openidList = dataJSON.getString("openid");
+                blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+                nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+                count++;
+            }
+        }
+        return blackList;
+    }
+
+    /**
+     * 批量拉黑用户
+     */
+    @Override
+    public boolean batchBlackList(List<String> openidList) {
+        String url = BATCH_BALCKLIST_URL;
+
+        String body = queryWXBlackListInterface(url, openidList);
+        return checkIsSuccess(body);
+    }
+
+    /**
+     * 批量取消拉黑用户
+     */
+    @Override
+    public boolean batchUnBlackList(List<String> openidList) {
+        String url = UNBATCH_BACKLIST_URL;
+
+        String body = queryWXBlackListInterface(url, openidList);
+        return checkIsSuccess(body);
+    }
+
+    private boolean checkIsSuccess(String body) {
+        JSONObject resultJSON = JSON.parseObject(body);
+        if ((Integer) resultJSON.get("errcode") == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private String queryWXBlackListInterface(String url, List<String> openidList) {
+        //拼装JSON数据
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("openid_list", openidList);
+        String body = restfulHelper.post(url, jsonObject.toJSONString());
+        logger.info(body);
+        return body;
+    }
+
+    @Override
+    public Integer loadUserScheduleCategory(Integer profileId) {
+        // 老用户
+        CustomerStatus status = customerStatusDao.load(profileId, CustomerStatus.SCHEDULE_LESS);
+        if (status != null) {
+            return CourseScheduleDefault.CategoryType.OLD_STUDENT;
+        } else {
+            return CourseScheduleDefault.CategoryType.NEW_STUDENT;
+        }
+    }
+
+    @Override
+    public Profile queryByUnionId(String unionId) {
+        return profileDao.queryByUnionId(unionId);
+    }
+
+    @Override
+    public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
+        return profileDao.updateHeadImgUrl(profileId, headImgUrl);
+    }
+
 }

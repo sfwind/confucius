@@ -20,7 +20,7 @@ public class AudioDao extends PracticeDBUtil {
 
     public int insertAudio(Audio audio) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Audio (Name, Url, Words) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Audio (Name, Url, Words,Updated) VALUES (?, ?, ?,2)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     audio.getName(),
@@ -33,15 +33,36 @@ public class AudioDao extends PracticeDBUtil {
         return -1;
     }
 
-    public void updateAudio(Audio audio) {
+    /**
+     * 修改带文件路径的Audio
+     *
+     * @param audio
+     */
+    public void updateAudioContainsUrl(Audio audio) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Audio set Name=?, Url=?, Words=? where id=?";
+        String sql = "Update Audio set Name=?, Url=?, Words=?,Updated = ? where id=?";
         try {
             runner.update(sql,
                     audio.getName(),
                     audio.getUrl(),
                     audio.getWords(),
+                    audio.getUpdated(),
                     audio.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
+     * 修改不带文件路径的Audio
+     *
+     * @param audio
+     */
+    public void updateAudio(Audio audio) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update Audio set Name = ?,Words = ?,Updated = ? where id = ?";
+        try {
+            runner.update(sql, audio.getName(), audio.getWords(), audio.getUpdated(), audio.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

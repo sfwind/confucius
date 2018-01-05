@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.po.systematism.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -60,6 +62,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private ClassDao classDao;
     @Autowired
     private AccountService accountService;
+
+    private Pattern pattern = Pattern.compile("\\{\\d+\\}");
 
     private Map<Integer, Question> questionMap = Maps.newConcurrentMap();
 
@@ -131,8 +135,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             m.setType(2);
         } else if (m.getType() == 31) {
             // 支付链接，占位符替换，当文字处理
-            Pattern pattern = Pattern.compile("\\{\\d+\\}");
-
             Matcher matcher = pattern.matcher(m.getContent());
             String courseId = null;
             String placeholder = null;
@@ -306,7 +308,15 @@ public class CourseStudyServiceImpl implements CourseStudyService {
 
         }
         //FIX:偶尔调用失败的bug
-        String shortUrl = restfulHelper.getPlain(requestUrl);
+        String shortUrl = "";
+        ResponseBody responseBody = restfulHelper.getPlain(requestUrl);
+        if (responseBody != null) {
+            try {
+                shortUrl = responseBody.string();
+            } catch (IOException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        }
         if (shortUrl.startsWith("http")) {
             return shortUrl;
         } else {

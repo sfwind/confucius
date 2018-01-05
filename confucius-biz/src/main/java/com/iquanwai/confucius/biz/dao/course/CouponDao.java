@@ -51,7 +51,7 @@ public class CouponDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
-            run.update("UPDATE Coupon SET Used =?, OrderId=null, Cost=null " +
+            run.update("UPDATE Coupon SET Used =?, Cost=null " +
                     "where OrderId = ?", status, orderId);
 
         } catch (SQLException e) {

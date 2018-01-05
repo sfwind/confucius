@@ -120,15 +120,16 @@ public class PCIndexController {
 
     private ModelAndView pcView(HttpServletRequest request, PCLoginUser pcLoginUser, String view) {
         ModelAndView mav = new ModelAndView(view);
+        String domainName = request.getHeader("Host-Test");
         if(request.getParameter("debug") != null) {
             if(ConfigUtils.isFrontDebug()) {
                 mav.addObject("resource", "http://0.0.0.0:4000/pc_bundle.js");
                 mav.addObject("loginSocketUrl", "127.0.0.1:8080/session");
             } else {
-                mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
+                mav.addObject("resource", ConfigUtils.staticPcResourceUrl(domainName));
             }
         } else {
-            mav.addObject("resource", ConfigUtils.staticPcResourceUrl());
+            mav.addObject("resource", ConfigUtils.staticPcResourceUrl(domainName));
         }
         if(pcLoginUser != null && pcLoginUser.getWeixin() != null) {
             Map<String, String> userParam = Maps.newHashMap();

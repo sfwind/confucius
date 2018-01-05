@@ -62,20 +62,20 @@ public interface OperationManagementService {
     boolean isComment(Integer submitId, Integer commentProfileId);
 
     /**
-     * 获取小课的所有巩固练习
-     * @param problemId 小课id
+     * 获取课程的所有选择题
+     * @param problemId 课程id
      */
     List<WarmupPractice> getPracticeByProblemId(Integer problemId);
 
     /**
-     * 保存巩固练习
-     * @param warmupPractice 巩固练习
+     * 保存选择题
+     * @param warmupPractice 选择题
      */
     void save(WarmupPractice warmupPractice);
 
     /**
-     * 获取下一个巩固练习
-     * @param problemId 小课id
+     * 获取下一个选择题
+     * @param problemId 课程id
      * @param prePracticeId 练习id
      */
     WarmupPractice getNextPractice(Integer problemId, Integer prePracticeId);
@@ -88,10 +88,5 @@ public interface OperationManagementService {
      * -1：数据异常
      */
     Integer deleteAsstWarmupDiscuss(Integer discussId);
-
-    /**
-     * 获取所有小课列表对应的知识点集合
-     */
-    List<ProblemSchedule> loadKnowledgesGroupByProblem();
 
 }

@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -23,16 +24,7 @@ public class CostRepoImpl implements CostRepo {
 
     @Override
     public double discount(Double price, String orderId, Coupon coupon) {
-        Double remain = price;
-        Double amount = coupon.getAmount();
-        if (remain > amount) {
-            remain = CommonUtils.substract(remain, amount);
-            couponDao.updateCoupon(coupon.getId(), orderId, amount);
-        } else {
-            remain = 0D;
-            couponDao.updateCoupon(coupon.getId(), orderId, CommonUtils.substract(amount, remain));
-        }
-        return CommonUtils.substract(price, remain);
+        return discount(price, orderId, Lists.newArrayList(coupon));
     }
 
     @Override

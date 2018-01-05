@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
@@ -102,7 +101,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     public RiseClassMember queryByProfileIdAndTime(Integer profileId, Integer year, Integer month) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Year = ? AND Month = ? AND Del = 0";
-        ResultSetHandler<RiseClassMember> h = new BeanHandler<RiseClassMember>(RiseClassMember.class);
+        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, profileId, year, month);
         } catch (SQLException e) {
@@ -150,6 +149,10 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     }
 
     public int batchUpdateGroupId(List<Integer> ids, String groupId) {
+        if (ids.size() == 0) {
+            return -1;
+        }
+
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE RiseClassMember SET GroupId = ? WHERE Id IN (" + produceQuestionMark(ids.size()) + ") AND Del = 0";
         List<Object> objects = Lists.newArrayList();
@@ -192,6 +195,21 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<RiseClassMember> loadByMemberIds(List<String> memberIds) {
+        if (memberIds.size() == 0) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId In (" + produceQuestionMark(memberIds.size()) + ")";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, memberIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<RiseClassMember> loadByClassName(String className) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND (GroupId IS NOT NULL AND GroupId != '') AND Del = 0 ORDER BY ClassName, GroupId";
@@ -204,31 +222,12 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    /**
-     * 近似查询 MemberId 获取当前学号中最近的一个人
-     */
-    public RiseClassMember loadLatestLikeMemberIdRiseClassMember(String likeMemberId) {
+    public RiseClassMember loadPurchaseRiseClassMember(Integer profileId, Integer year, Integer month) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE MemberId LIKE '" + likeMemberId + "%' AND Del = 0 ORDER BY Id DESC Limit 1";
-        ResultSetHandler<RiseClassMember> h = new BeanHandler<RiseClassMember>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public RiseClassMember loadPurchaseRiseClassMember(Integer profileId, String className, MonthlyCampConfig monthlyCampConfig) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND ProfileId = ? AND YEAR = ? AND Month = ? AND Active = 0 AND Del = 0";
+        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND YEAR = ? AND Month = ? AND Del = 0";
         ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
-            return runner.query(sql, h,
-                    className,
-                    profileId,
-                    monthlyCampConfig.getSellingYear(),
-                    monthlyCampConfig.getSellingMonth());
+            return runner.query(sql, h, profileId, year, month);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -260,4 +259,40 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    /**
+     * 获得所有的班级和小组
+     * @return
+     */
+    public List<RiseClassMember> loadAllClassNameAndGroup(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = " select ClassName,GroupId from RiseClassMember where Active = 1 and Del = 0 group by ClassName,GroupId order by ClassName";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+
+        try {
+           return runner.query(sql,h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+    /**
+     * 根据班级和小组获得用户
+     * @param className
+     * @param groupId
+     * @return
+     */
+    public List<RiseClassMember> getRiseClassMemberByClassNameGroupId(String className,String groupId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from RiseClassMember where ClassName = ? and GroupId = ? and Active = 1 and Del = 0";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+
+        try {
+            return runner.query(sql,h,className,groupId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
 }

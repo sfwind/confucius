@@ -22,6 +22,9 @@ public class BusinessSchoolApplication {
     private Boolean isDuplicate;
     private String comment;
     private Date dealTime;
+    private Date addTime;
+    private String orderId;
+    private Integer lastVerified;
 
     private String originMemberTypeName;
 

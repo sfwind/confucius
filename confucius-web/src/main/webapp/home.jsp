@@ -334,7 +334,7 @@
         <div style="margin-top: 30px; float: right;">
             <div class="email" style="text-decoration: none; color: rgb(255, 255, 255); position: relative;">
                 意见反馈
-                <div class="email-link">iquanwaivip@163.com</div>
+                <div class="email-link">iquanwai@vip.163.com</div>
             </div>
         </div>
         <div
@@ -343,8 +343,6 @@
                style="text-decoration: none; color: rgb(204, 204, 204);">沪ICP备15006409号</a></div>
     </div>
 </div>
-</body>
-</html>
 
 <script>
     var display = '<%=ConfigUtils.domainName()%>'

@@ -3,51 +3,43 @@ package com.iquanwai.confucius.web.pc.backend.controller;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.TableDto;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
-import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
-import com.iquanwai.confucius.biz.po.common.survey.SurveySubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
+import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemCatalogDto;
-import com.iquanwai.confucius.web.pc.fragmentation.dto.ProblemListDto;
+import com.iquanwai.confucius.web.pc.backend.dto.ProblemCatalogDto;
+import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.net.ConnectException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,6 +68,12 @@ public class RiseOperationController {
     private AccountService accountService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
+    @Autowired
+    private SignupService signupService;
+    @Autowired
+    private PayService payService;
+
+
     private static final String SEARCH_TOPIC = "business_school_application_search";
     private static final String NOTICE_TOPIC = "business_school_application_notice";
 
@@ -187,11 +185,13 @@ public class RiseOperationController {
             return dto;
         }).collect(Collectors.toList());
 
+
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser == null ? null : pcLoginUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习")
                 .action("获取问题列表");
         operationLogService.log(operationLog);
+
         return WebUtils.result(result);
     }
 
@@ -249,11 +249,20 @@ public class RiseOperationController {
         page.setPageSize(20);
 
         List<BusinessSchoolApplication> applications = businessSchoolService.loadBusinessSchoolList(page);
+        final List<String> openidList;
+        if (applications != null && applications.size() > 0) {
+            //获取黑名单用户
+            openidList = accountService.loadBlackListOpenIds();
+        } else {
+            openidList = null;
+        }
+
+        Assert.notNull(applications);
         List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
             Profile profile = accountService.getProfile(application.getProfileId());
             ApplicationDto dto = this.initApplicationDto(application);
-            Pair<SurveySubmit, List<SurveyQuestionSubmit>> submitPair = businessSchoolService.loadSubmit(application.getSubmitId());
-            this.initSurveyInfo(dto, submitPair.getLeft(), submitPair.getRight());
+            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
+            dto.setQuestionList(questions);
             // 查询是否会员
             RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
             if (riseMember != null) {
@@ -264,6 +273,38 @@ public class RiseOperationController {
             dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
+            dto.setIsBlack("否");
+
+            int lastVerifiedCode = application.getLastVerified();
+
+            if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()){
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
+            }
+            else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()){
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
+            }
+            else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()){
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
+            }
+            else if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()){
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
+            }
+            else if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()){
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
+            }
+            else{
+                dto.setVerifiedResult("未知");
+            }
+
+            if (openidList != null && (openidList.size() > 0)) {
+                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+                    dto.setIsBlack("是");
+                }
+            }
+            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
+            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
+            dto.setOrderId(application.getOrderId());
+
             return dto;
         }).collect(Collectors.toList());
         TableDto<ApplicationDto> result = new TableDto<>();
@@ -286,6 +327,16 @@ public class RiseOperationController {
         } else {
             boolean reject = businessSchoolService.rejectApplication(application.getId(), approveDto.getComment());
             if (reject) {
+                String orderId = application.getOrderId();
+                if (orderId != null) {
+                    QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+                    if (quanwaiOrder != null) {
+                        if (quanwaiOrder.getStatus().equals(QuanwaiOrder.PAID) || quanwaiOrder.getStatus().equals(QuanwaiOrder.REFUND_FAILED)) {
+                            // 开始退款
+                            payService.refund(orderId, quanwaiOrder.getPrice());
+                        }
+                    }
+                }
                 return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
@@ -379,59 +430,6 @@ public class RiseOperationController {
         return dto;
     }
 
-    private void initSurveyInfo(ApplicationDto dto, SurveySubmit submit, List<SurveyQuestionSubmit> questions) {
-        if (submit == null || CollectionUtils.isEmpty(questions)) {
-            LOGGER.error("问卷信息为空");
-            return;
-        }
-        /* 初始化题目信息，注意两点：  1.4_5，第四题选择题，如果选择选项5（其他）会出现填空，数据库多出4_5的答案 */
-        Map<String, SurveyQuestionSubmit> questionGroup = questions.stream().collect(Collectors.toMap(SurveyQuestionSubmit::getQuestionLabel, (p) -> p));
-        dto.setQ1Answer(queryQuestionField(questionGroup, "q1"));
-        dto.setQ2Answer(queryQuestionField(questionGroup, "q2"));
-        dto.setQ3Answer(queryQuestionField(questionGroup, "q3"));
-        dto.setQ4Answer(queryQuestionField(questionGroup, "q4"));
-        dto.setQ5Answer(queryQuestionField(questionGroup, "q5"));
-        dto.setQ6Answer(queryQuestionField(questionGroup, "q6"));
-        dto.setQ7Answer(queryQuestionField(questionGroup, "q7"));
-        dto.setQ8Answer(queryQuestionField(questionGroup, "q8"));
-        dto.setQ9Answer(queryQuestionField(questionGroup, "q9"));
-        dto.setQ10Answer(queryQuestionField(questionGroup, "q10"));
-        dto.setQ11Answer(queryQuestionField(questionGroup, "q11"));
-        dto.setQ12Answer(queryQuestionField(questionGroup, "q12"));
-        dto.setQ13Answer(queryQuestionField(questionGroup, "q13"));
-        dto.setQ14Answer(queryQuestionField(questionGroup, "q14"));
-        dto.setQ15Answer(queryQuestionField(questionGroup, "q15"));
-
-        dto.setSubmitTime(DateUtils.parseDateToString(submit.getSubmitTime()));
-        dto.setTimeTaken(submit.getTimeTaken() + "");
-    }
-
-
-    private String queryQuestionField(Map<String, SurveyQuestionSubmit> map, String label) {
-        SurveyQuestionSubmit submit = map.get(label);
-        String content = submit == null ? null : submit.getContent().trim();
-        if (content == null) {
-            return null;
-        }
-        if ("q4".equals(label)) {
-            // 特殊处理q4
-            if ("5".equals(content)) {
-                // 选了其他
-                SurveyQuestionSubmit q4_5 = map.get("q4_5");
-                return q4_5 != null ? q4_5.getContent() : null;
-            }
-        }
-
-        if (StringUtils.isNumeric(content)) {
-            String mappingValue = businessSchoolService.queryAnswerContentMapping(label, content);
-            if (mappingValue != null) {
-                return mappingValue;
-            }
-        }
-        // 答案没有匹配到，直接把content当作答案
-        return content;
-    }
-
     @RequestMapping(value = "/survey/config/list", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadConfigList(PCLoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
@@ -458,9 +456,9 @@ public class RiseOperationController {
         return WebUtils.result(updateStatus);
     }
 
-    @RequestMapping(value = "/delete/survey/config/{id}",method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> deleteSurveyConfig(PCLoginUser loginUser,@PathVariable Integer id){
-        Assert.notNull(loginUser,"用户不能为空");
+    @RequestMapping(value = "/delete/survey/config/{id}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> deleteSurveyConfig(PCLoginUser loginUser, @PathVariable Integer id) {
+        Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(id, "问卷id不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理")

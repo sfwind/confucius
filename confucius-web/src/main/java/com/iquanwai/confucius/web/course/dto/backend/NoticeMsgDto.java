@@ -9,17 +9,19 @@ import java.util.List;
  */
 @Data
 public class NoticeMsgDto {
-    private String comment;
+
+    private Boolean forcePush; // 是否强制推送
+    private String comment; // 发送备注
+    private String messageId;
     private String first;
-    private String remark;
     private String keyword1;
     private String keyword2;
     private String keyword3;
     private String keyword4;
-    private String messageId;
-    private List<String> openids;
-    private String url;
+    private String remark;
+    private String remarkColor; // remark 备注颜色
+    private String url; // 点击跳转 url
+    private List<String> openids; // 发送通知名单
+    private List<String> excludes; // 需要排除的人员名单
 
-
-    private Boolean forcePush;
 }

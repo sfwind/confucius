@@ -19,7 +19,7 @@ public class GoodsInfoDto {
     private Double fee;
     /** 商品名 */
     private String name;
-    /** 商品的Id，如果是会员，则对应memberTypeId，如果是小课，则对应ProblemID */
+    /** 商品的Id，如果是会员，则对应memberTypeId，如果是课程，则对应ProblemID */
     private Integer goodsId;
     /** 获取优惠券 */
     private List<Coupon> coupons;
@@ -44,6 +44,7 @@ public class GoodsInfoDto {
         // 初始化商品列表，下面的常量也需要定义
         GOODS_TYPES.add(QuanwaiOrder.FRAG_CAMP);
         GOODS_TYPES.add(QuanwaiOrder.FRAG_MEMBER);
+        GOODS_TYPES.add(QuanwaiOrder.BS_APPLICATION);
     }
 
 }

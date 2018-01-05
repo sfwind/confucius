@@ -16,7 +16,7 @@ public class MonthlyCampConfigDao extends PracticeDBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public MonthlyCampConfig loadActiveMonthlyCampConfig() {
+    public MonthlyCampConfig loadActiveConfig() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM MonthlyCampConfig WHERE Active = 1";
         ResultSetHandler<MonthlyCampConfig> h = new BeanHandler<>(MonthlyCampConfig.class);

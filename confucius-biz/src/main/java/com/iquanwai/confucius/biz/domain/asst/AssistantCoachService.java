@@ -1,6 +1,9 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -21,14 +24,14 @@ public interface AssistantCoachService {
 
     /**
      * 获取待评论的小课分享
-     * @param problemId 小课id
+     * @param problemId 课程id
      * */
     List<RiseWorkInfoDto> getUnderCommentArticles(Integer problemId);
 
 
     /**
      * 获取待评论的应用练习
-     * @param problemId 小课id
+     * @param problemId 课程id
      * */
     List<RiseWorkInfoDto> getUnderCommentApplications(Integer problemId);
 
@@ -38,6 +41,9 @@ public interface AssistantCoachService {
     List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName);
 
     List<RiseWorkInfoDto> getUnderCommentApplicationsByMemberId(Integer problemId, String memberId);
+
+    List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId,String className,String groupId);
+
 
     /**
      * 获取待评论的应用练习数量
@@ -54,4 +60,47 @@ public interface AssistantCoachService {
      * @param profileId 助教id
      * */
     List<RiseWorkInfoDto> getCommentedSubmit(Integer profileId);
+
+
+    /**
+     * 获取RiseClassMember中的ClassName和GroupId
+     * @return
+     */
+    List<RiseClassMember> loadClassNameAndGroupId();
+
+    /**
+     * 加载教练
+     * @return
+     */
+    List<UserRole> loadAssists();
+
+    /**
+     * 对教练进行升降级
+     */
+
+    Integer updateAssist(Integer id,Integer roleId);
+
+    /**
+     * 教练过期
+     */
+
+    Integer deleteAssist(Integer id);
+
+    /**
+     * 根据NickName加载非教练人员
+     * @param nickName
+     * @return
+     */
+    List<Profile> loadUnAssistByNickName(String nickName);
+
+    /**
+     * 添加教练
+     * @param roleId
+     * @param riseId
+     * @return
+     */
+    Integer addAssist(Integer roleId,String riseId);
+
+
+
 }

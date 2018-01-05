@@ -1,6 +1,9 @@
 package com.iquanwai.confucius.web.course.dto.backend;
 
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/9/28.
@@ -8,18 +11,60 @@ import lombok.Data;
 @Data
 public class ApplicationDto {
     private Integer id;
-    private String finalPayStatus; // 最终支付状态
-    private Integer status; // 审核状态
-    private String coupon; // 奖学金金额
-    private String openid; // openid
-    private String nickname; // 昵称
-    private String isDuplicate; // 是否重复提交
+    /**
+     * 最终支付状态
+     */
+    private String finalPayStatus;
+    /**
+     *  审核状态
+     *  1-通过，2-拒绝，3-私信
+     */
+    private Integer status;
+    /**
+     * 奖学金金额
+     */
+    private String coupon;
+    private String openid;
+    /**
+     * 昵称
+     */
+    private String nickname;
+    /**
+     * 是否重复提交
+     */
+    private String isDuplicate;
+    /**
+     * 是否是助教
+     */
     private String isAsst;
+    /**
+     * 是否是黑名单用户
+     */
+    private String isBlack;
+    /**
+     * 会员类型id
+     */
     private Integer memberTypeId;
-    private String memberType; // 会员类型
-    private String submitTime; //提交答卷时间
-    private String timeTaken; // 	所用时间
+    /**
+     * 会员类型
+     */
+    private String memberType;
+    /**
+     * 提交答卷时间
+     */
+    private String submitTime;
+    /**
+     * 所用时间
+     */
+    private String timeTaken;
+    /**
+     * 备注
+     */
     private String comment;
+    /**
+     * 订单id
+     */
+    private String orderId;
 
     private String q1Answer; // 1. 请选择您目前从事的行业
     private String q2Answer; // 2. 请选择您目前从事的职业：
@@ -37,6 +82,8 @@ public class ApplicationDto {
     private String q14Answer;     // 12. 请输入您的手机号码（仅用于重要申请消息通知，不会泄露给第三方或用于其他商业用途）：
     private String q15Answer;     // 13. 您的微信号（非微信昵称，而是微信ID）：
 
+    List<BusinessApplyQuestion> questionList;
+
 
     private Integer submitId;
     private Integer profileId;
@@ -44,7 +91,7 @@ public class ApplicationDto {
     private Boolean deal; // 技术是否处理
     private Integer originMemberType; // 申请时的会员类型
     private String originMemberTypeName;
+    private String reward;
     private Boolean del;
-
-
+    private String verifiedResult;
 }

@@ -214,11 +214,15 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         Assert.notNull(warmupPractice, "待保存的练习不能为空");
         WarmupPractice origin = warmupPracticeDao.load(WarmupPractice.class, warmupPractice.getId());
         if(origin != null) {
+
             //解析或者题干有修改时,更新题目
             if(!warmupPractice.getAnalysis().equals(origin.getAnalysis()) ||
                     !warmupPractice.getQuestion().equals(origin.getQuestion())) {
                 warmupPracticeDao.updateWarmupPractice(warmupPractice);
             }
+
+            //更新额外信息
+            warmupPracticeDao.updateExtraWarmupPractice(warmupPractice);
 
             //选项或者正确性有修改时,更新选项
             List<WarmupChoice> originChoices = warmupChoiceDao.loadChoices(origin.getId());
@@ -266,39 +270,6 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         } else {
             return -1;
         }
-    }
-
-    @Override
-    public List<ProblemSchedule> loadKnowledgesGroupByProblem() {
-        List<Problem> problems = problemDao.loadAll(Problem.class);
-        List<ProblemSchedule> problemSchedules = problemScheduleDao.loadAll(ProblemSchedule.class);
-        // 取出所有知识点列表，并且将知识点列表转换成键值对
-        List<Knowledge> knowledges = knowledgeDao.loadAll(Knowledge.class);
-        Map<Integer, Knowledge> knowledgeMap = Maps.newHashMap();
-        knowledges.forEach(knowledge -> knowledgeMap.put(knowledge.getId(), knowledge));
-        // 过滤出未被删除的小课列表
-        List<Problem> validProblems = problems.stream().filter(problem -> !problem.getDel()).collect(Collectors.toList());
-        // 逐个便利小课，并将该小课，与该小课对应的所有知识点合并成一个对象进行返回
-        List<ProblemSchedule> problemAndKnowledges = validProblems.stream().map(problem -> {
-            ProblemSchedule targetProblemSchedule = new ProblemSchedule();
-            // 取出该小课的 id
-            Integer problemId = problem.getId();
-            targetProblemSchedule.setId(problemId);
-            targetProblemSchedule.setProblemId(problemId);
-            // 根据取出的小课 id，遍历 problemSchedules 列表，取出二者 problemId 相同对象，并返回该所有对象的相关 KnowledgeId 的集合
-            List<Integer> relatedKnowledgeIds = problemSchedules.stream().filter(problemSchedule -> problemId.equals(problemSchedule.getProblemId()))
-                    .map(ProblemSchedule::getKnowledgeId).collect(Collectors.toList());
-            List<Knowledge> targetKnowledges = Lists.newArrayList();
-            relatedKnowledgeIds.forEach(relatedKnowledgeId -> {
-                Knowledge targetKnowledge = knowledgeMap.get(relatedKnowledgeId);
-                if(targetKnowledge != null) {
-                    targetKnowledges.add(targetKnowledge);
-                }
-            });
-            targetProblemSchedule.setKnowledges(targetKnowledges);
-            return targetProblemSchedule;
-        }).collect(Collectors.toList());
-        return problemAndKnowledges;
     }
 
 }

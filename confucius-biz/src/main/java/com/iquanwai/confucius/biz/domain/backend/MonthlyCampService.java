@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.backend;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,10 +23,6 @@ public interface MonthlyCampService {
 
     List<RiseClassMember> batchQueryRiseClassMemberByProfileIds(List<Integer> profileIds);
 
-    boolean validForceOpenCourse(Integer month, Integer problemId);
-
-    void batchForceOpenCourse(Integer problemId, Date startDate, Date closeDate);
-
     /**
      * 训练营切换人员数据处理<br/>
      * 1. 获取切换之前月份中的所有人，筛选出会员身份人员<br/>
@@ -42,4 +37,6 @@ public interface MonthlyCampService {
     void switchCampDataProcess(Integer sourceYear, Integer sourceMonth, Integer targetYear, Integer targetMonth);
 
     void unlockMonthlyCampAuthority(String riseId);
+
+    void insertRiseCertificate(Integer type, List<String> memberIds);
 }

@@ -1,9 +1,14 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.iquanwai.confucius.biz.domain.backend.KnowledgeService;
+import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
+import com.iquanwai.confucius.web.enums.KnowledgeEnums;
+import com.iquanwai.confucius.web.pc.backend.dto.ProblemKnowledgesDto;
 import com.iquanwai.confucius.web.pc.backend.dto.SimpleKnowledge;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -23,6 +28,8 @@ public class KnowledgeImportController {
     private KnowledgeService knowledgeService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private ProblemService problemService;
 
     @RequestMapping("/simple/{problemId}")
     public ResponseEntity<Map<String, Object>> getSimpleKnowledge(PCLoginUser loginUser,
@@ -69,9 +76,42 @@ public class KnowledgeImportController {
         int result = knowledgeService.updateKnowledge(knowledge, problemId);
         if (result > 0) {
             return WebUtils.result(result);
-        } else {
-            return WebUtils.error("设置的章节与现有章节重复");
+        } else if(result == KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getCode()){
+            return WebUtils.error(KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getMsg());
         }
+        else{
+            return WebUtils.error(KnowledgeEnums.UNKNOWN_ERROR.getMsg());
+        }
+    }
+
+    @RequestMapping(value = "/query/knowledges",method = RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> queryKnowledges(PCLoginUser loginUser){
+        Assert.notNull(loginUser, "登录用户不能为空");
+        OperationLog operationLog = OperationLog.create().module("后台管理").function("查询知识点").action("查询知识点")
+                .openid(loginUser.getOpenId());
+
+        operationLogService.log(operationLog);
+
+        List<Knowledge> result = knowledgeService.queryAllKnowLedges();
+
+        return WebUtils.result(result);
+    }
+
+    @RequestMapping(value = "/load/knowledges", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadKnowledgesGroupByProblem(PCLoginUser loginUser) {
+        Assert.notNull(loginUser, "用户信息不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理").function("巩固练习新增").action("加载问题与知识点");
+        operationLogService.log(operationLog);
+        List<Problem> problems = problemService.loadProblems();
+        List<ProblemSchedule> knowledges = knowledgeService.loadKnowledgesGroupByProblem();
+        if(problems != null && knowledges != null) {
+            ProblemKnowledgesDto dto = new ProblemKnowledgesDto();
+            dto.setProblems(problems);
+            dto.setKnowledges(knowledges);
+            return WebUtils.result(dto);
+        }
+        return WebUtils.error("未找到课程与知识点关联信息");
     }
 
 }

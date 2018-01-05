@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.asst;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
+import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.AsstCoachCommentDao;
@@ -13,6 +14,7 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.ProfileCount;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.AsstCoachComment;
@@ -57,8 +59,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
+    @Autowired
+    private UserRoleDao userRoleDao;
 
     private static final int SIZE = 100;
+
+    private static final int APPLICTION_SIZE = 200;
 
     //最近30天
     private static final int PREVIOUS_DAY = 30;
@@ -149,7 +155,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplications(Integer problemId) {
         List<RiseWorkInfoDto> underCommentArticles = Lists.newArrayList();
-        //找出小课的所有应用练习包括删除的
+        //找出课程的所有应用练习包括删除的
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
         //只评论30天内的文章
         Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);
@@ -273,33 +279,13 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName) {
-        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
-
-        List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
-        if (profiles.size() == 0) {
+        List<Profile> profiles = accountService.loadAllProfilesByNickName(nickName);
+        if(profiles.size()==0){
             return Lists.newArrayList();
         }
+        List<Integer> profileIds = profiles.stream().map(Profile::getId).collect(Collectors.toList());
 
-        List<Integer> profileIds = Lists.newArrayList();
-        for (Profile profile : profiles) {
-            profileIds.add(profile.getId());
-        }
-
-        List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByProfileIds(problemId, profileIds);
-        submits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
-
-        List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
-        for (ApplicationSubmit submit : submits) {
-            RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
-            applicationPractices.forEach(applicationPractice -> {
-                if (submit.getApplicationId().equals(applicationPractice.getId())) {
-                    riseWorkInfoDto.setTitle(applicationPractice.getTopic());
-                }
-            });
-            workInfoDtos.add(riseWorkInfoDto);
-        }
-
-        return workInfoDtos;
+        return getWorkInfoDtos(problemId,profileIds);
     }
 
     @Override
@@ -325,6 +311,22 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             }
         }
         return workInfoDtos;
+    }
+
+    /**
+     * 根据班级和小组查询所有待点评的应用题
+     *
+     * @param className
+     * @param groupId
+     * @return
+     */
+    @Override
+    public List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId, String className, String groupId) {
+        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className, groupId);
+        List<Integer> profiles = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
+
+        return getWorkInfoDtos(problemId,profiles);
     }
 
     @Override
@@ -427,4 +429,141 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         return riseWorkInfoDto;
     }
 
+
+    /**
+     * 获得RiseClassMember中的ClassName和GroupId
+     *
+     * @return
+     */
+    @Override
+    public List<RiseClassMember> loadClassNameAndGroupId() {
+        return riseClassMemberDao.loadAllClassNameAndGroup();
+    }
+
+    /**
+     * 返回200条应用提交（求点评在前，不需要点评在后，按照发布时间降序排序）
+     * @param problemId
+     * @param profileIds
+     * @return
+     */
+    private List<RiseWorkInfoDto> getWorkInfoDtos(Integer problemId,List<Integer> profileIds){
+        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
+        if (profileIds.size() == 0) {
+            return Lists.newArrayList();
+        }
+        List<ApplicationSubmit> requestSubmits = applicationSubmitDao.loadRequestByProfileIds(problemId, profileIds);
+        requestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
+        List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
+        if (requestSubmits.size() >= APPLICTION_SIZE) {
+            requestSubmits.subList(0, APPLICTION_SIZE).stream().forEach(requestSubmit -> {
+                RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(requestSubmit);
+                applicationPractices.forEach(applicationPractice -> {
+                    if (requestSubmit.getApplicationId().equals(applicationPractice.getId())) {
+                        riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                    }
+                });
+                workInfoDtos.add(riseWorkInfoDto);
+            });
+            return workInfoDtos;
+        } else {
+            //将求点评的塞到返回值中
+            requestSubmits.stream().forEach(requestSubmit -> {
+                RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(requestSubmit);
+                applicationPractices.forEach(applicationPractice -> {
+                    if (requestSubmit.getApplicationId().equals(applicationPractice.getId())) {
+                        riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                    }
+                });
+                workInfoDtos.add(riseWorkInfoDto);
+            });
+            List<ApplicationSubmit> unRequestSubmits = applicationSubmitDao.loadUnRequestByProfileIds(problemId, profileIds);
+            unRequestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
+            int reamin = APPLICTION_SIZE - workInfoDtos.size();
+            if(unRequestSubmits.size()>=reamin) {
+                unRequestSubmits.subList(0, reamin).stream().forEach(unRequestSubmit -> {
+                    RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
+                    applicationPractices.forEach(applicationPractice -> {
+                        if (unRequestSubmit.getApplicationId().equals(applicationPractice.getId())) {
+                            riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                        }
+                    });
+                    workInfoDtos.add(riseWorkInfoDto);
+                });
+            }else{
+                unRequestSubmits.stream().forEach(unRequestSubmit -> {
+                    RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
+                    applicationPractices.forEach(applicationPractice -> {
+                        if (unRequestSubmit.getApplicationId().equals(applicationPractice.getId())) {
+                            riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                        }
+                    });
+                    workInfoDtos.add(riseWorkInfoDto);
+                });
+            }
+            return workInfoDtos;
+        }
+    }
+    /**
+     * 加载所有的教练
+     * @return
+     */
+    @Override
+    public List<UserRole> loadAssists() {
+        return userRoleDao.loadAssists();
+    }
+
+    /**
+     * 对教练进行升降级
+     * @param id
+     * @param roleId
+     * @return
+     */
+    @Override
+    public Integer updateAssist(Integer id, Integer roleId) {
+        return userRoleDao.updateAssist(id,roleId);
+    }
+
+    /**
+     * 教练过期
+     * @param id
+     * @return
+     */
+    @Override
+    public Integer deleteAssist(Integer id) {
+        return userRoleDao.deleteAssist(id);
+    }
+
+    @Override
+    public List<Profile> loadUnAssistByNickName(String nickName) {
+        List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
+        if(profiles.size()==0){
+            return profiles;
+        }
+        List<Profile> unAssistProfiles = Lists.newArrayList();
+        profiles.stream().forEach(profile -> {
+           if(userRoleDao.loadAssist(profile.getId())==null){
+                unAssistProfiles.add(profile);
+           }
+        });
+        return unAssistProfiles;
+    }
+
+    /**
+     * 添加教练
+     * @param roleId
+     * @param riseId
+     * @return
+     */
+    @Override
+    public Integer addAssist(Integer roleId, String riseId) {
+        Profile profile = accountService.getProfileByRiseId(riseId);
+        if(profile==null){
+            return -1;
+        }
+        //判断是否已经是教练
+       if(userRoleDao.loadAssist(profile.getId())!=null){
+            return -1;
+       }
+        return userRoleDao.insertAssist(roleId,profile.getOpenid(),profile.getId());
+    }
 }

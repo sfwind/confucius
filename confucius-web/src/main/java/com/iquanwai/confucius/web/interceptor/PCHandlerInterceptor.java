@@ -56,7 +56,7 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
                     WebUtils.login(request, response);
                     return false;
                 } else if(pair.getLeft() == -2){
-                    response.sendRedirect(ConfigUtils.adapterDomainName() + "/pc/static/error?err=请先关注服务号并开始一节小课");
+                    response.sendRedirect(ConfigUtils.adapterDomainName() + "/pc/static/error?err=请先关注服务号");
                     CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
                     WebUtils.login(request, response);
                     return false;

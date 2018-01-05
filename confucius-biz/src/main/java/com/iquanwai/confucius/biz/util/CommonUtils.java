@@ -25,8 +25,8 @@ import java.util.Random;
  * Created by justin on 16/8/7.
  */
 public class CommonUtils {
-    public static String placeholderReplace(String content, Map<String, String> replacer){
-        if(StringUtils.isNotEmpty(content) && replacer!=null) {
+    public static String placeholderReplace(String content, Map<String, String> replacer) {
+        if (StringUtils.isNotEmpty(content) && replacer != null) {
             for (Map.Entry<String, String> entry : replacer.entrySet()) {
                 content = StringUtils.replace(content, "{" + entry.getKey() + "}", entry.getValue());
             }
@@ -34,8 +34,8 @@ public class CommonUtils {
         return content;
     }
 
-    public static Map<String, Object> jsonToMap(String json){
-        if(StringUtils.isEmpty(json)){
+    public static Map<String, Object> jsonToMap(String json) {
+        if (StringUtils.isEmpty(json)) {
             return Maps.newHashMap();
         }
         Map<String, Object> gsonMap = new Gson().fromJson(json,
@@ -44,8 +44,8 @@ public class CommonUtils {
         return gsonMap;
     }
 
-    public static String mapToJson(Map<String, Object> map){
-        if(MapUtils.isEmpty(map)){
+    public static String mapToJson(Map<String, Object> map) {
+        if (MapUtils.isEmpty(map)) {
             return "";
         }
         String json = new Gson().toJson(map,
@@ -55,25 +55,25 @@ public class CommonUtils {
     }
 
     public static boolean isError(String json) throws WeixinException {
-        if(StringUtils.isEmpty(json)){
+        if (StringUtils.isEmpty(json)) {
             return false;
         }
         Map<String, Object> gsonMap = jsonToMap(json);
-        if(gsonMap.get("errcode")!=null && gsonMap.get("errmsg")!=null){
+        if (gsonMap.get("errcode") != null && gsonMap.get("errmsg") != null) {
             Integer errcode;
             try {
                 errcode = ((Double) gsonMap.get("errcode")).intValue();
-            }catch (Exception e){
+            } catch (Exception e) {
                 errcode = Integer.valueOf((String) gsonMap.get("errcode"));
             }
-            if(errcode.equals(ErrorConstants.ACCESS_TOKEN_EXPIRED)){
+            if (errcode.equals(ErrorConstants.ACCESS_TOKEN_EXPIRED)) {
                 throw new WeixinException(ErrorConstants.ACCESS_TOKEN_EXPIRED, "accessToken过期了");
             }
-            if(errcode.equals(ErrorConstants.ACCESS_TOKEN_INVALID)){
+            if (errcode.equals(ErrorConstants.ACCESS_TOKEN_INVALID)) {
                 throw new WeixinException(ErrorConstants.ACCESS_TOKEN_INVALID, "accessToken失效了");
             }
 
-            return errcode!=0;
+            return errcode != 0;
         }
         return false;
     }
@@ -85,7 +85,7 @@ public class CommonUtils {
         List<String> list = new ArrayList(map.keySet());
         Collections.sort(list);
 
-        List<String> kvList = Lists.transform(list, input -> input+"="+map.get(input));
+        List<String> kvList = Lists.transform(list, input -> input + "=" + map.get(input));
 
         String digest = StringUtils.join(kvList.iterator(), "&");
         return MessageDigestHelper.getSHA1String(digest);
@@ -102,11 +102,11 @@ public class CommonUtils {
         return sb.toString();
     }
 
-    public static String sign(final Map<String, String> params){
+    public static String sign(final Map<String, String> params) {
         List<String> list = new ArrayList(params.keySet());
         Collections.sort(list);
 
-        List<String> kvList = Lists.transform(list, input -> input+"="+params.get(input));
+        List<String> kvList = Lists.transform(list, input -> input + "=" + params.get(input));
 
         String digest = StringUtils.join(kvList.iterator(), "&")
                 .concat("&key=")
@@ -115,11 +115,11 @@ public class CommonUtils {
         return MessageDigestHelper.getMD5String(digest);
     }
 
-    public static String signH5Pay(final Map<String,String> params){
+    public static String signH5Pay(final Map<String, String> params) {
         List<String> list = new ArrayList(params.keySet());
         Collections.sort(list);
 
-        List<String> kvList = Lists.transform(list, input -> input+"="+params.get(input));
+        List<String> kvList = Lists.transform(list, input -> input + "=" + params.get(input));
 
         String digest = StringUtils.join(kvList.iterator(), "&");
 
@@ -128,8 +128,8 @@ public class CommonUtils {
     }
 
     //保留两位小数
-    public static Double substract(Double a, Double b){
-        if(a==null||b==null){
+    public static Double substract(Double a, Double b) {
+        if (a == null || b == null) {
             return null;
         }
 
@@ -137,14 +137,14 @@ public class CommonUtils {
                 setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 
-    public static String removeHTMLTag(String html){
-        if(html==null){
+    public static String removeHTMLTag(String html) {
+        if (html == null) {
             return "";
         }
         return StringUtils.removePattern(html, "<[^>]*>");
     }
 
-    public static String replaceHttpsDomainName(String content){
+    public static String replaceHttpsDomainName(String content) {
         String temp = StringUtils.replace(content, "http://www.iqycamp.com", "https://www.iqycamp.com");
         return StringUtils.replace(temp, "http://static.iqycamp.com", "https://static.iqycamp.com");
     }
@@ -174,22 +174,24 @@ public class CommonUtils {
                 switch (b1) {
                     case SECTION_6:
                         return true;
+                    default:
+                        break;
                 }
             default:
                 return false;
         }
     }
 
-    public static List<String> separateWords(String words){
+    public static List<String> separateWords(String words) {
         List<String> usefulWords = Lists.newArrayList();
 
-        IKSegmentation ikSeg = new IKSegmentation(new StringReader(words) , false);
+        IKSegmentation ikSeg = new IKSegmentation(new StringReader(words), false);
         try {
             Lexeme l;
-            while( (l = ikSeg.next()) != null){
+            while ((l = ikSeg.next()) != null) {
                 //找出词语,数字,英文单词
-                if(l.getLexemeType() == Lexeme.TYPE_CJK_NORMAL || l.getLexemeType() == Lexeme.TYPE_NUM ||
-                        l.getLexemeType() == Lexeme.TYPE_LETTER){
+                if (l.getLexemeType() == Lexeme.TYPE_CJK_NORMAL || l.getLexemeType() == Lexeme.TYPE_NUM ||
+                        l.getLexemeType() == Lexeme.TYPE_LETTER) {
                     usefulWords.add(l.getLexemeText().toUpperCase());
                 }
             }
@@ -199,4 +201,43 @@ public class CommonUtils {
 
         return usefulWords;
     }
+
+    /**
+     * 过滤emoji 或者 其他非文字类型的字符
+     */
+    public static String filterEmoji(String source) {
+        //到这里铁定包含
+        StringBuilder buf = null;
+        int len = source.length();
+        for (int i = 0; i < len; i++) {
+            char codePoint = source.charAt(i);
+            if (isEmojiCharacter(codePoint)) {
+                if (buf == null) {
+                    buf = new StringBuilder(source.length());
+                }
+                buf.append(codePoint);
+            }
+        }
+        if (buf == null) {
+            return source;//如果没有找到 emoji表情，则返回源字符串
+        } else {
+            if (buf.length() == len) {//这里的意义在于尽可能少的toString，因为会重新生成字符串
+                return source;
+            } else {
+                return buf.toString();
+            }
+        }
+
+    }
+
+    private static boolean isEmojiCharacter(char codePoint) {
+        return (codePoint == 0x0) ||
+                (codePoint == 0x9) ||
+                (codePoint == 0xA) ||
+                (codePoint == 0xD) ||
+                ((codePoint >= 0x20) && (codePoint <= 0xD7FF)) ||
+                ((codePoint >= 0xE000) && (codePoint <= 0xFFFD)) ||
+                ((codePoint >= 0x10000) && (codePoint <= 0x10FFFF));
+    }
+
 }

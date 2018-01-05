@@ -11,12 +11,12 @@ import java.util.List;
  */
 @Data
 public class RiseMemberDto {
-    private Integer memberType;
     private String openId;
     private List<Integer> couponIdGroup;
 
     private List<MemberType> memberTypes;
-    private List<Coupon> coupons;
+    private MemberType memberType;
+    private String tip;
     /** 是否有报名权限 */
     private Boolean privilege;
     /** 已经是商学院会员 */
@@ -33,4 +33,6 @@ public class RiseMemberDto {
     private int remainHour;
     /** 订单关闭剩余分钟 */
     private int remainMinute;
+    /** 是否已经报名 */
+    private boolean entry;
 }

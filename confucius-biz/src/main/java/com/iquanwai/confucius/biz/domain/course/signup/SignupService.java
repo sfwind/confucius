@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -16,54 +15,53 @@ public interface SignupService {
     /**
      * 商品支付资格校验
      */
-    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType, MonthlyCampConfig monthlyCampConfig);
+    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
 
     /**
      * 报名商学院, 不生成预付订单
      */
-    QuanwaiOrder signupRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
+    QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
     /**
      * 报名训练营, 不生成预付订单
      */
-    QuanwaiOrder signupMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, MonthlyCampConfig monthlyCampConfig);
+    QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
-     * 获取学员详情
+     * 商学院申请, 不生成预付订单
      */
-    ClassMember classMember(String orderId);
-
+    QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
-     * 购买完训练营小课后续操作
+     * 购买完训练营后续操作
      * 1、更新 Profile RiseMember 值
      * 2、RiseMemberClass 新增数据记录
      * 3、更新 RiseMember 表旧数据为过期状态，并新增一条当前购买类型数据记录
      * 4、送优惠券
-     * 5、发送 mq 通知 platon 强制开启小课
+     * 5、发送 mq 通知 platon 强制开启课程
      * 6、发送购买成功信息，开课信息（可以合并）
      */
-    void payMonthlyCampSuccess(String orderId, MonthlyCampConfig monthlyCampConfig);
+    void payMonthlyCampSuccess(String orderId);
 
     /**
-     * 后台解锁小课训练营
-     * @param profileId
-     * @param monthlyCampConfig
+     * 后台解锁训练营
      */
-    void unlockMonthlyCamp(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    void unlockMonthlyCamp(Integer profileId);
 
+    /**
+     * 获取训练营订单
+     * */
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    String generateMemberId(MonthlyCampConfig monthlyCampConfig, String classPrefix, Integer identityType);
-
-    void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
-
-    void test();
+    /**
+     * 生成学号
+     * */
+    String generateMemberId(Integer year, Integer month, Integer identityType);
 
     /**
-     * 重新加载班级
-     */
-    void reloadClass();
+     * 商学院购买成功处理
+     * */
+    void payRiseSuccess(String orderId);
 
     /**
      * 获得圈外订单
@@ -92,9 +90,11 @@ public interface SignupService {
     /**
      * 查询会员类型的支付信息
      */
-    List<MemberType> getMemberTypesPayInfo(MonthlyCampConfig monthlyCampConfig);
-
-    List<MemberType> getMemberTypesPayInfo(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    List<MemberType> getMemberTypesPayInfo();
+    /**
+     * 查询会员类型的支付信息
+     */
+    List<MemberType> getMemberTypesPayInfo(Integer profileId);
 
     /**
      * 计算优惠券
@@ -116,9 +116,9 @@ public interface SignupService {
     Integer loadCurrentCampMonth(MonthlyCampConfig monthlyCampConfig);
 
     /**
-     * 小课售卖页面，跳转小课介绍页面 problemId
+     * 课程售卖页面，跳转课程介绍页面 problemId
      */
-    Integer loadHrefProblemId(Integer month);
+    Integer loadHrefProblemId(Integer profileId, Integer month);
 
     /**
      * 获取商学院数据
@@ -130,12 +130,36 @@ public interface SignupService {
      * 获取用户当前会员信息
      * @param profileId 用户id
      */
-    RiseMember getCurrentRiseMemberStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentRiseMemberStatus(Integer profileId);
 
     /**
-     * 获取当前小课训练营信息
+     * 获取当前训练营信息
      */
-    RiseMember getCurrentMonthlyCampStatus(Integer profileId, MonthlyCampConfig monthlyCampConfig);
+    RiseMember getCurrentMonthlyCampStatus(Integer profileId);
 
+    /**
+     * 获取用户所有的用户信息
+     */
     List<RiseMember> loadPersonalAllRiseMembers(Integer profileId);
+
+
+    /**
+     * 申请商学院付费后
+     */
+    void payApplicationSuccess(String orderId);
+
+    /**
+     * 获取商学院申请订单
+     * */
+    BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
+
+    /**
+     * 获取商学院申请订单
+     * */
+    boolean isAppliedBefore(Integer profileId);
+
+    /**
+     * 根据商品类型和售价智能选择优惠券
+     * */
+    List<Coupon> autoChooseCoupon(String goodsType, Double fee, List<Coupon> coupons);
 }
