@@ -58,6 +58,8 @@ public interface SignupService {
 
     void riseMemberEntry(String orderId, MonthlyCampConfig monthlyCampConfig);
 
+    void test();
+
     /**
      * 重新加载班级
      */

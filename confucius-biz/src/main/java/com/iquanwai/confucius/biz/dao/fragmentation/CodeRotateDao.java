@@ -18,6 +18,18 @@ public class CodeRotateDao extends PracticeDBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    public List<CodeRotate> loadAllCodeRotates() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM CodeRotate WHERE Del = 0";
+        ResultSetHandler<List<CodeRotate>> h = new BeanListHandler<>(CodeRotate.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<CodeRotate> loadBySceneCode(String sceneCode) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM CodeRotate WHERE SceneCode = ? AND Del = 0";
