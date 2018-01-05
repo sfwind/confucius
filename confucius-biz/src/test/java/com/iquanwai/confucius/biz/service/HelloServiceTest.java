@@ -15,7 +15,6 @@ public class HelloServiceTest extends TestBase {
 
     @Test
     public void test() {
-        signupService.test();
     }
 
 }
