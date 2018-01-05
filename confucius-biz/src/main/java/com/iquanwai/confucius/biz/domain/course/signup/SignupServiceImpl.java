@@ -655,7 +655,7 @@ public class SignupServiceImpl implements SignupService {
 
                     logger.info("发送训练营数据");
                     // 发送消息给训练营购买用户
-                    customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getValue("pay.success.camp.reply.image"), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                    customerMessageService.sendCustomerMessage(profile.getOpenid(), codeRotate.getMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
                     try {
                         TimeUnit.SECONDS.sleep(2);
                     } catch (InterruptedException e) {
