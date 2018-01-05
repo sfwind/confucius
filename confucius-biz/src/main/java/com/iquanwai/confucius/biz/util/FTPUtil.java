@@ -14,7 +14,7 @@ public class FTPUtil {
 
     private FTPClient client;
 
-    private static final Integer FTP_PORT = 21;
+    private int port = 21;
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -25,6 +25,7 @@ public class FTPUtil {
     public FTPUtil(boolean isFTPS) {
         if (isFTPS) {
             client = new FTPSClient("SSL", true);
+            this.port = 22;
         } else {
             client = new FTPClient();
         }
@@ -35,7 +36,7 @@ public class FTPUtil {
     }
 
     public boolean connect() throws IOException {
-        return connect(ConfigUtils.getFtpHost(), ConfigUtils.getFtpUser(), ConfigUtils.getFtpPassword(), FTP_PORT);
+        return connect(ConfigUtils.getFtpHost(), ConfigUtils.getFtpUser(), ConfigUtils.getFtpPassword(), port);
     }
 
     public boolean connect(String host, String login, String password, int port) throws IOException {
