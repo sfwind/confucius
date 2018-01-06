@@ -4,14 +4,13 @@ import com.iquanwai.confucius.biz.dao.fragmentation.AudioDao;
 import com.iquanwai.confucius.biz.po.fragmentation.Audio;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.FTPUtil;
+import com.iquanwai.confucius.biz.util.SFTPUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -29,27 +28,14 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public String uploadFtpAudioFile(String prefix, String originFileName, InputStream uploadFileStream) {
-        FTPUtil ftpUtil = new FTPUtil(true);
+        SFTPUtil sftpUtil = new SFTPUtil();
         int dotIndex = originFileName.lastIndexOf(".");
         String sufFileName = originFileName.substring(dotIndex);
         String targetFileName = prefix + "_" + CommonUtils.randomString(8) + sufFileName;
-        try {
-            ftpUtil.connect();
-            ftpUtil.setBinaryType();
-            boolean result = ftpUtil.storeFile(FTP_AUDIO_STORE + targetFileName, uploadFileStream);
-            if (result) {
-                return targetFileName;
-            }
-        } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        } finally {
-            try {
-                ftpUtil.disconnect();
-            } catch (IOException e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-        }
-        return null;
+
+        sftpUtil.upload(FTP_AUDIO_STORE, targetFileName, uploadFileStream);
+
+        return targetFileName;
     }
 
 
