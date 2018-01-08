@@ -24,7 +24,7 @@ public class QuanwaiOrderDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO QuanwaiOrder(OrderId, Openid, Price, Discount, PrepayId, " +
                 " Status, CreateTime, GoodsId, GoodsName, GoodsType, PayType) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ？)";
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
                     quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
