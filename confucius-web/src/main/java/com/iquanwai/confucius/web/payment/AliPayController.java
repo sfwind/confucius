@@ -112,7 +112,7 @@ public class AliPayController {
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
             String sign = params.get("sign");
 
-            boolean verify_result = AlipaySignature.rsaCheckV2(params, ConfigUtils.getValue("alipay.public.key"),
+            boolean verify_result = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
             String content = AlipaySignature.getSignCheckContentV2(params);
 
