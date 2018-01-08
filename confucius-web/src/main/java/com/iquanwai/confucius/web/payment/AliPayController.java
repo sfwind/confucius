@@ -110,13 +110,13 @@ public class AliPayController {
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
             //计算得出通知验证结果
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
+            String sign = params.get(params);
 
             boolean verify_result = AlipaySignature.rsaCheckV2(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
             String content = AlipaySignature.getSignCheckContentV2(params);
 
             String charset = "UTF-8";
-            String sign = params.get(params);
             String publicKey = ConfigUtils.getValue("alipay.public.key");
             try {
 
