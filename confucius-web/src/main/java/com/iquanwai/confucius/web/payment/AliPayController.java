@@ -114,7 +114,7 @@ public class AliPayController {
 
             boolean verify_result = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
-            String content = AlipaySignature.getSignCheckContentV2(params);
+            String content = AlipaySignature.getSignCheckContentV1(params);
 
             String charset = "UTF-8";
             String publicKey = ConfigUtils.getValue("alipay.public.key");
@@ -137,6 +137,7 @@ public class AliPayController {
                 logger.info("signature.getAlgorithm():{}", signature.getAlgorithm());
 
                 boolean temp = signature.verify(Base64.decodeBase64(sign.getBytes()));
+                logger.info("temp:{}", temp);
             } catch (Exception e) {
                 throw new AlipayApiException(
                         "RSAcontent = " + content + ",sign=" + sign + ",charset = " + charset, e);
