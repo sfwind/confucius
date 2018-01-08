@@ -53,7 +53,7 @@ public class AliPayController {
         alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");//在公共参数中设置回跳和通知地址
         alipayRequest.setBizContent("{" +
                 " \"out_trade_no\":\"" + CommonUtils.randomString(32) + "\"," +
-                " \"total_amount\":\"0.08\"," +
+                " \"total_amount\":\"0.01\"," +
                 " \"subject\":\"圈外商学院\"," +
                 " \"product_code\":\"QUICK_WAP_PAY\"" +
                 " }");//填充业务参数
