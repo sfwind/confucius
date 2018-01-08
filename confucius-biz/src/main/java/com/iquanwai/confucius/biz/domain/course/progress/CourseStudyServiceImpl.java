@@ -63,6 +63,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     @Autowired
     private AccountService accountService;
 
+    private Pattern pattern = Pattern.compile("\\{\\d+\\}");
+
     private Map<Integer, Question> questionMap = Maps.newConcurrentMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -133,8 +135,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             m.setType(2);
         } else if (m.getType() == 31) {
             // 支付链接，占位符替换，当文字处理
-            Pattern pattern = Pattern.compile("\\{\\d+\\}");
-
             Matcher matcher = pattern.matcher(m.getContent());
             String courseId = null;
             String placeholder = null;

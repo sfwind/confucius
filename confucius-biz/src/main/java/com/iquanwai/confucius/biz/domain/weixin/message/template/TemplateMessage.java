@@ -23,12 +23,17 @@ public class TemplateMessage {
 
     @Data
     public static class Keyword {
+        private String value;
+        private String color = "#04136d";
+
         public Keyword(String value) {
             this.value = value;
         }
 
-        private String value;
-        private String color = "#04136d";
+        public Keyword(String value, String color) {
+            this.value = value;
+            this.color = color;
+        }
     }
 
     public String getContent() {

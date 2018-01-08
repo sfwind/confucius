@@ -5,7 +5,9 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.subscribe.SubscribeRouterService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
+import com.iquanwai.confucius.biz.exception.WeixinException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.SubscribeRouterConfig;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import reactor.core.support.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,13 +49,16 @@ public class IndexController {
 
     private static final String PAY_VIEW = "pay";
 
+    private static final String PAY_CAMP = "/pay/camp";
+
+    private static final String PAY_GUEST_CAMP = "/pay/static/camp";
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * 点击圈外同学菜单后，确定需要跳转到的位置
      */
     @RequestMapping(value = "/community", method = RequestMethod.GET)
-    public void fragmentGoWhere(HttpServletRequest request, HttpServletResponse response) throws Exception{
+    public void fragmentGoWhere(HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.sendRedirect("/fragment/rise");
     }
 
@@ -60,6 +66,34 @@ public class IndexController {
     public ModelAndView goSubscribe(HttpServletRequest request, HttpServletResponse response) throws Exception {
         logger.info("用户未关注，跳转关注页面：{}", request.getRequestURI());
         return payView(request, null, PAY_VIEW);
+    }
+
+    @RequestMapping(value = "/pay/redirect/camp/pay", method = RequestMethod.GET)
+    public void getGuestPayCampPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        try {
+            if (checkFollow(request, response)) {
+                // 关注
+                String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+                String openId = oAuthService.openId(accessToken);
+                // openid在checkFollow里检查了
+                Assert.notNull(openId);
+                OperationLog operationLog = new OperationLog().openid(openId).module("训练营").function("售卖页").action("redirect")
+                        .memo(request.getParameter(SubscribeRouterConfig.QUERY_KEY));
+                operationLogService.log(operationLog);
+                response.sendRedirect(PAY_CAMP);
+            } else {
+                // 未关注
+                String url = PAY_GUEST_CAMP;
+                if (request.getQueryString() != null) {
+                    url += "?" + request.getQueryString();
+                }
+                logger.info("redirect :{}", url);
+                response.sendRedirect(url);
+            }
+        } catch (WeixinException e) {
+            // ignore WeixinException
+            logger.error("微信 Exception");
+        }
     }
 
     @RequestMapping(value = "/pay/static/**", method = RequestMethod.GET)
@@ -76,6 +110,38 @@ public class IndexController {
             return null;
         }
         return payView(request, loginUser, PAY_VIEW);
+    }
+
+    private boolean checkFollow(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
+            return true;
+        }
+
+        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+        String openId = oAuthService.openId(accessToken);
+
+        if (StringUtils.isEmpty(openId)) {
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            try {
+                WebUtils.auth(request, response);
+            } catch (Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            throw new WeixinException(ErrorConstants.ACCESS_TOKEN_INVALID, "cookie无效");
+        }
+
+        Account account = null;
+        try {
+            account = accountService.getAccount(openId, false);
+        } catch (NotFollowingException e) {
+            return false;
+        }
+        if (account != null) {
+            return true;
+        } else {
+            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            return false;
+        }
     }
 
     private boolean checkAccessToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -101,7 +167,8 @@ public class IndexController {
             account = accountService.getAccount(openId, false);
         } catch (NotFollowingException e) {
             try {
-                SubscribeRouterConfig subscribeRouterConfig = subscribeRouterService.loadUnSubscribeRouterConfig(request.getRequestURI());
+                String followKey = request.getParameter(SubscribeRouterConfig.QUERY_KEY);
+                SubscribeRouterConfig subscribeRouterConfig = subscribeRouterService.loadUnSubscribeRouterConfig(request.getRequestURI(), followKey);
                 if (subscribeRouterConfig != null) {
                     // 未关注
                     response.sendRedirect(SUBSCRIBE_URL + "?scene=" + subscribeRouterConfig.getScene());

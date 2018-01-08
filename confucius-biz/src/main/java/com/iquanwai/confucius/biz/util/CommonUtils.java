@@ -174,6 +174,8 @@ public class CommonUtils {
                 switch (b1) {
                     case SECTION_6:
                         return true;
+                    default:
+                        break;
                 }
             default:
                 return false;

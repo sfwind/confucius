@@ -11,4 +11,5 @@ public class SubscribeRouterConfig {
     private Integer sequence; // 正则匹配优先级
     private Boolean del;
 
+    public static final String QUERY_KEY="_fk";
 }
