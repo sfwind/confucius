@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.payment;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.AlipayConstants;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
@@ -105,7 +106,9 @@ public class AliPayController {
             //计算得出通知验证结果
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
             boolean verify_result = AlipaySignature.rsaCheckV2(params, ConfigUtils.getValue("alipay.public.key"),
-                    "UTF-8", "RSA2");
+                    "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
+            String content = AlipaySignature.getSignCheckContentV2(params);
+            logger.info("sign content :{}", content);
             logger.info("进入回调,{},{},{},{}", out_trade_no, trade_no, trade_status, verify_result);
 
             if (verify_result) {//验证成功
