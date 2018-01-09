@@ -203,11 +203,10 @@ public class RestfulHelper {
 
     /**
      * 上传微信素材
-     * @param multipartFile
      * @param url
      * @return
      */
-    public String uploadWXFile(MultipartFile multipartFile,String url) {
+    public String uploadWXFile(InputStream inputStream,String fileName,String url) {
         String result = null;
         String accessToken = accessTokenService.getAccessToken();
         logger.info("accesstoken is :{}", accessToken);
@@ -229,12 +228,12 @@ public class RestfulHelper {
             OutputStream output = conn.getOutputStream();
             output.write(("--" + boundary + "\r\n").getBytes());
             output.write(
-                    String.format("Content-Disposition: form-data; name=\"media\"; filename=\"%s\"\r\n", multipartFile.getOriginalFilename())
+                    String.format("Content-Disposition: form-data; name=\"media\"; filename=\"%s\"\r\n", fileName)
                             .getBytes());
             output.write("Content-Type: image/jpeg \r\n\r\n".getBytes());
             byte[] data = new byte[1024];
             int len = 0;
-            DataInputStream input = new DataInputStream(multipartFile.getInputStream());
+            DataInputStream input = new DataInputStream(inputStream);
             while ((len = input.read(data)) > -1) {
                 output.write(data, 0, len);
             }
