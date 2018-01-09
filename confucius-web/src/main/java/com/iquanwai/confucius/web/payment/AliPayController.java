@@ -77,6 +77,7 @@ public class AliPayController {
     public void alipayNotifyCallback(HttpServletRequest request, HttpServletResponse response) {
         //获取支付宝POST过来反馈信息
         try {
+            logger.info("request url = {} \n {}", request.getRequestURL(),request.getQueryString());
             PrintWriter out = response.getWriter();
             Map<String, String> params = Maps.newHashMap();
             Map requestParams = request.getParameterMap();
