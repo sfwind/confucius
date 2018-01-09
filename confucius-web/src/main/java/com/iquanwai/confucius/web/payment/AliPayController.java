@@ -58,7 +58,7 @@ public class AliPayController {
         alipayRequest.setBizContent("{" +
                 " \"out_trade_no\":\"" + CommonUtils.randomString(32) + "\"," +
                 " \"total_amount\":\"0.01\"," +
-                " \"subject\":\"圈外商学院\"," +
+                " \"subject\":\"product\"," +
                 " \"product_code\":\"QUICK_WAP_PAY\"" +
                 " }");//填充业务参数
         String form = "";
