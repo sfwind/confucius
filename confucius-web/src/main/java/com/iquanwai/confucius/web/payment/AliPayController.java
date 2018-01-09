@@ -5,8 +5,6 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConstants;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
-import com.alipay.api.internal.util.StringUtils;
-import com.alipay.api.internal.util.codec.Base64;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
@@ -23,11 +21,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -95,7 +94,17 @@ public class AliPayController {
                 params.put(name, valueStr);
             }
             logger.info("notify requestParams:{}", requestParams);
-            logger.info("notify param:{}", params);
+            StringBuffer content = new StringBuffer();
+            List<String> keys = new ArrayList<String>(params.keySet());
+            Collections.sort(keys);
+
+            for (int i = 0; i < keys.size(); i++) {
+                String key = keys.get(i);
+                String value = params.get(key);
+                content.append((i == 0 ? "" : "&") + key + "=" + value);
+            }
+
+            logger.info("notify param:{}", content.toString());
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
             //商户订单号
 
@@ -110,41 +119,10 @@ public class AliPayController {
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
             //计算得出通知验证结果
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
-            String sign = params.get("sign");
-
             boolean verify_result = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
-            String content = AlipaySignature.getSignCheckContentV1(params);
-
-            String charset = "UTF-8";
-            String publicKey = ConfigUtils.getValue("alipay.public.key");
-            try {
-
-                PublicKey pubKey = AlipaySignature.getPublicKeyFromX509("RSA",
-                        new ByteArrayInputStream(publicKey.getBytes()));
-
-                java.security.Signature signature = java.security.Signature
-                        .getInstance(AlipayConstants.SIGN_SHA256RSA_ALGORITHMS);
-
-                signature.initVerify(pubKey);
-
-                if (StringUtils.isEmpty(charset)) {
-                    signature.update(content.getBytes());
-                } else {
-                    signature.update(content.getBytes(charset));
-                }
-
-                logger.info("signature.getAlgorithm():{}", signature.getAlgorithm());
-
-                boolean temp = signature.verify(Base64.decodeBase64(sign.getBytes()));
-                logger.info("temp:{}", temp);
-            } catch (Exception e) {
-                throw new AlipayApiException(
-                        "RSAcontent = " + content + ",sign=" + sign + ",charset = " + charset, e);
-            }
 
 
-            logger.info("sign content :{}", content);
             logger.info("进入回调,{},{},{},{}", out_trade_no, trade_no, trade_status, verify_result);
 
             if (verify_result) {//验证成功
