@@ -35,7 +35,7 @@ public class CallbackDao extends DBUtil {
 
     public int insertWeMiniCallBack(Callback callback) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Callback (State, WeMiniAccessToken, WeMiniOpenid, UnionId) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Callback (State, WeMiniAccessToken, WeMiniOpenid, UnionId) VALUES (?, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     callback.getState(),
