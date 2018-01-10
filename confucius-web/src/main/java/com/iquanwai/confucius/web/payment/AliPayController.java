@@ -8,9 +8,11 @@ import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +126,15 @@ public class AliPayController {
             String tradeNo = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"), "UTF-8");
             //交易状态
             String tradeStatus = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"), "UTF-8");
+            //交易结束时间
+            String paymentTime = new String(request.getParameter("gmt_payment").getBytes("ISO-8859-1"), "UTF-8");
 
+            PayCallback payCallback = new PayCallback();
+            payCallback.setTime_end(paymentTime);
+            payCallback.setTransaction_id(tradeNo);
+            payCallback.setOut_trade_no(outTradeNo);
+            payCallback.setResult_code(tradeStatus);
+            payCallback.setTotal_fee();
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
             //计算得出通知验证结果
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
@@ -192,7 +202,23 @@ public class AliPayController {
      */
     private void tradeBusinessDeal(String outTradeNo, String tradeNo, String tradeStatus) {
         logger.info("处理订单业务逻辑,商户订单号:{},支付宝交易号:{},交易状态:{}", outTradeNo, tradeNo, tradeStatus);
-
+        PayCallback payCallback = new PayCallback();
+        payCallback.setResult_code(tradeStatus);
+        payCallback.setOut_trade_no(outTradeNo);
+        payCallback.setTransaction_id(tradeNo);
+        payCallback.setTime_end();
+        ThreadPool.execute(() -> {
+            try {
+                payService.handlePayResult(payCallback);
+                if ("SUCCESS".equals(payCallback.getResult_code())) {
+                    payService.payMemberSuccess(payCallback.getOut_trade_no());
+                } else {
+                    logger.error("{}付费失败", payCallback.getOut_trade_no());
+                }
+            } catch (Exception e) {
+                logger.error("rise会员支付结果回调处理失败", e);
+            }
+        });
     }
 
 
