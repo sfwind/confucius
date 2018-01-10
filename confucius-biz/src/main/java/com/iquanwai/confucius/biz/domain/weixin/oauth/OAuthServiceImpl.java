@@ -198,6 +198,7 @@ public class OAuthServiceImpl implements OAuthService {
                 .replace("{JSCODE}", code);
         ResponseBody responseBody = restfulHelper.getPlain(requestUrl);
         JSONObject resultJson = JSONObject.parseObject(responseBody.string());
+        logger.info(resultJson.toString());
         String sessionKey = resultJson.getString("session_key");
         String openId = resultJson.getString("openid");
         String unionId = resultJson.getString("unionid");

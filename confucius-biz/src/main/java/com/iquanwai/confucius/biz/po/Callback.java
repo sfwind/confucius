@@ -24,5 +24,4 @@ public class Callback {
 
     // 非 db
     private Long expireDate;
-
 }

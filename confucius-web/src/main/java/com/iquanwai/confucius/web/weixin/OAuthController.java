@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.pc.LoginUserService;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
+import com.iquanwai.confucius.web.weixin.dto.WeMiniCallback;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,10 +158,10 @@ public class OAuthController {
             Callback callback = oAuthService.weMiniAccessToken(code);
             Assert.notNull(callback, "callback 数据不能为空");
 
-            Callback targetCallback = new Callback();
-            targetCallback.setState(callback.getState());
-            targetCallback.setExpireDate(DateUtils.afterDays(new Date(), 7).getTime());
-            return WebUtils.result(targetCallback);
+            WeMiniCallback weMiniCallback = new WeMiniCallback();
+            weMiniCallback.setState(callback.getState());
+            weMiniCallback.setExpireDate(DateUtils.afterDays(new Date(), 7).getTime());
+            return WebUtils.result(weMiniCallback);
         } catch (IOException e) {
             logger.error(e.getLocalizedMessage(), e);
             return WebUtils.error("服务器伐开心,我们正在想办法");
