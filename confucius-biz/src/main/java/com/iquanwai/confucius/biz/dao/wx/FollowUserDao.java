@@ -23,15 +23,22 @@ public class FollowUserDao extends DBUtil {
 
     public int insert(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO FollowUsers(Openid, Country, Groupid, Headimgurl, " +
-                "Nickname, Remark, Sex, Subscribe_time, UnionId) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO FollowUsers(Openid, WeMiniOpenId, UnionId, Nickname, Sex, City, Country, Province, Headimgurl, Subscribe_time, Remark, Groupid)" +
+                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            return run.update(insertSql,
-                    account.getOpenid(), account.getCountry(),
-                    account.getGroupid(), account.getHeadimgurl(),
-                    account.getNickname(), account.getRemark(),
-                    account.getSex(), account.getSubscribe_time(), account.getUnionid());
+            return run.update(sql,
+                    account.getOpenid(),
+                    account.getWeMiniOpenId(),
+                    account.getUnionid(),
+                    account.getNickname(),
+                    account.getSex(),
+                    account.getCity(),
+                    account.getCountry(),
+                    account.getProvince(),
+                    account.getHeadimgurl(),
+                    account.getSubscribe_time(),
+                    account.getRemark(),
+                    account.getGroupid());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -53,6 +60,17 @@ public class FollowUserDao extends DBUtil {
         return null;
     }
 
+    public Account queryByUnionId(String unionId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM FollowUsers WHERE UnionId = ?";
+        ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
+        try {
+            return runner.query(sql, h, unionId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
 
     public List<String> queryAll() {
         QueryRunner run = new QueryRunner(getDataSource());

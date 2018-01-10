@@ -1,8 +1,9 @@
 package com.iquanwai.confucius.biz.domain.weixin.oauth;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
+import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
@@ -11,6 +12,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import okhttp3.ResponseBody;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -31,12 +34,15 @@ import java.util.regex.Pattern;
  */
 @Service
 public class OAuthServiceImpl implements OAuthService {
+
     @Autowired
-    private RestfulHelper restfulHelper;
+    private AccountService accountService;
     @Autowired
     private CallbackDao callbackDao;
     @Autowired
-    private AccountService accountService;
+    private FollowUserDao followUserDao;
+    @Autowired
+    private RestfulHelper restfulHelper;
 
     private static final String REDIRECT_PATH = "/wx/oauth/code";
 
@@ -74,18 +80,19 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Override
     public String openId(String accessToken) {
-        if(accessToken==null){
+        if (accessToken == null) {
             return null;
         }
         Callback callback = callbackDao.queryByAccessToken(accessToken);
-        if(callback==null){
+        if (callback == null) {
             logger.error("accesstoken {} is invalid", accessToken);
             return null;
         }
         return callback.getOpenid();
     }
+
     @Override
-    public String pcOpenId(String act){
+    public String pcOpenId(String act) {
         if (act == null) {
             logger.info("error，pc _qt is null");
             return null;
@@ -101,28 +108,55 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public String refresh(String accessToken) {
         Callback callback = callbackDao.queryByAccessToken(accessToken);
-        if(callback==null){
+        if (callback == null) {
             logger.error("accesstoken {} is invalid", accessToken);
             return null;
         }
         String requestUrl = REFRESH_TOKEN_URL;
 
-        Map<String,String> params = Maps.newHashMap();
+        Map<String, String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         params.put("refresh_token", callback.getRefreshToken());
         requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
         String body = restfulHelper.get(requestUrl);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
-        String newAccessToken = (String)result.get("access_token");
+        String newAccessToken = (String) result.get("access_token");
 
         //刷新accessToken
         callbackDao.refreshToken(callback.getState(), newAccessToken);
         return newAccessToken;
     }
 
-    /**
-     * 新增pc获取accessToken
-     */
+    @Override
+    public Callback accessToken(String code, String state) {
+        Callback callback = callbackDao.queryByState(state);
+        if (callback == null) {
+            logger.error("state {} is not found", state);
+            return null;
+        }
+        String requestUrl = ACCESS_TOKEN_URL;
+
+        Map<String, String> params = Maps.newHashMap();
+        params.put("appid", ConfigUtils.getAppid());
+        params.put("secret", ConfigUtils.getSecret());
+        params.put("code", code);
+        requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
+        String body = restfulHelper.get(requestUrl);
+        Map<String, Object> result = CommonUtils.jsonToMap(body);
+
+        String accessToken = (String) result.get("access_token");
+        String openid = (String) result.get("openid");
+        String refreshToken = (String) result.get("refresh_token");
+        //更新accessToken，refreshToken，openid
+        callback.setOpenid(openid);
+        callback.setRefreshToken(refreshToken);
+        callback.setAccessToken(accessToken);
+        logger.info("update callback, state:{},accesstoken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
+        callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
+
+        return callback;
+    }
+
     @Override
     public Callback pcAccessToken(String code, String state) {
         Callback callback = callbackDao.queryByState(state);
@@ -158,50 +192,31 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public Callback accessToken(String code, String state) {
-        Callback callback = callbackDao.queryByState(state);
-        if(callback==null){
-            logger.error("state {} is not found", state);
-            return null;
+    public Callback weMiniAccessToken(String code) throws IOException {
+        String requestUrl = WE_MINI_ACCESS_TOKEN_URL.replace("{APPID}", ConfigUtils.getWeMiniAppId())
+                .replace("{SECRET}", ConfigUtils.getWeMiniAppSecret())
+                .replace("{JSCODE}", code);
+        ResponseBody responseBody = restfulHelper.getPlain(requestUrl);
+        JSONObject resultJson = JSONObject.parseObject(responseBody.string());
+        String sessionKey = resultJson.getString("session_key");
+        String openId = resultJson.getString("openid");
+        String unionId = resultJson.getString("unionid");
+        Callback callback = new Callback();
+        String state = CommonUtils.randomString(32);
+        callback.setState(state);
+        callback.setWeMiniAccessToken(sessionKey);
+        callback.setUnionId(unionId);
+        callback.setWeMiniOpenid(openId);
+        int insertResult = callbackDao.insertWeMiniCallBack(callback);
+        if (insertResult > 0) {
+            return callback;
+        } else {
+            throw new RuntimeException("callback 表插入失败，state：" + state);
         }
-        String requestUrl = ACCESS_TOKEN_URL;
-
-        Map<String,String> params = Maps.newHashMap();
-        params.put("appid", ConfigUtils.getAppid());
-        params.put("secret", ConfigUtils.getSecret());
-        params.put("code", code);
-        requestUrl = CommonUtils.placeholderReplace(requestUrl, params);
-        String body = restfulHelper.get(requestUrl);
-        Map<String, Object> result = CommonUtils.jsonToMap(body);
-
-        String accessToken = (String)result.get("access_token");
-        String openid = (String)result.get("openid");
-        String refreshToken = (String)result.get("refresh_token");
-        //更新accessToken，refreshToken，openid
-        callback.setOpenid(openid);
-        callback.setRefreshToken(refreshToken);
-        callback.setAccessToken(accessToken);
-        logger.info("update callback, state:{},accesstoken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
-        callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
-
-        return callback;
     }
 
-    public static String getIPFromUrl(String url){
-        Pattern ipPattern = Pattern.compile(IP_REGULAR);
-        Matcher matcher = ipPattern.matcher(url);
-        if (matcher.find()) {
-            return matcher.group();
-        }
-
-        return null;
-    }
-
-    /**
-     * 根据请求中的回调 URI，拼凑出用于生成微信二维码的参数
-     */
     @Override
-    public Map<String,String> pcRedirectUrl(String callbackUrl){
+    public Map<String, String> pcRedirectUrl(String callbackUrl) {
         Callback callback = new Callback();
         try {
             callbackUrl = URLDecoder.decode(callbackUrl, "utf-8");
@@ -209,21 +224,21 @@ public class OAuthServiceImpl implements OAuthService {
             logger.error(e.getLocalizedMessage(), e);
         }
         String ip = getIPFromUrl(callbackUrl);
-        if(ip!=null){
-            callbackUrl = callbackUrl.replace("http://"+ip, ConfigUtils.domainName());
+        if (ip != null) {
+            callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
         }
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
         callback.setState(state);
         logger.info("state is {}", state);
         callbackDao.insert(callback);
-        Map<String,String> param = Maps.newHashMap();
-        param.put("appid",ConfigUtils.getRisePcAppid());
+        Map<String, String> param = Maps.newHashMap();
+        param.put("appid", ConfigUtils.getRisePcAppid());
         param.put("scope", "snsapi_login");
-        param.put("redirect_uri",RISE_PC_OAUTH_URL);
-        param.put("state",state);
+        param.put("redirect_uri", RISE_PC_OAUTH_URL);
+        param.put("state", state);
         param.put("style", "");
-        param.put("href","");
+        param.put("href", "");
         return param;
     }
 
@@ -271,6 +286,16 @@ public class OAuthServiceImpl implements OAuthService {
             callbackDao.updateOpenId(callback.getState(), profile.getOpenid());
             return new MutablePair<>(1, callback);
         }
+    }
+
+    private static String getIPFromUrl(String url) {
+        Pattern ipPattern = Pattern.compile(IP_REGULAR);
+        Matcher matcher = ipPattern.matcher(url);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        return null;
     }
 
 }

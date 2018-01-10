@@ -19,21 +19,6 @@ import java.sql.SQLException;
 public class CallbackDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-
-    public Callback loadUserCallback(String openId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
-
-        try {
-            Callback callback = run.query("SELECT * FROM Callback where OpenId=? and (AccessToken is not null or PcAccessToken is not null) limit 1", h, openId);
-            return callback;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return null;
-    }
-
     public void insert(Callback callback) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO Callback(Openid, Accesstoken, CallbackUrl, RefreshToken, State) " +
@@ -48,10 +33,19 @@ public class CallbackDao extends DBUtil {
 
     }
 
-    public void updateUserInfo(String state,
-                               String accessToken,
-                               String refreshToken,
-                               String openid) {
+    public int insertWeMiniCallBack(Callback callback) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO Callback (State, WeMiniAccessToken, WeMiniOpenid) VALUES (?, ?, ?)";
+        try {
+            Long result = runner.insert(sql, new ScalarHandler<>(), callback.getState(), callback.getWeMiniAccessToken(), callback.getWeMiniOpenid());
+            return result.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public void updateUserInfo(String state, String accessToken, String refreshToken, String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
             run.update("UPDATE Callback Set AccessToken=?,RefreshToken=?,Openid=? where State=?",
@@ -62,10 +56,7 @@ public class CallbackDao extends DBUtil {
         }
     }
 
-    public void updatePcUserInfo(String state,
-                               String accessToken,
-                               String refreshToken,
-                               String openid) {
+    public void updatePcUserInfo(String state, String accessToken, String refreshToken, String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
             run.update("UPDATE Callback Set PcAccessToken=?,RefreshToken=?,PcOpenid=? where State=?",
@@ -75,8 +66,8 @@ public class CallbackDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-    public void refreshToken(String state,
-                               String newAccessToken) {
+
+    public void refreshToken(String state, String newAccessToken) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
             run.update("UPDATE Callback Set AccessToken=? where State=?",
@@ -92,12 +83,10 @@ public class CallbackDao extends DBUtil {
         ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
 
         try {
-            Callback callback = run.query("SELECT * FROM Callback where State=?", h, state);
-            return callback;
+            return run.query("SELECT * FROM Callback where State = ?", h, state);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-
         return null;
     }
 
@@ -129,9 +118,9 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public void updateOpenId(String state,String openId){
+    public void updateOpenId(String state, String openId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        try{
+        try {
             String sql = "update Callback set openid = ? where State = ?";
             run.update(sql, openId, state);
         } catch (SQLException e) {
