@@ -30,13 +30,13 @@ public class QuanwaiOrderDao extends DBUtil {
                     quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
                     quanwaiOrder.getDiscount(), quanwaiOrder.getPrepayId(), quanwaiOrder.getStatus(),
                     quanwaiOrder.getCreateTime(), quanwaiOrder.getGoodsId(), quanwaiOrder.getGoodsName(),
-                    quanwaiOrder.getGoodsType(), quanwaiOrder.getRefundTime());
+                    quanwaiOrder.getGoodsType(), null);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public QuanwaiOrder loadOrder(String orderId){
+    public QuanwaiOrder loadOrder(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<QuanwaiOrder> h = new BeanHandler<>(QuanwaiOrder.class);
 
@@ -61,7 +61,7 @@ public class QuanwaiOrderDao extends DBUtil {
         return null;
     }
 
-    public void updatePrepayId(String prepayId, String orderId){
+    public void updatePrepayId(String prepayId, String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
@@ -73,7 +73,7 @@ public class QuanwaiOrderDao extends DBUtil {
         }
     }
 
-    public void payError(String errMsg, String orderId){
+    public void payError(String errMsg, String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
@@ -85,7 +85,7 @@ public class QuanwaiOrderDao extends DBUtil {
         }
     }
 
-    public void paySuccess(Date paidTime, String transactionId, String orderId){
+    public void paySuccess(Date paidTime, String transactionId, String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
@@ -97,7 +97,7 @@ public class QuanwaiOrderDao extends DBUtil {
         }
     }
 
-    public void refundOrder(String orderId, Double refundFee, String refundOrderId){
+    public void refundOrder(String orderId, Double refundFee, String refundOrderId) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
