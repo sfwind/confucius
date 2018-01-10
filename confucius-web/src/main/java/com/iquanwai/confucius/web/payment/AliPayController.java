@@ -10,7 +10,6 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.resolver.LoginUser;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,47 +33,72 @@ import java.util.Map;
 public class AliPayController {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * <p>交易完成，触发方式：</p>
+     * <ul>
+     * <li>可退款交易，超过退款期限，则支付宝会推送该消息</li>
+     * <li>不可退款交易，在支付完成后会立刻推送该消息</li>
+     * </ul>
+     */
+    public static final String ALIPAY_TRADE_FINISHED = "TRADE_FINISHED";
+    /**
+     * <p>交易成功，触发方式：</p>
+     * <ul>
+     * <li>可退款交易，在支付完成后会立刻推送该消息</li>
+     * </ul>
+     */
+    public static final String ALIPAY_TRADE_SUCCESS = "TRADE_SUCCESS";
+
+
     @Autowired
     private PayService payService;
 
+    /**
+     * 测试接口，待删除
+     */
     @RequestMapping(value = "/form")
     public void getPayForm(HttpServletRequest httpRequest,
-                           HttpServletResponse httpResponse, LoginUser loginUser) throws Exception {
+                           HttpServletResponse httpResponse) throws Exception {
+
         AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
                 ConfigUtils.getValue("alipay.appid"),
                 ConfigUtils.getValue("alipay.private.key"),
                 "json",
                 "UTF-8",
                 ConfigUtils.getValue("alipay.public.key"),
-                "RSA2"); //获得初始化的AlipayClient
+                "RSA2");
 
-
-        AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();//创建API对应的request
+        //获得初始化的AlipayClient
+        AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
+        //创建API对应的request
         alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
-        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");//在公共参数中设置回跳和通知地址
+        //在公共参数中设置回跳和通知地址
+        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");
+        //填充业务参数
         alipayRequest.setBizContent("{" +
                 " \"out_trade_no\":\"" + CommonUtils.randomString(32) + "\"," +
                 " \"total_amount\":\"0.01\"," +
                 " \"subject\":\"product\"," +
                 " \"product_code\":\"QUICK_WAP_PAY\"" +
-                " }");//填充业务参数
+                " }");
         String form = "";
         try {
-            form = alipayClient.pageExecute(alipayRequest).getBody(); //调用SDK生成表单
+            //调用SDK生成表单
+            form = alipayClient.pageExecute(alipayRequest).getBody();
         } catch (AlipayApiException e) {
-            e.printStackTrace();
+            logger.error(e.getLocalizedMessage(), e);
         }
         httpResponse.setContentType("text/html;charset=" + "UTF-8");
-        httpResponse.getWriter().write(form);//直接将完整的表单html输出到页面
+        //直接将完整的表单html输出到页面
+        httpResponse.getWriter().write(form);
         httpResponse.getWriter().flush();
         httpResponse.getWriter().close();
     }
 
     @RequestMapping(value = "callback/notify", method = RequestMethod.POST)
     public void alipayNotifyCallback(HttpServletRequest request, HttpServletResponse response) {
-        //获取支付宝POST过来反馈信息
         try {
-            logger.info("request url = {} \n {}", request.getRequestURL(),request.getQueryString());
+            //获取支付宝POST过来反馈信息
             PrintWriter out = response.getWriter();
             Map<String, String> params = Maps.newHashMap();
             Map requestParams = request.getParameterMap();
@@ -91,61 +112,42 @@ public class AliPayController {
                 }
                 //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
                 //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
-                logger.info("key:{} \n value:{}", name, valueStr);
                 params.put(name, valueStr);
             }
-            logger.info("notify requestParams:{}", requestParams);
-            StringBuffer content = new StringBuffer();
-            List<String> keys = new ArrayList<String>(params.keySet());
-            Collections.sort(keys);
-
-            for (int i = 0; i < keys.size(); i++) {
-                String key = keys.get(i);
-                String value = params.get(key);
-                content.append((i == 0 ? "" : "&") + key + "=" + value);
-            }
-
-            logger.info("notify param:{}", content.toString());
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
             //商户订单号
-
-            String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"), "UTF-8");
+            String outTradeNo = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"), "UTF-8");
             //支付宝交易号
-
-            String trade_no = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"), "UTF-8");
-
+            String tradeNo = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"), "UTF-8");
             //交易状态
-            String trade_status = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"), "UTF-8");
+            String tradeStatus = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"), "UTF-8");
 
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
             //计算得出通知验证结果
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
-            boolean verify_result = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
+            boolean verifyResult = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
-
-
-            logger.info("进入回调,{},{},{},{}", out_trade_no, trade_no, trade_status, verify_result);
-
-            if (verify_result) {//验证成功
+            logger.info("进入回调.\n 订单号：{} \n 交易号：{} \n 交易状态：{} \n 验签结果：{}", outTradeNo, tradeNo, tradeStatus, verifyResult);
+            if (verifyResult) {
+                //验证成功
                 //////////////////////////////////////////////////////////////////////////////////////////
                 //请在这里加上商户的业务逻辑程序代码
                 //——请根据您的业务逻辑来编写程序（以下代码仅作参考）——
-
-                if ("TRADE_FINISHED".equals(trade_status)) {
+                if (ALIPAY_TRADE_FINISHED.equals(tradeStatus)) {
                     //判断该笔订单是否在商户网站中已经做过处理
                     //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
                     //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
                     //如果有做过处理，不执行商户的业务程序
-
+                    tradeBusinessDeal(outTradeNo, tradeNo, tradeStatus);
                     //注意：
                     //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
                     //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
-                } else if ("TRADE_SUCCESS".equals(trade_status)) {
+                } else if (ALIPAY_TRADE_SUCCESS.equals(tradeStatus)) {
                     //判断该笔订单是否在商户网站中已经做过处理
                     //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
                     //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
                     //如果有做过处理，不执行商户的业务程序
-
+                    tradeBusinessDeal(outTradeNo, tradeNo, tradeStatus);
                     //注意：
                     //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
                 }
@@ -153,8 +155,8 @@ public class AliPayController {
                 //——请根据您的业务逻辑来编写程序（以上代码仅作参考）——
                 try {
                     response.setHeader("Content-Type", "text/plain");
-                    logger.info("return success");
-                    out.println("success");    //请不要修改或删除
+                    //请不要修改或删除
+                    out.println("success");
                     response.flushBuffer();
                 } catch (IOException e1) {
                     logger.error(e1.getLocalizedMessage(), e1);
@@ -165,7 +167,6 @@ public class AliPayController {
             } else {//验证失败
                 try {
                     response.setHeader("Content-Type", "text/plain");
-                    logger.info("return fail");
                     out.println("fail");
                     response.flushBuffer();
                 } catch (IOException e1) {
@@ -177,6 +178,18 @@ public class AliPayController {
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    /**
+     * 订单的业务处理
+     *
+     * @param outTradeNo 商户订单号
+     * @param tradeNo 支付宝交易号
+     * @param tradeStatus 交易状态
+     */
+    private void tradeBusinessDeal(String outTradeNo, String tradeNo, String tradeStatus) {
+        logger.info("处理订单业务逻辑,商户订单号:{},支付宝交易号:{},交易状态:{}", outTradeNo, tradeNo, tradeStatus);
+
     }
 
 

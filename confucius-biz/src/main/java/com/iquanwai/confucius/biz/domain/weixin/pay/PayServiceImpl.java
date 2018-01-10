@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.weixin.pay;
 
+import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
@@ -416,27 +417,32 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public String buildAlipayParam(String orderId, String remoteIp, String openid) {
+        //获得初始化的AlipayClient
         AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
                 ConfigUtils.getValue("alipay.appid"),
                 ConfigUtils.getValue("alipay.private.key"),
                 "json",
                 "UTF-8",
                 ConfigUtils.getValue("alipay.public.key"),
-                "RSA2"); //获得初始化的AlipayClient
+                "RSA2");
 
-
-        AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();//创建API对应的request
+        //创建API对应的request
+        AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
+        //在公共参数中设置回跳和通知地址
         alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
-        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");//在公共参数中设置回跳和通知地址
-        alipayRequest.setBizContent("{" +
-                " \"out_trade_no\":\"" + CommonUtils.randomString(32) + "\"," +
-                " \"total_amount\":\"88.88\"," +
-                " \"subject\":\"圈外商学院\"," +
-                " \"product_code\":\"QUICK_WAP_PAY\"" +
-                " }");//填充业务参数
+        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");
+        //填充业务参数
+        Map<String,String> bizContent = Maps.newHashMap();
+        bizContent.put("out_trade_no", CommonUtils.randomString(32));
+        bizContent.put("total_amount", "0.01");
+        bizContent.put("subject", "圈外商学院");
+        bizContent.put("product_code", "QUICK_WAP_PAY");
+        bizContent.put("timeout_express", "1m");
+        alipayRequest.setBizContent(JSON.toJSONString(bizContent));
         String redirectParam = "";
         try {
-            redirectParam = alipayClient.pageExecute(alipayRequest, "GET").getBody(); //调用SDK生成表单
+            //调用SDK生成表单
+            redirectParam = alipayClient.pageExecute(alipayRequest, "GET").getBody();
         } catch (AlipayApiException e) {
             e.printStackTrace();
         }
