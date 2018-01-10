@@ -1,10 +1,10 @@
 package com.iquanwai.confucius.web.payment;
 
-import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConstants;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.google.common.collect.Maps;
@@ -76,13 +76,14 @@ public class AliPayController {
         //在公共参数中设置回跳和通知地址
         alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");
         //填充业务参数
-        Map<String,String> bizContent = Maps.newHashMap();
-        bizContent.put("out_trade_no", CommonUtils.randomString(32));
-        bizContent.put("total_amount", "0.01");
-        bizContent.put("subject", "圈外商学院");
-        bizContent.put("product_code", "QUICK_WAP_PAY");
-        bizContent.put("timeout_express", "1m");
-        alipayRequest.setBizContent(JSON.toJSONString(bizContent));
+        AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
+        model.setOutTradeNo(CommonUtils.randomString(32));
+        model.setTotalAmount("0.01");
+        model.setBody("描述");
+        model.setSubject("圈外商学院");
+        model.setProductCode("QUICK_WAP_PAY");
+        model.setTimeoutExpress("2m");
+        alipayRequest.setBizModel(model);
         String form = "";
         try {
             //调用SDK生成表单
