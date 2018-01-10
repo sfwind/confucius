@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.biz.domain.weixin.pay;
 
-import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -28,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import java.math.RoundingMode;
 import java.net.ConnectException;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,8 @@ public class PayServiceImpl implements PayService {
     private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
     private static final String RISE_CAMP_PAY_CALLBACK_PATH = "/wx/pay/result/risecamp/callback";
     private static final String BS_APPLICATION_PAY_CALLBACK_PATH = "/wx/pay/result/application/callback";
+
+    private static final String ALIPAY_CALLBACK_PATH = "/ali/pay/callback/notify";
 
 
     @PostConstruct
@@ -416,7 +420,12 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public String buildAlipayParam(String orderId, String remoteIp, String openid) {
+    public String buildAlipayParam(QuanwaiOrder quanwaiOrder) {
+        if (quanwaiOrder == null) {
+            logger.error("order id {} not existed", quanwaiOrder);
+            return "";
+        }
+
         //获得初始化的AlipayClient
         AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
                 ConfigUtils.getValue("alipay.appid"),
@@ -429,16 +438,19 @@ public class PayServiceImpl implements PayService {
         //创建API对应的request
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
         //在公共参数中设置回跳和通知地址
-        alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
-        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");
+//        alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
+        alipayRequest.setNotifyUrl(ConfigUtils.adapterDomainName() + ALIPAY_CALLBACK_PATH);
         //填充业务参数
-        Map<String,String> bizContent = Maps.newHashMap();
-        bizContent.put("out_trade_no", CommonUtils.randomString(32));
-        bizContent.put("total_amount", "0.01");
-        bizContent.put("subject", "圈外商学院");
-        bizContent.put("product_code", "QUICK_WAP_PAY");
-        bizContent.put("timeout_express", "1m");
-        alipayRequest.setBizContent(JSON.toJSONString(bizContent));
+        AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
+        model.setOutTradeNo(CommonUtils.randomString(32));
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        model.setTotalAmount(df.format(quanwaiOrder.getPrice()));
+        model.setSubject(quanwaiOrder.getGoodsName());
+        model.setProductCode("QUICK_WAP_PAY");
+        model.setTimeExpire(DateUtils.parseDateTimeToString(
+                DateUtils.afterMinutes(new Date(), ConfigUtils.getBillOpenMinute())));
+        alipayRequest.setBizModel(model);
         String redirectParam = "";
         try {
             //调用SDK生成表单
@@ -481,5 +493,4 @@ public class PayServiceImpl implements PayService {
 
         return refundOrder;
     }
-
 }

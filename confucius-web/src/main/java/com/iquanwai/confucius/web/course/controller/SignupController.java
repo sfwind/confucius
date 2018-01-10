@@ -500,7 +500,7 @@ public class SignupController {
         paymentDto.setFree(Double.valueOf(0d).equals(quanwaiOrder.getPrice()));
         paymentDto.setProductId(quanwaiOrder.getOrderId());
         if (!Double.valueOf(0).equals(quanwaiOrder.getPrice())) {
-            String postPayString = payService.buildAlipayParam(quanwaiOrder.getOrderId(), remoteIp, quanwaiOrder.getOpenid());
+            String postPayString = payService.buildAlipayParam(quanwaiOrder);
             Map<String, String> signParams = Maps.newHashMap();
             signParams.put("alipayUrl", postPayString);
             paymentDto.setSignParams(signParams);
