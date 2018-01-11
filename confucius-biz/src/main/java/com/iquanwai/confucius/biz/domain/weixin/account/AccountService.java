@@ -13,13 +13,9 @@ import java.util.List;
 public interface AccountService {
 
     String USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN";
-
     String GET_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}";
-
     String GET_NEXT_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}&next_openid={next_openid}";
-
     String PC_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN";
-
     String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
     String BATCH_BALCKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchblacklist?access_token={access_token}";
     String UNBATCH_BACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchunblacklist?access_token={access_token}";
@@ -40,7 +36,7 @@ public interface AccountService {
     List<Profile> getProfiles(List<Integer> profileIds);
 
     /**
-     *  从微信实时获取头像信息
+     * 从微信实时获取头像信息
      */
     String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException;
 
@@ -86,8 +82,6 @@ public interface AccountService {
 
     /**
      * 根据昵称模糊查询用户的详细信息(所有)
-     * @param nickName
-     * @return
      */
     List<Profile> loadAllProfilesByNickName(String nickName);
 
@@ -101,20 +95,17 @@ public interface AccountService {
     /**
      * 获取黑名单列表
      * (该接口一次最多返回10000条数据)
-     *
      */
     List<String> loadBlackListOpenIds();
 
     /**
      * 批量拉黑用户
-     *
      * @param openidList 拉黑用户列表
      */
     boolean batchBlackList(List<String> openidList);
 
     /**
      * 取消拉黑用户
-     *
      * @param openidList 取消拉黑用户列表
      */
     boolean batchUnBlackList(List<String> openidList);
@@ -127,4 +118,7 @@ public interface AccountService {
     Profile queryByUnionId(String unionid);
 
     int updateHeadImageUrl(Integer profileId, String headImgUrl);
+
+
+    int initProfileAndFollowUser(String unionId, String nickName, String avatarUrl, Integer gender);
 }

@@ -135,7 +135,6 @@ public class ConfigUtils {
         return url;
     }
 
-
     public static String staticPcResourceUrl(String domainName) {
         String url = getValue("static.pc.resource.url");
         //测试环境防浏览器缓存，添加随机参数
@@ -156,6 +155,14 @@ public class ConfigUtils {
 
     public static String getDefaultOpenid() {
         return getValue("default.openid");
+    }
+
+    public static String getDefaultWeMiniOpenId() {
+        return getValue("default.weminiopenid");
+    }
+
+    public static String getDefaultUnionId() {
+        return getValue("default.unionid");
     }
 
     public static Integer getDefaultProfileId() {

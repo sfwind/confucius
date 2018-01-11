@@ -10,5 +10,6 @@ public class WeMiniCallback {
 
     private String state; // 随机值，供客户端调用
     private Long expireDate;
+    private Boolean firstLogin; // 是否是第一次登录
 
 }

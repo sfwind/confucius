@@ -122,6 +122,18 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
+    public Callback queryByUnionId(String unionId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Callback WHERE UnionId = ?";
+        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
+        try {
+            return runner.query(sql, h, unionId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public void updateOpenId(String state, String openId) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {

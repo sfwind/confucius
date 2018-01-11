@@ -1,7 +1,9 @@
 package com.iquanwai.confucius.web.weixin;
 
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -41,6 +43,8 @@ public class OAuthController {
     private OAuthService oAuthService;
     @Autowired
     private LoginUserService loginUserService;
+    @Autowired
+    private AccountService accountService;
 
     @RequestMapping("/auth")
     public void oauthCode(@RequestParam("callbackUrl") String callbackUrl, HttpServletRequest request, HttpServletResponse response) {
@@ -156,11 +160,13 @@ public class OAuthController {
     public ResponseEntity<Map<String, Object>> oauthWeMiniCode(@RequestParam(value = "code") String code) {
         try {
             Callback callback = oAuthService.weMiniAccessToken(code);
+            Profile profile = accountService.queryByUnionId(callback.getUnionId());
             Assert.notNull(callback, "callback 数据不能为空");
 
             WeMiniCallback weMiniCallback = new WeMiniCallback();
             weMiniCallback.setState(callback.getState());
             weMiniCallback.setExpireDate(DateUtils.afterDays(new Date(), 7).getTime());
+            weMiniCallback.setFirstLogin(profile == null);
             return WebUtils.result(weMiniCallback);
         } catch (IOException e) {
             logger.error(e.getLocalizedMessage(), e);

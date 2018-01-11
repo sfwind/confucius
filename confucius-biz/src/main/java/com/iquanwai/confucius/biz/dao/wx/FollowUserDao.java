@@ -64,6 +64,7 @@ public class FollowUserDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM FollowUsers WHERE UnionId = ?";
         ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
+
         try {
             return runner.query(sql, h, unionId);
         } catch (SQLException e) {

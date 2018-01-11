@@ -11,9 +11,11 @@ import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -50,7 +52,6 @@ public class AccountServiceImpl implements AccountService {
     private ProfileDao profileDao;
     @Autowired
     private RedisUtil redisUtil;
-
     @Autowired
     private UserRoleDao userRoleDao;
     @Autowired
@@ -61,6 +62,8 @@ public class AccountServiceImpl implements AccountService {
     private RiseCertificateDao riseCertificateDao;
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
+    @Autowired
+    private CallbackDao callbackDao;
 
     private Map<String, Integer> userRoleMap = Maps.newHashMap();
 
@@ -519,6 +522,40 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
         return profileDao.updateHeadImgUrl(profileId, headImgUrl);
+    }
+
+    @Override
+    public int initProfileAndFollowUser(String unionId, String nickName, String avatarUrl, Integer gender) {
+        Account account = followUserDao.queryByUnionId(unionId);
+        int result = -1;
+
+        if (account == null) {
+            Callback callback = callbackDao.queryByUnionId(unionId);
+            String weMiniOpenId = callback.getWeMiniOpenid();
+
+            account = new Account();
+            account.setWeMiniOpenId(weMiniOpenId);
+            account.setUnionid(unionId);
+            account.setNickname(nickName);
+            account.setSex(gender);
+            account.setHeadimgurl(avatarUrl);
+            followUserDao.insert(account);
+
+            ModelMapper modelMapper = new ModelMapper();
+            Profile profile = modelMapper.map(account, Profile.class);
+            profile.setRiseId(CommonUtils.randomString(7));
+            try {
+                result = profileDao.insertProfile(profile);
+            } catch (SQLException e) {
+                profile.setRiseId(CommonUtils.randomString(7));
+                try {
+                    result = profileDao.insertProfile(profile);
+                } catch (SQLException e1) {
+                    logger.error(e1.getLocalizedMessage(), e);
+                }
+            }
+            return result;
+        }
     }
 
 }
