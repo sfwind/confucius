@@ -134,7 +134,6 @@ public class AliPayController {
             payCallback.setTransaction_id(tradeNo);
             payCallback.setOut_trade_no(outTradeNo);
             payCallback.setResult_code(tradeStatus);
-            payCallback.setTotal_fee();
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
             //计算得出通知验证结果
             //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
@@ -151,7 +150,7 @@ public class AliPayController {
                     //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
                     //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
                     //如果有做过处理，不执行商户的业务程序
-                    tradeBusinessDeal(outTradeNo, tradeNo, tradeStatus);
+                    tradeBusinessDeal(payCallback);
                     //注意：
                     //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
                     //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
@@ -160,7 +159,7 @@ public class AliPayController {
                     //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
                     //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
                     //如果有做过处理，不执行商户的业务程序
-                    tradeBusinessDeal(outTradeNo, tradeNo, tradeStatus);
+                    tradeBusinessDeal(payCallback);
                     //注意：
                     //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
                 }
@@ -195,18 +194,11 @@ public class AliPayController {
 
     /**
      * 订单的业务处理
-     *
-     * @param outTradeNo 商户订单号
-     * @param tradeNo 支付宝交易号
-     * @param tradeStatus 交易状态
      */
-    private void tradeBusinessDeal(String outTradeNo, String tradeNo, String tradeStatus) {
-        logger.info("处理订单业务逻辑,商户订单号:{},支付宝交易号:{},交易状态:{}", outTradeNo, tradeNo, tradeStatus);
-        PayCallback payCallback = new PayCallback();
-        payCallback.setResult_code(tradeStatus);
-        payCallback.setOut_trade_no(outTradeNo);
-        payCallback.setTransaction_id(tradeNo);
-        payCallback.setTime_end();
+    private void tradeBusinessDeal(PayCallback payCallback) {
+        logger.info("处理订单业务逻辑,商户订单号:{},支付宝交易号:{},交易状态:{}", payCallback.getOut_trade_no(),
+                payCallback.getTransaction_id(),
+                payCallback.getResult_code());
         ThreadPool.execute(() -> {
             try {
                 payService.handlePayResult(payCallback);

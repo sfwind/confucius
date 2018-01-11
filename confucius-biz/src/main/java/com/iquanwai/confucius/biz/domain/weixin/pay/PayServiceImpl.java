@@ -445,11 +445,13 @@ public class PayServiceImpl implements PayService {
         model.setOutTradeNo(CommonUtils.randomString(32));
         DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
+        // 总价
         model.setTotalAmount(df.format(quanwaiOrder.getPrice()));
         model.setSubject(quanwaiOrder.getGoodsName());
+        // 固定的
         model.setProductCode("QUICK_WAP_PAY");
-        model.setTimeExpire(DateUtils.parseDateTimeToString(
-                DateUtils.afterMinutes(new Date(), ConfigUtils.getBillOpenMinute())));
+        // 手机网站支付2.0的交易超时时间只能设置相对时间吗
+        model.setTimeoutExpress("1h");
         alipayRequest.setBizModel(model);
         String redirectParam = "";
         try {
