@@ -25,6 +25,7 @@ public class QuanwaiOrder {
     private String goodsName; //商品名称
     private Double total; //非db字段,订单的原始金额,不计折扣金额
     private Integer payType; // 1-微信支付，2-阿里支付
+    private Date refundTime; //退款时间
 
     /** 商学院 */
     public static final String FRAG_MEMBER = "fragment_member";

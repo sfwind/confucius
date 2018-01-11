@@ -23,14 +23,14 @@ public class QuanwaiOrderDao extends DBUtil {
     public void insert(QuanwaiOrder quanwaiOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO QuanwaiOrder(OrderId, Openid, Price, Discount, PrepayId, " +
-                " Status, CreateTime, GoodsId, GoodsName, GoodsType, PayType) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                " Status, CreateTime, GoodsId, GoodsName, GoodsType, PayType, RefundTime) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
                     quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
                     quanwaiOrder.getDiscount(), quanwaiOrder.getPrepayId(), quanwaiOrder.getStatus(),
                     quanwaiOrder.getCreateTime(), quanwaiOrder.getGoodsId(), quanwaiOrder.getGoodsName(),
-                    quanwaiOrder.getGoodsType(), quanwaiOrder.getPayType());
+                    quanwaiOrder.getGoodsType(), quanwaiOrder.getPayType(), quanwaiOrder.getRefundTime());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -54,7 +54,7 @@ public class QuanwaiOrderDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "Select * from QuanwaiOrder where Openid = ? and (GoodsType = 'fragment_member' or GoodsType = 'fragment_camp')";
         try {
-            return runner.query(sql, new BeanHandler<QuanwaiOrder>(QuanwaiOrder.class), openId);
+            return runner.query(sql, new BeanHandler<>(QuanwaiOrder.class), openId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -101,8 +101,8 @@ public class QuanwaiOrderDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
-            run.update("UPDATE QuanwaiOrder SET Status=3, RefundFee=?, RefundOrderId=? " +
-                    "where OrderId=?", refundFee, refundOrderId, orderId);
+            run.update("UPDATE QuanwaiOrder SET Status=3, RefundFee=?, RefundOrderId=?, RefundTime=? " +
+                    "where OrderId=?", refundFee, refundOrderId, new Date(), orderId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
