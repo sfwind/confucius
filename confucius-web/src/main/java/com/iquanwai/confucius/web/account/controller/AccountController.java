@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,7 +67,7 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/init", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> initWeMiniUserInfo(WeMiniLoginUser weMiniLoginUser, UserInfo userInfo) {
+    public ResponseEntity<Map<String, Object>> initWeMiniUserInfo(WeMiniLoginUser weMiniLoginUser, @RequestBody UserInfo userInfo) {
         Assert.notNull(weMiniLoginUser);
         String unionId = weMiniLoginUser.getUnionId();
         String nickName = userInfo.getNickName();

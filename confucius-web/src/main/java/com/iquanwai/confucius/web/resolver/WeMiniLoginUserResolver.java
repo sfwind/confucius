@@ -77,7 +77,7 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
                 Profile profile = accountService.queryByUnionId(unionId);
                 logger.info("根据 unionId 获取 profile");
                 if (profile != null) {
-                    logger.info("profile 不存在");
+                    logger.info("profile 存在");
                     weMiniLoginUser.setId(profile.getId());
                     weMiniLoginUser.setOpenId(profile.getOpenid());
                     // 放入缓存

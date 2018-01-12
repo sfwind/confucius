@@ -526,9 +526,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public int initProfileAndFollowUser(String unionId, String nickName, String avatarUrl, Integer gender) {
-        Account account = followUserDao.queryByUnionId(unionId);
-        int result = -1;
+        int result = 1;
 
+        Account account = followUserDao.queryByUnionId(unionId);
         if (account == null) {
             Callback callback = callbackDao.queryByUnionId(unionId);
             String weMiniOpenId = callback.getWeMiniOpenid();
@@ -539,22 +539,28 @@ public class AccountServiceImpl implements AccountService {
             account.setNickname(nickName);
             account.setSex(gender);
             account.setHeadimgurl(avatarUrl);
-            followUserDao.insert(account);
+            result *= followUserDao.insert(account) > 0 ? 1 : -1;
+        }
 
-            ModelMapper modelMapper = new ModelMapper();
-            Profile profile = modelMapper.map(account, Profile.class);
+        Profile profile = queryByUnionId(unionId);
+        if (profile == null) {
+            profile = new Profile();
+            profile.setUnionid(unionId);
+            profile.setNickname(nickName);
+            profile.setHeadimgurl(avatarUrl);
             profile.setRiseId(CommonUtils.randomString(7));
             try {
-                result = profileDao.insertProfile(profile);
+                result *= profileDao.insertProfile(profile);
             } catch (SQLException e) {
                 profile.setRiseId(CommonUtils.randomString(7));
                 try {
-                    result = profileDao.insertProfile(profile);
+                    result *= profileDao.insertProfile(profile) > 0 ? 1 : -1;
                 } catch (SQLException e1) {
                     logger.error(e1.getLocalizedMessage(), e);
                 }
             }
         }
+
         return result;
     }
 

@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,7 @@ public class FollowUserDao extends DBUtil {
         String sql = "INSERT INTO FollowUsers(Openid, WeMiniOpenId, UnionId, Nickname, Sex, City, Country, Province, Headimgurl, Subscribe_time, Remark, Groupid)" +
                 " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            return run.update(sql,
+            Long result = run.insert(sql, new ScalarHandler<>(),
                     account.getOpenid(),
                     account.getWeMiniOpenId(),
                     account.getUnionid(),
@@ -39,6 +40,7 @@ public class FollowUserDao extends DBUtil {
                     account.getSubscribe_time(),
                     account.getRemark(),
                     account.getGroupid());
+            return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
