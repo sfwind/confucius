@@ -53,7 +53,7 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
             logger.info("key : {} value: {}", key, request.getHeader(key));
         }
 
-        String state = request.getHeader("_sk");
+        String state = request.getHeader("sk");
         logger.info("接收 state：{}", state);
         if (weMiniLoginUserMap.containsKey(state)) {
             logger.info("读取缓存：{}", state);
