@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +65,7 @@ public class AccountController {
         }
     }
 
-    @RequestMapping("/init")
+    @RequestMapping(value = "/init", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> initWeMiniUserInfo(WeMiniLoginUser weMiniLoginUser, UserInfo userInfo) {
         Assert.notNull(weMiniLoginUser);
         String unionId = weMiniLoginUser.getUnionId();
