@@ -554,8 +554,8 @@ public class AccountServiceImpl implements AccountService {
                     logger.error(e1.getLocalizedMessage(), e);
                 }
             }
-            return result;
         }
+        return result;
     }
 
 }

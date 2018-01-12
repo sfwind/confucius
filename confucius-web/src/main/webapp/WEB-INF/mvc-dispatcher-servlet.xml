@@ -51,6 +51,7 @@
             <bean class="com.iquanwai.confucius.web.resolver.PCLoginUserResolver">
                 <constructor-arg ref="loginUserService"/>
             </bean>
+            <bean class="com.iquanwai.confucius.web.resolver.WeMiniLoginUserResolver"/>
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
