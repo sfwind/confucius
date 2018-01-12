@@ -5,7 +5,6 @@ import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
@@ -18,6 +17,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 import java.util.Map;
 
 /**
@@ -42,11 +42,17 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         logger.info("进入 WeMiniLoginUser Resolver");
-        if (ConfigUtils.isDebug()) {
-            return WeMiniLoginUser.defaultUser();
-        }
+        // if (ConfigUtils.isDebug()) {
+        //     return WeMiniLoginUser.defaultUser();
+        // }
 
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
+        Enumeration headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String key = (String) headerNames.nextElement();
+            logger.info("key : {} value: {}", key, request.getHeader(key));
+        }
+
         String state = request.getHeader("_sk");
         logger.info("接收 state：{}", state);
         if (weMiniLoginUserMap.containsKey(state)) {
