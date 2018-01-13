@@ -196,4 +196,15 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     public BusinessSchoolApplication loadCheckingApply(Integer profileId) {
         return businessSchoolApplicationDao.loadCheckingApplication(profileId);
     }
+
+    @Override
+    public List<UserRole> loadAssts() {
+        return userRoleDao.loadAssists();
+    }
+
+    @Override
+    public Integer assignInterviewer(Integer applyId, Integer interviewer) {
+        return businessSchoolApplicationDao.assignInterviewer(applyId, interviewer);
+    }
+
 }
