@@ -17,6 +17,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.ref.SoftReference;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
     @Autowired
     private AccountService accountService;
 
-    private static Map<String, WeMiniLoginUser> weMiniLoginUserMap = Maps.newHashMap();
+    private static Map<String, SoftReference<WeMiniLoginUser>> weMiniLoginUserMap = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -81,7 +82,7 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
                     weMiniLoginUser.setId(profile.getId());
                     weMiniLoginUser.setOpenId(profile.getOpenid());
                     // 放入缓存
-                    weMiniLoginUserMap.put(state, weMiniLoginUser);
+                    weMiniLoginUserMap.put(state, new SoftReference<>(weMiniLoginUser));
                 }
                 logger.info("最后输出 weMiniLoginUser");
                 ReflectionToStringBuilder.toString(weMiniLoginUser, ToStringStyle.MULTI_LINE_STYLE);

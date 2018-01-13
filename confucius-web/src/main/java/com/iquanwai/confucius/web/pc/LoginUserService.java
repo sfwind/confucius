@@ -35,13 +35,6 @@ import java.util.Map;
  */
 @Service
 public class LoginUserService {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    /**
-     * 缓存已经登录的用户
-     */
-    public static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
-    public static String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
     @Autowired
     private OAuthService oAuthService;
     @Autowired
@@ -56,11 +49,19 @@ public class LoginUserService {
     private CallbackDao callbackDao;
 
     /**
+     * 缓存已经登录的用户
+     */
+    public static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
+    public static String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    /**
      * 登录，就是缓存起来
      * @param sessionId sessionId,这个sessionIds是三个点拼起来的
      * @param pcLoginUser 用户
      */
-    public  void login(String sessionId, PCLoginUser pcLoginUser) {
+    public void login(String sessionId, PCLoginUser pcLoginUser) {
         SoftReference<PCLoginUser> temp = new SoftReference<PCLoginUser>(pcLoginUser);
         pcLoginUserMap.put(sessionId, temp);
     }
@@ -68,11 +69,11 @@ public class LoginUserService {
     /**
      * 根据sessionId判断用户是否登录
      * @param sessionId SessionId
-     * @return  是否登录
+     * @return 是否登录
      */
-    public  boolean isLogin(String sessionId){
+    public boolean isLogin(String sessionId) {
         SoftReference<PCLoginUser> softReference = pcLoginUserMap.get(sessionId);
-        if(softReference!=null){
+        if (softReference != null) {
             PCLoginUser pcLoginUser = softReference.get();
             if (pcLoginUser != null) {
                 logger.info("act:{},已登录,user:{},nickName:{}", sessionId, pcLoginUser.getOpenId(),
@@ -102,11 +103,11 @@ public class LoginUserService {
     public boolean userIsFollowing(PCLoginUser loginUser) {
         try {
             Account account = accountService.getAccount(loginUser.getOpenId(), false);
-            if(account.getSubscribe() == 1){
+            if (account.getSubscribe() == 1) {
                 return true;
             }
-        } catch(NotFollowingException e) {
-            if(loginUser.getWeixin() != null) {
+        } catch (NotFollowingException e) {
+            if (loginUser.getWeixin() != null) {
                 logger.info(loginUser.getWeixin().getWeixinName() + "未关注");
             }
         }
@@ -118,7 +119,7 @@ public class LoginUserService {
      * -2 key查到了，但是获取不到user，应该是没点服务号
      * 1 成功
      */
-    public Pair<Integer,Callback> refreshLogin(String sessionId){
+    public Pair<Integer, Callback> refreshLogin(String sessionId) {
         // 有key但是没有value，重新查一遍
         // 先检查这个cookie是否合法
         Callback callback = callbackDao.queryByPcAccessToken(sessionId);
@@ -133,19 +134,19 @@ public class LoginUserService {
                 pcLoginUserMap.remove(sessionId);
                 return new MutablePair<>(-2, callback);
             } else {
-                logger.info("key:{} is lost , search again: {}",sessionId, result.getRight());
+                logger.info("key:{} is lost , search again: {}", sessionId, result.getRight());
                 login(sessionId, result.getRight());
                 return new MutablePair<>(1, callback);
             }
         }
     }
+
     public Boolean checkPermission(Integer roleId, String uri) {
         return permissionService.checkPermission(roleId, uri);
     }
 
     /**
      * 获取PCLoginUser
-     *
      * @return -1:没有cookie <br/>
      * -2:accessToken无效<br/>
      * -3:没有关注<br/>
@@ -162,7 +163,6 @@ public class LoginUserService {
 
     /**
      * 获取PCLoginUser
-     *
      * @return -1:没有cookie <br/>
      * -2:accessToken无效,没有点页面<br/>
      * -3:没有关注，一般不会走到这个<br/>
@@ -226,7 +226,7 @@ public class LoginUserService {
         return new MutablePair<>(1, pcLoginUser);
     }
 
-    public Role getUserRole(String openid){
+    public Role getUserRole(String openid) {
         Role role = permissionService.getRole(openid);
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号
