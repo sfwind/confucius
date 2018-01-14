@@ -286,8 +286,8 @@ public class OAuthServiceImpl implements OAuthService {
         logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
 
-        String errorCode = result.get("errcode").toString();
-        if (!StringUtils.isEmpty(errorCode)) {
+        Object errorCode = result.get("errcode");
+        if (errorCode != null) {
             logger.info("获取用户信息失败 {}", result.toString());
         }
 
