@@ -11,7 +11,6 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import okhttp3.ResponseBody;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -291,7 +290,7 @@ public class OAuthServiceImpl implements OAuthService {
             logger.info("获取用户信息失败 {}", result.toString());
         }
 
-        String unionId = result.get("unionId").toString();
+        String unionId = result.get("unionid").toString();
         // 根据 unionId 查询
         Profile profile = accountService.queryByUnionId(unionId);
         if (profile == null) {
