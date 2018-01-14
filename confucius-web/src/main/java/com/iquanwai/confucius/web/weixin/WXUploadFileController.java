@@ -8,8 +8,6 @@ import com.iquanwai.confucius.biz.domain.weixin.file.WXUploadFileService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -45,7 +43,7 @@ public class WXUploadFileController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台管理").function("上传微信素材").action("上传微信素材");
         operationLogService.log(operationLog);
         if (picFile != null) {
-            String result = wxUploadFileService.addEverMaterial(picFile.getInputStream(), picFile.getOriginalFilename(), type, tmp);
+            String result = wxUploadFileService.addEverMaterial(picFile,type,tmp);
             JSONObject jsonObject = JSON.parseObject(result);
             if (jsonObject.containsKey("errcode")) {
                 return WebUtils.error("上传图片失败");
