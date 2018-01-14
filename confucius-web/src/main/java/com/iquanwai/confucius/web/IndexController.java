@@ -199,7 +199,6 @@ public class IndexController {
         return WebUtils.success();
     }
 
-
     private ModelAndView payView(HttpServletRequest request, LoginUser loginUser, String viewName) {
         ModelAndView mav = new ModelAndView(viewName);
         String domainName = request.getHeader("Host-Test");

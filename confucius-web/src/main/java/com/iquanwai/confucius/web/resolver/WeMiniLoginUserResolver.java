@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
@@ -43,9 +44,10 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         logger.info("进入 WeMiniLoginUser Resolver");
-        // if (ConfigUtils.isDebug()) {
-        //     return WeMiniLoginUser.defaultUser();
-        // }
+
+        if (ConfigUtils.isDebug()) {
+            return WeMiniLoginUser.defaultUser();
+        }
 
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
         Enumeration headerNames = request.getHeaderNames();
