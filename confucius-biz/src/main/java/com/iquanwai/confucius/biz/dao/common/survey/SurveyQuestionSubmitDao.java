@@ -1,10 +1,8 @@
 package com.iquanwai.confucius.biz.dao.common.survey;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyQuestionSubmit;
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -21,7 +19,7 @@ public class SurveyQuestionSubmitDao extends DBUtil{
 
     public void batchInsert(List<SurveyQuestionSubmit> submitList){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into SurveyQuestionSubmit(SurveySubmitId, Activity, OpenId,QuestionLabel,Content) " +
+        String sql = "insert into SurveyQuestionSubmit(SurveySubmitId, Activity, OpenId, QuestionLabel, Content) " +
                 "VALUES (?, ?, ?, ?, ?)";
         try {
             Object[][] param = new Object[submitList.size()][];
@@ -38,16 +36,5 @@ public class SurveyQuestionSubmitDao extends DBUtil{
         }catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-    }
-
-    public List<SurveyQuestionSubmit> loadSubmitQuestions(Integer surveySubmitId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM SurveyQuestionSubmit WHERE SurveySubmitId = ?";
-        try {
-            return runner.query(sql, new BeanListHandler<SurveyQuestionSubmit>(SurveyQuestionSubmit.class), surveySubmitId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
     }
 }

@@ -22,17 +22,6 @@ import java.util.List;
 public class BusinessSchoolApplicationDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public BusinessSchoolApplication loadByOpenId(String openId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE Openid = ? AND Del = 0";
-        try {
-            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
     public BusinessSchoolApplication loadLastApproveApplication(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 1 Order by Id desc";

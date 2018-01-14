@@ -92,9 +92,8 @@ public class ApplicationImportController {
                 .action("加载自己的应用任务")
                 .memo(planId + ":" + applicationId);
         operationLogService.log(operationLog);
-        String openId = loginUser.getOpenId();
         // 先检查该用户有没有买这个作业
-        List<ImprovementPlan> userPlans = planService.loadUserPlans(openId);
+        List<ImprovementPlan> userPlans = planService.loadUserPlans(loginUser.getProfileId());
         // 看看这个id在不在
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
@@ -115,7 +114,7 @@ public class ApplicationImportController {
             dto.setRequest(applicationSubmit.getRequestFeedback());
             return WebUtils.result(dto);
         } else {
-            logger.error("用户:{},没有该训练计划:{}，应用练习:{}", openId, plan, applicationId);
+            logger.error("用户:{},没有该训练计划:{}，应用练习:{}", loginUser.getProfileId(), plan, applicationId);
             return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
 

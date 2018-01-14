@@ -13,7 +13,6 @@ import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.systematism.ClassMember;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
@@ -196,18 +195,7 @@ public class LoginUserService {
 
 
         Profile profile = accountService.getProfile(openid, false);
-        Role role = permissionService.getRole(profile.getId());
-        if (role == null) {
-            // 获得用户的openid，根据openid查询用户的学号
-            //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
-            List<ClassMember> classMembers = courseProgressService.loadActiveCourse(profile.getId());
-            List<ImprovementPlan> plans = planService.loadUserPlans(openid);
-            if (classMembers.isEmpty() && plans.isEmpty()) {
-                role = Role.stranger();
-            } else {
-                role = Role.student();
-            }
-        }
+        Role role = getUserRole(profile.getId());
         PCLoginUser pcLoginUser = new PCLoginUser();
         LoginUser loginUser = new LoginUser();
         loginUser.setId(profile.getId());
@@ -226,14 +214,13 @@ public class LoginUserService {
         return new MutablePair<>(1, pcLoginUser);
     }
 
-    public Role getUserRole(String openid){
-        Role role = permissionService.getRole(openid);
+    public Role getUserRole(Integer profileId){
+        Role role = permissionService.getRole(profileId);
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号
             //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
-            List<ClassMember> classMembers = courseProgressService.loadActiveCourse(openid);
-            List<ImprovementPlan> plans = planService.loadUserPlans(openid);
-            if (classMembers.isEmpty() && plans.isEmpty()) {
+            List<ImprovementPlan> plans = planService.loadUserPlans(profileId);
+            if (plans.isEmpty()) {
                 role = Role.stranger();
             } else {
                 role = Role.student();

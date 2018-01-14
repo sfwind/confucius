@@ -30,7 +30,7 @@ public class HomeworkVoteDao extends PracticeDBUtil {
      */
     public List<HomeworkVote> allVoteList(Integer type, Integer referencedId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<HomeworkVote>> h = new BeanListHandler<HomeworkVote>(HomeworkVote.class);
+        ResultSetHandler<List<HomeworkVote>> h = new BeanListHandler<>(HomeworkVote.class);
 
         try {
             List<HomeworkVote> list = run.query("select * from HomeworkVote where Type=? and referencedId=?"
@@ -64,12 +64,11 @@ public class HomeworkVoteDao extends PracticeDBUtil {
      */
     public void vote(HomeworkVote homeworkVote) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO HomeworkVote(Type,ReferencedId,VoteOpenId,VoteProfileId,VotedOpenId,VotedProfileId,Device) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO HomeworkVote(Type,ReferencedId,VoteProfileId,VotedProfileId,Device) " +
+                "VALUES(?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(), homeworkVote.getType(), homeworkVote.getReferencedId(),
-                    homeworkVote.getVoteOpenId(), homeworkVote.getVoteProfileId(), homeworkVote.getVotedOpenid(),
-                    homeworkVote.getVotedProfileId(), homeworkVote.getDevice());
+                    homeworkVote.getVoteProfileId(), homeworkVote.getVotedProfileId(), homeworkVote.getDevice());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

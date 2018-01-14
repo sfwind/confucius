@@ -46,7 +46,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         // 查询该应用练习
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交
-        ApplicationSubmit submit = applicationSubmitDao.load(applicationId, planId, openId);
+        ApplicationSubmit submit = applicationSubmitDao.load(applicationId, planId, profileId);
         if (submit == null && create) {
             // 没有提交，生成
             submit = new ApplicationSubmit();
@@ -126,7 +126,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 pointRepo.risePoint(submit.getPlanId(), point);
                 // 修改status
                 applicationSubmitDao.updatePointStatus(id);
-                pointRepo.riseCustomerPoint(submit.getOpenid(), point);
+                pointRepo.riseCustomerPoint(submit.getProfileId(), point);
             }
         }
         return result;

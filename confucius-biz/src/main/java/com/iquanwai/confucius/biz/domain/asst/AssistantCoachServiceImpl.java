@@ -201,9 +201,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                     .forEach(item -> applicationSubmitList.addAll(
                             submitGroup.get(item)
                                     .stream()
-                                    // 越晚提交优先级越高
+                                            // 越晚提交优先级越高
                                     .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                    // 如果已经满了则空转，否则取出需要被点评的数量
+                                            // 如果已经满了则空转，否则取出需要被点评的数量
                                     .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                     .collect(Collectors.toList())));
             if (applicationSubmitList.size() < SIZE) {
@@ -211,10 +211,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                 // 两个月之内要过期的人
                 List<Integer> willExpired = riseMemberDao.loadByWillExpired(DateUtils.afterMonths(new Date(), 2))
                         .stream()
-                        // 按时间排序，越早过期的优先级越高
+                                // 按时间排序，越早过期的优先级越高
                         .sorted((o1, o2) -> o1.getExpireDate().equals(o2.getExpireDate()) ? 0 : (o1.getExpireDate().before(o2.getExpireDate()) ? -1 : 1))
                         .map(RiseMember::getProfileId)
-                        // 这个快过期的人不在必须被评论的list里，这个在上面已经被排进去了
+                                // 这个快过期的人不在必须被评论的list里，这个在上面已经被排进去了
                         .filter(item -> !mustComment.contains(item))
                         .collect(Collectors.toList());
                 // 从这些快过期的人中选作业
@@ -223,9 +223,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                         .filter(submitGroup::containsKey)
                         .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
                                 .stream()
-                                // 越晚提交被露出概率越高
+                                        // 越晚提交被露出概率越高
                                 .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                // 如果没满则取
+                                        // 如果没满则取
                                 .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                 .collect(Collectors.toList())));
                 if (applicationSubmitList.size() < SIZE) {
@@ -237,9 +237,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                             .filter(item -> !existProfileIds.contains(item) && submitGroup.keySet().contains(item))
                             .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
                                     .stream()
-                                    // 越晚提交被露出概率越高
+                                            // 越晚提交被露出概率越高
                                     .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                    // 如果没满则取
+                                            // 如果没满则取
                                     .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                     .collect(Collectors.toList())));
                     if (applicationSubmitList.size() < SIZE) {
@@ -250,9 +250,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                                 .stream().filter(item -> !profileIds.contains(item))
                                 .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
                                         .stream()
-                                        // 越晚提交被露出概率越高
+                                                // 越晚提交被露出概率越高
                                         .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                        // 如果没满则取
+                                                // 如果没满则取
                                         .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                         .collect(Collectors.toList())));
                     }
@@ -280,12 +280,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplicationsByNickName(Integer problemId, String nickName) {
         List<Profile> profiles = accountService.loadAllProfilesByNickName(nickName);
-        if(profiles.size()==0){
+        if (profiles.size() == 0) {
             return Lists.newArrayList();
         }
         List<Integer> profileIds = profiles.stream().map(Profile::getId).collect(Collectors.toList());
 
-        return getWorkInfoDtos(problemId,profileIds);
+        return getWorkInfoDtos(problemId, profileIds);
     }
 
     @Override
@@ -326,7 +326,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className, groupId);
         List<Integer> profiles = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
 
-        return getWorkInfoDtos(problemId,profiles);
+        return getWorkInfoDtos(problemId, profiles);
     }
 
     @Override
@@ -442,11 +442,12 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
     /**
      * 返回200条应用提交（求点评在前，不需要点评在后，按照发布时间降序排序）
+     *
      * @param problemId
      * @param profileIds
      * @return
      */
-    private List<RiseWorkInfoDto> getWorkInfoDtos(Integer problemId,List<Integer> profileIds){
+    private List<RiseWorkInfoDto> getWorkInfoDtos(Integer problemId, List<Integer> profileIds) {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
         if (profileIds.size() == 0) {
             return Lists.newArrayList();
@@ -479,7 +480,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             List<ApplicationSubmit> unRequestSubmits = applicationSubmitDao.loadUnRequestByProfileIds(problemId, profileIds);
             unRequestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
             int reamin = APPLICTION_SIZE - workInfoDtos.size();
-            if(unRequestSubmits.size()>=reamin) {
+            if (unRequestSubmits.size() >= reamin) {
                 unRequestSubmits.subList(0, reamin).stream().forEach(unRequestSubmit -> {
                     RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
                     applicationPractices.forEach(applicationPractice -> {
@@ -489,7 +490,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                     });
                     workInfoDtos.add(riseWorkInfoDto);
                 });
-            }else{
+            } else {
                 unRequestSubmits.stream().forEach(unRequestSubmit -> {
                     RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
                     applicationPractices.forEach(applicationPractice -> {
@@ -503,8 +504,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             return workInfoDtos;
         }
     }
+
     /**
      * 加载所有的教练
+     *
      * @return
      */
     @Override
@@ -514,17 +517,19 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
     /**
      * 对教练进行升降级
+     *
      * @param id
      * @param roleId
      * @return
      */
     @Override
     public Integer updateAssist(Integer id, Integer roleId) {
-        return userRoleDao.updateAssist(id,roleId);
+        return userRoleDao.updateAssist(id, roleId);
     }
 
     /**
      * 教练过期
+     *
      * @param id
      * @return
      */
@@ -536,20 +541,21 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public List<Profile> loadUnAssistByNickName(String nickName) {
         List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
-        if(profiles.size()==0){
+        if (profiles.size() == 0) {
             return profiles;
         }
         List<Profile> unAssistProfiles = Lists.newArrayList();
         profiles.stream().forEach(profile -> {
-           if(userRoleDao.loadAssist(profile.getId())==null){
+            if (userRoleDao.loadAssist(profile.getId()) == null) {
                 unAssistProfiles.add(profile);
-           }
+            }
         });
         return unAssistProfiles;
     }
 
     /**
      * 添加教练
+     *
      * @param roleId
      * @param riseId
      * @return
@@ -557,13 +563,13 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public Integer addAssist(Integer roleId, String riseId) {
         Profile profile = accountService.getProfileByRiseId(riseId);
-        if(profile==null){
+        if (profile == null) {
             return -1;
         }
         //判断是否已经是教练
-       if(userRoleDao.loadAssist(profile.getId())!=null){
+        if (userRoleDao.loadAssist(profile.getId()) != null) {
             return -1;
-       }
-        return userRoleDao.insertAssist(roleId,profile.getOpenid(),profile.getId());
+        }
+        return userRoleDao.insertAssist(roleId, profile.getId());
     }
 }

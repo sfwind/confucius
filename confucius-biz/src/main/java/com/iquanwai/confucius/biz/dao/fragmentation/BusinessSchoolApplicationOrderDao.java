@@ -22,11 +22,11 @@ public class BusinessSchoolApplicationOrderDao extends DBUtil {
 
     public int insert(BusinessSchoolApplicationOrder businessSchoolApplicationOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO BusinessSchoolApplicationOrder (OrderId, Openid, ProfileId) " +
+        String sql = "INSERT INTO BusinessSchoolApplicationOrder (OrderId, ProfileId) " +
                 "VALUES (?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
-                    businessSchoolApplicationOrder.getOrderId(), businessSchoolApplicationOrder.getOpenid(),
+                    businessSchoolApplicationOrder.getOrderId(),
                     businessSchoolApplicationOrder.getProfileId());
             return result.intValue();
         } catch (SQLException e) {
@@ -69,15 +69,4 @@ public class BusinessSchoolApplicationOrderDao extends DBUtil {
         }
     }
 
-    public BusinessSchoolApplicationOrder loadUnAppliedOrder(Integer profileId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplicationOrder WHERE ProfileId = ? and Paid=1 and Del = 0 and Applied = 0";
-        ResultSetHandler<BusinessSchoolApplicationOrder> h = new BeanHandler<>(BusinessSchoolApplicationOrder.class);
-        try {
-            return runner.query(sql, h, profileId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
 }

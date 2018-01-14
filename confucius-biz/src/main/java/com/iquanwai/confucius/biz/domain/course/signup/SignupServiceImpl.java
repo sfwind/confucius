@@ -559,13 +559,13 @@ public class SignupServiceImpl implements SignupService {
                 // 精英会员一年
                 // RiseClassMember 新增会员记录
                 insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
-                profileDao.initOnceRequestCommentCount(openId);
+                profileDao.initOnceRequestCommentCount(riseOrder.getProfileId());
             }
             riseMember.setExpired(false);
             riseMemberDao.insert(riseMember);
 
             // 所有计划设置为会员
-            List<ImprovementPlan> plans = improvementPlanDao.loadUserPlans(riseOrder.getOpenid());
+            List<ImprovementPlan> plans = improvementPlanDao.loadAllPlans(riseOrder.getProfileId());
             // 不是会员的计划，设置一下
             // 给精英版正在进行的 plan + 1 个求点评次数
             // 非精英版或者不是正在进行的，不加点评次数
