@@ -44,6 +44,9 @@ public class WXUploadFileController {
         operationLogService.log(operationLog);
         if (picFile != null) {
             String result = wxUploadFileService.addEverMaterial(picFile,type,tmp);
+            if(result == null){
+                return WebUtils.error("上传图片失败");
+            }
             JSONObject jsonObject = JSON.parseObject(result);
             if (jsonObject.containsKey("errcode")) {
                 return WebUtils.error("上传图片失败");
