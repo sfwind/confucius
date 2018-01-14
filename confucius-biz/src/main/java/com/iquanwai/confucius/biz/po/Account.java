@@ -11,6 +11,8 @@ import java.util.Date;
 @Data
 @Alias("account")
 public class Account {
+    private Integer id;
+
     private Integer subscribe;    // 用户是否订阅该公众号标识，值为0时，代表此用户没有关注该公众号，拉取不到其余信息。
     private String openid;    //用户的标识，对当前公众号唯一
     private String weMiniOpenId; // 微信小程序 openId

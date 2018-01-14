@@ -108,6 +108,25 @@ public class ProfileDao extends DBUtil {
         return -1;
     }
 
+    public int updateOAuthFields(Profile profile) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Profile SET UnionId = ?, NickName = ?, HeadImgUrl = ?, RiseId = ? WHERE Id = ?";
+        try {
+            return runner.update(sql, new ScalarHandler<>(),
+                    profile.getUnionid(),
+                    profile.getNickname(),
+                    profile.getHeadimgurl(),
+                    profile.getRiseId(),
+                    profile.getId());
+        } catch (SQLException e) {
+            if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
+                throw e;
+            }
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
     public void updatePoint(String openId, int point) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE Profile SET Point = ? where Openid = ?";

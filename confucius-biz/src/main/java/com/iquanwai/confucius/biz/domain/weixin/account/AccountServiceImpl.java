@@ -182,66 +182,71 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private Account getAccountFromWeixin(String openid) throws NotFollowingException {
-        //调用api查询account对象
+        // 调用api查询用户详情
         String url = USER_INFO_URL;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
         logger.info("请求用户信息:{}", openid);
         url = CommonUtils.placeholderReplace(url, map);
-
         String body = restfulHelper.get(url);
         logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
-        Account accountNew = new Account();
+
+        if (result.get("errcode") == null) {
+            logger.error("获取用户信息失败");
+            return null;
+        }
+
+        Account account = new Account();
         try {
+            // TODO 方法意义不清
             ConvertUtils.register((aClass, value) -> {
                 if (value == null) {
                     return null;
                 }
-
                 if (!(value instanceof Double)) {
                     logger.error("不是日期类型");
                     throw new ConversionException("不是日期类型");
                 }
                 Double time = (Double) value * 1000;
-
                 return new DateTime(time.longValue()).toDate();
             }, Date.class);
-
-            BeanUtils.populate(accountNew, result);
-            if (accountNew.getSubscribe() != null && accountNew.getSubscribe() == 0) {
+            BeanUtils.populate(account, result);
+            if (account.getSubscribe() != null && account.getSubscribe() == 0) {
                 //未关注直接抛异常
                 throw new NotFollowingException();
             }
+
             redisUtil.lock("lock:wx:user:insert", (lock) -> {
-                Account finalQuery = followUserDao.queryByOpenid(openid);
-                if (finalQuery == null) {
-                    if (accountNew.getNickname() != null) {
-                        logger.info("插入用户信息:{}", accountNew);
-                        followUserDao.insert(accountNew);
-                        // 插入profile表
-                        Profile profile = getProfileFromDB(accountNew.getOpenid());
-                        if (profile == null) {
+                Account existAccount = followUserDao.queryByOpenid(openid);
+                if (existAccount == null) {
+                    logger.info("插入用户信息:{}", account);
+                    followUserDao.insert(account);
+                    // 插入profile表
+                    Profile profile = getProfileFromDB(account.getOpenid());
+                    if (profile == null) {
+                        ModelMapper modelMapper = new ModelMapper();
+                        profile = modelMapper.map(account, Profile.class);
+                        try {
+                            logger.info("插入Profile表信息:{}", profile);
+                            profile.setRiseId(CommonUtils.randomString(7));
+                            profileDao.insertProfile(profile);
+                        } catch (SQLException err) {
+                            profile.setRiseId(CommonUtils.randomString(7));
                             try {
-                                ModelMapper modelMapper = new ModelMapper();
-                                profile = modelMapper.map(accountNew, Profile.class);
-                                logger.info("插入Profile表信息:{}", profile);
-                                profile.setRiseId(CommonUtils.randomString(7));
                                 profileDao.insertProfile(profile);
-                            } catch (SQLException err) {
-                                profile.setRiseId(CommonUtils.randomString(7));
-                                try {
-                                    profileDao.insertProfile(profile);
-                                } catch (SQLException subErr) {
-                                    logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
-                                }
+                            } catch (SQLException subErr) {
+                                logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
                             }
                         }
+                    } else {
+                        ModelMapper modelMapper = new ModelMapper();
+                        profile = modelMapper.map(account, Profile.class);
+                        profileDao.updateOAuthFields(profile);
                     }
                 } else {
-                    if (accountNew.getNickname() != null) {
-                        followUserDao.updateMeta(accountNew);
-                    }
+                    account.setId(existAccount.getId());
+                    followUserDao.updateOAuthFields(account);
                 }
             });
         } catch (NotFollowingException e1) {
@@ -249,7 +254,7 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-        return accountNew;
+        return account;
     }
 
     @Override
@@ -540,6 +545,11 @@ public class AccountServiceImpl implements AccountService {
             account.setSex(gender);
             account.setHeadimgurl(avatarUrl);
             result *= followUserDao.insert(account) > 0 ? 1 : -1;
+        } else {
+            Callback callback = callbackDao.queryByUnionId(unionId);
+            String weMiniOpenId = callback.getWeMiniOpenid();
+            account.setWeMiniOpenId(weMiniOpenId);
+            result *= followUserDao.updateOAuthFields(account);
         }
 
         Profile profile = queryByUnionId(unionId);

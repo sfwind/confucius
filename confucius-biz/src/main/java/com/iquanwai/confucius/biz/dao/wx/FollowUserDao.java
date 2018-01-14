@@ -48,13 +48,27 @@ public class FollowUserDao extends DBUtil {
         return -1;
     }
 
+    public int updateOAuthFields(Account account) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE FollowUsers SET OpenId = ?, WeMiniOpenId = ?, UnionId = ?, NickName = ?, Sex = ?, City = ?, Country = ?, " +
+                "Province = ?, HeadImgUrl = ?, Remark = ?, GroupId = ?, Subscribe = ?, Subscribe_time WHERE Id = ?";
+        try {
+            return runner.update(sql, account.getOpenid(), account.getWeMiniOpenId(), account.getUnionid(), account.getNickname(),
+                    account.getSex(), account.getCity(), account.getCountry(), account.getProvince(), account.getHeadimgurl(),
+                    account.getHeadimgurl(), account.getRemark(), account.getGroupid(), account.getSubscribe(), account.getSubscribe_time(),
+                    account.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
     public Account queryByOpenid(String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
 
         try {
-            Account account = run.query("SELECT * FROM FollowUsers where Openid=?", h, openid);
-            return account;
+            return run.query("SELECT * FROM FollowUsers where Openid=?", h, openid);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
