@@ -480,7 +480,7 @@ public class RiseOperationController {
                 .function("审批")
                 .action("获取审批者列表");
         operationLogService.log(operationLog);
-        List<UserRole> userRoles = businessSchoolService.loadAssts();
+        List<UserRole> userRoles = businessSchoolService.loadInterviewer();
         userRoles.forEach(item -> {
             Profile profile = accountService.getProfile(item.getProfileId());
             item.setAsstName(profile.getNickname());

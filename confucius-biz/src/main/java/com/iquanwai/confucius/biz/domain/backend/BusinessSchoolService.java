@@ -88,11 +88,11 @@ public interface BusinessSchoolService {
     BusinessSchoolApplication loadCheckingApply(Integer profileId);
 
     /**
-     * 获取所有助教
+     * 获取所有面试官
      *
      * @return 助教列表
      */
-    List<UserRole> loadAssts();
+    List<UserRole> loadInterviewer();
 
     /**
      * 分配审核人
