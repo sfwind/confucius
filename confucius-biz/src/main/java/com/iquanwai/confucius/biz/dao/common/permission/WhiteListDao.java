@@ -38,7 +38,7 @@ public class WhiteListDao extends DBUtil {
 
     public List<WhiteList> loadWhiteList(String function) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM WhiteList where Function=? and ProfileId=? and Del=0";
+        String sql = "SELECT * FROM WhiteList where Function=? and Del=0";
         try {
             return run.query(sql, new BeanListHandler<>(WhiteList.class), function);
         } catch (SQLException e) {
