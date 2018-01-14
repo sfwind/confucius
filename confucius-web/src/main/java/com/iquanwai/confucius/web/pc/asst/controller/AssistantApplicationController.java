@@ -99,7 +99,7 @@ public class AssistantApplicationController {
                 .memo(type + ":" + submitId);
         operationLogService.log(operationLog);
         List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId, page).stream().map(item -> {
-            Profile account = accountService.getProfile(item.getCommentOpenId(), false);
+            Profile account = accountService.getProfile(item.getCommentProfileId());
             if (account != null) {
                 RiseWorkCommentDto dto = new RiseWorkCommentDto();
                 dto.setId(item.getId());
@@ -109,9 +109,9 @@ public class AssistantApplicationController {
                 dto.setHeadPic(account.getHeadimgurl());
                 dto.setRole(account.getRole());
                 // dto.setSignature(account.getSignature());
-                dto.setIsMine(item.getCommentOpenId().equals(loginUser.getOpenId()));
+                dto.setIsMine(item.getCommentProfileId().equals(loginUser.getProfileId()));
                 if (item.getRepliedId() != null) {
-                    Profile replyAccount = accountService.getProfile(item.getRepliedOpenId(), false);
+                    Profile replyAccount = accountService.getProfile(item.getRepliedProfileId());
                     dto.setReplyId(item.getRepliedId());
                     dto.setReplyName(replyAccount.getNickname());
                     dto.setReplyContent(item.getRepliedComment());
@@ -215,7 +215,7 @@ public class AssistantApplicationController {
             if (dto.getReplyId() != null) {
                 resultDto.setReplyId(dto.getReplyId());
                 Comment replyComment = commentDao.load(Comment.class, dto.getReplyId());
-                Profile profile = accountService.getProfile(replyComment.getCommentOpenId(), false);
+                Profile profile = accountService.getProfile(replyComment.getCommentProfileId());
                 if (profile != null) {
                     resultDto.setReplyName(profile.getNickname());
                 }
@@ -296,7 +296,6 @@ public class AssistantApplicationController {
             return WebUtils.error(404, "无该提交记录");
         } else {
             // 查到了
-            String openId = submit.getOpenid();
             RiseWorkShowDto show = new RiseWorkShowDto();
             show.setSubmitId(submit.getId());
             show.setUpTime(DateUtils.parseDateToFormat5(submit.getPublishTime()));
@@ -304,7 +303,7 @@ public class AssistantApplicationController {
             show.setType("application");
             show.setRequest(submit.getRequestFeedback());
             // 查询这个openid的数据
-            if(loginUser.getOpenId().equals(openId)) {
+            if(loginUser.getProfileId().equals(submit.getProfileId())) {
                 // 是自己的
                 show.setIsMine(true);
                 show.setUpName(loginUser.getWeixin().getWeixinName());
@@ -313,7 +312,7 @@ public class AssistantApplicationController {
                 show.setWorkId(submit.getApplicationId());
                 show.setRequestCommentCount(practiceService.hasRequestComment(submit.getPlanId()));
             } else {
-                Profile account = accountService.getProfile(openId, false);
+                Profile account = accountService.getProfile(loginUser.getProfileId());
                 if(account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());

@@ -50,7 +50,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (submit == null && create) {
             // 没有提交，生成
             submit = new ApplicationSubmit();
-            submit.setOpenid(openId);
             submit.setProfileId(profileId);
             submit.setPlanId(planId);
             submit.setApplicationId(applicationId);

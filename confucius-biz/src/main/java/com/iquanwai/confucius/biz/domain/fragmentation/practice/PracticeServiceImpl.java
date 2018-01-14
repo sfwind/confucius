@@ -88,15 +88,12 @@ public class PracticeServiceImpl implements PracticeService {
                     return false;
                 }
                 planId = submit.getPlanId();
-                submitOpenId = submit.getOpenid();
                 submitProfileId = submit.getProfileId();
             }
             HomeworkVote homeworkVote = new HomeworkVote();
             homeworkVote.setReferencedId(referencedId);
-            homeworkVote.setVoteOpenId(openid);
             homeworkVote.setVoteProfileId(profileId);
             homeworkVote.setType(type);
-            homeworkVote.setVotedOpenid(submitOpenId);
             homeworkVote.setVotedProfileId(submitProfileId);
             homeworkVote.setDevice(Constants.Device.PC);
             homeworkVoteDao.vote(homeworkVote);
@@ -144,7 +141,6 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setReferencedId(referId);
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
-        comment.setCommentOpenId(openId);
         comment.setCommentProfileId(profileId);
         comment.setDevice(Constants.Device.PC);
         int id = commentDao.insert(comment);
@@ -164,7 +160,7 @@ public class PracticeServiceImpl implements PracticeService {
             //更新助教评论状态
             if (isAsst) {
                 applicationSubmitDao.asstFeedback(load.getId());
-                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
+                asstCoachComment(load.getProfileId(), load.getProblemId());
             }
             //自己给自己评论不提醒
             if (load.getProfileId() != null && !load.getProfileId().equals(profileId)) {
@@ -195,7 +191,7 @@ public class PracticeServiceImpl implements PracticeService {
             if (isAsst) {
                 // 将此条评论所对应的 ApplicationSubmit 置为已被助教评论
                 applicationSubmitDao.asstFeedback(load.getId());
-                asstCoachComment(load.getOpenid(), load.getProfileId(), load.getProblemId());
+                asstCoachComment(load.getProfileId(), load.getProblemId());
             }
         }
 
@@ -211,11 +207,9 @@ public class PracticeServiceImpl implements PracticeService {
         comment.setType(Constants.CommentType.STUDENT);
         comment.setContent(content);
         comment.setCommentProfileId(profileId);
-        comment.setCommentOpenId(openId);
         comment.setRepliedProfileId(repliedComment.getCommentProfileId());
         comment.setRepliedComment(repliedComment.getContent());
         comment.setRepliedDel(0);
-        comment.setRepliedOpenId(repliedComment.getCommentOpenId());
         comment.setRepliedId(repliedId);
         comment.setDevice(Constants.Device.PC);
 
@@ -235,12 +229,11 @@ public class PracticeServiceImpl implements PracticeService {
         return new MutablePair<>(id, "评论成功");
     }
 
-    private void asstCoachComment(String openId, Integer profileId, Integer problemId) {
+    private void asstCoachComment(Integer profileId, Integer problemId) {
         AsstCoachComment asstCoachComment = asstCoachCommentDao.loadAsstCoachComment(problemId, profileId);
         if (asstCoachComment == null) {
             asstCoachComment = new AsstCoachComment();
             asstCoachComment.setCount(1);
-            asstCoachComment.setOpenid(openId);
             asstCoachComment.setProfileId(profileId);
             asstCoachComment.setProblemId(problemId);
             asstCoachCommentDao.insert(asstCoachComment);

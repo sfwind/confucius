@@ -77,6 +77,23 @@ public class ProfileDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<Profile> queryAccountsByOpenids(List<String> openids) {
+        if (CollectionUtils.isEmpty(openids)) {
+            return Lists.newArrayList();
+        }
+        String questionMarks = produceQuestionMark(openids.size());
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
+        String sql = "SELECT * FROM Profile where Openid in (" + questionMarks + ")";
+        try {
+            return run.query(sql, h, openids.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
     public int insertProfile(Profile profile) throws SQLException {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Profile(Openid, Nickname, City, Country, Province, Headimgurl, MobileNo, Email, Industry, Function, WorkingLife, RealName, RiseId, UnionId)"

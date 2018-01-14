@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
@@ -29,6 +30,7 @@ import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -249,12 +251,14 @@ public class RiseOperationController {
         page.setPageSize(20);
 
         List<BusinessSchoolApplication> applications = businessSchoolService.loadBusinessSchoolList(page);
-        final List<String> openidList;
+        final List<Integer> profileIds;
         if (applications != null && applications.size() > 0) {
             //获取黑名单用户
-            openidList = accountService.loadBlackListOpenIds();
+            List<String> openidList = accountService.loadBlackListOpenIds();
+            List<Profile> profiles = accountService.getProfilesByOpenids(openidList);
+            profileIds = profiles.stream().map(Profile::getId).collect(Collectors.toList());
         } else {
-            openidList = null;
+            profileIds = Lists.newArrayList();
         }
 
         Assert.notNull(applications);
@@ -296,8 +300,8 @@ public class RiseOperationController {
                 dto.setVerifiedResult("未知");
             }
 
-            if (openidList != null && (openidList.size() > 0)) {
-                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+            if (!CollectionUtils.isEmpty(profileIds)) {
+                if (profileIds.contains(loginUser.getId())) {
                     dto.setIsBlack("是");
                 }
             }
@@ -423,7 +427,6 @@ public class RiseOperationController {
         dto.setComment(application.getComment());
         dto.setId(application.getId());
         dto.setProfileId(application.getProfileId());
-        dto.setOpenid(application.getOpenid());
         dto.setStatus(application.getStatus());
         dto.setCheckTime(application.getCheckTime() == null ? "未审核" : DateUtils.parseDateToString(application.getCheckTime()));
         dto.setDel(application.getDel());

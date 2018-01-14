@@ -410,7 +410,6 @@ public class SignupServiceImpl implements SignupService {
         if (existRiseMember == null) {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
-            riseMember.setOpenId(profile.getOpenid());
             if (orderId != null) {
                 riseMember.setOrderId(orderId);
             } else {
@@ -425,7 +424,6 @@ public class SignupServiceImpl implements SignupService {
         } else {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
-            riseMember.setOpenId(profile.getOpenid());
             riseMember.setOrderId(orderId == null ? "manual" : orderId);
             riseMember.setProfileId(profile.getId());
             riseMember.setMemberTypeId(RiseMember.CAMP);
@@ -457,7 +455,6 @@ public class SignupServiceImpl implements SignupService {
     private void insertCampCoupon(Profile profile) {
         // 送优惠券
         Coupon coupon = new Coupon();
-        coupon.setOpenid(profile.getOpenid());
         coupon.setProfileId(profile.getId());
         coupon.setAmount(MONTHLY_CAMP_COUPON);
         coupon.setUsed(Coupon.UNUSED);
@@ -537,7 +534,6 @@ public class SignupServiceImpl implements SignupService {
             riseMemberDao.updateExpiredAhead(riseOrder.getProfileId());
             // 添加会员表
             RiseMember riseMember = new RiseMember();
-            riseMember.setOpenId(riseOrder.getOpenid());
             riseMember.setOrderId(riseOrder.getOrderId());
             riseMember.setProfileId(riseOrder.getProfileId());
             riseMember.setMemberTypeId(memberType.getId());

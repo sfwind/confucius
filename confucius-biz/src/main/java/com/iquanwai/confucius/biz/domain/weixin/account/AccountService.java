@@ -39,6 +39,12 @@ public interface AccountService {
      */
     List<Profile> getProfiles(List<Integer> profileIds);
 
+
+    /**
+     * 根据openid id 列表获取用户的详细信息
+     */
+    List<Profile> getProfilesByOpenids(List<String> openids);
+
     /**
      *  从微信实时获取头像信息
      */

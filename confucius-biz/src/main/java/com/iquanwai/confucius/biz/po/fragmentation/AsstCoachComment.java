@@ -8,7 +8,6 @@ import lombok.Data;
 @Data
 public class AsstCoachComment {
     private int id;
-    private String openid;
     private Integer profileId;
     private Integer count;
     private Integer problemId;

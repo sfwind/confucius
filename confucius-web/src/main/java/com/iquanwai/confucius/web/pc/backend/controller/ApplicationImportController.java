@@ -180,7 +180,7 @@ public class ApplicationImportController {
                 .memo(applicationId.toString());
         operationLogService.log(operationLog);
         List<RiseWorkInfoDto> submits = applicationService.loadApplicationSubmitList(applicationId).stream()
-                .filter(item -> !item.getOpenid().equals(loginUser.getOpenId())).map(item -> {
+                .filter(item -> !item.getProfileId().equals(loginUser.getProfileId())).map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto();
                     item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
                     dto.setContent(item.getContent().length() > 180 ?
@@ -192,7 +192,7 @@ public class ApplicationImportController {
                     dto.setPublishTime(item.getPublishTime());
                     dto.setSubmitId(item.getId());
                     dto.setPriority(item.getPriority());
-                    Profile profile = accountService.getProfile(item.getOpenid(), false);
+                    Profile profile = accountService.getProfile(item.getProfileId());
                     if(profile != null) {
                         dto.setUpName(profile.getNickname());
                         dto.setHeadPic(profile.getHeadimgurl());
