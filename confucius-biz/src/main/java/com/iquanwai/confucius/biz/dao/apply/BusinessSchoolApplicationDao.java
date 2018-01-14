@@ -109,4 +109,15 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         }
         return null;
     }
+
+    public Integer assignInterviewer(Integer applyId, Integer interviewer) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE BusinessSchoolApplication SET Interviewer = ? WHERE Id = ?";
+        try {
+            return runner.update(sql, interviewer, applyId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
 }
