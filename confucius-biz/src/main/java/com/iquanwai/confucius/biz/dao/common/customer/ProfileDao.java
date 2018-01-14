@@ -119,9 +119,6 @@ public class ProfileDao extends DBUtil {
                     profile.getRiseId(),
                     profile.getId());
         } catch (SQLException e) {
-            if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
-                throw e;
-            }
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
