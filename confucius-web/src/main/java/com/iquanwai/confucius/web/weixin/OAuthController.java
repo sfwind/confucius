@@ -108,8 +108,7 @@ public class OAuthController {
             } else {
                 logger.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
-                CookieUtils.addCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME,
-                        callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
+                CookieUtils.addCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
                 response.sendRedirect(callback.getCallbackUrl());
             }
         } catch (Exception e) {
@@ -221,7 +220,6 @@ public class OAuthController {
 
     @RequestMapping("/pc/code")
     public void pcOAuthCode(@RequestParam(required = false) String code, @RequestParam String state, HttpServletRequest request, HttpServletResponse response) {
-
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
             logger.info("remoteIp:{} ask code", remoteIp);
@@ -232,18 +230,17 @@ public class OAuthController {
             }
             // 根据openid，accessToken换取unionid，根据unionid来获取
             Pair<Integer, Callback> pair = oAuthService.initOpenId(callback);
+
             if (pair.getLeft() == -1) {
                 // 提示关注并选择课程
-                CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
-                        response);
+                CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
                 response.sendRedirect("/servercode");
             } else {
                 Role userRole = loginUserService.getUserRole(callback.getOpenid());
                 if (userRole.getLevel().equals(0)) {
                     // 选择课程
                     logger.info("state:{},openid:{},提示开始训练", state, callback.getOpenid());
-                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
-                            response);
+                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
                     response.sendRedirect("/servercode");
                     return;
                 }

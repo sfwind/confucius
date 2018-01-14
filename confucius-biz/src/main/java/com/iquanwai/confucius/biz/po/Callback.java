@@ -10,12 +10,13 @@ import org.apache.ibatis.type.Alias;
 @Alias("callback")
 public class Callback {
 
-    private String callbackUrl; // 回调地址
+    private Integer id;
     private String state; // 随机值，供客户端调用
+    private String callbackUrl; // 回调地址
     private String accessToken; // 服务号 accessToken
-    private String refreshToken; // 服务号 刷新 accessToken 使用
     private String pcAccessToken; // PC accessToken
     private String weMiniAccessToken; // WeMiniAccessToken
+    private String refreshToken; // 服务号 刷新 accessToken 使用
     private String unionId; // 微信公众平台 unionId
     private String openid;  // 服务号 openId
     private String pcOpenid;    // PC OpenId

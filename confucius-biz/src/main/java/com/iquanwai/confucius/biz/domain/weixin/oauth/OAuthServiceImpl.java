@@ -3,17 +3,15 @@ package com.iquanwai.confucius.biz.domain.weixin.oauth;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
-import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import okhttp3.ResponseBody;
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -25,6 +23,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,8 +38,6 @@ public class OAuthServiceImpl implements OAuthService {
     private AccountService accountService;
     @Autowired
     private CallbackDao callbackDao;
-    @Autowired
-    private FollowUserDao followUserDao;
     @Autowired
     private RestfulHelper restfulHelper;
 
@@ -63,8 +60,17 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
         callback.setState(state);
-        logger.info("state is {}", state);
-        callbackDao.insert(callback);
+        try {
+            callbackDao.insert(callback);
+        } catch (SQLException e) {
+            callback.setState(CommonUtils.randomString(32));
+            try {
+                callbackDao.insert(callback);
+            } catch (SQLException e1) {
+                logger.error(e1.getLocalizedMessage(), e1);
+            }
+        }
+        logger.info("state is {}", callback.getState());
 
         Map<String, String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
@@ -85,7 +91,7 @@ public class OAuthServiceImpl implements OAuthService {
         }
         Callback callback = callbackDao.queryByAccessToken(accessToken);
         if (callback == null) {
-            logger.error("accesstoken {} is invalid", accessToken);
+            logger.error("accessToken {} is invalid", accessToken);
             return null;
         }
         return callback.getOpenid();
@@ -108,10 +114,12 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public String refresh(String accessToken) {
         Callback callback = callbackDao.queryByAccessToken(accessToken);
+
         if (callback == null) {
-            logger.error("accesstoken {} is invalid", accessToken);
+            logger.error("accessToken {} is invalid", accessToken);
             return null;
         }
+
         String requestUrl = REFRESH_TOKEN_URL;
 
         Map<String, String> params = Maps.newHashMap();
@@ -122,7 +130,7 @@ public class OAuthServiceImpl implements OAuthService {
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         String newAccessToken = (String) result.get("access_token");
 
-        //刷新accessToken
+        // 刷新accessToken
         callbackDao.refreshToken(callback.getState(), newAccessToken);
         return newAccessToken;
     }
@@ -147,11 +155,12 @@ public class OAuthServiceImpl implements OAuthService {
         String accessToken = (String) result.get("access_token");
         String openid = (String) result.get("openid");
         String refreshToken = (String) result.get("refresh_token");
-        //更新accessToken，refreshToken，openid
+
+        // 更新accessToken，refreshToken，openid
         callback.setOpenid(openid);
         callback.setRefreshToken(refreshToken);
         callback.setAccessToken(accessToken);
-        logger.info("update callback, state:{},accesstoken:{},refreshToken:{},openId:{},code:{}", state, accessToken, refreshToken, openid, code);
+        logger.info("update callback, state:{}, accessToken:{}, refreshToken:{}, openId:{}, code:{}", state, accessToken, refreshToken, openid, code);
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
 
         return callback;
@@ -177,7 +186,7 @@ public class OAuthServiceImpl implements OAuthService {
         String accessToken = (String) result.get("access_token");
         String openid = (String) result.get("openid");
         String refreshToken = (String) result.get("refresh_token");
-        //更新accessToken，refreshToken，openid
+        // 更新accessToken，refreshToken，openid
         logger.info("update callback, state:{},pcAccessToken:{},refreshToken:{},pcOpenId:{},code:{}", state, accessToken, refreshToken, openid, code);
         // pc登录，先将用户的openid存下来
         callback.setPcOpenid(openid);
@@ -185,9 +194,6 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setPcAccessToken(accessToken);
         callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid);
 
-        // callbackUrl增加参数access_token
-//        String callbackUrl = callback.getCallbackUrl();
-//        callbackUrl = CommonUtils.appendAccessToken(callbackUrl, accesstoken);
         return callback;
     }
 
@@ -208,7 +214,17 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setWeMiniAccessToken(sessionKey);
         callback.setUnionId(unionId);
         callback.setWeMiniOpenid(openId);
-        int insertResult = callbackDao.insertWeMiniCallBack(callback);
+        int insertResult = 0;
+        try {
+            insertResult = callbackDao.insert(callback);
+        } catch (SQLException e) {
+            callback.setState(CommonUtils.randomString(32));
+            try {
+                insertResult = callbackDao.insert(callback);
+            } catch (SQLException e1) {
+                logger.error(e1.getLocalizedMessage(), e1);
+            }
+        }
         if (insertResult > 0) {
             return callback;
         } else {
@@ -232,7 +248,18 @@ public class OAuthServiceImpl implements OAuthService {
         String state = CommonUtils.randomString(32);
         callback.setState(state);
         logger.info("state is {}", state);
-        callbackDao.insert(callback);
+
+        try {
+            callbackDao.insert(callback);
+        } catch (SQLException e) {
+            callback.setState(CommonUtils.randomString(32));
+            try {
+                callbackDao.insert(callback);
+            } catch (SQLException e1) {
+                logger.error(e1.getLocalizedMessage(), e1);
+            }
+        }
+
         Map<String, String> param = Maps.newHashMap();
         param.put("appid", ConfigUtils.getRisePcAppid());
         param.put("scope", "snsapi_login");
@@ -248,6 +275,7 @@ public class OAuthServiceImpl implements OAuthService {
         String openid = callback.getPcOpenid();
         String accessToken = callback.getPcAccessToken();
         String url = AccountService.PC_USER_INFO_URL;
+
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openid);
         map.put("access_token", accessToken);
@@ -257,15 +285,15 @@ public class OAuthServiceImpl implements OAuthService {
         String body = restfulHelper.get(url);
         logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
-        Account account = new Account();
-        try {
-            BeanUtils.populate(account, result);
-        } catch (Exception e) {
-            logger.info("获取用户信息失败 {}", e);
-            return null;
+
+        String errorCode = result.get("errcode").toString();
+        if (!StringUtils.isEmpty(errorCode)) {
+            logger.info("获取用户信息失败 {}", result.toString());
         }
-        //根据unionId查询
-        Profile profile = accountService.queryByUnionId(account.getUnionid());
+
+        String unionId = result.get("unionId").toString();
+        // 根据 unionId 查询
+        Profile profile = accountService.queryByUnionId(unionId);
         if (profile == null) {
             // 提示关注并选择rise
             logger.info("未关注，请先关注并选择课程,callback:{}", callback);
@@ -276,7 +304,7 @@ public class OAuthServiceImpl implements OAuthService {
             try {
                 accountService.getAccount(weixinOpenid, false);
             } catch (NotFollowingException e) {
-                logger.info("未关注，请先关注并选择课程,callback:{}", callback);
+                logger.info("未关注，请先关注并选择课程，callback:{}", callback);
                 return new MutablePair<>(-1, null);
             }
 
@@ -284,7 +312,7 @@ public class OAuthServiceImpl implements OAuthService {
             // 更新数据库
             logger.info("更新数据库,account:{}", profile);
             callback.setOpenid(profile.getOpenid());
-            callbackDao.updateOpenId(callback.getState(), profile.getOpenid());
+            callbackDao.updateOpenIdAndUnionId(callback.getState(), profile.getOpenid(), unionId);
             return new MutablePair<>(1, callback);
         }
     }
@@ -295,7 +323,6 @@ public class OAuthServiceImpl implements OAuthService {
         if (matcher.find()) {
             return matcher.group();
         }
-
         return null;
     }
 

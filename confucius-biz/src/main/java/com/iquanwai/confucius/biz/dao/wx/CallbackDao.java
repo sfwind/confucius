@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.dao.wx;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Callback;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -19,31 +20,28 @@ import java.sql.SQLException;
 public class CallbackDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public void insert(Callback callback) {
+    public int insert(Callback callback) throws SQLException {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO Callback(Openid, Accesstoken, CallbackUrl, RefreshToken, State) " +
-                "VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Callback(State, CallbackUrl, AccessToken, PcAccessToken, WeMiniAccessToken, " +
+                "RefreshToken, UnionId, Openid, PcOpenid, WeMiniOpenid) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            run.insert(insertSql, new ScalarHandler<>(),
-                    callback.getOpenid(), callback.getAccessToken(), callback.getCallbackUrl(),
-                    callback.getRefreshToken(), callback.getState());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-    }
-
-    public int insertWeMiniCallBack(Callback callback) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Callback (State, WeMiniAccessToken, WeMiniOpenid, UnionId) VALUES (?, ?, ?, ?)";
-        try {
-            Long result = runner.insert(sql, new ScalarHandler<>(),
+            Long result = run.insert(sql, new ScalarHandler<>(),
                     callback.getState(),
+                    callback.getCallbackUrl(),
+                    callback.getAccessToken(),
+                    callback.getPcAccessToken(),
                     callback.getWeMiniAccessToken(),
-                    callback.getWeMiniOpenid(),
-                    callback.getUnionId());
+                    callback.getRefreshToken(),
+                    callback.getUnionId(),
+                    callback.getOpenid(),
+                    callback.getPcOpenid(),
+                    callback.getWeMiniOpenid());
             return result.intValue();
         } catch (SQLException e) {
+            if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
+                throw e;
+            }
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
@@ -134,11 +132,11 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public void updateOpenId(String state, String openId) {
+    public void updateOpenIdAndUnionId(String state, String openId, String unionId) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
-            String sql = "update Callback set openid = ? where State = ?";
-            run.update(sql, openId, state);
+            String sql = "update Callback set OpenId = ?, UnionId = ? where State = ?";
+            run.update(sql, openId, unionId, state);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
