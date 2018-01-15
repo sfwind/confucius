@@ -442,7 +442,7 @@ public class PayServiceImpl implements PayService {
         alipayRequest.setNotifyUrl(ConfigUtils.getAlipayNotifyDomain() + ALIPAY_CALLBACK_PATH);
         //填充业务参数
         AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
-        model.setOutTradeNo(CommonUtils.randomString(32));
+        model.setOutTradeNo(quanwaiOrder.getOrderId());
         DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
         // 总价
