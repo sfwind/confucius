@@ -94,4 +94,6 @@ public class ApplicationDto {
     private String reward;
     private Boolean del;
     private String verifiedResult;
+    private Integer interviewer;
+    private String interviewerName;
 }

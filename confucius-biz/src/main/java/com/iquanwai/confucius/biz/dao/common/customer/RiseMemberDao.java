@@ -125,7 +125,7 @@ public class RiseMemberDao extends DBUtil {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseMember WHERE ProfileId IN (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0";
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId IN (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
         ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
         try {
             return runner.query(sql, h, profileIds.toArray());

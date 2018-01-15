@@ -12,4 +12,9 @@ public class UserRole {
     private String openid;
     private Integer profileId;
     private Boolean del;
+
+    // 非DB字段
+    private String asstName;
+    private String asstType;
+    private Integer level;
 }
