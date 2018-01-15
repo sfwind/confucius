@@ -149,6 +149,7 @@ public class PayServiceImpl implements PayService {
     public void handlePayResult(PayCallback payCallback) {
         Assert.notNull(payCallback, "支付结果不能为空");
         String orderId = payCallback.getOut_trade_no();
+        QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
         if (payCallback.getErr_code_des() != null) {
             logger.error(payCallback.getErr_code_des() + ", orderId=" + orderId);
             if (!ignoreCode(payCallback.getErr_code())) {
@@ -159,7 +160,12 @@ public class PayServiceImpl implements PayService {
 
         String transactionId = payCallback.getTransaction_id();
         String paidTimeStr = payCallback.getTime_end();
-        Date paidTime = DateUtils.parseStringToDate3(paidTimeStr);
+        Date paidTime = null;
+        if (order.getPayType() == QuanwaiOrder.PAY_ALI) {
+            paidTime = DateUtils.parseStringToDateTime(paidTimeStr);
+        } else if (order.getPayType() == QuanwaiOrder.PAY_WECHAT) {
+            paidTime = DateUtils.parseStringToDate3(paidTimeStr);
+        }
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
     }
 
