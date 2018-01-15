@@ -199,7 +199,7 @@ public class AccountServiceImpl implements AccountService {
 
         Account account = new Account();
         try {
-            // TODO 方法意义不清
+            // TODO
             ConvertUtils.register((aClass, value) -> {
                 if (value == null) {
                     return null;
@@ -245,7 +245,6 @@ public class AccountServiceImpl implements AccountService {
                         profileDao.updateOAuthFields(profile);
                     }
                 } else {
-                    account.setId(existAccount.getId());
                     followUserDao.updateOAuthFields(account);
                 }
             });

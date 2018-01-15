@@ -110,14 +110,11 @@ public class ProfileDao extends DBUtil {
 
     public int updateOAuthFields(Profile profile) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET UnionId = ?, NickName = ?, HeadImgUrl = ?, RiseId = ? WHERE Id = ?";
+        String sql = "UPDATE Profile SET OpenId = ? WHERE UnionId = ?";
         try {
             return runner.update(sql, new ScalarHandler<>(),
-                    profile.getUnionid(),
-                    profile.getNickname(),
-                    profile.getHeadimgurl(),
-                    profile.getRiseId(),
-                    profile.getId());
+                    profile.getOpenid(),
+                    profile.getUnionid());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

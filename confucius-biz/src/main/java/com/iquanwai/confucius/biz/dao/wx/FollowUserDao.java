@@ -51,12 +51,12 @@ public class FollowUserDao extends DBUtil {
     public int updateOAuthFields(Account account) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE FollowUsers SET OpenId = ?, WeMiniOpenId = ?, UnionId = ?, NickName = ?, Sex = ?, City = ?, Country = ?, " +
-                "Province = ?, HeadImgUrl = ?, Remark = ?, GroupId = ?, Subscribe = ?, Subscribe_time WHERE Id = ?";
+                "Province = ?, HeadImgUrl = ?, Remark = ?, GroupId = ?, Subscribe = ?, Subscribe_time WHERE UnionId = ?";
         try {
             return runner.update(sql, account.getOpenid(), account.getWeMiniOpenId(), account.getUnionid(), account.getNickname(),
                     account.getSex(), account.getCity(), account.getCountry(), account.getProvince(), account.getHeadimgurl(),
                     account.getHeadimgurl(), account.getRemark(), account.getGroupid(), account.getSubscribe(), account.getSubscribe_time(),
-                    account.getId());
+                    account.getUnionid());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
