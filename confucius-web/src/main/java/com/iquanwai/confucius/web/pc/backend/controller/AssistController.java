@@ -39,9 +39,6 @@ public class AssistController {
 
     /**
      * 加载所有的教练
-     *
-     * @param loginUser
-     * @return
      */
     @RequestMapping("/load")
     public ResponseEntity<Map<String, Object>> loadAssists(PCLoginUser loginUser) {
@@ -80,9 +77,6 @@ public class AssistController {
 
     /**
      * 加载教练类别
-     *
-     * @param loginUser
-     * @return
      */
     @RequestMapping("/load/catalog")
     public ResponseEntity<Map<String, Object>> loadAssistCatalogs(PCLoginUser loginUser) {
@@ -101,36 +95,29 @@ public class AssistController {
 
     /**
      * 修改教练状态
-     * @param loginUser
-     * @param assistId
-     * @param assistCatalog
-     * @return
      */
     @RequestMapping("update/{assistId}/{assistCatalog}")
-    public ResponseEntity<Map<String,Object>> updateAssist(PCLoginUser loginUser, @PathVariable Integer assistId,@PathVariable Integer assistCatalog){
-            OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("教练升降级").action("教练升降级");
-            operationLogService.log(operationLog);
+    public ResponseEntity<Map<String, Object>> updateAssist(PCLoginUser loginUser, @PathVariable Integer assistId, @PathVariable Integer assistCatalog) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("教练升降级").action("教练升降级");
+        operationLogService.log(operationLog);
 
-            if(assistCatalog.equals(AssistCatalogEnums.EXPIRED_ASSIST.getRoleId())){
-                return WebUtils.result(assistantCoachService.deleteAssist(assistId));
-            } else {
-                return WebUtils.result(assistantCoachService.updateAssist(assistId,assistCatalog));
-            }
+        if (assistCatalog.equals(AssistCatalogEnums.EXPIRED_ASSIST.getRoleId())) {
+            return WebUtils.result(assistantCoachService.deleteAssist(assistId));
+        } else {
+            return WebUtils.result(assistantCoachService.updateAssist(assistId, assistCatalog));
+        }
     }
 
 
     /**
      * 根据NickName加载非教练人员
-     * @param loginUser
-     * @param nickName
-     * @return
      */
     @RequestMapping("load/unassist/{nickName}")
-    public ResponseEntity<Map<String,Object>> loadUnAssistByNickName(PCLoginUser loginUser,@PathVariable String nickName){
+    public ResponseEntity<Map<String, Object>> loadUnAssistByNickName(PCLoginUser loginUser, @PathVariable String nickName) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("加载非教练人员").action("加载非教练人员");
         operationLogService.log(operationLog);
 
-        List<Profile> profiles =  assistantCoachService.loadUnAssistByNickName(nickName);
+        List<Profile> profiles = assistantCoachService.loadUnAssistByNickName(nickName);
 
         List<AssistDto> assistDtos = Lists.newArrayList();
 
@@ -149,16 +136,12 @@ public class AssistController {
     }
 
     @RequestMapping("add/{riseId}/{assistCatalog}")
-    public ResponseEntity<Map<String,Object>> addAssist(PCLoginUser loginUser,@PathVariable String riseId,@PathVariable Integer assistCatalog){
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("铰链管理").function("添加教练").action("添加教练");
+    public ResponseEntity<Map<String, Object>> addAssist(PCLoginUser loginUser, @PathVariable String riseId, @PathVariable Integer assistCatalog) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("添加教练").action("添加教练");
         operationLogService.log(operationLog);
 
-       return WebUtils.result(assistantCoachService.addAssist(assistCatalog,riseId));
+        return WebUtils.result(assistantCoachService.addAssist(assistCatalog, riseId));
     }
-
-
-
-
 
 
 }

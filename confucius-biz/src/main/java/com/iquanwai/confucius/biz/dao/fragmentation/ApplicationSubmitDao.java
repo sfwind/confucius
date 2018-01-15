@@ -414,14 +414,14 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     /**
      * 加载这些人非求点评的
-     * @param problemId
-     * @param profileIds
-     * @return
+     * @param problemId 小课id
+     * @param profileIds 人员id
+     * @return 应用题提交列表
      */
     public List<ApplicationSubmit> loadUnRequestByProfileIds(Integer problemId, List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( " + produceQuestionMark(profileIds.size()) + " )  AND RequestFeedback = 0 AND Del = 0";
+        String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( " + produceQuestionMark(profileIds.size()) + " )  AND (RequestFeedback = 0 or (RequestFeedback = 1 and Feedback = 1)) AND Del = 0";
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
         param.addAll(profileIds);
