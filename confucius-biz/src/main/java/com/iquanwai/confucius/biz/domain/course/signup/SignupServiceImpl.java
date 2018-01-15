@@ -192,6 +192,7 @@ public class SignupServiceImpl implements SignupService {
 
         Assert.notNull(profile, "用户信息错误");
         Assert.notNull(memberType, "会员类型错误");
+        Assert.notNull(payType, "支付类型错误");
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), fee, orderPair.getRight(), memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAG_MEMBER,
                 payType);
