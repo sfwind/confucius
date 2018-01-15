@@ -439,7 +439,7 @@ public class PayServiceImpl implements PayService {
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
         //在公共参数中设置回跳和通知地址
 //        alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
-        alipayRequest.setNotifyUrl(ConfigUtils.adapterDomainName() + ALIPAY_CALLBACK_PATH);
+        alipayRequest.setNotifyUrl(ConfigUtils.getAlipayNotifyDomain() + ALIPAY_CALLBACK_PATH);
         //填充业务参数
         AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
         model.setOutTradeNo(CommonUtils.randomString(32));

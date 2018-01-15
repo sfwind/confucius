@@ -390,7 +390,7 @@ public class SignupController {
         if (paymentDto.getPayType() == QuanwaiOrder.PAY_WECHAT) {
             paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
         } else if (paymentDto.getPayType() == QuanwaiOrder.PAY_ALI) {
-            paymentParam = this.createAlipay(quanwaiOrder, remoteIp);
+            paymentParam = this.createAlipay(quanwaiOrder);
         } else {
             return WebUtils.error("支付方式异常");
         }
@@ -490,10 +490,9 @@ public class SignupController {
     /**
      * 阿里支付
      * @param quanwaiOrder 订单对象
-     * @param remoteIp ip
      * @return 支付参数
      */
-    private PaymentDto createAlipay(QuanwaiOrder quanwaiOrder, String remoteIp) {
+    private PaymentDto createAlipay(QuanwaiOrder quanwaiOrder) {
         // 下单
         PaymentDto paymentDto = new PaymentDto();
         paymentDto.setFee(quanwaiOrder.getPrice());
