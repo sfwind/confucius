@@ -322,7 +322,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
      */
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId, String className, String groupId) {
-        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className, groupId);
         List<Integer> profiles = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
 
@@ -455,7 +454,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         requestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
         if (requestSubmits.size() >= APPLICTION_SIZE) {
-            requestSubmits.subList(0, APPLICTION_SIZE).stream().forEach(requestSubmit -> {
+            requestSubmits.subList(0, APPLICTION_SIZE).forEach(requestSubmit -> {
                 RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(requestSubmit);
                 applicationPractices.forEach(applicationPractice -> {
                     if (requestSubmit.getApplicationId().equals(applicationPractice.getId())) {
@@ -467,7 +466,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             return workInfoDtos;
         } else {
             //将求点评的塞到返回值中
-            requestSubmits.stream().forEach(requestSubmit -> {
+            requestSubmits.forEach(requestSubmit -> {
                 RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(requestSubmit);
                 applicationPractices.forEach(applicationPractice -> {
                     if (requestSubmit.getApplicationId().equals(applicationPractice.getId())) {
@@ -480,7 +479,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             unRequestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
             int reamin = APPLICTION_SIZE - workInfoDtos.size();
             if(unRequestSubmits.size()>=reamin) {
-                unRequestSubmits.subList(0, reamin).stream().forEach(unRequestSubmit -> {
+                unRequestSubmits.subList(0, reamin).forEach(unRequestSubmit -> {
                     RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
                     applicationPractices.forEach(applicationPractice -> {
                         if (unRequestSubmit.getApplicationId().equals(applicationPractice.getId())) {
@@ -490,7 +489,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                     workInfoDtos.add(riseWorkInfoDto);
                 });
             }else{
-                unRequestSubmits.stream().forEach(unRequestSubmit -> {
+                unRequestSubmits.forEach(unRequestSubmit -> {
                     RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
                     applicationPractices.forEach(applicationPractice -> {
                         if (unRequestSubmit.getApplicationId().equals(applicationPractice.getId())) {
