@@ -19,8 +19,8 @@ public class ProblemDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Problem(Problem, Length, CatalogId, SubCatalogId, " +
                 "Author, AuthorPic, DifficultyScore, UsefulScore, DescPic, " +
-                "AudioId, Who, How, Why, Trial, Abbreviation) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "AudioId, Who, How, Why, Trial, Abbreviation,Updated) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,2)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), problem.getProblem(), problem.getLength(),
                     problem.getCatalogId(), problem.getSubCatalogId(), problem.getAuthor(),
@@ -38,13 +38,13 @@ public class ProblemDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "Update Problem set Problem =?, Length=?, CatalogId=?, SubCatalogId=?, " +
                 "Author=?, AuthorPic=?, DifficultyScore=?, UsefulScore=?, DescPic=?, " +
-                "AudioId=?, Who=?, How=?, Why=?, Trial=?, Abbreviation=? where id=?";
+                "AudioId=?, Who=?, How=?, Why=?, Trial=?, Abbreviation=?,Updated = ? where id=?";
         try {
             runner.update(sql, problem.getProblem(), problem.getLength(),
                     problem.getCatalogId(), problem.getSubCatalogId(), problem.getAuthor(),
                     problem.getAuthorPic(), problem.getDifficultyScore(), problem.getUsefulScore(),
                     problem.getDescPic(), problem.getAudioId(), problem.getWho(), problem.getHow(),
-                    problem.getWhy(), problem.getTrial(), problem.getAbbreviation(), problem.getId());
+                    problem.getWhy(), problem.getTrial(), problem.getAbbreviation(),problem.getUpdated(), problem.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

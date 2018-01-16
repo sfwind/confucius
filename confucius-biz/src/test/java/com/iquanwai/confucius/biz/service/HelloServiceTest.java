@@ -22,8 +22,8 @@ public class HelloServiceTest extends TestBase {
 
     @Test
     public void test() {
-        customerMessageService.sendCustomerMessage(accountService.getProfile(30).getOpenid(), "LiCBL-QjQYIpExWSJt9gUxLGt3vNdf9bqYuxe-QDt5A", Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-        customerMessageService.sendCustomerMessage(accountService.getProfile(30).getOpenid(), "LiCBL-QjQYIpExWSJt9gUxLGt3vNdf9bqYuxe-QDt5A", Constants.WEIXIN_MESSAGE_TYPE.TEXT);
+        customerMessageService.sendCustomerMessage(accountService.getProfile(54343).getOpenid(), "AocGwtSS5Q56aAZGE8kRmHmYlCBmFki9GW1knInEbjewY5Q46O2qOR1p5yO4JEAt", Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+       // customerMessageService.sendCustomerMessage(accountService.getProfile(30).getOpenid(), "LiCBL-QjQYIpExWSJt9gUxLGt3vNdf9bqYuxe-QDt5A", Constants.WEIXIN_MESSAGE_TYPE.TEXT);
     }
 
 }
