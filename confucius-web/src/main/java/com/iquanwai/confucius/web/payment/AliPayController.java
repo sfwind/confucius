@@ -232,7 +232,7 @@ public class AliPayController {
         ThreadPool.execute(() -> {
             try {
                 payService.handlePayResult(payCallback);
-                if ("SUCCESS".equals(payCallback.getResult_code())) {
+                if ("TRADE_SUCCESS".equals(payCallback.getResult_code())) {
                     payService.payMemberSuccess(payCallback.getOut_trade_no());
                 } else {
                     logger.error("{}付费失败", payCallback.getOut_trade_no());
