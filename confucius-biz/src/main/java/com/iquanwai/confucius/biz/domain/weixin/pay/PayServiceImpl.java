@@ -428,7 +428,7 @@ public class PayServiceImpl implements PayService {
     @Override
     public String buildAlipayParam(QuanwaiOrder quanwaiOrder) {
         if (quanwaiOrder == null) {
-            logger.error("order id {} not existed", quanwaiOrder);
+            logger.error("order not existed");
             return "";
         }
 
