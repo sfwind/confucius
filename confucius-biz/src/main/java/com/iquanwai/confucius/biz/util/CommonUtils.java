@@ -15,6 +15,8 @@ import sun.net.util.IPAddressUtil;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +27,12 @@ import java.util.Random;
  * Created by justin on 16/8/7.
  */
 public class CommonUtils {
+    public static DecimalFormat priceFormat;
+    static {
+        priceFormat = new DecimalFormat("0.00");
+        priceFormat.setRoundingMode(RoundingMode.HALF_UP);
+    }
+
     public static String placeholderReplace(String content, Map<String, String> replacer) {
         if (StringUtils.isNotEmpty(content) && replacer != null) {
             for (Map.Entry<String, String> entry : replacer.entrySet()) {
@@ -238,6 +246,10 @@ public class CommonUtils {
                 ((codePoint >= 0x20) && (codePoint <= 0xD7FF)) ||
                 ((codePoint >= 0xE000) && (codePoint <= 0xFFFD)) ||
                 ((codePoint >= 0x10000) && (codePoint <= 0x10FFFF));
+    }
+
+    public static String formatePrice(Double fee) {
+        return priceFormat.format(fee);
     }
 
 }

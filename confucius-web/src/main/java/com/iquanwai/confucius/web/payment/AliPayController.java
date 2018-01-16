@@ -3,7 +3,6 @@ package com.iquanwai.confucius.web.payment;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConstants;
-import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeQueryModel;
 import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.alipay.api.internal.util.AlipaySignature;
@@ -15,6 +14,7 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.io.IOUtils;
@@ -61,6 +61,8 @@ public class AliPayController {
 
     @Autowired
     private PayService payService;
+    @Autowired
+    private RestfulHelper restfulHelper;
 
     /**
      * 测试接口，待删除
@@ -69,13 +71,7 @@ public class AliPayController {
     public void getPayForm(HttpServletRequest httpRequest,
                            HttpServletResponse httpResponse) throws Exception {
 
-        AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
-                ConfigUtils.getValue("alipay.appid"),
-                ConfigUtils.getValue("alipay.private.key"),
-                "json",
-                "UTF-8",
-                ConfigUtils.getValue("alipay.public.key"),
-                "RSA2");
+        AlipayClient alipayClient = restfulHelper.initAlipayClient();
 
         //获得初始化的AlipayClient
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
@@ -111,23 +107,16 @@ public class AliPayController {
         //商户订单号，商户网站订单系统中唯一订单号，必填
         /**********************/
         // SDK 公共请求类，包含公共请求参数，以及封装了签名与验签，开发者无需关注签名与验签
-        AlipayClient client = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
-                ConfigUtils.getValue("alipay.appid"),
-                ConfigUtils.getValue("alipay.private.key"),
-                "json",
-                "UTF-8",
-                ConfigUtils.getValue("alipay.public.key"),
-                "RSA2");
-        AlipayTradeQueryRequest alipay_request = new AlipayTradeQueryRequest();
+        AlipayClient client = restfulHelper.initAlipayClient();
+        AlipayTradeQueryRequest alipayRequest = new AlipayTradeQueryRequest();
 
         AlipayTradeQueryModel model = new AlipayTradeQueryModel();
         model.setOutTradeNo(order);
-        alipay_request.setBizModel(model);
+        alipayRequest.setBizModel(model);
 
-        AlipayTradeQueryResponse alipay_response = null;
-        alipay_response = client.execute(alipay_request);
-        logger.info(alipay_response.getBody());
-        return WebUtils.result(alipay_response.getBody());
+        AlipayTradeQueryResponse alipayResponse = client.execute(alipayRequest);
+        logger.info(alipayResponse.getBody());
+        return WebUtils.result(alipayResponse.getBody());
     }
 
     @RequestMapping(value = "callback/notify", method = RequestMethod.POST)
