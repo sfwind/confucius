@@ -2,9 +2,10 @@ package com.iquanwai.confucius.biz.dao.apply;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -115,6 +116,34 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         String sql = "UPDATE BusinessSchoolApplication SET Interviewer = ? WHERE Id = ?";
         try {
             return runner.update(sql, interviewer, applyId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    /**
+     * 根据教练加载正在审核中的商学院申请
+     * @param interviewer
+     * @return
+     */
+    public List<BusinessSchoolApplication> loadByInterviewer(Integer interviewer,Page page){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from BusinessSchoolApplication where interviewer = ? and status = 0 and del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
+        ResultSetHandler<List<BusinessSchoolApplication>> h = new BeanListHandler<>(BusinessSchoolApplication.class);
+        try {
+            return runner.query(sql,h,interviewer);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public Integer loadAssistBACount(Integer interviewer) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT count(*) from BusinessSchoolApplication WHERE interviewer = ? and status = 0 AND Del =0";
+        try {
+            return runner.query(sql, new ScalarHandler<Long>(),interviewer).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

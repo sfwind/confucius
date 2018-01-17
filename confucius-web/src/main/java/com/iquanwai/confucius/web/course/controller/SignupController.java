@@ -14,7 +14,7 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;

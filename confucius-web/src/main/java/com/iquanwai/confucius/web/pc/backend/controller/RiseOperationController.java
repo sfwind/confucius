@@ -13,7 +13,7 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.TableDto;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
@@ -252,67 +252,67 @@ public class RiseOperationController {
         page.setPageSize(20);
 
         List<BusinessSchoolApplication> applications = businessSchoolService.loadBusinessSchoolList(page);
-        final List<String> openidList;
-        if (applications != null && applications.size() > 0) {
-            //获取黑名单用户
-            openidList = accountService.loadBlackListOpenIds();
-        } else {
-            openidList = null;
-        }
+//        final List<String> openidList;
+//        if (applications != null && applications.size() > 0) {
+//            //获取黑名单用户
+//            openidList = accountService.loadBlackListOpenIds();
+//        } else {
+//            openidList = null;
+//        }
 
         Assert.notNull(applications);
-        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
-            Profile profile = accountService.getProfile(application.getProfileId());
-            ApplicationDto dto = this.initApplicationDto(application);
-            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
-            dto.setQuestionList(questions);
-            // 查询是否会员
-            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
-            if (riseMember != null) {
-                dto.setMemberTypeId(riseMember.getMemberTypeId());
-                dto.setMemberType(riseMember.getName());
-            }
-            dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
-            dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
-            dto.setNickname(profile.getNickname());
-            dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
-            dto.setIsBlack("否");
-
-            int lastVerifiedCode = application.getLastVerified();
-
-            if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
-            } else {
-                dto.setVerifiedResult("未知");
-            }
-
-            if (openidList != null && (openidList.size() > 0)) {
-                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
-                    dto.setIsBlack("是");
-                }
-            }
-            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
-            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
-            dto.setOrderId(application.getOrderId());
-            if (application.getInterviewer() != null) {
-                Profile interviewer = accountService.getProfile(application.getInterviewer());
-                dto.setInterviewer(application.getInterviewer());
-                dto.setInterviewerName(interviewer.getNickname());
-            }
-
-            return dto;
-        }).collect(Collectors.toList());
+//        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
+//            Profile profile = accountService.getProfile(application.getProfileId());
+//            ApplicationDto dto = this.initApplicationDto(application);
+//            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
+//            dto.setQuestionList(questions);
+//            // 查询是否会员
+//            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
+//            if (riseMember != null) {
+//                dto.setMemberTypeId(riseMember.getMemberTypeId());
+//                dto.setMemberType(riseMember.getName());
+//            }
+//            dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
+//            dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
+//            dto.setNickname(profile.getNickname());
+//            dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
+//            dto.setIsBlack("否");
+//
+//            int lastVerifiedCode = application.getLastVerified();
+//
+//            if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()) {
+//                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
+//            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()) {
+//                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
+//            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()) {
+//                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
+//            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()) {
+//                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
+//            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()) {
+//                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
+//            } else {
+//                dto.setVerifiedResult("未知");
+//            }
+//
+//            if (openidList != null && (openidList.size() > 0)) {
+//                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+//                    dto.setIsBlack("是");
+//                }
+//            }
+//            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
+//            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
+//            dto.setOrderId(application.getOrderId());
+//            if (application.getInterviewer() != null) {
+//                Profile interviewer = accountService.getProfile(application.getInterviewer());
+//                dto.setInterviewer(application.getInterviewer());
+//                dto.setInterviewerName(interviewer.getNickname());
+//            }
+//
+//            return dto;
+//        }).collect(Collectors.toList());
         TableDto<ApplicationDto> result = new TableDto<>();
         result.setPage(page);
-        result.setData(dtoGroup);
+        result.setData(getApplicationDto(applications));
         return WebUtils.result(result);
     }
 
@@ -506,5 +506,68 @@ public class RiseOperationController {
         } else {
             return WebUtils.error("分配失败");
         }
+    }
+
+
+
+    private List<ApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications){
+        final List<String> openidList;
+        if (applications != null && applications.size() > 0) {
+            //获取黑名单用户
+            openidList = accountService.loadBlackListOpenIds();
+        } else {
+            openidList = null;
+        }
+        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
+            Profile profile = accountService.getProfile(application.getProfileId());
+            ApplicationDto dto = this.initApplicationDto(application);
+            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
+            dto.setQuestionList(questions);
+            // 查询是否会员
+            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
+            if (riseMember != null) {
+                dto.setMemberTypeId(riseMember.getMemberTypeId());
+                dto.setMemberType(riseMember.getName());
+            }
+            dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
+            dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
+            dto.setNickname(profile.getNickname());
+            dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
+            dto.setIsBlack("否");
+
+            int lastVerifiedCode = application.getLastVerified();
+
+            if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
+            } else {
+                dto.setVerifiedResult("未知");
+            }
+
+            if (openidList != null && (openidList.size() > 0)) {
+                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+                    dto.setIsBlack("是");
+                }
+            }
+            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
+            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
+            dto.setOrderId(application.getOrderId());
+            if (application.getInterviewer() != null) {
+                Profile interviewer = accountService.getProfile(application.getInterviewer());
+                dto.setInterviewer(application.getInterviewer());
+                dto.setInterviewerName(interviewer.getNickname());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return dtoGroup;
     }
 }

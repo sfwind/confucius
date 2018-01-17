@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.domain.asst;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
+import com.iquanwai.confucius.biz.dao.apply.InterviewRecordDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
@@ -13,6 +15,8 @@ import com.iquanwai.confucius.biz.dao.fragmentation.SubjectArticleDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.ProfileCount;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
@@ -25,6 +29,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +66,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private UserRoleDao userRoleDao;
+    @Autowired
+    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
+    @Autowired
+    private InterviewRecordDao interviewRecordDao;
 
     private static final int SIZE = 100;
 
@@ -499,7 +508,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     /**
      * 对教练进行升降级
      *
-     * @param id 主键
+     * @param id     主键
      * @param roleId 角色id
      * @return 更新条数
      */
@@ -521,6 +530,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
 
     /**
      * 根据昵称获取非助教信息
+     *
      * @param nickName 昵称
      * @return 非助教列表
      */
@@ -557,5 +567,28 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             return -1;
         }
         return userRoleDao.insertAssist(roleId, profile.getOpenid(), profile.getId());
+    }
+
+    @Override
+    public List<BusinessSchoolApplication> loadByInterviewer(Integer interviewer, Page page) {
+        page.setTotal(businessSchoolApplicationDao.loadAssistBACount(interviewer));
+        return businessSchoolApplicationDao.loadByInterviewer(interviewer, page);
+    }
+
+    @Override
+    public InterviewRecord loadInterviewRecord(Integer applyId) {
+        return interviewRecordDao.queryByApplyId(applyId);
+    }
+
+    @Override
+    public Integer addInterviewRecord(InterviewRecord interviewRecord) {
+        Integer applyId = interviewRecord.getApplyId();
+        InterviewRecord existInterviewRecord = interviewRecordDao.queryByApplyId(applyId);
+        if (existInterviewRecord == null) {
+            return interviewRecordDao.insert(interviewRecord);
+        } else {
+            interviewRecord.setId(existInterviewRecord.getId());
+            return interviewRecordDao.update(interviewRecord);
+        }
     }
 }
