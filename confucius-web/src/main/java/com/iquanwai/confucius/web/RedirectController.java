@@ -24,6 +24,11 @@ public class RedirectController {
     @Autowired
     private AccountService accountService;
 
+    /**
+     * 小课洞见文章跳转区分
+     *
+     * @param problemId 小课id
+     */
     @RequestMapping(value = "/kit_package/{id}")
     public void redirectKitPackage(LoginUser loginUser, @PathVariable(value = "id") Integer problemId, HttpServletResponse response) {
         OperationLog operationLog = new OperationLog()
