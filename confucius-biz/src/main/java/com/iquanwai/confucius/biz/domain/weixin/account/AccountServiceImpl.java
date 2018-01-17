@@ -157,7 +157,8 @@ public class AccountServiceImpl implements AccountService {
         return profiles;
     }
 
-    private Integer getRiseMember(Integer profileId) {
+    @Override
+    public Integer getRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember == null) {
             return 0;
