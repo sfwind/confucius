@@ -5,31 +5,28 @@ import com.alipay.api.DefaultAlipayClient;
 import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.exception.WeixinException;
 import com.rabbitmq.client.TrustEverythingTrustManager;
+import okhttp3.Headers;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.KeyStore;
 
 /**
@@ -236,7 +233,7 @@ public class RestfulHelper {
      * @param url
      * @return
      */
-    public String uploadWXFile(MultipartFile multipartFile ,String url){
+    public String uploadWXFile(MultipartFile multipartFile , String url){
         String accessToken = accessTokenService.getAccessToken();
         logger.info("accesstoken is :{}", accessToken);
         url = url.replace("{access_token}",accessToken);
