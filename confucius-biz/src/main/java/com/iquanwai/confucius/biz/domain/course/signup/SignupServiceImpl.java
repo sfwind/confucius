@@ -935,14 +935,15 @@ public class SignupServiceImpl implements SignupService {
         BusinessSchoolApplicationOrder order = businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(orderId);
         Assert.notNull(order, "商学院申请购买订单不能为空，orderId：" + orderId);
         BusinessSchoolApplication apply = businessSchoolApplicationDao.loadLatestInvalidApply(order.getProfileId());
-        // 更新最后一次无效申请
-        Integer result = businessSchoolApplicationDao.validApply(orderId, apply.getId());
-        if (result < 0) {
-            logger.error("更新申请失败");
-        } else {
+        if (apply == null) {
             // 更新订单状态
             businessSchoolApplicationOrderDao.paid(orderId);
+        } else {
+            // 更新最后一次无效申请
+            businessSchoolApplicationDao.validApply(orderId, apply.getId());
+            businessSchoolApplicationOrderDao.paid(orderId);
         }
+
     }
 
     @Override
