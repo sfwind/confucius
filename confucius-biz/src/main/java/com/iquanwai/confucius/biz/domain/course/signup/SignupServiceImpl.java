@@ -4,20 +4,37 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolApplicationOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.OperateRotateDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
-import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.Coupon;
+import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -38,7 +55,11 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.lang.ref.SoftReference;
 import java.net.ConnectException;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -86,6 +107,8 @@ public class SignupServiceImpl implements SignupService {
     private ProfileDao profileDao;
     @Autowired
     private BusinessSchoolApplicationOrderDao businessSchoolApplicationOrderDao;
+    @Autowired
+    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
 
     private final static int PROBLEM_MAX_LENGTH = 30; //课程最长开放时间
 
@@ -910,10 +933,16 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public void payApplicationSuccess(String orderId) {
         BusinessSchoolApplicationOrder order = businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(orderId);
-        Assert.notNull(order, "训练营购买订单不能为空，orderId：" + orderId);
-
-        // 更新订单状态
-        businessSchoolApplicationOrderDao.paid(orderId);
+        Assert.notNull(order, "商学院申请购买订单不能为空，orderId：" + orderId);
+        BusinessSchoolApplication apply = businessSchoolApplicationDao.loadLatestInvalidApply(order.getProfileId());
+        // 更新最后一次无效申请
+        Integer result = businessSchoolApplicationDao.validApply(orderId, apply.getId());
+        if (result < 0) {
+            logger.error("更新申请失败");
+        } else {
+            // 更新订单状态
+            businessSchoolApplicationOrderDao.paid(orderId);
+        }
     }
 
     @Override
