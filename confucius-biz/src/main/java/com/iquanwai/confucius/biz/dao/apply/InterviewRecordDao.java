@@ -22,7 +22,7 @@ public class InterviewRecordDao extends DBUtil {
     public Integer insert(InterviewRecord interviewRecord) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO InterviewRecord(ProfileId,InterviewerId,ApprovalId,ApplyId,InterviewTime,Question,FocusChannel,FocusChannelName,TouchDuration,TouchDurationName,ApplyEvent,ApplyEventName," +
-                "LearningWill,PotentialScore,ApplyAward,ApplyReason) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
+                "LearningWill,PotentialScore,ApplyAward,ApplyReason) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
 
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), interviewRecord.getProfileId(), interviewRecord.getInterviewerId(),interviewRecord.getApprovalId(),interviewRecord.getApplyId(), interviewRecord.getInterviewTime(), interviewRecord.getQuestion(),
