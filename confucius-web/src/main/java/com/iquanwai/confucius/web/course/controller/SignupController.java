@@ -534,8 +534,9 @@ public class SignupController {
         // 不同商品的特殊逻辑
         Assert.notNull(memberType);
         if (memberType.getId() == RiseMember.ELITE) {
-            int dailyFee = (int) (memberType.getFee() / 365);
-            dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
+//            int dailyFee = (int) (memberType.getFee() / 365);
+//            dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
+            dto.setTip(DateUtils.parseDateToStringByCommon(DateUtils.afterDays(new Date(), 7)) + "前可全额退款");
         } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
             dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
         }
