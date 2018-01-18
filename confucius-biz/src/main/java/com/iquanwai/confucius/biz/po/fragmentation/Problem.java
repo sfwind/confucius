@@ -24,6 +24,7 @@ public class Problem {
     private String who; //适合人群
     private String how; //如何学习
     private String why; //为什么学习
+    private Integer updated;//是否更新
     private Boolean del; //是否删除(0-否,1-是)
     private Boolean trial = true; //试用版（0-否,1-是）
     private String abbreviation; // 缩略名
