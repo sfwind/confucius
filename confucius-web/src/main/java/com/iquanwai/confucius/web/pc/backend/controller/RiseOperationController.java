@@ -265,7 +265,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/reject", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> rejectApplication(LoginUser loginUser, @RequestBody ApproveDto approveDto) {
+    public ResponseEntity<Map<String, Object>> rejectApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -280,7 +280,7 @@ public class RiseOperationController {
             if(interviewRecord == null){
                 return WebUtils.error("更新失败");
             }
-            interviewRecord.setApprovalId(loginUser.getId());
+            interviewRecord.setApprovalId(loginUser.getProfileId());
             if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
                 return WebUtils.error("更新失败");
             }
@@ -304,7 +304,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/approve", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> approveApplication(LoginUser loginUser, @RequestBody ApproveDto approveDto) {
+    public ResponseEntity<Map<String, Object>> approveApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
         System.out.println(loginUser);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId()+"");
         operationLogService.log(operationLog);
@@ -320,7 +320,7 @@ public class RiseOperationController {
             if(interviewRecord == null){
                 return WebUtils.error("更新失败");
             }
-            interviewRecord.setApprovalId(loginUser.getId());
+            interviewRecord.setApprovalId(loginUser.getProfileId());
             if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
                 return WebUtils.error("更新失败");
             }
@@ -332,7 +332,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/ignore", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> ignoreApplication(LoginUser loginUser, @RequestBody ApproveDto approveDto) {
+    public ResponseEntity<Map<String, Object>> ignoreApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -347,7 +347,7 @@ public class RiseOperationController {
             if(interviewRecord == null){
                 return WebUtils.error("更新失败");
             }
-            interviewRecord.setApprovalId(loginUser.getId());
+            interviewRecord.setApprovalId(loginUser.getProfileId());
             if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
                 return WebUtils.error("更新失败");
             }
