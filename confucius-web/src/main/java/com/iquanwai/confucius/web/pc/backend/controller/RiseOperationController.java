@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
+import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.TableDto;
@@ -336,7 +337,11 @@ public class RiseOperationController {
                     if (quanwaiOrder != null) {
                         if (quanwaiOrder.getStatus().equals(QuanwaiOrder.PAID) || quanwaiOrder.getStatus().equals(QuanwaiOrder.REFUND_FAILED)) {
                             // 开始退款
-                            payService.refund(orderId, quanwaiOrder.getPrice());
+                            try {
+                                payService.refund(orderId, quanwaiOrder.getPrice());
+                            } catch (RefundException e){
+                                LOGGER.error("退款失败:{}", orderId);
+                            }
                         }
                     }
                 }

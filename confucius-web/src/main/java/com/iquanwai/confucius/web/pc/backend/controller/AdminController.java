@@ -3,6 +3,7 @@ package com.iquanwai.confucius.web.pc.backend.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
+import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.zk.ConfigNode;
 import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
@@ -117,14 +118,18 @@ public class AdminController {
                                                             @RequestBody RefundDto refundDto) {
 
         Assert.notNull(pcLoginUser, "用户不能为空");
-        payService.refund(refundDto.getOrderId(), Double.parseDouble(refundDto.getFee()));
-
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
                 .module("管理员")
                 .function("退款")
                 .action("退款")
                 .memo(refundDto.getOrderId());
         operationLogService.log(operationLog);
+
+        try {
+            payService.refund(refundDto.getOrderId(), Double.parseDouble(refundDto.getFee()));
+        } catch (RefundException e){
+            return WebUtils.error(e.getMessage());
+        }
 
         return WebUtils.success();
     }

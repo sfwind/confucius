@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -449,11 +450,13 @@ public class PayServiceImpl implements PayService {
                 logger.error("response is------\n" + alipayResponse.getBody());
                 messageService.sendAlarm("退款出错", "退款接口调用失败",
                         "高", "订单id:" + quanwaiOrder.getOrderId(), "msg:" + alipayResponse.getSubMsg() + ", error:" + alipayResponse.getMsg());
+                throw new RefundException(alipayResponse.getMsg());
             }
         } catch (AlipayApiException e) {
             logger.error(e.getLocalizedMessage(), e);
             messageService.sendAlarm("退款出错", "退款接口调用失败",
                     "高", "订单id:" + quanwaiOrder.getOrderId(), "msg:" + e.getLocalizedMessage());
+            throw new RefundException(e.getLocalizedMessage());
         }
     }
 
@@ -493,6 +496,7 @@ public class PayServiceImpl implements PayService {
                 logger.error("response is------\n" + response);
                 messageService.sendAlarm("退款出错", "退款接口调用失败",
                         "高", "订单id:" + quanwaiOrder.getOrderId(), "msg:" + reply.getReturn_msg() + ", error:" + reply.getErr_code_des());
+                throw new RefundException(reply.getReturn_msg());
             } else {
                 quanwaiOrderDao.refundOrder(quanwaiOrder.getOrderId(), fee, refundOrder.getOut_refund_no());
             }
