@@ -284,7 +284,7 @@ public class SignupServiceImpl implements SignupService {
 
         QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), fee, orderPair.getRight(),
-                memberTypeId + "", "商学院申请", QuanwaiOrder.BS_APPLICATION);
+                memberTypeId + "", "商学院申请", QuanwaiOrder.BS_APPLICATION, payType);
 
         // 插入训练营报名数据
         BusinessSchoolApplicationOrder bsOrder = new BusinessSchoolApplicationOrder();
