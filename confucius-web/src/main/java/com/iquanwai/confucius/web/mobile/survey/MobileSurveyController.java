@@ -7,10 +7,10 @@ import com.iquanwai.confucius.web.resolver.LoginUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * Created by nethunder on 2017/1/29.
  */
-@Controller
+@RestController
 @RequestMapping("/survey")
 public class MobileSurveyController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -29,7 +29,7 @@ public class MobileSurveyController {
     private OperationLogService operationLogService;
 
     @RequestMapping(value = "/wjx", method = RequestMethod.GET)
-    public String redirectToSurvey(LoginUser loginUser,
+    public void redirectToSurvey(LoginUser loginUser,
                                  HttpServletRequest request,
                                  HttpServletResponse response,
                                  @RequestParam("activity") String activity) {
@@ -53,13 +53,19 @@ public class MobileSurveyController {
                 response.sendRedirect(redirectUrl);
             } catch (NumberFormatException e) {
                 logger.error("问卷参数错误{}", activity);
-                return "/404.jsp";
+                try {
+                    response.sendRedirect("/404.jsp");
+                } catch (Exception e1) {
+                    logger.error("跳转异常页面失败", e);
+                }
             } catch (IOException e) {
-                logger.error("跳转问卷星失败", e);
-                return "/403.jsp";
+                logger.error("跳转问卷星失败:", e);
+                try {
+                    response.sendRedirect("/403.jsp");
+                } catch (Exception e1) {
+                    logger.error("跳转异常页面失败", e);
+                }
             }
         }
-
-        return null;
     }
 }
