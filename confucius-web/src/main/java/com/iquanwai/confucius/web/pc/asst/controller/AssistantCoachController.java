@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.pc.asst.controller;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.dao.apply.BusinessApplySubmitDao;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
@@ -58,8 +57,6 @@ public class AssistantCoachController {
     private BusinessSchoolService businessSchoolService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private BusinessApplySubmitDao businessApplySubmitDao;
 
     @RequestMapping("/application/{problemId}")
     public ResponseEntity<Map<String, Object>> getUnderCommentApplication(PCLoginUser pcLoginUser,
@@ -359,7 +356,7 @@ public class AssistantCoachController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
-            List<BusinessApplySubmit> businessApplySubmits = businessApplySubmitDao.loadByApplyId(application.getId());
+            List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             businessApplySubmits.stream().forEach(businessApplySubmit -> {
                 Integer questionId = businessApplySubmit.getQuestionId();
                 if(questionId == 14){

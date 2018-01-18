@@ -220,4 +220,9 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         return businessSchoolApplicationDao.assignInterviewer(applyId, interviewer);
     }
 
+    @Override
+    public List<BusinessApplySubmit> loadByApplyId(Integer applyId) {
+        return businessApplySubmitDao.loadByApplyId(applyId);
+    }
+
 }

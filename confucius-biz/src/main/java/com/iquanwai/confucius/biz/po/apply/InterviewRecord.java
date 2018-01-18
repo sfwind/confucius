@@ -9,6 +9,10 @@ public class InterviewRecord {
     private Integer profileId;
     private Integer interviewerId;
     /**
+     * 审核人id
+     */
+    private Integer approvalId;
+    /**
      * 申请id号
      */
     private Integer applyId;

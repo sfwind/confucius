@@ -588,7 +588,11 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             return interviewRecordDao.insert(interviewRecord);
         } else {
             interviewRecord.setId(existInterviewRecord.getId());
-            return interviewRecordDao.update(interviewRecord);
+            //判断是管理员还是助教
+            if(interviewRecord.getApprovalId()!=null){
+                return interviewRecordDao.updateByAdmin(interviewRecord);
+            }
+            return interviewRecordDao.updateByAssist(interviewRecord);
         }
     }
 }
