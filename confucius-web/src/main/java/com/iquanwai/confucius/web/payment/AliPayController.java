@@ -10,8 +10,10 @@ import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -63,6 +65,8 @@ public class AliPayController {
     private PayService payService;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private SignupService signupService;
 
     /**
      * 测试接口，待删除
@@ -122,7 +126,6 @@ public class AliPayController {
     @RequestMapping(value = "callback/notify", method = RequestMethod.POST)
     public void alipayNotifyCallback(HttpServletRequest request, HttpServletResponse response) {
         try {
-            //获取支付宝POST过来反馈信息
             PrintWriter out = response.getWriter();
             Map<String, String> params = Maps.newHashMap();
             Map requestParams = request.getParameterMap();
@@ -134,59 +137,29 @@ public class AliPayController {
                     valueStr = (i == values.length - 1) ? valueStr + values[i]
                             : valueStr + values[i] + ",";
                 }
-                //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
-                //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
                 params.put(name, valueStr);
             }
-            //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
             //商户订单号
-            String outTradeNo = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"), "UTF-8");
+            String outTradeNo = request.getParameter("out_trade_no");
             //支付宝交易号
-            String tradeNo = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"), "UTF-8");
+            String tradeNo = request.getParameter("trade_no");
             //交易状态
-            String tradeStatus = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"), "UTF-8");
+            String tradeStatus = request.getParameter("trade_status");
             //交易结束时间
-            String paymentTime = new String(request.getParameter("gmt_payment").getBytes("ISO-8859-1"), "UTF-8");
+            String paymentTime = request.getParameter("gmt_payment");
 
             PayCallback payCallback = new PayCallback();
             payCallback.setTime_end(paymentTime);
             payCallback.setTransaction_id(tradeNo);
             payCallback.setOut_trade_no(outTradeNo);
             payCallback.setResult_code(tradeStatus);
-            //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
-            //计算得出通知验证结果
-            //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
             boolean verifyResult = AlipaySignature.rsaCheckV1(params, ConfigUtils.getValue("alipay.public.key"),
                     "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
             logger.info("进入回调.\n 订单号：{} \n 交易号：{} \n 交易状态：{} \n 验签结果：{}", outTradeNo, tradeNo, tradeStatus, verifyResult);
             if (verifyResult) {
                 //验证成功
-                //////////////////////////////////////////////////////////////////////////////////////////
-                //请在这里加上商户的业务逻辑程序代码
-                //——请根据您的业务逻辑来编写程序（以下代码仅作参考）——
-                if (ALIPAY_TRADE_FINISHED.equals(tradeStatus)) {
-                    //判断该笔订单是否在商户网站中已经做过处理
-                    //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
-                    //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
-                    //如果有做过处理，不执行商户的业务程序
-                    tradeBusinessDeal(payCallback);
-                    //注意：
-                    //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
-                    //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
-                } else if (ALIPAY_TRADE_SUCCESS.equals(tradeStatus)) {
-                    //判断该笔订单是否在商户网站中已经做过处理
-                    //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
-                    //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
-                    //如果有做过处理，不执行商户的业务程序
-                    tradeBusinessDeal(payCallback);
-                    //注意：
-                    //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
-                }
-
-                //——请根据您的业务逻辑来编写程序（以上代码仅作参考）——
+                tradeBusinessDeal(payCallback);
                 try {
-                    response.setHeader("Content-Type", "text/plain");
-                    //请不要修改或删除
                     out.println("success");
                     response.flushBuffer();
                 } catch (IOException e1) {
@@ -194,10 +167,8 @@ public class AliPayController {
                 } finally {
                     IOUtils.closeQuietly(out);
                 }
-                //////////////////////////////////////////////////////////////////////////////////////////
             } else {//验证失败
                 try {
-                    response.setHeader("Content-Type", "text/plain");
                     out.println("fail");
                     response.flushBuffer();
                 } catch (IOException e1) {
@@ -220,12 +191,29 @@ public class AliPayController {
                 payCallback.getResult_code());
         ThreadPool.execute(() -> {
             try {
-                payService.handlePayResult(payCallback);
-                if ("TRADE_SUCCESS".equals(payCallback.getResult_code())) {
-                    payService.payMemberSuccess(payCallback.getOut_trade_no());
-                } else {
-                    logger.error("{}付费失败", payCallback.getOut_trade_no());
+                QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(payCallback.getOut_trade_no());
+                if (quanwaiOrder.getStatus() != QuanwaiOrder.UNDER_PAY) {
+                    return;
                 }
+                payService.handlePayResult(payCallback);
+//                if (ALIPAY_TRADE_FINISHED.equals(payCallback.getResult_code())) {
+//                    //注意：
+//                    //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
+//                    //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
+//
+//                } else if (ALIPAY_TRADE_SUCCESS.equals(payCallback.getResult_code())) {
+//                    //注意：
+//                    //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
+//                }
+
+                if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+                    payService.payMemberSuccess(quanwaiOrder.getOrderId());
+                } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
+                    signupService.payMonthlyCampSuccess(quanwaiOrder.getOrderId());
+                } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
+                    signupService.payApplicationSuccess(quanwaiOrder.getOrderId());
+                }
+
             } catch (Exception e) {
                 logger.error("rise会员支付结果回调处理失败", e);
             }
