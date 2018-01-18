@@ -29,7 +29,7 @@ public class MobileSurveyController {
     private OperationLogService operationLogService;
 
     @RequestMapping(value = "/wjx", method = RequestMethod.GET)
-    public void redirectToSurvey(LoginUser loginUser,
+    public String redirectToSurvey(LoginUser loginUser,
                                  HttpServletRequest request,
                                  HttpServletResponse response,
                                  @RequestParam("activity") String activity) {
@@ -53,19 +53,13 @@ public class MobileSurveyController {
                 response.sendRedirect(redirectUrl);
             } catch (NumberFormatException e) {
                 logger.error("问卷参数错误{}", activity);
-                try {
-                    response.sendRedirect("/404.jsp");
-                } catch (Exception e1) {
-                    logger.error("跳转异常页面失败", e);
-                }
+                return "/404.jsp";
             } catch (IOException e) {
-                logger.error("跳转问卷星失败:", e);
-                try {
-                    response.sendRedirect("/403.jsp");
-                } catch (Exception e1) {
-                    logger.error("跳转异常页面失败", e);
-                }
+                logger.error("跳转问卷星失败", e);
+                return "/403.jsp";
             }
         }
+
+        return null;
     }
 }
