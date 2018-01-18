@@ -22,6 +22,7 @@ public class Knowledge {
     private Integer keynoteAudioId;// 要点语音id
     private Integer audioId; //知识点语音id
     private String pic; //图片链接
+    private Integer updated;//更新字段
 
     private Integer appear; //非db字段,是否出现过
     private Integer chapter; //非db字段,章节

@@ -31,6 +31,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     private final static int REVIEW_KNOWLEDGE_ID = 59;
 
+
     @Override
     public Knowledge loadKnowledge(Integer knowledgeId) {
         Knowledge knowledge = knowledgeDao.load(Knowledge.class, knowledgeId);
@@ -57,6 +58,12 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     @Override
     public Integer updateKnowledge(Knowledge knowledge, Integer problemId) {
         if (knowledge.getId() != 0) {
+            Knowledge updateKnowledge = knowledgeDao.load(Knowledge.class,knowledge.getId());
+            if(updateKnowledge.getUpdated() == 2){
+                knowledge.setUpdated(2);
+            }else{
+                knowledge.setUpdated(1);
+            }
             return knowledgeDao.updateKnowledge(knowledge);
             //插入知识点操作
         } else {

@@ -78,6 +78,13 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public int saveProblem(Problem problem) {
         if (problem.getId() != 0) {
+            Problem updateProblem = problemDao.load(Problem.class,problem.getId());
+            //如果已经是插入，则不更新为1
+            if(updateProblem.getUpdated() == 2){
+                problem.setUpdated(2);
+            } else{
+                problem.setUpdated(1);
+            }
             problemDao.updateProblem(problem);
             return problem.getId();
         } else {
