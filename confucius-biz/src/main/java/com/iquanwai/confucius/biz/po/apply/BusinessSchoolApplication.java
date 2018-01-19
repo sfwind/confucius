@@ -21,7 +21,7 @@ public class BusinessSchoolApplication {
     private Boolean del;
     private Boolean isDuplicate;
     private String comment;
-    private Date SubmitTime;
+    private Date submitTime;
     private Date dealTime;
     private Date addTime;
     private String orderId;
