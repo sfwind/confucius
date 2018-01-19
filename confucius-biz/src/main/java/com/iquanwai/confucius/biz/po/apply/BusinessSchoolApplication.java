@@ -26,6 +26,7 @@ public class BusinessSchoolApplication {
     private String orderId;
     private Integer lastVerified;
     private Integer interviewer;
+    private Boolean valid;
 
     private String originMemberTypeName;
 
