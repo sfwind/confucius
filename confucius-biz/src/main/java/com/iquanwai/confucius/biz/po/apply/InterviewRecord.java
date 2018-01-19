@@ -72,6 +72,11 @@ public class InterviewRecord {
     private String applyReason;
 
     /**
+     * 备注信息
+     */
+    private String remark;
+
+    /**
      * 是否删除
      */
     private Integer del;
