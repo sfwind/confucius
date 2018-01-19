@@ -70,6 +70,7 @@ public class PayServiceImpl implements PayService {
     private static final String BS_APPLICATION_PAY_CALLBACK_PATH = "/wx/pay/result/application/callback";
 
     private static final String ALIPAY_CALLBACK_PATH = "/ali/pay/callback/notify";
+    private static final String ALIPAY_RETURN_PATH = "/pay/alipay/callback/return";
 
 
     @PostConstruct
@@ -517,7 +518,7 @@ public class PayServiceImpl implements PayService {
         //创建API对应的request
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
         //在公共参数中设置回跳和通知地址
-//        alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
+        alipayRequest.setReturnUrl(ConfigUtils.getAlipayNotifyDomain() + ALIPAY_RETURN_PATH);
         alipayRequest.setNotifyUrl(ConfigUtils.getAlipayNotifyDomain() + ALIPAY_CALLBACK_PATH);
         //填充业务参数
         AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
