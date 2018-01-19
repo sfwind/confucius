@@ -70,7 +70,7 @@ public class PayServiceImpl implements PayService {
     private static final String BS_APPLICATION_PAY_CALLBACK_PATH = "/wx/pay/result/application/callback";
 
     private static final String ALIPAY_CALLBACK_PATH = "/ali/pay/callback/notify";
-    private static final String ALIPAY_RETURN_PATH = "/pay/alipay/callback/return";
+    private static final String ALIPAY_RETURN_PATH = "/pay/alipay/return";
 
 
     @PostConstruct
