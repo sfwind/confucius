@@ -197,6 +197,11 @@
             <artifactId>spring-rabbit</artifactId>
         </dependency>
         <dependency>
+            <groupId>alipay</groupId>
+            <artifactId>alipay-h5</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
         </dependency>

@@ -23,14 +23,14 @@ public class QuanwaiOrderDao extends DBUtil {
     public void insert(QuanwaiOrder quanwaiOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
         String insertSql = "INSERT INTO QuanwaiOrder(OrderId, Openid, Price, Discount, PrepayId, " +
-                " Status, CreateTime, GoodsId, GoodsName, GoodsType, RefundTime) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                " Status, CreateTime, GoodsId, GoodsName, GoodsType, PayType, RefundTime) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
                     quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
                     quanwaiOrder.getDiscount(), quanwaiOrder.getPrepayId(), quanwaiOrder.getStatus(),
                     quanwaiOrder.getCreateTime(), quanwaiOrder.getGoodsId(), quanwaiOrder.getGoodsName(),
-                    quanwaiOrder.getGoodsType(), quanwaiOrder.getRefundTime());
+                    quanwaiOrder.getGoodsType(), quanwaiOrder.getPayType(), quanwaiOrder.getRefundTime());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

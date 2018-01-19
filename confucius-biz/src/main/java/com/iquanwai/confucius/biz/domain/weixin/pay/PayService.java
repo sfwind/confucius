@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.pay;
 
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+
 import java.util.Map;
 
 /**
@@ -64,4 +66,10 @@ public interface PayService {
     String LOGIN_USER_RELOAD_TOPIC ="login_user_reload";
 
 
+    /**
+     * 生成阿里订单url
+     * @param order 订单
+     * @return 订单url
+     */
+    String buildAlipayParam(QuanwaiOrder order);
 }

@@ -351,12 +351,32 @@ public class ConfigUtils {
     public static String replaceDomainName(String url, String domainName) {
         String urlPattern = "^((http://)|(https://))?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}(/)";
         //替换
-        return url.replaceAll(urlPattern, "http://" + domainName+"/");
+        return url.replaceAll(urlPattern, "http://" + domainName + "/");
     }
 
-    public static String getCampPayInfo(){
+    public static String getCampPayInfo() {
         return getValue("camp.pay.json.info");
     }
 
+
+    public static String getAlipayNotifyDomain() {
+        return getValue("ali.pay.notify.domain");
+    }
+
+    public static String getAlipayAppId(){
+        return getValue("alipay.appid");
+    }
+
+    public static String getAlipayPrivateKey(){
+        return getValue("alipay.private.key");
+    }
+
+    public static String getAlipayPublicKey(){
+        return getValue("alipay.public.key");
+    }
+
+    public static String getAlipayGateway(){
+        return getValue("alipay.gateway");
+    }
 
 }
