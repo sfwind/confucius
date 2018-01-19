@@ -634,6 +634,22 @@ public class SignupController {
         }
     }
 
+    @RequestMapping(value = "/order/success", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> orderQuerySuccess(LoginUser loginUser, @RequestParam String orderId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("订单")
+                .function("支付状态")
+                .action("查询是否支付成功")
+                .memo(orderId);
+        operationLogService.log(operationLog);
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+        if (quanwaiOrder != null && quanwaiOrder.getStatus() == QuanwaiOrder.PAID) {
+            return WebUtils.success();
+        } else {
+            return WebUtils.error("还没有支付");
+        }
+    }
+
 
     private boolean canUseCoupon(GoodsInfoDto goodsInfoDto) {
         //申请商学院不能用优惠券
