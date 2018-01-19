@@ -644,7 +644,10 @@ public class SignupController {
         operationLogService.log(operationLog);
         QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
         if (quanwaiOrder != null && quanwaiOrder.getStatus() == QuanwaiOrder.PAID) {
-            return WebUtils.success();
+            PaymentDto dto = new PaymentDto();
+            dto.setGoodsId(Integer.parseInt(quanwaiOrder.getGoodsId()));
+            dto.setGoodsType(quanwaiOrder.getGoodsType());
+            return WebUtils.result(dto);
         } else {
             return WebUtils.error("还没有支付");
         }
