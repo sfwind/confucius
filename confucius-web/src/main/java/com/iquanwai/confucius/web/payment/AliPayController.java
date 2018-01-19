@@ -4,17 +4,14 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConstants;
 import com.alipay.api.domain.AlipayTradeQueryModel;
-import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeQueryRequest;
-import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.ThreadPool;
@@ -68,43 +65,6 @@ public class AliPayController {
     @Autowired
     private SignupService signupService;
 
-    /**
-     * 测试接口，待删除
-     */
-    @RequestMapping(value = "/form")
-    public void getPayForm(HttpServletRequest httpRequest,
-                           HttpServletResponse httpResponse) throws Exception {
-
-        AlipayClient alipayClient = restfulHelper.initAlipayClient();
-
-        //获得初始化的AlipayClient
-        AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
-        //创建API对应的request
-        alipayRequest.setReturnUrl("http://zzk.confucius.mobi/ali/pay/callback/return");
-        //在公共参数中设置回跳和通知地址
-        alipayRequest.setNotifyUrl("http://zzk.confucius.mobi/ali/pay/callback/notify");
-        //填充业务参数
-        AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
-        model.setOutTradeNo(CommonUtils.randomString(32));
-        model.setTotalAmount("0.01");
-        model.setBody("描述");
-        model.setSubject("圈外商学院");
-        model.setProductCode("QUICK_WAP_PAY");
-        model.setTimeoutExpress("2m");
-        alipayRequest.setBizModel(model);
-        String form = "";
-        try {
-            //调用SDK生成表单
-            form = alipayClient.pageExecute(alipayRequest).getBody();
-        } catch (AlipayApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        httpResponse.setContentType("text/html;charset=" + "UTF-8");
-        //直接将完整的表单html输出到页面
-        httpResponse.getWriter().write(form);
-        httpResponse.getWriter().flush();
-        httpResponse.getWriter().close();
-    }
 
     @RequestMapping(value = "order/query", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> queryOrder(@RequestParam String order) throws AlipayApiException {
@@ -195,7 +155,6 @@ public class AliPayController {
                 if (quanwaiOrder.getStatus() != QuanwaiOrder.UNDER_PAY) {
                     return;
                 }
-                payService.handlePayResult(payCallback);
 //                if (ALIPAY_TRADE_FINISHED.equals(payCallback.getResult_code())) {
 //                    //注意：
 //                    //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
@@ -205,15 +164,16 @@ public class AliPayController {
 //                    //注意：
 //                    //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
 //                }
-
-                if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
-                    payService.payMemberSuccess(quanwaiOrder.getOrderId());
-                } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
-                    signupService.payMonthlyCampSuccess(quanwaiOrder.getOrderId());
-                } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
-                    signupService.payApplicationSuccess(quanwaiOrder.getOrderId());
+                if (ALIPAY_TRADE_FINISHED.equals(payCallback.getResult_code()) || ALIPAY_TRADE_SUCCESS.equals(payCallback.getResult_code())) {
+                    payService.handlePayResult(payCallback);
+                    if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+                        payService.payMemberSuccess(quanwaiOrder.getOrderId());
+                    } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
+                        signupService.payMonthlyCampSuccess(quanwaiOrder.getOrderId());
+                    } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
+                        signupService.payApplicationSuccess(quanwaiOrder.getOrderId());
+                    }
                 }
-
             } catch (Exception e) {
                 logger.error("rise会员支付结果回调处理失败", e);
             }
