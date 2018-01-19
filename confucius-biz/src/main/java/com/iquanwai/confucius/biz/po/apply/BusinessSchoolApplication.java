@@ -21,6 +21,7 @@ public class BusinessSchoolApplication {
     private Boolean del;
     private Boolean isDuplicate;
     private String comment;
+    private Date SubmitTime;
     private Date dealTime;
     private Date addTime;
     private String orderId;
@@ -34,5 +35,6 @@ public class BusinessSchoolApplication {
     public static final int APPROVE = 1;
     public static final int REJECT = 2;
     public static final int IGNORE = 3;
+    public static final int AUTO_CLOSE = 4;
 
 }
