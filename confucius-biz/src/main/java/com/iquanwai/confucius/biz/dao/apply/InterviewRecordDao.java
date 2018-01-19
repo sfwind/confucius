@@ -22,14 +22,14 @@ public class InterviewRecordDao extends DBUtil {
     public Integer insert(InterviewRecord interviewRecord) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO InterviewRecord(ProfileId,InterviewerId,ApprovalId,ApplyId,InterviewTime,Question,FocusChannel,FocusChannelName,TouchDuration,TouchDurationName,ApplyEvent,ApplyEventName," +
-                "LearningWill,PotentialScore,ApplyAward,ApplyReason) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
+                "LearningWill,PotentialScore,ApplyAward,ApplyReason,Remark) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
 
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), interviewRecord.getProfileId(), interviewRecord.getInterviewerId(),interviewRecord.getApprovalId(),interviewRecord.getApplyId(), interviewRecord.getInterviewTime(), interviewRecord.getQuestion(),
                     interviewRecord.getFocusChannel(),interviewRecord.getFocusChannelName(), interviewRecord.getTouchDuration(),
                     interviewRecord.getTouchDurationName(),interviewRecord.getApplyEvent(),interviewRecord.getApplyEventName(),
                     interviewRecord.getLearningWill(), interviewRecord.getPotentialScore(),
-                    interviewRecord.getApplyAward(), interviewRecord.getApplyReason());
+                    interviewRecord.getApplyAward(), interviewRecord.getApplyReason(),interviewRecord.getRemark());
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -40,12 +40,12 @@ public class InterviewRecordDao extends DBUtil {
     public Integer updateByAssist(InterviewRecord interviewRecord) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = " UPDATE InterviewRecord SET InterviewTime =?,Question =?,FocusChannel = ?,FocusChannelName = ? ,TouchDuration=?,TouchDurationName=?,ApplyEvent=?,ApplyEventName = ?,LearningWill = ?,  " +
-                "  PotentialScore = ?,ApplyAward = ?,ApplyReason = ? WHERE ID = ? ";
+                "  PotentialScore = ?,ApplyAward = ?,ApplyReason = ?,Remark = ? WHERE ID = ? ";
         try {
            return runner.update(sql,interviewRecord.getInterviewTime(),interviewRecord.getQuestion(),interviewRecord.getFocusChannel(),
                    interviewRecord.getFocusChannelName(),interviewRecord.getTouchDuration(),interviewRecord.getTouchDurationName(),
                    interviewRecord.getApplyEvent(),interviewRecord.getApplyEventName(),
-                    interviewRecord.getLearningWill(),interviewRecord.getPotentialScore(),interviewRecord.getApplyAward(),interviewRecord.getApplyReason(),interviewRecord.getId());
+                    interviewRecord.getLearningWill(),interviewRecord.getPotentialScore(),interviewRecord.getApplyAward(),interviewRecord.getApplyReason(),interviewRecord.getRemark(),interviewRecord.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);
         }
@@ -55,12 +55,12 @@ public class InterviewRecordDao extends DBUtil {
     public Integer updateByAdmin(InterviewRecord interviewRecord){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = " UPDATE InterviewRecord SET ApprovalId = ?, InterviewTime =?,Question =?,FocusChannel = ?,FocusChannelName = ? ,TouchDuration=?,TouchDurationName=?,ApplyEvent=?,ApplyEventName = ?,LearningWill = ?,  " +
-                "  PotentialScore = ?,ApplyAward = ?,ApplyReason = ? WHERE ID = ? ";
+                "  PotentialScore = ?,ApplyAward = ?,ApplyReason = ?,Remark = ? WHERE ID = ? ";
         try {
             return runner.update(sql,interviewRecord.getApprovalId(),interviewRecord.getInterviewTime(),interviewRecord.getQuestion(),interviewRecord.getFocusChannel(),
                     interviewRecord.getFocusChannelName(),interviewRecord.getTouchDuration(),interviewRecord.getTouchDurationName(),
                     interviewRecord.getApplyEvent(),interviewRecord.getApplyEventName(),
-                    interviewRecord.getLearningWill(),interviewRecord.getPotentialScore(),interviewRecord.getApplyAward(),interviewRecord.getApplyReason(),interviewRecord.getId());
+                    interviewRecord.getLearningWill(),interviewRecord.getPotentialScore(),interviewRecord.getApplyAward(),interviewRecord.getApplyReason(),interviewRecord.getRemark(),interviewRecord.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);
         }
