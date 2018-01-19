@@ -16,7 +16,7 @@ import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.po.apply.AuditionReward;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -218,6 +218,11 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     @Override
     public Integer assignInterviewer(Integer applyId, Integer interviewer) {
         return businessSchoolApplicationDao.assignInterviewer(applyId, interviewer);
+    }
+
+    @Override
+    public List<BusinessApplySubmit> loadByApplyId(Integer applyId) {
+        return businessApplySubmitDao.loadByApplyId(applyId);
     }
 
 }

@@ -3,22 +3,27 @@ package com.iquanwai.confucius.web.pc.asst.controller;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
+import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.fragmentation.Problem;
-import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
+import com.iquanwai.confucius.biz.po.TableDto;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
+import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.ClassNameGroups;
 import com.iquanwai.confucius.web.pc.asst.dto.Group;
-import com.iquanwai.confucius.web.pc.backend.dto.DiscussDto;
-import com.iquanwai.confucius.web.pc.backend.dto.ProblemCatalogDto;
-import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
-import com.iquanwai.confucius.web.pc.backend.dto.RefreshListDto;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +53,10 @@ public class AssistantCoachController {
     private OperationManagementService operationManagementService;
     @Autowired
     private ProblemService problemService;
+    @Autowired
+    private BusinessSchoolService businessSchoolService;
+    @Autowired
+    private AccountService accountService;
 
     @RequestMapping("/application/{problemId}")
     public ResponseEntity<Map<String, Object>> getUnderCommentApplication(PCLoginUser pcLoginUser,
@@ -282,4 +294,170 @@ public class AssistantCoachController {
 
        return WebUtils.result(assistantCoachService.getUnderCommentApplicationsByClassNameAndGroup(problemId,className,groupId));
     }
+
+    @RequestMapping("/load/business/applications")
+    public ResponseEntity<Map<String,Object>> loadBusinessApplications(PCLoginUser loginUser,@ModelAttribute Page page){
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("助教管理")
+                .action("加载商学院审批");
+        operationLogService.log(operationLog);
+        if (page == null) {
+            page = new Page();
+        }
+        page.setPageSize(20);
+
+        List<BusinessSchoolApplication> applications = assistantCoachService.loadByInterviewer(loginUser.getProfileId(),page);
+
+        TableDto<ApplicationDto> result = new TableDto<>();
+        result.setPage(page);
+        result.setData(getApplictionDto(applications));
+        return WebUtils.result(result);
+    }
+
+    @RequestMapping(value = "/add/interview/record",method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> addInterviewRecord(PCLoginUser loginUser, @RequestBody InterviewRecord interviewRecord){
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("助教管理")
+                .action("添加面试记录");
+        operationLogService.log(operationLog);
+        interviewRecord.setInterviewerId(loginUser.getProfileId());
+        if(assistantCoachService.addInterviewRecord(interviewRecord)==-1){
+            return WebUtils.error("添加面试记录失败");
+        }
+        return WebUtils.success();
+    }
+
+
+    private List<ApplicationDto> getApplictionDto(List<BusinessSchoolApplication> applications){
+        final List<String> openidList;
+        if (applications != null && applications.size() > 0) {
+            //获取黑名单用户
+            openidList = accountService.loadBlackListOpenIds();
+        } else {
+            openidList = null;
+        }
+        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
+            Profile profile = accountService.getProfile(application.getProfileId());
+            ApplicationDto dto = this.initApplicationDto(application);
+            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
+            dto.setQuestionList(questions);
+            // 查询是否会员
+            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
+            if (riseMember != null) {
+                dto.setMemberTypeId(riseMember.getMemberTypeId());
+                dto.setMemberType(riseMember.getName());
+            }
+            dto.setApplyId(application.getId());
+            dto.setInterviewRecord(assistantCoachService.loadInterviewRecord(application.getId()));
+            dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
+            dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
+            dto.setNickname(profile.getNickname());
+            dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
+            dto.setIsBlack("否");
+            List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
+            businessApplySubmits.stream().forEach(businessApplySubmit -> {
+                Integer questionId = businessApplySubmit.getQuestionId();
+                if(questionId == 14){
+                    dto.setInterviewTime(businessApplySubmit.getChoiceText());
+                }
+                if(questionId== 5 || questionId == 22){
+                    dto.setWorkYear(businessApplySubmit.getChoiceText());
+                }
+                if(questionId == 2 || questionId == 19){
+                    dto.setIndustry(businessApplySubmit.getChoiceText());
+                }
+                if(questionId == 6 || questionId == 23){
+                    dto.setEducation(businessApplySubmit.getChoiceText());
+                }
+                if(questionId == 7 || questionId == 24){
+                    dto.setCollege(businessApplySubmit.getUserValue());
+                }
+                if(questionId == 8 || questionId == 25){
+                    dto.setLocation(businessApplySubmit.getUserValue());
+                }
+                if( questionId == 1 || questionId == 18){
+                    dto.setJob(businessApplySubmit.getChoiceText());
+                }
+            });
+
+            int lastVerifiedCode = application.getLastVerified();
+
+            if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
+            } else {
+                dto.setVerifiedResult("未知");
+            }
+
+            if (openidList != null && (openidList.size() > 0)) {
+                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+                    dto.setIsBlack("是");
+                }
+            }
+            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
+            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
+            dto.setOrderId(application.getOrderId());
+            if (application.getInterviewer() != null) {
+                Profile interviewer = accountService.getProfile(application.getInterviewer());
+                dto.setInterviewer(application.getInterviewer());
+                dto.setInterviewerName(interviewer.getNickname());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return dtoGroup;
+    }
+
+    private String getMemberName(Integer type) {
+        if (type == null) {
+            return "非会员";
+        }
+        switch (type) {
+            case RiseMember.ELITE:
+                return "商学院";
+            case RiseMember.HALF_ELITE:
+                return "精英半年";
+            case RiseMember.HALF:
+                return "专业半年";
+            case RiseMember.ANNUAL:
+                return "专业一年";
+            case RiseMember.CAMP:
+                return "训练营";
+            default:
+                return "异常数据";
+        }
+    }
+
+    private ApplicationDto initApplicationDto(BusinessSchoolApplication application) {
+        ApplicationDto dto = new ApplicationDto();
+        dto.setSubmitId(application.getSubmitId());
+        dto.setIsDuplicate(application.getIsDuplicate() ? "是" : "否");
+        if (application.getCoupon() != null) {
+            dto.setCoupon(new BigDecimal(application.getCoupon()).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        } else {
+            dto.setCoupon("无");
+        }
+        dto.setOriginMemberType(application.getOriginMemberType());
+        dto.setDeal(application.getDeal());
+        dto.setComment(application.getComment());
+        dto.setId(application.getId());
+        dto.setProfileId(application.getProfileId());
+        dto.setOpenid(application.getOpenid());
+        dto.setStatus(application.getStatus());
+        dto.setCheckTime(application.getCheckTime() == null ? "未审核" : DateUtils.parseDateToString(application.getCheckTime()));
+        dto.setDel(application.getDel());
+        return dto;
+    }
+
+
 }

@@ -1,12 +1,14 @@
 package com.iquanwai.confucius.web.course.dto.backend;
 
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import lombok.Data;
 
 import java.util.List;
 
 /**
  * Created by nethunder on 2017/9/28.
+ * 返回给前端的商学院申请Dto
  */
 @Data
 public class ApplicationDto {
@@ -66,22 +68,6 @@ public class ApplicationDto {
      */
     private String orderId;
 
-    private String q1Answer; // 1. 请选择您目前从事的行业
-    private String q2Answer; // 2. 请选择您目前从事的职业：
-    private String q3Answer; // 3. 请选择您的职位层级：
-    private String q4Answer; //4. 请选择您目前所在公司的企业性质：
-    private String q5Answer;     // 	5. 请填写您的工作年限（请填写数字，暂无工作经验请填0）
-    private String q6Answer;     // 6. 请选择您的最高学历
-    private String q7Answer;     // 7.1 请选择您获取最高学历的国内高校名称：
-    private String q8Answer;     // 7.2 如您毕业于海外高校，请填写您所毕业的海外高校名称：
-    private String q9Answer;     // 8.1 请选择你所在的国内城市（方便我们邀请您加入校友会和当地活动）:
-    private String q10Answer;     // 	8.2 如果您长期居住在海外，请填写你所在的海外国家和城市:
-    private String q11Answer;     // 9. 请描述您加入圈外商学院的成长目标（如果您有其他任何有助于申请的信息，也可以在此留言告诉我们）
-    private String q12Answer;     // 10. 您是否要申请奖学金？（奖学金视申请词而定，在100-300不等。极少数特别有诚意者，将有机会半免；奖学金申请结果将与商学院申请结果共同发放）
-    private String q13Answer;     // 11. 请填写您的奖学金申请词，告诉我们：为什么应该给你奖学金
-    private String q14Answer;     // 12. 请输入您的手机号码（仅用于重要申请消息通知，不会泄露给第三方或用于其他商业用途）：
-    private String q15Answer;     // 13. 您的微信号（非微信昵称，而是微信ID）：
-
     List<BusinessApplyQuestion> questionList;
 
 
@@ -96,4 +82,45 @@ public class ApplicationDto {
     private String verifiedResult;
     private Integer interviewer;
     private String interviewerName;
+
+    /**
+     * 申请id
+     */
+    private Integer applyId;
+    /**
+     * 面试时间
+     */
+    private String interviewTime;
+    /**
+     * 工作时间
+     */
+    private String workYear;
+    /**
+     * 工作职责
+     */
+    private String industry;
+    /**
+     * 学历
+     */
+    private String education;
+
+    /**
+     * 院校名称
+     */
+    private String college;
+
+    /**
+     * 所在地
+     */
+    private String location;
+    /**
+     * 当前行业
+      */
+    private String job;
+
+    /**
+     * 面试记录
+     */
+    private InterviewRecord interviewRecord;
+
 }

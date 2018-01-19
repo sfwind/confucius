@@ -1,7 +1,8 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -102,4 +103,9 @@ public interface BusinessSchoolService {
      * @return 分配结果
      */
     Integer assignInterviewer(Integer applyId, Integer interviewer);
+
+    /**
+     * 加载商学院申请提交数据
+     */
+   List<BusinessApplySubmit> loadByApplyId(Integer applyId);
 }

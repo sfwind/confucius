@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
+import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
@@ -14,7 +15,9 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.TableDto;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
@@ -76,6 +79,8 @@ public class RiseOperationController {
     private SignupService signupService;
     @Autowired
     private PayService payService;
+    @Autowired
+    private AssistantCoachService assistantCoachService;
 
 
     private static final String SEARCH_TOPIC = "business_school_application_search";
@@ -253,72 +258,15 @@ public class RiseOperationController {
         page.setPageSize(20);
 
         List<BusinessSchoolApplication> applications = businessSchoolService.loadBusinessSchoolList(page);
-        final List<String> openidList;
-        if (applications != null && applications.size() > 0) {
-            //获取黑名单用户
-            openidList = accountService.loadBlackListOpenIds();
-        } else {
-            openidList = null;
-        }
-
         Assert.notNull(applications);
-        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
-            Profile profile = accountService.getProfile(application.getProfileId());
-            ApplicationDto dto = this.initApplicationDto(application);
-            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
-            dto.setQuestionList(questions);
-            // 查询是否会员
-            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
-            if (riseMember != null) {
-                dto.setMemberTypeId(riseMember.getMemberTypeId());
-                dto.setMemberType(riseMember.getName());
-            }
-            dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
-            dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
-            dto.setNickname(profile.getNickname());
-            dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
-            dto.setIsBlack("否");
-
-            int lastVerifiedCode = application.getLastVerified();
-
-            if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
-            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()) {
-                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
-            } else {
-                dto.setVerifiedResult("未知");
-            }
-
-            if (openidList != null && (openidList.size() > 0)) {
-                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
-                    dto.setIsBlack("是");
-                }
-            }
-            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
-            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
-            dto.setOrderId(application.getOrderId());
-            if (application.getInterviewer() != null) {
-                Profile interviewer = accountService.getProfile(application.getInterviewer());
-                dto.setInterviewer(application.getInterviewer());
-                dto.setInterviewerName(interviewer.getNickname());
-            }
-
-            return dto;
-        }).collect(Collectors.toList());
         TableDto<ApplicationDto> result = new TableDto<>();
         result.setPage(page);
-        result.setData(dtoGroup);
+        result.setData(getApplicationDto(applications));
         return WebUtils.result(result);
     }
 
     @RequestMapping(value = "/bs/application/reject", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> rejectApplication(LoginUser loginUser, @RequestBody ApproveDto approveDto) {
+    public ResponseEntity<Map<String, Object>> rejectApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -329,7 +277,15 @@ public class RiseOperationController {
         if (application == null) {
             return WebUtils.error("该申请不存在");
         } else {
-            boolean reject = businessSchoolService.rejectApplication(application.getId(), approveDto.getComment());
+            InterviewRecord interviewRecord = approveDto.getInterviewRecord();
+            if(interviewRecord == null){
+                return WebUtils.error("更新失败");
+            }
+            interviewRecord.setApprovalId(loginUser.getProfileId());
+            if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
+                return WebUtils.error("更新失败");
+            }
+            boolean reject = businessSchoolService.rejectApplication(application.getId(),"");
             if (reject) {
                 String orderId = application.getOrderId();
                 if (orderId != null) {
@@ -353,23 +309,27 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/approve", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> approveApplication(LoginUser loginUser, @RequestBody ApproveDto approveDto) {
-        OperationLog operationLog = OperationLog.create()
-                .module("后台功能")
-                .function("商学院申请")
-                .action("通过")
-                .memo(approveDto.getId() + "");
+    public ResponseEntity<Map<String, Object>> approveApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
+        System.out.println(loginUser);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId()+"");
         operationLogService.log(operationLog);
+
         BusinessSchoolApplication application = businessSchoolService.loadBusinessSchoolApplication(approveDto.getId());
         if (application == null) {
-            return WebUtils.error("该申请不存在");
+           return WebUtils.error("该申请不存在");
         } else {
             if (approveDto.getCoupon() == null) {
                 approveDto.setCoupon(0d);
+           }
+            InterviewRecord interviewRecord = approveDto.getInterviewRecord();
+            if(interviewRecord == null){
+                return WebUtils.error("更新失败");
             }
-            boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(), approveDto.getComment());
-            if (approve) {
-                return WebUtils.success();
+            interviewRecord.setApprovalId(loginUser.getProfileId());
+            if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
+                return WebUtils.error("更新失败");
+            }
+           boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(),"");if (approve) { return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
             }
@@ -377,7 +337,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/ignore", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> ignoreApplication(LoginUser loginUser, @RequestBody ApproveDto approveDto) {
+    public ResponseEntity<Map<String, Object>> ignoreApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -388,7 +348,15 @@ public class RiseOperationController {
         if (application == null) {
             return WebUtils.error("该申请不存在");
         } else {
-            boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(), approveDto.getComment());
+            InterviewRecord interviewRecord = approveDto.getInterviewRecord();
+            if(interviewRecord == null){
+                return WebUtils.error("更新失败");
+            }
+            interviewRecord.setApprovalId(loginUser.getProfileId());
+            if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
+                return WebUtils.error("更新失败");
+            }
+            boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(),"");
             if (approve) {
                 return WebUtils.success();
             } else {
@@ -511,5 +479,95 @@ public class RiseOperationController {
         } else {
             return WebUtils.error("分配失败");
         }
+    }
+
+
+
+    private List<ApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications){
+        final List<String> openidList;
+        if (applications != null && applications.size() > 0) {
+            //获取黑名单用户
+            openidList = accountService.loadBlackListOpenIds();
+        } else {
+            openidList = null;
+        }
+        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
+            Profile profile = accountService.getProfile(application.getProfileId());
+            ApplicationDto dto = this.initApplicationDto(application);
+            List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
+            dto.setQuestionList(questions);
+            // 查询是否会员
+            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
+            if (riseMember != null) {
+                dto.setMemberTypeId(riseMember.getMemberTypeId());
+                dto.setMemberType(riseMember.getName());
+            }
+            dto.setApplyId(application.getId());
+            dto.setInterviewRecord(assistantCoachService.loadInterviewRecord(application.getId()));
+            dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
+            dto.setFinalPayStatus(businessSchoolService.queryFinalPayStatus(application.getProfileId()));
+            dto.setNickname(profile.getNickname());
+            dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
+            dto.setIsBlack("否");
+            List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
+            businessApplySubmits.stream().forEach(businessApplySubmit -> {
+                Integer questionId = businessApplySubmit.getQuestionId();
+                if(questionId == 14){
+                    dto.setInterviewTime(businessApplySubmit.getChoiceText());
+                }
+                if(questionId== 5 || questionId == 22){
+                    dto.setWorkYear(businessApplySubmit.getChoiceText());
+                }
+                if(questionId == 2 || questionId == 19){
+                    dto.setIndustry(businessApplySubmit.getChoiceText());
+                }
+                if(questionId == 6 || questionId == 23){
+                    dto.setEducation(businessApplySubmit.getChoiceText());
+                }
+                if(questionId == 7 || questionId == 24){
+                    dto.setCollege(businessApplySubmit.getUserValue());
+                }
+                if(questionId == 8 || questionId == 25){
+                    dto.setLocation(businessApplySubmit.getUserValue());
+                }
+                if( questionId == 1 || questionId == 18){
+                    dto.setJob(businessApplySubmit.getChoiceText());
+                }
+            });
+
+            int lastVerifiedCode = application.getLastVerified();
+
+            if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()) {
+                dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
+            } else {
+                dto.setVerifiedResult("未知");
+            }
+
+            if (openidList != null && (openidList.size() > 0)) {
+                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+                    dto.setIsBlack("是");
+                }
+            }
+            dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
+            dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
+            dto.setOrderId(application.getOrderId());
+            if (application.getInterviewer() != null) {
+                Profile interviewer = accountService.getProfile(application.getInterviewer());
+                dto.setInterviewer(application.getInterviewer());
+                dto.setInterviewerName(interviewer.getNickname());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return dtoGroup;
     }
 }
