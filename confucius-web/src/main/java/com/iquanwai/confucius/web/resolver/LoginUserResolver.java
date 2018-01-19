@@ -54,7 +54,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
                 return getLoginUser(request.getParameter("debug"));
             }
         }
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+        String accessToken = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
             return loginUserMap.get(accessToken);
         }
@@ -96,7 +96,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     }
 
     public static LoginUser getLoginUser(HttpServletRequest request){
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+        String accessToken = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
         if(loginUserMap.containsKey(accessToken)){
             return loginUserMap.get(accessToken);
         }

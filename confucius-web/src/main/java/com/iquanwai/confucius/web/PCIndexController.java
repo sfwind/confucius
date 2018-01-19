@@ -95,7 +95,7 @@ public class PCIndexController {
     @RequestMapping(value = "/logout")
     public void getLogoutPage(HttpServletRequest request, HttpServletResponse response, PCLoginUser pcLoginUser) throws IOException {
         // 获取当前链接 cookie 的值，作为删除 cookieMap 的 key 值
-        String cookie = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
+        String cookie = CookieUtils.getCookie(request, OAuthService.PC_STATE_COOKIE_NAME);
         System.out.println("cookie = " + cookie);
         logger.info("cookie:" + cookie);
         if(cookie == null) {
@@ -104,7 +104,7 @@ public class PCIndexController {
         }
         logger.info(ConfigUtils.domainName());
         // 1、删除 cookie
-        CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, ConfigUtils.realDomainName(), response);
+        CookieUtils.removeCookie(OAuthService.PC_STATE_COOKIE_NAME, ConfigUtils.realDomainName(), response);
         try {
             // 2、通过 MQ 发送广播，删除每个节点上的 cookie 数据
             mqPublisher.publish(cookie);

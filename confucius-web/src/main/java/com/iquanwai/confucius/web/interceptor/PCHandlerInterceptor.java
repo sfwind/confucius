@@ -39,7 +39,7 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!ConfigUtils.isDebug()) {
             // 获取sessionId
-            String value = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
+            String value = CookieUtils.getCookie(request, OAuthService.PC_STATE_COOKIE_NAME);
             if (StringUtils.isEmpty(value)) {
                 // 没有session信息,跳转到登录页面
                 logger.error("no cookie,go to login page");
@@ -52,12 +52,12 @@ public class PCHandlerInterceptor extends HandlerInterceptorAdapter {
                 Pair<Integer, Callback> pair = loginUserService.refreshLogin(value);
                 if (pair.getLeft() == -1) {
                     logger.error("clean _qt cookie:{}", value);
-                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
+                    CookieUtils.removeCookie(OAuthService.PC_STATE_COOKIE_NAME, response);
                     WebUtils.login(request, response);
                     return false;
                 } else if(pair.getLeft() == -2){
                     response.sendRedirect(ConfigUtils.adapterDomainName() + "/pc/static/error?err=请先关注服务号");
-                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
+                    CookieUtils.removeCookie(OAuthService.PC_STATE_COOKIE_NAME, response);
                     WebUtils.login(request, response);
                     return false;
                 }

@@ -42,7 +42,7 @@ public class PCAjaxHandlerInterceptor extends HandlerInterceptorAdapter {
         if (!ConfigUtils.isDebug()) {
 
             // 获取sessionId
-            String value = CookieUtils.getCookie(request, OAuthService.QUANWAI_TOKEN_COOKIE_NAME);
+            String value = CookieUtils.getCookie(request, OAuthService.PC_STATE_COOKIE_NAME);
             boolean cookieInvalid = false;
             // 没有session信息
             if (StringUtils.isEmpty(value)) {

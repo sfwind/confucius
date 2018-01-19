@@ -19,8 +19,8 @@ public interface OAuthService {
 
     String RISE_PC_OAUTH_URL = ConfigUtils.domainName() + "/wx/oauth/pc/code";
 
-    String ACCESS_TOKEN_COOKIE_NAME = "_act";
-    String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
+    String WE_CHAT_STATE_COOKIE_NAME = "_act";
+    String PC_STATE_COOKIE_NAME = "_qt";
     String ACCESS_ASK_TOKEN_COOKIE_NAME = "_ask";
 
     int SEVEN_DAYS = 60 * 60 * 24 * 7;

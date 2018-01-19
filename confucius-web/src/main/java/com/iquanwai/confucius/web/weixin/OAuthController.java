@@ -108,7 +108,7 @@ public class OAuthController {
             } else {
                 logger.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
-                CookieUtils.addCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
+                CookieUtils.addCookie(OAuthService.WE_CHAT_STATE_COOKIE_NAME, callback.getState(), OAuthService.SEVEN_DAYS, response);
                 response.sendRedirect(callback.getCallbackUrl());
             }
         } catch (Exception e) {
@@ -141,8 +141,7 @@ public class OAuthController {
             } else {
                 logger.info("set _ask {} for {} ", callback.getAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
-                CookieUtils.addCookie(OAuthService.ACCESS_ASK_TOKEN_COOKIE_NAME,
-                        callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
+                CookieUtils.addCookie(OAuthService.ACCESS_ASK_TOKEN_COOKIE_NAME, callback.getAccessToken(), OAuthService.SEVEN_DAYS, response);
                 response.sendRedirect(callback.getCallbackUrl());
             }
         } catch (Exception e) {
@@ -233,14 +232,14 @@ public class OAuthController {
 
             if (pair.getLeft() == -1) {
                 // 提示关注并选择课程
-                CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
+                CookieUtils.removeCookie(OAuthService.PC_STATE_COOKIE_NAME, response);
                 response.sendRedirect("/servercode");
             } else {
                 Role userRole = loginUserService.getUserRole(callback.getOpenid());
                 if (userRole.getLevel().equals(0)) {
                     // 选择课程
                     logger.info("state:{},openid:{},提示开始训练", state, callback.getOpenid());
-                    CookieUtils.removeCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME, response);
+                    CookieUtils.removeCookie(OAuthService.PC_STATE_COOKIE_NAME, response);
                     response.sendRedirect("/servercode");
                     return;
                 }
@@ -248,8 +247,7 @@ public class OAuthController {
                 // 返回带accessToken的url
                 logger.info("set _act {} for {} ", callback.getPcAccessToken(), callback.getOpenid());
                 //在cookie中写入access_token
-                CookieUtils.addCookie(OAuthService.QUANWAI_TOKEN_COOKIE_NAME,
-                        callback.getPcAccessToken(), OAuthService.SEVEN_DAYS, response);
+                CookieUtils.addCookie(OAuthService.PC_STATE_COOKIE_NAME, callback.getState(), OAuthService.SEVEN_DAYS, response);
                 response.sendRedirect(callback.getCallbackUrl());
             }
         } catch (Exception e) {

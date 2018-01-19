@@ -25,7 +25,7 @@ public class ExceptionAspect {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Map<String, Object>> jsonErrorHandler(HttpServletRequest req, Exception e) throws Exception {
-        String openid = oAuthService.openId(CookieUtils.getCookie(req, OAuthService.ACCESS_TOKEN_COOKIE_NAME));
+        String openid = oAuthService.openId(CookieUtils.getCookie(req, OAuthService.WE_CHAT_STATE_COOKIE_NAME));
         Cookie[] cookies = req.getCookies();
         String cookie = "";
         if(cookies!=null && cookies.length > 0){

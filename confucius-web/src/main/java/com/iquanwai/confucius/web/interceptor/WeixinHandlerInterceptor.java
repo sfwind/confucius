@@ -28,7 +28,7 @@ public class WeixinHandlerInterceptor extends HandlerInterceptorAdapter {
             if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
                 return true;
             }
-            String value = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+            String value = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
             //没有access_token,跳转去授权
             if (StringUtils.isEmpty(value)) {
                 WebUtils.auth(request, response);

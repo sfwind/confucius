@@ -73,7 +73,7 @@ public class IndexController {
         try {
             if (checkFollow(request, response)) {
                 // 关注
-                String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+                String accessToken = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
                 String openId = oAuthService.openId(accessToken);
                 // openid在checkFollow里检查了
                 Assert.notNull(openId);
@@ -117,11 +117,11 @@ public class IndexController {
             return true;
         }
 
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+        String accessToken = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
         String openId = oAuthService.openId(accessToken);
 
         if (StringUtils.isEmpty(openId)) {
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            CookieUtils.removeCookie(OAuthService.WE_CHAT_STATE_COOKIE_NAME, response);
             try {
                 WebUtils.auth(request, response);
             } catch (Exception e) {
@@ -139,7 +139,7 @@ public class IndexController {
         if (account != null) {
             return true;
         } else {
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            CookieUtils.removeCookie(OAuthService.WE_CHAT_STATE_COOKIE_NAME, response);
             return false;
         }
     }
@@ -149,11 +149,11 @@ public class IndexController {
             return true;
         }
 
-        String accessToken = CookieUtils.getCookie(request, OAuthService.ACCESS_TOKEN_COOKIE_NAME);
+        String accessToken = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
         String openId = oAuthService.openId(accessToken);
 
         if (StringUtils.isEmpty(openId)) {
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            CookieUtils.removeCookie(OAuthService.WE_CHAT_STATE_COOKIE_NAME, response);
             try {
                 WebUtils.auth(request, response);
             } catch (Exception e) {
@@ -184,7 +184,7 @@ public class IndexController {
         if (account != null) {
             return true;
         } else {
-            CookieUtils.removeCookie(OAuthService.ACCESS_TOKEN_COOKIE_NAME, response);
+            CookieUtils.removeCookie(OAuthService.WE_CHAT_STATE_COOKIE_NAME, response);
             try {
                 WebUtils.auth(request, response);
             } catch (Exception e) {
