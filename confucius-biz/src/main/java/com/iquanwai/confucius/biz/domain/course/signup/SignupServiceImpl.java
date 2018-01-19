@@ -4,20 +4,37 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
+import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolApplicationOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.OperateRotateDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
-import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.Coupon;
+import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -38,7 +55,11 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.lang.ref.SoftReference;
 import java.net.ConnectException;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -86,6 +107,8 @@ public class SignupServiceImpl implements SignupService {
     private ProfileDao profileDao;
     @Autowired
     private BusinessSchoolApplicationOrderDao businessSchoolApplicationOrderDao;
+    @Autowired
+    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
 
     private final static int PROBLEM_MAX_LENGTH = 30; //课程最长开放时间
 
@@ -176,7 +199,7 @@ public class SignupServiceImpl implements SignupService {
 
 
     @Override
-    public QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId) {
+    public QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId, Integer payType) {
         // 查询该openid是否是我们的用户
         Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
@@ -192,8 +215,10 @@ public class SignupServiceImpl implements SignupService {
 
         Assert.notNull(profile, "用户信息错误");
         Assert.notNull(memberType, "会员类型错误");
+        Assert.notNull(payType, "支付类型错误");
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
-                orderPair.getLeft(), fee, orderPair.getRight(), memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAG_MEMBER);
+                orderPair.getLeft(), fee, orderPair.getRight(), memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAG_MEMBER,
+                payType);
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
@@ -207,8 +232,14 @@ public class SignupServiceImpl implements SignupService {
         return quanwaiOrder;
     }
 
+
     @Override
-    public QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId) {
+    public QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId) {
+        return this.signUpRiseMember(profileId, memberTypeId, couponId, QuanwaiOrder.PAY_WECHAT);
+    }
+
+    @Override
+    public QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买训练营，配置 zk，查看当前月份
         Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
@@ -222,7 +253,7 @@ public class SignupServiceImpl implements SignupService {
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
 
         QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(), orderPair.getLeft(), fee, orderPair.getRight(),
-                memberTypeId + "", sellingMonth + "月训练营", QuanwaiOrder.FRAG_CAMP);
+                memberTypeId + "", sellingMonth + "月训练营", QuanwaiOrder.FRAG_CAMP, payType);
 
         // 插入训练营报名数据
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
@@ -235,7 +266,13 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId) {
+    public QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId) {
+        return this.signUpMonthlyCamp(profileId, memberTypeId, couponId, QuanwaiOrder.PAY_WECHAT);
+    }
+
+
+    @Override
+    public QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买训练营，配置 zk，查看当前月份
         Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
@@ -247,7 +284,7 @@ public class SignupServiceImpl implements SignupService {
 
         QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(),
                 orderPair.getLeft(), fee, orderPair.getRight(),
-                memberTypeId + "", "商学院申请", QuanwaiOrder.BS_APPLICATION);
+                memberTypeId + "", "商学院申请", QuanwaiOrder.BS_APPLICATION, payType);
 
         // 插入训练营报名数据
         BusinessSchoolApplicationOrder bsOrder = new BusinessSchoolApplicationOrder();
@@ -256,6 +293,11 @@ public class SignupServiceImpl implements SignupService {
         bsOrder.setProfileId(profileId);
         businessSchoolApplicationOrderDao.insert(bsOrder);
         return quanwaiOrder;
+    }
+
+    @Override
+    public QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId) {
+        return this.signupBusinessSchoolApplication(profileId, memberTypeId, couponId, QuanwaiOrder.PAY_WECHAT);
     }
 
     @Override
@@ -891,10 +933,17 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public void payApplicationSuccess(String orderId) {
         BusinessSchoolApplicationOrder order = businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(orderId);
-        Assert.notNull(order, "训练营购买订单不能为空，orderId：" + orderId);
+        Assert.notNull(order, "商学院申请购买订单不能为空，orderId：" + orderId);
+        BusinessSchoolApplication apply = businessSchoolApplicationDao.loadLatestInvalidApply(order.getProfileId());
+        if (apply == null) {
+            // 更新订单状态
+            businessSchoolApplicationOrderDao.paid(orderId);
+        } else {
+            // 更新最后一次无效申请
+            businessSchoolApplicationDao.validApply(orderId, apply.getId());
+            businessSchoolApplicationOrderDao.paid(orderId);
+        }
 
-        // 更新订单状态
-        businessSchoolApplicationOrderDao.paid(orderId);
     }
 
     @Override
@@ -968,7 +1017,7 @@ public class SignupServiceImpl implements SignupService {
         return new MutablePair<>(orderId, discount);
     }
 
-    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId, String goodsName, String goodsType) {
+    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId, String goodsName, String goodsType, Integer payType) {
         // 创建订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
         quanwaiOrder.setCreateTime(new Date());
@@ -981,8 +1030,16 @@ public class SignupServiceImpl implements SignupService {
         quanwaiOrder.setGoodsId(goodsId);
         quanwaiOrder.setGoodsName(goodsName);
         quanwaiOrder.setGoodsType(goodsType);
+        quanwaiOrder.setPayType(payType);
         quanwaiOrderDao.insert(quanwaiOrder);
         return quanwaiOrder;
+    }
+
+    /**
+     * 默认微信方式支付
+     */
+    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId, String goodsName, String goodsType) {
+        return this.createQuanwaiOrder(openId, orderId, fee, discount, goodsId, goodsName, goodsType, QuanwaiOrder.PAY_WECHAT);
     }
 
     // 专业版折价方案

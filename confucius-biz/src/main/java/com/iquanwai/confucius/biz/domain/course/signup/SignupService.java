@@ -2,6 +2,12 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,12 +26,24 @@ public interface SignupService {
     /**
      * 报名商学院, 不生成预付订单
      */
+    QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId, Integer payType);
+
+    /**
+     * 报名商学院, 不生成预付订单
+     */
     QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
     /**
      * 报名训练营, 不生成预付订单
      */
+    QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType);
+
+    /**
+     * 报名训练营, 不生成预付订单
+     */
     QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
+
+    QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType);
 
     /**
      * 商学院申请, 不生成预付订单
@@ -50,33 +68,36 @@ public interface SignupService {
 
     /**
      * 获取训练营订单
-     * */
+     */
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
     /**
      * 生成学号
-     * */
+     */
     String generateMemberId(Integer year, Integer month, Integer identityType);
 
     /**
      * 商学院购买成功处理
-     * */
+     */
     void payRiseSuccess(String orderId);
 
     /**
      * 获得圈外订单
+     *
      * @param orderId 订单id
      */
     QuanwaiOrder getQuanwaiOrder(String orderId);
 
     /**
      * 获得rise订单
+     *
      * @param orderId 订单id
      */
     RiseOrder getRiseOrder(String orderId);
 
     /**
      * 获取会员类型
+     *
      * @param memberType 会员类型Id
      * @return 会员类型
      */
@@ -91,6 +112,7 @@ public interface SignupService {
      * 查询会员类型的支付信息
      */
     List<MemberType> getMemberTypesPayInfo();
+
     /**
      * 查询会员类型的支付信息
      */
@@ -98,8 +120,9 @@ public interface SignupService {
 
     /**
      * 计算优惠券
+     *
      * @param memberTypeId 会员id
-     * @param couponId 优惠券id
+     * @param couponId     优惠券id
      * @return 打的折扣是多少
      */
     Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponId);
@@ -122,12 +145,14 @@ public interface SignupService {
 
     /**
      * 获取商学院数据
+     *
      * @param profileId 用户id
      */
     BusinessSchool getSchoolInfoForPay(Integer profileId);
 
     /**
      * 获取用户当前会员信息
+     *
      * @param profileId 用户id
      */
     RiseMember getCurrentRiseMemberStatus(Integer profileId);
@@ -150,16 +175,16 @@ public interface SignupService {
 
     /**
      * 获取商学院申请订单
-     * */
+     */
     BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
 
     /**
      * 获取商学院申请订单
-     * */
+     */
     boolean isAppliedBefore(Integer profileId);
 
     /**
      * 根据商品类型和售价智能选择优惠券
-     * */
+     */
     List<Coupon> autoChooseCoupon(String goodsType, Double fee, List<Coupon> coupons);
 }

@@ -1,11 +1,19 @@
 package com.iquanwai.confucius.biz.util;
 
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
 import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.exception.WeixinException;
 import com.rabbitmq.client.TrustEverythingTrustManager;
-import okhttp3.*;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
 
 /**
@@ -53,8 +61,9 @@ public class RestfulHelper {
     /**
      * 发起POST请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
+     *
      * @param requestUrl 请求链接
-     * @param json 请求参数
+     * @param json       请求参数
      * @return 响应体
      */
     public String post(String requestUrl, String json) {
@@ -97,8 +106,9 @@ public class RestfulHelper {
 
     /**
      * 发起POST请求
+     *
      * @param requestUrl 请求的url
-     * @param xml 参数
+     * @param xml        参数
      * @return 响应体
      */
     public String postXML(String requestUrl, String xml) {
@@ -125,6 +135,7 @@ public class RestfulHelper {
     /**
      * 发起GET请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
+     *
      * @param requestUrl 请求url，参数需要手动拼接到url中
      * @return 响应体
      */
@@ -202,12 +213,27 @@ public class RestfulHelper {
     }
 
     /**
-     * Okhttp
-     * @param multipartFile
+     * 初始化阿里请求client
+     *
+     * @return AlipayClient
+     */
+    public AlipayClient initAlipayClient() {
+        return new DefaultAlipayClient(ConfigUtils.getAlipayGateway(),
+                ConfigUtils.getAlipayAppId(),
+                ConfigUtils.getAlipayPrivateKey(),
+                "json",
+                "UTF-8",
+                ConfigUtils.getAlipayPublicKey(),
+                "RSA2");
+    }
+
+    /**
+     * 上传微信素材
+     *
      * @param url
      * @return
      */
-    public String uploadWXFile(MultipartFile multipartFile ,String url){
+    public String uploadWXFile(MultipartFile multipartFile , String url){
         String accessToken = accessTokenService.getAccessToken();
         logger.info("accesstoken is :{}", accessToken);
         url = url.replace("{access_token}",accessToken);

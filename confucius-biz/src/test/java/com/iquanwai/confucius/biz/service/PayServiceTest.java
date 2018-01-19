@@ -22,6 +22,6 @@ public class PayServiceTest extends TestBase {
 
     @Test
     public void testRefund(){
-        payService.refund("9k21fr2o64ebulm4", 0.01);
+        payService.refund("png8wo0gjyi4n8fx", 0.01);
     }
 }

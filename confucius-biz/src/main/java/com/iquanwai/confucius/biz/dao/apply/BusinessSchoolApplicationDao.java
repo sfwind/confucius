@@ -22,20 +22,9 @@ import java.util.List;
 public class BusinessSchoolApplicationDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public BusinessSchoolApplication loadByOpenId(String openId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE Openid = ? AND Del = 0";
-        try {
-            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
     public BusinessSchoolApplication loadLastApproveApplication(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 1 Order by Id desc";
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 1 AND Valid = 1 Order by Id desc";
         try {
             return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
         } catch (SQLException e) {
@@ -46,7 +35,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public List<BusinessSchoolApplication> loadList(Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE Status = 0 AND Del =0 LIMIT " + page.getOffset() + "," + page.getLimit();
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE Status = 0 AND Del =0 AND Valid = 1 LIMIT " + page.getOffset() + "," + page.getLimit();
         try {
             return runner.query(sql, new BeanListHandler<>(BusinessSchoolApplication.class));
         } catch (SQLException e) {
@@ -57,7 +46,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public Integer loadCount() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT count(*) from BusinessSchoolApplication WHERE Status = 0 AND Del =0";
+        String sql = "SELECT count(*) from BusinessSchoolApplication WHERE Status = 0 AND Del =0 AND Valid = 1";
         try {
             return runner.query(sql, new ScalarHandler<Long>()).intValue();
         } catch (SQLException e) {
@@ -101,13 +90,35 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public BusinessSchoolApplication loadCheckingApplication(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 0 Order by Id desc";
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 0 AND Valid = 1 Order by Id desc";
         try {
             return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
+    }
+
+    public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from BusinessSchoolApplication where ProfileId = ? and Valid = 0 and Del = 0 order by Id desc limit 1";
+        try {
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    public Integer validApply(String orderId, Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE BusinessSchoolApplication SET Valid = 1,OrderId = ? WHERE Id = ?";
+        try {
+            return runner.update(sql, orderId, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
     }
 
     public Integer assignInterviewer(Integer applyId, Integer interviewer) {
