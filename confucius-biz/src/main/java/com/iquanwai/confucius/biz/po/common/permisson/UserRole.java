@@ -17,4 +17,5 @@ public class UserRole {
     private String asstName;
     private String asstType;
     private Integer level;
+    private Integer assignCount;//分配人数
 }
