@@ -510,6 +510,7 @@ public class RiseOperationController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
+            dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId())==null?"否":"是");
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             businessApplySubmits.stream().forEach(businessApplySubmit -> {
                 Integer questionId = businessApplySubmit.getQuestionId();
