@@ -762,7 +762,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public List<MemberType> getMemberTypesPayInfo(Integer profileId) {
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-
+        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig();
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
 
         List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
@@ -770,7 +770,7 @@ public class SignupServiceImpl implements SignupService {
         for (MemberType memberType : memberTypes) {
             if (memberType.getId().equals(RiseMember.CAMP)) {
                 // 训练营类型
-                memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+                memberType.setStartTime(DateUtils.parseDateToStringByCommon(monthlyCampConfig.getOpenDate()));
                 memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(monthlyCampConfig.getCloseDate(), 1)));
             } else if (memberType.getId().equals(RiseMember.ELITE) || memberType.getId().equals(RiseMember.HALF_ELITE)) {
                 // 商学院类型（一年、半年）
@@ -785,9 +785,9 @@ public class SignupServiceImpl implements SignupService {
                     }
                 } else {
                     // 商学院报名
-                    memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
+                    memberType.setStartTime(DateUtils.parseDateToStringByCommon(businessSchoolConfig.getOpenDate()));
                     memberType.setEndTime(DateUtils.parseDateToStringByCommon(
-                            DateUtils.beforeDays(DateUtils.afterMonths(monthlyCampConfig.getOpenDate(), memberType.getOpenMonth()), 1)));
+                            DateUtils.beforeDays(DateUtils.afterMonths(businessSchoolConfig.getOpenDate(), memberType.getOpenMonth()), 1)));
                 }
             } else {
                 memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
