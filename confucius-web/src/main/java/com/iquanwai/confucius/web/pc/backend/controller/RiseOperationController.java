@@ -460,6 +460,7 @@ public class RiseOperationController {
             AssistCatalogEnums role = AssistCatalogEnums.getById(item.getRoleId());
             item.setAsstType(role == null ? "" : role.getRoleName());
             item.setLevel(role == null ? -10 : role.getLevel());
+            item.setAssignCount(assistantCoachService.loadAssignedCount(item.getProfileId()));
         });
         userRoles.sort(((o1, o2) -> o2.getLevel() - o1.getLevel()));
         return WebUtils.result(userRoles);
@@ -509,6 +510,7 @@ public class RiseOperationController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
+            dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId())==null?"否":"是");
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             businessApplySubmits.stream().forEach(businessApplySubmit -> {
                 Integer questionId = businessApplySubmit.getQuestionId();

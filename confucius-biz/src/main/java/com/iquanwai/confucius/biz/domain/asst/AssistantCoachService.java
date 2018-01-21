@@ -123,4 +123,11 @@ public interface AssistantCoachService {
      */
     Integer addInterviewRecord(InterviewRecord interviewRecord);
 
+    /**
+     * 获取教练被的分配的数量
+     * @param interviewer
+     * @return
+     */
+    Integer loadAssignedCount(Integer interviewer);
+
 }
