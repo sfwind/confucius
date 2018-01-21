@@ -5,13 +5,11 @@ import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,8 +30,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     private KnowledgeDao knowledgeDao;
     @Autowired
     private PointRepo pointRepo;
-    @Autowired
-    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     @Override
     public ApplicationPractice loadApplicationPractice(Integer id) {
@@ -56,7 +52,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             submit.setProblemId(applicationPractice.getProblemId());
             int submitId = applicationSubmitDao.insert(submit);
             submit.setId(submitId);
-            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));
         } else {
             if (submit == null) {
                 submit = new ApplicationSubmit();

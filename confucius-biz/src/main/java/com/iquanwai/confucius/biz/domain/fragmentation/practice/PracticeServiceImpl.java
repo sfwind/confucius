@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -34,19 +33,9 @@ public class PracticeServiceImpl implements PracticeService {
     @Autowired
     private ApplicationSubmitDao applicationSubmitDao;
     @Autowired
-    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
-    @Autowired
     private MessageService messageService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private SubjectArticleDao subjectArticleDao;
-    @Autowired
-    private ArticleLabelDao articleLabelDao;
-    @Autowired
-    private LabelConfigDao labelConfigDao;
-    @Autowired
-    private PictureDao pictureDao;
     @Autowired
     private ApplicationPracticeDao applicationPracticeDao;
     @Autowired
@@ -225,11 +214,6 @@ public class PracticeServiceImpl implements PracticeService {
             asstCoachComment.setCount(asstCoachComment.getCount() + 1);
             asstCoachCommentDao.updateCount(asstCoachComment);
         }
-    }
-
-    @Override
-    public Integer riseArticleViewCount(Integer module, Integer id, Integer type) {
-        return fragmentAnalysisDataDao.riseArticleViewCount(module, id, type);
     }
 
     @Override

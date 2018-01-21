@@ -55,11 +55,6 @@ public interface PracticeService {
                                        Integer profileId, String content, Integer replyId);
 
     /**
-     * 增加浏览量
-     */
-    Integer riseArticleViewCount(Integer module, Integer id, Integer type);
-
-    /**
      * 根据应用id,获取练习训练
      * @param practiceId 练习id
      */

@@ -340,8 +340,6 @@ public class AssistantApplicationController {
             if(!integrated) {
                 show.setKnowledgeId(applicationPractice.getKnowledgeId());
             }
-            // 提升浏览量
-            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);
         }
     }

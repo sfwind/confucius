@@ -75,21 +75,6 @@ public class AssistantCoachController {
         return WebUtils.result(riseWorkInfoDtos);
     }
 
-    @RequestMapping("/subject/{problemId}")
-    public ResponseEntity<Map<String, Object>> getUnderCommentSubject(PCLoginUser pcLoginUser,
-                                                                      @PathVariable Integer problemId) {
-        Assert.notNull(pcLoginUser, "用户不能为空");
-        List<RiseWorkInfoDto> applicationSubmit = assistantCoachService.getUnderCommentArticles(problemId);
-
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                .module("助教后台")
-                .function("小课论坛")
-                .action("获取待评论的小课分享");
-        operationLogService.log(operationLog);
-
-        return WebUtils.result(applicationSubmit);
-    }
-
     @RequestMapping("/comment/count")
     public ResponseEntity<Map<String, Object>> getCommentCount(PCLoginUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户不能为空");
@@ -134,49 +119,6 @@ public class AssistantCoachController {
                 .action("获取问题列表");
         operationLogService.log(operationLog);
         return WebUtils.result(result);
-    }
-
-    @RequestMapping("/subject/problem/list")
-    public ResponseEntity<Map<String, Object>> loadSubjectArticleProblems(PCLoginUser pcLoginUser) {
-        Assert.notNull(pcLoginUser, "用户不能为空");
-        List<Problem> problems = problemService.loadProblems();
-        List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
-        Map<Integer, Integer> underCommentMap = assistantCoachService.getUnderCommentSubjectArticleCount();
-        List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
-            ProblemCatalogDto dto = new ProblemCatalogDto();
-            List<ProblemListDto> collect = problems.stream().filter(problem -> !problem.getDel())
-                    .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
-                        ProblemListDto problemList = new ProblemListDto();
-                        problemList.setId(problem.getId());
-                        problemList.setProblem(problem.getProblem());
-                        problemList.setUnderCommentCount(underCommentMap.get(problem.getId()));
-                        return problemList;
-                    }).collect(Collectors.toList());
-            dto.setProblems(collect);
-            dto.setName(item.getName());
-            return dto;
-        }).collect(Collectors.toList());
-
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                .module("助教后台")
-                .function("小课分享评论")
-                .action("获取问题列表");
-        operationLogService.log(operationLog);
-        return WebUtils.result(result);
-    }
-
-    @RequestMapping("/commented/submit")
-    public ResponseEntity<Map<String, Object>> getCommentedSubmit(PCLoginUser pcLoginUser) {
-        Assert.notNull(pcLoginUser, "用户不能为空");
-        List<RiseWorkInfoDto> riseWorkInfoDtos = assistantCoachService.getCommentedSubmit(pcLoginUser.getProfileId());
-
-        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
-                .module("助教后台")
-                .function("评论")
-                .action("获取已评论文章");
-        operationLogService.log(operationLog);
-
-        return WebUtils.result(riseWorkInfoDtos);
     }
 
     @RequestMapping("/hot/warmup")

@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.backend.dto;
 
-import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
 import lombok.Data;
 
 import java.util.List;
@@ -30,6 +29,5 @@ public class RiseWorkShowDto {
     private Integer knowledgeId; //知识点id
 
     private String desc; // 描述
-    private List<LabelConfig> labelList;
 
 }
