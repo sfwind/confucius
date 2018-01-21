@@ -42,7 +42,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, Integer profileId,
-                                                         String openId, boolean create) {
+                                                         boolean create) {
         // 查询该应用练习
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交

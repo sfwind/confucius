@@ -43,11 +43,11 @@ public class QuestionSubmitDao extends DBUtil {
             return 0;
         }
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO QuestionSubmit(SubmitOpenid, SubmitProfileId, ClassId, QuestionId, SubmitAnswer, SubmitTime, Score, `IsRight`) " +
-                "VALUES(?, ?, ?, ?, ?, now(), ?, ?)";
+        String insertSql = "INSERT INTO QuestionSubmit(SubmitProfileId, ClassId, QuestionId, SubmitAnswer, SubmitTime, Score, `IsRight`) " +
+                "VALUES(?, ?, ?, ?, now(), ?, ?)";
         try {
             Long result = run.insert(insertSql, new ScalarHandler<>(),
-                    questionSubmit.getSubmitOpenid(), questionSubmit.getSubmitProfileId(),
+                    questionSubmit.getSubmitProfileId(),
                     questionSubmit.getClassId(), questionSubmit.getQuestionId(),
                     questionSubmit.getSubmitAnswer(), questionSubmit.getScore(), questionSubmit.getIsRight());
             return result.intValue();

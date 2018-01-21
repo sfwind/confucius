@@ -98,7 +98,7 @@ public class ApplicationImportController {
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
             ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId,
-                    loginUser.getProfileId(), loginUser.getOpenId(),false);
+                    loginUser.getProfileId(), false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
             dto.setSubmitId(applicationSubmit.getId());
             dto.setTitle(applicationSubmit.getTopic());
@@ -139,7 +139,7 @@ public class ApplicationImportController {
                 .memo(applicationId + "");
         operationLogService.log(operationLog);
         ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId,
-                loginUser.getProfileId(), loginUser.getOpenId(),false);
+                loginUser.getProfileId(), false);
         RiseWorkInfoDto dto = new RiseWorkInfoDto();
         dto.setSubmitId(applicationSubmit.getId());
         dto.setTitle(applicationSubmit.getTopic());

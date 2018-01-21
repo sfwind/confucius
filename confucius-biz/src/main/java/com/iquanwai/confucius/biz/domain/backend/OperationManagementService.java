@@ -32,13 +32,12 @@ public interface OperationManagementService {
     /**
      * 内容运营回复某个巩固练习
      *
-     * @param openid           发表讨论的用户openid
      * @param profileId           发表讨论的用户id
      * @param warmupPracticeId 巩固练习id
      * @param comment          讨论内容
      * @param repliedId        回复的讨论id
      */
-    void discuss(String openid, Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId);
+    void discuss(Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId);
 
     /**
      * 回复加精

@@ -24,11 +24,11 @@ public class CourseOrderDao extends DBUtil {
 
     public void insert(CourseOrder courseOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO CourseOrder(OrderId, Openid, ProfileId, CourseId, ClassId, Entry) " +
-                "VALUES(?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO CourseOrder(OrderId, ProfileId, CourseId, ClassId, Entry) " +
+                "VALUES(?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
-                    courseOrder.getOrderId(), courseOrder.getOpenid(), courseOrder.getProfileId(),
+                    courseOrder.getOrderId(), courseOrder.getProfileId(),
                     courseOrder.getCourseId(), courseOrder.getClassId(),
                     courseOrder.getEntry());
         } catch (SQLException e) {

@@ -67,7 +67,7 @@ public class AssistantApplicationController {
         String openId = loginUser.getOpenId();
 
         if (status == 1) {
-            practiceService.vote(vote.getType(), refer, loginUser.getProfileId(), openId);
+            practiceService.vote(vote.getType(), refer, loginUser.getProfileId());
         } else {
             // 禁止取消点赞
             logger.error("取消点赞！已禁止!");
@@ -147,7 +147,7 @@ public class AssistantApplicationController {
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
         Pair<Integer, String> result = practiceService.comment(moduleId, submitId,
-                loginUser.getOpenId(), loginUser.getProfileId(), dto.getContent());
+                loginUser.getProfileId(), dto.getContent());
         if (result.getLeft() > 0) {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
@@ -195,7 +195,7 @@ public class AssistantApplicationController {
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
         Pair<Integer, String> result = practiceService.replyComment(moduleId, submitId,
-                loginUser.getOpenId(), loginUser.getProfileId(), dto.getContent(), dto.getReplyId());
+                loginUser.getProfileId(), dto.getContent(), dto.getReplyId());
         if (result.getLeft() > 0) {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
@@ -324,7 +324,8 @@ public class AssistantApplicationController {
             // 查询点赞数
             Integer votesCount = practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, submit.getId());
             // 查询我对它的点赞状态
-            HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.APPLICATION, submit.getId(), loginUser.getOpenId());
+            HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.APPLICATION, submit.getId(),
+                    loginUser.getProfileId());
             if(myVote != null && myVote.getDel() == 0) {
                 // 点赞中
                 show.setVoteStatus(1);
@@ -339,9 +340,6 @@ public class AssistantApplicationController {
             if(!integrated) {
                 show.setKnowledgeId(applicationPractice.getKnowledgeId());
             }
-            // 查询照片
-//            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
-//            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
             // 提升浏览量
             practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);

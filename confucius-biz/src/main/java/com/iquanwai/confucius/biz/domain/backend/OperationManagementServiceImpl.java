@@ -104,7 +104,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public void discuss(String openid, Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId) {
+    public void discuss(Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId) {
         WarmupPracticeDiscuss warmupPracticeDiscuss = new WarmupPracticeDiscuss();
         warmupPracticeDiscuss.setWarmupPracticeId(warmupPracticeId);
         warmupPracticeDiscuss.setComment(comment);

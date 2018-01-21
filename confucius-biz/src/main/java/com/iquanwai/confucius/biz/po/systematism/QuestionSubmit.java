@@ -11,7 +11,6 @@ import java.util.Date;
 public class QuestionSubmit {
     private int id;
     private Integer questionId; //问题id
-    private String submitOpenid; //提交人openid
     private Integer submitProfileId; //提交人id
     private Integer classId;  //班级id
     private Date submitTime;  //提交时间

@@ -220,7 +220,7 @@ public class AssistantCoachController {
             return WebUtils.result("您提交的讨论字数过长");
         }
 
-        operationManagementService.discuss(loginUser.getOpenId(), loginUser.getProfileId(),
+        operationManagementService.discuss(loginUser.getProfileId(),
                 discussDto.getWarmupPracticeId(),
                 discussDto.getComment(), discussDto.getRepliedId());
 

@@ -197,7 +197,6 @@ public class SignupServiceImpl implements SignupService {
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
-        riseOrder.setOpenid(profile.getOpenid());
         riseOrder.setEntry(false);
         riseOrder.setIsDel(false);
         riseOrder.setMemberType(memberTypeId);
@@ -227,7 +226,6 @@ public class SignupServiceImpl implements SignupService {
         // 插入训练营报名数据
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
         monthlyCampOrder.setOrderId(orderPair.getLeft());
-        monthlyCampOrder.setOpenId(profile.getOpenid());
         monthlyCampOrder.setProfileId(profileId);
         monthlyCampOrder.setMonth(sellingMonth);
         monthlyCampOrderDao.insert(monthlyCampOrder);
@@ -252,7 +250,6 @@ public class SignupServiceImpl implements SignupService {
         // 插入训练营报名数据
         BusinessSchoolApplicationOrder bsOrder = new BusinessSchoolApplicationOrder();
         bsOrder.setOrderId(orderPair.getLeft());
-        bsOrder.setOpenid(profile.getOpenid());
         bsOrder.setProfileId(profileId);
         businessSchoolApplicationOrderDao.insert(bsOrder);
         return quanwaiOrder;
@@ -525,7 +522,6 @@ public class SignupServiceImpl implements SignupService {
         }
 
         riseOrderDao.entry(orderId);
-        String openId = riseOrder.getOpenid();
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         if (RiseMember.ELITE == memberType.getId()) {
             // 查看是否存在现成会员数据
@@ -576,7 +572,7 @@ public class SignupServiceImpl implements SignupService {
                     improvementPlanDao.becomeRiseMember(plan);
                 }
             });
-            Profile profile = accountService.getProfile(openId, false);
+            Profile profile = accountService.getProfile(riseOrder.getProfileId());
             // 发送模板消息
             sendPurchaseMessage(profile, memberType.getId(), orderId, businessSchoolConfig.getSellingYear(), businessSchoolConfig.getSellingMonth());
         } else {

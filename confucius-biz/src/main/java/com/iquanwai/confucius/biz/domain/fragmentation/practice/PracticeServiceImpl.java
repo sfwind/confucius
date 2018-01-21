@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
@@ -11,7 +10,6 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
-import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -23,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/12/11.
@@ -75,11 +72,10 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public boolean vote(Integer type, Integer referencedId, Integer profileId, String openid) {
-        HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openid);
+    public boolean vote(Integer type, Integer referencedId, Integer profileId) {
+        HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, profileId);
         if (vote == null) {
             Integer planId = null;
-            String submitOpenId = null;
             Integer submitProfileId = null;
             if (type == Constants.VoteType.APPLICATION) {
                 // 应用任务点赞
@@ -106,20 +102,8 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Pair<Integer, String> disVote(Integer type, Integer referencedId, String openId) {
-        HomeworkVote vote = homeworkVoteDao.loadVoteRecord(type, referencedId, openId);
-        if (vote == null) {
-            // 没有
-            return new MutablePair<>(0, "没有您的点赞记录");
-        } else {
-            homeworkVoteDao.disVote(vote.getId());
-            return new MutablePair<>(1, "success");
-        }
-    }
-
-    @Override
-    public HomeworkVote loadVoteRecord(Integer type, Integer referId, String openId) {
-        return homeworkVoteDao.loadVoteRecord(type, referId, openId);
+    public HomeworkVote loadVoteRecord(Integer type, Integer referId, Integer profileId) {
+        return homeworkVoteDao.loadVoteRecord(type, referId, profileId);
     }
 
     @Override
@@ -134,7 +118,7 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public Pair<Integer, String> comment(Integer moduleId, Integer referId,
-                                         String openId, Integer profileId, String content) {
+                                         Integer profileId, String content) {
         //先插入评论
         Comment comment = new Comment();
         comment.setModuleId(moduleId);
@@ -172,7 +156,7 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public Pair<Integer, String> replyComment(Integer moduleId, Integer referId, String openId,
+    public Pair<Integer, String> replyComment(Integer moduleId, Integer referId,
                                               Integer profileId, String content, Integer repliedId) {
         // 查看该评论是否为助教回复
         boolean isAsst = false;
@@ -246,86 +230,6 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Integer riseArticleViewCount(Integer module, Integer id, Integer type) {
         return fragmentAnalysisDataDao.riseArticleViewCount(module, id, type);
-    }
-
-    @Override
-    public List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page) {
-        page.setTotal(subjectArticleDao.count(problemId));
-        return subjectArticleDao.loadArticles(problemId, page).stream().map(item -> {
-            String content = CommonUtils.replaceHttpsDomainName(item.getContent());
-            if (!content.equals(item.getContent())) {
-                item.setContent(content);
-                subjectArticleDao.updateContent(item.getId(), content);
-            }
-            item.setVoteCount(homeworkVoteDao.votedCount(Constants.VoteType.SUBJECT, item.getId()));
-            item.setCommentCount(commentDao.commentCount(Constants.CommentModule.SUBJECT, item.getId()));
-            return item;
-        }).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId) {
-        return subjectArticleDao.loadArticles(problemId, openId);
-    }
-
-    @Override
-    public List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId) {
-        return articleLabelDao.loadArticleActiveLabels(moduleId, articleId);
-    }
-
-    @Override
-    public SubjectArticle loadSubjectArticle(Integer submitId) {
-        return subjectArticleDao.load(SubjectArticle.class, submitId);
-    }
-
-    @Override
-    public Integer submitSubjectArticle(SubjectArticle subjectArticle) {
-        String content = CommonUtils.removeHTMLTag(subjectArticle.getContent());
-        subjectArticle.setLength(content.length());
-        Integer submitId = subjectArticle.getId();
-        if (subjectArticle.getId() == null) {
-            // 第一次提交
-            submitId = subjectArticleDao.insert(subjectArticle);
-            // 生成记录表
-            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.SUBJECT, submitId));
-        } else {
-            // 更新之前的
-            subjectArticleDao.update(subjectArticle);
-        }
-        return submitId;
-    }
-
-    @Override
-    public List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels) {
-        List<ArticleLabel> oldLabels = articleLabelDao.loadArticleLabels(module, articleId);
-        List<ArticleLabel> shouldDels = Lists.newArrayList();
-        List<ArticleLabel> shouldReAdds = Lists.newArrayList();
-        labels = labels == null ? Lists.newArrayList() : labels;
-        List<Integer> userChoose = labels.stream().map(LabelConfig::getId).collect(Collectors.toList());
-        oldLabels.forEach(item -> {
-            if (userChoose.contains(item.getLabelId())) {
-                if (item.getDel()) {
-                    shouldReAdds.add(item);
-                }
-            } else {
-                shouldDels.add(item);
-            }
-            userChoose.remove(item.getLabelId());
-        });
-        userChoose.forEach(item -> articleLabelDao.insertArticleLabel(module, articleId, item));
-        shouldDels.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 1));
-        shouldReAdds.forEach(item -> articleLabelDao.updateDelStatus(item.getId(), 0));
-        return articleLabelDao.loadArticleActiveLabels(module, articleId);
-    }
-
-    @Override
-    public List<LabelConfig> loadProblemLabels(Integer problemId) {
-        return labelConfigDao.loadLabelConfigs(problemId);
-    }
-
-    @Override
-    public void updatePicReference(List<String> picList, Integer submitId) {
-        picList.forEach(item -> pictureDao.updateReference(item, submitId));
     }
 
     @Override
@@ -405,11 +309,6 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public Integer loadWarmupPracticeCntByPracticeUid(String practiceUid) {
         return warmupPracticeDao.loadWarmupPracticeCntByPracticeUid(practiceUid);
-    }
-
-    @Override
-    public Integer delWarmupPracticeByPracticeUid(String practiceUid) {
-        return warmupPracticeDao.delWarmupPracticeByPracticeUid(practiceUid);
     }
 
     @Override
