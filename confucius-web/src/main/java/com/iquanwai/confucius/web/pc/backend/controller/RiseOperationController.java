@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
@@ -14,8 +13,9 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.TableDto;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -23,8 +23,10 @@ import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
+import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
+import com.iquanwai.confucius.web.pc.backend.dto.AssignDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ProblemCatalogDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
@@ -251,14 +253,12 @@ public class RiseOperationController {
         page.setPageSize(20);
 
         List<BusinessSchoolApplication> applications = businessSchoolService.loadBusinessSchoolList(page);
-        final List<Integer> profileIds;
+        final List<String> openidList;
         if (applications != null && applications.size() > 0) {
             //获取黑名单用户
-            List<String> openidList = accountService.loadBlackListOpenIds();
-            List<Profile> profiles = accountService.getProfilesByOpenids(openidList);
-            profileIds = profiles.stream().map(Profile::getId).collect(Collectors.toList());
+            openidList = accountService.loadBlackListOpenIds();
         } else {
-            profileIds = Lists.newArrayList();
+            openidList = null;
         }
 
         Assert.notNull(applications);
@@ -281,33 +281,33 @@ public class RiseOperationController {
 
             int lastVerifiedCode = application.getLastVerified();
 
-            if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()){
+            if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedCode()) {
                 dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_ZERO.getLastVerifiedMsg());
-            }
-            else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()){
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedCode()) {
                 dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_APPROVAL.getLastVerifiedMsg());
-            }
-            else  if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()){
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedCode()) {
                 dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_REJECT.getLastVerifiedMsg());
-            }
-            else if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()){
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedCode()) {
                 dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_IGNORE.getLastVerifiedMsg());
-            }
-            else if(lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()){
+            } else if (lastVerifiedCode == LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedCode()) {
                 dto.setVerifiedResult(LastVerifiedEnums.LAST_VERIFIED_EXPIRED.getLastVerifiedMsg());
-            }
-            else{
+            } else {
                 dto.setVerifiedResult("未知");
             }
 
-            if (!CollectionUtils.isEmpty(profileIds)) {
-                if (profileIds.contains(loginUser.getId())) {
+            if (openidList!=null && CollectionUtils.isNotEmpty(openidList)) {
+                if (openidList.contains(profile.getOpenid())) {
                     dto.setIsBlack("是");
                 }
             }
             dto.setReward(businessSchoolService.loadUserAuditionReward(application.getProfileId()));
             dto.setSubmitTime(DateUtils.parseDateTimeToString(application.getAddTime()));
             dto.setOrderId(application.getOrderId());
+            if (application.getInterviewer() != null) {
+                Profile interviewer = accountService.getProfile(application.getInterviewer());
+                dto.setInterviewer(application.getInterviewer());
+                dto.setInterviewerName(interviewer.getNickname());
+            }
 
             return dto;
         }).collect(Collectors.toList());
@@ -472,4 +472,39 @@ public class RiseOperationController {
         return WebUtils.result(deleteStatus);
     }
 
+    @RequestMapping(value = "/interviewer/list", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadInterviewerList(PCLoginUser loginUser) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("审批")
+                .action("获取审批者列表");
+        operationLogService.log(operationLog);
+        List<UserRole> userRoles = businessSchoolService.loadInterviewer();
+        userRoles.forEach(item -> {
+            Profile profile = accountService.getProfile(item.getProfileId());
+            item.setAsstName(profile.getNickname());
+            AssistCatalogEnums role = AssistCatalogEnums.getById(item.getRoleId());
+            item.setAsstType(role == null ? "" : role.getRoleName());
+            item.setLevel(role == null ? -10 : role.getLevel());
+        });
+        userRoles.sort(((o1, o2) -> o2.getLevel() - o1.getLevel()));
+        return WebUtils.result(userRoles);
+    }
+
+    @RequestMapping(value = "/assign/interviewer", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> assignInterviewer(PCLoginUser loginUser, @RequestBody AssignDto assignDto) {
+        Assert.notNull(loginUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理")
+                .function("审批")
+                .action("分配审批者");
+        operationLogService.log(operationLog);
+        Integer result = businessSchoolService.assignInterviewer(assignDto.getApplyId(), assignDto.getProfileId());
+        if (result != null && result > 0) {
+            return WebUtils.success();
+        } else {
+            return WebUtils.error("分配失败");
+        }
+    }
 }

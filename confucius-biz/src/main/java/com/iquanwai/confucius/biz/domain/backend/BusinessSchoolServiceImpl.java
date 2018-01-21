@@ -9,12 +9,14 @@ import com.iquanwai.confucius.biz.dao.common.customer.MemberTypeDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
+import com.iquanwai.confucius.biz.dao.common.permission.WhiteListDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.WhiteList;
 import com.iquanwai.confucius.biz.po.apply.AuditionReward;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -58,7 +60,8 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     private BusinessApplySubmitDao businessApplySubmitDao;
     @Autowired
     private AuditionRewardDao auditionRewardDao;
-
+    @Autowired
+    private WhiteListDao whiteListDao;
 
     @Override
     public List<BusinessSchoolApplication> loadBusinessSchoolList(Page page) {
@@ -196,4 +199,30 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     public BusinessSchoolApplication loadCheckingApply(Integer profileId) {
         return businessSchoolApplicationDao.loadCheckingApplication(profileId);
     }
+
+    @Override
+    public List<UserRole> loadInterviewer() {
+        List<WhiteList> whiteLists = whiteListDao.loadWhiteList(WhiteList.INTERVIEWER);
+        return whiteLists.stream().map(item -> {
+            UserRole role = userRoleDao.loadAssist(item.getProfileId());
+            if (role != null) {
+                return role;
+            } else {
+                role = new UserRole();
+                role.setProfileId(item.getProfileId());
+                return role;
+            }
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Integer assignInterviewer(Integer applyId, Integer interviewer) {
+        return businessSchoolApplicationDao.assignInterviewer(applyId, interviewer);
+    }
+
+    @Override
+    public List<BusinessApplySubmit> loadByApplyId(Integer applyId) {
+        return businessApplySubmitDao.loadByApplyId(applyId);
+    }
+
 }

@@ -72,6 +72,7 @@
             <mvc:mapping path="/**"/>
             <mvc:exclude-mapping path="/"/>
             <mvc:exclude-mapping path="/wx/**"/>
+            <mvc:exclude-mapping path="/ali/pay/**"/>
             <mvc:exclude-mapping path="/b/**"/>
             <mvc:exclude-mapping path="/image/**"/>
             <mvc:exclude-mapping path="/js/**"/>
@@ -90,6 +91,7 @@
             <mvc:exclude-mapping path="/performance/**"/>
             <mvc:exclude-mapping path="/internal/**"/>
             <mvc:exclude-mapping path="/heartbeat"/>
+            <mvc:exclude-mapping path="/pay/alipay/*"/>
             <bean class="com.iquanwai.confucius.web.interceptor.WeixinHandlerInterceptor"></bean>
         </mvc:interceptor>
         <mvc:interceptor>

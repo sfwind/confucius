@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.backend.dto;
 
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import lombok.Data;
 
 /**

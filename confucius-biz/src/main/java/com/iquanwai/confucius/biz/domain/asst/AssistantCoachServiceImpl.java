@@ -2,17 +2,22 @@ package com.iquanwai.confucius.biz.domain.asst;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
+import com.iquanwai.confucius.biz.dao.apply.InterviewRecordDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.ProfileCount;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +48,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private UserRoleDao userRoleDao;
+    @Autowired
+    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
+    @Autowired
+    private InterviewRecordDao interviewRecordDao;
 
     private static final int SIZE = 100;
 
@@ -246,7 +255,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
      */
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId, String className, String groupId) {
-        List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className, groupId);
         List<Integer> profiles = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
 
@@ -295,66 +303,50 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         return riseClassMemberDao.loadAllClassNameAndGroup();
     }
 
+    private void initWorkInfoDto(ApplicationSubmit requestSubmit, List<ApplicationPractice> practices, List<RiseWorkInfoDto> workInfoDtos) {
+        RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(requestSubmit);
+        practices.forEach(applicationPractice -> {
+            if (requestSubmit.getApplicationId().equals(applicationPractice.getId())) {
+                riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+            }
+        });
+        workInfoDtos.add(riseWorkInfoDto);
+    }
+
+
     /**
      * 返回200条应用提交（求点评在前，不需要点评在后，按照发布时间降序排序）
      *
-     * @param problemId
-     * @param profileIds
-     * @return
+     * @param problemId  小课id
+     * @param profileIds 被查询的人
+     * @return 结果列表
      */
     private List<RiseWorkInfoDto> getWorkInfoDtos(Integer problemId, List<Integer> profileIds) {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
         if (profileIds.size() == 0) {
             return Lists.newArrayList();
         }
+        // 加载求点评且未点评的人
         List<ApplicationSubmit> requestSubmits = applicationSubmitDao.loadRequestByProfileIds(problemId, profileIds);
         requestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
         List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
         if (requestSubmits.size() >= APPLICTION_SIZE) {
-            requestSubmits.subList(0, APPLICTION_SIZE).stream().forEach(requestSubmit -> {
-                RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(requestSubmit);
-                applicationPractices.forEach(applicationPractice -> {
-                    if (requestSubmit.getApplicationId().equals(applicationPractice.getId())) {
-                        riseWorkInfoDto.setTitle(applicationPractice.getTopic());
-                    }
-                });
-                workInfoDtos.add(riseWorkInfoDto);
-            });
+            requestSubmits
+                    .subList(0, APPLICTION_SIZE)
+                    .forEach(requestSubmit -> this.initWorkInfoDto(requestSubmit, applicationPractices, workInfoDtos));
             return workInfoDtos;
         } else {
             //将求点评的塞到返回值中
-            requestSubmits.stream().forEach(requestSubmit -> {
-                RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(requestSubmit);
-                applicationPractices.forEach(applicationPractice -> {
-                    if (requestSubmit.getApplicationId().equals(applicationPractice.getId())) {
-                        riseWorkInfoDto.setTitle(applicationPractice.getTopic());
-                    }
-                });
-                workInfoDtos.add(riseWorkInfoDto);
-            });
+            requestSubmits.forEach(requestSubmit -> this.initWorkInfoDto(requestSubmit, applicationPractices, workInfoDtos));
             List<ApplicationSubmit> unRequestSubmits = applicationSubmitDao.loadUnRequestByProfileIds(problemId, profileIds);
             unRequestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
             int reamin = APPLICTION_SIZE - workInfoDtos.size();
             if (unRequestSubmits.size() >= reamin) {
-                unRequestSubmits.subList(0, reamin).stream().forEach(unRequestSubmit -> {
-                    RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
-                    applicationPractices.forEach(applicationPractice -> {
-                        if (unRequestSubmit.getApplicationId().equals(applicationPractice.getId())) {
-                            riseWorkInfoDto.setTitle(applicationPractice.getTopic());
-                        }
-                    });
-                    workInfoDtos.add(riseWorkInfoDto);
-                });
+                unRequestSubmits.subList(0, reamin)
+                        .forEach(unRequestSubmit -> this.initWorkInfoDto(unRequestSubmit, applicationPractices, workInfoDtos));
             } else {
-                unRequestSubmits.stream().forEach(unRequestSubmit -> {
-                    RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(unRequestSubmit);
-                    applicationPractices.forEach(applicationPractice -> {
-                        if (unRequestSubmit.getApplicationId().equals(applicationPractice.getId())) {
-                            riseWorkInfoDto.setTitle(applicationPractice.getTopic());
-                        }
-                    });
-                    workInfoDtos.add(riseWorkInfoDto);
-                });
+                unRequestSubmits
+                        .forEach(unRequestSubmit -> this.initWorkInfoDto(unRequestSubmit, applicationPractices, workInfoDtos));
             }
             return workInfoDtos;
         }
@@ -363,7 +355,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     /**
      * 加载所有的教练
      *
-     * @return
+     * @return 教练名单
      */
     @Override
     public List<UserRole> loadAssists() {
@@ -373,9 +365,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     /**
      * 对教练进行升降级
      *
-     * @param id
-     * @param roleId
-     * @return
+     * @param id     主键
+     * @param roleId 角色id
+     * @return 更新条数
      */
     @Override
     public Integer updateAssist(Integer id, Integer roleId) {
@@ -385,14 +377,20 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     /**
      * 教练过期
      *
-     * @param id
-     * @return
+     * @param id 主键
+     * @return 更新条数
      */
     @Override
     public Integer deleteAssist(Integer id) {
         return userRoleDao.deleteAssist(id);
     }
 
+    /**
+     * 根据昵称获取非助教信息
+     *
+     * @param nickName 昵称
+     * @return 非助教列表
+     */
     @Override
     public List<Profile> loadUnAssistByNickName(String nickName) {
         List<Profile> profiles = accountService.loadProfilesByNickName(nickName);
@@ -400,7 +398,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             return profiles;
         }
         List<Profile> unAssistProfiles = Lists.newArrayList();
-        profiles.stream().forEach(profile -> {
+        profiles.forEach(profile -> {
             if (userRoleDao.loadAssist(profile.getId()) == null) {
                 unAssistProfiles.add(profile);
             }
@@ -411,9 +409,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     /**
      * 添加教练
      *
-     * @param roleId
-     * @param riseId
-     * @return
+     * @param roleId 角色id
+     * @param riseId 圈外id
+     * @return 添加结果
      */
     @Override
     public Integer addAssist(Integer roleId, String riseId) {
@@ -426,5 +424,32 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             return -1;
         }
         return userRoleDao.insertAssist(roleId, profile.getId());
+    }
+
+    @Override
+    public List<BusinessSchoolApplication> loadByInterviewer(Integer interviewer, Page page) {
+        page.setTotal(businessSchoolApplicationDao.loadAssistBACount(interviewer));
+        return businessSchoolApplicationDao.loadByInterviewer(interviewer, page);
+    }
+
+    @Override
+    public InterviewRecord loadInterviewRecord(Integer applyId) {
+        return interviewRecordDao.queryByApplyId(applyId);
+    }
+
+    @Override
+    public Integer addInterviewRecord(InterviewRecord interviewRecord) {
+        Integer applyId = interviewRecord.getApplyId();
+        InterviewRecord existInterviewRecord = interviewRecordDao.queryByApplyId(applyId);
+        if (existInterviewRecord == null) {
+            return interviewRecordDao.insert(interviewRecord);
+        } else {
+            interviewRecord.setId(existInterviewRecord.getId());
+            //判断是管理员还是助教
+            if(interviewRecord.getApprovalId()!=null){
+                return interviewRecordDao.updateByAdmin(interviewRecord);
+            }
+            return interviewRecordDao.updateByAssist(interviewRecord);
+        }
     }
 }

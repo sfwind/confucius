@@ -11,4 +11,9 @@ public class UserRole {
     private Integer roleId;
     private Integer profileId;
     private Boolean del;
+
+    // 非DB字段
+    private String asstName;
+    private String asstType;
+    private Integer level;
 }

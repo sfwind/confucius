@@ -1,9 +1,12 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -83,6 +86,23 @@ public interface AssistantCoachService {
      */
     Integer addAssist(Integer roleId,String riseId);
 
+    /**
+     * 加载教练审核中的商学院申请
+     * @param interviewer
+     * @return
+     */
+    List<BusinessSchoolApplication> loadByInterviewer(Integer interviewer,Page page);
 
+    /**
+     * 加载审批的面试记录
+     * @param applyId
+     * @return
+     */
+    InterviewRecord loadInterviewRecord(Integer applyId);
+
+    /**
+     * 添加或者更新审批记录
+     */
+    Integer addInterviewRecord(InterviewRecord interviewRecord);
 
 }

@@ -1,5 +1,12 @@
 package com.iquanwai.confucius.biz.domain.weixin.pay;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.domain.AlipayTradeRefundModel;
+import com.alipay.api.domain.AlipayTradeWapPayModel;
+import com.alipay.api.request.AlipayTradeRefundRequest;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -7,9 +14,14 @@ import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.slf4j.Logger;
@@ -56,6 +68,9 @@ public class PayServiceImpl implements PayService {
     private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
     private static final String RISE_CAMP_PAY_CALLBACK_PATH = "/wx/pay/result/risecamp/callback";
     private static final String BS_APPLICATION_PAY_CALLBACK_PATH = "/wx/pay/result/application/callback";
+
+    private static final String ALIPAY_CALLBACK_PATH = "/ali/pay/callback/notify";
+    private static final String ALIPAY_RETURN_PATH = "/pay/alipay/return";
 
 
     @PostConstruct
@@ -136,6 +151,7 @@ public class PayServiceImpl implements PayService {
     public void handlePayResult(PayCallback payCallback) {
         Assert.notNull(payCallback, "支付结果不能为空");
         String orderId = payCallback.getOut_trade_no();
+        QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
         if (payCallback.getErr_code_des() != null) {
             logger.error(payCallback.getErr_code_des() + ", orderId=" + orderId);
             if (!ignoreCode(payCallback.getErr_code())) {
@@ -146,7 +162,12 @@ public class PayServiceImpl implements PayService {
 
         String transactionId = payCallback.getTransaction_id();
         String paidTimeStr = payCallback.getTime_end();
-        Date paidTime = DateUtils.parseStringToDate3(paidTimeStr);
+        Date paidTime = null;
+        if (order.getPayType() == QuanwaiOrder.PAY_ALI) {
+            paidTime = DateUtils.parseStringToDateTime(paidTimeStr);
+        } else if (order.getPayType() == QuanwaiOrder.PAY_WECHAT) {
+            paidTime = DateUtils.parseStringToDate3(paidTimeStr);
+        }
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
     }
 
@@ -278,7 +299,7 @@ public class PayServiceImpl implements PayService {
             notify_url = ConfigUtils.adapterDomainName() + RISE_MEMBER_PAY_CALLBACK_PATH;
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + RISE_CAMP_PAY_CALLBACK_PATH;
-        } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())){
+        } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
             notify_url = ConfigUtils.adapterDomainName() + BS_APPLICATION_PAY_CALLBACK_PATH;
         }
 
@@ -374,12 +395,12 @@ public class PayServiceImpl implements PayService {
         return unifiedOrder;
     }
 
-    private String buildOrderDetail(QuanwaiOrder quanwaiOrder, Integer total_fee) {
+    private String buildOrderDetail(QuanwaiOrder quanwaiOrder, Integer totalFee) {
         OrderDetail orderDetail = new OrderDetail();
         List<GoodsDetail> goodsDetailList = Lists.newArrayList();
         orderDetail.setGoodsDetail(goodsDetailList);
         GoodsDetail goodsDetail = new GoodsDetail();
-        goodsDetail.setPrice(total_fee);
+        goodsDetail.setPrice(totalFee);
         goodsDetail.setGoods_id(quanwaiOrder.getGoodsId());
         goodsDetail.setGoods_name(quanwaiOrder.getGoodsName());
         goodsDetail.setGoods_num(1);
@@ -390,23 +411,57 @@ public class PayServiceImpl implements PayService {
     @Override
     public void refund(String orderId, Double fee) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-        RefundOrder refundOrder = buildRefundOrder(quanwaiOrder, fee);
-        String response = restfulHelper.sslPostXml(REFUND_ORDER_URL, XMLHelper.createXML(refundOrder));
-
-        RefundOrderReply reply = XMLHelper.parseXml(RefundOrderReply.class, response);
-        if (reply != null) {
-            if (FAIL.equals(reply.getReturn_code()) || FAIL.equals(reply.getResult_code())) {
-                logger.error("response is------\n" + response);
-                messageService.sendAlarm("退款出错", "退款接口调用失败",
-                        "高", "订单id:" + orderId, "msg:" + reply.getReturn_msg() + ", error:" + reply.getErr_code_des());
-            } else {
-                quanwaiOrderDao.refundOrder(orderId, fee, refundOrder.getOut_refund_no());
-            }
-
+        if (quanwaiOrder.getPayType() == QuanwaiOrder.PAY_WECHAT) {
+            this.refundWechatPay(quanwaiOrder, fee);
+        } else if (quanwaiOrder.getPayType() == QuanwaiOrder.PAY_ALI) {
+            // 支付宝
+            this.refundAliPay(quanwaiOrder, fee);
         }
     }
 
-    private RefundOrder buildRefundOrder(QuanwaiOrder quanwaiOrder, Double fee) {
+    private void refundAliPay(QuanwaiOrder quanwaiOrder, Double fee) {
+        //商户订单号和支付宝交易号不能同时为空。 trade_no、  out_trade_no如果同时存在优先取trade_no
+        //商户订单号，和支付宝交易号二选一
+        String outTradeNo = quanwaiOrder.getOrderId();
+        //退款金额，不能大于订单总金额
+        String refundAmount = CommonUtils.formatePrice(fee);
+        //退款的原因说明
+        String refundReason = "";
+        //标识一次退款请求，同一笔交易多次退款需要保证唯一，如需部分退款，则此参数必传。
+        String outRequestNo = CommonUtils.randomString(16);
+        // SDK 公共请求类，包含公共请求参数，以及封装了签名与验签，开发者无需关注签名与验签
+        AlipayClient client = restfulHelper.initAlipayClient();
+        AlipayTradeRefundRequest alipayRequest = new AlipayTradeRefundRequest();
+
+        AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+        model.setOutTradeNo(outTradeNo);
+        //model.setTradeNo(trade_no);
+        model.setRefundAmount(refundAmount);
+        model.setRefundReason(refundReason);
+        model.setOutRequestNo(outRequestNo);
+        alipayRequest.setBizModel(model);
+
+        AlipayTradeRefundResponse alipayResponse = null;
+        try {
+            alipayResponse = client.execute(alipayRequest);
+            logger.info("订单：{},退款结果:{}", quanwaiOrder.getOrderId(), alipayResponse.getBody());
+            if (alipayResponse.isSuccess()) {
+                quanwaiOrderDao.refundOrder(quanwaiOrder.getOrderId(), fee, outRequestNo);
+            } else {
+                logger.error("response is------\n" + alipayResponse.getBody());
+                messageService.sendAlarm("退款出错", "退款接口调用失败",
+                        "高", "订单id:" + quanwaiOrder.getOrderId(), "msg:" + alipayResponse.getSubMsg() + ", error:" + alipayResponse.getMsg());
+                throw new RefundException(alipayResponse.getMsg());
+            }
+        } catch (AlipayApiException e) {
+            logger.error(e.getLocalizedMessage(), e);
+            messageService.sendAlarm("退款出错", "退款接口调用失败",
+                    "高", "订单id:" + quanwaiOrder.getOrderId(), "msg:" + e.getLocalizedMessage());
+            throw new RefundException(e.getLocalizedMessage());
+        }
+    }
+
+    private void refundWechatPay(QuanwaiOrder quanwaiOrder, Double fee) {
         RefundOrder refundOrder = new RefundOrder();
         Map<String, String> map = Maps.newHashMap();
         String appid = ConfigUtils.getAppid();
@@ -435,6 +490,55 @@ public class PayServiceImpl implements PayService {
         refundOrder.setOut_refund_no(out_refund_no);
         refundOrder.setSign(sign);
 
-        return refundOrder;
+        String response = restfulHelper.sslPostXml(REFUND_ORDER_URL, XMLHelper.createXML(refundOrder));
+        RefundOrderReply reply = XMLHelper.parseXml(RefundOrderReply.class, response);
+        if (reply != null) {
+            if (FAIL.equals(reply.getReturn_code()) || FAIL.equals(reply.getResult_code())) {
+                logger.error("response is------\n" + response);
+                messageService.sendAlarm("退款出错", "退款接口调用失败",
+                        "高", "订单id:" + quanwaiOrder.getOrderId(), "msg:" + reply.getReturn_msg() + ", error:" + reply.getErr_code_des());
+                throw new RefundException(reply.getReturn_msg());
+            } else {
+                quanwaiOrderDao.refundOrder(quanwaiOrder.getOrderId(), fee, refundOrder.getOut_refund_no());
+            }
+
+        }
+    }
+
+    @Override
+    public String buildAlipayParam(QuanwaiOrder quanwaiOrder) {
+        if (quanwaiOrder == null) {
+            logger.error("order not existed");
+            return "";
+        }
+
+        //获得初始化的AlipayClient
+        AlipayClient alipayClient = restfulHelper.initAlipayClient();
+
+        //创建API对应的request
+        AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
+        //在公共参数中设置回跳和通知地址
+        alipayRequest.setReturnUrl(ConfigUtils.getAlipayNotifyDomain() + ALIPAY_RETURN_PATH);
+        alipayRequest.setNotifyUrl(ConfigUtils.getAlipayNotifyDomain() + ALIPAY_CALLBACK_PATH);
+        //填充业务参数
+        AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
+        model.setOutTradeNo(quanwaiOrder.getOrderId());
+        // 总价
+        model.setTotalAmount(CommonUtils.formatePrice(quanwaiOrder.getPrice()));
+        model.setSubject(quanwaiOrder.getGoodsName());
+        // 固定的
+        model.setProductCode("QUICK_WAP_PAY");
+        // 手机网站支付2.0的交易超时时间只能设置相对时间吗
+        model.setTimeoutExpress("1h");
+        alipayRequest.setBizModel(model);
+        String redirectParam = "";
+        try {
+            //调用SDK生成表单
+            redirectParam = alipayClient.pageExecute(alipayRequest, "GET").getBody();
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        logger.info("redirect " + redirectParam);
+        return redirectParam;
     }
 }

@@ -159,11 +159,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Profile> getProfilesByOpenids(List<String> openids) {
-        return profileDao.queryAccountsByOpenids(openids);
-    }
-
-    private Integer getRiseMember(Integer profileId) {
+    public Integer getRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember == null) {
             return 0;

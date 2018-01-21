@@ -15,4 +15,6 @@ public class WhiteList {
     public final static String FRAG_PRACTICE = "FRAG_PRACTICE";
     public final static String PAY_TEST = "PAY_TEST";
     public final static String TEST = "TEST";
+    public final static String INTERVIEWER = "INTERVIEWER";
 }
+

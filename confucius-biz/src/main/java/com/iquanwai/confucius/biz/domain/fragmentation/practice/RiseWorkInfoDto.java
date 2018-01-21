@@ -40,7 +40,7 @@ public class RiseWorkInfoDto {
         this.submitId = origin.getId();
         this.type = Constants.PracticeType.APPLICATION;
         this.content = origin.getContent();
-        this.request = origin.getRequestFeedback();
+        this.request = origin.getRequestFeedback() && !origin.getFeedback();
         this.upTime = DateUtils.parseDateToString(origin.getPublishTime());
     }
 }

@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
@@ -14,7 +15,7 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.common.customer.BusinessSchoolApplication;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
@@ -385,7 +386,14 @@ public class SignupController {
         // 根据前端传进来的 param 创建订单信息
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(paymentDto, loginUser.getId());
         // 下单
-        PaymentDto paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
+        PaymentDto paymentParam;
+        if (paymentDto.getPayType() == QuanwaiOrder.PAY_WECHAT) {
+            paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
+        } else if (paymentDto.getPayType() == QuanwaiOrder.PAY_ALI) {
+            paymentParam = this.createAlipay(quanwaiOrder);
+        } else {
+            return WebUtils.error("支付方式异常");
+        }
         return WebUtils.result(paymentParam);
     }
 
@@ -433,21 +441,21 @@ public class SignupController {
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER: {
-                return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup());
+                return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup(), paymentDto.getPayType());
             }
             case QuanwaiOrder.FRAG_CAMP: {
                 Integer couponId = null;
                 if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
-                return signupService.signUpMonthlyCamp(profileId, paymentDto.getGoodsId(), couponId);
+                return signupService.signUpMonthlyCamp(profileId, paymentDto.getGoodsId(), couponId, paymentDto.getPayType());
             }
             case QuanwaiOrder.BS_APPLICATION: {
                 Integer couponId = null;
                 if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
                     couponId = paymentDto.getCouponsIdGroup().get(0);
                 }
-                return signupService.signupBusinessSchoolApplication(profileId, paymentDto.getGoodsId(), couponId);
+                return signupService.signupBusinessSchoolApplication(profileId, paymentDto.getGoodsId(), couponId, paymentDto.getPayType());
             }
             default:
                 logger.error("异常，用户:{} 的商品类型未知:{}", profileId, paymentDto);
@@ -479,6 +487,34 @@ public class SignupController {
         return paymentDto;
     }
 
+    /**
+     * 阿里支付
+     *
+     * @param quanwaiOrder 订单对象
+     * @return 支付参数
+     */
+    private PaymentDto createAlipay(QuanwaiOrder quanwaiOrder) {
+        // 下单
+        PaymentDto paymentDto = new PaymentDto();
+        paymentDto.setFee(quanwaiOrder.getPrice());
+        paymentDto.setFree(Double.valueOf(0d).equals(quanwaiOrder.getPrice()));
+        paymentDto.setProductId(quanwaiOrder.getOrderId());
+        if (!Double.valueOf(0).equals(quanwaiOrder.getPrice())) {
+            String postPayString = payService.buildAlipayParam(quanwaiOrder);
+            Map<String, String> signParams = Maps.newHashMap();
+            signParams.put("alipayUrl", postPayString);
+            paymentDto.setSignParams(signParams);
+            OperationLog payParamLog = OperationLog.create().openid(quanwaiOrder.getOpenid())
+                    .module("报名")
+                    .function("支付宝支付")
+                    .action("下单")
+                    .memo(signParams.toString());
+            operationLogService.log(payParamLog);
+        }
+        return paymentDto;
+    }
+
+
     @RequestMapping("/rise/member/{memberTypeId}")
     public ResponseEntity<Map<String, Object>> riseMember(@PathVariable Integer memberTypeId, LoginUser loginUser) {
         Assert.notNull(loginUser, "用户不能为空");
@@ -499,8 +535,7 @@ public class SignupController {
         // 不同商品的特殊逻辑
         Assert.notNull(memberType);
         if (memberType.getId() == RiseMember.ELITE) {
-            int dailyFee = (int) (memberType.getFee() / 365);
-            dto.setTip("每天给自己投资" + dailyFee + "元，获得全年36次职场加速机会");
+            dto.setTip("开学后7天内可全额退款");
         } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
             dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
         }
@@ -599,6 +634,25 @@ public class SignupController {
         }
     }
 
+    @RequestMapping(value = "/order/success", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> orderQuerySuccess(LoginUser loginUser, @RequestParam String orderId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("订单")
+                .function("支付状态")
+                .action("查询是否支付成功")
+                .memo(orderId);
+        operationLogService.log(operationLog);
+        QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+        if (quanwaiOrder != null && quanwaiOrder.getStatus() == QuanwaiOrder.PAID) {
+            PaymentDto dto = new PaymentDto();
+            dto.setGoodsId(Integer.parseInt(quanwaiOrder.getGoodsId()));
+            dto.setGoodsType(quanwaiOrder.getGoodsType());
+            return WebUtils.result(dto);
+        } else {
+            return WebUtils.error("还没有支付");
+        }
+    }
+
 
     private boolean canUseCoupon(GoodsInfoDto goodsInfoDto) {
         //申请商学院不能用优惠券
@@ -608,4 +662,5 @@ public class SignupController {
 
         return true;
     }
+
 }

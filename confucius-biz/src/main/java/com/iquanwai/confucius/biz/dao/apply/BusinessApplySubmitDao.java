@@ -47,7 +47,7 @@ public class BusinessApplySubmitDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from BusinessApplySubmit where ApplyId = ? and Del = 0";
         try {
-            return runner.query(sql, new BeanListHandler<BusinessApplySubmit>(BusinessApplySubmit.class), id);
+            return runner.query(sql, new BeanListHandler<>(BusinessApplySubmit.class), id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
