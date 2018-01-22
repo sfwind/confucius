@@ -160,7 +160,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setRefreshToken(refreshToken);
         callback.setAccessToken(accessToken);
         logger.info("update callback, state:{}, accessToken:{}, refreshToken:{}, openId:{}, code:{}", state, accessToken, refreshToken, openid, code);
-        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid, accessToken);
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(AccountService.MOBILE_USER_INFO_URL, openid, accessToken);
         String unionId = userInfoResult.get("unionid").toString();
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
@@ -192,7 +192,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setPcOpenid(openid);
         callback.setRefreshToken(refreshToken);
         callback.setPcAccessToken(accessToken);
-        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid, accessToken);
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(AccountService.MOBILE_USER_INFO_URL, openid, accessToken);
         String unionId = userInfoResult.get("unionid").toString();
         callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
@@ -276,7 +276,7 @@ public class OAuthServiceImpl implements OAuthService {
         String openid = callback.getPcOpenid();
         String accessToken = callback.getPcAccessToken();
 
-        Map<String, Object> result = getUserInfoFromWeiXin(openid, accessToken);
+        Map<String, Object> result = getUserInfoFromWeiXin(AccountService.MOBILE_USER_INFO_URL, openid, accessToken);
         String unionId = result.get("unionid").toString();
         // 根据 unionId 查询
         Profile profile = accountService.queryByUnionId(unionId);
@@ -305,12 +305,11 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * 从微信获取用户基本信息
+     * @param url 微信请求 url
      * @param openId 各个平台对应 openid
      * @param accessToken 各个平台对应 accessToken
      */
-    private Map<String, Object> getUserInfoFromWeiXin(String openId, String accessToken) {
-        String url = AccountService.PC_USER_INFO_URL;
-
+    private Map<String, Object> getUserInfoFromWeiXin(String url, String openId, String accessToken) {
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openId);
         map.put("access_token", accessToken);
