@@ -452,4 +452,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             return interviewRecordDao.updateByAssist(interviewRecord);
         }
     }
+
+    @Override
+    public Integer loadAssignedCount(Integer interviewer) {
+        return businessSchoolApplicationDao.loadAssistBACount(interviewer);
+    }
 }

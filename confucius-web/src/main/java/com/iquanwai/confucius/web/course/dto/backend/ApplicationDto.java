@@ -123,4 +123,9 @@ public class ApplicationDto {
      */
     private InterviewRecord interviewRecord;
 
+    /**
+     * 是否已经面试过
+     */
+    private String isInterviewed;
+
 }

@@ -301,6 +301,7 @@ public class AssistantCoachController {
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
+            dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId())==null?"否":"是");
             businessApplySubmits.stream().forEach(businessApplySubmit -> {
                 Integer questionId = businessApplySubmit.getQuestionId();
                 if(questionId == 14){
