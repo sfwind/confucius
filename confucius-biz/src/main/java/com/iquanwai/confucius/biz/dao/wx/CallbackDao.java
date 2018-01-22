@@ -51,7 +51,7 @@ public class CallbackDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
             run.update("UPDATE Callback Set AccessToken = ?, RefreshToken = ?, Openid = ?, UnionId = ? where State = ?",
-                    accessToken, refreshToken, openid, state, unionId);
+                    accessToken, refreshToken, openid, unionId, state);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
