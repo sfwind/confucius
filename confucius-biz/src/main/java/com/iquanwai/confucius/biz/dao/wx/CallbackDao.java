@@ -47,10 +47,10 @@ public class CallbackDao extends DBUtil {
         return -1;
     }
 
-    public void updateUserInfo(String state, String accessToken, String refreshToken, String openid) {
+    public void updateUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
-            run.update("UPDATE Callback Set AccessToken=?,RefreshToken=?,Openid=? where State=?",
+            run.update("UPDATE Callback Set AccessToken = ?, RefreshToken = ?, Openid = ?, UnionId = ? where State = ?",
                     accessToken, refreshToken, openid, state);
 
         } catch (SQLException e) {
@@ -58,12 +58,11 @@ public class CallbackDao extends DBUtil {
         }
     }
 
-    public void updatePcUserInfo(String state, String accessToken, String refreshToken, String openid) {
+    public void updatePcUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
-            run.update("UPDATE Callback Set PcAccessToken=?,RefreshToken=?,PcOpenid=? where State=?",
-                    accessToken, refreshToken, openid, state);
-
+            run.update("UPDATE Callback Set PcAccessToken = ?, RefreshToken = ?, PcOpenid = ?, UnionId = ? where State = ?",
+                    accessToken, refreshToken, openid, unionId, state);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

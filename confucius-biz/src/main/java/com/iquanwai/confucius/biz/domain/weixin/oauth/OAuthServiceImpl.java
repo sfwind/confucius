@@ -160,8 +160,9 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setRefreshToken(refreshToken);
         callback.setAccessToken(accessToken);
         logger.info("update callback, state:{}, accessToken:{}, refreshToken:{}, openId:{}, code:{}", state, accessToken, refreshToken, openid, code);
-        callbackDao.updateUserInfo(state, accessToken, refreshToken, openid);
-
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid, accessToken);
+        String unionId = userInfoResult.get("unionid").toString();
+        callbackDao.updateUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
     }
 
@@ -191,8 +192,9 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setPcOpenid(openid);
         callback.setRefreshToken(refreshToken);
         callback.setPcAccessToken(accessToken);
-        callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid);
-
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid, accessToken);
+        String unionId = userInfoResult.get("unionid").toString();
+        callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
     }
 
@@ -273,23 +275,8 @@ public class OAuthServiceImpl implements OAuthService {
     public Pair<Integer, Callback> initOpenId(Callback callback) {
         String openid = callback.getPcOpenid();
         String accessToken = callback.getPcAccessToken();
-        String url = AccountService.PC_USER_INFO_URL;
 
-        Map<String, String> map = Maps.newHashMap();
-        map.put("openid", openid);
-        map.put("access_token", accessToken);
-        logger.info("请求用户信息,pcOpenid:{}", openid);
-        url = CommonUtils.placeholderReplace(url, map);
-
-        String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}", body);
-        Map<String, Object> result = CommonUtils.jsonToMap(body);
-
-        Object errorCode = result.get("errcode");
-        if (errorCode != null) {
-            logger.info("获取用户信息失败 {}", result.toString());
-        }
-
+        Map<String, Object> result = getUserInfoFromWeiXin(openid, accessToken);
         String unionId = result.get("unionid").toString();
         // 根据 unionId 查询
         Profile profile = accountService.queryByUnionId(unionId);
@@ -314,6 +301,32 @@ public class OAuthServiceImpl implements OAuthService {
             callbackDao.updateOpenIdAndUnionId(callback.getState(), profile.getOpenid(), unionId);
             return new MutablePair<>(1, callback);
         }
+    }
+
+    /**
+     * 从微信获取用户基本信息
+     * @param openId 各个平台对应 openid
+     * @param accessToken 各个平台对应 accessToken
+     */
+    private Map<String, Object> getUserInfoFromWeiXin(String openId, String accessToken) {
+        String url = AccountService.PC_USER_INFO_URL;
+
+        Map<String, String> map = Maps.newHashMap();
+        map.put("openid", openId);
+        map.put("access_token", accessToken);
+        logger.info("请求用户信息,pcOpenid:{}", openId);
+        url = CommonUtils.placeholderReplace(url, map);
+
+        String body = restfulHelper.get(url);
+        logger.info("请求用户信息结果:{}", body);
+        Map<String, Object> result = CommonUtils.jsonToMap(body);
+
+        Object errorCode = result.get("errcode");
+        if (errorCode != null) {
+            logger.info("获取用户信息失败 {}", result.toString());
+            return Maps.newHashMap();
+        }
+        return result;
     }
 
     private static String getIPFromUrl(String url) {
