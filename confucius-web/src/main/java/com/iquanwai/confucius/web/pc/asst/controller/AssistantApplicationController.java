@@ -312,7 +312,7 @@ public class AssistantApplicationController {
                 show.setWorkId(submit.getApplicationId());
                 show.setRequestCommentCount(practiceService.hasRequestComment(submit.getPlanId()));
             } else {
-                Profile account = accountService.getProfile(loginUser.getProfileId());
+                Profile account = accountService.getProfile(submit.getProfileId());
                 if(account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
