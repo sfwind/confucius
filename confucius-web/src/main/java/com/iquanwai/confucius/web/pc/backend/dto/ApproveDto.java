@@ -11,4 +11,5 @@ public class ApproveDto {
     private Integer id;
     private Double coupon;
     private String comment;
+    private InterviewRecord interviewRecord;
 }

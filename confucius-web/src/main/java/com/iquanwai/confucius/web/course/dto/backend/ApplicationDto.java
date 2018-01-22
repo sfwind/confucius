@@ -26,7 +26,6 @@ public class ApplicationDto {
      * 奖学金金额
      */
     private String coupon;
-    private String openid;
     /**
      * 昵称
      */
