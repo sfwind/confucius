@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
-import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
@@ -77,8 +76,6 @@ public class RiseOperationController {
     private SignupService signupService;
     @Autowired
     private PayService payService;
-    @Autowired
-    private AssistantCoachService assistantCoachService;
 
 
     private static final String SEARCH_TOPIC = "business_school_application_search";
@@ -490,7 +487,6 @@ public class RiseOperationController {
             AssistCatalogEnums role = AssistCatalogEnums.getById(item.getRoleId());
             item.setAsstType(role == null ? "" : role.getRoleName());
             item.setLevel(role == null ? -10 : role.getLevel());
-            item.setAssignCount(assistantCoachService.loadAssignedCount(item.getProfileId()));
         });
         userRoles.sort(((o1, o2) -> o2.getLevel() - o1.getLevel()));
         return WebUtils.result(userRoles);
