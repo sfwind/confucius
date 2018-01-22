@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.weixin.oauth;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
+import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Callback;
@@ -39,6 +40,8 @@ public class OAuthServiceImpl implements OAuthService {
     private CallbackDao callbackDao;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     private static final String REDIRECT_PATH = "/wx/oauth/code";
 
@@ -160,7 +163,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setRefreshToken(refreshToken);
         callback.setAccessToken(accessToken);
         logger.info("update callback, state:{}, accessToken:{}, refreshToken:{}, openId:{}, code:{}", state, accessToken, refreshToken, openid, code);
-        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(AccountService.MOBILE_USER_INFO_URL, openid, accessToken);
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid);
         String unionId = userInfoResult.get("unionid").toString();
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
@@ -192,7 +195,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setPcOpenid(openid);
         callback.setRefreshToken(refreshToken);
         callback.setPcAccessToken(accessToken);
-        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(AccountService.MOBILE_USER_INFO_URL, openid, accessToken);
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid);
         String unionId = userInfoResult.get("unionid").toString();
         callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
@@ -276,7 +279,7 @@ public class OAuthServiceImpl implements OAuthService {
         String openid = callback.getPcOpenid();
         String accessToken = callback.getPcAccessToken();
 
-        Map<String, Object> result = getUserInfoFromWeiXin(AccountService.MOBILE_USER_INFO_URL, openid, accessToken);
+        Map<String, Object> result = getUserInfoFromWeiXin(openid);
         String unionId = result.get("unionid").toString();
         // 根据 unionId 查询
         Profile profile = accountService.queryByUnionId(unionId);
@@ -305,11 +308,12 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * 从微信获取用户基本信息
-     * @param url 微信请求 url
      * @param openId 各个平台对应 openid
-     * @param accessToken 各个平台对应 accessToken
      */
-    private Map<String, Object> getUserInfoFromWeiXin(String url, String openId, String accessToken) {
+    private Map<String, Object> getUserInfoFromWeiXin(String openId) {
+        String url = AccountService.USER_INFO_URL;
+        String accessToken = accessTokenService.getAccessToken();
+
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openId);
         map.put("access_token", accessToken);
