@@ -10,5 +10,5 @@ import lombok.Data;
 public class ApproveDto {
     private Integer id;
     private Double coupon;
-    private InterviewRecord interviewRecord;
+    private String comment;
 }

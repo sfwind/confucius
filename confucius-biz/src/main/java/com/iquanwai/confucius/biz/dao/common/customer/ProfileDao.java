@@ -77,12 +77,33 @@ public class ProfileDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<Profile> queryAccountsByOpenids(List<String> openids) {
+        if (CollectionUtils.isEmpty(openids)) {
+            return Lists.newArrayList();
+        }
+        String questionMarks = produceQuestionMark(openids.size());
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
+        String sql = "SELECT * FROM Profile where Openid in (" + questionMarks + ")";
+        try {
+            return run.query(sql, h, openids.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
     public int insertProfile(Profile profile) throws SQLException {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Profile(Openid, Nickname, City, Country, Province, Headimgurl, MobileNo, Email, Industry, Function, WorkingLife, RealName, RiseId, UnionId)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Profile(Openid, Nickname, City, Country, Province, Headimgurl, MobileNo, Email, Industry, Function, WorkingLife, RealName, RiseId, UnionId)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
-            Long insertRs = runner.insert(sql, new ScalarHandler<>(), profile.getOpenid(), profile.getNickname(), profile.getCity(), profile.getCountry(), profile.getProvince(), profile.getHeadimgurl(), profile.getMobileNo(), profile.getEmail(), profile.getIndustry(), profile.getFunction(), profile.getWorkingLife(), profile.getRealName(), profile.getRiseId(), profile.getUnionid());
+            Long insertRs = runner.insert(sql, new ScalarHandler<>(), profile.getOpenid(), profile.getNickname(), profile.getCity(),
+                    profile.getCountry(), profile.getProvince(), profile.getHeadimgurl(), profile.getMobileNo(), profile.getEmail(),
+                    profile.getIndustry(), profile.getFunction(), profile.getWorkingLife(),
+                    profile.getRealName(), profile.getRiseId(), profile.getUnionid());
             return insertRs.intValue();
         } catch (SQLException e) {
             if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
@@ -93,11 +114,11 @@ public class ProfileDao extends DBUtil {
         return -1;
     }
 
-    public void updatePoint(String openId, int point) {
+    public void updatePoint(Integer profileId, int point) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET Point = ? where Openid = ?";
+        String sql = "UPDATE Profile SET Point = ? where ProfileId = ?";
         try {
-            runner.update(sql, point, openId);
+            runner.update(sql, point, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -114,11 +135,11 @@ public class ProfileDao extends DBUtil {
         return -1;
     }
 
-    public void initOnceRequestCommentCount(String openId) {
+    public void initOnceRequestCommentCount(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Profile SET RequestCommentCount=1 WHERE OpenId = ?";
+        String sql = "Update Profile SET RequestCommentCount=1 WHERE ProfileId = ?";
         try {
-            runner.update(sql, openId);
+            runner.update(sql, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -23,58 +23,6 @@ import java.util.List;
 public class ImprovementPlanDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    // 查询该用户付过费的plan
-    public List<ImprovementPlan> loadUserPlans(String openId){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ImprovementPlan WHERE Openid = ? and Del=0";
-        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
-        try {
-            List<ImprovementPlan> improvementPlans = runner.query(sql, h, openId);
-            return improvementPlans;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public ImprovementPlan loadRunningPlan(String openid){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ImprovementPlan WHERE Openid=? and CloseDate>=? and Status = 1 ? and Del=0";
-        ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
-        try {
-            ImprovementPlan improvementPlan =runner.query(sql, h, openid, DateUtils.parseDateTimeToString(new Date()));
-            return improvementPlan;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public ImprovementPlan loadPlanByProblemId(String openid, Integer problemId){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ImprovementPlan WHERE Openid=? and ProblemId=? ? and Del=0 order by id desc";
-        ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
-        try {
-            ImprovementPlan improvementPlan =runner.query(sql, h, openid, problemId);
-            return improvementPlan;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public ImprovementPlan loadPlanByProblemId(Integer profileId, Integer problemId){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ImprovementPlan WHERE ProfileId=? and ProblemId=? and Del=0";
-        ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
-        try {
-            return runner.query(sql, h, profileId, problemId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
     public List<ImprovementPlan> loadAllPlans(Integer profileId){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ImprovementPlan WHERE ProfileId=? and Del=0";
@@ -138,20 +86,5 @@ public class ImprovementPlanDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
 
-    }
-
-    /**
-     * 重新开课
-     * @param planId planId
-     * @param closeDate 关闭订单
-     */
-    public void reOpenPlan(Integer planId, Date closeDate) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE ImprovementPlan set RiseMember = 1,Status = 1,CloseDate =? WHERE Id = ?";
-        try{
-            runner.update(sql, closeDate, planId);
-        } catch (SQLException e){
-            logger.error(e.getLocalizedMessage());
-        }
     }
 }

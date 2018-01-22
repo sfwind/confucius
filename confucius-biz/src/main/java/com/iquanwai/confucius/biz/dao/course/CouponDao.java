@@ -61,12 +61,11 @@ public class CouponDao extends DBUtil {
 
     public void insert(Coupon coupon) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String insertSql = "insert into Coupon (OpenId, ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
-                "values (?, ?, ?, ?, ?, ?, ?)";
+        String insertSql = "insert into Coupon (ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
+                "values (?, ?, ?, ?, ?, ?)";
         try {
             runner.insert(insertSql, new ScalarHandler<>(),
-                    coupon.getOpenid(), coupon.getProfileId(),
-                    coupon.getAmount(), coupon.getUsed(),
+                    coupon.getProfileId(), coupon.getAmount(), coupon.getUsed(),
                     coupon.getExpiredDate(), coupon.getCategory(), coupon.getDescription());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

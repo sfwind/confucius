@@ -5,13 +5,11 @@ import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,8 +30,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     private KnowledgeDao knowledgeDao;
     @Autowired
     private PointRepo pointRepo;
-    @Autowired
-    private FragmentAnalysisDataDao fragmentAnalysisDataDao;
 
     @Override
     public ApplicationPractice loadApplicationPractice(Integer id) {
@@ -42,22 +38,20 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, Integer profileId,
-                                                         String openId, boolean create) {
+                                                         boolean create) {
         // 查询该应用练习
         ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
         // 查询该用户是否提交
-        ApplicationSubmit submit = applicationSubmitDao.load(applicationId, planId, openId);
+        ApplicationSubmit submit = applicationSubmitDao.load(applicationId, planId, profileId);
         if (submit == null && create) {
             // 没有提交，生成
             submit = new ApplicationSubmit();
-            submit.setOpenid(openId);
             submit.setProfileId(profileId);
             submit.setPlanId(planId);
             submit.setApplicationId(applicationId);
             submit.setProblemId(applicationPractice.getProblemId());
             int submitId = applicationSubmitDao.insert(submit);
             submit.setId(submitId);
-            fragmentAnalysisDataDao.insertArticleViewInfo(ArticleViewInfo.initArticleViews(Constants.ViewInfo.Module.APPLICATION, submitId));
         } else {
             if (submit == null) {
                 submit = new ApplicationSubmit();
@@ -126,7 +120,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 pointRepo.risePoint(submit.getPlanId(), point);
                 // 修改status
                 applicationSubmitDao.updatePointStatus(id);
-                pointRepo.riseCustomerPoint(submit.getOpenid(), point);
+                pointRepo.riseCustomerPoint(submit.getProfileId(), point);
             }
         }
         return result;

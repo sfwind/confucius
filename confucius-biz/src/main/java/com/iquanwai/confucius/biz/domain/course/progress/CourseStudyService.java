@@ -11,12 +11,11 @@ public interface CourseStudyService {
     /**
      * 获取章节页信息
      *
-     * @param openid    学员openid
      * @param profileId 学员id
      * @param chapterId 课程章节id
      * @param page      课程页码
      */
-    Page loadPage(String openid, Integer profileId, Integer chapterId, Integer page, Boolean lazyLoad);
+    Page loadPage(Integer profileId, Integer chapterId, Integer page, Boolean lazyLoad);
 
     /**
      * 获取章节信息
@@ -72,7 +71,7 @@ public interface CourseStudyService {
      * @param profileId  学员id
      * @param questionId 选择题id
      */
-    boolean submitQuestion(String openid, Integer profileId, Integer questionId, List<Integer> choiceList);
+    boolean submitQuestion(Integer profileId, Integer questionId, List<Integer> choiceList);
 
     /**
      * 章节结束
@@ -96,24 +95,11 @@ public interface CourseStudyService {
     /**
      * 记录看到第几页
      *
-     * @param openid       openid
      * @param profileId    学员id
      * @param chapterId    章节id
      * @param pageSequence 页码
      */
-    void markPage(String openid, Integer profileId, Integer chapterId, Integer pageSequence);
-
-    /**
-     * 获取课程第一章节信息
-     *
-     * @param courseId 课程id
-     */
-    Chapter loadFirstChapter(Integer courseId);
-
-    /**
-     * 重新加载问题
-     */
-    void reloadQuestion();
+    void markPage(Integer profileId, Integer chapterId, Integer pageSequence);
 
     // 课程结束后额外开放天数
     int EXTRA_OPEN_DAYS = 7;

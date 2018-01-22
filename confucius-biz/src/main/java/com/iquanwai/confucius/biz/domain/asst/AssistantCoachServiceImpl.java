@@ -6,12 +6,7 @@ import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.apply.InterviewRecordDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.AsstCoachCommentDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.SubjectArticleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.ProfileCount;
@@ -19,14 +14,7 @@ import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.AsstCoachComment;
-import com.iquanwai.confucius.biz.po.fragmentation.Comment;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
-import com.iquanwai.confucius.biz.util.Constants;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -35,11 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,8 +36,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private CommentDao commentDao;
     @Autowired
     private ApplicationSubmitDao applicationSubmitDao;
-    @Autowired
-    private SubjectArticleDao subjectArticleDao;
     @Autowired
     private ApplicationPracticeDao applicationPracticeDao;
     @Autowired
@@ -94,64 +76,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                 .distinct().count();
 
         return new ImmutablePair<>(todayCommentCnt.intValue(), totalCommentCnt.intValue());
-    }
-
-    @Override
-    public List<RiseWorkInfoDto> getUnderCommentArticles(Integer problemId) {
-        List<RiseWorkInfoDto> underCommentArticles = Lists.newArrayList();
-        //只评论30天内的文章
-        Date date = DateUtils.beforeDays(new Date(), PREVIOUS_DAY);
-        int size = SIZE;
-        //获取求点评的文章
-        List<SubjectArticle> subjectArticles = Lists.newArrayList();
-        List<SubjectArticle> list = subjectArticleDao.loadRequestCommentArticles(problemId, size);
-        subjectArticles.addAll(list);
-        size = size - list.size();
-
-        if (size > 0) {
-            //已评价用户id
-            List<Integer> profileIds = asstCoachCommentDao.loadCommentedStudent(problemId).stream()
-                    .map(AsstCoachComment::getProfileId).collect(Collectors.toList());
-            //精英用户id
-            List<Integer> elites = riseMemberDao.eliteMembers().stream()
-                    .map(RiseMember::getProfileId).collect(Collectors.toList());
-
-            //未点评精英=精英-已点评用户
-            List<Integer> unCommentedElite = Lists.newArrayList(elites);
-            unCommentedElite.removeAll(profileIds);
-            list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, unCommentedElite);
-            subjectArticles.addAll(list);
-            size = size - list.size();
-            if (size > 0) {
-                //未点评普通=所有-（精英+已点评用户)
-                List<Integer> unCommentedNormal = Lists.newArrayList(elites);
-                unCommentedNormal.addAll(profileIds);
-                list = subjectArticleDao.loadUnderCommentArticlesExcludeSomeone(problemId, size, date, unCommentedNormal);
-                subjectArticles.addAll(list);
-                size = size - list.size();
-                if (size > 0) {
-                    //已点评精英=精英&已点评用户
-                    List<Integer> commentedElite = Lists.newArrayList(elites);
-                    commentedElite.retainAll(profileIds);
-                    list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, commentedElite);
-                    subjectArticles.addAll(list);
-                    size = size - list.size();
-                    if (size > 0) {
-                        //已点评精英=已点评用户-精英
-                        List<Integer> commentedNormal = Lists.newArrayList(profileIds);
-                        commentedNormal.removeAll(elites);
-                        list = subjectArticleDao.loadUnderCommentArticlesIncludeSomeone(problemId, size, date, commentedNormal);
-                        subjectArticles.addAll(list);
-                    }
-                }
-            }
-        }
-
-        subjectArticles.forEach(subjectArticle -> {
-            RiseWorkInfoDto riseWorkInfoDto = buildSubjectArticle(subjectArticle);
-            underCommentArticles.add(riseWorkInfoDto);
-        });
-        return underCommentArticles;
     }
 
 
@@ -210,9 +134,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                     .forEach(item -> applicationSubmitList.addAll(
                             submitGroup.get(item)
                                     .stream()
-                                    // 越晚提交优先级越高
+                                            // 越晚提交优先级越高
                                     .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                    // 如果已经满了则空转，否则取出需要被点评的数量
+                                            // 如果已经满了则空转，否则取出需要被点评的数量
                                     .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                     .collect(Collectors.toList())));
             if (applicationSubmitList.size() < SIZE) {
@@ -220,10 +144,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                 // 两个月之内要过期的人
                 List<Integer> willExpired = riseMemberDao.loadByWillExpired(DateUtils.afterMonths(new Date(), 2))
                         .stream()
-                        // 按时间排序，越早过期的优先级越高
+                                // 按时间排序，越早过期的优先级越高
                         .sorted((o1, o2) -> o1.getExpireDate().equals(o2.getExpireDate()) ? 0 : (o1.getExpireDate().before(o2.getExpireDate()) ? -1 : 1))
                         .map(RiseMember::getProfileId)
-                        // 这个快过期的人不在必须被评论的list里，这个在上面已经被排进去了
+                                // 这个快过期的人不在必须被评论的list里，这个在上面已经被排进去了
                         .filter(item -> !mustComment.contains(item))
                         .collect(Collectors.toList());
                 // 从这些快过期的人中选作业
@@ -232,9 +156,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                         .filter(submitGroup::containsKey)
                         .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
                                 .stream()
-                                // 越晚提交被露出概率越高
+                                        // 越晚提交被露出概率越高
                                 .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                // 如果没满则取
+                                        // 如果没满则取
                                 .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                 .collect(Collectors.toList())));
                 if (applicationSubmitList.size() < SIZE) {
@@ -246,9 +170,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                             .filter(item -> !existProfileIds.contains(item) && submitGroup.keySet().contains(item))
                             .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
                                     .stream()
-                                    // 越晚提交被露出概率越高
+                                            // 越晚提交被露出概率越高
                                     .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                    // 如果没满则取
+                                            // 如果没满则取
                                     .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                     .collect(Collectors.toList())));
                     if (applicationSubmitList.size() < SIZE) {
@@ -259,9 +183,9 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
                                 .stream().filter(item -> !profileIds.contains(item))
                                 .forEach(item -> applicationSubmitList.addAll(submitGroup.get(item)
                                         .stream()
-                                        // 越晚提交被露出概率越高
+                                                // 越晚提交被露出概率越高
                                         .sorted(((o1, o2) -> o1.getPublishTime().before(o2.getPublishTime()) ? 1 : -1))
-                                        // 如果没满则取
+                                                // 如果没满则取
                                         .limit(applicationSubmitList.size() < SIZE ? (shouldComment.get(item) != null ? shouldComment.get(item) : 1) : 0)
                                         .collect(Collectors.toList())));
                     }
@@ -345,61 +269,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         return countMap;
     }
 
-    @Override
-    public Map<Integer, Integer> getUnderCommentSubjectArticleCount() {
-        List<UnderCommentCount> underCommentCounts = subjectArticleDao.getUnderCommentCount();
-        Map<Integer, Integer> countMap = Maps.newHashMap();
-        underCommentCounts.forEach(underCommentCount -> countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount()));
-        return countMap;
-    }
-
-    @Override
-    public List<RiseWorkInfoDto> getCommentedSubmit(Integer profileId) {
-        List<RiseWorkInfoDto> riseWorkInfoDtos = Lists.newArrayList();
-        List<Comment> comments = commentDao.loadCommentsByProfileId(profileId);
-
-        List<Integer> subjectArticleIdsList = Lists.newArrayList();
-        List<Integer> applicationSubmitIdsList = Lists.newArrayList();
-
-        comments.forEach(comment -> {
-            if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
-                applicationSubmitIdsList.add(comment.getReferencedId());
-            } else if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
-                subjectArticleIdsList.add(comment.getReferencedId());
-            }
-        });
-
-        List<SubjectArticle> subjectArticleList = subjectArticleDao.loadArticles(subjectArticleIdsList);
-        List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.loadSubmits(applicationSubmitIdsList);
-
-        //按照评论顺序,组装RiseWorkInfoDto
-        comments.forEach(comment -> {
-            if (comment.getModuleId().equals(Constants.CommentModule.SUBJECT)) {
-                for (SubjectArticle subjectArticle : subjectArticleList) {
-                    if (subjectArticle.getId().equals(comment.getReferencedId())) {
-                        RiseWorkInfoDto riseWorkInfoDto = buildSubjectArticle(subjectArticle);
-                        riseWorkInfoDtos.add(riseWorkInfoDto);
-                        break;
-                    }
-                }
-            } else if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
-                for (ApplicationSubmit applicationSubmit : applicationSubmitList) {
-                    if (applicationSubmit.getId() == comment.getReferencedId()) {
-                        RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(applicationSubmit);
-                        riseWorkInfoDtos.add(riseWorkInfoDto);
-                        break;
-                    }
-                }
-            }
-        });
-
-        //过滤重复的文章
-        Map<String, RiseWorkInfoDto> filterMap = Maps.newLinkedHashMap();
-        riseWorkInfoDtos.forEach(riseWorkInfoDto -> filterMap.putIfAbsent(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString(), riseWorkInfoDto));
-
-        return Lists.newArrayList(filterMap.values());
-    }
-
     private RiseWorkInfoDto buildApplicationSubmit(ApplicationSubmit applicationSubmit) {
         RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(applicationSubmit);
         if (riseWorkInfoDto.getContent() != null) {
@@ -421,20 +290,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             riseWorkInfoDto.setUpName(profile.getNickname());
             riseWorkInfoDto.setSignature(profile.getSignature());
         }
-    }
-
-    private RiseWorkInfoDto buildSubjectArticle(SubjectArticle subjectArticle) {
-        RiseWorkInfoDto riseWorkInfoDto = new RiseWorkInfoDto(subjectArticle);
-        if (riseWorkInfoDto.getContent() != null) {
-            riseWorkInfoDto.setContent(HtmlRegexpUtil.filterHtml(riseWorkInfoDto.getContent()));
-            riseWorkInfoDto.setContent(riseWorkInfoDto.getContent().length() > 180 ?
-                    riseWorkInfoDto.getContent().substring(0, 180) + "......" :
-                    riseWorkInfoDto.getContent());
-        }
-        //设置用户信息
-        buildRiseWorkInfo(riseWorkInfoDto, subjectArticle.getProfileId());
-
-        return riseWorkInfoDto;
     }
 
 
@@ -487,9 +342,11 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
             unRequestSubmits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
             int reamin = APPLICTION_SIZE - workInfoDtos.size();
             if (unRequestSubmits.size() >= reamin) {
-                unRequestSubmits.subList(0, reamin).forEach(unRequestSubmit -> this.initWorkInfoDto(unRequestSubmit, applicationPractices, workInfoDtos));
+                unRequestSubmits.subList(0, reamin)
+                        .forEach(unRequestSubmit -> this.initWorkInfoDto(unRequestSubmit, applicationPractices, workInfoDtos));
             } else {
-                unRequestSubmits.forEach(unRequestSubmit -> this.initWorkInfoDto(unRequestSubmit, applicationPractices, workInfoDtos));
+                unRequestSubmits
+                        .forEach(unRequestSubmit -> this.initWorkInfoDto(unRequestSubmit, applicationPractices, workInfoDtos));
             }
             return workInfoDtos;
         }
@@ -566,7 +423,7 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         if (userRoleDao.loadAssist(profile.getId()) != null) {
             return -1;
         }
-        return userRoleDao.insertAssist(roleId, profile.getOpenid(), profile.getId());
+        return userRoleDao.insertAssist(roleId, profile.getId());
     }
 
     @Override

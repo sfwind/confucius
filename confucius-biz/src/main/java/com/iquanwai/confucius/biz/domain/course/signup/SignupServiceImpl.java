@@ -222,7 +222,6 @@ public class SignupServiceImpl implements SignupService {
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
-        riseOrder.setOpenid(profile.getOpenid());
         riseOrder.setEntry(false);
         riseOrder.setIsDel(false);
         riseOrder.setMemberType(memberTypeId);
@@ -258,7 +257,6 @@ public class SignupServiceImpl implements SignupService {
         // 插入训练营报名数据
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
         monthlyCampOrder.setOrderId(orderPair.getLeft());
-        monthlyCampOrder.setOpenId(profile.getOpenid());
         monthlyCampOrder.setProfileId(profileId);
         monthlyCampOrder.setMonth(sellingMonth);
         monthlyCampOrderDao.insert(monthlyCampOrder);
@@ -289,7 +287,6 @@ public class SignupServiceImpl implements SignupService {
         // 插入训练营报名数据
         BusinessSchoolApplicationOrder bsOrder = new BusinessSchoolApplicationOrder();
         bsOrder.setOrderId(orderPair.getLeft());
-        bsOrder.setOpenid(profile.getOpenid());
         bsOrder.setProfileId(profileId);
         businessSchoolApplicationOrderDao.insert(bsOrder);
         return quanwaiOrder;
@@ -452,7 +449,6 @@ public class SignupServiceImpl implements SignupService {
         if (existRiseMember == null) {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
-            riseMember.setOpenId(profile.getOpenid());
             if (orderId != null) {
                 riseMember.setOrderId(orderId);
             } else {
@@ -467,7 +463,6 @@ public class SignupServiceImpl implements SignupService {
         } else {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
-            riseMember.setOpenId(profile.getOpenid());
             riseMember.setOrderId(orderId == null ? "manual" : orderId);
             riseMember.setProfileId(profile.getId());
             riseMember.setMemberTypeId(RiseMember.CAMP);
@@ -499,7 +494,6 @@ public class SignupServiceImpl implements SignupService {
     private void insertCampCoupon(Profile profile) {
         // 送优惠券
         Coupon coupon = new Coupon();
-        coupon.setOpenid(profile.getOpenid());
         coupon.setProfileId(profile.getId());
         coupon.setAmount(MONTHLY_CAMP_COUPON);
         coupon.setUsed(Coupon.UNUSED);
@@ -570,7 +564,6 @@ public class SignupServiceImpl implements SignupService {
         }
 
         riseOrderDao.entry(orderId);
-        String openId = riseOrder.getOpenid();
         MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
         if (RiseMember.ELITE == memberType.getId()) {
             // 查看是否存在现成会员数据
@@ -579,7 +572,6 @@ public class SignupServiceImpl implements SignupService {
             riseMemberDao.updateExpiredAhead(riseOrder.getProfileId());
             // 添加会员表
             RiseMember riseMember = new RiseMember();
-            riseMember.setOpenId(riseOrder.getOpenid());
             riseMember.setOrderId(riseOrder.getOrderId());
             riseMember.setProfileId(riseOrder.getProfileId());
             riseMember.setMemberTypeId(memberType.getId());
@@ -601,13 +593,13 @@ public class SignupServiceImpl implements SignupService {
                 // 精英会员一年
                 // RiseClassMember 新增会员记录
                 insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
-                profileDao.initOnceRequestCommentCount(openId);
+                profileDao.initOnceRequestCommentCount(riseOrder.getProfileId());
             }
             riseMember.setExpired(false);
             riseMemberDao.insert(riseMember);
 
             // 所有计划设置为会员
-            List<ImprovementPlan> plans = improvementPlanDao.loadUserPlans(riseOrder.getOpenid());
+            List<ImprovementPlan> plans = improvementPlanDao.loadAllPlans(riseOrder.getProfileId());
             // 不是会员的计划，设置一下
             // 给精英版正在进行的 plan + 1 个求点评次数
             // 非精英版或者不是正在进行的，不加点评次数
@@ -622,7 +614,7 @@ public class SignupServiceImpl implements SignupService {
                     improvementPlanDao.becomeRiseMember(plan);
                 }
             });
-            Profile profile = accountService.getProfile(openId, false);
+            Profile profile = accountService.getProfile(riseOrder.getProfileId());
             // 发送模板消息
             sendPurchaseMessage(profile, memberType.getId(), orderId, businessSchoolConfig.getSellingYear(), businessSchoolConfig.getSellingMonth());
         } else {

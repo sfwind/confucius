@@ -22,11 +22,11 @@ public interface ApplicationService {
      *
      * @param planId        计划id
      * @param applicationId 应用练习id
-     * @param openId        openId
+     * @param profileId     用户id
      * @return 应用练习
      */
     ApplicationSubmit loadMineApplicationPractice(Integer planId, Integer applicationId, Integer profileId,
-                                                  String openId, boolean create);
+                                                  boolean create);
 
     /**
      * 获取应用练习的提交答案

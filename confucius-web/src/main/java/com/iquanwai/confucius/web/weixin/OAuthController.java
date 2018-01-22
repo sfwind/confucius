@@ -1,7 +1,9 @@
 package com.iquanwai.confucius.web.weixin;
 
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.pc.LoginUserService;
@@ -36,6 +38,8 @@ public class OAuthController {
     private OAuthService oAuthService;
     @Autowired
     private LoginUserService loginUserService;
+    @Autowired
+    private AccountService accountService;
 
     @RequestMapping("/auth")
     public void oauthCode(@RequestParam("callbackUrl") String callbackUrl,
@@ -223,7 +227,8 @@ public class OAuthController {
                         response);
                 response.sendRedirect("/servercode");
             } else {
-                Role userRole = loginUserService.getUserRole(callback.getOpenid());
+                Profile profile = accountService.getProfile(callback.getOpenid());
+                Role userRole = loginUserService.getUserRole(profile.getId());
                 if (userRole.getLevel().equals(0)) {
                     // 选择课程
                     LOGGER.info("state:{},openid:{},提示开始训练", state, callback.getOpenid());

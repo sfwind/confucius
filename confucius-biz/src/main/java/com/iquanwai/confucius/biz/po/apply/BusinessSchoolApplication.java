@@ -12,7 +12,6 @@ public class BusinessSchoolApplication {
     private Integer id;
     private Integer submitId;
     private Integer profileId;
-    private String openid;
     private Integer status;
     private Date checkTime;
     private Double coupon;

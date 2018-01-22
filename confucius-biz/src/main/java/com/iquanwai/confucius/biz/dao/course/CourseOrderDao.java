@@ -24,31 +24,17 @@ public class CourseOrderDao extends DBUtil {
 
     public void insert(CourseOrder courseOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO CourseOrder(OrderId, Openid, ProfileId, CourseId, ClassId, Entry, IsDel) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO CourseOrder(OrderId, ProfileId, CourseId, ClassId, Entry) " +
+                "VALUES(?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
-                    courseOrder.getOrderId(), courseOrder.getOpenid(), courseOrder.getProfileId(),
+                    courseOrder.getOrderId(), courseOrder.getProfileId(),
                     courseOrder.getCourseId(), courseOrder.getClassId(),
-                    courseOrder.getEntry(), courseOrder.getIsDel());
+                    courseOrder.getEntry());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
-    }
-
-    public CourseOrder loadOrder(String orderId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<CourseOrder> h = new BeanHandler<>(CourseOrder.class);
-
-        try {
-            CourseOrder order = run.query("SELECT * FROM CourseOrder where OrderId=? ", h, orderId);
-            return order;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return null;
     }
 
     public List<CourseOrder> loadNotExpiredClassOrder(List<Integer> classId) {
@@ -81,16 +67,6 @@ public class CourseOrderDao extends DBUtil {
         }
 
         return 0;
-    }
-
-    public void closeOrder(String orderId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "Update CourseOrder set IsDel=1 where OrderId=?";
-        try {
-            run.update(sql, orderId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
     }
 
     public void entry(String orderId) {
