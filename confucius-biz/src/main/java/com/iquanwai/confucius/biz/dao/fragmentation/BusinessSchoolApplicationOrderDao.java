@@ -23,7 +23,7 @@ public class BusinessSchoolApplicationOrderDao extends DBUtil {
     public int insert(BusinessSchoolApplicationOrder businessSchoolApplicationOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO BusinessSchoolApplicationOrder (OrderId, ProfileId) " +
-                "VALUES (?, ?, ?)";
+                "VALUES (?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     businessSchoolApplicationOrder.getOrderId(),
