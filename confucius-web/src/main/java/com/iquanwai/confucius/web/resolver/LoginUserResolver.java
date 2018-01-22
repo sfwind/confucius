@@ -40,28 +40,28 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         //调试时，返回mock user
-        if(ConfigUtils.isDebug()){
+        if (ConfigUtils.isDebug()) {
             return LoginUser.defaultUser();
         }
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
 
-        if(request.getParameter("debug")!=null && ConfigUtils.isFrontDebug()){
+        if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
             //前端调试开启时，如果debug=true,返回mockuser
-            if("true".equalsIgnoreCase(request.getParameter("debug"))) {
+            if ("true".equalsIgnoreCase(request.getParameter("debug"))) {
                 return LoginUser.defaultUser();
-            }else{
+            } else {
                 //返回模拟的openid user
                 return getLoginUser(request.getParameter("debug"));
             }
         }
-        String accessToken = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
-        if(loginUserMap.containsKey(accessToken)){
-            return loginUserMap.get(accessToken);
+        String state = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
+        if (loginUserMap.containsKey(state)) {
+            return loginUserMap.get(state);
         }
 
-        String openId = oAuthService.openId(accessToken);
-        if(StringUtils.isEmpty(openId)){
-            logger.error("accesstoken {} is not found in db", accessToken);
+        String openId = oAuthService.openId(state);
+        if (StringUtils.isEmpty(openId)) {
+            logger.error("accesstoken {} is not found in db", state);
             return null;
         }
 
@@ -69,7 +69,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         if (loginUser == null) {
             return null;
         }
-        loginUserMap.put(accessToken, loginUser);
+        loginUserMap.put(state, loginUser);
 
         return loginUser;
     }
@@ -77,7 +77,7 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
     private LoginUser getLoginUser(String openId) {
         Profile account = accountService.getProfile(openId, false);
 
-        if(account==null || account.getNickname()==null){
+        if (account == null || account.getNickname() == null) {
             logger.error("openId {} is not found in db", openId);
             return null;
         }
@@ -86,18 +86,18 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         loginUser.setId(account.getId());
         loginUser.setOpenId(account.getOpenid());
         loginUser.setWeixinName(account.getNickname());
-        if(StringUtils.isNotEmpty(account.getHeadimgurl())) {
+        if (StringUtils.isNotEmpty(account.getHeadimgurl())) {
             loginUser.setHeadimgUrl(account.getHeadimgurl());
-        }else{
+        } else {
             loginUser.setHeadimgUrl(Profile.DEFAULT_AVATAR);
         }
         loginUser.setRealName(account.getRealName());
         return loginUser;
     }
 
-    public static LoginUser getLoginUser(HttpServletRequest request){
+    public static LoginUser getLoginUser(HttpServletRequest request) {
         String accessToken = CookieUtils.getCookie(request, OAuthService.WE_CHAT_STATE_COOKIE_NAME);
-        if(loginUserMap.containsKey(accessToken)){
+        if (loginUserMap.containsKey(accessToken)) {
             return loginUserMap.get(accessToken);
         }
         return null;

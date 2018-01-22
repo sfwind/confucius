@@ -84,13 +84,13 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public String openId(String accessToken) {
-        if (accessToken == null) {
+    public String openId(String state) {
+        if (state == null) {
             return null;
         }
-        Callback callback = callbackDao.queryByAccessToken(accessToken);
+        Callback callback = callbackDao.queryByState(state);
         if (callback == null) {
-            logger.error("accessToken {} is invalid", accessToken);
+            logger.error("accessToken {} is invalid", state);
             return null;
         }
         return callback.getOpenid();
@@ -102,7 +102,7 @@ public class OAuthServiceImpl implements OAuthService {
             logger.info("error，pc _qt is null");
             return null;
         }
-        Callback callback = callbackDao.queryByPcAccessToken(act);
+        Callback callback = callbackDao.queryByState(act);
         if (callback == null) {
             logger.error("pcAccessToken {} is invalid", act);
             return null;

@@ -40,25 +40,24 @@ public class PCAjaxHandlerInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!ConfigUtils.isDebug()) {
-
-            // 获取sessionId
-            String value = CookieUtils.getCookie(request, OAuthService.PC_STATE_COOKIE_NAME);
+            // 获取 state
+            String state = CookieUtils.getCookie(request, OAuthService.PC_STATE_COOKIE_NAME);
             boolean cookieInvalid = false;
-            // 没有session信息
-            if (StringUtils.isEmpty(value)) {
+            // 没有 state 信息
+            if (StringUtils.isEmpty(state)) {
                 cookieInvalid = true;
             } else {
                 // cookie 不为空
-                if (!loginUserService.isLogin(value)) {
+                if (!loginUserService.isLogin(state)) {
                     // 有cookie，但是没有登录
-                    Pair<Integer, Callback> pair = loginUserService.refreshLogin(value);
+                    Pair<Integer, Callback> pair = loginUserService.refreshLogin(state);
                     if (pair.getLeft() < 1) {
                         cookieInvalid = true;
                     }
                     // 否则通过
                 }
             }
-            if(cookieInvalid){
+            if (cookieInvalid) {
                 Map<String, Object> map = Maps.newHashMap();
                 PrintWriter out = response.getWriter();
                 map.put("code", 401);
@@ -68,15 +67,16 @@ public class PCAjaxHandlerInterceptor extends HandlerInterceptorAdapter {
             }
 
             // 查看权限
-            Pair<Integer,PCLoginUser> pair = loginUserService.getLoginUser(value);
+            Pair<Integer, PCLoginUser> pair = loginUserService.getLoginUser(state);
             if (pair.getLeft() < 1) {
-                logger.error("登录信息异常：_qt:{},result:{}", value, pair);
+                logger.error("登录信息异常：_qt:{},result:{}", state, pair);
                 WebUtils.login(request, response);
                 return false;
             }
 
             PCLoginUser pcLoginUser = pair.getRight();
             Integer role = pcLoginUser.getRole();
+
             // 根据role查询所有权限列表
             if (!loginUserService.checkPermission(role, request.getRequestURI())) {
                 logger.error("权限检查失败,用户:{},role:{},url:{}", pcLoginUser.getOpenId(), role, request.getRequestURI());

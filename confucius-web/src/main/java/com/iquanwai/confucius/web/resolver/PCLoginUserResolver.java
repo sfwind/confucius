@@ -43,8 +43,8 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         Pair<Integer, PCLoginUser> loginUser = loginUserService.getLoginUser(request);
         if (loginUser.getLeft() < 1) {
             String remoteIp = request.getHeader("X-Forwarded-For");
-            String value = CookieUtils.getCookie(request, LoginUserService.QUANWAI_TOKEN_COOKIE_NAME);
-            logger.error("没有找到用户,uri:{},ip:{},_qt:{}", request.getRequestURI(), remoteIp, value);
+            String state = CookieUtils.getCookie(request, LoginUserService.QUANWAI_TOKEN_COOKIE_NAME);
+            logger.error("没有找到用户,uri:{},ip:{},_qt:{}", request.getRequestURI(), remoteIp, state);
         }
         return loginUser.getRight();
     }

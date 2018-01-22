@@ -41,14 +41,14 @@ public interface OAuthService {
     Callback accessToken(String code, String state);
 
     /**
-     * 根据accessToken，获取授权用户的openid
+     * 根据 state，获取授权用户的openid
      */
-    String openId(String accessToken);
+    String openId(String state);
 
     /**
-     * 根据accessToken，查询授权用户的openid
+     * 根据 state，查询授权用户的 openId
      */
-    String pcOpenId(String accessToken);
+    String pcOpenId(String state);
 
     /**
      * 刷新accessToken
