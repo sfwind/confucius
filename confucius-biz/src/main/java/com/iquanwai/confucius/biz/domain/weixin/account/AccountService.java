@@ -47,7 +47,7 @@ public interface AccountService {
      * 0:非会员<br/>
      * 1:商学院，专业版 <br/>
      * 2:99元课程<br/>
-     * 3:小课训练营<br/>
+     * 3:专项课<br/>
      * </p>
      */
     Integer getRiseMember(Integer profileId);

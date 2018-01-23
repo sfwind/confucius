@@ -29,7 +29,7 @@ public class QuanwaiOrder {
 
     /** 商学院 */
     public static final String FRAG_MEMBER = "fragment_member";
-    /** 训练营 */
+    /** 专项课 */
     public static final String FRAG_CAMP = "fragment_camp";
     /** 商学院申请 */
     public static final String BS_APPLICATION = "bs_application";
