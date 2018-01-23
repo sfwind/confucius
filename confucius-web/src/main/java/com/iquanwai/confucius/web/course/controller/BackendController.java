@@ -292,10 +292,10 @@ public class BackendController {
     public ResponseEntity<Map<String, Object>> loginUsersList(@RequestBody RefreshLoginUserDto refreshLoginUserDto) {
         ThreadPool.execute(() -> {
             try {
-                List<String> openIds = refreshLoginUserDto.getOpenIds();
-                openIds.forEach(openid -> {
+                List<String> unionIds = refreshLoginUserDto.getUnionIds();
+                unionIds.forEach(unionId -> {
                     try {
-                        rabbitMQPublisher.publish(openid);
+                        rabbitMQPublisher.publish(unionId);
                         //防止队列阻塞
                         Thread.sleep(50);
                     } catch (Exception e) {

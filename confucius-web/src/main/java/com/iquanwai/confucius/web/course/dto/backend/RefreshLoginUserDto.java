@@ -9,5 +9,5 @@ import java.util.List;
  */
 @Data
 public class RefreshLoginUserDto {
-    private List<String> openIds;
+    private List<String> unionIds;
 }
