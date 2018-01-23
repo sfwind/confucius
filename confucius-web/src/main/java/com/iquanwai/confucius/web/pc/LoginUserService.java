@@ -218,7 +218,7 @@ public class LoginUserService {
         Role role = permissionService.getRole(profileId);
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号
-            //如果报名了训练营或者开启了RISE,返回学生角色,反之返回陌生人
+            //如果报名了专项课或者开启了RISE,返回学生角色,反之返回陌生人
             List<ImprovementPlan> plans = planService.loadUserPlans(profileId);
             if (plans.isEmpty()) {
                 role = Role.stranger();

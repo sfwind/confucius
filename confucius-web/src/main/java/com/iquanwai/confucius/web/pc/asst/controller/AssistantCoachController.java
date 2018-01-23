@@ -377,7 +377,7 @@ public class AssistantCoachController {
             case RiseMember.ANNUAL:
                 return "专业一年";
             case RiseMember.CAMP:
-                return "训练营";
+                return "专项课";
             default:
                 return "异常数据";
         }
