@@ -11,6 +11,6 @@ import java.util.Date;
 public class PromoCodeUsage {
     private int	id;
     private Integer promoCodeId; //优惠码id
-    private String user;  //使用者openid
+    private String user;  //使用者
     private Date addTime; //使用时间
 }
