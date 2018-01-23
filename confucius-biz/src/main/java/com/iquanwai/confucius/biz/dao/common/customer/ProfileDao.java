@@ -140,7 +140,7 @@ public class ProfileDao extends DBUtil {
 
     public void updatePoint(Integer profileId, int point) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET Point = ? where ProfileId = ?";
+        String sql = "UPDATE Profile SET Point = ? where Id = ?";
         try {
             runner.update(sql, point, profileId);
         } catch (SQLException e) {
