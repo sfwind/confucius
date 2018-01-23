@@ -161,7 +161,7 @@ public class ProfileDao extends DBUtil {
 
     public void initOnceRequestCommentCount(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Profile SET RequestCommentCount=1 WHERE ProfileId = ?";
+        String sql = "Update Profile SET RequestCommentCount = 1 WHERE Id = ?";
         try {
             runner.update(sql, profileId);
         } catch (SQLException e) {
