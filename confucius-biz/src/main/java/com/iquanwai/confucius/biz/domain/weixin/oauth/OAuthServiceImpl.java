@@ -76,6 +76,8 @@ public class OAuthServiceImpl implements OAuthService {
 
         Map<String, String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
+        params.put("scope", "snsapi_login,snsapi_userinfo");
+
         try {
             params.put("redirect_url", URLEncoder.encode(ConfigUtils.adapterDomainName() + (OAUTH_URL.equals(authUrl) ? REDIRECT_PATH : REDIRECT_ASK_PATH), "utf-8"));
         } catch (UnsupportedEncodingException e) {
