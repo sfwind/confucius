@@ -13,7 +13,7 @@ public class PromoCode {
     private String code; //优惠码
     private String activityCode; //活动id
     private Integer useCount;	//使用次数
-    private String owner;  //拥有者openid
+    private String owner;  //拥有者
     private Date expiredDate; //过期时间
     private Double discount; //折扣金额
 }

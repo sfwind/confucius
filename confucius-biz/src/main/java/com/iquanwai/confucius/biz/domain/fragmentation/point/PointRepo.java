@@ -21,7 +21,7 @@ public interface PointRepo {
     /**
      * 给用户信息表加分
      */
-    void riseCustomerPoint(String openId, Integer increment);
+    void riseCustomerPoint(Integer profileId, Integer increment);
 
     // 重新读取分数配置
     void reloadScore();

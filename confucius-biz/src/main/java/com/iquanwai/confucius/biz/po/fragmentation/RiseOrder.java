@@ -9,7 +9,6 @@ import lombok.Data;
 public class RiseOrder {
     private int id;
     private String orderId; //订单id
-    private String openid; //openid
     private Integer profileId; //用户id
     private Integer memberType; // 会员类型
     private Boolean entry; //是否已报名 0-未报名,1-已报名

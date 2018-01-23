@@ -1,12 +1,10 @@
 package com.iquanwai.confucius.biz.dao.wx;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by justin on 17/1/19.
@@ -25,15 +22,15 @@ public class QuanwaiOrderDao extends DBUtil {
 
     public void insert(QuanwaiOrder quanwaiOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO QuanwaiOrder(OrderId, Openid, Price, Discount, PrepayId, " +
-                " Status, CreateTime, GoodsId, GoodsName, GoodsType) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO QuanwaiOrder(OrderId, ProfileId, Price, Discount, PrepayId, " +
+                " Status, CreateTime, GoodsId, GoodsName, GoodsType, PayType, RefundTime) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
-                    quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
+                    quanwaiOrder.getOrderId(), quanwaiOrder.getProfileId(), quanwaiOrder.getPrice(),
                     quanwaiOrder.getDiscount(), quanwaiOrder.getPrepayId(), quanwaiOrder.getStatus(),
                     quanwaiOrder.getCreateTime(), quanwaiOrder.getGoodsId(), quanwaiOrder.getGoodsName(),
-                    quanwaiOrder.getGoodsType());
+                    quanwaiOrder.getGoodsType(), quanwaiOrder.getPayType(), quanwaiOrder.getRefundTime());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -53,11 +50,12 @@ public class QuanwaiOrderDao extends DBUtil {
         return null;
     }
 
-    public QuanwaiOrder loadCampOrBusinessOrder(String openId) {
+    public QuanwaiOrder loadCampOrBusinessOrder(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Select * from QuanwaiOrder where Openid = ? and (GoodsType = 'fragment_member' or GoodsType = 'fragment_camp')";
+        String sql = "Select * from QuanwaiOrder where ProfileId = ? " +
+                "and (GoodsType = 'fragment_member' or GoodsType = 'fragment_camp')";
         try {
-            return runner.query(sql, new BeanHandler<QuanwaiOrder>(QuanwaiOrder.class), openId);
+            return runner.query(sql, new BeanHandler<>(QuanwaiOrder.class), profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -104,8 +102,8 @@ public class QuanwaiOrderDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
-            run.update("UPDATE QuanwaiOrder SET Status=3, RefundFee=?, RefundOrderId=? " +
-                    "where OrderId=?", refundFee, refundOrderId, orderId);
+            run.update("UPDATE QuanwaiOrder SET Status=3, RefundFee=?, RefundOrderId=?, RefundTime=? " +
+                    "where OrderId=?", refundFee, refundOrderId, new Date(), orderId);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

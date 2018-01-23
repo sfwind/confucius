@@ -5,15 +5,13 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * @author nethunder
- * @version 2017/9/27
+ * Created by nethunder on 2017/9/27.
  */
 @Data
 public class BusinessSchoolApplication {
     private Integer id;
     private Integer submitId;
     private Integer profileId;
-    private String openid;
     private Integer status;
     private Date checkTime;
     private Double coupon;
@@ -24,6 +22,11 @@ public class BusinessSchoolApplication {
     private String comment;
     private Date submitTime;
     private Date dealTime;
+    private Date addTime;
+    private String orderId;
+    private Integer lastVerified;
+    private Integer interviewer;
+    private Boolean valid;
 
     private String originMemberTypeName;
 

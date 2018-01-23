@@ -37,12 +37,11 @@ public class RiseMemberDao extends DBUtil {
 
     public int insert(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into RiseMember(Openid, ProfileId, OrderId, MemberTypeId, ExpireDate, Expired, Memo, OpenDate) " +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "insert into RiseMember(ProfileId, OrderId, MemberTypeId, ExpireDate, Expired, Memo, OpenDate) " +
+                " VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
-                    riseMember.getOpenId(),
                     riseMember.getProfileId(),
                     riseMember.getOrderId(),
                     riseMember.getMemberTypeId(),
@@ -125,7 +124,7 @@ public class RiseMemberDao extends DBUtil {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseMember WHERE ProfileId IN (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0";
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId IN (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
         ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
         try {
             return runner.query(sql, h, profileIds.toArray());

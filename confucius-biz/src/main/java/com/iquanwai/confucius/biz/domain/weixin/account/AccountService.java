@@ -37,6 +37,19 @@ public interface AccountService {
     List<Profile> getProfiles(List<Integer> profileIds);
 
     /**
+     * 获得会员类型
+     *
+     * @param profileId 用户id
+     * @return <p>
+     * 0:非会员<br/>
+     * 1:商学院，专业版 <br/>
+     * 2:99元课程<br/>
+     * 3:小课训练营<br/>
+     * </p>
+     */
+    Integer getRiseMember(Integer profileId);
+
+    /**
      * 从微信实时获取头像信息
      */
     String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException;
@@ -119,7 +132,6 @@ public interface AccountService {
     Profile queryByUnionId(String unionid);
 
     int updateHeadImageUrl(Integer profileId, String headImgUrl);
-
 
     int initProfileAndFollowUser(String unionId, String nickName, String avatarUrl, Integer gender);
 }

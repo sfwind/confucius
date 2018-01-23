@@ -96,6 +96,14 @@ public class IndexController {
         }
     }
 
+    @RequestMapping(value = "/pay/alipay/**", method = RequestMethod.GET)
+    public ModelAndView getAlipayIndex(HttpServletRequest request) throws Exception {
+        OperationLog operationLog = new OperationLog().function("打点").module("访问页面").action("阿里支付")
+                .memo(request.getRequestURI());
+        operationLogService.log(operationLog);
+        return payView(request, null, PAY_VIEW);
+    }
+
     @RequestMapping(value = "/pay/static/**", method = RequestMethod.GET)
     public ModelAndView getPayStaticIndex(HttpServletRequest request) throws Exception {
         OperationLog operationLog = new OperationLog().function("打点").module("访问页面").action("游客访问")

@@ -111,15 +111,6 @@ public class CourseProgressServiceImpl implements CourseProgressService {
     }
 
     @Override
-    public List<ClassMember> loadActiveCourse(String openid) {
-        Profile profile = accountService.getProfile(openid, false);
-        if (profile == null) {
-            return Lists.newArrayList();
-        }
-        return loadActiveCourse(profile.getId());
-    }
-
-    @Override
     public List<ClassMember> loadGraduateClassMember(Integer profileId, Integer courseId) {
         return classMemberDao.graduateInfo(profileId, courseId).stream().filter(
                 classMember -> classMember.getCertificateNo() != null).collect(Collectors.toList());
@@ -141,7 +132,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
             return;
         }
         if (classMember.getGraduate()) {
-            logger.info("{} has no active course {}", classMember.getOpenId(), classMember.getCourseId());
+            logger.info("{} has no active course {}", classMember.getProfileId(), classMember.getCourseId());
             return;
         }
 
@@ -229,7 +220,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Assert.notNull(course, "course不能为空");
         String key = ConfigUtils.coursePassMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser(classMember.getOpenId());
+//        templateMessage.setTouser(classMember.getOpenId());
 
         boolean pass = classMember.getPass();
         boolean superb = classMember.getSuperb() == null ? false : classMember.getSuperb();
@@ -311,7 +302,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Assert.notNull(classMember, "classMember不能为空");
         String key = ConfigUtils.incompleteTaskMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser(classMember.getOpenId());
+//        templateMessage.setTouser(classMember.getOpenId());
 
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
@@ -507,7 +498,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         classMembers.stream().filter(item -> {
             String name = courseName.get(item.getCourseId());
             if (name == null) {
-                logger.error("用户:{}的课程异常:{}", item.getOpenId(), item.getCourseId());
+                logger.error("用户:{}的课程异常:{}", item.getProfileId(), item.getCourseId());
                 return false;
             } else {
                 item.setCourseName(name);
@@ -532,7 +523,7 @@ public class CourseProgressServiceImpl implements CourseProgressService {
         Assert.notNull(classMember, "classMember不能为空");
         String key = ConfigUtils.willCloseMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser(classMember.getOpenId());
+//        templateMessage.setTouser(classMember.getOpenId());
 
         templateMessage.setTemplate_id(key);
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();

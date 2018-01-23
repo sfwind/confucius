@@ -9,7 +9,12 @@ import lombok.Data;
 public class UserRole {
     private Integer id;
     private Integer roleId;
-    private String openid;
     private Integer profileId;
     private Boolean del;
+
+    // 非DB字段
+    private String asstName;
+    private String asstType;
+    private Integer level;
+    private Integer assignCount;//分配人数
 }

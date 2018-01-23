@@ -1,8 +1,6 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
-import com.iquanwai.confucius.biz.po.fragmentation.LabelConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.SubjectArticle;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import lombok.Data;
@@ -30,7 +28,6 @@ public class RiseWorkInfoDto {
     private Boolean perfect;
     private Integer authorType;
     private Boolean isMine;
-    private List<LabelConfig> labelList;
     private List<String> picList;
     private Date publishTime;
     private Integer priority;
@@ -39,24 +36,11 @@ public class RiseWorkInfoDto {
     private Integer requestCommentCount;
     private Boolean request;
 
-    public RiseWorkInfoDto(SubjectArticle origin) {
-        this.title = origin.getTitle();
-        this.submitId = origin.getId();
-        this.type = Constants.PracticeType.SUBJECT;
-        this.content = origin.getContent();
-        this.voteCount = origin.getVoteCount();
-        this.upTime = DateUtils.parseDateToString(origin.getAddTime());
-        this.commentCount = origin.getCommentCount();
-        this.request = origin.getRequestFeedback();
-        this.perfect = origin.getSequence() != null && origin.getSequence() > 0;
-        this.authorType = origin.getAuthorType();
-    }
-
     public RiseWorkInfoDto(ApplicationSubmit origin) {
         this.submitId = origin.getId();
         this.type = Constants.PracticeType.APPLICATION;
         this.content = origin.getContent();
-        this.request = origin.getRequestFeedback();
+        this.request = origin.getRequestFeedback() && !origin.getFeedback();
         this.upTime = DateUtils.parseDateToString(origin.getPublishTime());
     }
 }

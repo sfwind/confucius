@@ -67,7 +67,7 @@ public class AssistantApplicationController {
         String openId = loginUser.getOpenId();
 
         if (status == 1) {
-            practiceService.vote(vote.getType(), refer, loginUser.getProfileId(), openId);
+            practiceService.vote(vote.getType(), refer, loginUser.getProfileId());
         } else {
             // 禁止取消点赞
             logger.error("取消点赞！已禁止!");
@@ -99,7 +99,7 @@ public class AssistantApplicationController {
                 .memo(type + ":" + submitId);
         operationLogService.log(operationLog);
         List<RiseWorkCommentDto> comments = practiceService.loadComments(type, submitId, page).stream().map(item -> {
-            Profile account = accountService.getProfile(item.getCommentOpenId(), false);
+            Profile account = accountService.getProfile(item.getCommentProfileId());
             if (account != null) {
                 RiseWorkCommentDto dto = new RiseWorkCommentDto();
                 dto.setId(item.getId());
@@ -109,9 +109,9 @@ public class AssistantApplicationController {
                 dto.setHeadPic(account.getHeadimgurl());
                 dto.setRole(account.getRole());
                 // dto.setSignature(account.getSignature());
-                dto.setIsMine(item.getCommentOpenId().equals(loginUser.getOpenId()));
+                dto.setIsMine(item.getCommentProfileId().equals(loginUser.getProfileId()));
                 if (item.getRepliedId() != null) {
-                    Profile replyAccount = accountService.getProfile(item.getRepliedOpenId(), false);
+                    Profile replyAccount = accountService.getProfile(item.getRepliedProfileId());
                     dto.setReplyId(item.getRepliedId());
                     dto.setReplyName(replyAccount.getNickname());
                     dto.setReplyContent(item.getRepliedComment());
@@ -147,7 +147,7 @@ public class AssistantApplicationController {
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
         Pair<Integer, String> result = practiceService.comment(moduleId, submitId,
-                loginUser.getOpenId(), loginUser.getProfileId(), dto.getContent());
+                loginUser.getProfileId(), dto.getContent());
         if (result.getLeft() > 0) {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
@@ -195,7 +195,7 @@ public class AssistantApplicationController {
         Assert.notNull(submitId, "文章不能为空");
         Assert.notNull(dto, "内容不能为空");
         Pair<Integer, String> result = practiceService.replyComment(moduleId, submitId,
-                loginUser.getOpenId(), loginUser.getProfileId(), dto.getContent(), dto.getReplyId());
+                loginUser.getProfileId(), dto.getContent(), dto.getReplyId());
         if (result.getLeft() > 0) {
             OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                     .module("训练")
@@ -215,7 +215,7 @@ public class AssistantApplicationController {
             if (dto.getReplyId() != null) {
                 resultDto.setReplyId(dto.getReplyId());
                 Comment replyComment = commentDao.load(Comment.class, dto.getReplyId());
-                Profile profile = accountService.getProfile(replyComment.getCommentOpenId(), false);
+                Profile profile = accountService.getProfile(replyComment.getCommentProfileId());
                 if (profile != null) {
                     resultDto.setReplyName(profile.getNickname());
                 }
@@ -296,7 +296,6 @@ public class AssistantApplicationController {
             return WebUtils.error(404, "无该提交记录");
         } else {
             // 查到了
-            String openId = submit.getOpenid();
             RiseWorkShowDto show = new RiseWorkShowDto();
             show.setSubmitId(submit.getId());
             show.setUpTime(DateUtils.parseDateToFormat5(submit.getPublishTime()));
@@ -304,7 +303,7 @@ public class AssistantApplicationController {
             show.setType("application");
             show.setRequest(submit.getRequestFeedback());
             // 查询这个openid的数据
-            if(loginUser.getOpenId().equals(openId)) {
+            if(loginUser.getProfileId().equals(submit.getProfileId())) {
                 // 是自己的
                 show.setIsMine(true);
                 show.setUpName(loginUser.getWeixin().getWeixinName());
@@ -313,7 +312,7 @@ public class AssistantApplicationController {
                 show.setWorkId(submit.getApplicationId());
                 show.setRequestCommentCount(practiceService.hasRequestComment(submit.getPlanId()));
             } else {
-                Profile account = accountService.getProfile(openId, false);
+                Profile account = accountService.getProfile(submit.getProfileId());
                 if(account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
@@ -325,7 +324,8 @@ public class AssistantApplicationController {
             // 查询点赞数
             Integer votesCount = practiceService.loadHomeworkVotesCount(Constants.VoteType.APPLICATION, submit.getId());
             // 查询我对它的点赞状态
-            HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.APPLICATION, submit.getId(), loginUser.getOpenId());
+            HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.APPLICATION, submit.getId(),
+                    loginUser.getProfileId());
             if(myVote != null && myVote.getDel() == 0) {
                 // 点赞中
                 show.setVoteStatus(1);
@@ -340,11 +340,6 @@ public class AssistantApplicationController {
             if(!integrated) {
                 show.setKnowledgeId(applicationPractice.getKnowledgeId());
             }
-            // 查询照片
-//            List<Picture> pictureList = pictureService.loadPicture(Constants.PictureType.APPLICATION, submit.getId());
-//            show.setPicList(pictureList.stream().map(item -> pictureService.getModulePrefix(Constants.PictureType.APPLICATION) + item.getRealName()).collect(Collectors.toList()));
-            // 提升浏览量
-            practiceService.riseArticleViewCount(Constants.ViewInfo.Module.APPLICATION, submitId, Constants.ViewInfo.EventType.PC_SHOW);
             return WebUtils.result(show);
         }
     }

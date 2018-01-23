@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
-import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -25,8 +24,8 @@ public class KnowledgeDao extends PracticeDBUtil {
         String sql = "INSERT INTO Knowledge (" +
                 "Knowledge, Step, Analysis, Means, Keynote, " +
                 "AnalysisPic, MeansPic, KeynotePic, Pic, " +
-                "AnalysisAudioId, MeansAudioId, KeynoteAudioId, AudioId " +
-                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "AnalysisAudioId, MeansAudioId, KeynoteAudioId, AudioId,Updated " +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,2)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     knowledge.getKnowledge(), knowledge.getStep(), knowledge.getAnalysis(),
@@ -44,12 +43,12 @@ public class KnowledgeDao extends PracticeDBUtil {
     public Integer updateKnowledge(Knowledge knowledge) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?, Analysis = ?, Means = ?, Keynote = ?," +
-                "AnalysisAudioId=?, MeansAudioId=?, KeynoteAudioId=?, AudioId=? WHERE Id = ?";
+                "AnalysisAudioId=?, MeansAudioId=?, KeynoteAudioId=?, AudioId=?,Updated = ? WHERE Id = ?";
         try {
             return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),
                     knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
                     knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
-                    knowledge.getKeynoteAudioId(), knowledge.getAudioId(), knowledge.getId());
+                    knowledge.getKeynoteAudioId(), knowledge.getAudioId(),knowledge.getUpdated(),knowledge.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

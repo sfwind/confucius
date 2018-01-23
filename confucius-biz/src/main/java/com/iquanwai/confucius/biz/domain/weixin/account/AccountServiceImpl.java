@@ -65,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private CallbackDao callbackDao;
 
-    private Map<String, Integer> userRoleMap = Maps.newHashMap();
+    private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -79,7 +79,8 @@ public class AccountServiceImpl implements AccountService {
     private void loadUserRole() {
         List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
 
-        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole -> userRoleMap.put(userRole.getOpenid(), userRole.getRoleId()));
+        userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole ->
+                userRoleMap.put(userRole.getProfileId(), userRole.getRoleId()));
 
         logger.info("role init complete");
     }
@@ -121,7 +122,7 @@ public class AccountServiceImpl implements AccountService {
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
-            Integer role = userRoleMap.get(profile.getOpenid());
+            Integer role = userRoleMap.get(profile.getId());
             if (role == null) {
                 profile.setRole(0);
             } else {
@@ -149,7 +150,7 @@ public class AccountServiceImpl implements AccountService {
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
-            Integer role = userRoleMap.get(profile.getOpenid());
+            Integer role = userRoleMap.get(profile.getId());
             if (role == null) {
                 profile.setRole(0);
             } else {
@@ -160,7 +161,8 @@ public class AccountServiceImpl implements AccountService {
         return profiles;
     }
 
-    private Integer getRiseMember(Integer profileId) {
+    @Override
+    public Integer getRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember == null) {
             return 0;
@@ -390,7 +392,7 @@ public class AccountServiceImpl implements AccountService {
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
-            Integer role = userRoleMap.get(profile.getOpenid());
+            Integer role = userRoleMap.get(profile.getId());
             if (role == null) {
                 profile.setRole(0);
             } else {

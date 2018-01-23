@@ -235,7 +235,8 @@ public class OAuthController {
                 CookieUtils.removeCookie(OAuthService.PC_STATE_COOKIE_NAME, response);
                 response.sendRedirect("/servercode");
             } else {
-                Role userRole = loginUserService.getUserRole(callback.getOpenid());
+                Profile profile = accountService.getProfile(callback.getOpenid());
+                Role userRole = loginUserService.getUserRole(profile.getId());
                 if (userRole.getLevel().equals(0)) {
                     // 选择课程
                     logger.info("state:{},openid:{},提示开始训练", state, callback.getOpenid());

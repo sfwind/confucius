@@ -22,11 +22,11 @@ public class RiseCourseOrderDao extends DBUtil {
 
     public int insert(RiseCourseOrder riseCourseOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into RiseCourseOrder(ProfileId, Openid, ProblemId, OrderId) " +
-                " VALUES (?, ?, ?, ?)";
+        String sql = "insert into RiseCourseOrder(ProfileId, ProblemId, OrderId) " +
+                " VALUES (?, ?, ?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
-                    riseCourseOrder.getProfileId(), riseCourseOrder.getOpenid(), riseCourseOrder.getProblemId(), riseCourseOrder.getOrderId());
+                    riseCourseOrder.getProfileId(), riseCourseOrder.getProblemId(), riseCourseOrder.getOrderId());
             return insertRs.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

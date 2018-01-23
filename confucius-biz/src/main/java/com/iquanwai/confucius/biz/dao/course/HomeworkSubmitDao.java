@@ -67,11 +67,11 @@ public class HomeworkSubmitDao extends DBUtil {
 
     public int insert(HomeworkSubmit homeworkSubmit) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO HomeworkSubmit(SubmitOpenid, SubmitProfileId, ClassId, HomeworkId, SubmitUrl, ShortUrl) " +
-                "VALUES(?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO HomeworkSubmit(SubmitProfileId, ClassId, HomeworkId, SubmitUrl, ShortUrl) " +
+                "VALUES(?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
-                    homeworkSubmit.getSubmitOpenid(), homeworkSubmit.getSubmitProfileId(),
+                    homeworkSubmit.getSubmitProfileId(),
                     homeworkSubmit.getClassId(), homeworkSubmit.getHomeworkId(),
                     homeworkSubmit.getSubmitUrl(), homeworkSubmit.getShortUrl());
         } catch (SQLException e) {
@@ -82,10 +82,6 @@ public class HomeworkSubmitDao extends DBUtil {
     }
 
     public void submit(int homeworkId, int classId, Integer profileId, String submitContent) {
-        // 可以重复提交
-//        if(submitted(openid, classId, homeworkId)){
-//            return;
-//        }
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {

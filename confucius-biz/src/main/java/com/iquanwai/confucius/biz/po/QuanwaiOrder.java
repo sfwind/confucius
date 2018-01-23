@@ -11,7 +11,7 @@ import java.util.Date;
 public class QuanwaiOrder {
     private int id;
     private String orderId; //订单id
-    private String openid; //openid
+    private Integer profileId; //用户id
     private Double price;   //实际金额 总金额-折扣金额
     private Double discount; //折扣金额
     private String prepayId; //预支付交易会话标识
@@ -24,6 +24,8 @@ public class QuanwaiOrder {
     private String goodsType; //商品类型
     private String goodsName; //商品名称
     private Double total; //非db字段,订单的原始金额,不计折扣金额
+    private Integer payType; // 1-微信支付，2-阿里支付
+    private Date refundTime; //退款时间
 
     /** 商学院 */
     public static final String FRAG_MEMBER = "fragment_member";
@@ -37,4 +39,7 @@ public class QuanwaiOrder {
     public static final int CANCELLED = 2;
     public static final int REFUND = 3;
     public static final int REFUND_FAILED = 4;
+
+    public static final int PAY_WECHAT = 1;
+    public static final int PAY_ALI = 2;
 }

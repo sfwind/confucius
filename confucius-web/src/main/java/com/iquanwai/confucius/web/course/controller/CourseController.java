@@ -85,7 +85,7 @@ public class CourseController {
                         last = that;
                     }
                 } catch (NumberFormatException e) {
-                    LOGGER.error(classMember.getOpenId() + " progress is abnormal," + aProgressArr + " is not a number");
+                    LOGGER.error(classMember.getProfileId() + " progress is abnormal," + aProgressArr + " is not a number");
                 }
             }
         }

@@ -137,7 +137,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
                 // 其他情况发送报警消息
                 List<String> alarmList = ConfigUtils.getAlarmList();
                 alarmList.forEach(openid -> {
-                    this.SMSAlarm(openid,
+                    this.smsAlarm(openid,
                             shortMessage.getNickname(),
                             shortMessageSubmit.getMsgId(),
                             smsSendResult != null ? smsSendResult.getResult() : "空",
@@ -154,7 +154,7 @@ public class ShortMessageServiceImpl implements ShortMessageService {
     }
 
     @Override
-    public void SMSAlarm(String openId, String nickname, String msgId, String result, String desc) {
+    public void smsAlarm(String openId, String nickname, String msgId, String result, String desc) {
         String key = ConfigUtils.incompleteTaskMsgKey();
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTouser(openId);

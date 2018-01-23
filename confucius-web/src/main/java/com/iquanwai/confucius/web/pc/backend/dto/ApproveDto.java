@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.backend.dto;
 
+import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import lombok.Data;
 
 /**
@@ -10,4 +11,5 @@ public class ApproveDto {
     private Integer id;
     private Double coupon;
     private String comment;
+    private InterviewRecord interviewRecord;
 }

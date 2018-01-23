@@ -32,12 +32,11 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public int insert(ApplicationSubmit applicationSubmit) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into ApplicationSubmit(ProfileId, Openid, ApplicationId, PlanId, ProblemId) " +
-                "values(?,?,?,?,?)";
+        String sql = "insert into ApplicationSubmit(ProfileId, ApplicationId, PlanId, ProblemId) " +
+                "values(?,?,?,?)";
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
-                    applicationSubmit.getProfileId(),
-                    applicationSubmit.getOpenid(), applicationSubmit.getApplicationId(),
+                    applicationSubmit.getProfileId(), applicationSubmit.getApplicationId(),
                     applicationSubmit.getPlanId(), applicationSubmit.getProblemId());
             return insertRs.intValue();
         } catch (SQLException e) {
@@ -46,36 +45,16 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return -1;
     }
 
-    /**
-     * 查询用户提交记录
-     *
-     * @param applicationId 应用练习id
-     * @param planId        计划id
-     * @param openid        openid
-     */
-    public ApplicationSubmit load(Integer applicationId, Integer planId, String openid) {
+    public ApplicationSubmit load(Integer applicationId, Integer planId, Integer profileId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ApplicationSubmit> h = new BeanHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=? and PlanId=? and Del=0";
+        String sql = "SELECT * FROM ApplicationSubmit where ProfileId=? and ApplicationId=? and PlanId=? and Del=0";
         try {
-            return run.query(sql, h, openid, applicationId, planId);
+            return run.query(sql, h, profileId, applicationId, planId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
-    }
-
-    public List<ApplicationSubmit> load(Integer applicationId, String openid) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "SELECT * FROM ApplicationSubmit where Openid=? and ApplicationId=? and Del=0";
-        try {
-            return run.query(sql, h, openid, applicationId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
     }
 
     public List<ApplicationSubmit> load(Integer applicationId) {
@@ -244,7 +223,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String questionMark = produceQuestionMark(profileIds.size());
         if (profileIds.size() != 0) {
-            String sql = "select Id,Openid, ProfileId, ApplicationId, PlanId, ProblemId, PointStatus, PublishTime, LastModifiedTime, Priority, HighlightTime, RequestFeedback, Feedback, Length, Del, AddTime, UpdateTime from ApplicationSubmit where ProblemId =? " +
+            String sql = "select Id, ProfileId, ApplicationId, PlanId, ProblemId, PointStatus, PublishTime, LastModifiedTime, Priority, HighlightTime, RequestFeedback, Feedback, Length, Del, AddTime, UpdateTime from ApplicationSubmit where ProblemId =? " +
                     "and Feedback=0 and RequestFeedback =0 and Length >= 15 and AddTime>? and ProfileId not in (" + questionMark + ") and Del=0 " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
@@ -260,7 +239,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
                 logger.error(e.getLocalizedMessage(), e);
             }
         } else {
-            String sql = "select Id,Openid, ProfileId, ApplicationId, PlanId, ProblemId, PointStatus, PublishTime, LastModifiedTime, Priority, HighlightTime, RequestFeedback, Feedback, Length, Del, AddTime, UpdateTime from ApplicationSubmit where ProblemId =? " +
+            String sql = "select Id, ProfileId, ApplicationId, PlanId, ProblemId, PointStatus, PublishTime, LastModifiedTime, Priority, HighlightTime, RequestFeedback, Feedback, Length, Del, AddTime, UpdateTime from ApplicationSubmit where ProblemId =? " +
                     "and Feedback=0 and RequestFeedback =0 and Length >= 15 and AddTime>? and Del=0 " +
                     "order by length desc limit " + size;
             ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
@@ -370,18 +349,19 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     /**
      * 获得需要求点评的提交
+     *
      * @param problemId
      * @param profileId
      * @return
      */
-    public List<ApplicationSubmit> loadRequestFeedBackSubmitsByProfileId(Integer problemId,Integer profileId){
+    public List<ApplicationSubmit> loadRequestFeedBackSubmitsByProfileId(Integer problemId, Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ApplicationSubmit WHERE ProblemId = ? AND ProfileId = ? AND RequestFeedback = 1 AND Del = 0";
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
-          return   runner.query(sql,h,problemId,profileId);
+            return runner.query(sql, h, problemId, profileId);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
@@ -389,44 +369,46 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     /**
      * 根据profileIdS获得需要求点评的提交
+     *
      * @param problemId
      * @param profileIds
      * @return
      */
-    public List<ApplicationSubmit> loadRequestByProfileIds(Integer problemId,List<Integer> profileIds){
+    public List<ApplicationSubmit> loadRequestByProfileIds(Integer problemId, List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-        String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( " + produceQuestionMark(profileIds.size()) + " ) AND  RequestFeedback = 1 AND Del = 0";
+        String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( "
+                + produceQuestionMark(profileIds.size()) + " ) AND  RequestFeedback = 1 AND Feedback = 0 AND Del = 0";
         List<Object> param = Lists.newArrayList();
         param.add(problemId);
         param.addAll(profileIds);
         try {
-          return   runner.query(sql,h,param.toArray());
+            return runner.query(sql, h, param.toArray());
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
 
     /**
-     *
-     * @param problemId
-     * @param profileIds
-     * @return
+     * 加载这些人非求点评的
+     * @param problemId 小课id
+     * @param profileIds 人员id
+     * @return 应用题提交列表
      */
-     public List<ApplicationSubmit> loadUnRequestByProfileIds(Integer problemId,List<Integer> profileIds){
-         QueryRunner runner = new QueryRunner(getDataSource());
-         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
-         String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( " + produceQuestionMark(profileIds.size()) + " )  AND RequestFeedback = 0 AND Del = 0";
-         List<Object> param = Lists.newArrayList();
-         param.add(problemId);
-         param.addAll(profileIds);
-         try {
-             return   runner.query(sql,h,param.toArray());
-         } catch (SQLException e) {
-             logger.error(e.getLocalizedMessage(),e);
-         }
-         return Lists.newArrayList();
-     }
+    public List<ApplicationSubmit> loadUnRequestByProfileIds(Integer problemId, List<Integer> profileIds) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        String sql = "select * from ApplicationSubmit where ProblemId = ? and ProfileId in ( " + produceQuestionMark(profileIds.size()) + " )  AND (RequestFeedback = 0 or (RequestFeedback = 1 and Feedback = 1)) AND Del = 0";
+        List<Object> param = Lists.newArrayList();
+        param.add(problemId);
+        param.addAll(profileIds);
+        try {
+            return runner.query(sql, h, param.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }
