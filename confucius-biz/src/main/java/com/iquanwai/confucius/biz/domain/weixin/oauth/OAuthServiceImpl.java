@@ -163,7 +163,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setRefreshToken(refreshToken);
         callback.setAccessToken(accessToken);
         logger.info("update callback, state:{}, accessToken:{}, refreshToken:{}, openId:{}, code:{}", state, accessToken, refreshToken, openid, code);
-        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid);
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid, accessToken);
         String unionId = userInfoResult.get("unionid").toString();
         callbackDao.updateUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
@@ -195,7 +195,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setPcOpenid(openid);
         callback.setRefreshToken(refreshToken);
         callback.setPcAccessToken(accessToken);
-        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid);
+        Map<String, Object> userInfoResult = getUserInfoFromWeiXin(openid, accessToken);
         String unionId = userInfoResult.get("unionid").toString();
         callbackDao.updatePcUserInfo(state, accessToken, refreshToken, openid, unionId);
         return callback;
@@ -266,7 +266,7 @@ public class OAuthServiceImpl implements OAuthService {
 
         Map<String, String> param = Maps.newHashMap();
         param.put("appid", ConfigUtils.getRisePcAppid());
-        param.put("scope", "snsapi_login");
+        param.put("scope", "snsapi_login,snsapi_userinfo");
         param.put("redirect_uri", RISE_PC_OAUTH_URL);
         param.put("state", state);
         param.put("style", "");
@@ -310,20 +310,16 @@ public class OAuthServiceImpl implements OAuthService {
      * 从微信获取用户基本信息
      * @param openId 各个平台对应 openid
      */
-    private Map<String, Object> getUserInfoFromWeiXin(String openId) {
-        String url = AccountService.USER_INFO_URL;
-        String accessToken = accessTokenService.getAccessToken();
-
+    private Map<String, Object> getUserInfoFromWeiXin(String openId, String accessToken) {
+        String url = AccountService.SNS_API_USER_INFO;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openId);
         map.put("access_token", accessToken);
         logger.info("请求用户信息,pcOpenid:{}", openId);
         url = CommonUtils.placeholderReplace(url, map);
-
         String body = restfulHelper.get(url);
         logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
-
         Object errorCode = result.get("errcode");
         if (errorCode != null) {
             logger.info("获取用户信息失败 {}", result.toString());
