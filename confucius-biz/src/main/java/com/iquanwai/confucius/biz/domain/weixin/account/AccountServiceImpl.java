@@ -192,11 +192,6 @@ public class AccountServiceImpl implements AccountService {
         logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
 
-        if (result.get("errcode") == null) {
-            logger.error("获取用户信息失败");
-            return null;
-        }
-
         Account account = new Account();
         try {
             // TODO

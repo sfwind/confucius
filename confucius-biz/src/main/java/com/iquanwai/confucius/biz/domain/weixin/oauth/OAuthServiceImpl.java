@@ -313,10 +313,6 @@ public class OAuthServiceImpl implements OAuthService {
      * @param openId 各个平台对应 openid
      */
     private Map<String, Object> getUserInfoFromWeiXin(String openId, String accessToken) {
-        if (accessToken == null) {
-            return Maps.newHashMap();
-        }
-
         String url = AccountService.SNS_API_USER_INFO;
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openId);
