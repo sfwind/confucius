@@ -317,10 +317,10 @@ public class OAuthServiceImpl implements OAuthService {
         Map<String, String> map = Maps.newHashMap();
         map.put("openid", openId);
         map.put("access_token", accessToken);
-        logger.info("请求用户信息,pcOpenid:{}", openId);
+        logger.info("请求用户信息, openid:{}", openId);
         url = CommonUtils.placeholderReplace(url, map);
         String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}", body);
+        logger.info("请求用户信息结果: {}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
         Object errorCode = result.get("errcode");
         if (errorCode != null) {
