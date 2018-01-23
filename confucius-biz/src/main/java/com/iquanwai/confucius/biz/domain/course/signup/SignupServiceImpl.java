@@ -376,7 +376,7 @@ public class SignupServiceImpl implements SignupService {
 
         // 刷新用户的会员状态
         try {
-            freshLoginUserPublisher.publish(profile.getOpenid());
+            freshLoginUserPublisher.publish(profile.getUnionid());
         } catch (ConnectException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -945,7 +945,7 @@ public class SignupServiceImpl implements SignupService {
     private void refreshStatus(QuanwaiOrder quanwaiOrder, Profile profile, String orderId) {
         // 刷新会员状态
         try {
-            freshLoginUserPublisher.publish(profile.getOpenid());
+            freshLoginUserPublisher.publish(profile.getUnionid());
         } catch (ConnectException e) {
             logger.error("发送会员信息更新mq失败", e);
         }

@@ -48,9 +48,8 @@
         </mvc:message-converters>
         <mvc:argument-resolvers>
             <bean class="com.iquanwai.confucius.web.resolver.LoginUserResolver"/>
-            <bean class="com.iquanwai.confucius.web.resolver.PCLoginUserResolver">
-                <constructor-arg ref="loginUserService"/>
-            </bean>
+            <bean class="com.iquanwai.confucius.web.resolver.PCLoginUserResolver"/>
+            <bean class="com.iquanwai.confucius.web.resolver.WeMiniLoginUserResolver"/>
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
@@ -65,7 +64,6 @@
     <!--</websocket:handshake-interceptors>-->
     <!--</websocket:handlers>-->
     <!--<bean id="sessionHandler" class="com.iquanwai.confucius.web.account.websocket.SessionSocketHandler"/>-->
-
 
     <mvc:interceptors>
         <mvc:interceptor>

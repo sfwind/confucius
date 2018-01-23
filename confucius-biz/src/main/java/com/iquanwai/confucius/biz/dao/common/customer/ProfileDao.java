@@ -100,15 +100,39 @@ public class ProfileDao extends DBUtil {
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
-            Long insertRs = runner.insert(sql, new ScalarHandler<>(), profile.getOpenid(), profile.getNickname(), profile.getCity(),
-                    profile.getCountry(), profile.getProvince(), profile.getHeadimgurl(), profile.getMobileNo(), profile.getEmail(),
-                    profile.getIndustry(), profile.getFunction(), profile.getWorkingLife(),
-                    profile.getRealName(), profile.getRiseId(), profile.getUnionid());
+            Long insertRs = runner.insert(sql, new ScalarHandler<>(),
+                    profile.getOpenid(),
+                    profile.getNickname(),
+                    profile.getCity(),
+                    profile.getCountry(),
+                    profile.getProvince(),
+                    profile.getHeadimgurl(),
+                    profile.getMobileNo(),
+                    profile.getEmail(),
+                    profile.getIndustry(),
+                    profile.getFunction(),
+                    profile.getWorkingLife(),
+                    profile.getRealName(),
+                    profile.getRiseId(),
+                    profile.getUnionid());
             return insertRs.intValue();
         } catch (SQLException e) {
             if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
                 throw e;
             }
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public int updateOAuthFields(Profile profile) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Profile SET OpenId = ? WHERE UnionId = ?";
+        try {
+            return runner.update(sql, new ScalarHandler<>(),
+                    profile.getOpenid(),
+                    profile.getUnionid());
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
@@ -137,7 +161,7 @@ public class ProfileDao extends DBUtil {
 
     public void initOnceRequestCommentCount(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Profile SET RequestCommentCount=1 WHERE Id = ?";
+        String sql = "Update Profile SET RequestCommentCount = 1 WHERE Id = ?";
         try {
             runner.update(sql, profileId);
         } catch (SQLException e) {

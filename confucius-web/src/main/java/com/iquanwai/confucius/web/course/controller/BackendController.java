@@ -143,8 +143,8 @@ public class BackendController {
         String[] cookies = cookieStr.split(";");
         String accessToken = "";
         for (String cookie : cookies) {
-            if (cookie.startsWith(OAuthService.ACCESS_TOKEN_COOKIE_NAME + "=")) {
-                accessToken = cookie.substring(OAuthService.ACCESS_TOKEN_COOKIE_NAME.length() + 1);
+            if (cookie.startsWith(OAuthService.WE_CHAT_STATE_COOKIE_NAME + "=")) {
+                accessToken = cookie.substring(OAuthService.WE_CHAT_STATE_COOKIE_NAME.length() + 1);
                 break;
             }
         }
@@ -292,10 +292,10 @@ public class BackendController {
     public ResponseEntity<Map<String, Object>> loginUsersList(@RequestBody RefreshLoginUserDto refreshLoginUserDto) {
         ThreadPool.execute(() -> {
             try {
-                List<String> openIds = refreshLoginUserDto.getOpenIds();
-                openIds.forEach(openid -> {
+                List<String> unionIds = refreshLoginUserDto.getUnionIds();
+                unionIds.forEach(unionId -> {
                     try {
-                        rabbitMQPublisher.publish(openid);
+                        rabbitMQPublisher.publish(unionId);
                         //防止队列阻塞
                         Thread.sleep(50);
                     } catch (Exception e) {

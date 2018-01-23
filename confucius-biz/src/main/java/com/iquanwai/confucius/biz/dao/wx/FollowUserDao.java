@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -23,19 +24,42 @@ public class FollowUserDao extends DBUtil {
 
     public int insert(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO FollowUsers(Openid, Country, Groupid, Headimgurl, " +
-                "Nickname, Remark, Sex, Subscribe_time, UnionId) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO FollowUsers(Openid, WeMiniOpenId, UnionId, Nickname, Sex, City, Country, Province, Headimgurl, Subscribe_time, Remark, Groupid)" +
+                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            return run.update(insertSql,
-                    account.getOpenid(), account.getCountry(),
-                    account.getGroupid(), account.getHeadimgurl(),
-                    account.getNickname(), account.getRemark(),
-                    account.getSex(), account.getSubscribe_time(), account.getUnionid());
+            Long result = run.insert(sql, new ScalarHandler<>(),
+                    account.getOpenid(),
+                    account.getWeMiniOpenId(),
+                    account.getUnionid(),
+                    account.getNickname(),
+                    account.getSex(),
+                    account.getCity(),
+                    account.getCountry(),
+                    account.getProvince(),
+                    account.getHeadimgurl(),
+                    account.getSubscribe_time(),
+                    account.getRemark(),
+                    account.getGroupid());
+            return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
+        return -1;
+    }
+
+    public int updateOAuthFields(Account account) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE FollowUsers SET OpenId = ?, WeMiniOpenId = ?, UnionId = ?, NickName = ?, Sex = ?, City = ?, Country = ?, " +
+                "Province = ?, HeadImgUrl = ?, Remark = ?, GroupId = ?, Subscribe = ?, Subscribe_time = ? WHERE UnionId = ?";
+        try {
+            return runner.update(sql, account.getOpenid(), account.getWeMiniOpenId(), account.getUnionid(), account.getNickname(),
+                    account.getSex(), account.getCity(), account.getCountry(), account.getProvince(), account.getHeadimgurl(),
+                    account.getRemark(), account.getGroupid(), account.getSubscribe(), account.getSubscribe_time(),
+                    account.getUnionid());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
         return -1;
     }
 
@@ -44,8 +68,7 @@ public class FollowUserDao extends DBUtil {
         ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
 
         try {
-            Account account = run.query("SELECT * FROM FollowUsers where Openid=?", h, openid);
-            return account;
+            return run.query("SELECT * FROM FollowUsers where Openid=?", h, openid);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -53,6 +76,18 @@ public class FollowUserDao extends DBUtil {
         return null;
     }
 
+    public Account queryByUnionId(String unionId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM FollowUsers WHERE UnionId = ?";
+        ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
+
+        try {
+            return runner.query(sql, h, unionId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
 
     public List<String> queryAll() {
         QueryRunner run = new QueryRunner(getDataSource());

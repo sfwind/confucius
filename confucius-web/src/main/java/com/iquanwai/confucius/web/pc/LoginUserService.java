@@ -34,13 +34,6 @@ import java.util.Map;
  */
 @Service
 public class LoginUserService {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    /**
-     * 缓存已经登录的用户
-     */
-    public static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
-    public static String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
     @Autowired
     private OAuthService oAuthService;
     @Autowired
@@ -55,30 +48,37 @@ public class LoginUserService {
     private CallbackDao callbackDao;
 
     /**
+     * 缓存已经登录的用户
+     */
+    public static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
+    public static String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    /**
      * 登录，就是缓存起来
-     * @param sessionId sessionId,这个sessionIds是三个点拼起来的
+     * @param state sessionId,这个sessionIds是三个点拼起来的
      * @param pcLoginUser 用户
      */
-    public  void login(String sessionId, PCLoginUser pcLoginUser) {
-        SoftReference<PCLoginUser> temp = new SoftReference<PCLoginUser>(pcLoginUser);
-        pcLoginUserMap.put(sessionId, temp);
+    public void login(String state, PCLoginUser pcLoginUser) {
+        SoftReference<PCLoginUser> temp = new SoftReference<>(pcLoginUser);
+        pcLoginUserMap.put(state, temp);
     }
 
     /**
      * 根据sessionId判断用户是否登录
-     * @param sessionId SessionId
-     * @return  是否登录
+     * @param state SessionId
+     * @return 是否登录
      */
-    public  boolean isLogin(String sessionId){
-        SoftReference<PCLoginUser> softReference = pcLoginUserMap.get(sessionId);
-        if(softReference!=null){
+    public boolean isLogin(String state) {
+        SoftReference<PCLoginUser> softReference = pcLoginUserMap.get(state);
+        if (softReference != null) {
             PCLoginUser pcLoginUser = softReference.get();
             if (pcLoginUser != null) {
-                logger.info("act:{},已登录,user:{},nickName:{}", sessionId, pcLoginUser.getOpenId(),
-                        pcLoginUser.getWeixin() != null ? pcLoginUser.getWeixin().getWeixinName() : "没有微信信息");
+                logger.info("act:{},已登录,user:{},nickName:{}", state, pcLoginUser.getOpenId(), pcLoginUser.getWeixin() != null ? pcLoginUser.getWeixin().getWeixinName() : "没有微信信息");
                 return true;
             } else {
-                logger.info("act:{},softReference失效", sessionId);
+                logger.info("act:{},softReference失效", state);
                 return false;
             }
         } else {
@@ -88,10 +88,10 @@ public class LoginUserService {
 
     /**
      * 用户登出，删除登录缓存数据
-     * @param sessionId 存储的 cookie 的值
+     * @param state 存储的 cookie 的值
      */
-    public void logout(String sessionId) {
-        pcLoginUserMap.remove(sessionId);
+    public void logout(String state) {
+        pcLoginUserMap.remove(state);
     }
 
     /**
@@ -101,11 +101,11 @@ public class LoginUserService {
     public boolean userIsFollowing(PCLoginUser loginUser) {
         try {
             Account account = accountService.getAccount(loginUser.getOpenId(), false);
-            if(account.getSubscribe() == 1){
+            if (account.getSubscribe() == 1) {
                 return true;
             }
-        } catch(NotFollowingException e) {
-            if(loginUser.getWeixin() != null) {
+        } catch (NotFollowingException e) {
+            if (loginUser.getWeixin() != null) {
                 logger.info(loginUser.getWeixin().getWeixinName() + "未关注");
             }
         }
@@ -117,69 +117,68 @@ public class LoginUserService {
      * -2 key查到了，但是获取不到user，应该是没点服务号
      * 1 成功
      */
-    public Pair<Integer,Callback> refreshLogin(String sessionId){
+    public Pair<Integer, Callback> refreshLogin(String state) {
         // 有key但是没有value，重新查一遍
         // 先检查这个cookie是否合法
-        Callback callback = callbackDao.queryByPcAccessToken(sessionId);
+        Callback callback = callbackDao.queryByState(state);
         if (callback == null) {
             // 不合法
             return new MutablePair<>(-1, null);
         } else {
             // 合法，再查一遍
-            Pair<Integer, PCLoginUser> result = getLoginUser(sessionId);
+            Pair<Integer, PCLoginUser> result = getLoginUser(state);
             if (result.getLeft() < 0) {
-                logger.info("key:{} is lost , remove cookie", sessionId);
-                pcLoginUserMap.remove(sessionId);
+                logger.info("key:{} is lost , remove cookie", state);
+                pcLoginUserMap.remove(state);
                 return new MutablePair<>(-2, callback);
             } else {
-                logger.info("key:{} is lost , search again: {}",sessionId, result.getRight());
-                login(sessionId, result.getRight());
+                logger.info("key:{} is lost , search again: {}", state, result.getRight());
+                login(state, result.getRight());
                 return new MutablePair<>(1, callback);
             }
         }
     }
+
     public Boolean checkPermission(Integer roleId, String uri) {
         return permissionService.checkPermission(roleId, uri);
     }
 
     /**
      * 获取PCLoginUser
-     *
      * @return -1:没有cookie <br/>
      * -2:accessToken无效<br/>
      * -3:没有关注<br/>
      * 1:PCLoginUser
      */
     public Pair<Integer, PCLoginUser> getLoginUser(HttpServletRequest request) {
-        String pcToken = CookieUtils.getCookie(request, QUANWAI_TOKEN_COOKIE_NAME);
-        if (StringUtils.isEmpty(pcToken)) {
+        String state = CookieUtils.getCookie(request, QUANWAI_TOKEN_COOKIE_NAME);
+        if (StringUtils.isEmpty(state)) {
             return new MutablePair<>(-1, null);
         } else {
-            return getLoginUser(pcToken);
+            return getLoginUser(state);
         }
     }
 
     /**
      * 获取PCLoginUser
-     *
      * @return -1:没有cookie <br/>
      * -2:accessToken无效,没有点页面<br/>
      * -3:没有关注，一般不会走到这个<br/>
      * -4:一般是没有关注服务号
      * 1:PCLoginUser
      */
-    public Pair<Integer, PCLoginUser> getLoginUser(String accessToken) {
+    public Pair<Integer, PCLoginUser> getLoginUser(String state) {
         // 先检查有没有缓存
-        SoftReference<PCLoginUser> pcLoginUserSoftReference = pcLoginUserMap.get(accessToken);
+        SoftReference<PCLoginUser> pcLoginUserSoftReference = pcLoginUserMap.get(state);
         if (pcLoginUserSoftReference != null && pcLoginUserSoftReference.get() != null) {
-            logger.debug("已缓存,_qt:{}", accessToken);
+            logger.debug("已缓存,_qt:{}", state);
             return new MutablePair<>(1, pcLoginUserSoftReference.get());
         }
 
-        String openid = oAuthService.pcOpenId(accessToken);
+        String openid = oAuthService.pcOpenId(state);
         if (openid == null) {
             // 没有查到openid，一般是该用户没有关注服务号
-            logger.info("accesstoken:{} can't find openid", accessToken);
+            logger.info("accesstoken:{} can't find openid", state);
             return new MutablePair<>(-4, null);
         }
         Account account;
@@ -188,7 +187,7 @@ public class LoginUserService {
         } catch (NotFollowingException e) {
             return new MutablePair<>(-3, null);
         }
-        logger.info("accesstoken:{},openId:{},account:{}", accessToken, openid, account);
+        logger.info("state: {}, openId: {}, account: {}", state, openid, account);
         if (account == null) {
             return new MutablePair<>(-2, null);
         }
@@ -196,6 +195,7 @@ public class LoginUserService {
 
         Profile profile = accountService.getProfile(openid, false);
         Role role = getUserRole(profile.getId());
+
         PCLoginUser pcLoginUser = new PCLoginUser();
         LoginUser loginUser = new LoginUser();
         loginUser.setId(profile.getId());
@@ -214,7 +214,7 @@ public class LoginUserService {
         return new MutablePair<>(1, pcLoginUser);
     }
 
-    public Role getUserRole(Integer profileId){
+    public Role getUserRole(Integer profileId) {
         Role role = permissionService.getRole(profileId);
         if (role == null) {
             // 获得用户的openid，根据openid查询用户的学号

@@ -6,6 +6,7 @@ import com.iquanwai.confucius.web.util.CookieUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -20,15 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Autowired
     private LoginUserService loginUserService;
-
-    public PCLoginUserResolver(){
-    }
-
-    public PCLoginUserResolver(LoginUserService loginUserService) {
-        this.loginUserService = loginUserService;
-    }
-
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -49,8 +43,8 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         Pair<Integer, PCLoginUser> loginUser = loginUserService.getLoginUser(request);
         if (loginUser.getLeft() < 1) {
             String remoteIp = request.getHeader("X-Forwarded-For");
-            String value = CookieUtils.getCookie(request, LoginUserService.QUANWAI_TOKEN_COOKIE_NAME);
-            logger.error("没有找到用户,uri:{},ip:{},_qt:{}", request.getRequestURI(), remoteIp, value);
+            String state = CookieUtils.getCookie(request, LoginUserService.QUANWAI_TOKEN_COOKIE_NAME);
+            logger.error("没有找到用户,uri:{},ip:{},_qt:{}", request.getRequestURI(), remoteIp, state);
         }
         return loginUser.getRight();
     }
