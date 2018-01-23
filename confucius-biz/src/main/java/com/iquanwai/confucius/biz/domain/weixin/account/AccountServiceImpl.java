@@ -192,9 +192,11 @@ public class AccountServiceImpl implements AccountService {
         logger.info("请求用户信息结果:{}", body);
         Map<String, Object> result = CommonUtils.jsonToMap(body);
 
+        logger.info("111");
         Account account = new Account();
         try {
             // TODO
+            logger.info("222");
             ConvertUtils.register((aClass, value) -> {
                 if (value == null) {
                     return null;
@@ -207,13 +209,16 @@ public class AccountServiceImpl implements AccountService {
                 return new DateTime(time.longValue()).toDate();
             }, Date.class);
             BeanUtils.populate(account, result);
+            logger.info("333");
             if (account.getSubscribe() != null && account.getSubscribe() == 0) {
                 //未关注直接抛异常
                 throw new NotFollowingException();
             }
 
+            logger.info("444");
             redisUtil.lock("lock:wx:user:insert", (lock) -> {
                 Account existAccount = followUserDao.queryByOpenid(openid);
+                logger.info("existAccount: {}", existAccount);
                 if (existAccount == null) {
                     logger.info("插入用户信息:{}", account);
                     followUserDao.insert(account);
