@@ -201,7 +201,6 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId, Integer payType) {
         // 查询该openid是否是我们的用户
-        Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
         Double fee;
         if (memberTypeId == RiseMember.ELITE) {
@@ -213,12 +212,10 @@ public class SignupServiceImpl implements SignupService {
         }
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
 
-        Assert.notNull(profile, "用户信息错误");
         Assert.notNull(memberType, "会员类型错误");
         Assert.notNull(payType, "支付类型错误");
-        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profile.getOpenid(),
-                orderPair.getLeft(), fee, orderPair.getRight(), memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAG_MEMBER,
-                payType);
+        QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profileId, orderPair.getLeft(), fee, orderPair.getRight(),
+                memberTypeId + "", memberType.getName(), QuanwaiOrder.FRAG_MEMBER, payType);
 
         // rise的报名数据
         RiseOrder riseOrder = new RiseOrder();
@@ -226,7 +223,7 @@ public class SignupServiceImpl implements SignupService {
         riseOrder.setIsDel(false);
         riseOrder.setMemberType(memberTypeId);
         riseOrder.setOrderId(orderPair.getLeft());
-        riseOrder.setProfileId(profile.getId());
+        riseOrder.setProfileId(profileId);
         riseOrderDao.insert(riseOrder);
         return quanwaiOrder;
     }
@@ -240,9 +237,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买训练营，配置 zk，查看当前月份
-        Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        Assert.notNull(profile, "用户不能为空");
         Assert.notNull(memberType, "会员类型错误");
 
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
@@ -251,7 +246,7 @@ public class SignupServiceImpl implements SignupService {
         Double fee = memberType.getFee();
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
 
-        QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(), orderPair.getLeft(), fee, orderPair.getRight(),
+        QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profileId, orderPair.getLeft(), fee, orderPair.getRight(),
                 memberTypeId + "", sellingMonth + "月训练营", QuanwaiOrder.FRAG_CAMP, payType);
 
         // 插入训练营报名数据
@@ -272,15 +267,13 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买训练营，配置 zk，查看当前月份
-        Profile profile = accountService.getProfile(profileId);
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        Assert.notNull(profile, "用户不能为空");
         Assert.notNull(memberType, "会员类型错误");
 
         Double fee = memberType.getFee();
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
 
-        QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profile.getOpenid(),
+        QuanwaiOrder quanwaiOrder = createQuanwaiOrder(profileId,
                 orderPair.getLeft(), fee, orderPair.getRight(),
                 memberTypeId + "", "商学院申请", QuanwaiOrder.BS_APPLICATION, payType);
 
@@ -339,7 +332,7 @@ public class SignupServiceImpl implements SignupService {
 
         sendPurchaseMessage(profile, RiseMember.CAMP, orderId, year, month);
         // 刷新相关状态
-        refreshStatus(quanwaiOrderDao.loadOrder(orderId), orderId);
+        refreshStatus(quanwaiOrderDao.loadOrder(orderId), profile, orderId);
     }
 
     @Override
@@ -949,16 +942,16 @@ public class SignupServiceImpl implements SignupService {
         return businessSchoolApplicationOrder != null;
     }
 
-    private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
+    private void refreshStatus(QuanwaiOrder quanwaiOrder, Profile profile, String orderId) {
         // 刷新会员状态
         try {
-            freshLoginUserPublisher.publish(quanwaiOrder.getOpenid());
+            freshLoginUserPublisher.publish(profile.getOpenid());
         } catch (ConnectException e) {
             logger.error("发送会员信息更新mq失败", e);
         }
         // 更新优惠券使用状态
         if (quanwaiOrder.getDiscount() != 0.0) {
-            logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
+            logger.info("{}使用优惠券", profile.getOpenid());
             costRepo.updateCoupon(Coupon.USED, orderId);
         }
         // 发送支付成功 mq 消息
@@ -1009,11 +1002,12 @@ public class SignupServiceImpl implements SignupService {
         return new MutablePair<>(orderId, discount);
     }
 
-    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId, String goodsName, String goodsType, Integer payType) {
+    private QuanwaiOrder createQuanwaiOrder(Integer profileId, String orderId, Double fee, Double discount, String goodsId,
+                                            String goodsName, String goodsType, Integer payType) {
         // 创建订单
         QuanwaiOrder quanwaiOrder = new QuanwaiOrder();
         quanwaiOrder.setCreateTime(new Date());
-        quanwaiOrder.setOpenid(openId);
+        quanwaiOrder.setProfileId(profileId);
         quanwaiOrder.setOrderId(orderId);
         quanwaiOrder.setTotal(fee);
         quanwaiOrder.setDiscount(discount);
@@ -1025,13 +1019,6 @@ public class SignupServiceImpl implements SignupService {
         quanwaiOrder.setPayType(payType);
         quanwaiOrderDao.insert(quanwaiOrder);
         return quanwaiOrder;
-    }
-
-    /**
-     * 默认微信方式支付
-     */
-    private QuanwaiOrder createQuanwaiOrder(String openId, String orderId, Double fee, Double discount, String goodsId, String goodsName, String goodsType) {
-        return this.createQuanwaiOrder(openId, orderId, fee, discount, goodsId, goodsName, goodsType, QuanwaiOrder.PAY_WECHAT);
     }
 
     // 专业版折价方案

@@ -106,8 +106,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     @Override
     public String queryFinalPayStatus(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        Profile profile = profileDao.load(Profile.class, profileId);
-        QuanwaiOrder order = quanwaiOrderDao.loadCampOrBusinessOrder(profile.getOpenid());
+        QuanwaiOrder order = quanwaiOrderDao.loadCampOrBusinessOrder(profileId);
         if (riseMember == null) {
             // 查看是否点过付费按钮
             if (order != null) {

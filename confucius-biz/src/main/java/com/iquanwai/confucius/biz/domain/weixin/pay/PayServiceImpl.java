@@ -14,9 +14,11 @@ import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -54,6 +56,8 @@ public class PayServiceImpl implements PayService {
     private MessageService messageService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
+    @Autowired
+    private AccountService accountService;
 
     private RabbitMQPublisher paySuccessPublisher;
 
@@ -65,7 +69,6 @@ public class PayServiceImpl implements PayService {
 
     private static final String PAY_CALLBACK_PATH = "/wx/pay/result/callback";
     private static final String RISE_MEMBER_PAY_CALLBACK_PATH = "/wx/pay/result/risemember/callback";
-    private static final String RISE_COURSE_PAY_CALLBACK_PATH = "/wx/pay/result/risecourse/callback";
     private static final String RISE_CAMP_PAY_CALLBACK_PATH = "/wx/pay/result/risecamp/callback";
     private static final String BS_APPLICATION_PAY_CALLBACK_PATH = "/wx/pay/result/application/callback";
 
@@ -83,13 +86,13 @@ public class PayServiceImpl implements PayService {
     @Override
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
-        QuanwaiOrder courseOrder = quanwaiOrderDao.loadOrder(orderId);
-        if (courseOrder == null) {
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        if (quanwaiOrder == null) {
             logger.error("order id {} not existed", orderId);
             return "";
         }
 
-        UnifiedOrder unifiedOrder = buildOrder(courseOrder);
+        UnifiedOrder unifiedOrder = buildOrder(quanwaiOrder);
 
         String response = restfulHelper.postXML(UNIFIED_ORDER_URL, XMLHelper.createXML(unifiedOrder));
         UnifiedOrderReply reply = XMLHelper.parseXml(UnifiedOrderReply.class, response);
@@ -208,15 +211,17 @@ public class PayServiceImpl implements PayService {
     }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
+        Profile profile = accountService.getProfile(quanwaiOrder.getProfileId());
+
         // 刷新会员状态
         try {
-            freshLoginUserPublisher.publish(quanwaiOrder.getOpenid());
+            freshLoginUserPublisher.publish(profile.getOpenid());
         } catch (ConnectException e) {
             logger.error("发送会员信息更新mq失败", e);
         }
         // 更新优惠券使用状态
         if (quanwaiOrder.getDiscount() != 0.0) {
-            logger.info("{}使用优惠券", quanwaiOrder.getOpenid());
+            logger.info("{}使用优惠券", profile.getOpenid());
             costRepo.updateCoupon(Coupon.USED, orderId);
         }
         // 发送mq消息
@@ -281,6 +286,8 @@ public class PayServiceImpl implements PayService {
      * 根据预先生成的 order 订单数据，生成对微信的请求 url，xml 格式
      */
     private UnifiedOrder buildJSApiOrder(QuanwaiOrder quanwaiOrder, String ip) {
+        Profile profile = accountService.getProfile(quanwaiOrder.getProfileId());
+        Assert.notNull(profile, "用户不能为空");
         UnifiedOrder unifiedOrder = new UnifiedOrder();
         Map<String, String> map = Maps.newHashMap();
         String appid = ConfigUtils.getAppid();
@@ -291,7 +298,7 @@ public class PayServiceImpl implements PayService {
         map.put("nonce_str", nonce_str);
         String body = GOODS_BODY;
         map.put("body", body);
-        String openid = quanwaiOrder.getOpenid();
+        String openid = profile.getOpenid();
         map.put("openid", openid);
 
         String notify_url = null;
@@ -343,6 +350,8 @@ public class PayServiceImpl implements PayService {
     }
 
     private UnifiedOrder buildOrder(QuanwaiOrder quanwaiOrder) {
+        Profile profile = accountService.getProfile(quanwaiOrder.getProfileId());
+        Assert.notNull(profile, "用户不能为空");
         UnifiedOrder unifiedOrder = new UnifiedOrder();
         Map<String, String> map = Maps.newHashMap();
         String appid = ConfigUtils.getAppid();
@@ -353,7 +362,7 @@ public class PayServiceImpl implements PayService {
         map.put("nonce_str", nonce_str);
         String body = GOODS_BODY;
         map.put("body", body);
-        String openid = quanwaiOrder.getOpenid();
+        String openid = profile.getOpenid();
         map.put("openid", openid);
         String notify_url = ConfigUtils.adapterDomainName() + PAY_CALLBACK_PATH;
         map.put("notify_url", notify_url);
