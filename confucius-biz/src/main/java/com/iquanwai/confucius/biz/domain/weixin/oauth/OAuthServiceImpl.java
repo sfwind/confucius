@@ -279,7 +279,7 @@ public class OAuthServiceImpl implements OAuthService {
         String openid = callback.getPcOpenid();
         String accessToken = callback.getPcAccessToken();
 
-        Map<String, Object> result = getUserInfoFromWeiXin(openid);
+        Map<String, Object> result = getUserInfoFromWeiXin(openid, accessToken);
         String unionId = result.get("unionid").toString();
         // 根据 unionId 查询
         Profile profile = accountService.queryByUnionId(unionId);
@@ -301,7 +301,7 @@ public class OAuthServiceImpl implements OAuthService {
             // 更新数据库
             logger.info("更新数据库,account:{}", profile);
             callback.setOpenid(profile.getOpenid());
-            callbackDao.updateOpenIdAndUnionId(callback.getState(), profile.getOpenid(), unionId);
+            callbackDao.updateOpenId(callback.getState(), profile.getOpenid());
             return new MutablePair<>(1, callback);
         }
     }

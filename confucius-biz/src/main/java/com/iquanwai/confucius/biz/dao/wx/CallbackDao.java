@@ -131,11 +131,11 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public void updateOpenIdAndUnionId(String state, String openId, String unionId) {
+    public void updateOpenId(String state, String openId) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
-            String sql = "update Callback set OpenId = ?, UnionId = ? where State = ?";
-            run.update(sql, openId, unionId, state);
+            String sql = "update Callback set OpenId = ? where State = ?";
+            run.update(sql, openId, state);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
