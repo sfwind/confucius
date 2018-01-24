@@ -47,4 +47,12 @@ public interface PlanService {
     List<Knowledge> getProblemKnowledgeList(Integer problemId);
 
     AuditionClassMember getAuditionClassMember(Integer profileId);
+
+    /**
+     * 获得用户所有的plans
+     * @param profileId
+     * @return
+     */
+    List<ImprovementPlan> getUserPlans(Integer profileId);
+
 }

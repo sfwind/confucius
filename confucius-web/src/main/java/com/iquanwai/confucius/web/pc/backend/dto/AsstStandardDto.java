@@ -1,40 +1,48 @@
-package com.iquanwai.confucius.biz.po.asst;
+package com.iquanwai.confucius.web.pc.backend.dto;
 
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
-/**
- * 助教升级实际情况
- */
 @Data
-public class AsstUpExecution {
+public class AsstStandardDto {
 
     private Integer id;
-
-    private Integer profileId;
     /**
      * 助教级别
      */
     private Integer roleId;
+
     /**
-     * 开始时间
+     * 昵称
      */
-    private Date startDate;
+    private String nickName;
+    private Integer profileId;
+    /**
+     * 助教名
+     */
+    private String roleName;
+    /**
+     * 倒计时
+     */
+    private Integer countDown;
+    /**
+     * 累计学习小课数量
+     */
+    private Integer learnedProblem;
     /**
      * 最低需要满足的点评数
      */
     private Integer reviewNumber;
+
     /**
      * 求点评的回答数
      */
     private Integer requestReviewNumber;
-
     /**
-     * 有效的点评量
+     * 有效的点评所占的比例（百分之）
      */
-    private Integer validReviewNumber;
+    private Integer ValidReviewRate;
     /**
      * 优质回答数
      */
@@ -49,12 +57,12 @@ public class AsstUpExecution {
     private BigDecimal hostScore;
     /**
      * 串讲人次数
-      */
+     */
     private Integer mainPointNumber;
     /**
      * 串讲人分数
      */
-    private BigDecimal mainPointScore;
+    private  BigDecimal mainPointScore;
     /**
      * 线上答题演习
      */
@@ -70,7 +78,7 @@ public class AsstUpExecution {
     /**
      * 线上活动反馈分数
      */
-    private BigDecimal onlineScore;
+    private  BigDecimal onlineScore;
     /**
      * 训练营次数
      */

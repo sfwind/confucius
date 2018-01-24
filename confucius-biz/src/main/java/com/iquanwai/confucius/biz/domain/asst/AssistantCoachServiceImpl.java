@@ -604,9 +604,4 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     public Integer loadAssignedCount(Integer interviewer) {
         return businessSchoolApplicationDao.loadAssistBACount(interviewer);
     }
-
-    @Override
-    public AsstUpExecution loadUpGradeInfo(Integer profileId) {
-        return  asstUpExecutionDao.queryByProfileId(profileId);
-    }
 }

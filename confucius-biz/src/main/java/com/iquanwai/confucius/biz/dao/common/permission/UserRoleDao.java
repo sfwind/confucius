@@ -4,11 +4,13 @@ package com.iquanwai.confucius.biz.dao.common.permission;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.omg.CORBA.PUBLIC_MEMBER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -79,7 +81,6 @@ public class UserRoleDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
         String sql = " select * from UserRole where roleId in (3,4,11) and Del = 0 ";
-
         try {
             return runner.query(sql, h);
         } catch (SQLException e) {
@@ -153,6 +154,32 @@ public class UserRoleDao extends DBUtil {
         try {
           Long result = runner.insert(sql,new ScalarHandler<>(),roleId,openId,profileId);
           return result.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return -1;
+    }
+
+
+    public List<UserRole> loadAssistsList(Page page){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
+        String sql = "select * from UserRole where RoleId in (3,11,12,13,14,15,16,17) and del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
+
+        try {
+            return runner.query(sql,h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public Integer loadAssistsCount(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT COUNT(*) FROM UserRole where RoleId in (3,11,12,13,14,15,16,17) and del = 0 ";
+
+        try {
+            return runner.query(sql,new ScalarHandler<Long>()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);
         }

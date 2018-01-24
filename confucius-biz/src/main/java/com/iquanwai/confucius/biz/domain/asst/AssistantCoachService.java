@@ -130,11 +130,4 @@ public interface AssistantCoachService {
      * @return
      */
     Integer loadAssignedCount(Integer interviewer);
-
-    /**
-     * 加载升级信息
-     * @param profileId
-     * @return
-     */
-    AsstUpExecution loadUpGradeInfo(Integer profileId);
 }

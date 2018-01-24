@@ -96,4 +96,9 @@ public class PlanServiceImpl implements PlanService {
         return auditionClassMemberDao.loadByProfileId(profileId);
     }
 
+    @Override
+    public List<ImprovementPlan> getUserPlans(Integer profileId) {
+        return improvementPlanDao.loadAllPlans(profileId);
+    }
+
 }
