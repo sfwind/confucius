@@ -307,7 +307,7 @@ public class SignupServiceImpl implements SignupService {
         updateMonthlyCampRiseMemberStatus(profile, orderId);
 
         // 送优惠券
-        insertCampCoupon(profile);
+//        insertCampCoupon(profile);
 
         // 更新订单状态
         monthlyCampOrderDao.entry(orderId);
