@@ -12,6 +12,7 @@ import com.iquanwai.confucius.biz.util.page.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,5 +64,20 @@ public class AsstUpServiceImpl implements AsstUpService{
     public List<AsstUpDefault> loadAssistDefault() {
         List<AsstUpDefault> asstUpDefaults = asstUpDefaultDao.loadAll(AsstUpDefault.class);
         return asstUpDefaults.stream().filter(asstUpDefault -> asstUpDefault.getDel() == 0).collect(Collectors.toList());
+    }
+
+    @Override
+    public AsstUpDefault loadDefaultByRoleId(Integer roleId) {
+        return asstUpDefaultDao.queryByRoleId(roleId);
+    }
+
+    @Override
+    public Integer insertStandard(AsstUpStandard asstUpStandard) {
+        return asstUpStandardDao.insert(asstUpStandard);
+    }
+
+    @Override
+    public Integer insertExecution(Integer standardId,Integer profileId, Integer roleId,Date startDate) {
+        return asstUpExecutionDao.insert(standardId,profileId,roleId,startDate);
     }
 }

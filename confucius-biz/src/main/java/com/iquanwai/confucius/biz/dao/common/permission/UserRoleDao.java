@@ -119,7 +119,7 @@ public class UserRoleDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);
         }
-        return 0;
+        return -1;
     }
 
     /**

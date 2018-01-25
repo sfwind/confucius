@@ -8,10 +8,12 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.TableDto;
+import com.iquanwai.confucius.biz.po.asst.AsstUpDefault;
 import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.AssistCatalogDto;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +38,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("pc/operation/assist")
 public class AssistController {
-
-
     @Autowired
     private AssistantCoachService assistantCoachService;
     @Autowired
@@ -99,16 +100,43 @@ public class AssistController {
     /**
      * 修改教练状态
      */
-    @RequestMapping("update/{assistId}/{assistCatalog}")
-    public ResponseEntity<Map<String, Object>> updateAssist(PCLoginUser loginUser, @PathVariable Integer assistId, @PathVariable Integer assistCatalog) {
+    @RequestMapping("update")
+    public ResponseEntity<Map<String, Object>> updateAssist(PCLoginUser loginUser, @RequestParam("riseId")String riseId,@RequestParam("assist") Integer assistId, @RequestParam("catalog") Integer roleId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("教练升降级").action("教练升降级");
         operationLogService.log(operationLog);
 
-        if (assistCatalog.equals(AssistCatalogEnums.EXPIRED_ASSIST.getRoleId())) {
-            return WebUtils.result(assistantCoachService.deleteAssist(assistId));
-        } else {
-            return WebUtils.result(assistantCoachService.updateAssist(assistId, assistCatalog));
+        Profile profile = accountService.getProfileByRiseId(riseId);
+        if(profile == null){
+            return WebUtils.error("该用户不存在");
         }
+
+        if (AssistCatalogEnums.EXPIRED_ASSIST.getRoleId().equals(roleId)) {
+           if(assistantCoachService.deleteAssist(assistId) == -1){
+               return WebUtils.error("更新教练级别失败");
+           }
+        } else {
+            if(assistantCoachService.updateAssist(assistId,roleId)==-1){
+                return WebUtils.error("更新教练级别失败");
+            }
+        }
+        Integer profileId = profile.getId();
+        AsstUpDefault asstUpDefault = asstUpService.loadDefaultByRoleId(roleId);
+        if(asstUpDefault == null){
+            return WebUtils.error("没有对应的助教默认表");
+        }
+        AsstUpStandard asstUpStandard = new AsstUpStandard();
+        BeanUtils.copyProperties(asstUpDefault,asstUpStandard);
+        asstUpStandard.setProfileId(profileId);
+        asstUpStandard.setRoleId(roleId);
+        Integer standardId = asstUpService.insertStandard(asstUpStandard);
+        if(standardId==-1){
+            return WebUtils.error("生成助教标准表失败");
+        }
+        Date date = DateUtils.afterDays(new Date(),0);
+        if(asstUpService.insertExecution(standardId,profileId,roleId,date)==-1){
+            return WebUtils.error("生成助教完成度表失败");
+        }
+        return WebUtils.success();
     }
 
 
@@ -299,14 +327,17 @@ public class AssistController {
         asstUpExecution.setValidReviewNumber(existExecution.getValidReviewNumber() + asstUpExecution.getValidReviewNumber());
         asstUpExecution.setHighQualityAnswer(existExecution.getHighQualityAnswer() + asstUpExecution.getHighQualityAnswer());
         asstUpExecution.setHostNumber(existExecution.getHostNumber() + asstUpExecution.getHostNumber());
-        //TODO:评分的设定(HostScore,MainPointScore,OnlineScore,CampScore)
+        asstUpExecution.setHostScore(asstUpExecution.getHostScore());
         asstUpExecution.setMainPointNumber(existExecution.getMainPointNumber() + asstUpExecution.getMainPointNumber());
+        asstUpExecution.setMainPointScore(asstUpExecution.getMainPointScore());
         asstUpExecution.setOnlineOrSwingNumber(existExecution.getOnlineOrSwingNumber() + asstUpExecution.getOnlineOrSwingNumber());
+        asstUpExecution.setOnlineScore(asstUpExecution.getOnlineScore());
         asstUpExecution.setCampNumber(existExecution.getCampNumber() + asstUpExecution.getCampNumber());
         asstUpExecution.setAsstNumber(existExecution.getAsstNumber() + asstUpExecution.getAsstNumber());
+        asstUpExecution.setCampScore(asstUpExecution.getCampScore());
         asstUpExecution.setFosterNew(existExecution.getFosterNew() + asstUpExecution.getFosterNew());
         asstUpExecution.setCompanyTrainNumber(existExecution.getCompanyTrainNumber() + asstUpExecution.getCompanyTrainNumber());
-
+        asstUpExecution.setCompanyTrainScore(asstUpExecution.getCompanyTrainScore());
         return asstUpExecution;
     }
 

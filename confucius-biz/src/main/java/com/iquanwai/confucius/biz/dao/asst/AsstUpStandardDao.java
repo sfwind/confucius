@@ -41,7 +41,7 @@ public class AsstUpStandardDao extends DBUtil {
                 "ReviewNumber,RequestReviewNumber,ValidReviewRate,HighQualityAnswer,HostNumber,HostScore," +
                 "MainPointNumber,MainPointScore,OnlineAnswer,Swing,OnlineOrSwingNumber," +
                 "OnlineScore,CampNumber,AsstNumber,CampScore,MonthlyWork,FosterNew," +
-                "CompanyTrainNumber,CompanyTrainScore) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "CompanyTrainNumber,CompanyTrainScore) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), asstUpStandard.getProfileId(), asstUpStandard.getRoleId(),

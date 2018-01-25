@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.Date;
 
 @Repository
 public class AsstUpExecutionDao extends DBUtil {
@@ -35,28 +36,15 @@ public class AsstUpExecutionDao extends DBUtil {
         return null;
     }
 
-
-    public Integer insert(AsstUpExecution asstUpExecution) {
+    public Integer insert(Integer standardId,Integer profileId, Integer roleId, Date startDate){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO AsstUpExecution(RoleId,StartDate," +
-                "ReviewNumber,RequestReviewNumber,ValidReviewNumber,HighQualityAnswer,HostNumber,HostScore,MainPointNumber," +
-                "MainPointScore,OnlineAnswer,Swing,OnlineOrSwingNumber,OnlineScore,CampNumber," +
-                "AsstNumber,CampScore,MonthlyWork,FosterNew,CompanyTrainNumber,CompanyTrainScore) " +
-                "Values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
+        String sql = " INSERT INTO AsstUpExecution(StandardId,ProfileId,RoleId,StartDate) VALUES (?,?,?,?) ";
 
         try {
-            Long result = runner.query(sql, new ScalarHandler<>(), asstUpExecution.getRoleId(), asstUpExecution.getStartDate(),
-                    asstUpExecution.getReviewNumber(), asstUpExecution.getRequestReviewNumber(),
-                    asstUpExecution.getValidReviewNumber(), asstUpExecution.getHighQualityAnswer(),
-                    asstUpExecution.getHostNumber(), asstUpExecution.getHostScore(), asstUpExecution.getMainPointNumber(),
-                    asstUpExecution.getMainPointScore(), asstUpExecution.getOnlineAnswer(), asstUpExecution.getSwing(),
-                    asstUpExecution.getOnlineOrSwingNumber(), asstUpExecution.getOnlineScore(),
-                    asstUpExecution.getCampNumber(), asstUpExecution.getAsstNumber(), asstUpExecution.getCampScore(),
-                    asstUpExecution.getMonthlyWork(), asstUpExecution.getFosterNew(), asstUpExecution.getCompanyTrainNumber(),
-                    asstUpExecution.getCompanyTrainScore());
+            Long result = runner.insert(sql,new ScalarHandler<>(),standardId,profileId,roleId,startDate);
             return result.intValue();
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
+            logger.error(e.getLocalizedMessage(),e);
         }
         return -1;
     }

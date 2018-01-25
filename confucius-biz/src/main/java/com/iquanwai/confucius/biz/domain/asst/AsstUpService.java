@@ -6,29 +6,13 @@ import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.page.Page;
 
+import java.util.Date;
 import java.util.List;
 
 /**
- * 助教升降级service
+ * 助教评分service
  */
 public interface AsstUpService {
-    /**
-     * 加载升降级完成情况
-     * @param profileId
-     * @return
-     */
-    AsstUpExecution loadUpGradeExecution(Integer profileId);
-    Integer updateExecution(AsstUpExecution asstUpExecution);
-    AsstUpExecution load(Integer id);
-    /**
-     * 加载助教升级标准
-     * @param profileId
-     * @return
-     */
-    AsstUpStandard loadStandard(Integer profileId);
-
-    Integer updateStandard(AsstUpStandard asstUpStandard);
-
     /**
      * 加载教练
      * @param page
@@ -37,4 +21,27 @@ public interface AsstUpService {
     List<UserRole> loadAssists(Page page);
 
     List<AsstUpDefault> loadAssistDefault();
+
+    /**
+     * 根据教练级别获得对应的默认规则
+     * @param roleId
+     * @return
+     */
+    AsstUpDefault loadDefaultByRoleId(Integer roleId);
+    /**
+     * 加载助教升级标准
+     * @param profileId
+     * @return
+     */
+    AsstUpStandard loadStandard(Integer profileId);
+    Integer insertStandard(AsstUpStandard asstUpStandard);
+    Integer updateStandard(AsstUpStandard asstUpStandard);
+
+    AsstUpExecution loadUpGradeExecution(Integer profileId);
+    AsstUpExecution load(Integer id);
+    Integer insertExecution(Integer standardId,Integer profileId,Integer roleId,Date startDate);
+    Integer updateExecution(AsstUpExecution asstUpExecution);
+
+
+
 }
