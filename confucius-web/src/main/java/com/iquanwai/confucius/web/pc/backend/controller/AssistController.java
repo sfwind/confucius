@@ -167,11 +167,35 @@ public class AssistController {
     }
 
     @RequestMapping("add/{riseId}/{assistCatalog}")
-    public ResponseEntity<Map<String, Object>> addAssist(PCLoginUser loginUser, @PathVariable String riseId, @PathVariable Integer assistCatalog) {
+    public ResponseEntity<Map<String, Object>> addAssist(PCLoginUser loginUser, @PathVariable String riseId, @PathVariable("assistCatalog") Integer roleId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("添加教练").action("添加教练");
         operationLogService.log(operationLog);
 
-        return WebUtils.result(assistantCoachService.addAssist(assistCatalog, riseId));
+        Profile profile = accountService.getProfileByRiseId(riseId);
+        if(profile == null){
+            return WebUtils.error("该用户不存在");
+        }
+        assistantCoachService.addAssist(roleId, riseId);
+
+        Integer profileId = profile.getId();
+        AsstUpDefault asstUpDefault = asstUpService.loadDefaultByRoleId(roleId);
+        if(asstUpDefault == null){
+            return WebUtils.error("没有对应的助教默认表");
+        }
+        AsstUpStandard asstUpStandard = new AsstUpStandard();
+        BeanUtils.copyProperties(asstUpDefault,asstUpStandard);
+        asstUpStandard.setProfileId(profileId);
+        asstUpStandard.setRoleId(roleId);
+        Integer standardId = asstUpService.insertStandard(asstUpStandard);
+        if(standardId==-1){
+            return WebUtils.error("生成助教标准表失败");
+        }
+        Date date = DateUtils.afterDays(new Date(),0);
+        if(asstUpService.insertExecution(standardId,profileId,roleId,date)==-1){
+            return WebUtils.error("生成助教完成度表失败");
+        }
+        return WebUtils.success();
+
     }
 
     /**
