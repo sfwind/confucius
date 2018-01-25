@@ -14,4 +14,11 @@ public interface PlanService {
      * @param profileId 用户id
      */
     List<ImprovementPlan> loadUserPlans(Integer profileId);
+
+    /**
+     * 获得用户所有的plans
+     * @param profileId
+     * @return
+     */
+    List<ImprovementPlan> getUserPlans(Integer profileId);
 }
