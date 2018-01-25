@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
+import com.iquanwai.confucius.biz.po.asst.AsstUpDefault;
 import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -18,6 +19,7 @@ public interface AsstUpService {
      */
     AsstUpExecution loadUpGradeExecution(Integer profileId);
     Integer updateExecution(AsstUpExecution asstUpExecution);
+    AsstUpExecution load(Integer id);
     /**
      * 加载助教升级标准
      * @param profileId
@@ -34,6 +36,5 @@ public interface AsstUpService {
      */
     List<UserRole> loadAssists(Page page);
 
-
-
+    List<AsstUpDefault> loadAssistDefault();
 }

@@ -26,7 +26,7 @@ public class AsstUpExecutionDao extends DBUtil {
     public AsstUpExecution queryByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<AsstUpExecution> h = new BeanHandler<AsstUpExecution>(AsstUpExecution.class);
-        String sql = " SELECT * FROM AsstUpExecution WHERE ProfileId = ? AND DEL = 0 ";
+        String sql = " SELECT * FROM AsstUpExecution WHERE ProfileId = ? AND DEL = 0 order by id desc limit 1 ";
         try {
             return runner.query(sql, h, profileId);
         } catch (SQLException e) {
@@ -46,7 +46,7 @@ public class AsstUpExecutionDao extends DBUtil {
 
         try {
             Long result = runner.query(sql, new ScalarHandler<>(), asstUpExecution.getRoleId(), asstUpExecution.getStartDate(),
-                     asstUpExecution.getReviewNumber(),asstUpExecution.getRequestReviewNumber(),
+                    asstUpExecution.getReviewNumber(), asstUpExecution.getRequestReviewNumber(),
                     asstUpExecution.getValidReviewNumber(), asstUpExecution.getHighQualityAnswer(),
                     asstUpExecution.getHostNumber(), asstUpExecution.getHostScore(), asstUpExecution.getMainPointNumber(),
                     asstUpExecution.getMainPointScore(), asstUpExecution.getOnlineAnswer(), asstUpExecution.getSwing(),
@@ -70,13 +70,12 @@ public class AsstUpExecutionDao extends DBUtil {
      */
     public Integer update(AsstUpExecution asstUpExecution) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = " Update AsstUpExecution SET RoleId = ?,StartDate = ?,ReviewNumber = ?, " +
+        String sql = " Update AsstUpExecution SET ReviewNumber = ?, " +
                 "RequestReviewNumber = ? ,ValidReviewNumber = ?,HighQualityAnswer = ?,HostNumber = ?,HostScore = ? ,MainPointNumber = ?,MainPointScore=?," +
                 "OnlineAnswer =?,Swing = ?,OnlineOrSwingNumber =?,OnlineScore = ?,CampNumber = ?,AsstNumber = ?,CampScore = ?," +
                 "MonthlyWork = ?,FosterNew = ?,CompanyTrainNumber = ?,CompanyTrainScore = ? Where id = ?";
         try {
-            return runner.update(sql, asstUpExecution.getRoleId(), asstUpExecution.getStartDate(),
-                    asstUpExecution.getReviewNumber(),asstUpExecution.getRequestReviewNumber(),
+            return runner.update(sql, asstUpExecution.getReviewNumber(), asstUpExecution.getRequestReviewNumber(),
                     asstUpExecution.getValidReviewNumber(), asstUpExecution.getHighQualityAnswer(), asstUpExecution.getHostNumber(), asstUpExecution.getHostScore(),
                     asstUpExecution.getMainPointNumber(), asstUpExecution.getMainPointScore(), asstUpExecution.getOnlineAnswer(),
                     asstUpExecution.getSwing(), asstUpExecution.getOnlineOrSwingNumber(), asstUpExecution.getOnlineScore(),

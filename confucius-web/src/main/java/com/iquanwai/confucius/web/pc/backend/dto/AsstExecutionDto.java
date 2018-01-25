@@ -3,34 +3,27 @@ package com.iquanwai.confucius.web.pc.backend.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
-public class AsstStandardDto {
+public class AsstExecutionDto {
 
     private Integer id;
-    /**
-     * 助教级别
-     */
-    private Integer roleId;
 
-    /**
-     * 昵称
-     */
     private String nickName;
-    /**
-     * 助教名
-     */
+
     private String roleName;
     /**
-     * 倒计时
+     * 考核开始日期
      */
+    private Date startDate;
+
     private Integer countDown;
-    /**
-     * 累计学习小课数量
-     */
+
     private Integer learnedProblem;
+
     /**
-     * 最低需要满足的点评数
+     * 点评数
      */
     private Integer reviewNumber;
 
@@ -38,77 +31,58 @@ public class AsstStandardDto {
      * 求点评的回答数
      */
     private Integer requestReviewNumber;
+
     /**
-     * 有效的点评所占的比例（百分之）
+     * 有效的点评数
+     */
+    private Integer validReviewNumber;
+    /**
+     * 有效点评率
      */
     private Integer ValidReviewRate;
     /**
      * 优质回答数
      */
     private Integer highQualityAnswer;
+
     /**
-     * 主持人次数
+     * 主持次数
      */
     private Integer hostNumber;
+
     /**
      * 主持人评分
      */
     private BigDecimal hostScore;
+
     /**
      * 串讲人次数
      */
     private Integer mainPointNumber;
     /**
-     * 串讲人分数
+     * 串讲人评分
      */
-    private  BigDecimal mainPointScore;
-    /**
-     * 线上答题演习
-     */
+    private BigDecimal mainPointScore;
+
     private String onlineAnswer;
-    /**
-     * 吊打演习
-     */
+
     private String swing;
-    /**
-     * 线上答题或吊打次数
-     */
+
     private Integer onlineOrSwingNumber;
-    /**
-     * 线上活动反馈分数
-     */
-    private  BigDecimal onlineScore;
-    /**
-     * 训练营次数
-     */
+
+    private BigDecimal onlineScore;
+
     private Integer campNumber;
 
-    /**
-     * 大教练次数
-     */
     private Integer asstNumber;
-    /**
-     * 训练营评分
-     */
+
     private BigDecimal campScore;
-    /**
-     * 每月作业
-     */
+
     private String monthlyWork;
-    /**
-     * 培养新人次数
-     */
+
     private Integer fosterNew;
-    /**
-     * 企业培训次数
-     */
+
     private Integer companyTrainNumber;
-    /**
-     * 企业培训评分
-     */
+
     private BigDecimal companyTrainScore;
-    /**
-     * 是否删除 0-未删除 1-已删除
-     */
-    private Integer del;
 }

@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.biz.domain.asst;
 
+import com.iquanwai.confucius.biz.dao.asst.AsstUpDefaultDao;
 import com.iquanwai.confucius.biz.dao.asst.AsstUpExecutionDao;
 import com.iquanwai.confucius.biz.dao.asst.AsstUpStandardDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
+import com.iquanwai.confucius.biz.po.asst.AsstUpDefault;
 import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -11,9 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AsstUpServiceImpl implements AsstUpService{
+    @Autowired
+    private AsstUpDefaultDao asstUpDefaultDao;
     @Autowired
     private AsstUpStandardDao asstUpStandardDao;
     @Autowired
@@ -29,7 +34,12 @@ public class AsstUpServiceImpl implements AsstUpService{
 
     @Override
     public Integer updateExecution(AsstUpExecution asstUpExecution) {
-        return null;
+        return asstUpExecutionDao.update(asstUpExecution);
+    }
+
+    @Override
+    public AsstUpExecution load(Integer id) {
+        return asstUpExecutionDao.load(AsstUpExecution.class,id);
     }
 
     @Override
@@ -47,5 +57,11 @@ public class AsstUpServiceImpl implements AsstUpService{
         List<UserRole> userRoles = userRoleDao.loadAssistsList(page);
         page.setTotal(userRoleDao.loadAssistsCount());
         return userRoles;
+    }
+
+    @Override
+    public List<AsstUpDefault> loadAssistDefault() {
+        List<AsstUpDefault> asstUpDefaults = asstUpDefaultDao.loadAll(AsstUpDefault.class);
+        return asstUpDefaults.stream().filter(asstUpDefault -> asstUpDefault.getDel() == 0).collect(Collectors.toList());
     }
 }

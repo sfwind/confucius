@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 public class AsstUpDefaultDao  extends DBUtil{
@@ -31,5 +32,27 @@ public class AsstUpDefaultDao  extends DBUtil{
             logger.error(e.getLocalizedMessage(),e);
         }
         return null;
+    }
+
+    public Integer update(AsstUpDefault asstUpDefault){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = " Update AsstUpDefault set CountDown = ?,LearnedProblem = ?,ReviewNumber = ?,RequestReviewNumber = ?," +
+                "ValidReviewRate = ?, HighQualityAnswer = ?,HostNumber = ?,HostScore = ?,MainPointNumber = ?," +
+                "MainPointScore = ?,OnlineAnswer = ?,Swing = ?,OnlineOrSwingNumber = ?,OnlineScore=?," +
+                "CampNumber =?,AsstNumber =?,CampScore =?,MonthlyWork=?,FosterNew=?,CompanyTrainNumber=?," +
+                "CompanyTrainScore where id = ?";
+        try {
+           return runner.update(sql,asstUpDefault.getCountDown(),asstUpDefault.getLearnedProblem(),asstUpDefault.getReviewNumber(),
+                    asstUpDefault.getRequestReviewNumber(),asstUpDefault.getValidReviewRate(),asstUpDefault.getHighQualityAnswer(),
+                    asstUpDefault.getHostNumber(),asstUpDefault.getHostScore(),asstUpDefault.getMainPointNumber(),
+                    asstUpDefault.getMainPointScore(),asstUpDefault.getOnlineAnswer(),asstUpDefault.getSwing(),
+                    asstUpDefault.getOnlineOrSwingNumber(),asstUpDefault.getOnlineScore(),asstUpDefault.getCampNumber(),
+                    asstUpDefault.getAsstNumber(),asstUpDefault.getCampScore(),asstUpDefault.getMonthlyWork(),
+                    asstUpDefault.getFosterNew(),asstUpDefault.getCompanyTrainNumber(),asstUpDefault.getCompanyTrainScore(),
+                    asstUpDefault.getId());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return -1;
     }
 }
