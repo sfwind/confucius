@@ -20,6 +20,9 @@ public class AsstExecutionDto {
 
     private Integer countDown;
 
+    private Integer remainDay;
+
+
     private Integer learnedProblem;
 
     /**

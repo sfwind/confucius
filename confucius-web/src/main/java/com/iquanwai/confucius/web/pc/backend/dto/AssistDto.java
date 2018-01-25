@@ -10,4 +10,5 @@ public class AssistDto {
     private String riseId;
     private String nickName;
     private String headImageUrl;
+    private String  reached;
 }

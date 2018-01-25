@@ -16,13 +16,10 @@ import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
-import com.iquanwai.confucius.web.pc.backend.dto.AssistCatalogDto;
-import com.iquanwai.confucius.web.pc.backend.dto.AssistDto;
-import com.iquanwai.confucius.web.pc.backend.dto.AsstExecutionDto;
-import com.iquanwai.confucius.web.pc.backend.dto.AsstStandardDto;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
+import com.iquanwai.confucius.web.pc.datahelper.AsstHelper;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
-import org.apache.zookeeper.Op;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -72,6 +69,14 @@ public class AssistController {
                 assistDto.setNickName(profile.getNickname());
                 assistDto.setRiseId(profile.getRiseId());
                 assistDto.setHeadImageUrl(profile.getHeadimgurl());
+                Integer  profileId = profile.getId();
+                AsstUpStandard asstUpStandard = asstUpService.loadStandard(profileId);
+                AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profileId);
+                if (checkIsReached(profileId, asstUpStandard, asstUpExecution)) {
+                    assistDto.setReached("是");
+                } else {
+                    assistDto.setReached("否");
+                }
             }
             assistDtoList.add(assistDto);
         });
@@ -101,38 +106,38 @@ public class AssistController {
      * 修改教练状态
      */
     @RequestMapping("update")
-    public ResponseEntity<Map<String, Object>> updateAssist(PCLoginUser loginUser, @RequestParam("riseId")String riseId,@RequestParam("assist") Integer assistId, @RequestParam("catalog") Integer roleId) {
+    public ResponseEntity<Map<String, Object>> updateAssist(PCLoginUser loginUser, @RequestParam("riseId") String riseId, @RequestParam("assist") Integer assistId, @RequestParam("catalog") Integer roleId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("教练升降级").action("教练升降级");
         operationLogService.log(operationLog);
 
         Profile profile = accountService.getProfileByRiseId(riseId);
-        if(profile == null){
+        if (profile == null) {
             return WebUtils.error("该用户不存在");
         }
 
         if (AssistCatalogEnums.EXPIRED_ASSIST.getRoleId().equals(roleId)) {
-           if(assistantCoachService.deleteAssist(assistId) == -1){
-               return WebUtils.error("更新教练级别失败");
-           }
+            if (assistantCoachService.deleteAssist(assistId) == -1) {
+                return WebUtils.error("更新教练级别失败");
+            }
         } else {
-            if(assistantCoachService.updateAssist(assistId,roleId)==-1){
+            if (assistantCoachService.updateAssist(assistId, roleId) == -1) {
                 return WebUtils.error("更新教练级别失败");
             }
             Integer profileId = profile.getId();
             AsstUpDefault asstUpDefault = asstUpService.loadDefaultByRoleId(roleId);
-            if(asstUpDefault == null){
+            if (asstUpDefault == null) {
                 return WebUtils.error("没有对应的助教默认表");
             }
             AsstUpStandard asstUpStandard = new AsstUpStandard();
-            BeanUtils.copyProperties(asstUpDefault,asstUpStandard);
+            BeanUtils.copyProperties(asstUpDefault, asstUpStandard);
             asstUpStandard.setProfileId(profileId);
             asstUpStandard.setRoleId(roleId);
             Integer standardId = asstUpService.insertStandard(asstUpStandard);
-            if(standardId==-1){
+            if (standardId == -1) {
                 return WebUtils.error("生成助教标准表失败");
             }
-            Date date = DateUtils.afterDays(new Date(),0);
-            if(asstUpService.insertExecution(standardId,profileId,roleId,date)==-1){
+            Date date = DateUtils.afterDays(new Date(), 0);
+            if (asstUpService.insertExecution(standardId, profileId, roleId, date) == -1) {
                 return WebUtils.error("生成助教完成度表失败");
             }
         }
@@ -172,26 +177,26 @@ public class AssistController {
         operationLogService.log(operationLog);
 
         Profile profile = accountService.getProfileByRiseId(riseId);
-        if(profile == null){
+        if (profile == null) {
             return WebUtils.error("该用户不存在");
         }
         assistantCoachService.addAssist(roleId, riseId);
 
         Integer profileId = profile.getId();
         AsstUpDefault asstUpDefault = asstUpService.loadDefaultByRoleId(roleId);
-        if(asstUpDefault == null){
+        if (asstUpDefault == null) {
             return WebUtils.error("没有对应的助教默认表");
         }
         AsstUpStandard asstUpStandard = new AsstUpStandard();
-        BeanUtils.copyProperties(asstUpDefault,asstUpStandard);
+        BeanUtils.copyProperties(asstUpDefault, asstUpStandard);
         asstUpStandard.setProfileId(profileId);
         asstUpStandard.setRoleId(roleId);
         Integer standardId = asstUpService.insertStandard(asstUpStandard);
-        if(standardId==-1){
+        if (standardId == -1) {
             return WebUtils.error("生成助教标准表失败");
         }
-        Date date = DateUtils.afterDays(new Date(),0);
-        if(asstUpService.insertExecution(standardId,profileId,roleId,date)==-1){
+        Date date = DateUtils.afterDays(new Date(), 0);
+        if (asstUpService.insertExecution(standardId, profileId, roleId, date) == -1) {
             return WebUtils.error("生成助教完成度表失败");
         }
         return WebUtils.success();
@@ -256,7 +261,7 @@ public class AssistController {
         }
         page.setPageSize(20);
         List<UserRole> userRoles = asstUpService.loadAssists(page);
-        TableDto<AsstExecutionDto> result = new TableDto<>();
+        TableDto<GradeDto> result = new TableDto<>();
         result.setPage(page);
         result.setData(initExecutions(userRoles));
         return WebUtils.result(result);
@@ -309,37 +314,162 @@ public class AssistController {
         return asstStandardDtos;
     }
 
-    private List<AsstExecutionDto> initExecutions(List<UserRole> userRoles) {
-        List<AsstExecutionDto> asstExecutionDtos = Lists.newArrayList();
+//    private List<AsstExecutionDto> initExecutions(List<UserRole> userRoles) {
+//        List<AsstExecutionDto> asstExecutionDtos = Lists.newArrayList();
+//        userRoles.forEach(userRole -> {
+//            AsstExecutionDto asstExecutionDto = new AsstExecutionDto();
+//
+//            Profile profile = accountService.getProfile(userRole.getProfileId());
+//            if (profile == null) {
+//                return;
+//            }
+//            Integer profileId = profile.getId();
+//            asstExecutionDto.setNickName(profile.getNickname());
+//            Integer roleId = userRole.getRoleId();
+//            AsstUpStandard asstUpStandard = asstUpService.loadStandard(profileId);
+//            if (asstUpStandard == null) {
+//                return;
+//            }
+//            asstExecutionDto.setCountDown(asstUpStandard.getCountDown());
+//            asstExecutionDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
+//            Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime()!=null).count();
+//            asstExecutionDto.setLearnedProblem(result.intValue());
+//            AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profile.getId());
+//            BeanUtils.copyProperties(asstUpExecution, asstExecutionDto);
+//            if (asstExecutionDto.getReviewNumber() == 0) {
+//                asstExecutionDto.setValidReviewRate(0);
+//            } else {
+//                asstExecutionDto.setValidReviewRate((asstExecutionDto.getValidReviewNumber() * 100) / asstExecutionDto.getReviewNumber());
+//            }
+//            asstExecutionDtos.add(asstExecutionDto);
+//        });
+//        return asstExecutionDtos;
+//    }
+
+
+    private List<GradeDto> initExecutions(List<UserRole> userRoles) {
+        List<GradeDto> gradeDtos = Lists.newArrayList();
         userRoles.forEach(userRole -> {
-            AsstExecutionDto asstExecutionDto = new AsstExecutionDto();
+            GradeDto upGradeDto = new GradeDto();
 
             Profile profile = accountService.getProfile(userRole.getProfileId());
             if (profile == null) {
                 return;
             }
             Integer profileId = profile.getId();
-            asstExecutionDto.setNickName(profile.getNickname());
+            upGradeDto.setNickName(profile.getNickname());
             Integer roleId = userRole.getRoleId();
             AsstUpStandard asstUpStandard = asstUpService.loadStandard(profileId);
             if (asstUpStandard == null) {
                 return;
             }
-            asstExecutionDto.setCountDown(asstUpStandard.getCountDown());
-            asstExecutionDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
-            Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime()!=null).count();
-            asstExecutionDto.setLearnedProblem(result.intValue());
-            AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profile.getId());
-            BeanUtils.copyProperties(asstUpExecution, asstExecutionDto);
-            if (asstExecutionDto.getReviewNumber() == 0) {
-                asstExecutionDto.setValidReviewRate(0);
-            } else {
-                asstExecutionDto.setValidReviewRate((asstExecutionDto.getValidReviewNumber() * 100) / asstExecutionDto.getReviewNumber());
+            AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profileId);
+            if (asstUpExecution == null) {
+                return;
             }
-            asstExecutionDtos.add(asstExecutionDto);
+
+            upGradeDto.setId(asstUpExecution.getId());
+            upGradeDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
+            Integer interval = DateUtils.interval(asstUpExecution.getStartDate());
+            Integer countDown = asstUpStandard.getCountDown();
+            upGradeDto.setStartDate(asstUpExecution.getStartDate());
+            upGradeDto.setCountDown(countDown);
+            upGradeDto.setRemainDay(getRemain(interval, countDown));
+            //统计已经完成的课程数
+            Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).count();
+            Integer finish = result.intValue();
+            Integer total = asstUpStandard.getLearnedProblem();
+            upGradeDto.setNeedLearnedProblem(total);
+            upGradeDto.setLearnedProblem(finish);
+            upGradeDto.setRemainProblem(getRemain(finish, total));
+            finish = asstUpExecution.getReviewNumber();
+            total = asstUpStandard.getReviewNumber();
+            upGradeDto.setNeedReviewedNumber(total);
+            upGradeDto.setReviewedNumber(finish);
+            upGradeDto.setRemainReviewNumber(getRemain(finish, total));
+            Integer valid = asstUpExecution.getValidReviewNumber();
+            total = asstUpStandard.getRequestReviewNumber();
+            finish = asstUpExecution.getReviewNumber();
+            upGradeDto.setNeedRequestReviewNumber(total);
+            upGradeDto.setRequestReviewNumber(finish);
+            upGradeDto.setRemainRequestReviewNumber(getRemain(finish, total));
+            upGradeDto.setNeedReviewRate(asstUpStandard.getValidReviewRate());
+            if (finish == 0) {
+                upGradeDto.setReviewRate(0);
+            } else {
+                upGradeDto.setReviewRate(valid * 100 / finish);
+            }
+            finish = asstUpExecution.getHighQualityAnswer();
+            total = asstUpStandard.getHighQualityAnswer();
+            upGradeDto.setNeedHighAnswer(total);
+            upGradeDto.setHighAnswer(finish);
+            upGradeDto.setRemainHighAnswer(getRemain(finish, total));
+
+            total = asstUpStandard.getHostNumber();
+            finish = asstUpExecution.getHostNumber();
+
+            upGradeDto.setNeedHostNumber(total);
+            upGradeDto.setHostNumber(finish);
+            upGradeDto.setRemainHostNumber(getRemain(finish, total));
+
+            upGradeDto.setNeedHostScore(asstUpStandard.getHostScore());
+            upGradeDto.setHostScore(asstUpExecution.getHostScore());
+
+            total = asstUpStandard.getMainPointNumber();
+            finish = asstUpExecution.getMainPointNumber();
+            upGradeDto.setNeedMainPointNumber(total);
+            upGradeDto.setMainPointNumber(finish);
+            upGradeDto.setRemainPointNumber(getRemain(finish, total));
+
+            upGradeDto.setNeedPointScore(asstUpStandard.getMainPointScore());
+            upGradeDto.setMainPointScore(asstUpExecution.getMainPointScore());
+            upGradeDto.setNeedOnlineAnswer(asstUpStandard.getOnlineAnswer());
+            upGradeDto.setOnlineAnswer(asstUpExecution.getOnlineAnswer());
+            upGradeDto.setNeedSwing(asstUpStandard.getSwing());
+            upGradeDto.setSwing(asstUpExecution.getSwing());
+
+            total = asstUpStandard.getOnlineOrSwingNumber();
+            finish = asstUpExecution.getOnlineOrSwingNumber();
+            upGradeDto.setNeedOnlineNumber(total);
+            upGradeDto.setOnlineOrSwingNumber(finish);
+            upGradeDto.setRemainOnlineOrSwingNumber(getRemain(finish, total));
+            upGradeDto.setNeedOnlineScore(asstUpStandard.getOnlineScore());
+            upGradeDto.setOnlineScore(asstUpExecution.getOnlineScore());
+            total = asstUpStandard.getCampNumber();
+            finish = asstUpExecution.getCampNumber();
+            upGradeDto.setNeedCampNumber(total);
+            upGradeDto.setCampNumber(finish);
+            upGradeDto.setRemainCampNumber(getRemain(finish, total));
+            total = asstUpStandard.getAsstNumber();
+            finish = asstUpExecution.getAsstNumber();
+            upGradeDto.setNeedAsstNumber(total);
+            upGradeDto.setAsstNumber(finish);
+            upGradeDto.setRemainAsstNumber(getRemain(finish, total));
+            upGradeDto.setNeedCampScore(asstUpStandard.getCampScore());
+            upGradeDto.setCampScore(asstUpExecution.getCampScore());
+            upGradeDto.setNeedMonthlyWork(asstUpStandard.getMonthlyWork());
+            upGradeDto.setMonthlyWork(asstUpExecution.getMonthlyWork());
+
+            total = asstUpStandard.getFosterNew();
+            finish = asstUpExecution.getFosterNew();
+            upGradeDto.setNeedFosterNew(total);
+            upGradeDto.setFosterNew(finish);
+            upGradeDto.setRemainFosterNew(getRemain(finish, total));
+
+            total = asstUpStandard.getCompanyTrainNumber();
+            finish = asstUpExecution.getCompanyTrainNumber();
+            upGradeDto.setNeedCompanyNumber(total);
+            upGradeDto.setCompanyNumber(finish);
+            upGradeDto.setRemainCompanyNumber(getRemain(finish, total));
+            upGradeDto.setNeedCompanyScore(asstUpStandard.getCompanyTrainScore());
+            upGradeDto.setCompanyScore(asstUpExecution.getCompanyTrainScore());
+
+            gradeDtos.add(upGradeDto);
         });
-        return asstExecutionDtos;
+
+        return gradeDtos;
     }
+
 
     private AsstUpExecution genUpdateExecution(AsstUpExecution asstUpExecution) {
         AsstUpExecution existExecution = asstUpService.load(asstUpExecution.getId());
@@ -363,6 +493,38 @@ public class AssistController {
         asstUpExecution.setCompanyTrainNumber(existExecution.getCompanyTrainNumber() + asstUpExecution.getCompanyTrainNumber());
         asstUpExecution.setCompanyTrainScore(asstUpExecution.getCompanyTrainScore());
         return asstUpExecution;
+    }
+
+    /**
+     * 判断是否达标
+     *
+     * @param profileId
+     * @param asstUpStandard
+     * @param asstUpExecution
+     * @return
+     */
+    private boolean checkIsReached(Integer profileId, AsstUpStandard asstUpStandard, AsstUpExecution asstUpExecution) {
+        Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).count();
+        if (asstUpStandard.getLearnedProblem() > result.intValue()) {
+            return false;
+        }
+       return   AsstHelper.checkIsReached(asstUpStandard,asstUpExecution);
+    }
+
+
+    /**
+     * 计算剩余需要的完成数（如果已经完成的大于所有的，则返回0）
+     *
+     * @param finished
+     * @param totalNum
+     * @return
+     */
+    private Integer getRemain(Integer finished, Integer totalNum) {
+        if (totalNum < finished) {
+            return 0;
+        } else {
+            return totalNum - finished;
+        }
     }
 
 }
