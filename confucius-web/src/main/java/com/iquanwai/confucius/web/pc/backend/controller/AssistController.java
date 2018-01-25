@@ -118,23 +118,23 @@ public class AssistController {
             if(assistantCoachService.updateAssist(assistId,roleId)==-1){
                 return WebUtils.error("更新教练级别失败");
             }
-        }
-        Integer profileId = profile.getId();
-        AsstUpDefault asstUpDefault = asstUpService.loadDefaultByRoleId(roleId);
-        if(asstUpDefault == null){
-            return WebUtils.error("没有对应的助教默认表");
-        }
-        AsstUpStandard asstUpStandard = new AsstUpStandard();
-        BeanUtils.copyProperties(asstUpDefault,asstUpStandard);
-        asstUpStandard.setProfileId(profileId);
-        asstUpStandard.setRoleId(roleId);
-        Integer standardId = asstUpService.insertStandard(asstUpStandard);
-        if(standardId==-1){
-            return WebUtils.error("生成助教标准表失败");
-        }
-        Date date = DateUtils.afterDays(new Date(),0);
-        if(asstUpService.insertExecution(standardId,profileId,roleId,date)==-1){
-            return WebUtils.error("生成助教完成度表失败");
+            Integer profileId = profile.getId();
+            AsstUpDefault asstUpDefault = asstUpService.loadDefaultByRoleId(roleId);
+            if(asstUpDefault == null){
+                return WebUtils.error("没有对应的助教默认表");
+            }
+            AsstUpStandard asstUpStandard = new AsstUpStandard();
+            BeanUtils.copyProperties(asstUpDefault,asstUpStandard);
+            asstUpStandard.setProfileId(profileId);
+            asstUpStandard.setRoleId(roleId);
+            Integer standardId = asstUpService.insertStandard(asstUpStandard);
+            if(standardId==-1){
+                return WebUtils.error("生成助教标准表失败");
+            }
+            Date date = DateUtils.afterDays(new Date(),0);
+            if(asstUpService.insertExecution(standardId,profileId,roleId,date)==-1){
+                return WebUtils.error("生成助教完成度表失败");
+            }
         }
         return WebUtils.success();
     }
