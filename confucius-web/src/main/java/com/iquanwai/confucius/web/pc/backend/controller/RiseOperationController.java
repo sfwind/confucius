@@ -36,6 +36,7 @@ import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -316,11 +317,11 @@ public class RiseOperationController {
 
         BusinessSchoolApplication application = businessSchoolService.loadBusinessSchoolApplication(approveDto.getId());
         if (application == null) {
-           return WebUtils.error("该申请不存在");
+            return WebUtils.error("该申请不存在");
         } else {
             if (approveDto.getCoupon() == null) {
                 approveDto.setCoupon(0d);
-           }
+            }
             InterviewRecord interviewRecord = approveDto.getInterviewRecord();
             if(interviewRecord == null){
                 return WebUtils.error("更新失败");
@@ -329,7 +330,7 @@ public class RiseOperationController {
             if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
                 return WebUtils.error("更新失败");
             }
-           boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(),"");if (approve) { return WebUtils.success();
+            boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(),"");if (approve) { return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
             }
@@ -379,7 +380,7 @@ public class RiseOperationController {
             case RiseMember.ANNUAL:
                 return "专业一年";
             case RiseMember.CAMP:
-                return "训练营";
+                return "专项课";
             default:
                 return "异常数据";
         }
@@ -399,7 +400,6 @@ public class RiseOperationController {
         dto.setComment(application.getComment());
         dto.setId(application.getId());
         dto.setProfileId(application.getProfileId());
-        dto.setOpenid(application.getOpenid());
         dto.setStatus(application.getStatus());
         dto.setCheckTime(application.getCheckTime() == null ? "未审核" : DateUtils.parseDateToString(application.getCheckTime()));
         dto.setDel(application.getDel());
@@ -553,8 +553,8 @@ public class RiseOperationController {
                 dto.setVerifiedResult("未知");
             }
 
-            if (openidList != null && (openidList.size() > 0)) {
-                if (openidList.stream().filter(openid -> openid.contains(application.getOpenid())).count() > 0) {
+            if (openidList!=null && CollectionUtils.isNotEmpty(openidList)) {
+                if (openidList.contains(profile.getOpenid())) {
                     dto.setIsBlack("是");
                 }
             }

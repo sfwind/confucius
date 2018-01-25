@@ -16,18 +16,17 @@ public class CookieUtils {
      * @param value cookie的value
      * @param domain domain
      * ＠param  path path
-     * @param maxage  最长存活时间 单位为秒
-     * @param response
+     * @param maxage 最长存活时间 单位为秒
      */
-    public static void addCookie(String name ,String value,String domain,
-                                 int maxage,String path, HttpServletResponse response){
+    public static void addCookie(String name, String value, String domain,
+                                 int maxage, String path, HttpServletResponse response) {
         Cookie cookie = new Cookie(name, value);
-        if(domain!=null){
+        if (domain != null) {
             cookie.setDomain(domain);
         }
         cookie.setMaxAge(maxage);
         cookie.setPath(path);
-//        cookie.setHttpOnly(true);
+        // cookie.setHttpOnly(true);
         response.addCookie(cookie);
     }
 
@@ -36,30 +35,26 @@ public class CookieUtils {
      * * @param name cookie的key
      * @param value cookie的value
      * @param domain domain
-     * @param maxage  最长存活时间 单位为秒
-     * @param response
+     * @param maxage 最长存活时间 单位为秒
      */
-    public static void addCookie(String name ,String value,String domain,
-                                 int maxage, HttpServletResponse response){
-        addCookie(name, value, domain, maxage, "/" , response);
+    public static void addCookie(String name, String value, String domain,
+                                 int maxage, HttpServletResponse response) {
+        addCookie(name, value, domain, maxage, "/", response);
     }
 
     /**
      * 往根下面存一个cookie
      * * @param name cookie的key
      * @param value cookie的value
-     * @param maxage  最长存活时间 单位为秒
-     * @param response
+     * @param maxage 最长存活时间 单位为秒
      */
-    public static void addCookie(String name ,String value,
-                                 int maxage, HttpServletResponse response){
-        addCookie(name, value, ConfigUtils.realDomainName(), maxage, "/" , response);
+    public static void addCookie(String name, String value,
+                                 int maxage, HttpServletResponse response) {
+        addCookie(name, value, ConfigUtils.realDomainName(), maxage, "/", response);
     }
 
     /**
      * 从cookie值返回cookie值，如果没有返回 null
-     * @param request
-     * @param name
      * @return cookie的值
      */
     public static String getCookie(HttpServletRequest request, String name) {

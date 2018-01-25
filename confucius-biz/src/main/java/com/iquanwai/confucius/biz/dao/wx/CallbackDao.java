@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.dao.wx;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Callback;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -19,64 +20,55 @@ import java.sql.SQLException;
 public class CallbackDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-
-    public Callback loadUserCallback(String openId) {
+    public int insert(Callback callback) throws SQLException {
         QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
-
+        String sql = "INSERT INTO Callback(State, CallbackUrl, AccessToken, PcAccessToken, WeMiniAccessToken, " +
+                "RefreshToken, UnionId, Openid, PcOpenid, WeMiniOpenid) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            Callback callback = run.query("SELECT * FROM Callback where OpenId=? and (AccessToken is not null or PcAccessToken is not null) limit 1", h, openId);
-            return callback;
+            Long result = run.insert(sql, new ScalarHandler<>(),
+                    callback.getState(),
+                    callback.getCallbackUrl(),
+                    callback.getAccessToken(),
+                    callback.getPcAccessToken(),
+                    callback.getWeMiniAccessToken(),
+                    callback.getRefreshToken(),
+                    callback.getUnionId(),
+                    callback.getOpenid(),
+                    callback.getPcOpenid(),
+                    callback.getWeMiniOpenid());
+            return result.intValue();
         } catch (SQLException e) {
+            if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
+                throw e;
+            }
             logger.error(e.getLocalizedMessage(), e);
         }
-
-        return null;
+        return -1;
     }
 
-    public void insert(Callback callback) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO Callback(Openid, Accesstoken, CallbackUrl, RefreshToken, State) " +
-                "VALUES(?, ?, ?, ?, ?)";
-        try {
-            run.insert(insertSql, new ScalarHandler<>(),
-                    callback.getOpenid(), callback.getAccessToken(), callback.getCallbackUrl(),
-                    callback.getRefreshToken(), callback.getState());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-    }
-
-    public void updateUserInfo(String state,
-                               String accessToken,
-                               String refreshToken,
-                               String openid) {
+    public void updateUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
-            run.update("UPDATE Callback Set AccessToken=?,RefreshToken=?,Openid=? where State=?",
-                    accessToken, refreshToken, openid, state);
+            run.update("UPDATE Callback Set AccessToken = ?, RefreshToken = ?, Openid = ?, UnionId = ? where State = ?",
+                    accessToken, refreshToken, openid, unionId, state);
 
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public void updatePcUserInfo(String state,
-                               String accessToken,
-                               String refreshToken,
-                               String openid) {
+    public void updatePcUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
-            run.update("UPDATE Callback Set PcAccessToken=?,RefreshToken=?,PcOpenid=? where State=?",
-                    accessToken, refreshToken, openid, state);
-
+            run.update("UPDATE Callback Set PcAccessToken = ?, RefreshToken = ?, PcOpenid = ?, UnionId = ? where State = ?",
+                    accessToken, refreshToken, openid, unionId, state);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-    public void refreshToken(String state,
-                               String newAccessToken) {
+
+    public void refreshToken(String state, String newAccessToken) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
             run.update("UPDATE Callback Set AccessToken=? where State=?",
@@ -92,12 +84,10 @@ public class CallbackDao extends DBUtil {
         ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
 
         try {
-            Callback callback = run.query("SELECT * FROM Callback where State=?", h, state);
-            return callback;
+            return run.query("SELECT * FROM Callback where State = ?", h, state);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-
         return null;
     }
 
@@ -129,10 +119,22 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public void updateOpenId(String state,String openId){
+    public Callback queryByUnionId(String unionId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Callback WHERE UnionId = ?";
+        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
+        try {
+            return runner.query(sql, h, unionId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    public void updateOpenId(String state, String openId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        try{
-            String sql = "update Callback set openid = ? where State = ?";
+        try {
+            String sql = "update Callback set OpenId = ? where State = ?";
             run.update(sql, openId, state);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

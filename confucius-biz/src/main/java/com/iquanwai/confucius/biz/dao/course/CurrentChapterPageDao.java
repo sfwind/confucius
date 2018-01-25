@@ -39,29 +39,29 @@ public class CurrentChapterPageDao extends DBUtil {
         return 0;
     }
 
-    public void updatePage(String openid, Integer profileId, int chapterId, int pageSequence) {
+    public void updatePage(Integer profileId, int chapterId, int pageSequence) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         Integer value = currentPage(profileId, chapterId);
         if (value == null) {
-            insert(openid, profileId, chapterId, pageSequence, run);
+            insert(profileId, chapterId, pageSequence, run);
         } else {
-            String updateSql = "UPDATE CurrentChapterPage SET PageSequence=? WHERE Openid=? AND ChapterId=? ";
+            String updateSql = "UPDATE CurrentChapterPage SET PageSequence=? WHERE ProfileId=? AND ChapterId=? ";
             try {
                 run.update(updateSql,
-                        pageSequence, openid, chapterId);
+                        pageSequence, chapterId);
             } catch (SQLException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
         }
     }
 
-    public int insert(String openid, Integer profileId, int chapterId, int pageSequence, QueryRunner run) {
-        String insertSql = "INSERT INTO CurrentChapterPage(Openid, ProfileId, ChapterId, PageSequence) " +
-                "VALUES(?, ?, ?, ?)";
+    public int insert(Integer profileId, int chapterId, int pageSequence, QueryRunner run) {
+        String insertSql = "INSERT INTO CurrentChapterPage(ProfileId, ChapterId, PageSequence) " +
+                "VALUES(?, ?, ?)";
         try {
             Integer result = run.update(insertSql,
-                    openid, profileId, chapterId, pageSequence);
+                    profileId, chapterId, pageSequence);
             return result;
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

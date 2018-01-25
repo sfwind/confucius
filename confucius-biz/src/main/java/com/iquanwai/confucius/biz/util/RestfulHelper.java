@@ -131,7 +131,6 @@ public class RestfulHelper {
         return "";
     }
 
-
     /**
      * 发起GET请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
@@ -190,7 +189,6 @@ public class RestfulHelper {
         }
         return null;
     }
-
 
     public String sslPostXml(String requestUrl, String xml) {
         logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);

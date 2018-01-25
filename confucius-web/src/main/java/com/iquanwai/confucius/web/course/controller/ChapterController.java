@@ -64,7 +64,7 @@ public class ChapterController {
 
     private ChapterPageDto loadPage(LoginUser loginUser, Chapter chapter, Integer pageSequence, Boolean lazyLoad) {
         ChapterPageDto chapterPageDto = new ChapterPageDto();
-        Page page = courseStudyService.loadPage(loginUser.getOpenId(), loginUser.getId(),
+        Page page = courseStudyService.loadPage(loginUser.getId(),
                 chapter.getId(), pageSequence, lazyLoad);
         chapterPageDto.setPage(page);
 
@@ -148,7 +148,7 @@ public class ChapterController {
                                                               @PathVariable("questionId") Integer questionId,
                                                               @RequestBody AnswerDto answerDto){
         Assert.notNull(loginUser, "用户不能为空");
-        boolean right = courseStudyService.submitQuestion(loginUser.getOpenId(), loginUser.getId(),
+        boolean right = courseStudyService.submitQuestion(loginUser.getId(),
                 questionId, answerDto.getAnswers());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -204,7 +204,7 @@ public class ChapterController {
                                                         @PathVariable("chapterId") Integer chapterId,
                                                         @PathVariable("sequence") Integer sequence){
         Assert.notNull(loginUser, "用户不能为空");
-        courseStudyService.markPage(loginUser.getOpenId(), loginUser.getId(), chapterId, sequence);
+        courseStudyService.markPage(loginUser.getId(), chapterId, sequence);
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("章节")

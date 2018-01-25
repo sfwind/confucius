@@ -22,12 +22,12 @@ public class QuanwaiOrderDao extends DBUtil {
 
     public void insert(QuanwaiOrder quanwaiOrder) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String insertSql = "INSERT INTO QuanwaiOrder(OrderId, Openid, Price, Discount, PrepayId, " +
+        String insertSql = "INSERT INTO QuanwaiOrder(OrderId, ProfileId, Price, Discount, PrepayId, " +
                 " Status, CreateTime, GoodsId, GoodsName, GoodsType, PayType, RefundTime) " +
                 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             run.insert(insertSql, new ScalarHandler<>(),
-                    quanwaiOrder.getOrderId(), quanwaiOrder.getOpenid(), quanwaiOrder.getPrice(),
+                    quanwaiOrder.getOrderId(), quanwaiOrder.getProfileId(), quanwaiOrder.getPrice(),
                     quanwaiOrder.getDiscount(), quanwaiOrder.getPrepayId(), quanwaiOrder.getStatus(),
                     quanwaiOrder.getCreateTime(), quanwaiOrder.getGoodsId(), quanwaiOrder.getGoodsName(),
                     quanwaiOrder.getGoodsType(), quanwaiOrder.getPayType(), quanwaiOrder.getRefundTime());
@@ -50,11 +50,12 @@ public class QuanwaiOrderDao extends DBUtil {
         return null;
     }
 
-    public QuanwaiOrder loadCampOrBusinessOrder(String openId) {
+    public QuanwaiOrder loadCampOrBusinessOrder(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Select * from QuanwaiOrder where Openid = ? and (GoodsType = 'fragment_member' or GoodsType = 'fragment_camp')";
+        String sql = "Select * from QuanwaiOrder where ProfileId = ? " +
+                "and (GoodsType = 'fragment_member' or GoodsType = 'fragment_camp')";
         try {
-            return runner.query(sql, new BeanHandler<>(QuanwaiOrder.class), openId);
+            return runner.query(sql, new BeanHandler<>(QuanwaiOrder.class), profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -92,14 +92,13 @@ public class ApplicationImportController {
                 .action("加载自己的应用任务")
                 .memo(planId + ":" + applicationId);
         operationLogService.log(operationLog);
-        String openId = loginUser.getOpenId();
         // 先检查该用户有没有买这个作业
-        List<ImprovementPlan> userPlans = planService.loadUserPlans(openId);
+        List<ImprovementPlan> userPlans = planService.loadUserPlans(loginUser.getProfileId());
         // 看看这个id在不在
         Optional<ImprovementPlan> plan = userPlans.stream().filter(item -> Objects.equals(item.getId(), planId)).findFirst();
         if (plan.isPresent()) {
             ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId,
-                    loginUser.getProfileId(), loginUser.getOpenId(),false);
+                    loginUser.getProfileId(), false);
             RiseWorkEditDto dto = new RiseWorkEditDto();
             dto.setSubmitId(applicationSubmit.getId());
             dto.setTitle(applicationSubmit.getTopic());
@@ -115,7 +114,7 @@ public class ApplicationImportController {
             dto.setRequest(applicationSubmit.getRequestFeedback());
             return WebUtils.result(dto);
         } else {
-            logger.error("用户:{},没有该训练计划:{}，应用练习:{}", openId, plan, applicationId);
+            logger.error("用户:{},没有该训练计划:{}，应用练习:{}", loginUser.getProfileId(), plan, applicationId);
             return WebUtils.error(ErrorConstants.NOT_PAY_PROBLEM, "未购买的问题");
         }
 
@@ -140,7 +139,7 @@ public class ApplicationImportController {
                 .memo(applicationId + "");
         operationLogService.log(operationLog);
         ApplicationSubmit applicationSubmit = applicationService.loadMineApplicationPractice(planId, applicationId,
-                loginUser.getProfileId(), loginUser.getOpenId(),false);
+                loginUser.getProfileId(), false);
         RiseWorkInfoDto dto = new RiseWorkInfoDto();
         dto.setSubmitId(applicationSubmit.getId());
         dto.setTitle(applicationSubmit.getTopic());
@@ -181,7 +180,7 @@ public class ApplicationImportController {
                 .memo(applicationId.toString());
         operationLogService.log(operationLog);
         List<RiseWorkInfoDto> submits = applicationService.loadApplicationSubmitList(applicationId).stream()
-                .filter(item -> !item.getOpenid().equals(loginUser.getOpenId())).map(item -> {
+                .filter(item -> !item.getProfileId().equals(loginUser.getProfileId())).map(item -> {
                     RiseWorkInfoDto dto = new RiseWorkInfoDto();
                     item.setContent(HtmlRegexpUtil.filterHtml(item.getContent()));
                     dto.setContent(item.getContent().length() > 180 ?
@@ -193,7 +192,7 @@ public class ApplicationImportController {
                     dto.setPublishTime(item.getPublishTime());
                     dto.setSubmitId(item.getId());
                     dto.setPriority(item.getPriority());
-                    Profile profile = accountService.getProfile(item.getOpenid(), false);
+                    Profile profile = accountService.getProfile(item.getProfileId());
                     if(profile != null) {
                         dto.setUpName(profile.getNickname());
                         dto.setHeadPic(profile.getHeadimgurl());

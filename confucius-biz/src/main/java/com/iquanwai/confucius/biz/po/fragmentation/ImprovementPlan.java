@@ -12,7 +12,6 @@ import java.util.List;
 @Data
 public class ImprovementPlan {
     private int id;
-    private String openid; //openid
     private Integer profileId; //用户id
     private Integer problemId; //问题id
     private Date startDate; //开始日期
@@ -22,7 +21,6 @@ public class ImprovementPlan {
     private Integer point; //积分
     private Integer warmupComplete; //巩固练习完成数量
     private Integer applicationComplete; //应用练习完成数量
-    @Deprecated
     private Integer total; //任务总数
     @Deprecated
     private Integer keycnt; //钥匙数量

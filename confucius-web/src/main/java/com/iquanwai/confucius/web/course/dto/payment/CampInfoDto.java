@@ -3,7 +3,7 @@ package com.iquanwai.confucius.web.course.dto.payment;
 import lombok.Data;
 
 /**
- * 训练营售卖页的信息
+ * 专项课售卖页的信息
  * @author nethunder
  */
 @Data

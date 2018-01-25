@@ -19,11 +19,11 @@ public class MonthlyCampOrderDao extends DBUtil {
 
     public int insert(MonthlyCampOrder monthlyCampOrder) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO MonthlyCampOrder (OrderId, Openid, ProfileId, Month) " +
-                "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO MonthlyCampOrder (OrderId, ProfileId, Month) " +
+                "VALUES (?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
-                    monthlyCampOrder.getOrderId(), monthlyCampOrder.getOpenId(),
+                    monthlyCampOrder.getOrderId(),
                     monthlyCampOrder.getProfileId(), monthlyCampOrder.getMonth());
             return result.intValue();
         } catch (SQLException e) {

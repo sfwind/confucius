@@ -24,19 +24,14 @@ public interface PracticeService {
      * 点赞
      * @param type 1：小目标，2：体系化大作业
      * @param referencedId 被依赖的id
-     * @param openId 点赞的人
+     * @param profileId 点赞的人
      */
-    boolean vote(Integer type, Integer referencedId, Integer profileId, String openId);
-
-    /**
-     * 取消点赞
-     */
-    Pair<Integer, String> disVote(Integer type, Integer referencedId, String openId);
+    boolean vote(Integer type, Integer referencedId, Integer profileId);
 
     /**
      * 查询点赞记录
      */
-    HomeworkVote loadVoteRecord(Integer type, Integer referId, String openId);
+    HomeworkVote loadVoteRecord(Integer type, Integer referId, Integer profileId);
 
     /**
      * 查询评论
@@ -51,34 +46,13 @@ public interface PracticeService {
     /**
      * 评论
      */
-    Pair<Integer, String> comment(Integer type, Integer referId, String openId, Integer profileId, String content);
+    Pair<Integer, String> comment(Integer type, Integer referId, Integer profileId, String content);
 
     /**
      * 评论(replyId为该评论针对于哪条评论返回)
      */
-    Pair<Integer, String> replyComment(Integer type, Integer referId, String openId,
+    Pair<Integer, String> replyComment(Integer type, Integer referId,
                                        Integer profileId, String content, Integer replyId);
-
-    /**
-     * 增加浏览量
-     */
-    Integer riseArticleViewCount(Integer module, Integer id, Integer type);
-
-    List<SubjectArticle> loadSubjectArticles(Integer problemId, Page page);
-
-    List<SubjectArticle> loadUserSubjectArticles(Integer problemId, String openId);
-
-    List<ArticleLabel> loadArticleActiveLabels(Integer moduleId, Integer articleId);
-
-    SubjectArticle loadSubjectArticle(Integer submitId);
-
-    Integer submitSubjectArticle(SubjectArticle subjectArticle);
-
-    List<ArticleLabel> updateLabels(Integer module, Integer articleId, List<LabelConfig> labels);
-
-    List<LabelConfig> loadProblemLabels(Integer problemId);
-
-    void updatePicReference(List<String> picList, Integer submitId);
 
     /**
      * 根据应用id,获取练习训练
@@ -129,10 +103,6 @@ public interface PracticeService {
 
     Integer loadWarmupPracticeCntByPracticeUid(String practiceUid);
 
-    /**
-     * 根据 PracticeUid 删除 WarmupPractice
-     */
-    Integer delWarmupPracticeByPracticeUid(String practiceUid);
 
     void initCommentEvaluation(Integer submitId, Integer commentId);
 

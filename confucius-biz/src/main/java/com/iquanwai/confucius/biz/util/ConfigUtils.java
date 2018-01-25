@@ -135,7 +135,6 @@ public class ConfigUtils {
         return url;
     }
 
-
     public static String staticPcResourceUrl(String domainName) {
         String url = getValue("static.pc.resource.url");
         //测试环境防浏览器缓存，添加随机参数
@@ -156,6 +155,14 @@ public class ConfigUtils {
 
     public static String getDefaultOpenid() {
         return getValue("default.openid");
+    }
+
+    public static String getDefaultWeMiniOpenId() {
+        return getValue("default.weminiopenid");
+    }
+
+    public static String getDefaultUnionId() {
+        return getValue("default.unionid");
     }
 
     public static Integer getDefaultProfileId() {
@@ -358,6 +365,13 @@ public class ConfigUtils {
         return getValue("camp.pay.json.info");
     }
 
+    public static String getWeMiniAppId() {
+        return getValue("wemini.appid");
+    }
+
+    public static String getWeMiniAppSecret() {
+        return getValue("wemini.secrect");
+    }
 
     public static String getAlipayNotifyDomain() {
         return getValue("ali.pay.notify.domain");

@@ -11,7 +11,7 @@ import java.util.Date;
 public class QuanwaiOrder {
     private int id;
     private String orderId; //订单id
-    private String openid; //openid
+    private Integer profileId; //用户id
     private Double price;   //实际金额 总金额-折扣金额
     private Double discount; //折扣金额
     private String prepayId; //预支付交易会话标识
@@ -29,7 +29,7 @@ public class QuanwaiOrder {
 
     /** 商学院 */
     public static final String FRAG_MEMBER = "fragment_member";
-    /** 训练营 */
+    /** 专项课 */
     public static final String FRAG_CAMP = "fragment_camp";
     /** 商学院申请 */
     public static final String BS_APPLICATION = "bs_application";

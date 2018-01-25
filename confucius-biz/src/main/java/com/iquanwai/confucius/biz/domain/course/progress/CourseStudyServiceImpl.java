@@ -90,7 +90,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     @Override
-    public Page loadPage(String openid, Integer profileId, Integer chapterId, Integer pageSequence, Boolean lazyLoad) {
+    public Page loadPage(Integer profileId, Integer chapterId, Integer pageSequence, Boolean lazyLoad) {
         //首次学习
         if (pageSequence == null) {
             pageSequence = 1;
@@ -106,7 +106,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             page.setMaterialList(materialList);
             //记录到阅读到第几页
             if (!lazyLoad) {
-                markPage(openid, profileId, chapterId, pageSequence);
+                markPage(profileId, chapterId, pageSequence);
             }
         }
         return page;
@@ -156,7 +156,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     private String accountPlaceholder(String content, Integer profileId) {
         Profile account = accountService.getProfile(profileId);
         if (account == null) {
-            logger.error("openid {} is invalid", profileId);
+            logger.error("profileId {} is invalid", profileId);
             return content;
         }
 
@@ -282,7 +282,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             homework.setPcurl(shortUrl);
             HomeworkSubmit homeworkSubmit = new HomeworkSubmit();
             homeworkSubmit.setSubmitProfileId(profileId);
-            homeworkSubmit.setSubmitOpenid(classMember.getOpenId());
             homeworkSubmit.setClassId(classMember.getClassId());
             homeworkSubmit.setHomeworkId(homeworkId);
             homeworkSubmit.setSubmitUrl(url);
@@ -382,7 +381,7 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     @Override
-    public boolean submitQuestion(String openid, Integer profileId, Integer questionId, List<Integer> choiceList) {
+    public boolean submitQuestion(Integer profileId, Integer questionId, List<Integer> choiceList) {
         String answer = "";
         Question q = questionMap.get(questionId);
         if (q == null) {
@@ -411,7 +410,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             questionSubmit.setScore(score);
             questionSubmit.setQuestionId(questionId);
             questionSubmit.setSubmitAnswer(answer);
-            questionSubmit.setSubmitOpenid(openid);
             questionSubmit.setSubmitProfileId(profileId);
             questionSubmit.setIsRight(right ? 1 : 0);
             questionSubmitDao.insert(questionSubmit);
@@ -453,8 +451,8 @@ public class CourseStudyServiceImpl implements CourseStudyService {
     }
 
     @Override
-    public void markPage(String openid, Integer profileId, Integer chapterId, Integer pageSequence) {
-        currentChapterPageDao.updatePage(openid, profileId, chapterId, pageSequence);
+    public void markPage(Integer profileId, Integer chapterId, Integer pageSequence) {
+        currentChapterPageDao.updatePage(profileId, chapterId, pageSequence);
         //判断第一页
         if (pageSequence == 1) {
             progressChapter(profileId, chapterId);
@@ -536,27 +534,6 @@ public class CourseStudyServiceImpl implements CourseStudyService {
             return question.getPoint();
         }
         return 0;
-    }
-
-    @Override
-    public Chapter loadFirstChapter(Integer courseId) {
-        List<Chapter> chapters = chapterDao.loadChapters(courseId);
-        //初始化序号
-        int first = Integer.MAX_VALUE;
-        Chapter firstChapter = null;
-
-        for (Chapter chapter : chapters) {
-            if (chapter.getSequence() < first) {
-                first = chapter.getSequence();
-                firstChapter = chapter;
-            }
-        }
-        return firstChapter;
-    }
-
-    @Override
-    public void reloadQuestion() {
-        initQuestion();
     }
 
 }

@@ -27,13 +27,6 @@ public interface AssistantCoachService {
 
 
     /**
-     * 获取待评论的小课分享
-     * @param problemId 课程id
-     * */
-    List<RiseWorkInfoDto> getUnderCommentArticles(Integer problemId);
-
-
-    /**
      * 获取待评论的应用练习
      * @param problemId 课程id
      * */
@@ -53,11 +46,6 @@ public interface AssistantCoachService {
      * 获取待评论的应用练习数量
      * */
     Map<Integer, Integer> getUnderCommentApplicationCount();
-
-    /**
-     * 获取待评论的小课分享数量
-     * */
-    Map<Integer, Integer> getUnderCommentSubjectArticleCount();
 
     /**
      * 获取助教已评论的文章

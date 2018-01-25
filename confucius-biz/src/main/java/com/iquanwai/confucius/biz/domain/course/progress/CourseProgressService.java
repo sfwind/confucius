@@ -24,13 +24,6 @@ public interface CourseProgressService {
     List<ClassMember> loadActiveCourse(Integer profileId);
 
     /**
-     * 获取用户正在就读的所有班级信息
-     *
-     * @param openid 用户id
-     */
-    List<ClassMember> loadActiveCourse(String openid);
-
-    /**
      * 获取用户毕业的班级信息
      *
      * @param profileId 用户id

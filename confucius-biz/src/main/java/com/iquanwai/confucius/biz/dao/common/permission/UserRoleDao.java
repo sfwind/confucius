@@ -39,39 +39,6 @@ public class UserRoleDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public List<UserRole> getRoles(String openid) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
-        String sql = "SELECT * FROM UserRole where Openid=? and Del=0";
-        try {
-            return run.query(sql, h, openid);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return Lists.newArrayList();
-    }
-
-
-    /**
-     * 更新UserRole
-     *
-     * @param id
-     * @param roleId
-     * @param del
-     * @return
-     */
-    public Integer updateRole(Integer id, Integer roleId, boolean del) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update UserRole set roleId =?,del = ? where id = ?";
-        try {
-            return runner.update(sql, roleId, del, id);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return 0;
-    }
-
     /**
      * 获得所有的教练
      *
@@ -91,71 +58,74 @@ public class UserRoleDao extends DBUtil {
 
     /**
      * 修改教练状态
+     *
      * @param id
      * @param roleId
      * @return
      */
-    public Integer updateAssist(Integer id,Integer roleId){
+    public Integer updateAssist(Integer id, Integer roleId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update UserRole set RoleId = ? where id = ?";
         try {
-            return runner.update(sql,roleId,id);
+            return runner.update(sql, roleId, id);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return 0;
     }
 
     /**
      * 教练过期
+     *
      * @param id
      */
-    public Integer deleteAssist(Integer id){
+    public Integer deleteAssist(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update UserRole set Del = 1 where id = ?";
 
         try {
-          return  runner.update(sql,id);
+            return runner.update(sql, id);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
     }
 
     /**
      * 加载
+     *
      * @param profileId
      * @return
      */
-    public UserRole loadAssist(Integer profileId){
+    public UserRole loadAssist(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<UserRole> h = new BeanHandler<>(UserRole.class);
         String sql = " select * from UserRole where profileId = ? And RoleId in (3,4,11) And del = 0";
 
         try {
-           return runner.query(sql,h,profileId);
+            return runner.query(sql, h, profileId);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }
 
     /**
      * 添加教练
+     *
      * @param roleId
-     * @param openId
      * @param profileId
      * @return
      */
-    public Integer insertAssist(Integer roleId,String openId,Integer profileId){
+    public Integer insertAssist(Integer roleId, Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = " insert into UserRole(RoleId,OpenId,ProfileId) values(?,?,?)";
+        String sql = " insert into UserRole(RoleId,ProfileId) values(?,?)";
 
         try {
-          Long result = runner.insert(sql,new ScalarHandler<>(),roleId,openId,profileId);
-          return result.intValue();
+            Long result = runner.insert(sql, new ScalarHandler<>(), roleId, profileId);
+            return result.intValue();
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
     }

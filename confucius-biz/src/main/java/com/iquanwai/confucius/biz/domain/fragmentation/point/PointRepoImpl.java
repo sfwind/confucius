@@ -43,21 +43,21 @@ public class PointRepoImpl implements PointRepo {
     @Override
     public void risePoint(Integer planId, Integer increment) {
         ImprovementPlan improvementPlan = improvementPlanDao.load(ImprovementPlan.class, planId);
-        if(improvementPlan!=null){
-            improvementPlanDao.updatePoint(planId, improvementPlan.getPoint()+increment);
+        if (improvementPlan != null) {
+            improvementPlanDao.updatePoint(planId, improvementPlan.getPoint() + increment);
         }
     }
 
     @Override
-    public void riseCustomerPoint(String openId,Integer increment){
-        Profile profile = profileDao.queryByOpenId(openId);
-        if(profile!=null){
-            profileDao.updatePoint(openId,profile.getPoint() + increment);
+    public void riseCustomerPoint(Integer profileId, Integer increment) {
+        Profile profile = profileDao.load(Profile.class, profileId);
+        if (profile != null) {
+            profileDao.updatePoint(profileId, profile.getPoint() + increment);
         }
     }
 
     @Override
-    public void reloadScore(){
+    public void reloadScore() {
         score.clear();
         this.initPoint();
     }

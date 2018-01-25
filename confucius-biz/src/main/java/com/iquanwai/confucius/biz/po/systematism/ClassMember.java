@@ -11,7 +11,6 @@ import java.util.Date;
 public class ClassMember {
     private int id;
     private String memberId; // 学号
-    private String openId;  //openid
     private Integer profileId;  //用户id
     private Integer classId; //班级id
     private Integer courseId; //课程id

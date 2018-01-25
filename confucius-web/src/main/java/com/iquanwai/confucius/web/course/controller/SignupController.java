@@ -103,7 +103,7 @@ public class SignupController {
                 }
                 break;
             case QuanwaiOrder.FRAG_CAMP:
-                // 训练营购买
+                // 专项课购买
                 MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
                 if (campOrder == null) {
                     logger.error("{} 订单不存在", orderId);
@@ -113,7 +113,7 @@ public class SignupController {
                 }
                 break;
             case QuanwaiOrder.BS_APPLICATION:
-                // 训练营购买
+                // 商学院申请购买
                 BusinessSchoolApplicationOrder bsOrder = signupService.getBusinessSchoolOrder(orderId);
                 if (bsOrder == null) {
                     logger.error("{} 订单不存在", orderId);
@@ -388,9 +388,9 @@ public class SignupController {
         // 下单
         PaymentDto paymentParam;
         if (paymentDto.getPayType() == QuanwaiOrder.PAY_WECHAT) {
-            paymentParam = this.createPayParam(quanwaiOrder, remoteIp);
+            paymentParam = this.createPayParam(quanwaiOrder, remoteIp, loginUser.getOpenId());
         } else if (paymentDto.getPayType() == QuanwaiOrder.PAY_ALI) {
-            paymentParam = this.createAlipay(quanwaiOrder);
+            paymentParam = this.createAlipay(quanwaiOrder, loginUser.getOpenId());
         } else {
             return WebUtils.error("支付方式异常");
         }
@@ -468,16 +468,16 @@ public class SignupController {
      * 2. 这个参数只能在后端生成，然后作为参数返回给前端，前端拿到了参数直接调用。
      * 3. 备注：调用微信支付之后，微信的回调 URI 也是在这边配置
      */
-    private PaymentDto createPayParam(QuanwaiOrder quanwaiOrder, String remoteIp) {
+    private PaymentDto createPayParam(QuanwaiOrder quanwaiOrder, String remoteIp, String openid) {
         // 下单
         PaymentDto paymentDto = new PaymentDto();
         paymentDto.setFee(quanwaiOrder.getPrice());
         paymentDto.setFree(Double.valueOf(0d).equals(quanwaiOrder.getPrice()));
         paymentDto.setProductId(quanwaiOrder.getOrderId());
         if (!Double.valueOf(0).equals(quanwaiOrder.getPrice())) {
-            Map<String, String> signParams = payService.buildH5PayParam(quanwaiOrder.getOrderId(), remoteIp, quanwaiOrder.getOpenid());
+            Map<String, String> signParams = payService.buildH5PayParam(quanwaiOrder.getOrderId(), remoteIp, openid);
             paymentDto.setSignParams(signParams);
-            OperationLog payParamLog = OperationLog.create().openid(quanwaiOrder.getOpenid())
+            OperationLog payParamLog = OperationLog.create().openid(openid)
                     .module("报名")
                     .function("微信支付")
                     .action("下单")
@@ -493,7 +493,7 @@ public class SignupController {
      * @param quanwaiOrder 订单对象
      * @return 支付参数
      */
-    private PaymentDto createAlipay(QuanwaiOrder quanwaiOrder) {
+    private PaymentDto createAlipay(QuanwaiOrder quanwaiOrder, String openid) {
         // 下单
         PaymentDto paymentDto = new PaymentDto();
         paymentDto.setFee(quanwaiOrder.getPrice());
@@ -504,7 +504,7 @@ public class SignupController {
             Map<String, String> signParams = Maps.newHashMap();
             signParams.put("alipayUrl", postPayString);
             paymentDto.setSignParams(signParams);
-            OperationLog payParamLog = OperationLog.create().openid(quanwaiOrder.getOpenid())
+            OperationLog payParamLog = OperationLog.create().openid(openid)
                     .module("报名")
                     .function("支付宝支付")
                     .action("下单")
@@ -621,7 +621,7 @@ public class SignupController {
 
     @RequestMapping(value = "/guest/camp/sell/info", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> getCampSellInfo() {
-        logger.info("查询训练营售卖也信息");
+        logger.info("查询专项课售卖页信息");
         String json = ConfigUtils.getCampPayInfo();
         if (json == null) {
             return WebUtils.error("配置异常");
