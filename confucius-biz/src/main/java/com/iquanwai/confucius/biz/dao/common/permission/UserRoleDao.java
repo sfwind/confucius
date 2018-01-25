@@ -47,7 +47,7 @@ public class UserRoleDao extends DBUtil {
     public List<UserRole> loadAssists() {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
-        String sql = " select * from UserRole where roleId in (3,4,11) and Del = 0 ";
+        String sql = " select * from UserRole where roleId in (3,11,12,13,14,15,16,17) and Del = 0 ";
         try {
             return runner.query(sql, h);
         } catch (SQLException e) {
