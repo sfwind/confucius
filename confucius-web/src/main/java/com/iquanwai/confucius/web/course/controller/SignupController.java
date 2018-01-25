@@ -103,7 +103,7 @@ public class SignupController {
                 }
                 break;
             case QuanwaiOrder.FRAG_CAMP:
-                // 训练营购买
+                // 专项课购买
                 MonthlyCampOrder campOrder = signupService.getMonthlyCampOrder(orderId);
                 if (campOrder == null) {
                     logger.error("{} 订单不存在", orderId);
@@ -113,7 +113,7 @@ public class SignupController {
                 }
                 break;
             case QuanwaiOrder.BS_APPLICATION:
-                // 训练营购买
+                // 商学院申请购买
                 BusinessSchoolApplicationOrder bsOrder = signupService.getBusinessSchoolOrder(orderId);
                 if (bsOrder == null) {
                     logger.error("{} 订单不存在", orderId);
@@ -621,7 +621,7 @@ public class SignupController {
 
     @RequestMapping(value = "/guest/camp/sell/info", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> getCampSellInfo() {
-        logger.info("查询训练营售卖也信息");
+        logger.info("查询专项课售卖页信息");
         String json = ConfigUtils.getCampPayInfo();
         if (json == null) {
             return WebUtils.error("配置异常");

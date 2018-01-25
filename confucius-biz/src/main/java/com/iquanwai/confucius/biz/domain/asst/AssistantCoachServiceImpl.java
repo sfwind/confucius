@@ -15,6 +15,7 @@ import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -267,6 +268,41 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         Map<Integer, Integer> countMap = Maps.newHashMap();
         underCommentCounts.forEach(underCommentCount -> countMap.put(underCommentCount.getProblemId(), underCommentCount.getCount()));
         return countMap;
+    }
+
+    @Override
+    public List<RiseWorkInfoDto> getCommentedSubmit(Integer profileId) {
+        List<RiseWorkInfoDto> riseWorkInfoDtos = Lists.newArrayList();
+        List<Comment> comments = commentDao.loadCommentsByProfileId(profileId);
+
+        List<Integer> applicationSubmitIdsList = Lists.newArrayList();
+
+        comments.forEach(comment -> {
+            if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
+                applicationSubmitIdsList.add(comment.getReferencedId());
+            }
+        });
+
+        List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.loadSubmits(applicationSubmitIdsList);
+
+        //按照评论顺序,组装RiseWorkInfoDto
+        comments.forEach(comment -> {
+            if (comment.getModuleId().equals(Constants.CommentModule.APPLICATION)) {
+                for (ApplicationSubmit applicationSubmit : applicationSubmitList) {
+                    if (applicationSubmit.getId() == comment.getReferencedId()) {
+                        RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(applicationSubmit);
+                        riseWorkInfoDtos.add(riseWorkInfoDto);
+                        break;
+                    }
+                }
+            }
+        });
+
+        //过滤重复的文章
+        Map<String, RiseWorkInfoDto> filterMap = Maps.newLinkedHashMap();
+        riseWorkInfoDtos.forEach(riseWorkInfoDto -> filterMap.putIfAbsent(riseWorkInfoDto.getSubmitId().toString() + "-" + riseWorkInfoDto.getType().toString(), riseWorkInfoDto));
+
+        return Lists.newArrayList(filterMap.values());
     }
 
     private RiseWorkInfoDto buildApplicationSubmit(ApplicationSubmit applicationSubmit) {

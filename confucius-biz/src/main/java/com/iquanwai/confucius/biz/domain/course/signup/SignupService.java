@@ -34,12 +34,12 @@ public interface SignupService {
     QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
 
     /**
-     * 报名训练营, 不生成预付订单
+     * 报名专项课, 不生成预付订单
      */
     QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType);
 
     /**
-     * 报名训练营, 不生成预付订单
+     * 报名专项课, 不生成预付订单
      */
     QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
 
@@ -51,7 +51,7 @@ public interface SignupService {
     QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
-     * 购买完训练营后续操作
+     * 购买完专项课后续操作
      * 1、更新 Profile RiseMember 值
      * 2、RiseMemberClass 新增数据记录
      * 3、更新 RiseMember 表旧数据为过期状态，并新增一条当前购买类型数据记录
@@ -62,12 +62,12 @@ public interface SignupService {
     void payMonthlyCampSuccess(String orderId);
 
     /**
-     * 后台解锁训练营
+     * 后台解锁专项课
      */
     void unlockMonthlyCamp(Integer profileId);
 
     /**
-     * 获取训练营订单
+     * 获取专项课订单
      */
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
@@ -134,7 +134,7 @@ public interface SignupService {
     RiseMember currentRiseMember(Integer profileId);
 
     /**
-     * 当月训练营
+     * 当月专项课
      */
     Integer loadCurrentCampMonth(MonthlyCampConfig monthlyCampConfig);
 
@@ -158,7 +158,7 @@ public interface SignupService {
     RiseMember getCurrentRiseMemberStatus(Integer profileId);
 
     /**
-     * 获取当前训练营信息
+     * 获取当前专项课信息
      */
     RiseMember getCurrentMonthlyCampStatus(Integer profileId);
 

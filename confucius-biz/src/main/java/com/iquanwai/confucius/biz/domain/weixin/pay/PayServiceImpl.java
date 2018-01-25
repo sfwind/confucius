@@ -190,10 +190,10 @@ public class PayServiceImpl implements PayService {
             // 商品是rise会员
             signupService.payRiseSuccess(quanwaiOrder.getOrderId());
         } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
-            // 购买训练营
+            // 购买商学院申请
             signupService.payApplicationSuccess(orderId);
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
-            // 购买训练营
+            // 购买专项课
             signupService.payMonthlyCampSuccess(orderId);
         }
         refreshStatus(quanwaiOrder, orderId);
