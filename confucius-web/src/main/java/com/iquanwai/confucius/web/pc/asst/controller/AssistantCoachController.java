@@ -134,6 +134,20 @@ public class AssistantCoachController {
         return WebUtils.result(result);
     }
 
+    @RequestMapping("/commented/submit")
+    public ResponseEntity<Map<String, Object>> getCommentedSubmit(PCLoginUser pcLoginUser) {
+        Assert.notNull(pcLoginUser, "用户不能为空");
+        List<RiseWorkInfoDto> riseWorkInfoDtos = assistantCoachService.getCommentedSubmit(pcLoginUser.getProfileId());
+
+        OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
+                .module("助教后台")
+                .function("评论")
+                .action("获取已评论文章");
+        operationLogService.log(operationLog);
+
+        return WebUtils.result(riseWorkInfoDtos);
+    }
+
     @RequestMapping("/hot/warmup")
     public ResponseEntity<Map<String, Object>> getHotPracticeDiscuss(PCLoginUser loginUser, @ModelAttribute Page page) {
         //每页50道题目

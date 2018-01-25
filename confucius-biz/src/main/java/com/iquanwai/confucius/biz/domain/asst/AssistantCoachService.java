@@ -46,6 +46,12 @@ public interface AssistantCoachService {
      * */
     Map<Integer, Integer> getUnderCommentApplicationCount();
 
+    /**
+     * 获取助教已评论的文章
+     * @param profileId 助教id
+     * */
+    List<RiseWorkInfoDto> getCommentedSubmit(Integer profileId);
+
 
     /**
      * 获取RiseClassMember中的ClassName和GroupId
