@@ -311,6 +311,8 @@ public class SignupController {
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
             goodsInfoDto.setFee(bs.getFee());
             goodsInfoDto.setInitPrice(bs.getFee());
+        } else if (QuanwaiOrder.FRAG_CAMP.equals(goodsInfoDto.getGoodsType())) {
+            goodsInfoDto.setInitPrice(498D);
         }
 
         // 获取优惠券
