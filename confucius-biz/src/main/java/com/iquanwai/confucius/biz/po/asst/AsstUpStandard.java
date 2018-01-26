@@ -31,6 +31,7 @@ public class AsstUpStandard {
      * 累计学习小课数量
      */
     private Integer learnedProblem;
+
     /**
      * 最低需要满足的点评数
      */

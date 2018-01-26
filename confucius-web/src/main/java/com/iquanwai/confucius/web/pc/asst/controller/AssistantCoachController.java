@@ -322,7 +322,7 @@ public class AssistantCoachController {
         upGradeDto.setStartDate(asstUpExecution.getStartDate());
         upGradeDto.setCountDown(countDown);
         upGradeDto.setRemainDay(getRemain(interval,countDown));
-        //统计已经完成的课程数
+        //TODO:计算已经完成的应用题完成度在60%以上的小课数量
         Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime()!=null).count();
         Integer finish = result.intValue();
         Integer total = asstUpStandard.getLearnedProblem();
