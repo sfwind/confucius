@@ -35,7 +35,7 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
 
     @Override
     public MemberType memberType(Integer memberTypeId) {
-        return memberTypes.get(memberTypeId)==null?null:memberTypes.get(memberTypeId).copy();
+        return memberTypes.get(memberTypeId)==null?null: memberTypes.get(memberTypeId).copy();
     }
 
     @Override
