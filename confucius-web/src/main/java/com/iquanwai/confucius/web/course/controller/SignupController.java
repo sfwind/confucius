@@ -297,22 +297,19 @@ public class SignupController {
                 .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
                 .findFirst().orElse(null);
         if (memberType != null) {
+            goodsInfoDto.setInitPrice(memberType.getInitPrice());
             goodsInfoDto.setFee(memberType.getFee());
             // 申请付费不填写时间
             if (!QuanwaiOrder.BS_APPLICATION.equals(goodsInfoDto.getGoodsType())) {
                 goodsInfoDto.setStartTime(memberType.getStartTime());
                 goodsInfoDto.setEndTime(memberType.getEndTime());
             }
-            goodsInfoDto.setInitPrice(memberType.getFee());
             goodsInfoDto.setName(memberType.getName());
         }
 
         BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
         if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
             goodsInfoDto.setFee(bs.getFee());
-            goodsInfoDto.setInitPrice(bs.getFee());
-        } else if (QuanwaiOrder.FRAG_CAMP.equals(goodsInfoDto.getGoodsType())) {
-            goodsInfoDto.setInitPrice(498D);
         }
 
         // 获取优惠券
