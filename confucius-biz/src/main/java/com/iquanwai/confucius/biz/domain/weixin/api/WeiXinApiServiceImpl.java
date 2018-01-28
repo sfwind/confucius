@@ -23,6 +23,8 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
     @Autowired
     private RestfulHelper restfulHelper;
 
+    /** 获取应用级 accessToken url */
+    String APP_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}";
     /** 引导用户授权，在回调接口中返回 code 值 */
     String OAUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_url}&response_type=code&scope=snsapi_userinfo&state={state}#wechat_redirect";
     /** 获取当前用户的 accessToken */
@@ -48,6 +50,23 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
 
     private static final String IP_REGEX = "(\\d*\\.){3}\\d*";
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+
+    /**
+     * @return 应用级别的 accessToken
+     */
+    @Override
+    public String getAppAccessToken() {
+        Map<String, String> params = Maps.newHashMap();
+        params.put("appid", ConfigUtils.getAppid());
+        params.put("secret", ConfigUtils.getSecret());
+        String requestUrl = CommonUtils.placeholderReplace(APP_ACCESS_TOKEN_URL, params);
+        String body = restfulHelper.get(requestUrl);
+        Map<String, Object> accessTokenObject = CommonUtils.jsonToMap(body);
+        String accessToken = accessTokenObject.get("access_token").toString();
+        logger.info("最新请求 accessToken 为：{}", accessToken);
+        return accessToken;
+    }
 
     /**
      * 手机访问，组装授权请求

@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
-import com.iquanwai.confucius.biz.exception.WeixinException;
+import com.iquanwai.confucius.biz.exception.WeiXinException;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.wltea.analyzer.IKSegmentation;
@@ -62,7 +62,7 @@ public class CommonUtils {
         return json;
     }
 
-    public static boolean isError(String json) throws WeixinException {
+    public static boolean isError(String json) throws WeiXinException {
         if (StringUtils.isEmpty(json)) {
             return false;
         }
@@ -75,10 +75,10 @@ public class CommonUtils {
                 errcode = Integer.valueOf((String) gsonMap.get("errcode"));
             }
             if (errcode.equals(ErrorConstants.ACCESS_TOKEN_EXPIRED)) {
-                throw new WeixinException(ErrorConstants.ACCESS_TOKEN_EXPIRED, "accessToken过期了");
+                throw new WeiXinException(ErrorConstants.ACCESS_TOKEN_EXPIRED, "accessToken过期了");
             }
             if (errcode.equals(ErrorConstants.ACCESS_TOKEN_INVALID)) {
-                throw new WeixinException(ErrorConstants.ACCESS_TOKEN_INVALID, "accessToken失效了");
+                throw new WeiXinException(ErrorConstants.ACCESS_TOKEN_INVALID, "accessToken失效了");
             }
 
             return errcode != 0;

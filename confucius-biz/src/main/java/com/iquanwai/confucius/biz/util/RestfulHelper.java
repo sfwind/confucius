@@ -3,7 +3,7 @@ package com.iquanwai.confucius.biz.util;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
-import com.iquanwai.confucius.biz.exception.WeixinException;
+import com.iquanwai.confucius.biz.exception.WeiXinException;
 import com.rabbitmq.client.TrustEverythingTrustManager;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -69,11 +69,7 @@ public class RestfulHelper {
         if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(json)) {
             String accessToken = accessTokenService.getAccessToken();
             String url = requestUrl.replace("{access_token}", accessToken);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(JSON, json))
-                    .build();
-
+            Request request = new Request.Builder().url(url).post(RequestBody.create(JSON, json)).build();
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
@@ -81,7 +77,7 @@ public class RestfulHelper {
                     if (CommonUtils.isError(body)) {
                         logger.error("execute {} return error, error message is {}", url, body);
                     }
-                } catch (WeixinException e) {
+                } catch (WeiXinException e) {
                     //refresh token and try again
                     accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
@@ -112,11 +108,7 @@ public class RestfulHelper {
     public String postXML(String requestUrl, String xml) {
         logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);
         if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
-            Request request = new Request.Builder()
-                    .url(requestUrl)
-                    .post(RequestBody.create(XML, xml))
-                    .build();
-
+            Request request = new Request.Builder().url(requestUrl).post(RequestBody.create(XML, xml)).build();
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
@@ -140,10 +132,7 @@ public class RestfulHelper {
             String accessToken = accessTokenService.getAccessToken();
             logger.info("accesstoken is :{}", accessToken);
             String url = requestUrl.replace("{access_token}", accessToken);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-
+            Request request = new Request.Builder().url(url).build();
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
@@ -151,13 +140,11 @@ public class RestfulHelper {
                     if (CommonUtils.isError(body)) {
                         logger.error("execute {} return error, error message is {}", url, body);
                     }
-                } catch (WeixinException e) {
+                } catch (WeiXinException e) {
                     //refresh token and try again
                     accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
-                    request = new Request.Builder()
-                            .url(url)
-                            .build();
+                    request = new Request.Builder().url(url).build();
                     response = client.newCall(request).execute();
                     body = response.body().string();
                     if (CommonUtils.isError(body)) {
@@ -190,11 +177,7 @@ public class RestfulHelper {
     public String sslPostXml(String requestUrl, String xml) {
         logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);
         if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
-            Request request = new Request.Builder()
-                    .url(requestUrl)
-                    .post(RequestBody.create(XML, xml))
-                    .build();
-
+            Request request = new Request.Builder().url(requestUrl).post(RequestBody.create(XML, xml)).build();
             try {
                 Response response = sslClient.newCall(request).execute();
                 String body = response.body().string();
@@ -238,7 +221,6 @@ public class RestfulHelper {
         builder.addPart(Headers.of("Content-Disposition", "form-data;name=\"media\"; filename=\"" + multipartFile.getOriginalFilename() + "\"\n"), RequestBody.create(MediaType.parse("image/png"), fileBytes)).build();
 
         RequestBody body = builder.build();
-
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
@@ -250,7 +232,6 @@ public class RestfulHelper {
         }
         return null;
     }
-
 
     private void initCert() throws Exception {
         // 证书密码，默认为商户ID
@@ -274,6 +255,5 @@ public class RestfulHelper {
         // 设置httpclient的SSLSocketFactory
         sslClient = new OkHttpClient.Builder().sslSocketFactory(sslSocketFactory,
                 new TrustEverythingTrustManager()).build();
-
     }
 }

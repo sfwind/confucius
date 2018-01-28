@@ -7,7 +7,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.exception.WeixinException;
+import com.iquanwai.confucius.biz.exception.WeiXinException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.SubscribeRouterConfig;
@@ -90,8 +90,8 @@ public class IndexController {
                 logger.info("redirect :{}", url);
                 response.sendRedirect(url);
             }
-        } catch (WeixinException e) {
-            // ignore WeixinException
+        } catch (WeiXinException e) {
+            // ignore WeiXinException
             logger.error("微信 Exception");
         }
     }
@@ -135,7 +135,7 @@ public class IndexController {
             } catch (Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
-            throw new WeixinException(ErrorConstants.ACCESS_TOKEN_INVALID, "cookie无效");
+            throw new WeiXinException(ErrorConstants.ACCESS_TOKEN_INVALID, "cookie无效");
         }
 
         Account account = null;
