@@ -51,7 +51,6 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
     private static final String IP_REGEX = "(\\d*\\.){3}\\d*";
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-
     /**
      * @return 应用级别的 accessToken
      */
@@ -133,6 +132,36 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             userAccessTokenObject.setRefreshToken(refreshToken);
             userAccessTokenObject.setOpenId(openId);
             return userAccessTokenObject;
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取小程序根据 code 交换回来的 accessToken 对象
+     * @param jsCode 小程序授权之后返回的 jsCode
+     */
+    @Override
+    public WeiXinResult.MiniUserAccessTokenObject exchangeWeMiniUserAccessTokenByCode(String jsCode) {
+        Map<String, String> params = Maps.newHashMap();
+        params.put("appid", ConfigUtils.getAppid());
+        params.put("secret", ConfigUtils.getSecret());
+        params.put("jscode", jsCode);
+        String requestUrl = CommonUtils.placeholderReplace(WE_MINI_ACCESS_TOKEN_URL, params);
+        String body = restfulHelper.get(requestUrl);
+
+        WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject = new WeiXinResult.MiniUserAccessTokenObject();
+        try {
+            Map<String, Object> result = CommonUtils.jsonToMap(body);
+            String openId = result.get("openid").toString();
+            String accessToken = result.get("session_key").toString();
+            String unionId = result.get("unionid").toString();
+
+            miniUserAccessTokenObject.setOpenId(openId);
+            miniUserAccessTokenObject.setAccessToken(accessToken);
+            miniUserAccessTokenObject.setUnionId(unionId);
+            return miniUserAccessTokenObject;
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
             return null;

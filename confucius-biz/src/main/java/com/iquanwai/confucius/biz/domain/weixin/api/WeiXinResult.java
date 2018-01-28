@@ -32,4 +32,14 @@ public class WeiXinResult {
         private String unionId;
     }
 
+    /**
+     * 微信小程序通过 code 换取的 accessToken 对象
+     */
+    @Data
+    public static class MiniUserAccessTokenObject {
+        private String openId;
+        private String accessToken;
+        private String unionId;
+    }
+
 }

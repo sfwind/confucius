@@ -91,6 +91,10 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
+    public Callback supplementMiniCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject) {
+
+    }
+
     /**
      * 获取用户信息之后，将用户信息的 unionId 完善到 callback 中
      * @param state 随机数

@@ -14,5 +14,7 @@ public interface WeiXinApiService {
 
     Map<String, String> generateJsOAuthParam(String state, String codeCallbackUrl);
 
+    WeiXinResult.MiniUserAccessTokenObject exchangeWeMiniUserAccessTokenByCode(String jsCode);
+
     WeiXinResult.UserInfoObject getWeiXinUserInfo(String openId, String accessToken);
 }

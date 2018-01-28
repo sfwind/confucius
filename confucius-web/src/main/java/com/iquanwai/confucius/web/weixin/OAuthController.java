@@ -182,6 +182,11 @@ public class OAuthController {
     @RequestMapping("/mini/code")
     public ResponseEntity<Map<String, Object>> oauthWeMiniCode(@RequestParam(value = "code") String code) {
         try {
+            WeiXinResult.UserAccessTokenObject userAccessTokenObject = weiXinApiService.exchangeUserAccessTokenByCode(code);
+
+            String state = CommonUtils.randomString(32);
+            Callback callback = oAuthService.supplementPcCallback()
+
             Callback callback = oAuthService.weMiniAccessToken(code);
             Profile profile = accountService.getProfileByUnionId(callback.getUnionId());
             Assert.notNull(callback, "callback 数据不能为空");
