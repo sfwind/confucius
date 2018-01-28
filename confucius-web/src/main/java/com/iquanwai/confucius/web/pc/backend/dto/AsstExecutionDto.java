@@ -88,4 +88,6 @@ public class AsstExecutionDto {
     private Integer companyTrainNumber;
 
     private BigDecimal companyTrainScore;
+
+    private Integer upGrade;
 }

@@ -40,18 +40,9 @@ public class UpGradeDto {
      */
     private Integer remainProblem;
     /**
-     * 需要完成的点评数
-     */
-    private Integer needReviewedNumber;
-    /**
      * 已经完成的点评数
      */
     private Integer reviewedNumber;
-
-    /**
-     * 还需要的点评数
-     */
-    private Integer remainReviewNumber;
 
     /**
      * 需要完成的求点评数
@@ -66,6 +57,16 @@ public class UpGradeDto {
      * 剩余的求点评数
       */
     private Integer remainRequestReviewNumber;
+
+    /**
+     * 需要的有效点评数
+     */
+    private Integer needValidReviewNumber;
+
+    /**
+     * 有效的点评数
+     */
+    private Integer validReviewNumber;
 
     /**
      * 需要的点评率
@@ -241,5 +242,10 @@ public class UpGradeDto {
     /**
      * 企业培训的分数
      */
-    private BigDecimal companyScore;
+    private BigDecimal companyTrainScore;
+
+    /**
+     * 认证状态
+     */
+    private Integer upGrade;
 }

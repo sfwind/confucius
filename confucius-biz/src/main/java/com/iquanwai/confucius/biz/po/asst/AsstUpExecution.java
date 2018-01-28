@@ -23,7 +23,7 @@ public class AsstUpExecution {
      */
     private Date startDate;
     /**
-     * 最低需要满足的点评数
+     * 点评数
      */
     private Integer reviewNumber;
     /**
@@ -100,8 +100,16 @@ public class AsstUpExecution {
      * 企业培训评分
      */
     private BigDecimal companyTrainScore;
+
+    /**
+     * 升级认证（0-未认证，1-已通过 ，2-未通过）
+     */
+    private Integer upGrade;
     /**
      * 是否删除 0-未删除 1-已删除
      */
     private Integer del;
+
+
+
 }

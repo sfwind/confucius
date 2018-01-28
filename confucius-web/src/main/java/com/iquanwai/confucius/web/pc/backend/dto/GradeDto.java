@@ -41,18 +41,9 @@ public class GradeDto {
      */
     private Integer remainProblem;
     /**
-     * 需要完成的点评数
-     */
-    private Integer needReviewedNumber;
-    /**
      * 已经完成的点评数
      */
     private Integer reviewedNumber;
-
-    /**
-     * 还需要的点评数
-     */
-    private Integer remainReviewNumber;
 
     /**
      * 需要完成的求点评数
@@ -67,6 +58,17 @@ public class GradeDto {
      * 剩余的求点评数
      */
     private Integer remainRequestReviewNumber;
+
+
+    /**
+     * 需要完成的有效点评数
+     */
+    private Integer needValidReviewNumber;
+
+    /**
+     * 完成的有效点评数
+     */
+    private Integer validReviewNumber;
 
 
     /**
@@ -244,5 +246,8 @@ public class GradeDto {
     /**
      * 企业培训的分数
      */
-    private BigDecimal companyScore;
+    private BigDecimal companyTrainScore;
+
+    private Integer upGrade;
+
 }

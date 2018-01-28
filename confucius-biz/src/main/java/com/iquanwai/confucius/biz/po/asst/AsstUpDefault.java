@@ -31,14 +31,14 @@ public class AsstUpDefault {
     private Integer applicationRate;
 
     /**
-    * 最低需要满足的点评数
-    */
-    private Integer reviewNumber;
-
-    /**
      * 求点评的回答数
      */
     private Integer RequestReviewNumber;
+
+    /**
+     * 最低需要满足的有效点评的数量
+     */
+    private Integer validReviewNumber;
 
     /**
     * 有效的点评所占的比例（百分之）

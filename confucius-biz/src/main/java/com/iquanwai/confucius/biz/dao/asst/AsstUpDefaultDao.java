@@ -36,14 +36,14 @@ public class AsstUpDefaultDao  extends DBUtil{
 
     public Integer update(AsstUpDefault asstUpDefault){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = " Update AsstUpDefault set CountDown = ?,LearnedProblem = ?,ApplicationRate,ReviewNumber = ?,RequestReviewNumber = ?," +
+        String sql = " Update AsstUpDefault set CountDown = ?,LearnedProblem = ?,ApplicationRate = ?,RequestReviewNumber = ?,ValidReviewNumber = ?," +
                 "ValidReviewRate = ?, HighQualityAnswer = ?,HostNumber = ?,HostScore = ?,MainPointNumber = ?," +
                 "MainPointScore = ?,OnlineAnswer = ?,Swing = ?,OnlineOrSwingNumber = ?,OnlineScore=?," +
                 "CampNumber =?,AsstNumber =?,CampScore =?,MonthlyWork=?,FosterNew=?,CompanyTrainNumber=?," +
-                "CompanyTrainScore where id = ?";
+                "CompanyTrainScore = ? where id = ?";
         try {
-           return runner.update(sql,asstUpDefault.getCountDown(),asstUpDefault.getLearnedProblem(),asstUpDefault.getApplicationRate(),asstUpDefault.getReviewNumber(),
-                    asstUpDefault.getRequestReviewNumber(),asstUpDefault.getValidReviewRate(),asstUpDefault.getHighQualityAnswer(),
+           return runner.update(sql,asstUpDefault.getCountDown(),asstUpDefault.getLearnedProblem(),asstUpDefault.getApplicationRate(),
+                    asstUpDefault.getRequestReviewNumber(),asstUpDefault.getValidReviewNumber(),asstUpDefault.getValidReviewRate(),asstUpDefault.getHighQualityAnswer(),
                     asstUpDefault.getHostNumber(),asstUpDefault.getHostScore(),asstUpDefault.getMainPointNumber(),
                     asstUpDefault.getMainPointScore(),asstUpDefault.getOnlineAnswer(),asstUpDefault.getSwing(),
                     asstUpDefault.getOnlineOrSwingNumber(),asstUpDefault.getOnlineScore(),asstUpDefault.getCampNumber(),

@@ -29,15 +29,17 @@ public class AsstStandardDto {
      * 累计学习小课数量
      */
     private Integer learnedProblem;
-    /**
-     * 最低需要满足的点评数
-     */
-    private Integer reviewNumber;
 
+    private Integer applicationRate;
     /**
      * 求点评的回答数
      */
     private Integer requestReviewNumber;
+
+    /**
+     * 有效的点评数
+     */
+    private Integer validReviewNumber;
     /**
      * 有效的点评所占的比例（百分之）
      */
@@ -107,6 +109,7 @@ public class AsstStandardDto {
      * 企业培训评分
      */
     private BigDecimal companyTrainScore;
+
     /**
      * 是否删除 0-未删除 1-已删除
      */

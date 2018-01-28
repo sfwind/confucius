@@ -36,15 +36,16 @@ public class AsstUpStandard {
      * 应用题比例
      */
     private Integer applicationRate;
-    /**
-     * 最低需要满足的点评数
-     */
-    private Integer reviewNumber;
 
     /**
      * 求点评的回答数
      */
     private Integer requestReviewNumber;
+
+    /**
+     * 有效的点评数
+     */
+    private Integer validReviewNumber;
     /**
      * 有效的点评所占的比例（百分之）
      */
@@ -114,6 +115,7 @@ public class AsstUpStandard {
      * 企业培训评分
      */
     private BigDecimal companyTrainScore;
+
     /**
      * 是否删除 0-未删除 1-已删除
      */

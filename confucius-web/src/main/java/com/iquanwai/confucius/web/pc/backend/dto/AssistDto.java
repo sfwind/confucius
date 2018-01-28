@@ -11,4 +11,5 @@ public class AssistDto {
     private String nickName;
     private String headImageUrl;
     private String  reached;
+    private String verified;
 }

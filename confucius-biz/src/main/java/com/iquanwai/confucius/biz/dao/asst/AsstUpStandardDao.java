@@ -38,15 +38,15 @@ public class AsstUpStandardDao extends DBUtil {
     public Integer insert(AsstUpStandard asstUpStandard) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO AsstUpStandard(ProfileId,RoleId,CountDown,LearnedProblem," +
-                "ApplicationRate,ReviewNumber,RequestReviewNumber,ValidReviewRate,HighQualityAnswer,HostNumber,HostScore," +
+                "ApplicationRate,RequestReviewNumber,ValidReviewNumber,ValidReviewRate,HighQualityAnswer,HostNumber,HostScore," +
                 "MainPointNumber,MainPointScore,OnlineAnswer,Swing,OnlineOrSwingNumber," +
                 "OnlineScore,CampNumber,AsstNumber,CampScore,MonthlyWork,FosterNew," +
                 "CompanyTrainNumber,CompanyTrainScore) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), asstUpStandard.getProfileId(), asstUpStandard.getRoleId(),
-                    asstUpStandard.getCountDown(), asstUpStandard.getLearnedProblem(),asstUpStandard.getApplicationRate(),
-                    asstUpStandard.getReviewNumber(), asstUpStandard.getRequestReviewNumber(), asstUpStandard.getValidReviewRate(), asstUpStandard.getHighQualityAnswer(), asstUpStandard.getHostNumber(),
+                    asstUpStandard.getCountDown(), asstUpStandard.getLearnedProblem(), asstUpStandard.getApplicationRate(),
+                    asstUpStandard.getRequestReviewNumber(), asstUpStandard.getValidReviewNumber(), asstUpStandard.getValidReviewRate(), asstUpStandard.getHighQualityAnswer(), asstUpStandard.getHostNumber(),
                     asstUpStandard.getHostScore(), asstUpStandard.getMainPointNumber(), asstUpStandard.getMainPointScore(),
                     asstUpStandard.getOnlineAnswer(), asstUpStandard.getSwing(), asstUpStandard.getOnlineOrSwingNumber(),
                     asstUpStandard.getOnlineScore(), asstUpStandard.getCampNumber(), asstUpStandard.getAsstNumber(),
@@ -61,21 +61,21 @@ public class AsstUpStandardDao extends DBUtil {
 
     public Integer update(AsstUpStandard asstUpStandard) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update AsstUpStandard SET CountDown = ?,LearnedProblem = ?,ApplicationRate = ?,ReviewNumber = ?," +
-                "RequestReviewNumber=?,ValidReviewRate=?,HighQualityAnswer=?,HostNumber =?," +
+        String sql = "Update AsstUpStandard SET CountDown = ?,LearnedProblem = ?,ApplicationRate = ?," +
+                "RequestReviewNumber=?,ValidReviewNumber=?,ValidReviewRate=?,HighQualityAnswer=?,HostNumber =?," +
                 "HostScore = ?,MainPointNumber =?,MainPointScore=?,OnlineAnswer=?,Swing = ?," +
                 "OnlineOrSwingNumber = ?,OnlineScore=?,CampNumber=?,AsstNumber=?,CampScore=?," +
                 "MonthlyWork = ?,FosterNew=?,CompanyTrainNumber=?,CompanyTrainScore = ? where id = ?";
         try {
-           return runner.update(sql,asstUpStandard.getCountDown(), asstUpStandard.getLearnedProblem(), asstUpStandard.getApplicationRate(),
-                   asstUpStandard.getReviewNumber(), asstUpStandard.getRequestReviewNumber(), asstUpStandard.getValidReviewRate(), asstUpStandard.getHighQualityAnswer(),
-                    asstUpStandard.getHostNumber(), asstUpStandard.getHostScore(), asstUpStandard.getMainPointNumber(),
+            return runner.update(sql, asstUpStandard.getCountDown(), asstUpStandard.getLearnedProblem(), asstUpStandard.getApplicationRate(),
+                    asstUpStandard.getRequestReviewNumber(), asstUpStandard.getValidReviewNumber(), asstUpStandard.getValidReviewRate(),
+                    asstUpStandard.getHighQualityAnswer(), asstUpStandard.getHostNumber(), asstUpStandard.getHostScore(), asstUpStandard.getMainPointNumber(),
                     asstUpStandard.getMainPointScore(), asstUpStandard.getOnlineAnswer(), asstUpStandard.getSwing(),
                     asstUpStandard.getOnlineOrSwingNumber(), asstUpStandard.getOnlineScore(), asstUpStandard.getCampNumber(),
                     asstUpStandard.getAsstNumber(), asstUpStandard.getCampScore(), asstUpStandard.getMonthlyWork(),
-                    asstUpStandard.getFosterNew(), asstUpStandard.getCompanyTrainNumber(), asstUpStandard.getCompanyTrainScore(), asstUpStandard.getId());
+                    asstUpStandard.getFosterNew(), asstUpStandard.getCompanyTrainNumber(), asstUpStandard.getCompanyTrainScore(),asstUpStandard.getId());
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
     }

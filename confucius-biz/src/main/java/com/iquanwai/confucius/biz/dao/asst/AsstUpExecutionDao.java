@@ -61,7 +61,7 @@ public class AsstUpExecutionDao extends DBUtil {
         String sql = " Update AsstUpExecution SET ReviewNumber = ?, " +
                 "RequestReviewNumber = ? ,ValidReviewNumber = ?,HighQualityAnswer = ?,HostNumber = ?,HostScore = ? ,MainPointNumber = ?,MainPointScore=?," +
                 "OnlineAnswer =?,Swing = ?,OnlineOrSwingNumber =?,OnlineScore = ?,CampNumber = ?,AsstNumber = ?,CampScore = ?," +
-                "MonthlyWork = ?,FosterNew = ?,CompanyTrainNumber = ?,CompanyTrainScore = ? Where id = ?";
+                "MonthlyWork = ?,FosterNew = ?,CompanyTrainNumber = ?,CompanyTrainScore = ?,UpGrade=? Where id = ?";
         try {
             return runner.update(sql, asstUpExecution.getReviewNumber(), asstUpExecution.getRequestReviewNumber(),
                     asstUpExecution.getValidReviewNumber(), asstUpExecution.getHighQualityAnswer(), asstUpExecution.getHostNumber(), asstUpExecution.getHostScore(),
@@ -69,7 +69,7 @@ public class AsstUpExecutionDao extends DBUtil {
                     asstUpExecution.getSwing(), asstUpExecution.getOnlineOrSwingNumber(), asstUpExecution.getOnlineScore(),
                     asstUpExecution.getCampNumber(), asstUpExecution.getAsstNumber(), asstUpExecution.getCampScore(),
                     asstUpExecution.getMonthlyWork(), asstUpExecution.getFosterNew(), asstUpExecution.getCompanyTrainNumber(),
-                    asstUpExecution.getCompanyTrainScore(), asstUpExecution.getId());
+                    asstUpExecution.getCompanyTrainScore(),asstUpExecution.getUpGrade(), asstUpExecution.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
