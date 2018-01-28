@@ -26,6 +26,11 @@ public class AsstUpDefault {
     private Integer learnedProblem;
 
     /**
+     * 应用题完成比例
+     */
+    private Integer applicationRate;
+
+    /**
     * 最低需要满足的点评数
     */
     private Integer reviewNumber;

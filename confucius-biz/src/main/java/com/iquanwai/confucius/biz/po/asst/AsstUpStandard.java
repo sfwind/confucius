@@ -33,6 +33,10 @@ public class AsstUpStandard {
     private Integer learnedProblem;
 
     /**
+     * 应用题比例
+     */
+    private Integer applicationRate;
+    /**
      * 最低需要满足的点评数
      */
     private Integer reviewNumber;

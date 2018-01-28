@@ -13,6 +13,8 @@ import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
@@ -375,9 +377,19 @@ public class AssistController {
             upGradeDto.setStartDate(asstUpExecution.getStartDate());
             upGradeDto.setCountDown(countDown);
             upGradeDto.setRemainDay(getRemain(interval, countDown));
-            //TODO:计算已经完成的应用题完成度在60%以上的小课数量
-            Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).count();
-            Integer finish = result.intValue();
+            Integer applicationRate = asstUpStandard.getApplicationRate();
+            //统计完成度在applicationRate之上的课程数量
+           Integer finish = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime()!=null).map(improvementPlan -> {
+                List<PracticePlan> practicePlans = planService.loadPracticePlans(improvementPlan.getId());
+                Long sum = practicePlans.stream().filter(practicePlan -> (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType()==PracticePlan.APPLICATION_REVIEW)).count();
+                Long count = practicePlans.stream().filter(practicePlan ->(practicePlan.getStatus()==1)&& (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType()==PracticePlan.APPLICATION_REVIEW)).count();
+               if(count*100/sum>=applicationRate){
+                   return 1;
+               }else{
+                   return 0;
+               }
+           }).reduce(0,Integer::sum);
+
             Integer total = asstUpStandard.getLearnedProblem();
             upGradeDto.setNeedLearnedProblem(total);
             upGradeDto.setLearnedProblem(finish);

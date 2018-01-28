@@ -36,13 +36,13 @@ public class AsstUpDefaultDao  extends DBUtil{
 
     public Integer update(AsstUpDefault asstUpDefault){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = " Update AsstUpDefault set CountDown = ?,LearnedProblem = ?,ReviewNumber = ?,RequestReviewNumber = ?," +
+        String sql = " Update AsstUpDefault set CountDown = ?,LearnedProblem = ?,ApplicationRate,ReviewNumber = ?,RequestReviewNumber = ?," +
                 "ValidReviewRate = ?, HighQualityAnswer = ?,HostNumber = ?,HostScore = ?,MainPointNumber = ?," +
                 "MainPointScore = ?,OnlineAnswer = ?,Swing = ?,OnlineOrSwingNumber = ?,OnlineScore=?," +
                 "CampNumber =?,AsstNumber =?,CampScore =?,MonthlyWork=?,FosterNew=?,CompanyTrainNumber=?," +
                 "CompanyTrainScore where id = ?";
         try {
-           return runner.update(sql,asstUpDefault.getCountDown(),asstUpDefault.getLearnedProblem(),asstUpDefault.getReviewNumber(),
+           return runner.update(sql,asstUpDefault.getCountDown(),asstUpDefault.getLearnedProblem(),asstUpDefault.getApplicationRate(),asstUpDefault.getReviewNumber(),
                     asstUpDefault.getRequestReviewNumber(),asstUpDefault.getValidReviewRate(),asstUpDefault.getHighQualityAnswer(),
                     asstUpDefault.getHostNumber(),asstUpDefault.getHostScore(),asstUpDefault.getMainPointNumber(),
                     asstUpDefault.getMainPointScore(),asstUpDefault.getOnlineAnswer(),asstUpDefault.getSwing(),
