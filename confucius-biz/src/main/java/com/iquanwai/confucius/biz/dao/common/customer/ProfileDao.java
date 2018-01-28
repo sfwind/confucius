@@ -30,7 +30,7 @@ public class ProfileDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
         try {
-            return run.query("SELECT * FROM Profile where UnionId=?", h, unionId);
+            return run.query("SELECT * FROM Profile WHERE UnionId = ?", h, unionId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

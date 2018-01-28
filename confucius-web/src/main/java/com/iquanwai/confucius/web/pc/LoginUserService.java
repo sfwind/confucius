@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.pc;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -41,11 +40,17 @@ public class LoginUserService {
     @Autowired
     private PermissionService permissionService;
     @Autowired
-    private CourseProgressService courseProgressService;
-    @Autowired
     private PlanService planService;
     @Autowired
     private CallbackDao callbackDao;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private static final String PC_STATE_COOKIE_NAME = "_qt";
+    private static final String WE_CHAT_STATE_COOKIE_NAME = "_act";
+    private static final String WE_MINI_STATE_HEADER_NAME = "sk";
+
+    private static final String PLATFORM_HEADER_NAME = "platform";
 
     /**
      * 缓存已经登录的用户
@@ -53,7 +58,6 @@ public class LoginUserService {
     public static Map<String, SoftReference<PCLoginUser>> pcLoginUserMap = Maps.newHashMap();
     public static String QUANWAI_TOKEN_COOKIE_NAME = "_qt";
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 登录，就是缓存起来
@@ -228,4 +232,6 @@ public class LoginUserService {
         }
         return role;
     }
+
+
 }

@@ -61,9 +61,8 @@ public class RestfulHelper {
     /**
      * 发起POST请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
-     *
      * @param requestUrl 请求链接
-     * @param json       请求参数
+     * @param json 请求参数
      * @return 响应体
      */
     public String post(String requestUrl, String json) {
@@ -106,9 +105,8 @@ public class RestfulHelper {
 
     /**
      * 发起POST请求
-     *
      * @param requestUrl 请求的url
-     * @param xml        参数
+     * @param xml 参数
      * @return 响应体
      */
     public String postXML(String requestUrl, String xml) {
@@ -134,7 +132,6 @@ public class RestfulHelper {
     /**
      * 发起GET请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
-     *
      * @param requestUrl 请求url，参数需要手动拼接到url中
      * @return 响应体
      */
@@ -212,7 +209,6 @@ public class RestfulHelper {
 
     /**
      * 初始化阿里请求client
-     *
      * @return AlipayClient
      */
     public AlipayClient initAlipayClient() {
@@ -227,22 +223,19 @@ public class RestfulHelper {
 
     /**
      * 上传微信素材
-     *
-     * @param url
-     * @return
      */
-    public String uploadWXFile(MultipartFile multipartFile , String url){
+    public String uploadWXFile(MultipartFile multipartFile, String url) {
         String accessToken = accessTokenService.getAccessToken();
         logger.info("accesstoken is :{}", accessToken);
-        url = url.replace("{access_token}",accessToken);
+        url = url.replace("{access_token}", accessToken);
         byte[] fileBytes = null;
         try {
-           fileBytes = multipartFile.getBytes();
+            fileBytes = multipartFile.getBytes();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        builder.addPart(Headers.of("Content-Disposition","form-data;name=\"media\"; filename=\""+multipartFile.getOriginalFilename()+"\"\n"),RequestBody.create(MediaType.parse("image/png"),fileBytes)).build();
+        builder.addPart(Headers.of("Content-Disposition", "form-data;name=\"media\"; filename=\"" + multipartFile.getOriginalFilename() + "\"\n"), RequestBody.create(MediaType.parse("image/png"), fileBytes)).build();
 
         RequestBody body = builder.build();
 
@@ -253,7 +246,7 @@ public class RestfulHelper {
         try {
             return client.newCall(request).execute().body().string();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }

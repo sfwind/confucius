@@ -13,6 +13,8 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
+import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
+import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
@@ -64,6 +66,8 @@ public class AccountServiceImpl implements AccountService {
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private CallbackDao callbackDao;
+    @Autowired
+    private WeiXinApiService weiXinApiService;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -83,6 +87,109 @@ public class AccountServiceImpl implements AccountService {
                 userRoleMap.put(userRole.getProfileId(), userRole.getRoleId()));
 
         logger.info("role init complete");
+    }
+
+    @Override
+    public WeiXinResult.UserInfoObject storeWeiXinUserInfo(String openId, String accessToken, Profile.ProfileType profileType) {
+        WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfo(openId, accessToken);
+        String unionId = userInfoObject.getUnionId();
+        String nickName = userInfoObject.getNickName();
+        String headImgUrl = userInfoObject.getHeadImgUrl();
+        String sex = userInfoObject.getSex();
+        String country = userInfoObject.getCountry();
+        String province = userInfoObject.getProvince();
+        String city = userInfoObject.getCity();
+        redisUtil.lock("lock:wx:user:insert:followUser", lock -> {
+            Account account = followUserDao.queryByUnionId(unionId);
+            if (account == null) {
+                account = new Account();
+                account.setUnionid(unionId);
+                switch (profileType) {
+                    case MOBILE:
+                        account.setOpenid(openId);
+                        break;
+                    case PC:
+                        break;
+                    case MINI:
+                        account.setWeMiniOpenId(openId);
+                        break;
+                    default:
+                        break;
+                }
+                account.setNickname(nickName);
+                account.setHeadimgurl(headImgUrl);
+                account.setSex(Integer.parseInt(sex));
+                account.setCountry(country);
+                account.setProvince(province);
+                account.setCity(city);
+                followUserDao.insert(account);
+            } else {
+                switch (profileType) {
+                    case MOBILE:
+                        account.setOpenid(openId);
+                        break;
+                    case PC:
+                        break;
+                    case MINI:
+                        account.setWeMiniOpenId(openId);
+                        break;
+                    default:
+                        break;
+                }
+                account.setNickname(nickName);
+                account.setHeadimgurl(headImgUrl);
+                account.setSex(Integer.parseInt(sex));
+                account.setCountry(country);
+                account.setProvince(province);
+                account.setCity(city);
+                followUserDao.updateOAuthFields(account);
+            }
+        });
+        redisUtil.lock("lock:wx:user:insert:profile", lock -> {
+            Profile profile = profileDao.queryByUnionId(unionId);
+            if (profile == null) {
+                profile = new Profile();
+                profile.setUnionid(unionId);
+                switch (profileType) {
+                    case MOBILE:
+                        profile.setOpenid(openId);
+                        break;
+                    case PC:
+                        break;
+                    case MINI:
+                        break;
+                    default:
+                        break;
+                }
+                profile.setNickname(nickName);
+                profile.setHeadimgurl(headImgUrl);
+                profile.setRiseId(CommonUtils.randomString(7));
+                try {
+                    profileDao.insertProfile(profile);
+                } catch (SQLException e) {
+                    profile.setRiseId(CommonUtils.randomString(7));
+                    try {
+                        profileDao.insertProfile(profile);
+                    } catch (SQLException e1) {
+                        logger.error(e1.getLocalizedMessage(), e);
+                    }
+                }
+            } else {
+                switch (profileType) {
+                    case MOBILE:
+                        profile.setOpenid(openId);
+                        break;
+                    case PC:
+                        break;
+                    case MINI:
+                        break;
+                    default:
+                        break;
+                }
+                profileDao.updateOAuthFields(profile);
+            }
+        });
+        return userInfoObject;
     }
 
     @Override
@@ -515,9 +622,27 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    /**
+     * 获取 Profile 对象，如果数据库不存在，会重新从微信获取一次，并且存储到数据库中
+     */
     @Override
-    public Profile queryByUnionId(String unionId) {
-        return profileDao.queryByUnionId(unionId);
+    public Profile getProfileByUnionId(String unionId) {
+        Profile profile = profileDao.queryByUnionId(unionId);
+        if (profile == null) {
+            Callback callback = callbackDao.queryByUnionId(unionId);
+            if (callback.getOpenid() != null && callback.getAccessToken() != null) {
+                // 曾经手机端登录过
+                storeWeiXinUserInfo(callback.getOpenid(), callback.getAccessToken(), Profile.ProfileType.MOBILE);
+            } else if (callback.getPcOpenid() != null && callback.getPcAccessToken() != null) {
+                // 曾经 pc 端登陆过
+                storeWeiXinUserInfo(callback.getPcOpenid(), callback.getPcAccessToken(), Profile.ProfileType.PC);
+            } else if (callback.getWeMiniOpenid() != null && callback.getWeMiniAccessToken() != null) {
+                // 曾经小程序登陆过
+                storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
+            }
+            profile = profileDao.queryByUnionId(unionId);
+        }
+        return profile;
     }
 
     @Override
@@ -548,7 +673,7 @@ public class AccountServiceImpl implements AccountService {
             result *= followUserDao.updateOAuthFields(account);
         }
 
-        Profile profile = queryByUnionId(unionId);
+        Profile profile = getProfileByUnionId(unionId);
         if (profile == null) {
             profile = new Profile();
             profile.setUnionid(unionId);

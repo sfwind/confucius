@@ -26,7 +26,6 @@ public class RedirectController {
 
     /**
      * 小课洞见文章跳转区分
-     *
      * @param problemId 小课id
      */
     @RequestMapping(value = "/kit_package/{id}")
@@ -53,8 +52,6 @@ public class RedirectController {
             } catch (IOException e) {
                 logger.error("重定向失败,{}", loginUser.getOpenId());
             }
-
         }
-
     }
 }

@@ -3,8 +3,8 @@ package com.iquanwai.confucius.biz.domain.weixin.oauth;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
-import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -23,16 +23,26 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by justin on 16/8/13.
- */
 @Service
 public class OAuthServiceImpl implements OAuthService {
+
+    // String OAUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_url}&response_type=code&scope=snsapi_userinfo&state={state}#wechat_redirect";
+    // String OAUTH_ASK_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_url}&response_type=code&scope=snsapi_userinfo&state={state}#wechat_redirect";
+    // String REFRESH_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid={appid}&grant_type=refresh_token&refresh_token={refresh_token}";
+    // String ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code";
+    // String WE_MINI_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/jscode2session?appid={APPID}&secret={SECRET}&js_code={JSCODE}&grant_type=authorization_code";
+    //
+    // String RISE_PC_OAUTH_URL = ConfigUtils.domainName() + "/wx/oauth/pc/code";
+    //
+    // String WE_CHAT_STATE_COOKIE_NAME = "_act";
+    // String PC_STATE_COOKIE_NAME = "_qt";
+    // String ACCESS_ASK_TOKEN_COOKIE_NAME = "_ask";
+    //
+    // int SEVEN_DAYS = 60 * 60 * 24 * 7;
 
     @Autowired
     private AccountService accountService;
@@ -40,8 +50,6 @@ public class OAuthServiceImpl implements OAuthService {
     private CallbackDao callbackDao;
     @Autowired
     private RestfulHelper restfulHelper;
-    @Autowired
-    private AccessTokenService accessTokenService;
 
     private static final String REDIRECT_PATH = "/wx/oauth/code";
 
@@ -51,27 +59,124 @@ public class OAuthServiceImpl implements OAuthService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    /** 引导用户授权，在回调接口中返回 code 值 */
+    String OAUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_url}&response_type=code&scope=snsapi_userinfo&state={state}#wechat_redirect";
+
+    /** 获取当前用户的 accessToken */
+    String ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code";
+
+    /** 当前用户 accessToken 过期时，通过 refreshToken 获取新 accessToken 和 refreshToken */
+    String REFRESH_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid={appid}&grant_type=refresh_token&refresh_token={refresh_token}";
+
+    /** 通过 jscode 换取 accessToken，运用在小程序 */
+    String WE_MINI_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={jscode}&grant_type=authorization_code";
+
+    /** 获取用户信息，accessToken 为用户 accessToken，openId 为当前平台对应 openId，包含昵称、头像、unionId等信息 */
+    String SNS_API_USER_INFO = "https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN";
+
+    /** 获取用户基本信息，accessToken 为应用级调用接口凭证，包含昵称、头像、unionId、省份、城市、性别等信息 */
+    String USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN";
+
+    /** 获取用户列表，单次最大上线10000，从第一个开始拉取 */
+    String GET_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}";
+    /** 获取用户列表，单次最大上限10000，从 next_openid 开始拉取 */
+    String GET_NEXT_USERS_URL = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}&next_openid={next_openid}";
+
+    /** 获取黑名单人员 */
+    String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
+    /** 将人员标记为黑名单 */
+    String BATCH_BALCKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchblacklist?access_token={access_token}";
+    /** 将人员移除黑名单 */
+    String UNBATCH_BACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchunblacklist?access_token={access_token}";
+
+    String RISE_PC_OAUTH_URL = ConfigUtils.domainName() + "/wx/oauth/pc/code";
+
+    int SEVEN_DAYS = 60 * 60 * 24 * 7;
+
+    @Override
+    /**
+     * 在访问用户授权页面之前，预生成 Callback 对象，存储 state 已经对应的回调 url
+     */
+    public Callback initCallback(String callbackUrl, String state) {
+        String ip = getIpFromUrl(callbackUrl);
+        if (ip != null) {
+            callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
+        }
+
+        // 为了存储 state 值，不得不在此声明 callback
+        Callback callback = new Callback();
+        callback.setState(state);
+        callback.setCallbackUrl(callbackUrl);
+        callbackDao.insert(callback);
+        return callback;
+    }
+
+    /**
+     * 使用 code 换取 mobile 用户凭证之后，将凭证存储数据库
+     */
+    @Override
+    public Callback supplementMobileCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject) {
+        Callback callback = callbackDao.queryByState(state);
+        if (callback == null) {
+            logger.info("code 回调中的 state，Callback 中不存在，state: {}", state);
+            return null;
+        } else {
+            callback.setAccessToken(userAccessTokenObject.getAccessToken());
+            callback.setRefreshToken(userAccessTokenObject.getRefreshToken());
+            callback.setOpenid(userAccessTokenObject.getOpenId());
+            callbackDao.updateFields(callback);
+            return callback;
+        }
+    }
+
+    /**
+     * 使用 code 换取 pc 用户凭证之后，将凭证存储数据库
+     */
+    @Override
+    public Callback supplementPcCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject) {
+        Callback callback = callbackDao.queryByState(state);
+        if (callback == null) {
+            logger.info("code 回调中的 state，Callback 中不存在，state: {}", state);
+            return null;
+        } else {
+            callback.setPcAccessToken(userAccessTokenObject.getAccessToken());
+            callback.setPcOpenid(userAccessTokenObject.getOpenId());
+            callbackDao.updateFields(callback);
+            return callback;
+        }
+    }
+
+    /**
+     * 获取用户信息之后，将用户信息的 unionId 完善到 callback 中
+     * @param state 随机数
+     * @param unionId 公众平台 unionId
+     */
+    @Override
+    public Callback supplementCallbackUnionId(String state, String unionId) {
+       Callback callback = callbackDao.queryByState(state);
+       callback.setUnionId(unionId);
+       callbackDao.updateFields(callback);
+       return callback;
+    }
+
+    @Override
+    public Callback getCallbackByState(String state) {
+        return callbackDao.queryByState(state);
+    }
+
+
     @Override
     public String redirectUrl(String callbackUrl, String authUrl) {
         String requestUrl = authUrl;
         Callback callback = new Callback();
-        String ip = getIPFromUrl(callbackUrl);
+        String ip = getIpFromUrl(callbackUrl);
         if (ip != null) {
             callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
         }
         callback.setCallbackUrl(callbackUrl);
         String state = CommonUtils.randomString(32);
         callback.setState(state);
-        try {
-            callbackDao.insert(callback);
-        } catch (SQLException e) {
-            callback.setState(CommonUtils.randomString(32));
-            try {
-                callbackDao.insert(callback);
-            } catch (SQLException e1) {
-                logger.error(e1.getLocalizedMessage(), e1);
-            }
-        }
+        callbackDao.insert(callback);
         logger.info("state is {}", callback.getState());
 
         Map<String, String> params = Maps.newHashMap();
@@ -221,16 +326,7 @@ public class OAuthServiceImpl implements OAuthService {
         callback.setUnionId(unionId);
         callback.setWeMiniOpenid(openId);
         int insertResult = 0;
-        try {
-            insertResult = callbackDao.insert(callback);
-        } catch (SQLException e) {
-            callback.setState(CommonUtils.randomString(32));
-            try {
-                insertResult = callbackDao.insert(callback);
-            } catch (SQLException e1) {
-                logger.error(e1.getLocalizedMessage(), e1);
-            }
-        }
+        insertResult = callbackDao.insert(callback);
         if (insertResult > 0) {
             return callback;
         } else {
@@ -246,7 +342,7 @@ public class OAuthServiceImpl implements OAuthService {
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        String ip = getIPFromUrl(callbackUrl);
+        String ip = getIpFromUrl(callbackUrl);
         if (ip != null) {
             callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
         }
@@ -254,18 +350,7 @@ public class OAuthServiceImpl implements OAuthService {
         String state = CommonUtils.randomString(32);
         callback.setState(state);
         logger.info("state is {}", state);
-
-        try {
-            callbackDao.insert(callback);
-        } catch (SQLException e) {
-            callback.setState(CommonUtils.randomString(32));
-            try {
-                callbackDao.insert(callback);
-            } catch (SQLException e1) {
-                logger.error(e1.getLocalizedMessage(), e1);
-            }
-        }
-
+        callback.setState(CommonUtils.randomString(32));
         Map<String, String> param = Maps.newHashMap();
         param.put("appid", ConfigUtils.getRisePcAppid());
         param.put("scope", "snsapi_login,snsapi_userinfo");
@@ -284,7 +369,7 @@ public class OAuthServiceImpl implements OAuthService {
         Map<String, Object> result = getUserInfoFromWeiXin(openid, accessToken);
         String unionId = result.get("unionid").toString();
         // 根据 unionId 查询
-        Profile profile = accountService.queryByUnionId(unionId);
+        Profile profile = accountService.getProfileByUnionId(unionId);
         if (profile == null) {
             // 提示关注并选择rise
             logger.info("未关注，请先关注并选择课程,callback:{}", callback);
@@ -330,7 +415,7 @@ public class OAuthServiceImpl implements OAuthService {
         return result;
     }
 
-    private static String getIPFromUrl(String url) {
+    private static String getIpFromUrl(String url) {
         Pattern ipPattern = Pattern.compile(IP_REGULAR);
         Matcher matcher = ipPattern.matcher(url);
         if (matcher.find()) {

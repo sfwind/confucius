@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.weixin.oauth;
 
+import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,6 +25,19 @@ public interface OAuthService {
     String ACCESS_ASK_TOKEN_COOKIE_NAME = "_ask";
 
     int SEVEN_DAYS = 60 * 60 * 24 * 7;
+
+    /**
+     * 在访问用户授权页面之前，预生成 Callback 对象，存储 state 已经对应的回调 url
+     */
+    Callback initCallback(String callbackUrl, String state);
+
+    Callback supplementMobileCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject);
+
+    Callback supplementPcCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject);
+
+    Callback supplementCallbackUnionId(String state, String unionId);
+
+    Callback getCallbackByState(String state);
 
     /**
      * 组装微信授权页的url，记录回调url

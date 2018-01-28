@@ -22,7 +22,7 @@ public class QRServiceTest extends TestBase {
     @Test
     public void generateCode(){
 //        qrCodeService.generatePermanentQRCode("camp_month_10");
-            qrCodeService.generatePermanentQRCode("audition_signup");
+            qrCodeService.generatePermanentQRCode("special_detail");
 //        qrCodeService.generateTemporaryQRCode("audition_signup", 2592000);
     }
     @Test

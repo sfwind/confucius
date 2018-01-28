@@ -50,6 +50,7 @@
             <bean class="com.iquanwai.confucius.web.resolver.LoginUserResolver"/>
             <bean class="com.iquanwai.confucius.web.resolver.PCLoginUserResolver"/>
             <bean class="com.iquanwai.confucius.web.resolver.WeMiniLoginUserResolver"/>
+            <bean class="com.iquanwai.confucius.web.resolver.UnionUserResolver"/>
         </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
@@ -57,17 +58,61 @@
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
           p:prefix="/" p:suffix=".jsp" p:order="1"/>
 
-    <!--<websocket:handlers allowed-origins="*">-->
-    <!--<websocket:mapping path="/session" handler="sessionHandler"/>-->
-    <!--<websocket:handshake-interceptors>-->
-    <!--<bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>-->
-    <!--</websocket:handshake-interceptors>-->
-    <!--</websocket:handlers>-->
-    <!--<bean id="sessionHandler" class="com.iquanwai.confucius.web.account.websocket.SessionSocketHandler"/>-->
 
     <mvc:interceptors>
+        <!--<mvc:interceptor>-->
+        <!--<mvc:mapping path="/**"/>-->
+        <!--<mvc:exclude-mapping path="/"/>-->
+        <!--<mvc:exclude-mapping path="/wx/**"/>-->
+        <!--<mvc:exclude-mapping path="/ali/pay/**"/>-->
+        <!--<mvc:exclude-mapping path="/b/**"/>-->
+        <!--<mvc:exclude-mapping path="/image/**"/>-->
+        <!--<mvc:exclude-mapping path="/js/**"/>-->
+        <!--<mvc:exclude-mapping path="/cache/**"/>-->
+        <!--<mvc:exclude-mapping path="/file/image/**"/>-->
+        <!--<mvc:exclude-mapping path="/account/**"/>-->
+        <!--<mvc:exclude-mapping path="/login"/>-->
+        <!--<mvc:exclude-mapping path="/logout"/>-->
+        <!--<mvc:exclude-mapping path="/pc/**"/>-->
+        <!--<mvc:exclude-mapping path="/home"/>-->
+        <!--<mvc:exclude-mapping path="/fragment/**"/>-->
+        <!--<mvc:exclude-mapping path="/servercode"/>-->
+        <!--<mvc:exclude-mapping path="/community"/>-->
+        <!--<mvc:exclude-mapping path="/backend/**"/>-->
+        <!--<mvc:exclude-mapping path="/asst/**"/>-->
+        <!--<mvc:exclude-mapping path="/performance/**"/>-->
+        <!--<mvc:exclude-mapping path="/internal/**"/>-->
+        <!--<mvc:exclude-mapping path="/heartbeat"/>-->
+        <!--<mvc:exclude-mapping path="/pay/alipay/*"/>-->
+        <!--<bean class="com.iquanwai.confucius.web.interceptor.WeixinHandlerInterceptor"></bean>-->
+        <!--</mvc:interceptor>-->
+        <!--<mvc:interceptor>-->
+        <!--<mvc:mapping path="/pc/**"/>-->
+        <!--<mvc:mapping path="/account/get"/>-->
+        <!--<mvc:exclude-mapping path="/pc/static/**"/>-->
+        <!--<mvc:exclude-mapping path="/pc/fragment/problem/list"/>-->
+        <!--<mvc:exclude-mapping path="/pc/survey/wjx"/>-->
+        <!--<mvc:exclude-mapping path="/pc/survey/wjx/submit"/>-->
+        <!--<mvc:exclude-mapping path="/heartbeat"/>-->
+        <!--<bean class="com.iquanwai.confucius.web.interceptor.PCAjaxHandlerInterceptor">-->
+        <!--<constructor-arg ref="loginUserService"/>-->
+        <!--</bean>-->
+        <!--</mvc:interceptor>-->
+        <!--<mvc:interceptor>-->
+        <!--<mvc:mapping path="/fragment/**"/>-->
+        <!--<mvc:mapping path="/community"/>-->
+        <!--<mvc:mapping path="/pc/survey/wjx"/>-->
+        <!--<bean class="com.iquanwai.confucius.web.interceptor.PCHandlerInterceptor">-->
+        <!--<constructor-arg ref="loginUserService"/>-->
+        <!--</bean>-->
+        <!--</mvc:interceptor>-->
+
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
+            <mvc:mapping path="/fragment/**"/>
+            <mvc:mapping path="/community"/>
+            <mvc:mapping path="/pc/survey/wjx"/>
+            <mvc:exclude-mapping path="/"/>
             <mvc:exclude-mapping path="/"/>
             <mvc:exclude-mapping path="/wx/**"/>
             <mvc:exclude-mapping path="/ali/pay/**"/>
@@ -90,27 +135,12 @@
             <mvc:exclude-mapping path="/internal/**"/>
             <mvc:exclude-mapping path="/heartbeat"/>
             <mvc:exclude-mapping path="/pay/alipay/*"/>
-            <bean class="com.iquanwai.confucius.web.interceptor.WeixinHandlerInterceptor"></bean>
-        </mvc:interceptor>
-        <mvc:interceptor>
-            <mvc:mapping path="/pc/**"/>
-            <mvc:mapping path="/account/get"/>
             <mvc:exclude-mapping path="/pc/static/**"/>
             <mvc:exclude-mapping path="/pc/fragment/problem/list"/>
             <mvc:exclude-mapping path="/pc/survey/wjx"/>
             <mvc:exclude-mapping path="/pc/survey/wjx/submit"/>
             <mvc:exclude-mapping path="/heartbeat"/>
-            <bean class="com.iquanwai.confucius.web.interceptor.PCAjaxHandlerInterceptor">
-                <constructor-arg ref="loginUserService"/>
-            </bean>
-        </mvc:interceptor>
-        <mvc:interceptor>
-            <mvc:mapping path="/fragment/**"/>
-            <mvc:mapping path="/community"/>
-            <mvc:mapping path="/pc/survey/wjx"/>
-            <bean class="com.iquanwai.confucius.web.interceptor.PCHandlerInterceptor">
-                <constructor-arg ref="loginUserService"/>
-            </bean>
+            <bean class="com.iquanwai.confucius.web.interceptor.HandlerInterceptor"></bean>
         </mvc:interceptor>
     </mvc:interceptors>
 </beans>

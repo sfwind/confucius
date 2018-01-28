@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.dao.wx;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Callback;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -20,7 +19,7 @@ import java.sql.SQLException;
 public class CallbackDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public int insert(Callback callback) throws SQLException {
+    public int insert(Callback callback) {
         QueryRunner run = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Callback(State, CallbackUrl, AccessToken, PcAccessToken, WeMiniAccessToken, " +
                 "RefreshToken, UnionId, Openid, PcOpenid, WeMiniOpenid) " +
@@ -39,9 +38,20 @@ public class CallbackDao extends DBUtil {
                     callback.getWeMiniOpenid());
             return result.intValue();
         } catch (SQLException e) {
-            if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
-                throw e;
-            }
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public int updateFields(Callback callback) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Callback SET State = ?, CallbackUrl = ?, AccessToken = ?, PcAccessToken = ?, WeMiniAccessToken = ?, " +
+                "RefreshToken = ?, UnionId = ?, OpenId = ?, PcOpenId = ?, WeMiniOpenId = ? WHERE Id = ?";
+        try {
+            return runner.update(sql, callback.getState(), callback.getCallbackUrl(), callback.getAccessToken(), callback.getPcAccessToken(),
+                    callback.getWeMiniAccessToken(), callback.getRefreshToken(), callback.getUnionId(), callback.getOpenid(), callback.getPcOpenid(),
+                    callback.getWeMiniOpenid(), callback.getId());
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
