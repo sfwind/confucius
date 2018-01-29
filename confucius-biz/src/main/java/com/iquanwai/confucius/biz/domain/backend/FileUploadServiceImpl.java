@@ -45,6 +45,9 @@ public class FileUploadServiceImpl implements FileUploadService {
         audio.setName(name);
         audio.setUrl(AUDIO_RESOURCE_PREFIX + url);
         audio.setWords(words);
+        if(audioId==null){
+            return audioDao.insertAudio(audio);
+        }
         if (audioId > 0) {
             audio.setId(audioId);
             //判断是否需要更新文件路径
