@@ -300,7 +300,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId IN (" + produceQuestionMark(memberIds.size()) + ") ORDER BY Id DESC GROUP BY ProfileId";
+        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId IN (" + produceQuestionMark(memberIds.size()) + ") GROUP BY ProfileId ORDER BY Id DESC";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, memberIds.toArray());
