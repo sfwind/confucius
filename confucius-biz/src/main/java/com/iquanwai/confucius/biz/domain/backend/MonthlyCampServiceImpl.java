@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
@@ -135,6 +136,9 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     }
 
     @Override
+    /**
+     * 在 RiseCertificate 表中，初始化需要发送的人员数据
+     */
     public void insertRiseCertificate(Integer type, List<String> memberIds) {
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.loadByMemberIds(memberIds);
 
@@ -144,8 +148,8 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
         riseClassMembers.forEach(riseClassMember -> {
             logger.info("正在添加：" + riseClassMember.getMemberId());
             Integer profileId = riseClassMember.getProfileId();
-            Integer year = riseClassMember.getYear();
-            Integer month = riseClassMember.getMonth();
+            Integer year = ConfigUtils.getLearningYear();
+            Integer month = ConfigUtils.getLearningMonth();
 
             List<RiseCertificate> riseCertificates = riseCertificateDao.loadRiseCertificatesByProfileId(profileId);
             RiseCertificate existRiseCertificate = riseCertificates.stream()
