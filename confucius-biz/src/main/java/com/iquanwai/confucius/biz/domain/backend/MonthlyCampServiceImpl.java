@@ -11,7 +11,6 @@ import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
@@ -135,21 +134,18 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
         signupService.unlockMonthlyCamp(profile.getId());
     }
 
-    @Override
     /**
      * 在 RiseCertificate 表中，初始化需要发送的人员数据
      */
-    public void insertRiseCertificate(Integer type, List<String> memberIds) {
-        List<RiseClassMember> riseClassMembers = riseClassMemberDao.loadByMemberIds(memberIds);
-
+    @Override
+    public void insertRiseCertificate(Integer year, Integer month, Integer type, List<String> memberIds) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryForCertificateMemberIds(memberIds);
         List<Integer> certificateNoSequence = Lists.newArrayList();
         certificateNoSequence.add(1);
 
         riseClassMembers.forEach(riseClassMember -> {
             logger.info("正在添加：" + riseClassMember.getMemberId());
             Integer profileId = riseClassMember.getProfileId();
-            Integer year = ConfigUtils.getLearningYear();
-            Integer month = ConfigUtils.getLearningMonth();
 
             List<RiseCertificate> riseCertificates = riseCertificateDao.loadRiseCertificatesByProfileId(profileId);
             RiseCertificate existRiseCertificate = riseCertificates.stream()
@@ -168,6 +164,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
                 CourseScheduleDefault courseScheduleDefault = courseScheduleDefaults.stream()
                         .filter(scheduleDefault -> scheduleDefault.getType() == CourseScheduleDefault.Type.MAJOR)
                         .filter(scheduleDefault -> scheduleDefault.getMonth().equals(month)).findAny().orElse(null);
+
                 String problemName = "";
                 if (courseScheduleDefault != null) {
                     Integer problemId = courseScheduleDefault.getProblemId();

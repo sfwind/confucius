@@ -195,12 +195,12 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<RiseClassMember> loadByMemberIds(List<String> memberIds) {
+    public List<RiseClassMember> loadActiveByMemberIds(List<String> memberIds) {
         if (memberIds.size() == 0) {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId In (" + produceQuestionMark(memberIds.size()) + ")";
+        String sql = "SELECT * FROM RiseClassMember WHERE Active = 1 AND Del = 0 AND MemberId In (" + produceQuestionMark(memberIds.size()) + ")";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, memberIds.toArray());
@@ -275,7 +275,6 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-
     /**
      * 根据班级和小组获得用户
      */
@@ -286,6 +285,25 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
         try {
             return runner.query(sql, h, className, groupId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    /**
+     * 根据 MemberId 查询 RiseClassMember 记录，只是为了发证书
+     * @param memberIds 学号集合
+     */
+    public List<RiseClassMember> queryForCertificateMemberIds(List<String> memberIds) {
+        if (memberIds.size() == 0) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId IN (" + produceQuestionMark(memberIds.size()) + ") ORDER BY Id DESC GROUP BY ProfileId";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, memberIds.toArray());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

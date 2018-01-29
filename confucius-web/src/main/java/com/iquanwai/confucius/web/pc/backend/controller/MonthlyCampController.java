@@ -152,6 +152,7 @@ public class MonthlyCampController {
 
         return WebUtils.result(monthlyCampDtos);
     }
+
     @Deprecated
     @RequestMapping(value = "/load/ungroup", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp(@ModelAttribute Page page) {
@@ -303,9 +304,11 @@ public class MonthlyCampController {
     @RequestMapping(value = "/add/certificate", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> addCampRiseCertificate(@RequestBody CampRiseCertificateDao campRiseCertificateDao) {
         Integer type = campRiseCertificateDao.getType();
+        Integer year = campRiseCertificateDao.getYear();
+        Integer month = campRiseCertificateDao.getMonth();
         List<String> memberIds = campRiseCertificateDao.getMemberIds();
         logger.info("开始添加获得证书人员");
-        monthlyCampService.insertRiseCertificate(type, memberIds);
+        monthlyCampService.insertRiseCertificate(year, month, type, memberIds);
         logger.info("证书人员添加结束");
         return WebUtils.success();
     }

@@ -38,5 +38,5 @@ public interface MonthlyCampService {
 
     void unlockMonthlyCampAuthority(String riseId);
 
-    void insertRiseCertificate(Integer type, List<String> memberIds);
+    void insertRiseCertificate(Integer year, Integer month, Integer type, List<String> memberIds);
 }
