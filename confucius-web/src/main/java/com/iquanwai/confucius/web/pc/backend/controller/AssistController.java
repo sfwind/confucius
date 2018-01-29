@@ -71,7 +71,7 @@ public class AssistController {
                 assistDto.setNickName(profile.getNickname());
                 assistDto.setRiseId(profile.getRiseId());
                 assistDto.setHeadImageUrl(profile.getHeadimgurl());
-                Integer  profileId = profile.getId();
+                Integer profileId = profile.getId();
                 AsstUpStandard asstUpStandard = asstUpService.loadStandard(profileId);
                 AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profileId);
                 if (checkIsReached(profileId, asstUpStandard, asstUpExecution)) {
@@ -80,13 +80,11 @@ public class AssistController {
                     assistDto.setReached("否");
                 }
                 Integer upgrade = asstUpExecution.getUpGrade();
-                if(upgrade==0){
+                if (upgrade == 0) {
                     assistDto.setVerified("未认证");
-                }
-                else if(upgrade==1){
+                } else if (upgrade == 1) {
                     assistDto.setVerified("已通过");
-                }
-                else if(upgrade==2){
+                } else if (upgrade == 2) {
                     assistDto.setVerified("未通过");
                 }
 
@@ -348,26 +346,26 @@ public class AssistController {
                 return;
             }
 
-            UpGradeDto upGradeDto = AsstHelper.genUpGradeInfo(asstUpStandard,asstUpExecution);
+            UpGradeDto upGradeDto = AsstHelper.genUpGradeInfo(asstUpStandard, asstUpExecution);
 
-            BeanUtils.copyProperties(upGradeDto,gradeDto);
+            BeanUtils.copyProperties(upGradeDto, gradeDto);
 
             gradeDto.setId(asstUpExecution.getId());
             gradeDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
 
             Integer applicationRate = asstUpStandard.getApplicationRate();
             //统计完成度在applicationRate之上的课程数量
-           Integer finish = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime()!=null).map(improvementPlan -> {
+            Integer finish = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).map(improvementPlan -> {
                 List<PracticePlan> practicePlans = planService.loadPracticePlans(improvementPlan.getId());
-                Long sum = practicePlans.stream().filter(practicePlan -> (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType()==PracticePlan.APPLICATION_REVIEW)).count();
-                Long count = practicePlans.stream().filter(practicePlan ->(practicePlan.getStatus()==1)&& (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType()==PracticePlan.APPLICATION_REVIEW)).count();
+                Long sum = practicePlans.stream().filter(practicePlan -> (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
+                Long count = practicePlans.stream().filter(practicePlan -> (practicePlan.getStatus() == 1) && (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
 
-                if(count*100/sum>=applicationRate){
-                   return 1;
-               }else{
-                   return 0;
-               }
-           }).reduce(0,Integer::sum);
+                if (count * 100 / sum >= applicationRate) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }).reduce(0, Integer::sum);
 
             Integer total = asstUpStandard.getLearnedProblem();
             gradeDto.setNeedLearnedProblem(total);
@@ -391,17 +389,17 @@ public class AssistController {
         asstUpExecution.setRequestReviewNumber(existExecution.getRequestReviewNumber() + asstUpExecution.getRequestReviewNumber());
         asstUpExecution.setValidReviewNumber(existExecution.getValidReviewNumber() + asstUpExecution.getValidReviewNumber());
         asstUpExecution.setHighQualityAnswer(existExecution.getHighQualityAnswer() + asstUpExecution.getHighQualityAnswer());
-        asstUpExecution.setHostNumber(existExecution.getHostNumber() + asstUpExecution.getHostNumber());
+        asstUpExecution.setHostNumber(asstUpExecution.getHostNumber());
         asstUpExecution.setHostScore(asstUpExecution.getHostScore());
-        asstUpExecution.setMainPointNumber(existExecution.getMainPointNumber() + asstUpExecution.getMainPointNumber());
+        asstUpExecution.setMainPointNumber(asstUpExecution.getMainPointNumber());
         asstUpExecution.setMainPointScore(asstUpExecution.getMainPointScore());
-        asstUpExecution.setOnlineOrSwingNumber(existExecution.getOnlineOrSwingNumber() + asstUpExecution.getOnlineOrSwingNumber());
+        asstUpExecution.setOnlineOrSwingNumber(asstUpExecution.getOnlineOrSwingNumber());
         asstUpExecution.setOnlineScore(asstUpExecution.getOnlineScore());
-        asstUpExecution.setCampNumber(existExecution.getCampNumber() + asstUpExecution.getCampNumber());
-        asstUpExecution.setAsstNumber(existExecution.getAsstNumber() + asstUpExecution.getAsstNumber());
+        asstUpExecution.setCampNumber(asstUpExecution.getCampNumber());
+        asstUpExecution.setAsstNumber(asstUpExecution.getAsstNumber());
         asstUpExecution.setCampScore(asstUpExecution.getCampScore());
-        asstUpExecution.setFosterNew(existExecution.getFosterNew() + asstUpExecution.getFosterNew());
-        asstUpExecution.setCompanyTrainNumber(existExecution.getCompanyTrainNumber() + asstUpExecution.getCompanyTrainNumber());
+        asstUpExecution.setFosterNew(asstUpExecution.getFosterNew());
+        asstUpExecution.setCompanyTrainNumber(asstUpExecution.getCompanyTrainNumber());
         asstUpExecution.setCompanyTrainScore(asstUpExecution.getCompanyTrainScore());
         return asstUpExecution;
     }
@@ -419,7 +417,7 @@ public class AssistController {
         if (asstUpStandard.getLearnedProblem() > result.intValue()) {
             return false;
         }
-       return   AsstHelper.checkIsReached(asstUpStandard,asstUpExecution);
+        return AsstHelper.checkIsReached(asstUpStandard, asstUpExecution);
     }
 
 }
