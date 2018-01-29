@@ -8,6 +8,8 @@ import java.util.List;
 public class CampRiseCertificateDao {
 
     private Integer type;
+    private Integer year;
+    private Integer month;
     private List<String> memberIds;
 
 }

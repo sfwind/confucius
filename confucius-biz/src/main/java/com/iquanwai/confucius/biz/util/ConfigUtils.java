@@ -377,20 +377,28 @@ public class ConfigUtils {
         return getValue("ali.pay.notify.domain");
     }
 
-    public static String getAlipayAppId(){
+    public static String getAlipayAppId() {
         return getValue("alipay.appid");
     }
 
-    public static String getAlipayPrivateKey(){
+    public static String getAlipayPrivateKey() {
         return getValue("alipay.private.key");
     }
 
-    public static String getAlipayPublicKey(){
+    public static String getAlipayPublicKey() {
         return getValue("alipay.public.key");
     }
 
-    public static String getAlipayGateway(){
+    public static String getAlipayGateway() {
         return getValue("alipay.gateway");
+    }
+
+    public static Integer getLearningYear() {
+        return getIntValue("learning.year");
+    }
+
+    public static Integer getLearningMonth() {
+        return getIntValue("learning.month");
     }
 
 }
