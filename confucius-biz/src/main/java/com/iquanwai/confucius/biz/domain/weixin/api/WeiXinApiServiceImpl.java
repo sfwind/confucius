@@ -143,7 +143,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
      * @param jsCode 小程序授权之后返回的 jsCode
      */
     @Override
-    public WeiXinResult.MiniUserAccessTokenObject exchangeWeMiniUserAccessTokenByCode(String jsCode) {
+    public WeiXinResult.MiniUserAccessTokenObject exchangeMiniUserAccessTokenByCode(String jsCode) {
         Map<String, String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getAppid());
         params.put("secret", ConfigUtils.getSecret());

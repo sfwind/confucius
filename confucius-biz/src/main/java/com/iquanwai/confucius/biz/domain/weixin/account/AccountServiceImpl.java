@@ -13,6 +13,8 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
@@ -20,11 +22,9 @@ import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.beanutils.BeanUtils;
@@ -68,6 +68,10 @@ public class AccountServiceImpl implements AccountService {
     private CallbackDao callbackDao;
     @Autowired
     private WeiXinApiService weiXinApiService;
+    @Autowired
+    private PermissionService permissionService;
+    @Autowired
+    private PlanService planService;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -82,15 +86,14 @@ public class AccountServiceImpl implements AccountService {
 
     private void loadUserRole() {
         List<UserRole> userRoleList = userRoleDao.loadAll(UserRole.class);
-
         userRoleList.stream().filter(userRole1 -> !userRole1.getDel()).forEach(userRole ->
                 userRoleMap.put(userRole.getProfileId(), userRole.getRoleId()));
-
         logger.info("role init complete");
     }
 
     @Override
     public WeiXinResult.UserInfoObject storeWeiXinUserInfo(String openId, String accessToken, Profile.ProfileType profileType) {
+        // TODO 优化，不能每次过来都调用微信接口，比较调用微信接口和查询 callback 的时间花费差异
         WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfo(openId, accessToken);
         String unionId = userInfoObject.getUnionId();
         String nickName = userInfoObject.getNickName();
@@ -190,6 +193,20 @@ public class AccountServiceImpl implements AccountService {
             }
         });
         return userInfoObject;
+    }
+
+
+    /**
+     * 获取用户角色信息
+     */
+    @Override
+    public Role getUserRole(Integer profileId) {
+        Role role = permissionService.getRole(profileId);
+        if (role == null) {
+            List<ImprovementPlan> plans = planService.loadUserPlans(profileId);
+            role = plans.isEmpty() ? Role.stranger() : Role.student();
+        }
+        return role;
     }
 
     @Override
@@ -649,50 +666,4 @@ public class AccountServiceImpl implements AccountService {
     public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
         return profileDao.updateHeadImgUrl(profileId, headImgUrl);
     }
-
-    @Override
-    public int initProfileAndFollowUser(String unionId, String nickName, String avatarUrl, Integer gender) {
-        int result = 1;
-
-        Account account = followUserDao.queryByUnionId(unionId);
-        if (account == null) {
-            Callback callback = callbackDao.queryByUnionId(unionId);
-            String weMiniOpenId = callback.getWeMiniOpenid();
-
-            account = new Account();
-            account.setWeMiniOpenId(weMiniOpenId);
-            account.setUnionid(unionId);
-            account.setNickname(nickName);
-            account.setSex(gender);
-            account.setHeadimgurl(avatarUrl);
-            result *= followUserDao.insert(account) > 0 ? 1 : -1;
-        } else {
-            Callback callback = callbackDao.queryByUnionId(unionId);
-            String weMiniOpenId = callback.getWeMiniOpenid();
-            account.setWeMiniOpenId(weMiniOpenId);
-            result *= followUserDao.updateOAuthFields(account);
-        }
-
-        Profile profile = getProfileByUnionId(unionId);
-        if (profile == null) {
-            profile = new Profile();
-            profile.setUnionid(unionId);
-            profile.setNickname(nickName);
-            profile.setHeadimgurl(avatarUrl);
-            profile.setRiseId(CommonUtils.randomString(7));
-            try {
-                result *= profileDao.insertProfile(profile);
-            } catch (SQLException e) {
-                profile.setRiseId(CommonUtils.randomString(7));
-                try {
-                    result *= profileDao.insertProfile(profile) > 0 ? 1 : -1;
-                } catch (SQLException e1) {
-                    logger.error(e1.getLocalizedMessage(), e);
-                }
-            }
-        }
-
-        return result;
-    }
-
 }

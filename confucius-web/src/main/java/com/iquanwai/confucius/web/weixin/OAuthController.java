@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -182,21 +181,18 @@ public class OAuthController {
     @RequestMapping("/mini/code")
     public ResponseEntity<Map<String, Object>> oauthWeMiniCode(@RequestParam(value = "code") String code) {
         try {
-            WeiXinResult.UserAccessTokenObject userAccessTokenObject = weiXinApiService.exchangeUserAccessTokenByCode(code);
-
+            WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject = weiXinApiService.exchangeMiniUserAccessTokenByCode(code);
             String state = CommonUtils.randomString(32);
-            Callback callback = oAuthService.supplementPcCallback()
-
-            Callback callback = oAuthService.weMiniAccessToken(code);
-            Profile profile = accountService.getProfileByUnionId(callback.getUnionId());
-            Assert.notNull(callback, "callback 数据不能为空");
-
+            // 初始化 callback 对象，微信小程序通过 code 调用能够直接返回 unionId
+            Callback callback = oAuthService.initMiniCallback(state, miniUserAccessTokenObject);
+            // 存储 Profile 信息和 FollowUser 信息
+            accountService.storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
+            // 微信小程序
             WeMiniCallback weMiniCallback = new WeMiniCallback();
             weMiniCallback.setState(callback.getState());
             weMiniCallback.setExpireDate(DateUtils.afterDays(new Date(), 7).getTime());
-            weMiniCallback.setFirstLogin(profile == null);
             return WebUtils.result(weMiniCallback);
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
             return WebUtils.error("服务器伐开心,我们正在想办法");
         }

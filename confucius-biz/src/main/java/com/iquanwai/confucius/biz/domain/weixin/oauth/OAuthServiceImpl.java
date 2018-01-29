@@ -91,8 +91,20 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    public Callback supplementMiniCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject) {
-
+    /**
+     * 小程序与手机和 pc 不一样，前端返回 code，根据 code 兑换 openId 和 unionId
+     * @param state 随机数
+     * @param miniUserAccessTokenObject 根据 code 调用微信返回的 accessToken 信息
+     */
+    @Override
+    public Callback initMiniCallback(String state, WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject) {
+        Callback callback = new Callback();
+        callback.setState(state);
+        callback.setWeMiniOpenid(miniUserAccessTokenObject.getOpenId());
+        callback.setWeMiniAccessToken(miniUserAccessTokenObject.getAccessToken());
+        callback.setUnionId(miniUserAccessTokenObject.getUnionId());
+        callbackDao.insert(callback);
+        return callback;
     }
 
     /**

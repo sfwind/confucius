@@ -57,27 +57,6 @@ public class CallbackDao extends DBUtil {
         return -1;
     }
 
-    public void updateUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        try {
-            run.update("UPDATE Callback Set AccessToken = ?, RefreshToken = ?, Openid = ?, UnionId = ? where State = ?",
-                    accessToken, refreshToken, openid, unionId, state);
-
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    public void updatePcUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        try {
-            run.update("UPDATE Callback Set PcAccessToken = ?, RefreshToken = ?, PcOpenid = ?, UnionId = ? where State = ?",
-                    accessToken, refreshToken, openid, unionId, state);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
     public void refreshToken(String state, String newAccessToken) {
         QueryRunner run = new QueryRunner(getDataSource());
         try {
@@ -115,20 +94,6 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public Callback queryByPcAccessToken(String accessToken) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
-
-        try {
-            Callback callback = run.query("SELECT * FROM Callback where PcAccessToken=?", h, accessToken);
-            return callback;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return null;
-    }
-
     public Callback queryByUnionId(String unionId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM Callback WHERE UnionId = ?";
@@ -141,13 +106,4 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public void updateOpenId(String state, String openId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        try {
-            String sql = "update Callback set OpenId = ? where State = ?";
-            run.update(sql, openId, state);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
 }

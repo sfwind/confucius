@@ -31,8 +31,6 @@ public class UnionUserResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        logger.info("进入 UnionUser Resolver");
-
         if (ConfigUtils.isDebug()) {
             return UnionUser.defaultUser();
         }

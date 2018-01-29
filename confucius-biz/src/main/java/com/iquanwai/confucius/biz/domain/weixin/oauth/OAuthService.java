@@ -22,6 +22,8 @@ public interface OAuthService {
 
     Callback supplementPcCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject);
 
+    Callback initMiniCallback(String state, WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject);
+
     Callback supplementCallbackUnionId(String state, String unionId);
 
     Callback getCallbackByState(String state);

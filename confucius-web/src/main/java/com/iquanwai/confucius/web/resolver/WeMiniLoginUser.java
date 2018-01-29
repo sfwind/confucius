@@ -15,15 +15,15 @@ public class WeMiniLoginUser {
 
     private Integer id;
     private String openId;
-    private String weMiniOpenId;
-    private String unionId;
+    private String nickName;
+    private String headImgUrl;
 
     public static WeMiniLoginUser defaultUser() {
         return new WeMiniLoginUser(
                 ConfigUtils.getDefaultProfileId(),
                 ConfigUtils.getDefaultOpenid(),
-                ConfigUtils.getDefaultWeMiniOpenId(),
-                ConfigUtils.getDefaultUnionId());
+                "三十文",
+                "http://wx.qlogo.cn/mmopen/Q3auHgzwzM7wkhob9zgicD3IJxG1tLVSSe9qdzR1qUGXz6BwPv73sr67iaTEibcA1sNic3Roib4DgXCVG4IWe0zPAKJnlo5r4NibezssS6naic6dkM/0");
     }
 
 }

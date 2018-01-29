@@ -213,7 +213,6 @@ public class LoginUserService {
         pcLoginUser.setOpenId(loginUser.getOpenId());
         pcLoginUser.setRole(role.getId());
         pcLoginUser.setSignature(profile.getSignature());
-        pcLoginUser.setPermissionList(permissionService.loadPermissions(role.getLevel()));
         logger.info("pcUser:{}", pcLoginUser);
         return new MutablePair<>(1, pcLoginUser);
     }
