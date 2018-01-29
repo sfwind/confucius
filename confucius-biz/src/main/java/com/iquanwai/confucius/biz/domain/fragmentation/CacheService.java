@@ -8,6 +8,8 @@ public interface CacheService {
 
     MonthlyCampConfig loadMonthlyCampConfig();
 
+    void reload();
+
     void reloadMonthlyCampConfig();
 
     void reloadBusinessCollegeConfig();
