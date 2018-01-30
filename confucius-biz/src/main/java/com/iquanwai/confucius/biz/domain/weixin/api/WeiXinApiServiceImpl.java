@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.api;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -95,7 +96,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
     @Override
     public Map<String, String> generateJsOAuthParam(String state, String codeCallbackUrl) {
         Map<String, String> params = Maps.newHashMap();
-        params.put("appid", ConfigUtils.getRisePcAppid());
+        params.put("appid", ConfigUtils.getPcAppId());
         params.put("scope", "snsapi_login,snsapi_userinfo");
         try {
             params.put("redirect_uri", URLEncoder.encode(ConfigUtils.adapterDomainName() + codeCallbackUrl, "utf-8"));
@@ -113,10 +114,26 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
      * @param code 微信返回 code
      */
     @Override
-    public WeiXinResult.UserAccessTokenObject exchangeUserAccessTokenByCode(String code) {
+    public WeiXinResult.UserAccessTokenObject exchangeUserAccessTokenByCode(String code, Profile.ProfileType profileType) {
         Map<String, String> params = Maps.newHashMap();
-        params.put("appid", ConfigUtils.getAppid());
-        params.put("secret", ConfigUtils.getSecret());
+        switch (profileType) {
+            case MOBILE:
+                params.put("appid", ConfigUtils.getAppid());
+                params.put("secret", ConfigUtils.getSecret());
+                break;
+            case PC:
+                params.put("appid", ConfigUtils.getPcAppId());
+                params.put("secret", ConfigUtils.getPcSecret());
+                break;
+            case MINI:
+                params.put("appid", ConfigUtils.getWeMiniAppId());
+                params.put("secret", ConfigUtils.getWeMiniAppSecret());
+                break;
+            default:
+                params.put("appid", ConfigUtils.getAppid());
+                params.put("secret", ConfigUtils.getSecret());
+                break;
+        }
         params.put("code", code);
         String requestUrl = CommonUtils.placeholderReplace(USER_ACCESS_TOKEN_URL, params);
         String body = restfulHelper.get(requestUrl);
