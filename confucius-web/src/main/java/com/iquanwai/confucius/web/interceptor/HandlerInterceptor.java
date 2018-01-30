@@ -35,6 +35,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         if (platform == null) {
             // platform 为空，请求的是资源或者页面，在 IndexController 有相关页面匹配，此处仅做补充处理
             logger.info("platform 为空");
+            writeUnLoginStatus(response);
             return false;
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
