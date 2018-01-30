@@ -196,7 +196,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         Map<String, String> params = Maps.newHashMap();
         params.put("openid", openId);
         params.put("access_token", accessToken);
-        String requestUrl = CommonUtils.placeholderReplace(USER_INFO_URL, params);
+        String requestUrl = CommonUtils.placeholderReplace(SNS_API_USER_INFO, params);
         String body = restfulHelper.getPure(requestUrl);
 
         WeiXinResult.UserInfoObject userInfoObject = new WeiXinResult.UserInfoObject();
