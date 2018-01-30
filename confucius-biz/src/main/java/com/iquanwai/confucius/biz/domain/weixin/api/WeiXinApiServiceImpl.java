@@ -61,7 +61,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         params.put("appid", ConfigUtils.getAppid());
         params.put("secret", ConfigUtils.getSecret());
         String requestUrl = CommonUtils.placeholderReplace(APP_ACCESS_TOKEN_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String body = restfulHelper.getPure(requestUrl);
         Map<String, Object> accessTokenObject = CommonUtils.jsonToMap(body);
         String accessToken = accessTokenObject.get("access_token").toString();
         logger.info("最新请求 accessToken 为：{}", accessToken);
@@ -136,7 +136,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         }
         params.put("code", code);
         String requestUrl = CommonUtils.placeholderReplace(USER_ACCESS_TOKEN_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String body = restfulHelper.getPure(requestUrl);
 
         WeiXinResult.UserAccessTokenObject userAccessTokenObject = new WeiXinResult.UserAccessTokenObject();
         try {
@@ -166,7 +166,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         params.put("secret", ConfigUtils.getSecret());
         params.put("jscode", jsCode);
         String requestUrl = CommonUtils.placeholderReplace(WE_MINI_ACCESS_TOKEN_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String body = restfulHelper.getPure(requestUrl);
 
         WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject = new WeiXinResult.MiniUserAccessTokenObject();
         try {
@@ -197,7 +197,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         params.put("openid", openId);
         params.put("access_token", accessToken);
         String requestUrl = CommonUtils.placeholderReplace(USER_INFO_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String body = restfulHelper.getPure(requestUrl);
 
         WeiXinResult.UserInfoObject userInfoObject = new WeiXinResult.UserInfoObject();
         try {

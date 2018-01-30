@@ -159,6 +159,19 @@ public class RestfulHelper {
         return "";
     }
 
+    public String getPure(String requestUrl) {
+        if (!StringUtils.isEmpty(requestUrl)) {
+            Request request = new Request.Builder().url(requestUrl).build();
+            try {
+                Response response = client.newCall(request).execute();
+                return response.body().toString();
+            } catch (Exception e) {
+                logger.error("execute " + requestUrl + " error", e);
+            }
+        }
+        return null;
+    }
+
     public ResponseBody getPlain(String requestUrl) {
         if (StringUtils.isNotEmpty(requestUrl)) {
             Request request = new Request.Builder()
