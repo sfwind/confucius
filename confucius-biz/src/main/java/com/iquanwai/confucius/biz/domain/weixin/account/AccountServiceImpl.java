@@ -98,7 +98,7 @@ public class AccountServiceImpl implements AccountService {
         String unionId = userInfoObject.getUnionId();
         String nickName = userInfoObject.getNickName();
         String headImgUrl = userInfoObject.getHeadImgUrl();
-        String sex = userInfoObject.getSex();
+        Integer sex = userInfoObject.getSex();
         String country = userInfoObject.getCountry();
         String province = userInfoObject.getProvince();
         String city = userInfoObject.getCity();
@@ -121,7 +121,7 @@ public class AccountServiceImpl implements AccountService {
                 }
                 account.setNickname(nickName);
                 account.setHeadimgurl(headImgUrl);
-                account.setSex(Integer.parseInt(sex));
+                account.setSex(sex);
                 account.setCountry(country);
                 account.setProvince(province);
                 account.setCity(city);
@@ -141,7 +141,7 @@ public class AccountServiceImpl implements AccountService {
                 }
                 account.setNickname(nickName);
                 account.setHeadimgurl(headImgUrl);
-                account.setSex(Integer.parseInt(sex));
+                account.setSex(sex);
                 account.setCountry(country);
                 account.setProvince(province);
                 account.setCity(city);
