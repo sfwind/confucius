@@ -208,7 +208,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             String country = result.get("country").toString();
             String province = result.get("province").toString();
             String city = result.get("city").toString();
-            String unionId = result.get("unionId").toString();
+            String unionId = result.get("unionid").toString();
             userInfoObject.setOpenId(newOpenId);
             userInfoObject.setNickName(nickName);
             userInfoObject.setHeadImgUrl(headImgUrl);
