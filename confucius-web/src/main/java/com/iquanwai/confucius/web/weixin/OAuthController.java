@@ -143,6 +143,7 @@ public class OAuthController {
 
     @RequestMapping("/pc/code")
     public void pcOAuthCode(@RequestParam(required = false) String code, @RequestParam String state, HttpServletRequest request, HttpServletResponse response) {
+        logger.info("接收到 code：{}", code);
         try {
             if (code == null) {
                 // 用户不同意授权,跳转报错页面
