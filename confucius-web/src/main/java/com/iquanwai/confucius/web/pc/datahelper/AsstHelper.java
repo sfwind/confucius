@@ -166,6 +166,7 @@ public class AsstHelper {
         upGradeDto.setRemainCompanyNumber(getRemain(finish,total));
         upGradeDto.setNeedCompanyScore(asstUpStandard.getCompanyTrainScore());
         upGradeDto.setCompanyTrainScore(asstUpExecution.getCompanyTrainScore());
+        upGradeDto.setNeedVerified(asstUpStandard.getNeedVerified());
         upGradeDto.setUpGrade(asstUpExecution.getUpGrade());
         return upGradeDto;
 

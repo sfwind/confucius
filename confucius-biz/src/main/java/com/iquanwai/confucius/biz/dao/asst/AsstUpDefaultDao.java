@@ -40,7 +40,7 @@ public class AsstUpDefaultDao  extends DBUtil{
                 "ValidReviewRate = ?, HighQualityAnswer = ?,HostNumber = ?,HostScore = ?,MainPointNumber = ?," +
                 "MainPointScore = ?,OnlineAnswer = ?,Swing = ?,OnlineOrSwingNumber = ?,OnlineScore=?," +
                 "CampNumber =?,AsstNumber =?,CampScore =?,MonthlyWork=?,FosterNew=?,CompanyTrainNumber=?," +
-                "CompanyTrainScore = ? where id = ?";
+                "CompanyTrainScore = ?,NeedVerified where id = ?";
         try {
            return runner.update(sql,asstUpDefault.getCountDown(),asstUpDefault.getLearnedProblem(),asstUpDefault.getApplicationRate(),
                     asstUpDefault.getRequestReviewNumber(),asstUpDefault.getValidReviewNumber(),asstUpDefault.getValidReviewRate(),asstUpDefault.getHighQualityAnswer(),
@@ -49,6 +49,7 @@ public class AsstUpDefaultDao  extends DBUtil{
                     asstUpDefault.getOnlineOrSwingNumber(),asstUpDefault.getOnlineScore(),asstUpDefault.getCampNumber(),
                     asstUpDefault.getAsstNumber(),asstUpDefault.getCampScore(),asstUpDefault.getMonthlyWork(),
                     asstUpDefault.getFosterNew(),asstUpDefault.getCompanyTrainNumber(),asstUpDefault.getCompanyTrainScore(),
+                    asstUpDefault.getNeedVerified(),
                     asstUpDefault.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);

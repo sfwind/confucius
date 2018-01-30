@@ -102,9 +102,9 @@ public class AsstUpExecution {
     private BigDecimal companyTrainScore;
 
     /**
-     * 升级认证（0-未认证，1-已通过 ，2-未通过）
+     * 认证状态
      */
-    private Integer upGrade;
+    private String upGrade;
     /**
      * 是否删除 0-未删除 1-已删除
      */

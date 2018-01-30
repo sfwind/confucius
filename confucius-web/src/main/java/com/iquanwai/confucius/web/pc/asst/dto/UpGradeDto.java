@@ -245,7 +245,12 @@ public class UpGradeDto {
     private BigDecimal companyTrainScore;
 
     /**
+     * 是否需要认证
+     */
+    private String needVerified;
+
+    /**
      * 认证状态
      */
-    private Integer upGrade;
+    private String upGrade;
 }

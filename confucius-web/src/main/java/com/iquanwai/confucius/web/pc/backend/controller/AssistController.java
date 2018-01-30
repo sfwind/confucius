@@ -26,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -79,15 +80,8 @@ public class AssistController {
                 } else {
                     assistDto.setReached("否");
                 }
-                Integer upgrade = asstUpExecution.getUpGrade();
-                if (upgrade == 0) {
-                    assistDto.setVerified("未认证");
-                } else if (upgrade == 1) {
-                    assistDto.setVerified("已通过");
-                } else if (upgrade == 2) {
-                    assistDto.setVerified("未通过");
-                }
-
+                assistDto.setNeedVerified(asstUpStandard.getNeedVerified());
+                assistDto.setUpGrade(asstUpExecution.getUpGrade());
             }
             assistDtoList.add(assistDto);
         });
@@ -299,6 +293,20 @@ public class AssistController {
 
     }
 
+    @RequestMapping(value = "/execution/file/update",method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> updateAssistExecution(PCLoginUser loginUser,@RequestParam(value = "file") MultipartFile excelFile){
+
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理").function("助教管理").action("更新助教完成情况");
+
+        operationLogService.log(operationLog);
+
+        asstUpService.updateExecution(excelFile);
+
+        return WebUtils.success();
+    }
+
+
 
     /**
      * 生成评判标准
@@ -419,5 +427,8 @@ public class AssistController {
         }
         return AsstHelper.checkIsReached(asstUpStandard, asstUpExecution);
     }
+
+
+
 
 }

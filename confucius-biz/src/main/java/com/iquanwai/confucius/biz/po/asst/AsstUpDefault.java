@@ -117,6 +117,12 @@ public class AsstUpDefault {
      * 企业培训评分
      */
     private BigDecimal companyTrainScore;
+
+    /**
+     * 是否需要升级认证
+     */
+    private String needVerified;
+
     /**
      * 是否删除 0-未删除 1-已删除
      */

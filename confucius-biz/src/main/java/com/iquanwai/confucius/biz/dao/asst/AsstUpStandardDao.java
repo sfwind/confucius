@@ -41,7 +41,7 @@ public class AsstUpStandardDao extends DBUtil {
                 "ApplicationRate,RequestReviewNumber,ValidReviewNumber,ValidReviewRate,HighQualityAnswer,HostNumber,HostScore," +
                 "MainPointNumber,MainPointScore,OnlineAnswer,Swing,OnlineOrSwingNumber," +
                 "OnlineScore,CampNumber,AsstNumber,CampScore,MonthlyWork,FosterNew," +
-                "CompanyTrainNumber,CompanyTrainScore) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "CompanyTrainNumber,CompanyTrainScore,NeedVerified) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), asstUpStandard.getProfileId(), asstUpStandard.getRoleId(),
@@ -51,7 +51,7 @@ public class AsstUpStandardDao extends DBUtil {
                     asstUpStandard.getOnlineAnswer(), asstUpStandard.getSwing(), asstUpStandard.getOnlineOrSwingNumber(),
                     asstUpStandard.getOnlineScore(), asstUpStandard.getCampNumber(), asstUpStandard.getAsstNumber(),
                     asstUpStandard.getCampScore(), asstUpStandard.getMonthlyWork(), asstUpStandard.getFosterNew(),
-                    asstUpStandard.getCompanyTrainNumber(), asstUpStandard.getCompanyTrainScore());
+                    asstUpStandard.getCompanyTrainNumber(), asstUpStandard.getCompanyTrainScore(),asstUpStandard.getNeedVerified());
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -65,7 +65,7 @@ public class AsstUpStandardDao extends DBUtil {
                 "RequestReviewNumber=?,ValidReviewNumber=?,ValidReviewRate=?,HighQualityAnswer=?,HostNumber =?," +
                 "HostScore = ?,MainPointNumber =?,MainPointScore=?,OnlineAnswer=?,Swing = ?," +
                 "OnlineOrSwingNumber = ?,OnlineScore=?,CampNumber=?,AsstNumber=?,CampScore=?," +
-                "MonthlyWork = ?,FosterNew=?,CompanyTrainNumber=?,CompanyTrainScore = ? where id = ?";
+                "MonthlyWork = ?,FosterNew=?,CompanyTrainNumber=?,CompanyTrainScore = ?,NeedVerified = ? where id = ?";
         try {
             return runner.update(sql, asstUpStandard.getCountDown(), asstUpStandard.getLearnedProblem(), asstUpStandard.getApplicationRate(),
                     asstUpStandard.getRequestReviewNumber(), asstUpStandard.getValidReviewNumber(), asstUpStandard.getValidReviewRate(),
@@ -73,7 +73,7 @@ public class AsstUpStandardDao extends DBUtil {
                     asstUpStandard.getMainPointScore(), asstUpStandard.getOnlineAnswer(), asstUpStandard.getSwing(),
                     asstUpStandard.getOnlineOrSwingNumber(), asstUpStandard.getOnlineScore(), asstUpStandard.getCampNumber(),
                     asstUpStandard.getAsstNumber(), asstUpStandard.getCampScore(), asstUpStandard.getMonthlyWork(),
-                    asstUpStandard.getFosterNew(), asstUpStandard.getCompanyTrainNumber(), asstUpStandard.getCompanyTrainScore(),asstUpStandard.getId());
+                    asstUpStandard.getFosterNew(), asstUpStandard.getCompanyTrainNumber(), asstUpStandard.getCompanyTrainScore(),asstUpStandard.getNeedVerified(),asstUpStandard.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

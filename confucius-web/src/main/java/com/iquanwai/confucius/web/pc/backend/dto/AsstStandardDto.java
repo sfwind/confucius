@@ -111,6 +111,11 @@ public class AsstStandardDto {
     private BigDecimal companyTrainScore;
 
     /**
+     * 是否需要升级认证
+     */
+    private String needVerified;
+
+    /**
      * 是否删除 0-未删除 1-已删除
      */
     private Integer del;

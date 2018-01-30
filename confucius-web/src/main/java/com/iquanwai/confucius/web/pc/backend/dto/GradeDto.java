@@ -247,7 +247,14 @@ public class GradeDto {
      * 企业培训的分数
      */
     private BigDecimal companyTrainScore;
+    /**
+     * 是否需要认证
+     */
+    private String needVerified;
 
-    private Integer upGrade;
+    /**
+     * 升级状态
+     */
+    private String upGrade;
 
 }
