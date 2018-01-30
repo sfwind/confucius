@@ -96,7 +96,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
     public Map<String, String> generateJsOAuthParam(String state, String codeCallbackUrl) {
         Map<String, String> params = Maps.newHashMap();
         params.put("appid", ConfigUtils.getRisePcAppid());
-        params.put("scope", "snsapi_userinfo");
+        params.put("scope", "snsapi_login,snsapi_userinfo");
         try {
             params.put("redirect_uri", URLEncoder.encode(ConfigUtils.adapterDomainName() + codeCallbackUrl, "utf-8"));
         } catch (UnsupportedEncodingException e) {
