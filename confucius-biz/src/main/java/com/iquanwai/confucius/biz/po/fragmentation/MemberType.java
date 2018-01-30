@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class MemberType {
     private Integer id; // MemberId
     private Double fee; // 会员费用
+    private Double initPrice; //原价
     private String name; // 会员名
     private String description; // 描述
     private Integer openMonth; // 会员时长
@@ -30,6 +31,7 @@ public class MemberType {
         temp.setStartTime(this.startTime);
         temp.setEndTime(this.endTime);
         temp.setDel(this.del);
+        temp.setInitPrice(this.initPrice);
         return temp;
     }
 }

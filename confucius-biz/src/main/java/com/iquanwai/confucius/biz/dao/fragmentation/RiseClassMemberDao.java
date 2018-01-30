@@ -195,12 +195,12 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<RiseClassMember> loadByMemberIds(List<String> memberIds) {
+    public List<RiseClassMember> loadActiveByMemberIds(List<String> memberIds) {
         if (memberIds.size() == 0) {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId In (" + produceQuestionMark(memberIds.size()) + ")";
+        String sql = "SELECT * FROM RiseClassMember WHERE Active = 1 AND Del = 0 AND MemberId In (" + produceQuestionMark(memberIds.size()) + ")";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, memberIds.toArray());
@@ -261,37 +261,51 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     /**
      * 获得所有的班级和小组
-     * @return
      */
-    public List<RiseClassMember> loadAllClassNameAndGroup(){
+    public List<RiseClassMember> loadAllClassNameAndGroup() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = " select ClassName,GroupId from RiseClassMember where Active = 1 and Del = 0 group by ClassName,GroupId order by ClassName";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
 
         try {
-           return runner.query(sql,h);
+            return runner.query(sql, h);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-
     /**
      * 根据班级和小组获得用户
-     * @param className
-     * @param groupId
-     * @return
      */
-    public List<RiseClassMember> getRiseClassMemberByClassNameGroupId(String className,String groupId){
+    public List<RiseClassMember> getRiseClassMemberByClassNameGroupId(String className, String groupId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseClassMember where ClassName = ? and GroupId = ? and Active = 1 and Del = 0";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
 
         try {
-            return runner.query(sql,h,className,groupId);
+            return runner.query(sql, h, className, groupId);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    /**
+     * 根据 MemberId 查询 RiseClassMember 记录，只是为了发证书
+     * @param memberIds 学号集合
+     */
+    public List<RiseClassMember> queryForCertificateMemberIds(List<String> memberIds) {
+        if (memberIds.size() == 0) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId IN (" + produceQuestionMark(memberIds.size()) + ") GROUP BY ProfileId ORDER BY Id DESC";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, memberIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }

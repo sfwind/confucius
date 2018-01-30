@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
@@ -16,6 +17,7 @@ import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.CourseSchedule;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
@@ -37,7 +39,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 16/8/10.
@@ -64,6 +70,8 @@ public class AccountServiceImpl implements AccountService {
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private CallbackDao callbackDao;
+    @Autowired
+    private CourseScheduleDao courseScheduleDao;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -506,6 +514,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Integer loadUserScheduleCategory(Integer profileId) {
+        CourseSchedule courseSchedule = courseScheduleDao.loadOldestCourseSchedule(profileId);
+        if (courseSchedule != null) {
+            return courseSchedule.getCategory();
+        }
         // 老用户
         CustomerStatus status = customerStatusDao.load(profileId, CustomerStatus.SCHEDULE_LESS);
         if (status != null) {
