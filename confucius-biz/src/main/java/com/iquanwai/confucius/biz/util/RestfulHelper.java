@@ -164,7 +164,9 @@ public class RestfulHelper {
             Request request = new Request.Builder().url(requestUrl).build();
             try {
                 Response response = client.newCall(request).execute();
-                return response.body().toString();
+                String result = response.body().toString();
+                logger.info("调用：{}，\n 结果：{}", requestUrl, result);
+                return result;
             } catch (Exception e) {
                 logger.error("execute " + requestUrl + " error", e);
             }
