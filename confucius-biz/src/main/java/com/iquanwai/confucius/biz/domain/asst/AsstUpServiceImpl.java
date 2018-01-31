@@ -60,9 +60,9 @@ public class AsstUpServiceImpl implements AsstUpService {
      * @return
      */
     @Override
-    public void updateExecution(MultipartFile file) {
+    public Integer updateExecution(MultipartFile file) {
         List<AsstUpExecution> asstUpExecutions = genAsstUpExecution(file);
-        asstUpExecutions.forEach(asstUpExecution -> {
+        for(AsstUpExecution asstUpExecution:asstUpExecutions) {
             Integer profileId = asstUpExecution.getProfileId();
             AsstUpExecution existExecution = asstUpExecutionDao.queryByProfileId(profileId);
             //增量
@@ -137,8 +137,11 @@ public class AsstUpServiceImpl implements AsstUpService {
             if(asstUpExecution.getCompanyTrainScore()==null){
                 asstUpExecution.setCompanyTrainScore(existExecution.getCompanyTrainScore());
             }
-            asstUpExecutionDao.update(asstUpExecution);
-        });
+            if(asstUpExecutionDao.update(asstUpExecution)==-1){
+                return -1;
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -191,13 +194,16 @@ public class AsstUpServiceImpl implements AsstUpService {
         try {
             workbook = Workbook.getWorkbook(file.getInputStream());
             Sheet sheet = workbook.getSheet(0);
-
+            logger.info("总共需要处理的数据行为："+(sheet.getRows()-2));
             for (int row = 2; row < sheet.getRows(); row++) {
+                logger.info("当前处理的数据行为："+(row-1));
                 AsstUpExecution asstUpExecution = new AsstUpExecution();
 
                 String riseId = sheet.getCell(2, row).getContents();
                 Profile profile = profileDao.queryByRiseId(riseId);
-
+                if(profile == null){
+                    break;
+                }
                 asstUpExecution.setProfileId(profile.getId());
                 String reviewNumber = sheet.getCell(8, row).getContents();
                 if (!"".equals(reviewNumber)) {

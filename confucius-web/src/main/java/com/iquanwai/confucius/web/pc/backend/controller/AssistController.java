@@ -301,8 +301,9 @@ public class AssistController {
 
         operationLogService.log(operationLog);
 
-        asstUpService.updateExecution(excelFile);
-
+        if(asstUpService.updateExecution(excelFile)==-1){
+            return WebUtils.error("导入助教完成数据出错");
+        }
         return WebUtils.success();
     }
 

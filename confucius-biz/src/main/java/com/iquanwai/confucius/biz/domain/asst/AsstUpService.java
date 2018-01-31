@@ -43,7 +43,7 @@ public interface AsstUpService {
     Integer insertExecution(Integer standardId,Integer profileId,Integer roleId,Date startDate);
     Integer updateExecution(AsstUpExecution asstUpExecution);
 
-    void updateExecution(MultipartFile file);
+    Integer updateExecution(MultipartFile file);
 
 
 
