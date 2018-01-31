@@ -3,7 +3,10 @@ package com.iquanwai.confucius.web.internal.controller;
 import com.iquanwai.confucius.biz.domain.message.SMSSendResult;
 import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
-import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.web.internal.dto.SMSDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -27,11 +27,15 @@ import java.util.Map;
 @RestController
 @RequestMapping("/internal")
 public class InternalController {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ShortMessageService shortMessageService;
+    @Autowired
+    private OAuthService oAuthService;
+    @Autowired
+    private AccountService accountService;
 
     /**
      * 短信发送
@@ -40,48 +44,53 @@ public class InternalController {
      */
     @RequestMapping(value = "/sms/send", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> sendMessage(HttpServletRequest request, @RequestBody SMSDto smsDto) {
-        logger.info("param:{}", smsDto);
         Assert.notNull(smsDto);
-        String remoteIp = request.getHeader("X-Forwarded-For");
-        boolean isInternalIp = CommonUtils.internalIp(remoteIp);
-        logger.info("请求来源：{},是否内网：{}", remoteIp, isInternalIp);
-        if (isInternalIp) {
-            // 是内网ip的请求
-            ShortMessage shortMessage = new ShortMessage();
-            shortMessage.setProfileId(smsDto.getProfileId());
-            shortMessage.setContent(smsDto.getContent());
-            shortMessage.setPhone(smsDto.getPhone());
-            shortMessage.setType(smsDto.getType());
 
-            // 检查发送条数限制
-            Pair<Integer, String> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
-            if (checkSendLimit.getLeft() < 0) {
-                logger.error("发送参数异常，无法发送{}:{}", checkSendLimit.getLeft(), checkSendLimit.getRight());
-                // 不可以发送
-                SMSSendResult temp = new SMSSendResult();
-                temp.setResult(checkSendLimit.getLeft().toString());
-                temp.setDesc(checkSendLimit.getRight());
-                return WebUtils.error(temp);
-            }
+        ShortMessage shortMessage = new ShortMessage();
+        shortMessage.setProfileId(smsDto.getProfileId());
+        shortMessage.setContent(smsDto.getContent());
+        shortMessage.setPhone(smsDto.getPhone());
+        shortMessage.setType(smsDto.getType());
 
-            SMSSendResult result = shortMessageService.sendMessage(shortMessage);
-            if (result != null && "0".equals(result.getResult()) && StringUtils.isBlank(result.getFailPhones())) {
-                // 提交成功，并且没有发送失败的短信
-                shortMessageService.raiseSendCount(smsDto.getProfileId());
-                return WebUtils.result(result);
-            } else {
-                if (result != null && "0".equals(result.getResult()) && !StringUtils.isBlank(result.getFailPhones())) {
-                    result.setDesc("发送失败，手机号码异常");
-                    return WebUtils.error(result);
-                } else {
-                    return WebUtils.error(result);
-                }
-            }
+        // 检查发送条数限制
+        Pair<Integer, String> checkSendLimit = shortMessageService.checkSendAble(shortMessage);
+        if (checkSendLimit.getLeft() < 0) {
+            logger.error("发送参数异常，无法发送{}:{}", checkSendLimit.getLeft(), checkSendLimit.getRight());
+            // 不可以发送
+            SMSSendResult temp = new SMSSendResult();
+            temp.setResult(checkSendLimit.getLeft().toString());
+            temp.setDesc(checkSendLimit.getRight());
+            return WebUtils.error(temp);
+        }
+
+        SMSSendResult result = shortMessageService.sendMessage(shortMessage);
+        if (result != null && "0".equals(result.getResult()) && StringUtils.isBlank(result.getFailPhones())) {
+            // 提交成功，并且没有发送失败的短信
+            shortMessageService.raiseSendCount(smsDto.getProfileId());
+            return WebUtils.result(result);
         } else {
-            SMSSendResult smsSendResult = new SMSSendResult();
-            smsSendResult.setResult("-1");
-            smsSendResult.setDesc("非内网请求，禁止访问");
-            return WebUtils.error(smsSendResult);
+            if (result != null && "0".equals(result.getResult()) && !StringUtils.isBlank(result.getFailPhones())) {
+                result.setDesc("发送失败，手机号码异常");
+                return WebUtils.error(result);
+            } else {
+                return WebUtils.error(result);
+            }
         }
     }
+
+    /**
+     * 用户信息弥补，对于只存在 callback，却没有存储 Profile 和 FollowUser 用户的人员，调用该内部方法若用户不存在会初始化用户信息
+     * @param state callback 的随机 state
+     */
+    @RequestMapping(value = "/init/user", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> initProfile(HttpServletRequest request, @RequestParam("state") String state) {
+        Callback callback = oAuthService.getCallbackByState(state);
+        Profile profile = accountService.getProfileByUnionId(callback.getUnionId());
+        if (profile != null) {
+            return WebUtils.success();
+        } else {
+            return WebUtils.error("刷新用户 Profile 对象失败，state：" + state);
+        }
+    }
+
 }
