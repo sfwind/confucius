@@ -32,7 +32,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         logger.info("进入拦截器");
 
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
-        if (platform == null) {
+        if (platform == null || unionUserService.isDocumentRequest(request)) {
             // platform 为空，请求的是资源或者页面，在 IndexController 有相关页面匹配，此处仅做补充处理
             logger.info("platform 为空");
             return true;
@@ -51,6 +51,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
      * @return 是否通过拦截器
      */
     private boolean handleUnLogin(UnionUser.Platform platform, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        logger.info("不存在 callback，特殊处理请求");
         switch (platform) {
             case PC:
                 writeUnLoginStatus(response);

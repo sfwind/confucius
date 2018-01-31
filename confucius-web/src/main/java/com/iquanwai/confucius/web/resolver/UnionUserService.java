@@ -128,6 +128,10 @@ public class UnionUserService {
         return unionUser;
     }
 
+    public boolean isDocumentRequest(HttpServletRequest request) {
+        return request.getHeader(PLATFORM_HEADER_NAME) == null;
+    }
+
     public void addCookie(UnionUser.Platform platform, String state, HttpServletResponse response) {
         switch (platform) {
             case PC:

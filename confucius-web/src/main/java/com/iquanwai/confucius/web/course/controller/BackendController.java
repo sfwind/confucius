@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.course.controller;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
 import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -43,7 +42,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/b")
 public class BackendController {
 
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private CustomerMessageService customerMessageService;
@@ -60,16 +59,14 @@ public class BackendController {
     @Autowired
     private MessageService messageService;
     @Autowired
-    private MonthlyCampService monthlyCampService;
-    @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
-    private RabbitMQPublisher rabbitMQPublisher;
+    private RabbitMQPublisher userReloadPublisher;
 
 
     @PostConstruct
     public void init() {
-        rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
+        userReloadPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
     }
 
     @RequestMapping(value = "/log", method = RequestMethod.POST)
@@ -128,12 +125,12 @@ public class BackendController {
 
     @RequestMapping("/graduate/{classId}")
     public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId) {
-        LOGGER.info("classId {} graduate start", classId);
+        logger.info("classId {} graduate start", classId);
         ThreadPool.execute(() -> {
             try {
                 courseProgressService.graduate(classId);
             } catch (Exception e) {
-                LOGGER.error("触发毕业失败", e);
+                logger.error("触发毕业失败", e);
             }
         });
         return WebUtils.result("正在运行中");
@@ -231,7 +228,7 @@ public class BackendController {
                     templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush);
                 });
             } catch (Exception e) {
-                LOGGER.error("发送通知失败", e);
+                logger.error("发送通知失败", e);
             }
         });
         return WebUtils.result("正在运行中");
@@ -246,7 +243,7 @@ public class BackendController {
                 profileIds.forEach(profileId -> messageService.sendMessage(systemMsgDto.getMessage(),
                         profileId.toString(), MessageService.SYSTEM_MESSAGE, systemMsgDto.getUrl()));
             } catch (Exception e) {
-                LOGGER.error("发送通知失败", e);
+                logger.error("发送通知失败", e);
             }
         });
         return WebUtils.result("正在运行中");
@@ -265,7 +262,7 @@ public class BackendController {
                             Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                 });
             } catch (Exception e) {
-                LOGGER.error("发送通知失败", e);
+                logger.error("发送通知失败", e);
             }
         });
         return WebUtils.result("正在运行中");
@@ -295,15 +292,15 @@ public class BackendController {
                 List<String> unionIds = refreshLoginUserDto.getUnionIds();
                 unionIds.forEach(unionId -> {
                     try {
-                        rabbitMQPublisher.publish(unionId);
+                        userReloadPublisher.publish(unionId);
                         //防止队列阻塞
                         Thread.sleep(50);
                     } catch (Exception e) {
-                        LOGGER.error(e.getLocalizedMessage(), e);
+                        logger.error(e.getLocalizedMessage(), e);
                     }
                 });
             } catch (Exception e) {
-                LOGGER.error("发送通知失败", e);
+                logger.error("发送通知失败", e);
             }
         });
         return WebUtils.result("正在运行中");
