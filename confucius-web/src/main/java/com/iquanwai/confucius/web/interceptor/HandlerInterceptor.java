@@ -38,14 +38,18 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
             return true;
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
-            // 特殊逻辑，登录 pc 版必须先关注公众号
-            if (platform == UnionUser.Platform.PC) {
+            boolean approveTag = (callback != null && callback.getUnionId() != null) || handleUnLogin(platform, request, response);
+            if (approveTag && platform == UnionUser.Platform.PC) {
                 UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
                 if (unionUser.getOpenId() == null) {
                     response.sendRedirect("/servercode");
+                    return false;
+                } else {
+                    return true;
                 }
+            } else {
+                return true;
             }
-            return (callback != null && callback.getUnionId() != null) || handleUnLogin(platform, request, response);
         }
     }
 
