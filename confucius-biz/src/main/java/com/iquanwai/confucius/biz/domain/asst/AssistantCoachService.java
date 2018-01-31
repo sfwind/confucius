@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.asst;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
+import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
@@ -117,5 +118,4 @@ public interface AssistantCoachService {
      * @return
      */
     Integer loadAssignedCount(Integer interviewer);
-
 }

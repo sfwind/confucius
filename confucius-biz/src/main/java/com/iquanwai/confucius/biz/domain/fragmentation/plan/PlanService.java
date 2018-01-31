@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.plan;
 
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
 
 import java.util.List;
 
@@ -14,4 +15,14 @@ public interface PlanService {
      * @param profileId 用户id
      */
     List<ImprovementPlan> loadUserPlans(Integer profileId);
+
+    /**
+     * 获得用户所有的plans
+     * @param profileId
+     * @return
+     */
+    List<ImprovementPlan> getUserPlans(Integer profileId);
+
+    List<PracticePlan> loadPracticePlans(Integer PlanId);
+
 }

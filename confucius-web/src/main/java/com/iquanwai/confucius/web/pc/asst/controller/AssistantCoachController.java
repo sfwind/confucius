@@ -3,9 +3,11 @@ package com.iquanwai.confucius.web.pc.asst.controller;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
+import com.iquanwai.confucius.biz.domain.asst.AsstUpService;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
+import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.RiseWorkInfoDto;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -15,6 +17,8 @@ import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
+import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
+import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -23,7 +27,9 @@ import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.ClassNameGroups;
 import com.iquanwai.confucius.web.pc.asst.dto.Group;
+import com.iquanwai.confucius.web.pc.asst.dto.UpGradeDto;
 import com.iquanwai.confucius.web.pc.backend.dto.*;
+import com.iquanwai.confucius.web.pc.datahelper.AsstHelper;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -58,6 +64,10 @@ public class AssistantCoachController {
     private BusinessSchoolService businessSchoolService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private AsstUpService asstUpService;
+    @Autowired
+    private PlanService planService;
 
     @RequestMapping("/application/{problemId}")
     public ResponseEntity<Map<String, Object>> getUnderCommentApplication(PCLoginUser pcLoginUser,
@@ -285,6 +295,54 @@ public class AssistantCoachController {
         }
         return WebUtils.success();
     }
+
+    /**
+     * @param loginUser
+     * @return
+     */
+    @RequestMapping("/load/up/info")
+    public ResponseEntity<Map<String, Object>> loadUpGradeInfo(PCLoginUser loginUser) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("助教后台管理")
+                .function("助教信息").action("加载升级信息");
+        operationLogService.log(operationLog);
+
+        AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(loginUser.getProfileId());
+        AsstUpStandard asstUpStandard = asstUpService.loadStandard(loginUser.getProfileId());
+
+        UpGradeDto upGradeDto = initUpGradeDto(loginUser.getProfileId(),asstUpStandard,asstUpExecution);
+
+        return WebUtils.result(upGradeDto);
+    }
+
+
+    private UpGradeDto initUpGradeDto(Integer profileId,AsstUpStandard asstUpStandard,AsstUpExecution asstUpExecution){
+        UpGradeDto upGradeDto = AsstHelper.genUpGradeInfo(asstUpStandard,asstUpExecution);
+
+        Integer applicationRate = asstUpStandard.getApplicationRate();
+
+        Integer finish = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime()!=null).map(improvementPlan -> {
+            List<PracticePlan> practicePlans = planService.loadPracticePlans(improvementPlan.getId());
+            Long sum = practicePlans.stream().filter(practicePlan -> (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType()==PracticePlan.APPLICATION_REVIEW)).count();
+            Long count = practicePlans.stream().filter(practicePlan ->(practicePlan.getStatus()==1)&& (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType()==PracticePlan.APPLICATION_REVIEW)).count();
+            if(count*100/sum>=applicationRate){
+                return 1;
+            }else{
+                return 0;
+            }
+        }).reduce(0,Integer::sum);
+
+        Integer total = asstUpStandard.getLearnedProblem();
+        upGradeDto.setNeedLearnedProblem(total);
+        upGradeDto.setLearnedProblem(finish);
+        upGradeDto.setRemainProblem(AsstHelper.getRemain(finish,total));
+
+
+
+        return upGradeDto;
+
+    }
+
+
 
 
     private List<ApplicationDto> getApplictionDto(List<BusinessSchoolApplication> applications){
