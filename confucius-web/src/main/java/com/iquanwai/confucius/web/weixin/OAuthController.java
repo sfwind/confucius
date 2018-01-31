@@ -61,6 +61,7 @@ public class OAuthController {
             if (ConfigUtils.logDetail()) {
                 logger.info("ip is {}, callbackUrl is {}, requestUrl is {}", remoteIp, callbackUrl, redirectOAuthUrl);
             }
+            response.setHeader("Content-Type", "application/xml");
             response.sendRedirect(redirectOAuthUrl);
         } catch (Exception e) {
             logger.error("auth failed", e);
