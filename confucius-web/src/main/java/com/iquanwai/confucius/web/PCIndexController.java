@@ -63,7 +63,7 @@ public class PCIndexController {
         Callback callback = unionUserService.getCallbackByRequest(request);
         if (callback != null) {
             UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-            if (unionUser == null || unionUser.getOpenId() == null) {
+            if (unionUser != null && unionUser.getOpenId() == null) {
                 try {
                     logger.info("用户尚未有服务号信息，跳转二维码关注页面");
                     response.sendRedirect("/servercode");
