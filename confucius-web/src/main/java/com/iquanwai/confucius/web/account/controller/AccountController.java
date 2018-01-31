@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.account.controller;
 
-import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.web.account.dto.AccountDto;
 import com.iquanwai.confucius.web.pc.LoginUserService;
@@ -18,17 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-/**
- * Created by nethunder on 2016/12/20.
- */
 @RestController
 @RequestMapping("/account")
 public class AccountController {
 
     @Autowired
     private LoginUserService loginUserService;
-    @Autowired
-    private AccountService accountService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 

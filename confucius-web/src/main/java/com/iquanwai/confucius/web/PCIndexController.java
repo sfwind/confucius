@@ -57,7 +57,7 @@ public class PCIndexController {
     /**
      * 前往 pc 页面
      */
-    @RequestMapping(value = {"/pc/static/**", "/fragment/**", "/backend/**", "/asst/**"})
+    @RequestMapping(value = {"/fragment/**", "/backend/**", "/asst/**"})
     public ModelAndView getFragmentPage(HttpServletRequest request, HttpServletResponse response) {
         return pcView(request);
     }
