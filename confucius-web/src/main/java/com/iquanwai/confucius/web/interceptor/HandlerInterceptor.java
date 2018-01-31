@@ -37,19 +37,9 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
             logger.info("platform 为空");
             return true;
         } else {
+            logger.info("platform: {}", platform);
             Callback callback = unionUserService.getCallbackByRequest(request);
-            boolean approveTag = (callback != null && callback.getUnionId() != null) || handleUnLogin(platform, request, response);
-            if (approveTag && platform == UnionUser.Platform.PC) {
-                UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-                if (unionUser.getOpenId() == null) {
-                    response.sendRedirect("/servercode");
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                return true;
-            }
+            return (callback != null && callback.getUnionId() != null) || handleUnLogin(platform, request, response);
         }
     }
 

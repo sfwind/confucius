@@ -30,21 +30,21 @@ public class IndexController {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @RequestMapping(value = "/pay/alipay/**", method = RequestMethod.GET)
-    public ModelAndView getAlipayIndex(HttpServletRequest request) throws Exception {
+    public ModelAndView getAlipayIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
         OperationLog operationLog = new OperationLog().function("打点").module("访问页面").action("阿里支付").memo(request.getRequestURI());
         operationLogService.log(operationLog);
-        return payView(request, null, PAY_VIEW);
+        return payView(request, PAY_VIEW);
     }
 
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
-    public ModelAndView getPayIndex(UnionUser unionUser, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return payView(request, unionUser, PAY_VIEW);
+    public ModelAndView getPayIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        return payView(request, PAY_VIEW);
     }
 
     @RequestMapping(value = "/subscribe")
     public ModelAndView goSubscribe(HttpServletRequest request, HttpServletResponse response) throws Exception {
         logger.info("用户未关注，跳转关注页面：{}", request.getRequestURI());
-        return payView(request, null, PAY_VIEW);
+        return payView(request, PAY_VIEW);
     }
 
     @RequestMapping(value = "/heartbeat", method = RequestMethod.GET)
@@ -52,7 +52,7 @@ public class IndexController {
         return WebUtils.success();
     }
 
-    private ModelAndView payView(HttpServletRequest request, UnionUser unionUser, String viewName) {
+    private ModelAndView payView(HttpServletRequest request, String viewName) {
         ModelAndView mav = new ModelAndView(viewName);
         String domainName = request.getHeader("Host-Test");
         String resource = ConfigUtils.staticPayUrl(domainName);

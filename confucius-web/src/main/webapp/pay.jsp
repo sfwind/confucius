@@ -10,10 +10,7 @@
 <body>
 <script>
     window.ENV = {
-        reactMountPoint: "react-app",
-        userName: "${userName}",
-        headImage:"${headImage}",
-        configUrl:'',
+        reactMountPoint: "react-app"
     }
 </script>
 
@@ -32,21 +29,17 @@
         s.parentNode.insertBefore(j, s);
     })(window, document, 'script', '_MEIQIA');
     _MEIQIA('entId', 80143);
-
     _MEIQIA('withoutBtn');
     _MEIQIA('init');
 </script>
 <!-- 业务代码-->
 <script src="${resource}" onload="document.getElementById('loading').style.display = 'none'"></script>
-<!-- 业务代码-->
-<%--<script src="${resource}"></script>--%>
 <script src="//res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 <script>
     var display = '<%=ConfigUtils.domainName()%>'
     if(display === 'http://www.iquanwai.com' || display === 'https://www.iquanwai.com') {
         var _hmt = _hmt || [];
         (function () {
-
             var hm = document.createElement("script");
             hm.src = "https://hm.baidu.com/hm.js?64c8a6d40ec075c726072cd243d008a3";
             var s = document.getElementsByTagName("script")[0];
