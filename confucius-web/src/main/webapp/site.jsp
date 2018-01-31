@@ -1,5 +1,6 @@
 <!doctype html>
-<%@ page import="com.iquanwai.confucius.biz.util.ConfigUtils" contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
+<%@ page import="com.iquanwai.confucius.biz.util.ConfigUtils" contentType="text/html;charset=UTF-8" language="java"
+         pageEncoding="UTF-8" %>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -11,18 +12,18 @@
 <body>
 <script>
     window.ENV = {
-        reactMountPoint: "react-app",
-        userName: "${userName}",
-        headImage:"${headImage}",
-        loginSocketUrl:"${loginSocketUrl}",
-        isDevelopment:${isDevelopment},
-        feedBack:${feedBack},
-        backend:false,
-        roleId:${roleId},
-        signature:"${signature}",
-        configUrl:window.location.href,
+        reactMountPoint: "react-app"
     }
 </script>
+<%--userName: "${userName}",--%>
+<%--headImage:"${headImage}",--%>
+<%--loginSocketUrl:"${loginSocketUrl}",--%>
+<%--isDevelopment:${isDevelopment},--%>
+<%--feedBack:${feedBack},--%>
+<%--backend:false,--%>
+<%--roleId:${roleId},--%>
+<%--signature:"${signature}",--%>
+<%--configUrl:window.location.href,--%>
 
 <div id="react-app"></div>
 <script src="//res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js"></script>
@@ -31,7 +32,7 @@
 
 <script>
     var display = '<%=ConfigUtils.domainName()%>'
-    if(display === 'http://www.iquanwai.com' || display === 'https://www.iquanwai.com') {
+    if (display === 'http://www.iquanwai.com' || display === 'https://www.iquanwai.com') {
         var _hmt = _hmt || [];
         (function () {
 
