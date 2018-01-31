@@ -3,7 +3,6 @@ package com.iquanwai.confucius.web.interceptor;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.resolver.UnionUserService;
-import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
                 break;
             case MOBILE:
                 // 静默授权
-                WebUtils.auth(request, response);
+                writeUnLoginStatus(response);
                 break;
             case MINI:
                 writeUnLoginStatus(response);
