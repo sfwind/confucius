@@ -127,8 +127,8 @@ public class PCIndexController {
         } else {
             mav.addObject("resource", ConfigUtils.staticPcResourceUrl(domainName));
         }
-        mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
+        mav.addObject("feedBack", ConfigUtils.getFeedBackId());
         return mav;
     }
 

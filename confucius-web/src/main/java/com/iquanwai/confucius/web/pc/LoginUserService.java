@@ -105,7 +105,7 @@ public class LoginUserService {
     public boolean userIsFollowing(PCLoginUser loginUser) {
         try {
             Account account = accountService.getAccount(loginUser.getOpenId(), false);
-            if (account.getSubscribe() == 1) {
+            if (account != null && account.getSubscribe() == 1) {
                 return true;
             }
         } catch (NotFollowingException e) {
