@@ -39,6 +39,7 @@ public class UserRoleDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+
     /**
      * 获得所有的教练
      *
@@ -47,7 +48,7 @@ public class UserRoleDao extends DBUtil {
     public List<UserRole> loadAssists() {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
-        String sql = " select * from UserRole where roleId in (3,11,12,13,14,15,16,17) and Del = 0 ";
+        String sql = " select * from UserRole where roleId in (3,4,5,6,11,12,13,14,15) and Del = 0 ";
         try {
             return runner.query(sql, h);
         } catch (SQLException e) {
@@ -100,7 +101,7 @@ public class UserRoleDao extends DBUtil {
     public UserRole loadAssist(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<UserRole> h = new BeanHandler<>(UserRole.class);
-        String sql = " select * from UserRole where profileId = ? And RoleId in (3,4,11) And del = 0";
+        String sql = " select * from UserRole where profileId = ? And RoleId in (3,4,5,6,11,12,13,14,15) And del = 0";
 
         try {
             return runner.query(sql, h, profileId);
@@ -134,7 +135,7 @@ public class UserRoleDao extends DBUtil {
     public List<UserRole> loadAssistsList(Page page){
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
-        String sql = "select * from UserRole where RoleId in (3,11,12,13,14,15,16,17) and del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
+        String sql = "select * from UserRole where RoleId in (3,4,5,6,11,12,13,14,15) and del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
 
         try {
             return runner.query(sql,h);
@@ -146,7 +147,7 @@ public class UserRoleDao extends DBUtil {
 
     public Integer loadAssistsCount(){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT COUNT(*) FROM UserRole where RoleId in (3,11,12,13,14,15,16,17) and del = 0 ";
+        String sql = "SELECT COUNT(*) FROM UserRole where RoleId in (3,4,5,6,11,12,13,14,15) and del = 0 ";
 
         try {
             return runner.query(sql,new ScalarHandler<Long>()).intValue();

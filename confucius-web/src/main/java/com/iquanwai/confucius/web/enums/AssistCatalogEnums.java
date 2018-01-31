@@ -10,12 +10,13 @@ import java.util.Objects;
  */
 @Getter
 public enum AssistCatalogEnums {
-    III_HIGH_ASSIST(17,"高级3教练",8),
-    II_HIGH_ASSIST(16,"高级2教练",7),
-    I_HIGH_ASSIST(15,"高级1教练",6),
-    III_ASSIST(14,"III级教练",5),
-    II_ASSIST(13,"II级教练",4),
-    I_ASSIST(12,"I级教练",3),
+    CHIEF_ASSIST(6,"首席教练",9),
+    III_HIGH_ASSIST(15,"高级3教练",8),
+    II_HIGH_ASSIST(14,"高级2教练",7),
+    I_HIGH_ASSIST(5,"高级1教练",6),
+    III_ASSIST(13,"III级教练",5),
+    II_ASSIST(12,"II级教练",4),
+    I_ASSIST(4,"I级教练",3),
     PROBATIONARY_ASSIST(3,"见习",2),
     CANDIDATE_ASSIST(11,"候选",1),
     EXPIRED_ASSIST(0,"过期",-1);
