@@ -23,7 +23,11 @@ public class AccountController {
     @RequestMapping(value = "/check/follow")
     public ResponseEntity<Map<String, Object>> checkIsFollow(HttpServletRequest request, UnionUser unionUser) {
         // 只要用户有账户信息，就能够访问
-        return WebUtils.success();
+        if (unionUser != null) {
+            return WebUtils.success();
+        } else {
+            return WebUtils.error("用户不能为空");
+        }
     }
 
     @RequestMapping("/get")
