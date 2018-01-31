@@ -71,8 +71,8 @@ public class PCIndexController {
      * 前往登录页面
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView getLoginPage(HttpServletRequest request, UnionUser unionUser) {
-        return pcView(request, unionUser);
+    public ModelAndView getLoginPage(HttpServletRequest request) {
+        return pcView(request, null);
     }
 
     /**
@@ -101,8 +101,8 @@ public class PCIndexController {
     }
 
     @RequestMapping(value = "/servercode")
-    public ModelAndView getServerCodePage(HttpServletRequest request, UnionUser unionUser) {
-        return pcView(request, unionUser);
+    public ModelAndView getServerCodePage(HttpServletRequest request) {
+        return pcView(request, null);
     }
 
     private ModelAndView pcView(HttpServletRequest request, UnionUser unionUser) {
