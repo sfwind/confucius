@@ -3,6 +3,7 @@ package com.iquanwai.confucius.web.pc.datahelper;
 import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.UpGradeDto;
 
 public class AsstHelper {
@@ -76,6 +77,7 @@ public class AsstHelper {
 
     public static UpGradeDto genUpGradeInfo(AsstUpStandard asstUpStandard,AsstUpExecution asstUpExecution){
         UpGradeDto upGradeDto = new UpGradeDto();
+        upGradeDto.setRoleName(AssistCatalogEnums.getById(asstUpExecution.getRoleId()).getRoleName());
 
         Integer interval = DateUtils.interval(asstUpExecution.getStartDate());
         Integer countDown = asstUpStandard.getCountDown();

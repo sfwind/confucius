@@ -10,6 +10,10 @@ import java.util.Date;
  */
 @Data
 public class UpGradeDto {
+    /**
+     * 教练级别
+     */
+    private String roleName;
 
     /**
      *开始日期
