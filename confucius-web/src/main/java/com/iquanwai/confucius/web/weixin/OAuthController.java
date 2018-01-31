@@ -199,20 +199,6 @@ public class OAuthController {
         }
     }
 
-    /**
-     * 对于其他平台，如 platon，resolver 中如果没有获取到 UnionUser，调用此接口，成功返回之后，再次获取用户对象
-     */
-    @RequestMapping("/init/user")
-    public ResponseEntity<Map<String, Object>> generateUnionUser(@RequestParam("state") String state) {
-        Callback callback = oAuthService.getCallbackByState(state);
-        Profile profile = accountService.getProfileByUnionId(callback.getUnionId());
-        if (profile != null) {
-            return WebUtils.success();
-        } else {
-            return WebUtils.error("刷新用户 Profile 对象失败，state：" + state);
-        }
-    }
-
     @RequestMapping("/openid/{access_token}")
     public ResponseEntity<Map<String, Object>> openid(@PathVariable("access_token") String accessToken) {
         try {

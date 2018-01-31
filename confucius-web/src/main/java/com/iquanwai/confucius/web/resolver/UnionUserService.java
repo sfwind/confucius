@@ -143,6 +143,28 @@ public class UnionUserService {
         }
     }
 
+    public void removeCookie(UnionUser.Platform platform, HttpServletResponse response) {
+        switch (platform) {
+            case PC:
+                CookieUtils.removeCookie(PC_STATE_COOKIE_NAME, response);
+                break;
+            case MOBILE:
+                CookieUtils.removeCookie(MOBILE_STATE_COOKIE_NAME, response);
+                break;
+            case MINI:
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 删除当前用户的缓存信息
+     */
+    public void logout(String state) {
+        unionUserCacheMap.remove(state);
+    }
+
     /**
      * 根据 unionId 获取用户对象，如果 Profile 不存在，会从微信获取
      * @param unionId 联合 UnionId

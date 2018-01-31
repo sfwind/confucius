@@ -204,6 +204,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             Map<String, Object> result = CommonUtils.jsonToMap(body);
             String newOpenId = result.get("openid").toString();
             String nickName = result.get("nickname").toString();
+            Integer sex = Integer.valueOf(result.get("sex").toString());
             String headImgUrl = result.get("headimgurl").toString();
             String country = result.get("country").toString();
             String province = result.get("province").toString();
@@ -211,6 +212,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             String unionId = result.get("unionid").toString();
             userInfoObject.setOpenId(newOpenId);
             userInfoObject.setNickName(nickName);
+            userInfoObject.setSex(sex);
             userInfoObject.setHeadImgUrl(headImgUrl);
             userInfoObject.setCountry(country);
             userInfoObject.setProvince(province);
