@@ -25,7 +25,7 @@ public class WeiXinResult {
         private String openId;
         private String nickName;
         private String headImgUrl;
-        private String sex;
+        private Integer sex;
         private String country;
         private String province;
         private String city;

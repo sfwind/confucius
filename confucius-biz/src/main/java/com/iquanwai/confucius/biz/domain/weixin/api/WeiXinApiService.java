@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.api;
 
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
+
 import java.util.Map;
 
 /**
@@ -10,7 +12,7 @@ public interface WeiXinApiService {
 
     String generateRedirectOAuthUrl(String state, String codeCallbackUrl);
 
-    WeiXinResult.UserAccessTokenObject exchangeUserAccessTokenByCode(String code);
+    WeiXinResult.UserAccessTokenObject exchangeUserAccessTokenByCode(String code, Profile.ProfileType profileType);
 
     Map<String, String> generateJsOAuthParam(String state, String codeCallbackUrl);
 

@@ -122,8 +122,9 @@
             <mvc:exclude-mapping path="/file/image/**"/>
             <mvc:exclude-mapping path="/home"/>
             <mvc:exclude-mapping path="/servercode"/>
-            <mvc:exclude-mapping path="/backend/**"/>
-            <mvc:exclude-mapping path="/asst/**"/>
+            <mvc:exclude-mapping path="/community"/>
+            <!--<mvc:exclude-mapping path="/backend/**"/>-->
+            <!--<mvc:exclude-mapping path="/asst/**"/>-->
             <mvc:exclude-mapping path="/performance/**"/>
             <mvc:exclude-mapping path="/internal/**"/>
             <mvc:exclude-mapping path="/heartbeat"/>

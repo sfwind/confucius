@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.api;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -60,7 +61,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         params.put("appid", ConfigUtils.getAppid());
         params.put("secret", ConfigUtils.getSecret());
         String requestUrl = CommonUtils.placeholderReplace(APP_ACCESS_TOKEN_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String body = restfulHelper.getPure(requestUrl);
         Map<String, Object> accessTokenObject = CommonUtils.jsonToMap(body);
         String accessToken = accessTokenObject.get("access_token").toString();
         logger.info("最新请求 accessToken 为：{}", accessToken);
@@ -95,8 +96,8 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
     @Override
     public Map<String, String> generateJsOAuthParam(String state, String codeCallbackUrl) {
         Map<String, String> params = Maps.newHashMap();
-        params.put("appid", ConfigUtils.getRisePcAppid());
-        params.put("scope", "snsapi_userinfo");
+        params.put("appid", ConfigUtils.getPcAppId());
+        params.put("scope", "snsapi_login,snsapi_userinfo");
         try {
             params.put("redirect_uri", URLEncoder.encode(ConfigUtils.adapterDomainName() + codeCallbackUrl, "utf-8"));
         } catch (UnsupportedEncodingException e) {
@@ -113,13 +114,29 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
      * @param code 微信返回 code
      */
     @Override
-    public WeiXinResult.UserAccessTokenObject exchangeUserAccessTokenByCode(String code) {
+    public WeiXinResult.UserAccessTokenObject exchangeUserAccessTokenByCode(String code, Profile.ProfileType profileType) {
         Map<String, String> params = Maps.newHashMap();
-        params.put("appid", ConfigUtils.getAppid());
-        params.put("secret", ConfigUtils.getSecret());
+        switch (profileType) {
+            case MOBILE:
+                params.put("appid", ConfigUtils.getAppid());
+                params.put("secret", ConfigUtils.getSecret());
+                break;
+            case PC:
+                params.put("appid", ConfigUtils.getPcAppId());
+                params.put("secret", ConfigUtils.getPcSecret());
+                break;
+            case MINI:
+                params.put("appid", ConfigUtils.getWeMiniAppId());
+                params.put("secret", ConfigUtils.getWeMiniAppSecret());
+                break;
+            default:
+                params.put("appid", ConfigUtils.getAppid());
+                params.put("secret", ConfigUtils.getSecret());
+                break;
+        }
         params.put("code", code);
         String requestUrl = CommonUtils.placeholderReplace(USER_ACCESS_TOKEN_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String body = restfulHelper.getPure(requestUrl);
 
         WeiXinResult.UserAccessTokenObject userAccessTokenObject = new WeiXinResult.UserAccessTokenObject();
         try {
@@ -149,7 +166,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         params.put("secret", ConfigUtils.getSecret());
         params.put("jscode", jsCode);
         String requestUrl = CommonUtils.placeholderReplace(WE_MINI_ACCESS_TOKEN_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String body = restfulHelper.getPure(requestUrl);
 
         WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject = new WeiXinResult.MiniUserAccessTokenObject();
         try {
@@ -179,8 +196,8 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         Map<String, String> params = Maps.newHashMap();
         params.put("openid", openId);
         params.put("access_token", accessToken);
-        String requestUrl = CommonUtils.placeholderReplace(USER_INFO_URL, params);
-        String body = restfulHelper.get(requestUrl);
+        String requestUrl = CommonUtils.placeholderReplace(SNS_API_USER_INFO, params);
+        String body = restfulHelper.getPure(requestUrl);
 
         WeiXinResult.UserInfoObject userInfoObject = new WeiXinResult.UserInfoObject();
         try {
@@ -191,7 +208,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             String country = result.get("country").toString();
             String province = result.get("province").toString();
             String city = result.get("city").toString();
-            String unionId = result.get("unionId").toString();
+            String unionId = result.get("unionid").toString();
             userInfoObject.setOpenId(newOpenId);
             userInfoObject.setNickName(nickName);
             userInfoObject.setHeadImgUrl(headImgUrl);

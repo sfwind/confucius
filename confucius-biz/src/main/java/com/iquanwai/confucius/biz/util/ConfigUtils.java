@@ -267,11 +267,11 @@ public class ConfigUtils {
         return getValue("integrated.practice.index");
     }
 
-    public static String getRisePcAppid() {
+    public static String getPcAppId() {
         return getValue("rise.web.appid");
     }
 
-    public static String getRisePcSecret() {
+    public static String getPcSecret() {
         return getValue("rise.web.secret");
     }
 

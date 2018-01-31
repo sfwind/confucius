@@ -129,9 +129,7 @@ public class ProfileDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE Profile SET OpenId = ? WHERE UnionId = ?";
         try {
-            return runner.update(sql, new ScalarHandler<>(),
-                    profile.getOpenid(),
-                    profile.getUnionid());
+            return runner.update(sql, profile.getOpenid(), profile.getUnionid());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
