@@ -204,7 +204,15 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             Map<String, Object> result = CommonUtils.jsonToMap(body);
             String newOpenId = result.get("openid").toString();
             String nickName = result.get("nickname").toString();
-            Integer sex = (Integer) result.get("sex");
+            Integer sex = null;
+            try {
+                Double tempSex = (Double) result.get("sex");
+                if (tempSex != null) {
+                    sex = tempSex.intValue();
+                }
+            } catch (Exception e1) {
+                logger.error(e1.getLocalizedMessage(), e1);
+            }
             String headImgUrl = result.get("headimgurl").toString();
             String country = result.get("country").toString();
             String province = result.get("province").toString();
