@@ -1,7 +1,5 @@
 package com.iquanwai.confucius.web;
 
-import com.google.common.collect.Maps;
-import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
@@ -23,15 +21,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.Map;
 
 @Controller
 public class PCIndexController {
 
     @Autowired
     private UnionUserService unionUserService;
-    @Autowired
-    private AccountService accountService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
     private RabbitMQPublisher logoutPublisher;
@@ -47,7 +42,7 @@ public class PCIndexController {
      * 前往home页面
      */
     @RequestMapping(value = {"/home", "/"}, method = RequestMethod.GET)
-    public ModelAndView getHome(HttpServletRequest request) {
+    public ModelAndView getHome(HttpServletRequest request, HttpServletResponse response) {
         return ConfigUtils.isDevelopment() ? new ModelAndView("index") : new ModelAndView("home");
     }
 
@@ -63,16 +58,16 @@ public class PCIndexController {
      * 前往 pc 页面
      */
     @RequestMapping(value = {"/pc/static/**", "/fragment/**", "/backend/**", "/asst/**"})
-    public ModelAndView getFragmentPage(HttpServletRequest request, UnionUser unionUser) {
-        return pcView(request, unionUser);
+    public ModelAndView getFragmentPage(HttpServletRequest request, HttpServletResponse response) {
+        return pcView(request);
     }
 
     /**
      * 前往登录页面
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView getLoginPage(HttpServletRequest request) {
-        return pcView(request, null);
+    public ModelAndView getLoginPage(HttpServletRequest request, HttpServletResponse response) {
+        return pcView(request);
     }
 
     /**
@@ -102,10 +97,10 @@ public class PCIndexController {
 
     @RequestMapping(value = "/servercode")
     public ModelAndView getServerCodePage(HttpServletRequest request) {
-        return pcView(request, null);
+        return pcView(request);
     }
 
-    private ModelAndView pcView(HttpServletRequest request, UnionUser unionUser) {
+    private ModelAndView pcView(HttpServletRequest request) {
         ModelAndView mav = new ModelAndView("site");
         String domainName = request.getHeader("Host-Test");
         if (request.getParameter("debug") != null) {
@@ -118,14 +113,14 @@ public class PCIndexController {
         } else {
             mav.addObject("resource", ConfigUtils.staticPcResourceUrl(domainName));
         }
-        if (unionUser != null) {
-            Map<String, String> userParam = Maps.newHashMap();
-            userParam.put("userName", unionUser.getNickName());
-            if (unionUser.getHeadImgUrl() != null) {
-                userParam.put("headImage", unionUser.getHeadImgUrl().replace("http:", "https:"));
-            }
-            mav.addAllObjects(userParam);
-        }
+        // if (unionUser != null) {
+        //     Map<String, String> userParam = Maps.newHashMap();
+        //     userParam.put("userName", unionUser.getNickName());
+        //     if (unionUser.getHeadImgUrl() != null) {
+        //         userParam.put("headImage", unionUser.getHeadImgUrl().replace("http:", "https:"));
+        //     }
+        //     mav.addAllObjects(userParam);
+        // }
         // if (unionUser == null || unionUser.getRole() == null) {
         //     mav.addObject("roleId", 0);
         // } else {
