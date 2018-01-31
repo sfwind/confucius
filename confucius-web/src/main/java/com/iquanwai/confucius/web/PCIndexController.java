@@ -61,13 +61,15 @@ public class PCIndexController {
     @RequestMapping(value = {"/fragment/**", "/backend/**", "/asst/**"})
     public ModelAndView getFragmentPage(HttpServletRequest request, HttpServletResponse response) {
         Callback callback = unionUserService.getCallbackByRequest(request);
-        UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-        if (unionUser.getOpenId() == null) {
-            try {
-                logger.info("用户尚未有服务号信息，跳转二维码关注页面");
-                response.sendRedirect("/servercode");
-            } catch (IOException e) {
-                logger.error(e.getLocalizedMessage(), e);
+        if (callback != null) {
+            UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
+            if (unionUser == null || unionUser.getOpenId() == null) {
+                try {
+                    logger.info("用户尚未有服务号信息，跳转二维码关注页面");
+                    response.sendRedirect("/servercode");
+                } catch (IOException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
             }
         }
 
