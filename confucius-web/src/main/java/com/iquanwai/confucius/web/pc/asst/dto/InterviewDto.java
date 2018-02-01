@@ -1,9 +1,11 @@
-package com.iquanwai.confucius.biz.po.apply;
+package com.iquanwai.confucius.web.pc.asst.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
-public class InterviewRecord {
+public class InterviewDto {
 
     private Integer id;
     private Integer profileId;
@@ -19,7 +21,7 @@ public class InterviewRecord {
     /**
      * 面试时间
      */
-    private String interviewTime;
+    private Date interviewTime;
     /**
      * 学员问题
      */
@@ -81,5 +83,3 @@ public class InterviewRecord {
      */
     private Integer del;
 }
-
-
