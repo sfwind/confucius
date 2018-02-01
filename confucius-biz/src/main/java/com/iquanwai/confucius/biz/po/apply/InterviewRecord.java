@@ -2,6 +2,8 @@ package com.iquanwai.confucius.biz.po.apply;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class InterviewRecord {
 
@@ -19,7 +21,7 @@ public class InterviewRecord {
     /**
      * 面试时间
      */
-    private String interviewTime;
+    private Date interviewTime;
     /**
      * 学员问题
      */
