@@ -646,6 +646,10 @@ public class SignupServiceImpl implements SignupService {
                     Assert.notNull(operateRotate);
                     logger.info("operateRotate mediaId: {}", operateRotate.getMediaId());
                     RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), year, month);
+                    if (riseClassMember == null) {
+                        return;
+                    }
+
                     String entryCode = riseClassMember.getMemberId();
                     logger.info("发送会员数据");
                     // 发送消息给一年精英版的用户
@@ -678,6 +682,9 @@ public class SignupServiceImpl implements SignupService {
                     Assert.notNull(operateRotate);
 
                     RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), year, month);
+                    if (riseClassMember == null) {
+                        return;
+                    }
                     String entryCode = riseClassMember.getMemberId();
 
                     logger.info("发送专项课数据");
