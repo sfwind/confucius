@@ -27,6 +27,7 @@ import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.ClassNameGroups;
 import com.iquanwai.confucius.web.pc.asst.dto.Group;
+import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
 import com.iquanwai.confucius.web.pc.asst.dto.UpGradeDto;
 import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.pc.datahelper.AsstHelper;
@@ -34,16 +35,14 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -283,13 +282,18 @@ public class AssistantCoachController {
     }
 
     @RequestMapping(value = "/add/interview/record",method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> addInterviewRecord(PCLoginUser loginUser, @RequestBody InterviewRecord interviewRecord){
+    public ResponseEntity<Map<String,Object>> addInterviewRecord(PCLoginUser loginUser, @RequestBody InterviewDto interviewDto){
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("助教管理")
                 .action("添加面试记录");
         operationLogService.log(operationLog);
+        InterviewRecord interviewRecord = new InterviewRecord();
+        String[] str = {"interviewTime"};
+        BeanUtils.copyProperties(interviewDto,interviewRecord,str);
+        interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
         interviewRecord.setInterviewerId(loginUser.getProfileId());
+
         if(assistantCoachService.addInterviewRecord(interviewRecord)==-1){
             return WebUtils.error("添加面试记录失败");
         }
@@ -474,6 +478,7 @@ public class AssistantCoachController {
         dto.setDel(application.getDel());
         return dto;
     }
+
 
 
 }

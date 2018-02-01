@@ -29,6 +29,7 @@ import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
+import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
 import com.iquanwai.confucius.web.pc.backend.dto.AssignDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ProblemCatalogDto;
@@ -39,6 +40,7 @@ import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -278,7 +280,7 @@ public class RiseOperationController {
         if (application == null) {
             return WebUtils.error("该申请不存在");
         } else {
-            InterviewRecord interviewRecord = approveDto.getInterviewRecord();
+            InterviewRecord interviewRecord = convertInterview(approveDto.getInterviewDto());
             if(interviewRecord == null){
                 return WebUtils.error("更新失败");
             }
@@ -322,7 +324,8 @@ public class RiseOperationController {
             if (approveDto.getCoupon() == null) {
                 approveDto.setCoupon(0d);
             }
-            InterviewRecord interviewRecord = approveDto.getInterviewRecord();
+            InterviewRecord interviewRecord = convertInterview(approveDto.getInterviewDto());
+
             if(interviewRecord == null){
                 return WebUtils.error("更新失败");
             }
@@ -349,7 +352,7 @@ public class RiseOperationController {
         if (application == null) {
             return WebUtils.error("该申请不存在");
         } else {
-            InterviewRecord interviewRecord = approveDto.getInterviewRecord();
+            InterviewRecord interviewRecord = convertInterview(approveDto.getInterviewDto());
             if(interviewRecord == null){
                 return WebUtils.error("更新失败");
             }
@@ -571,5 +574,14 @@ public class RiseOperationController {
         }).collect(Collectors.toList());
 
         return dtoGroup;
+    }
+
+    private InterviewRecord convertInterview(InterviewDto interviewDto){
+        InterviewRecord interviewRecord = new InterviewRecord();
+        String[] str = {"interviewTime"};
+        BeanUtils.copyProperties(interviewDto,interviewRecord,str);
+        interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
+
+        return  interviewRecord;
     }
 }
