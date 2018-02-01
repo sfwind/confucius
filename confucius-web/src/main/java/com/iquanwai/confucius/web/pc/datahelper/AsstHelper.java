@@ -88,8 +88,6 @@ public class AsstHelper {
         Integer finish;
         Integer total;
 
-        finish = asstUpExecution.getReviewNumber();
-        upGradeDto.setReviewedNumber(finish);
         Integer valid = asstUpExecution.getValidReviewNumber();
         total = asstUpStandard.getRequestReviewNumber();
         finish = asstUpExecution.getRequestReviewNumber();
@@ -99,6 +97,8 @@ public class AsstHelper {
         upGradeDto.setNeedValidReviewNumber(asstUpStandard.getValidReviewNumber());
         upGradeDto.setValidReviewNumber(asstUpExecution.getValidReviewNumber());
         upGradeDto.setNeedReviewRate(asstUpStandard.getValidReviewRate());
+        finish = asstUpExecution.getReviewNumber();
+        upGradeDto.setReviewedNumber(finish);
         if(finish==0) {
             upGradeDto.setReviewRate(0);
         } else{
