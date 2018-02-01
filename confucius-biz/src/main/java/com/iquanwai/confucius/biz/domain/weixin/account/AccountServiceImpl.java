@@ -195,7 +195,6 @@ public class AccountServiceImpl implements AccountService {
         return userInfoObject;
     }
 
-
     /**
      * 获取用户角色信息
      */
@@ -646,20 +645,24 @@ public class AccountServiceImpl implements AccountService {
     public Profile getProfileByUnionId(String unionId) {
         Profile profile = profileDao.queryByUnionId(unionId);
         if (profile == null) {
-            Callback callback = callbackDao.queryByUnionId(unionId);
-            if (callback.getOpenid() != null && callback.getAccessToken() != null) {
-                // 曾经手机端登录过
-                storeWeiXinUserInfo(callback.getOpenid(), callback.getAccessToken(), Profile.ProfileType.MOBILE);
-            } else if (callback.getPcOpenid() != null && callback.getPcAccessToken() != null) {
-                // 曾经 pc 端登陆过
-                storeWeiXinUserInfo(callback.getPcOpenid(), callback.getPcAccessToken(), Profile.ProfileType.PC);
-            } else if (callback.getWeMiniOpenid() != null && callback.getWeMiniAccessToken() != null) {
-                // 曾经小程序登陆过
-                storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
-            }
-            profile = profileDao.queryByUnionId(unionId);
+            getProfileFromWeiXinByUnionId(unionId);
         }
         return profile;
+    }
+
+    @Override
+    public void getProfileFromWeiXinByUnionId(String unionId) {
+        Callback callback = callbackDao.queryByUnionId(unionId);
+        if (callback.getOpenid() != null && callback.getAccessToken() != null) {
+            // 曾经手机端登录过
+            storeWeiXinUserInfo(callback.getOpenid(), callback.getAccessToken(), Profile.ProfileType.MOBILE);
+        } else if (callback.getPcOpenid() != null && callback.getPcAccessToken() != null) {
+            // 曾经 pc 端登陆过
+            storeWeiXinUserInfo(callback.getPcOpenid(), callback.getPcAccessToken(), Profile.ProfileType.PC);
+        } else if (callback.getWeMiniOpenid() != null && callback.getWeMiniAccessToken() != null) {
+            // 曾经小程序登陆过
+            storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
+        }
     }
 
     @Override

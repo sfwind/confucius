@@ -5,8 +5,6 @@ import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
-import com.iquanwai.confucius.biz.po.Callback;
-import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.web.internal.dto.SMSDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -43,9 +40,8 @@ public class InternalController {
      * right: 当前规则下已经发送多少条了/最大电话数量／最大内容数量/请求结果
      */
     @RequestMapping(value = "/sms/send", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> sendMessage(HttpServletRequest request, @RequestBody SMSDto smsDto) {
+    public ResponseEntity<Map<String, Object>> sendMessage(@RequestBody SMSDto smsDto) {
         Assert.notNull(smsDto);
-
         ShortMessage shortMessage = new ShortMessage();
         shortMessage.setProfileId(smsDto.getProfileId());
         shortMessage.setContent(smsDto.getContent());
@@ -80,17 +76,15 @@ public class InternalController {
 
     /**
      * 用户信息弥补，对于只存在 callback，却没有存储 Profile 和 FollowUser 用户的人员，调用该内部方法若用户不存在会初始化用户信息
-     * @param state callback 的随机 state
      */
     @RequestMapping(value = "/init/user", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> initProfile(HttpServletRequest request, @RequestParam("state") String state) {
-        Callback callback = oAuthService.getCallbackByState(state);
-        Profile profile = accountService.getProfileByUnionId(callback.getUnionId());
-        if (profile != null) {
-            return WebUtils.success();
+    public ResponseEntity<Map<String, Object>> initProfile(@RequestParam("unionId") String unionId, @RequestParam("realTime") Boolean realTime) {
+        if (realTime) {
+            accountService.getProfileFromWeiXinByUnionId(unionId);
         } else {
-            return WebUtils.error("刷新用户 Profile 对象失败，state：" + state);
+            accountService.getProfileByUnionId(unionId);
         }
+        return WebUtils.success();
     }
 
 }

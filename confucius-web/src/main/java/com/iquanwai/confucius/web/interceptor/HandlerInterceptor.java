@@ -32,8 +32,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
 
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
         if (platform == null || unionUserService.isDocumentRequest(request)) {
-            // platform 为空，请求的是资源或者页面，在 IndexController 有相关页面匹配，此处仅做补充处理
-            logger.info("platform 为空");
+            logger.info("platform 为空或者当前请求的是资源请求");
             return true;
         } else {
             logger.info("platform: {}", platform);

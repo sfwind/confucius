@@ -133,6 +133,8 @@ public interface AccountService {
 
     Profile getProfileByUnionId(String unionId);
 
+    void getProfileFromWeiXinByUnionId(String unionId);
+
     int updateHeadImageUrl(Integer profileId, String headImgUrl);
 
 }
