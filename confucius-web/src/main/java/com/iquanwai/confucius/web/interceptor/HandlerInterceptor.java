@@ -38,33 +38,18 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         } else {
             logger.info("platform: {}", platform);
             Callback callback = unionUserService.getCallbackByRequest(request);
-            return (callback != null && callback.getUnionId() != null) || handleUnLogin(platform, request, response);
+            return (callback != null && callback.getUnionId() != null) || handleUnLogin(response);
         }
     }
 
     /**
      * 对于 ajax 请求，不存在 callback 请求的处理
-     * @param platform 平台信息
-     * @param request 请求
      * @param response 响应
      * @return 是否通过拦截器
      */
-    private boolean handleUnLogin(UnionUser.Platform platform, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    private boolean handleUnLogin(HttpServletResponse response) throws Exception {
         logger.info("不存在 callback，特殊处理请求");
-        switch (platform) {
-            case PC:
-                writeUnLoginStatus(response);
-                break;
-            case MOBILE:
-                // 静默授权
-                writeUnLoginStatus(response);
-                break;
-            case MINI:
-                writeUnLoginStatus(response);
-                break;
-            default:
-                break;
-        }
+        writeUnLoginStatus(response);
         return false;
     }
 
