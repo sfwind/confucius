@@ -75,13 +75,15 @@ public class AssistController {
                 Integer profileId = profile.getId();
                 AsstUpStandard asstUpStandard = asstUpService.loadStandard(profileId);
                 AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profileId);
-                if (checkIsReached(profileId, asstUpStandard, asstUpExecution)) {
-                    assistDto.setReached("是");
-                } else {
-                    assistDto.setReached("否");
+                if((asstUpStandard!=null) && (asstUpExecution!=null)){
+                    if (checkIsReached(profileId, asstUpStandard, asstUpExecution)) {
+                        assistDto.setReached("是");
+                    } else {
+                        assistDto.setReached("否");
+                    }
+                    assistDto.setNeedVerified(asstUpStandard.getNeedVerified());
+                    assistDto.setUpGrade(asstUpExecution.getUpGrade());
                 }
-                assistDto.setNeedVerified(asstUpStandard.getNeedVerified());
-                assistDto.setUpGrade(asstUpExecution.getUpGrade());
             }
             assistDtoList.add(assistDto);
         });
