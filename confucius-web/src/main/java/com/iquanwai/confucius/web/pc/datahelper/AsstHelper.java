@@ -92,7 +92,7 @@ public class AsstHelper {
         upGradeDto.setReviewedNumber(finish);
         Integer valid = asstUpExecution.getValidReviewNumber();
         total = asstUpStandard.getRequestReviewNumber();
-        finish = asstUpExecution.getReviewNumber();
+        finish = asstUpExecution.getRequestReviewNumber();
         upGradeDto.setNeedRequestReviewNumber(total);
         upGradeDto.setRequestReviewNumber(finish);
         upGradeDto.setRemainRequestReviewNumber(getRemain(finish,total));
