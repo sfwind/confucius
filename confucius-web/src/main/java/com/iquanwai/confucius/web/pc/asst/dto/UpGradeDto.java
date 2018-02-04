@@ -214,6 +214,10 @@ public class UpGradeDto {
      */
     private String monthlyWork;
     /**
+     * 缺作业数
+     */
+    private Integer lackTask;
+    /**
      * 需要培养新人的次数
      */
     private Integer needFosterNew;

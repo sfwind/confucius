@@ -154,7 +154,7 @@ public class AsstHelper {
         upGradeDto.setCampScore(asstUpExecution.getCampScore());
         upGradeDto.setNeedMonthlyWork(asstUpStandard.getMonthlyWork());
         upGradeDto.setMonthlyWork(asstUpExecution.getMonthlyWork());
-
+        upGradeDto.setLackTask(asstUpExecution.getLackTask());
         total = asstUpStandard.getFosterNew();
         finish = asstUpExecution.getFosterNew();
         upGradeDto.setNeedFosterNew(total);
