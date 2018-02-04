@@ -330,6 +330,9 @@ public class AssistController {
             Integer roleId = userRole.getRoleId();
             asstStandardDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
             AsstUpStandard asstStandard = asstUpService.loadStandard(profile.getId());
+            if(asstStandard==null){
+                return;
+            }
             BeanUtils.copyProperties(asstStandard, asstStandardDto);
             asstStandardDtos.add(asstStandardDto);
         });
