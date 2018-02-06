@@ -427,8 +427,21 @@ public class AssistController {
      * @return
      */
     private boolean checkIsReached(Integer profileId, AsstUpStandard asstUpStandard, AsstUpExecution asstUpExecution) {
-        Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).count();
-        if (asstUpStandard.getLearnedProblem() > result.intValue()) {
+        Integer applicationRate = asstUpStandard.getApplicationRate();
+        //统计完成度在applicationRate之上的课程数量
+        Integer finish = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).map(improvementPlan -> {
+            List<PracticePlan> practicePlans = planService.loadPracticePlans(improvementPlan.getId());
+            Long sum = practicePlans.stream().filter(practicePlan -> (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
+            Long count = practicePlans.stream().filter(practicePlan -> (practicePlan.getStatus() == 1) && (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
+
+            if (count * 100 / sum >= applicationRate) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }).reduce(0, Integer::sum);
+
+        if (asstUpStandard.getLearnedProblem() > finish) {
             return false;
         }
         return AsstHelper.checkIsReached(asstUpStandard, asstUpExecution);
