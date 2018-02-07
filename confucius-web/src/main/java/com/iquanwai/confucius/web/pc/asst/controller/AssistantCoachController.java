@@ -313,6 +313,10 @@ public class AssistantCoachController {
         AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(loginUser.getProfileId());
         AsstUpStandard asstUpStandard = asstUpService.loadStandard(loginUser.getProfileId());
 
+        if(asstUpStandard==null || asstUpExecution == null){
+            return WebUtils.error("没有您对应的升级信息");
+        }
+
         UpGradeDto upGradeDto = initUpGradeDto(loginUser.getProfileId(),asstUpStandard,asstUpExecution);
 
         return WebUtils.result(upGradeDto);
