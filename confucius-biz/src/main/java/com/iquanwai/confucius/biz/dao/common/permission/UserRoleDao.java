@@ -3,6 +3,8 @@ package com.iquanwai.confucius.biz.dao.common.permission;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
+import com.iquanwai.confucius.biz.po.apply.AuditionReward;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
@@ -155,5 +157,21 @@ public class UserRoleDao extends DBUtil {
             logger.error(e.getLocalizedMessage(),e);
         }
         return -1;
+    }
+
+    public List<UserRole> loadSearchAssists(List<Integer> profiles){
+        if (profiles.size() == 0) {
+            return Lists.newArrayList();
+        }
+
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM UserRole WHERE ProfileId IN (" + produceQuestionMark(profiles.size()) + ") AND Del = 0";
+        ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
+        try {
+            return runner.query(sql, h, profiles.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }
