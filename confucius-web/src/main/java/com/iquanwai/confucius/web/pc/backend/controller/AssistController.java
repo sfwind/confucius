@@ -419,7 +419,11 @@ public class AssistController {
             BeanUtils.copyProperties(upGradeDto, gradeDto);
 
             gradeDto.setId(asstUpExecution.getId());
-            gradeDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
+            AssistCatalogEnums assistCatalogEnums = AssistCatalogEnums.getById(roleId);
+            if (assistCatalogEnums == null) {
+                return;
+            }
+            gradeDto.setRoleName(assistCatalogEnums.getRoleName());
 
             Integer applicationRate = asstUpStandard.getApplicationRate();
             //统计完成度在applicationRate之上的课程数量
