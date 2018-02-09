@@ -78,7 +78,7 @@ public class OAuthController {
      * @param state 在构建授权页面时，携带给微信的 state，微信会一样返回，为 callback 中 state 的值
      */
     @RequestMapping("/code")
-    public void oauthCode(@RequestParam(required = false) String code, @RequestParam String state, HttpServletResponse response) {
+    public void oauthCode(@RequestParam(required = false) String code, @RequestParam String state, HttpServletRequest request, HttpServletResponse response) {
         try {
             if (code == null) {
                 // 用户不同意授权,跳转报错页面
@@ -97,6 +97,10 @@ public class OAuthController {
             } else {
                 // callback 存在，根据 accessToken 获取用户数据，并填充到 Profile 和 FollowUser
                 WeiXinResult.UserInfoObject userInfoObject = accountService.storeWeiXinUserInfo(callback.getOpenid(), callback.getAccessToken(), Profile.ProfileType.MOBILE);
+                if (userInfoObject == null) {
+                    WebUtils.auth(request, response);
+                    return;
+                }
                 oAuthService.supplementCallbackUnionId(state, userInfoObject.getUnionId());
                 // 在用户 cookie 中写入 state
                 logger.info("set _act {} for {} ", callback.getAccessToken(), callback.getOpenid());
@@ -162,6 +166,10 @@ public class OAuthController {
             } else {
                 // 存储 Profile、FollowUser
                 WeiXinResult.UserInfoObject userInfoObject = accountService.storeWeiXinUserInfo(callback.getPcOpenid(), callback.getPcAccessToken(), Profile.ProfileType.PC);
+                if (userInfoObject == null) {
+                    WebUtils.auth(request, response);
+                    return;
+                }
                 // 完善 Callback 表中的 UnionId
                 oAuthService.supplementCallbackUnionId(state, userInfoObject.getUnionId());
                 // 在用户 cookie 中写入 state
@@ -180,14 +188,18 @@ public class OAuthController {
     }
 
     @RequestMapping("/mini/code")
-    public ResponseEntity<Map<String, Object>> oauthWeMiniCode(@RequestParam(value = "code") String code) {
+    public ResponseEntity<Map<String, Object>> oauthWeMiniCode(@RequestParam(value = "code") String code, HttpServletRequest request, HttpServletResponse response) {
         try {
             WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject = weiXinApiService.exchangeMiniUserAccessTokenByCode(code);
             String state = CommonUtils.randomString(32);
             // 初始化 callback 对象，微信小程序通过 code 调用能够直接返回 unionId
             Callback callback = oAuthService.initMiniCallback(state, miniUserAccessTokenObject);
             // 存储 Profile 信息和 FollowUser 信息
-            accountService.storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
+            WeiXinResult.UserInfoObject userInfoObject = accountService.storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
+            if (userInfoObject == null) {
+                WebUtils.auth(request, response);
+                return null;
+            }
             // 微信小程序
             WeMiniCallback weMiniCallback = new WeMiniCallback();
             weMiniCallback.setState(callback.getState());

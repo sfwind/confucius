@@ -95,6 +95,9 @@ public class AccountServiceImpl implements AccountService {
     public WeiXinResult.UserInfoObject storeWeiXinUserInfo(String openId, String accessToken, Profile.ProfileType profileType) {
         // TODO 优化，不能每次过来都调用微信接口，比较调用微信接口和查询 callback 的时间花费差异
         WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfo(openId, accessToken);
+        if (userInfoObject == null) {
+            return null;
+        }
         String unionId = userInfoObject.getUnionId();
         String nickName = userInfoObject.getNickName();
         String headImgUrl = userInfoObject.getHeadImgUrl();
