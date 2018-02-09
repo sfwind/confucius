@@ -77,7 +77,7 @@ public class InternalController {
     /**
      * 用户信息弥补，对于只存在 callback，却没有存储 Profile 和 FollowUser 用户的人员，调用该内部方法若用户不存在会初始化用户信息
      */
-    @RequestMapping(value = "/init/user", method = RequestMethod.POST)
+    @RequestMapping(value = "/init/user", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> initProfile(@RequestParam("unionId") String unionId, @RequestParam("realTime") Boolean realTime) {
         if (realTime) {
             accountService.getProfileFromWeiXinByUnionId(unionId);
