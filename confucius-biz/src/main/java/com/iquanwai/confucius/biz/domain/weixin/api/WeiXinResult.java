@@ -42,4 +42,10 @@ public class WeiXinResult {
         private String unionId;
     }
 
+    @Data
+    public static class RefreshTokenObject {
+        private String accessToken;
+        private String refreshToken;
+    }
+
 }

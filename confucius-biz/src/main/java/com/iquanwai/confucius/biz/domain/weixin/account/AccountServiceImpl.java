@@ -96,7 +96,12 @@ public class AccountServiceImpl implements AccountService {
         // TODO 优化，不能每次过来都调用微信接口，比较调用微信接口和查询 callback 的时间花费差异
         WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfo(openId, accessToken);
         if (userInfoObject == null) {
-            return null;
+            WeiXinResult.RefreshTokenObject refreshTokenObject = weiXinApiService.refreshWeiXinAccessToken(accessToken);
+            if (refreshTokenObject == null || refreshTokenObject.getAccessToken() == null || refreshTokenObject.getRefreshToken() == null) {
+                return null;
+            } else {
+                userInfoObject = storeWeiXinUserInfo(openId, refreshTokenObject.getAccessToken(), profileType);
+            }
         }
         String unionId = userInfoObject.getUnionId();
         String nickName = userInfoObject.getNickName();
@@ -650,6 +655,7 @@ public class AccountServiceImpl implements AccountService {
         if (profile == null) {
             getProfileFromWeiXinByUnionId(unionId);
         }
+        profile = profileDao.queryByUnionId(unionId);
         return profile;
     }
 

@@ -19,4 +19,6 @@ public interface WeiXinApiService {
     WeiXinResult.MiniUserAccessTokenObject exchangeMiniUserAccessTokenByCode(String jsCode);
 
     WeiXinResult.UserInfoObject getWeiXinUserInfo(String openId, String accessToken);
+
+    WeiXinResult.RefreshTokenObject refreshWeiXinAccessToken(String accessToken);
 }

@@ -228,7 +228,28 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             userInfoObject.setUnionId(unionId);
             return userInfoObject;
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
+            logger.info("access token 过期：{}", accessToken);
+            return null;
+        }
+    }
+
+    @Override
+    public WeiXinResult.RefreshTokenObject refreshWeiXinAccessToken(String accessToken) {
+        Map<String, String> params = Maps.newHashMap();
+        params.put("appid", ConfigUtils.getAppid());
+        params.put("refresh_token", accessToken);
+        String requestUrl = CommonUtils.placeholderReplace(REFRESH_USER_TOKEN_URL, params);
+        String body = restfulHelper.getPure(requestUrl);
+        WeiXinResult.RefreshTokenObject refreshTokenObject = new WeiXinResult.RefreshTokenObject();
+        try {
+            Map<String, Object> result = CommonUtils.jsonToMap(body);
+            String returnAccessToken = result.get("access_token").toString();
+            String returnRefreshToken = result.get("refresh_token").toString();
+            refreshTokenObject.setAccessToken(returnAccessToken);
+            refreshTokenObject.setRefreshToken(returnRefreshToken);
+            return refreshTokenObject;
+        } catch (Exception e) {
+            logger.info("refresh token 过期：{}", accessToken);
             return null;
         }
     }
