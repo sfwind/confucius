@@ -98,7 +98,7 @@ public class OAuthController {
                 // callback 存在，根据 accessToken 获取用户数据，并填充到 Profile 和 FollowUser
                 WeiXinResult.UserInfoObject userInfoObject = accountService.storeWeiXinUserInfo(callback.getOpenid(), callback.getAccessToken(), Profile.ProfileType.MOBILE);
                 if (userInfoObject == null) {
-                    WebUtils.auth(request, response);
+                    response.sendRedirect(PAGE_NOT_FOUND);
                     return;
                 }
                 oAuthService.supplementCallbackUnionId(state, userInfoObject.getUnionId());
@@ -167,7 +167,7 @@ public class OAuthController {
                 // 存储 Profile、FollowUser
                 WeiXinResult.UserInfoObject userInfoObject = accountService.storeWeiXinUserInfo(callback.getPcOpenid(), callback.getPcAccessToken(), Profile.ProfileType.PC);
                 if (userInfoObject == null) {
-                    WebUtils.auth(request, response);
+                    response.sendRedirect(PAGE_NOT_FOUND);
                     return;
                 }
                 // 完善 Callback 表中的 UnionId

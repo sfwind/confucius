@@ -62,10 +62,20 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         params.put("secret", ConfigUtils.getSecret());
         String requestUrl = CommonUtils.placeholderReplace(APP_ACCESS_TOKEN_URL, params);
         String body = restfulHelper.getPure(requestUrl);
-        Map<String, Object> accessTokenObject = CommonUtils.jsonToMap(body);
-        String accessToken = accessTokenObject.get("access_token").toString();
-        logger.info("最新请求 accessToken 为：{}", accessToken);
-        return accessToken;
+
+        try {
+            if (CommonUtils.isError(body)) {
+                logger.error("微信获取服务号应用级 accessToken 失败：{}", body);
+                return null;
+            }
+            Map<String, Object> accessTokenObject = CommonUtils.jsonToMap(body);
+            String accessToken = accessTokenObject.get("access_token").toString();
+            logger.info("最新请求 accessToken 为：{}", accessToken);
+            return accessToken;
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return null;
+        }
     }
 
     /**
@@ -140,6 +150,10 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
 
         WeiXinResult.UserAccessTokenObject userAccessTokenObject = new WeiXinResult.UserAccessTokenObject();
         try {
+            if (CommonUtils.isError(body)) {
+                logger.error("微信交换 accessToken 失败：{}", body);
+                return null;
+            }
             Map<String, Object> result = CommonUtils.jsonToMap(body);
             String accessToken = result.get("access_token").toString();
             String openId = result.get("openid").toString();
@@ -170,6 +184,10 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
 
         WeiXinResult.MiniUserAccessTokenObject miniUserAccessTokenObject = new WeiXinResult.MiniUserAccessTokenObject();
         try {
+            if (CommonUtils.isError(body)) {
+                logger.error("微信小程序交换 accessToken 失败：{}", body);
+                return null;
+            }
             Map<String, Object> result = CommonUtils.jsonToMap(body);
             String openId = result.get("openid").toString();
             String accessToken = result.get("session_key").toString();
@@ -201,6 +219,10 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
 
         WeiXinResult.UserInfoObject userInfoObject = new WeiXinResult.UserInfoObject();
         try {
+            if (CommonUtils.isError(body)) {
+                logger.error("微信调用用户信息接口失败：{}", body);
+                return null;
+            }
             Map<String, Object> result = CommonUtils.jsonToMap(body);
             String newOpenId = result.get("openid").toString();
             String nickName = result.get("nickname").toString();
@@ -228,7 +250,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             userInfoObject.setUnionId(unionId);
             return userInfoObject;
         } catch (Exception e) {
-            logger.info("access token 过期：{}", accessToken);
+            logger.error(e.getLocalizedMessage(), e);
             return null;
         }
     }
@@ -242,6 +264,10 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         String body = restfulHelper.getPure(requestUrl);
         WeiXinResult.RefreshTokenObject refreshTokenObject = new WeiXinResult.RefreshTokenObject();
         try {
+            if (CommonUtils.isError(body)) {
+                logger.error("微信刷新用户 token 接口失败：{}", body);
+                return null;
+            }
             Map<String, Object> result = CommonUtils.jsonToMap(body);
             String returnAccessToken = result.get("access_token").toString();
             String returnRefreshToken = result.get("refresh_token").toString();
@@ -249,7 +275,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             refreshTokenObject.setRefreshToken(returnRefreshToken);
             return refreshTokenObject;
         } catch (Exception e) {
-            logger.info("refresh token 过期：{}", accessToken);
+            logger.error(e.getLocalizedMessage(), e);
             return null;
         }
     }

@@ -168,6 +168,7 @@ public class AccountServiceImpl implements AccountService {
                     case PC:
                         break;
                     case MINI:
+                        // TODO profile 增加 miniOpenId
                         break;
                     default:
                         break;
