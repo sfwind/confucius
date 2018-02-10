@@ -222,14 +222,10 @@ public class AssistController {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("查询标准情况");
         operationLogService.log(operationLog);
-        //根据昵称和riseId进行匹配
-        List<Integer> profiles = accountService.loadProfilesByNickName(riseId).stream().map(Profile::getId).collect(Collectors.toList());
+
+        List<Integer> profiles = searchProfiles(riseId);
         if (profiles.size() == 0) {
-            Profile profile = accountService.getProfileByRiseId(riseId);
-            if (profile == null) {
-                return WebUtils.error("没有该用户");
-            }
-            profiles.add(profile.getId());
+            return WebUtils.error("没有该用户");
         }
         List<UserRole> userRoles = asstUpService.loadSearchAssists(profiles);
         if (userRoles.size() == 0) {
@@ -309,15 +305,10 @@ public class AssistController {
                 .module("后台管理").function("助教管理").action("查询完成情况");
         operationLogService.log(operationLog);
         //根据昵称和riseId进行匹配
-        List<Integer> profiles = accountService.loadProfilesByNickName(riseId).stream().map(Profile::getId).collect(Collectors.toList());
+        List<Integer> profiles = searchProfiles(riseId);
         if (profiles.size() == 0) {
-            Profile profile = accountService.getProfileByRiseId(riseId);
-            if (profile == null) {
-                return WebUtils.error("没有该用户");
-            }
-            profiles.add(profile.getId());
+            return WebUtils.error("没有该用户");
         }
-        System.out.println(profiles.toString());
         List<UserRole> userRoles = asstUpService.loadSearchAssists(profiles);
         if (userRoles.size() == 0) {
             return WebUtils.error("不存在该助教");
@@ -503,6 +494,29 @@ public class AssistController {
             return false;
         }
         return AsstHelper.checkIsReached(asstUpStandard, asstUpExecution);
+    }
+
+
+    /**
+     * 根据昵称,学号或者riseId进行查询
+     *
+     * @param riseId
+     * @return
+     */
+    private List<Integer> searchProfiles(String riseId) {
+        List<Integer> profiles = accountService.loadProfilesByNickName(riseId).stream().map(Profile::getId).collect(Collectors.toList());
+        if (profiles.size() == 0) {
+            Profile riseProfile = accountService.getProfileByRiseId(riseId);
+            if (riseProfile == null) {
+                Profile memProfile = accountService.loadProfileByMemberId(riseId);
+                if (memProfile != null) {
+                    profiles.add(memProfile.getId());
+                }
+            } else {
+                profiles.add(riseProfile.getId());
+            }
+        }
+        return profiles;
     }
 
 
