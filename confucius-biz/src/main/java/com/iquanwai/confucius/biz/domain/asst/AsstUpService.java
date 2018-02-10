@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.asst;
 import com.iquanwai.confucius.biz.po.asst.AsstUpDefault;
 import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
-import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.springframework.web.multipart.MultipartFile;
