@@ -52,7 +52,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private ProblemScheduleDao problemScheduleDao;
 
     //每个练习的精华上限
-    private static final int HIGHLIGHT_LIMIT = 3;
+    private static final int HIGHLIGHT_LIMIT = 10;
 
     private static final String SYSTEM_MESSAGE = "AUTO";
 
