@@ -52,16 +52,13 @@ public class UnionUserService {
         String platformHeader = request.getHeader(PLATFORM_HEADER_NAME);
         if (platformHeader == null) {
             // 资源请求，没有 platform header，查看 cookie 值
-            logger.info("资源请求，没有 platform header，查看 cookie 值");
             String pcState = CookieUtils.getCookie(request, PC_STATE_COOKIE_NAME);
             if (pcState != null) {
-                logger.info("pcState: {}", pcState);
                 platformHeader = UnionUser.PlatformHeaderValue.PC_HEADER;
             }
 
             String mobileState = CookieUtils.getCookie(request, MOBILE_STATE_COOKIE_NAME);
             if (mobileState != null) {
-                logger.info("mobileState: {}", mobileState);
                 platformHeader = UnionUser.PlatformHeaderValue.MOBILE_HEADER;
             }
         }
@@ -69,16 +66,12 @@ public class UnionUserService {
         if (platformHeader != null) {
             switch (platformHeader) {
                 case UnionUser.PlatformHeaderValue.PC_HEADER:
-                    logger.info("所在平台为：{}", UnionUser.PlatformHeaderValue.PC_HEADER);
                     return UnionUser.Platform.PC;
                 case UnionUser.PlatformHeaderValue.MOBILE_HEADER:
-                    logger.info("所在平台为：{}", UnionUser.PlatformHeaderValue.MOBILE_HEADER);
                     return UnionUser.Platform.MOBILE;
                 case UnionUser.PlatformHeaderValue.MINI_HEADER:
-                    logger.info("所在平台为：{}", UnionUser.PlatformHeaderValue.MINI_HEADER);
                     return UnionUser.Platform.MINI;
                 default:
-                    logger.info("没有匹配到对应平台");
                     return null;
             }
         } else {
