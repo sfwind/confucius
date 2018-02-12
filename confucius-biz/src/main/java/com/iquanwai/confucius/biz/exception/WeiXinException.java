@@ -3,28 +3,28 @@ package com.iquanwai.confucius.biz.exception;
 /**
  * Created by justin on 8/22/16.
  */
-public class WeixinException extends Exception {
+public class WeiXinException extends Exception {
     private String errMsg;
     private int errcode;
 
-    public WeixinException(int errcode, String errMsg) {
+    public WeiXinException(int errcode, String errMsg) {
         this.errMsg = errMsg;
         this.errcode = errcode;
     }
 
-    public WeixinException(String message, String errMsg, int errcode) {
+    public WeiXinException(String message, String errMsg, int errcode) {
         super(message);
         this.errMsg = errMsg;
         this.errcode = errcode;
     }
 
-    public WeixinException(String message, Throwable throwable, String errMsg, int errcode) {
+    public WeiXinException(String message, Throwable throwable, String errMsg, int errcode) {
         super(message, throwable);
         this.errMsg = errMsg;
         this.errcode = errcode;
     }
 
-    public WeixinException(Throwable throwable, String errMsg, int errcode) {
+    public WeiXinException(Throwable throwable, String errMsg, int errcode) {
         super(throwable);
         this.errMsg = errMsg;
         this.errcode = errcode;

@@ -36,4 +36,18 @@ public class Profile {
 
     //默认头像
     public static final String DEFAULT_AVATAR = "https://static.iqycamp.com/images/default_avatar.png";
+
+    public enum ProfileType {
+        PC(1), MOBILE(2), MINI(3);
+        private int value;
+
+        ProfileType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
 }

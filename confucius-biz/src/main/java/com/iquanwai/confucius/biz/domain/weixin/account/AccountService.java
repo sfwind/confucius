@@ -1,9 +1,11 @@
 package com.iquanwai.confucius.biz.domain.weixin.account;
 
 
+import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
 
 import java.util.List;
 
@@ -20,6 +22,10 @@ public interface AccountService {
     String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
     String BATCH_BALCKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchblacklist?access_token={access_token}";
     String UNBATCH_BACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/batchunblacklist?access_token={access_token}";
+
+    WeiXinResult.UserInfoObject storeWeiXinUserInfo(String openId, String accessToken, Profile.ProfileType profileType);
+
+    Role getUserRole(Integer profileId);
 
     /**
      * 根据openid获取用户的详细信息
@@ -38,7 +44,6 @@ public interface AccountService {
 
     /**
      * 获得会员类型
-     *
      * @param profileId 用户id
      * @return <p>
      * 0:非会员<br/>
@@ -126,12 +131,10 @@ public interface AccountService {
 
     Integer loadUserScheduleCategory(Integer profileId);
 
-    /**
-     * 根据unionId获取用户详情
-     */
-    Profile queryByUnionId(String unionid);
+    Profile getProfileByUnionId(String unionId);
+
+    void getProfileFromWeiXinByUnionId(String unionId);
 
     int updateHeadImageUrl(Integer profileId, String headImgUrl);
 
-    int initProfileAndFollowUser(String unionId, String nickName, String avatarUrl, Integer gender);
 }
