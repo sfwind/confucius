@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,10 +151,10 @@ public class UnionUserService {
     public void removeCookie(UnionUser.Platform platform, HttpServletResponse response) {
         switch (platform) {
             case PC:
-                CookieUtils.removeCookie(PC_STATE_COOKIE_NAME, response);
+                CookieUtils.removeCookie(PC_STATE_COOKIE_NAME, ConfigUtils.realDomainName(), response);
                 break;
             case MOBILE:
-                CookieUtils.removeCookie(MOBILE_STATE_COOKIE_NAME, response);
+                CookieUtils.removeCookie(MOBILE_STATE_COOKIE_NAME, ConfigUtils.realDomainName(), response);
                 break;
             case MINI:
                 break;
