@@ -4,6 +4,7 @@ package com.iquanwai.confucius.biz.dao.common.permission;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -37,6 +38,7 @@ public class UserRoleDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+
     /**
      * 获得所有的教练
      *
@@ -45,8 +47,7 @@ public class UserRoleDao extends DBUtil {
     public List<UserRole> loadAssists() {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
-        String sql = " select * from UserRole where roleId in (3,4,11) and Del = 0 ";
-
+        String sql = " select * from UserRole where roleId in (3,4,5,6,11,12,13,14,15) and Del = 0 ";
         try {
             return runner.query(sql, h);
         } catch (SQLException e) {
@@ -87,7 +88,7 @@ public class UserRoleDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        return 0;
+        return -1;
     }
 
     /**
@@ -99,7 +100,7 @@ public class UserRoleDao extends DBUtil {
     public UserRole loadAssist(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<UserRole> h = new BeanHandler<>(UserRole.class);
-        String sql = " select * from UserRole where profileId = ? And RoleId in (3,4,11) And del = 0";
+        String sql = " select * from UserRole where profileId = ? And RoleId in (3,4,5,6,11,12,13,14,15) And del = 0";
 
         try {
             return runner.query(sql, h, profileId);
@@ -127,5 +128,47 @@ public class UserRoleDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+
+    public List<UserRole> loadAssistsList(Page page){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
+        String sql = "select * from UserRole where RoleId in (3,4,5,6,11,12,13,14,15) and del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
+
+        try {
+            return runner.query(sql,h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public Integer loadAssistsCount(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT COUNT(*) FROM UserRole where RoleId in (3,4,5,6,11,12,13,14,15) and del = 0 ";
+
+        try {
+            return runner.query(sql,new ScalarHandler<Long>()).intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return -1;
+    }
+
+    public List<UserRole> loadSearchAssists(List<Integer> profiles){
+        if (profiles.size() == 0) {
+            return Lists.newArrayList();
+        }
+
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM UserRole WHERE ProfileId IN (" + produceQuestionMark(profiles.size()) + ") AND Del = 0";
+        ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
+        try {
+            return runner.query(sql, h, profiles.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }

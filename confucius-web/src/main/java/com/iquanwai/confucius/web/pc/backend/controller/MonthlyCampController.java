@@ -81,10 +81,8 @@ public class MonthlyCampController {
     }
 
     @RequestMapping(value = "/load/profile/{type}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadProfile(@PathVariable("type") String type,
-                                                           @PathParam("nickName") String nickName,
-                                                           @PathParam("riseId") String riseId,
-                                                           @PathParam("memberId") String memberId) {
+    public ResponseEntity<Map<String, Object>> loadProfile(@PathVariable("type") String type, @PathParam("nickName") String nickName,
+                                                           @PathParam("riseId") String riseId, @PathParam("memberId") String memberId) {
         List<Profile> profiles = Lists.newArrayList();
         switch (type) {
             case "nickName":
@@ -155,6 +153,7 @@ public class MonthlyCampController {
         return WebUtils.result(monthlyCampDtos);
     }
 
+    @Deprecated
     @RequestMapping(value = "/load/ungroup", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp(@ModelAttribute Page page) {
         page.setPageSize(PAGE_SIZE);
@@ -180,6 +179,7 @@ public class MonthlyCampController {
         return WebUtils.result(monthlyCampPageDto);
     }
 
+    @Deprecated
     @RequestMapping(value = "/modify/update", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> modifyMonthlyCamp(@RequestBody MonthlyCampDto monthlyCampDto) {
         String RiseId = monthlyCampDto.getRiseId();
@@ -212,9 +212,9 @@ public class MonthlyCampController {
         }
     }
 
+    @Deprecated
     @RequestMapping(value = "/modify/batch/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId,
-                                                                             @RequestBody List<Integer> batchRiseClassMemberIds) {
+    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId, @RequestBody List<Integer> batchRiseClassMemberIds) {
         OperationLog operationLog = OperationLog.create()
                 .memo("Ids:" + batchRiseClassMemberIds.toString() + "groupId:" + groupId)
                 .openid("").module("训练营")
@@ -230,19 +230,17 @@ public class MonthlyCampController {
         }
     }
 
+    @Deprecated
     @RequestMapping(value = "/modify/add", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> modifyAddMonthlyCamp(@RequestBody MonthlyCampDto monthlyCampDto) {
-
         Profile profile = accountService.getProfileByRiseId(monthlyCampDto.getRiseId());
         OperationLog operationLog = OperationLog.create()
                 .memo("className:" + monthlyCampDto.getClassName() + ", groupId:" + monthlyCampDto.getGroupId())
-                .openid(profile.getOpenid()).module("训练营")
-                .function("信息新增").action("训练营用户新增");
+                .openid(profile.getOpenid()).module("训练营").function("信息新增").action("训练营用户新增");
         operationLogService.log(operationLog);
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         int sellingYear = monthlyCampConfig.getSellingYear();
         int sellingMonth = monthlyCampConfig.getSellingMonth();
-
 
         Integer riseClassMemberId = monthlyCampDto.getRiseClassMemberId();
         RiseClassMember riseClassMember = monthlyCampService.loadRiseClassMemberById(riseClassMemberId);
@@ -258,14 +256,11 @@ public class MonthlyCampController {
             }
 
             riseClassMember.setClassName(monthlyCampDto.getClassName());
-
             riseClassMember.setMemberId(memberId);
             riseClassMember.setGroupId(monthlyCampDto.getGroupId());
             riseClassMember.setProfileId(profile.getId());
-
             riseClassMember.setYear(sellingYear);
             riseClassMember.setMonth(sellingMonth);
-
             riseClassMember.setActive(monthlyCampDto.getActive());
             int result = monthlyCampService.initRiseClassMember(riseClassMember);
             if (result > 0) {
@@ -280,6 +275,7 @@ public class MonthlyCampController {
         }
     }
 
+    @Deprecated
     @RequestMapping(value = "/unlock/{riseId}")
     public ResponseEntity<Map<String, Object>> unlockMonthlyCampAuthority(@PathVariable String riseId) {
         Assert.notNull(riseId, "解锁用户的 RiseId 不能为空");
@@ -308,9 +304,11 @@ public class MonthlyCampController {
     @RequestMapping(value = "/add/certificate", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> addCampRiseCertificate(@RequestBody CampRiseCertificateDao campRiseCertificateDao) {
         Integer type = campRiseCertificateDao.getType();
+        Integer year = campRiseCertificateDao.getYear();
+        Integer month = campRiseCertificateDao.getMonth();
         List<String> memberIds = campRiseCertificateDao.getMemberIds();
         logger.info("开始添加获得证书人员");
-        monthlyCampService.insertRiseCertificate(type, memberIds);
+        monthlyCampService.insertRiseCertificate(year, month, type, memberIds);
         logger.info("证书人员添加结束");
         return WebUtils.success();
     }

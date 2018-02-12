@@ -134,18 +134,18 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
         signupService.unlockMonthlyCamp(profile.getId());
     }
 
+    /**
+     * 在 RiseCertificate 表中，初始化需要发送的人员数据
+     */
     @Override
-    public void insertRiseCertificate(Integer type, List<String> memberIds) {
-        List<RiseClassMember> riseClassMembers = riseClassMemberDao.loadByMemberIds(memberIds);
-
+    public void insertRiseCertificate(Integer year, Integer month, Integer type, List<String> memberIds) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryForCertificateMemberIds(memberIds);
         List<Integer> certificateNoSequence = Lists.newArrayList();
         certificateNoSequence.add(1);
 
         riseClassMembers.forEach(riseClassMember -> {
             logger.info("正在添加：" + riseClassMember.getMemberId());
             Integer profileId = riseClassMember.getProfileId();
-            Integer year = riseClassMember.getYear();
-            Integer month = riseClassMember.getMonth();
 
             List<RiseCertificate> riseCertificates = riseCertificateDao.loadRiseCertificatesByProfileId(profileId);
             RiseCertificate existRiseCertificate = riseCertificates.stream()
@@ -164,6 +164,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
                 CourseScheduleDefault courseScheduleDefault = courseScheduleDefaults.stream()
                         .filter(scheduleDefault -> scheduleDefault.getType() == CourseScheduleDefault.Type.MAJOR)
                         .filter(scheduleDefault -> scheduleDefault.getMonth().equals(month)).findAny().orElse(null);
+
                 String problemName = "";
                 if (courseScheduleDefault != null) {
                     Integer problemId = courseScheduleDefault.getProblemId();

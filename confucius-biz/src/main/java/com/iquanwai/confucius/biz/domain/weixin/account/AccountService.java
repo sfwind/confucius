@@ -80,7 +80,7 @@ public interface AccountService {
     Profile getProfile(String openid, boolean realTime);
 
     /**
-     * 根据openid获取用户详情
+     * 根据profileId获取用户详情
      */
     Profile getProfile(Integer profileId);
 

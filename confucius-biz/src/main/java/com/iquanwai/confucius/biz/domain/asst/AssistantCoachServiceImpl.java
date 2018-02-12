@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.apply.InterviewRecordDao;
+import com.iquanwai.confucius.biz.dao.asst.AsstUpExecutionDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
@@ -12,6 +13,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.ProfileCount;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
+import com.iquanwai.confucius.biz.po.asst.AsstUpExecution;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
@@ -53,6 +55,8 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
     @Autowired
     private InterviewRecordDao interviewRecordDao;
+    @Autowired
+    private AsstUpExecutionDao asstUpExecutionDao;
 
     private static final int SIZE = 100;
 

@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
@@ -20,6 +21,7 @@ import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.po.CourseSchedule;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
@@ -72,6 +74,8 @@ public class AccountServiceImpl implements AccountService {
     private PermissionService permissionService;
     @Autowired
     private PlanService planService;
+    @Autowired
+    private CourseScheduleDao courseScheduleDao;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -638,6 +642,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Integer loadUserScheduleCategory(Integer profileId) {
+        CourseSchedule courseSchedule = courseScheduleDao.loadOldestCourseSchedule(profileId);
+        if (courseSchedule != null) {
+            return courseSchedule.getCategory();
+        }
         // 老用户
         CustomerStatus status = customerStatusDao.load(profileId, CustomerStatus.SCHEDULE_LESS);
         if (status != null) {
