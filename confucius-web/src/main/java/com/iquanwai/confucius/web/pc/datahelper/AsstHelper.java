@@ -154,7 +154,6 @@ public class AsstHelper {
         upGradeDto.setCampScore(asstUpExecution.getCampScore());
         upGradeDto.setNeedMonthlyWork(asstUpStandard.getMonthlyWork());
         upGradeDto.setMonthlyWork(asstUpExecution.getMonthlyWork());
-
         total = asstUpStandard.getFosterNew();
         finish = asstUpExecution.getFosterNew();
         upGradeDto.setNeedFosterNew(total);
@@ -164,7 +163,7 @@ public class AsstHelper {
         total = asstUpStandard.getCompanyTrainNumber();
         finish = asstUpExecution.getCompanyTrainNumber();
         upGradeDto.setNeedCompanyNumber(total);
-        upGradeDto.setCompanyNumber(finish);
+        upGradeDto.setCompanyTrainNumber(finish);
         upGradeDto.setRemainCompanyNumber(getRemain(finish,total));
         upGradeDto.setNeedCompanyScore(asstUpStandard.getCompanyTrainScore());
         upGradeDto.setCompanyTrainScore(asstUpExecution.getCompanyTrainScore());
@@ -174,6 +173,74 @@ public class AsstHelper {
 
     }
 
+
+    public static Integer calUnReached(AsstUpStandard asstUpStandard, AsstUpExecution asstUpExecution){
+        Integer count = 0;
+        if (asstUpStandard.getRequestReviewNumber() > asstUpExecution.getRequestReviewNumber()) {
+            count++;
+        }
+        Integer rate;
+        if (asstUpExecution.getReviewNumber() == 0) {
+            rate = 0;
+        } else {
+            rate =  (asstUpExecution.getValidReviewNumber() * 100)/asstUpExecution.getReviewNumber();
+        }
+        if(asstUpStandard.getValidReviewNumber()>asstUpExecution.getValidReviewNumber()){
+            count++;
+        }
+        if(asstUpStandard.getValidReviewRate()>rate){
+            count++;
+        }
+        if(asstUpStandard.getHighQualityAnswer()>asstUpExecution.getHighQualityAnswer()){
+            count++;
+        }
+        if(asstUpStandard.getHostNumber()>asstUpExecution.getHostNumber()){
+            count++;
+        }
+        if(asstUpStandard.getHostScore().compareTo(asstUpExecution.getHostScore())>0){
+            count++;
+        }
+        if(asstUpStandard.getMainPointNumber()>asstUpExecution.getMainPointNumber()){
+            count++;
+        }
+        if(asstUpStandard.getMainPointScore().compareTo(asstUpExecution.getMainPointScore())>0){
+            count++;
+        }
+        if(asstUpStandard.getOnlineAnswer().equals("Y") && asstUpExecution.getOnlineAnswer().equals("N")){
+            count++;
+        }
+        if(asstUpStandard.getSwing().equals("Y") && asstUpExecution.getSwing().equals("N")){
+            count++;
+        }
+        if(asstUpStandard.getOnlineOrSwingNumber()>asstUpExecution.getOnlineOrSwingNumber()){
+            count++;
+        }
+        if(asstUpStandard.getOnlineScore().compareTo(asstUpExecution.getOnlineScore())>0){
+            count++;
+        }
+        if(asstUpStandard.getCampNumber()>asstUpExecution.getCampNumber()){
+            count++;
+        }
+        if(asstUpStandard.getAsstNumber()>asstUpExecution.getAsstNumber()){
+            count++;
+        }
+        if(asstUpStandard.getCampScore().compareTo(asstUpExecution.getCampScore())>0){
+            count++;
+        }
+        if(asstUpStandard.getMonthlyWork().equals("Y") && asstUpExecution.getMonthlyWork().equals("N")){
+            count++;
+        }
+        if(asstUpStandard.getFosterNew()>asstUpExecution.getFosterNew()){
+            count++;
+        }
+        if(asstUpStandard.getCompanyTrainNumber()>asstUpExecution.getCompanyTrainNumber()){
+            count++;
+        }
+        if(asstUpStandard.getCompanyTrainScore().compareTo(asstUpExecution.getCompanyTrainScore())>0){
+            count++;
+        }
+        return count;
+    }
 
 
     /**

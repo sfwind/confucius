@@ -68,7 +68,8 @@ public class AsstUpExecutionDao extends DBUtil {
                     asstUpExecution.getMainPointNumber(), asstUpExecution.getMainPointScore(), asstUpExecution.getOnlineAnswer(),
                     asstUpExecution.getSwing(), asstUpExecution.getOnlineOrSwingNumber(), asstUpExecution.getOnlineScore(),
                     asstUpExecution.getCampNumber(), asstUpExecution.getAsstNumber(), asstUpExecution.getCampScore(),
-                    asstUpExecution.getMonthlyWork(), asstUpExecution.getFosterNew(), asstUpExecution.getCompanyTrainNumber(),
+                    asstUpExecution.getMonthlyWork(),
+                    asstUpExecution.getFosterNew(), asstUpExecution.getCompanyTrainNumber(),
                     asstUpExecution.getCompanyTrainScore(),asstUpExecution.getUpGrade(), asstUpExecution.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

@@ -10,7 +10,9 @@ public class AssistDto {
     private String riseId;
     private String nickName;
     private String headImageUrl;
+    private Integer remainDay;
     private String  reached;
     private String needVerified;
     private String upGrade;
+    private Integer remainCount;
 }

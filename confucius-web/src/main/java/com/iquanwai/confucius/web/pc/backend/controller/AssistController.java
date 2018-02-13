@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 /**
  * 助教后台管理
  */
@@ -77,13 +78,18 @@ public class AssistController {
                 AsstUpStandard asstUpStandard = asstUpService.loadStandard(profileId);
                 AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profileId);
                 if ((asstUpStandard != null) && (asstUpExecution != null)) {
+                    assistDto.setRemainCount(unReachedCount(profileId, asstUpStandard, asstUpExecution));
                     if (checkIsReached(profileId, asstUpStandard, asstUpExecution)) {
                         assistDto.setReached("是");
                     } else {
                         assistDto.setReached("否");
                     }
+                    Integer interval = DateUtils.interval(asstUpExecution.getStartDate());
+                    Integer countDown = asstUpStandard.getCountDown();
+                    assistDto.setRemainDay(AsstHelper.getRemain(interval, countDown));
                     assistDto.setNeedVerified(asstUpStandard.getNeedVerified());
                     assistDto.setUpGrade(asstUpExecution.getUpGrade());
+
                 }
             }
             assistDtoList.add(assistDto);
@@ -517,6 +523,32 @@ public class AssistController {
             }
         }
         return profiles;
+    }
+
+
+    private Integer unReachedCount(Integer profileId, AsstUpStandard asstUpStandard, AsstUpExecution asstUpExecution) {
+        Integer unReached = 0;
+
+        Integer applicationRate = asstUpStandard.getApplicationRate();
+        //统计完成度在applicationRate之上的课程数量
+        Integer finish = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).map(improvementPlan -> {
+            List<PracticePlan> practicePlans = planService.loadPracticePlans(improvementPlan.getId());
+            Long sum = practicePlans.stream().filter(practicePlan -> (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
+            Long count = practicePlans.stream().filter(practicePlan -> (practicePlan.getStatus() == 1) && (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
+
+            if (count * 100 / sum >= applicationRate) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }).reduce(0, Integer::sum);
+
+        if (asstUpStandard.getLearnedProblem() > finish) {
+            unReached++;
+        }
+        unReached = unReached + AsstHelper.calUnReached(asstUpStandard, asstUpExecution);
+
+        return unReached;
     }
 
 

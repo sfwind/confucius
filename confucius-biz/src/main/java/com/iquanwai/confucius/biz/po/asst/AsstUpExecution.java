@@ -88,6 +88,7 @@ public class AsstUpExecution {
      * 每月作业
      */
     private String monthlyWork;
+
     /**
      * 培养新人次数
      */

@@ -213,6 +213,7 @@ public class GradeDto {
      * 每月作业
      */
     private String monthlyWork;
+
     /**
      * 需要培养新人的次数
      */
@@ -233,7 +234,7 @@ public class GradeDto {
     /**
      * 企业培训次数
      */
-    private Integer companyNumber;
+    private Integer companyTrainNumber;
     /**
      * 剩余企业培训次数
      */
