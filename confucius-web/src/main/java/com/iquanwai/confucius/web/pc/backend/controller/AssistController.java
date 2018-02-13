@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.iquanwai.confucius.web.pc.datahelper.AsstHelper.getRemain;
 
 /**
  * 助教后台管理
@@ -87,7 +86,7 @@ public class AssistController {
                     }
                     Integer interval = DateUtils.interval(asstUpExecution.getStartDate());
                     Integer countDown = asstUpStandard.getCountDown();
-                    assistDto.setRemainDay(getRemain(interval, countDown));
+                    assistDto.setRemainDay(AsstHelper.getRemain(interval, countDown));
                     assistDto.setNeedVerified(asstUpStandard.getNeedVerified());
                     assistDto.setUpGrade(asstUpExecution.getUpGrade());
 
@@ -440,7 +439,7 @@ public class AssistController {
             Integer total = asstUpStandard.getLearnedProblem();
             gradeDto.setNeedLearnedProblem(total);
             gradeDto.setLearnedProblem(finish);
-            gradeDto.setRemainProblem(getRemain(finish, total));
+            gradeDto.setRemainProblem(AsstHelper.getRemain(finish, total));
 
 
             gradeDtos.add(gradeDto);
