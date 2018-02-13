@@ -90,11 +90,6 @@ public class AsstUpExecution {
     private String monthlyWork;
 
     /**
-     * 缺少作业数
-     */
-    private Integer lackTask;
-
-    /**
      * 培养新人次数
      */
     private Integer fosterNew;

@@ -215,10 +215,6 @@ public class GradeDto {
     private String monthlyWork;
 
     /**
-     * 缺少作业数
-     */
-    private Integer lackTask;
-    /**
      * 需要培养新人的次数
      */
     private Integer needFosterNew;
