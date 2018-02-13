@@ -164,7 +164,7 @@ public class AsstHelper {
         total = asstUpStandard.getCompanyTrainNumber();
         finish = asstUpExecution.getCompanyTrainNumber();
         upGradeDto.setNeedCompanyNumber(total);
-        upGradeDto.setCompanyNumber(finish);
+        upGradeDto.setCompanyTrainNumber(finish);
         upGradeDto.setRemainCompanyNumber(getRemain(finish,total));
         upGradeDto.setNeedCompanyScore(asstUpStandard.getCompanyTrainScore());
         upGradeDto.setCompanyTrainScore(asstUpExecution.getCompanyTrainScore());
