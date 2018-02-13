@@ -230,8 +230,7 @@ public class RiseOperationController {
 
     /**
      * 碎片化总任务列表加载
-     *
-     * @param problemId   问题id
+     * @param problemId 问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
@@ -281,14 +280,14 @@ public class RiseOperationController {
             return WebUtils.error("该申请不存在");
         } else {
             InterviewRecord interviewRecord = convertInterview(approveDto.getInterviewDto());
-            if(interviewRecord == null){
+            if (interviewRecord == null) {
                 return WebUtils.error("更新失败");
             }
             interviewRecord.setApprovalId(loginUser.getProfileId());
-            if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
+            if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
-            boolean reject = businessSchoolService.rejectApplication(application.getId(),"");
+            boolean reject = businessSchoolService.rejectApplication(application.getId(), "");
             if (reject) {
                 String orderId = application.getOrderId();
                 if (orderId != null) {
@@ -298,7 +297,7 @@ public class RiseOperationController {
                             // 开始退款
                             try {
                                 payService.refund(orderId, quanwaiOrder.getPrice());
-                            } catch (RefundException e){
+                            } catch (RefundException e) {
                                 LOGGER.error("退款失败:{}", orderId);
                             }
                         }
@@ -314,7 +313,7 @@ public class RiseOperationController {
     @RequestMapping(value = "/bs/application/approve", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> approveApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
         System.out.println(loginUser);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId()+"");
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId() + "");
         operationLogService.log(operationLog);
 
         BusinessSchoolApplication application = businessSchoolService.loadBusinessSchoolApplication(approveDto.getId());
@@ -326,14 +325,16 @@ public class RiseOperationController {
             }
             InterviewRecord interviewRecord = convertInterview(approveDto.getInterviewDto());
 
-            if(interviewRecord == null){
+            if (interviewRecord == null) {
                 return WebUtils.error("更新失败");
             }
             interviewRecord.setApprovalId(loginUser.getProfileId());
-            if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
+            if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
-            boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(),"");if (approve) { return WebUtils.success();
+            boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(), "");
+            if (approve) {
+                return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
             }
@@ -353,14 +354,14 @@ public class RiseOperationController {
             return WebUtils.error("该申请不存在");
         } else {
             InterviewRecord interviewRecord = convertInterview(approveDto.getInterviewDto());
-            if(interviewRecord == null){
+            if (interviewRecord == null) {
                 return WebUtils.error("更新失败");
             }
             interviewRecord.setApprovalId(loginUser.getProfileId());
-            if(assistantCoachService.addInterviewRecord(interviewRecord) == -1){
+            if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
-            boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(),"");
+            boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(), "");
             if (approve) {
                 return WebUtils.success();
             } else {
@@ -513,29 +514,29 @@ public class RiseOperationController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
-            dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId())==null?"否":"是");
+            dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId()) == null ? "否" : "是");
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             businessApplySubmits.stream().forEach(businessApplySubmit -> {
                 Integer questionId = businessApplySubmit.getQuestionId();
-                if(questionId == 14){
+                if (questionId == 14) {
                     dto.setInterviewTime(businessApplySubmit.getChoiceText());
                 }
-                if(questionId== 5 || questionId == 22){
+                if (questionId == 5 || questionId == 22) {
                     dto.setWorkYear(businessApplySubmit.getChoiceText());
                 }
-                if(questionId == 2 || questionId == 19){
+                if (questionId == 2 || questionId == 19) {
                     dto.setIndustry(businessApplySubmit.getChoiceText());
                 }
-                if(questionId == 6 || questionId == 23){
+                if (questionId == 6 || questionId == 23) {
                     dto.setEducation(businessApplySubmit.getChoiceText());
                 }
-                if(questionId == 7 || questionId == 24){
+                if (questionId == 7 || questionId == 24) {
                     dto.setCollege(businessApplySubmit.getUserValue());
                 }
-                if(questionId == 8 || questionId == 25){
+                if (questionId == 8 || questionId == 25) {
                     dto.setLocation(businessApplySubmit.getUserValue());
                 }
-                if( questionId == 1 || questionId == 18){
+                if (questionId == 1 || questionId == 18) {
                     dto.setJob(businessApplySubmit.getChoiceText());
                 }
             });
@@ -556,7 +557,7 @@ public class RiseOperationController {
                 dto.setVerifiedResult("未知");
             }
 
-            if (openidList!=null && CollectionUtils.isNotEmpty(openidList)) {
+            if (openidList != null && CollectionUtils.isNotEmpty(openidList)) {
                 if (openidList.contains(profile.getOpenid())) {
                     dto.setIsBlack("是");
                 }
@@ -576,12 +577,12 @@ public class RiseOperationController {
         return dtoGroup;
     }
 
-    private InterviewRecord convertInterview(InterviewDto interviewDto){
+    private InterviewRecord convertInterview(InterviewDto interviewDto) {
         InterviewRecord interviewRecord = new InterviewRecord();
         String[] str = {"interviewTime"};
-        BeanUtils.copyProperties(interviewDto,interviewRecord,str);
+        BeanUtils.copyProperties(interviewDto, interviewRecord, str);
         interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
 
-        return  interviewRecord;
+        return interviewRecord;
     }
 }

@@ -3,7 +3,7 @@ package com.iquanwai.confucius.biz.util;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
-import com.iquanwai.confucius.biz.exception.WeixinException;
+import com.iquanwai.confucius.biz.exception.WeiXinException;
 import com.rabbitmq.client.TrustEverythingTrustManager;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -61,20 +61,15 @@ public class RestfulHelper {
     /**
      * 发起POST请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
-     *
      * @param requestUrl 请求链接
-     * @param json       请求参数
+     * @param json 请求参数
      * @return 响应体
      */
     public String post(String requestUrl, String json) {
         if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(json)) {
             String accessToken = accessTokenService.getAccessToken();
             String url = requestUrl.replace("{access_token}", accessToken);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(JSON, json))
-                    .build();
-
+            Request request = new Request.Builder().url(url).post(RequestBody.create(JSON, json)).build();
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
@@ -82,7 +77,7 @@ public class RestfulHelper {
                     if (CommonUtils.isError(body)) {
                         logger.error("execute {} return error, error message is {}", url, body);
                     }
-                } catch (WeixinException e) {
+                } catch (WeiXinException e) {
                     //refresh token and try again
                     accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
@@ -106,19 +101,14 @@ public class RestfulHelper {
 
     /**
      * 发起POST请求
-     *
      * @param requestUrl 请求的url
-     * @param xml        参数
+     * @param xml 参数
      * @return 响应体
      */
     public String postXML(String requestUrl, String xml) {
         logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);
         if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
-            Request request = new Request.Builder()
-                    .url(requestUrl)
-                    .post(RequestBody.create(XML, xml))
-                    .build();
-
+            Request request = new Request.Builder().url(requestUrl).post(RequestBody.create(XML, xml)).build();
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
@@ -134,7 +124,6 @@ public class RestfulHelper {
     /**
      * 发起GET请求,requestUrl中的{access_token}字段会被替换成缓存的accessToken<br/>
      * 触发WeixinException时会刷新AccessToken并重新调用
-     *
      * @param requestUrl 请求url，参数需要手动拼接到url中
      * @return 响应体
      */
@@ -143,10 +132,7 @@ public class RestfulHelper {
             String accessToken = accessTokenService.getAccessToken();
             logger.info("accesstoken is :{}", accessToken);
             String url = requestUrl.replace("{access_token}", accessToken);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-
+            Request request = new Request.Builder().url(url).build();
             try {
                 Response response = client.newCall(request).execute();
                 String body = response.body().string();
@@ -154,13 +140,11 @@ public class RestfulHelper {
                     if (CommonUtils.isError(body)) {
                         logger.error("execute {} return error, error message is {}", url, body);
                     }
-                } catch (WeixinException e) {
+                } catch (WeiXinException e) {
                     //refresh token and try again
                     accessToken = accessTokenService.refreshAccessToken(false);
                     url = requestUrl.replace("{access_token}", accessToken);
-                    request = new Request.Builder()
-                            .url(url)
-                            .build();
+                    request = new Request.Builder().url(url).build();
                     response = client.newCall(request).execute();
                     body = response.body().string();
                     if (CommonUtils.isError(body)) {
@@ -173,6 +157,19 @@ public class RestfulHelper {
             }
         }
         return "";
+    }
+
+    public String getPure(String requestUrl) {
+        if (!StringUtils.isEmpty(requestUrl)) {
+            Request request = new Request.Builder().url(requestUrl).build();
+            try {
+                Response response = client.newCall(request).execute();
+                return response.body().string();
+            } catch (Exception e) {
+                logger.error("execute " + requestUrl + " error", e);
+            }
+        }
+        return null;
     }
 
     public ResponseBody getPlain(String requestUrl) {
@@ -193,11 +190,7 @@ public class RestfulHelper {
     public String sslPostXml(String requestUrl, String xml) {
         logger.info("requestUrl: {}\nxml: {}", requestUrl, xml);
         if (StringUtils.isNotEmpty(requestUrl) && StringUtils.isNotEmpty(xml)) {
-            Request request = new Request.Builder()
-                    .url(requestUrl)
-                    .post(RequestBody.create(XML, xml))
-                    .build();
-
+            Request request = new Request.Builder().url(requestUrl).post(RequestBody.create(XML, xml)).build();
             try {
                 Response response = sslClient.newCall(request).execute();
                 String body = response.body().string();
@@ -212,7 +205,6 @@ public class RestfulHelper {
 
     /**
      * 初始化阿里请求client
-     *
      * @return AlipayClient
      */
     public AlipayClient initAlipayClient() {
@@ -227,25 +219,21 @@ public class RestfulHelper {
 
     /**
      * 上传微信素材
-     *
-     * @param url
-     * @return
      */
-    public String uploadWXFile(MultipartFile multipartFile , String url){
+    public String uploadWXFile(MultipartFile multipartFile, String url) {
         String accessToken = accessTokenService.getAccessToken();
         logger.info("accesstoken is :{}", accessToken);
-        url = url.replace("{access_token}",accessToken);
+        url = url.replace("{access_token}", accessToken);
         byte[] fileBytes = null;
         try {
-           fileBytes = multipartFile.getBytes();
+            fileBytes = multipartFile.getBytes();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        builder.addPart(Headers.of("Content-Disposition","form-data;name=\"media\"; filename=\""+multipartFile.getOriginalFilename()+"\"\n"),RequestBody.create(MediaType.parse("image/png"),fileBytes)).build();
+        builder.addPart(Headers.of("Content-Disposition", "form-data;name=\"media\"; filename=\"" + multipartFile.getOriginalFilename() + "\"\n"), RequestBody.create(MediaType.parse("image/png"), fileBytes)).build();
 
         RequestBody body = builder.build();
-
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
@@ -253,11 +241,10 @@ public class RestfulHelper {
         try {
             return client.newCall(request).execute().body().string();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }
-
 
     private void initCert() throws Exception {
         // 证书密码，默认为商户ID
@@ -281,6 +268,5 @@ public class RestfulHelper {
         // 设置httpclient的SSLSocketFactory
         sslClient = new OkHttpClient.Builder().sslSocketFactory(sslSocketFactory,
                 new TrustEverythingTrustManager()).build();
-
     }
 }

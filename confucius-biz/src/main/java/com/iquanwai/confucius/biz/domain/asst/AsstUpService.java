@@ -20,6 +20,7 @@ public interface AsstUpService {
      * @return
      */
     List<UserRole> loadAssists(Page page);
+    List<UserRole> loadSearchAssists(List<Integer> profiles);
 
     List<AsstUpDefault> loadAssistDefault();
 
@@ -44,7 +45,5 @@ public interface AsstUpService {
     Integer updateExecution(AsstUpExecution asstUpExecution);
 
     Integer updateExecution(MultipartFile file);
-
-
 
 }

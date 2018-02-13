@@ -1,9 +1,8 @@
 package com.iquanwai.confucius.web.resolver;
 
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.pc.LoginUserService;
-import com.iquanwai.confucius.web.util.CookieUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +14,14 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * Created by nethunder on 2016/12/23.
- */
 public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private LoginUserService loginUserService;
+    private UnionUserService unionUserService;
+    @Autowired
+    private AccountService accountService;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -31,22 +30,39 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        //调试时，返回mock user
+
         if (ConfigUtils.isDebug()) {
             return PCLoginUser.defaultUser();
         }
+
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        //前端调试开启时，返回mock user
-        if (request.getParameter("debug") != null && ConfigUtils.isFrontDebug()) {
-            return PCLoginUser.defaultUser();
-        }
-        Pair<Integer, PCLoginUser> loginUser = loginUserService.getLoginUser(request);
-        if (loginUser.getLeft() < 1) {
-            String remoteIp = request.getHeader("X-Forwarded-For");
-            String state = CookieUtils.getCookie(request, LoginUserService.QUANWAI_TOKEN_COOKIE_NAME);
-            logger.error("没有找到用户,uri:{},ip:{},_qt:{}", request.getRequestURI(), remoteIp, state);
-        }
-        return loginUser.getRight();
+
+        Callback callback = unionUserService.getCallbackByRequest(request);
+        if (callback == null) return null;
+
+        UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
+        PCLoginUser pcLoginUser = adapterUnionUser(unionUser);
+        logger.info("获取 adapter pcLoginUser 用户，id：{}", pcLoginUser.getId());
+        return pcLoginUser;
+    }
+
+    private PCLoginUser adapterUnionUser(UnionUser unionUser) {
+        PCLoginUser pcLoginUser = new PCLoginUser();
+        pcLoginUser.setId(unionUser.getId());
+        pcLoginUser.setProfileId(unionUser.getId());
+        pcLoginUser.setOpenId(unionUser.getOpenId());
+        pcLoginUser.setSignature("");
+        pcLoginUser.setRole(accountService.getUserRole(unionUser.getId()).getId());
+
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(unionUser.getId());
+        loginUser.setOpenId(unionUser.getOpenId());
+        loginUser.setWeixinName(unionUser.getNickName());
+        loginUser.setHeadimgUrl(unionUser.getHeadImgUrl());
+        loginUser.setRealName("");
+
+        pcLoginUser.setWeixin(loginUser);
+        return pcLoginUser;
     }
 
 }

@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.iquanwai.confucius.web.pc.datahelper.AsstHelper.getRemain;
 
@@ -77,7 +78,7 @@ public class AssistController {
                 Integer profileId = profile.getId();
                 AsstUpStandard asstUpStandard = asstUpService.loadStandard(profileId);
                 AsstUpExecution asstUpExecution = asstUpService.loadUpGradeExecution(profileId);
-                if((asstUpStandard!=null) && (asstUpExecution!=null)){
+                if ((asstUpStandard != null) && (asstUpExecution != null)) {
                     if (checkIsReached(profileId, asstUpStandard, asstUpExecution)) {
                         assistDto.setReached("是");
                     } else {
@@ -222,6 +223,30 @@ public class AssistController {
      * @param loginUser
      * @return
      */
+    @RequestMapping("/standard/search/load")
+    public ResponseEntity<Map<String, Object>> loadSearchStandard(@ModelAttribute Page page, PCLoginUser loginUser, @RequestParam("riseId") String riseId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理").function("助教管理").action("查询标准情况");
+        operationLogService.log(operationLog);
+
+        List<Integer> profiles = searchProfiles(riseId);
+        if (profiles.size() == 0) {
+            return WebUtils.error("没有该用户");
+        }
+        List<UserRole> userRoles = asstUpService.loadSearchAssists(profiles);
+        if (userRoles.size() == 0) {
+            return WebUtils.error("不存在该助教");
+        }
+        return WebUtils.result(initStandards(userRoles));
+    }
+
+
+    /**
+     * 加载助教评判标准
+     *
+     * @param loginUser
+     * @return
+     */
     @RequestMapping("/standard/load")
     public ResponseEntity<Map<String, Object>> loadAssistStandard(@ModelAttribute Page page, PCLoginUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台管理").function("教练管理").action("加载评判标准");
@@ -280,6 +305,23 @@ public class AssistController {
         return WebUtils.result(result);
     }
 
+    @RequestMapping("/execution/search/load")
+    public ResponseEntity<Map<String, Object>> loadSearchExecution(PCLoginUser loginUser, @RequestParam("riseId") String riseId) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("后台管理").function("助教管理").action("查询完成情况");
+        operationLogService.log(operationLog);
+        //根据昵称和riseId进行匹配
+        List<Integer> profiles = searchProfiles(riseId);
+        if (profiles.size() == 0) {
+            return WebUtils.error("没有该用户");
+        }
+        List<UserRole> userRoles = asstUpService.loadSearchAssists(profiles);
+        if (userRoles.size() == 0) {
+            return WebUtils.error("不存在该助教");
+        }
+        return WebUtils.result(initExecutions(userRoles));
+    }
+
     @RequestMapping(value = "/execution/update", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> updateAssistExecution(PCLoginUser loginUser, @RequestBody AsstExecutionDto asstExecutionDto) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -301,20 +343,19 @@ public class AssistController {
 
     }
 
-    @RequestMapping(value = "/execution/file/update",method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> updateAssistExecution(PCLoginUser loginUser,@RequestParam(value = "file") MultipartFile excelFile){
+    @RequestMapping(value = "/execution/file/update", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> updateAssistExecution(PCLoginUser loginUser, @RequestParam(value = "file") MultipartFile excelFile) {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("更新助教完成情况");
 
         operationLogService.log(operationLog);
 
-        if(asstUpService.updateExecution(excelFile)==-1){
+        if (asstUpService.updateExecution(excelFile) == -1) {
             return WebUtils.error("导入助教完成数据出错");
         }
         return WebUtils.success();
     }
-
 
 
     /**
@@ -334,8 +375,15 @@ public class AssistController {
             }
             asstStandardDto.setNickName(profile.getNickname());
             Integer roleId = userRole.getRoleId();
-            asstStandardDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
+            AssistCatalogEnums assistCatalogEnums = AssistCatalogEnums.getById(roleId);
+            if (assistCatalogEnums == null) {
+                return;
+            }
+            asstStandardDto.setRoleName(assistCatalogEnums.getRoleName());
             AsstUpStandard asstStandard = asstUpService.loadStandard(profile.getId());
+            if (asstStandard == null) {
+                return;
+            }
             BeanUtils.copyProperties(asstStandard, asstStandardDto);
             asstStandardDtos.add(asstStandardDto);
         });
@@ -368,7 +416,11 @@ public class AssistController {
             BeanUtils.copyProperties(upGradeDto, gradeDto);
 
             gradeDto.setId(asstUpExecution.getId());
-            gradeDto.setRoleName(AssistCatalogEnums.getById(roleId).getRoleName());
+            AssistCatalogEnums assistCatalogEnums = AssistCatalogEnums.getById(roleId);
+            if (assistCatalogEnums == null) {
+                return;
+            }
+            gradeDto.setRoleName(assistCatalogEnums.getRoleName());
 
             Integer applicationRate = asstUpStandard.getApplicationRate();
             //统计完成度在applicationRate之上的课程数量
@@ -430,14 +482,48 @@ public class AssistController {
      * @return
      */
     private boolean checkIsReached(Integer profileId, AsstUpStandard asstUpStandard, AsstUpExecution asstUpExecution) {
-        Long result = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).count();
-        if (asstUpStandard.getLearnedProblem() > result.intValue()) {
+        Integer applicationRate = asstUpStandard.getApplicationRate();
+        //统计完成度在applicationRate之上的课程数量
+        Integer finish = planService.getUserPlans(profileId).stream().filter(improvementPlan -> improvementPlan.getCompleteTime() != null).map(improvementPlan -> {
+            List<PracticePlan> practicePlans = planService.loadPracticePlans(improvementPlan.getId());
+            Long sum = practicePlans.stream().filter(practicePlan -> (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
+            Long count = practicePlans.stream().filter(practicePlan -> (practicePlan.getStatus() == 1) && (practicePlan.getType() == PracticePlan.APPLICATION) || (practicePlan.getType() == PracticePlan.APPLICATION_REVIEW)).count();
+
+            if (count * 100 / sum >= applicationRate) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }).reduce(0, Integer::sum);
+
+        if (asstUpStandard.getLearnedProblem() > finish) {
             return false;
         }
         return AsstHelper.checkIsReached(asstUpStandard, asstUpExecution);
     }
 
 
+    /**
+     * 根据昵称,学号或者riseId进行查询
+     *
+     * @param riseId
+     * @return
+     */
+    private List<Integer> searchProfiles(String riseId) {
+        List<Integer> profiles = accountService.loadProfilesByNickName(riseId).stream().map(Profile::getId).collect(Collectors.toList());
+        if (profiles.size() == 0) {
+            Profile riseProfile = accountService.getProfileByRiseId(riseId);
+            if (riseProfile == null) {
+                Profile memProfile = accountService.loadProfileByMemberId(riseId);
+                if (memProfile != null) {
+                    profiles.add(memProfile.getId());
+                }
+            } else {
+                profiles.add(riseProfile.getId());
+            }
+        }
+        return profiles;
+    }
 
 
 }

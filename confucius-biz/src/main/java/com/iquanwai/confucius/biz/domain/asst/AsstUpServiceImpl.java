@@ -167,6 +167,11 @@ public class AsstUpServiceImpl implements AsstUpService {
     }
 
     @Override
+    public List<UserRole> loadSearchAssists(List<Integer> profiles) {
+        return userRoleDao.loadSearchAssists(profiles);
+    }
+
+    @Override
     public List<AsstUpDefault> loadAssistDefault() {
         List<AsstUpDefault> asstUpDefaults = asstUpDefaultDao.loadAll(AsstUpDefault.class);
         return asstUpDefaults.stream().filter(asstUpDefault -> asstUpDefault.getDel() == 0).collect(Collectors.toList());

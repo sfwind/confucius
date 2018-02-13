@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -67,38 +66,16 @@ public class WebUtils {
     public static void auth(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String domainName = request.getHeader("Host-Test");
         String url;
-        if(domainName != null){
+        if (domainName != null) {
             url = "http://" + domainName + request.getRequestURI();
-        }else{
+        } else {
             url = ConfigUtils.adapterDomainName() + request.getRequestURI();
         }
-
         if (!StringUtils.isEmpty(request.getQueryString())) {
             url = url + "?" + request.getQueryString();
         }
         url = URLEncoder.encode(url, "UTF-8");
-
         response.sendRedirect(ConfigUtils.adapterDomainName() + "/wx/oauth/auth?callbackUrl=" + url);
-    }
-
-    /**
-     * 提示性授权
-     */
-    public static void askAuth(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String domainName = request.getHeader("Host-Test");
-        String url;
-        if(domainName != null){
-            url = "http://" + domainName + request.getRequestURI();
-        }else{
-            url = ConfigUtils.adapterDomainName() + request.getRequestURI();
-        }
-
-        if (!StringUtils.isEmpty(request.getQueryString())) {
-            url = url + "?" + request.getQueryString();
-        }
-        url = URLEncoder.encode(url, "UTF-8");
-
-        response.sendRedirect(ConfigUtils.adapterDomainName() + "/wx/oauth/auth/ask?callbackUrl=" + url);
     }
 
     /**
@@ -138,7 +115,7 @@ public class WebUtils {
     /**
      * 跳转至问卷星
      */
-    public static void wjx(HttpServletRequest request,HttpServletResponse response,String url) throws IOException {
+    public static void wjx(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
         response.sendRedirect(url);
     }
 }

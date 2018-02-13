@@ -10,7 +10,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
-import org.omg.CORBA.PUBLIC_MEMBER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -155,5 +154,21 @@ public class UserRoleDao extends DBUtil {
             logger.error(e.getLocalizedMessage(),e);
         }
         return -1;
+    }
+
+    public List<UserRole> loadSearchAssists(List<Integer> profiles){
+        if (profiles.size() == 0) {
+            return Lists.newArrayList();
+        }
+
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM UserRole WHERE ProfileId IN (" + produceQuestionMark(profiles.size()) + ") AND Del = 0";
+        ResultSetHandler<List<UserRole>> h = new BeanListHandler<>(UserRole.class);
+        try {
+            return runner.query(sql, h, profiles.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }

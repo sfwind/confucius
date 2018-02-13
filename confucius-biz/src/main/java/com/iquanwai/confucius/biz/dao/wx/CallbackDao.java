@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.dao.wx;
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.exception.ErrorConstants;
 import com.iquanwai.confucius.biz.po.Callback;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -20,7 +19,7 @@ import java.sql.SQLException;
 public class CallbackDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public int insert(Callback callback) throws SQLException {
+    public int insert(Callback callback) {
         QueryRunner run = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Callback(State, CallbackUrl, AccessToken, PcAccessToken, WeMiniAccessToken, " +
                 "RefreshToken, UnionId, Openid, PcOpenid, WeMiniOpenid) " +
@@ -39,33 +38,23 @@ public class CallbackDao extends DBUtil {
                     callback.getWeMiniOpenid());
             return result.intValue();
         } catch (SQLException e) {
-            if (e.getErrorCode() == ErrorConstants.DUPLICATE_CODE) {
-                throw e;
-            }
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
     }
 
-    public void updateUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
-        QueryRunner run = new QueryRunner(getDataSource());
+    public int updateFields(Callback callback) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Callback SET State = ?, CallbackUrl = ?, AccessToken = ?, PcAccessToken = ?, WeMiniAccessToken = ?, " +
+                "RefreshToken = ?, UnionId = ?, OpenId = ?, PcOpenId = ?, WeMiniOpenId = ? WHERE Id = ?";
         try {
-            run.update("UPDATE Callback Set AccessToken = ?, RefreshToken = ?, Openid = ?, UnionId = ? where State = ?",
-                    accessToken, refreshToken, openid, unionId, state);
-
+            return runner.update(sql, callback.getState(), callback.getCallbackUrl(), callback.getAccessToken(), callback.getPcAccessToken(),
+                    callback.getWeMiniAccessToken(), callback.getRefreshToken(), callback.getUnionId(), callback.getOpenid(), callback.getPcOpenid(),
+                    callback.getWeMiniOpenid(), callback.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-    }
-
-    public void updatePcUserInfo(String state, String accessToken, String refreshToken, String openid, String unionId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        try {
-            run.update("UPDATE Callback Set PcAccessToken = ?, RefreshToken = ?, PcOpenid = ?, UnionId = ? where State = ?",
-                    accessToken, refreshToken, openid, unionId, state);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
+        return -1;
     }
 
     public void refreshToken(String state, String newAccessToken) {
@@ -105,20 +94,6 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public Callback queryByPcAccessToken(String accessToken) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        ResultSetHandler<Callback> h = new BeanHandler<>(Callback.class);
-
-        try {
-            Callback callback = run.query("SELECT * FROM Callback where PcAccessToken=?", h, accessToken);
-            return callback;
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return null;
-    }
-
     public Callback queryByUnionId(String unionId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM Callback WHERE UnionId = ?";
@@ -131,13 +106,4 @@ public class CallbackDao extends DBUtil {
         return null;
     }
 
-    public void updateOpenId(String state, String openId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        try {
-            String sql = "update Callback set OpenId = ? where State = ?";
-            run.update(sql, openId, state);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
 }

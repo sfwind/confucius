@@ -117,7 +117,7 @@ public class AliPayController {
                     "UTF-8", AlipayConstants.SIGN_TYPE_RSA2);
             logger.info("进入回调.\n 订单号：{} \n 交易号：{} \n 交易状态：{} \n 验签结果：{}", outTradeNo, tradeNo, tradeStatus, verifyResult);
             if (verifyResult) {
-                //验证成功
+                // 验证成功
                 tradeBusinessDeal(payCallback);
                 try {
                     out.println("success");
@@ -127,7 +127,8 @@ public class AliPayController {
                 } finally {
                     IOUtils.closeQuietly(out);
                 }
-            } else {//验证失败
+            } else {
+                // 验证失败
                 try {
                     out.println("fail");
                     response.flushBuffer();
@@ -155,15 +156,15 @@ public class AliPayController {
                 if (quanwaiOrder.getStatus() != QuanwaiOrder.UNDER_PAY) {
                     return;
                 }
-//                if (ALIPAY_TRADE_FINISHED.equals(payCallback.getResult_code())) {
-//                    //注意：
-//                    //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
-//                    //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
-//
-//                } else if (ALIPAY_TRADE_SUCCESS.equals(payCallback.getResult_code())) {
-//                    //注意：
-//                    //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
-//                }
+                // if (ALIPAY_TRADE_FINISHED.equals(payCallback.getResult_code())) {
+                //     //注意：
+                //     //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
+                //     //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
+                //
+                // } else if (ALIPAY_TRADE_SUCCESS.equals(payCallback.getResult_code())) {
+                //     //注意：
+                //     //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
+                // }
                 if (ALIPAY_TRADE_FINISHED.equals(payCallback.getResult_code()) || ALIPAY_TRADE_SUCCESS.equals(payCallback.getResult_code())) {
                     payService.handlePayResult(payCallback);
                     if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
@@ -179,6 +180,5 @@ public class AliPayController {
             }
         });
     }
-
 
 }
