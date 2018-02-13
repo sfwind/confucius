@@ -14,4 +14,5 @@ public class AssistDto {
     private String  reached;
     private String needVerified;
     private String upGrade;
+    private Integer remainCount;
 }
