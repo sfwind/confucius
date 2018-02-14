@@ -12,13 +12,14 @@
 <body>
 <script>
     window.ENV = {
-        reactMountPoint: "react-app"
+        reactMountPoint: "react-app",
+        isDevelopment:${isDevelopment}
     }
 </script>
 <%--userName: "${userName}",--%>
 <%--headImage:"${headImage}",--%>
 <%--loginSocketUrl:"${loginSocketUrl}",--%>
-<%--isDevelopment:${isDevelopment},--%>
+
 <%--feedBack:${feedBack},--%>
 <%--backend:true,--%>
 <%--roleId:${roleId},--%>
