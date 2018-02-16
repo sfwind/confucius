@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.web.pc.backend.dto;
 
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.course.dto.PictureDto;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +24,8 @@ public class ApplicationDto {
     private Integer submitId; // 提交id，非db字段;
     private Date submitUpdateTime;// 非db字段
     private Integer planId; // 计划id
+    private boolean duplicate;
+    private String coupon;
 
     private List<PictureDto> picList;
     private Integer moduleId;

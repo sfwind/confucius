@@ -13,11 +13,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDto;
-import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampDtoGroup;
-import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampPageDto;
-import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
-import com.iquanwai.confucius.web.pc.backend.dto.CampRiseCertificateDao;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -295,9 +291,7 @@ public class MonthlyCampController {
         Integer targetYear = campProcessDto.getTargetYear();
         Integer targetMonth = campProcessDto.getTargetMonth();
 
-        ThreadPool.execute(() -> {
-            monthlyCampService.switchCampDataProcess(sourceYear, sourceMonth, targetYear, targetMonth);
-        });
+        ThreadPool.execute(() -> monthlyCampService.switchCampDataProcess(sourceYear, sourceMonth, targetYear, targetMonth));
         return WebUtils.success();
     }
 

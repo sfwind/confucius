@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.controller;
+package com.iquanwai.confucius.web.backend;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -17,7 +17,7 @@ import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.course.dto.backend.*;
+import com.iquanwai.confucius.web.backend.dto.*;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
