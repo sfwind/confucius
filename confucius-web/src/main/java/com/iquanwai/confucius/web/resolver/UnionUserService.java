@@ -82,7 +82,9 @@ public class UnionUserService {
     /** 根据请求获取 callback 数据 */
     public Callback getCallbackByRequest(HttpServletRequest request) {
         UnionUser.Platform platform = getPlatformType(request);
-        if (platform == null) return null;
+        if (platform == null){
+            return null;
+        }
         switch (platform) {
             case PC:
                 String pcState = CookieUtils.getCookie(request, PC_STATE_COOKIE_NAME);
