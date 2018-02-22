@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.dto;
+package com.iquanwai.confucius.web.payment.dto;
 
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;

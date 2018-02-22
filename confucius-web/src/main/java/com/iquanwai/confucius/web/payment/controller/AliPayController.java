@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.payment;
+package com.iquanwai.confucius.web.payment.controller;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
