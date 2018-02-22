@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.controller;
+package com.iquanwai.confucius.web.payment.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -25,12 +25,12 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.web.course.dto.RiseMemberDto;
-import com.iquanwai.confucius.web.course.dto.backend.MonthlyCampProcessDto;
-import com.iquanwai.confucius.web.course.dto.payment.BusinessSchoolDto;
-import com.iquanwai.confucius.web.course.dto.payment.CampInfoDto;
-import com.iquanwai.confucius.web.course.dto.payment.GoodsInfoDto;
-import com.iquanwai.confucius.web.course.dto.payment.PaymentDto;
+import com.iquanwai.confucius.web.payment.dto.RiseMemberDto;
+import com.iquanwai.confucius.web.payment.dto.MonthlyCampProcessDto;
+import com.iquanwai.confucius.web.payment.dto.BusinessSchoolDto;
+import com.iquanwai.confucius.web.payment.dto.CampInfoDto;
+import com.iquanwai.confucius.web.payment.dto.GoodsInfoDto;
+import com.iquanwai.confucius.web.payment.dto.PaymentDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;

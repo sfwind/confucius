@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.dto.payment;
+package com.iquanwai.confucius.web.payment.dto;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.po.Coupon;
