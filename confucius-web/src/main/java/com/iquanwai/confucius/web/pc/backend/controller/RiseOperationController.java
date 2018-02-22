@@ -496,6 +496,10 @@ public class RiseOperationController {
             Profile profile = accountService.getProfile(application.getProfileId());
             BusinessApplicationDto dto = this.initApplicationDto(application);
             List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
+            BusinessApplyQuestion levelQuestion = questions.get(3);
+            if(levelQuestion!=null){
+                dto.setLevel(levelQuestion.getAnswer());
+            }
             dto.setQuestionList(questions);
             // 查询是否会员
             RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());

@@ -127,4 +127,9 @@ public class BusinessApplicationDto {
      */
     private String isInterviewed;
 
+    /**
+     * 职位层级
+     */
+    private String level;
+
 }
