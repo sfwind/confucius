@@ -23,7 +23,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
+import com.iquanwai.confucius.web.pc.backend.dto.BusinessApplicationDto;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.ClassNameGroups;
 import com.iquanwai.confucius.web.pc.asst.dto.Group;
@@ -275,9 +275,9 @@ public class AssistantCoachController {
 
         List<BusinessSchoolApplication> applications = assistantCoachService.loadByInterviewer(loginUser.getProfileId(),page);
 
-        TableDto<ApplicationDto> result = new TableDto<>();
+        TableDto<BusinessApplicationDto> result = new TableDto<>();
         result.setPage(page);
-        result.setData(getApplictionDto(applications));
+        result.setData(getBusinessApplicationDto(applications));
         return WebUtils.result(result);
     }
 
@@ -353,7 +353,7 @@ public class AssistantCoachController {
 
 
 
-    private List<ApplicationDto> getApplictionDto(List<BusinessSchoolApplication> applications){
+    private List<BusinessApplicationDto> getBusinessApplicationDto(List<BusinessSchoolApplication> applications){
         final List<String> openidList;
         if (applications != null && applications.size() > 0) {
             //获取黑名单用户
@@ -362,9 +362,9 @@ public class AssistantCoachController {
             openidList = null;
         }
         Assert.notNull(applications);
-        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
+        List<BusinessApplicationDto> dtoGroup = applications.stream().map(application -> {
             Profile profile = accountService.getProfile(application.getProfileId());
-            ApplicationDto dto = this.initApplicationDto(application);
+            BusinessApplicationDto dto = this.initApplicationDto(application);
             List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
             dto.setQuestionList(questions);
             // 查询是否会员
@@ -463,8 +463,8 @@ public class AssistantCoachController {
         }
     }
 
-    private ApplicationDto initApplicationDto(BusinessSchoolApplication application) {
-        ApplicationDto dto = new ApplicationDto();
+    private BusinessApplicationDto initApplicationDto(BusinessSchoolApplication application) {
+        BusinessApplicationDto dto = new BusinessApplicationDto();
         dto.setSubmitId(application.getSubmitId());
         dto.setIsDuplicate(application.getIsDuplicate() ? "是" : "否");
         if (application.getCoupon() != null) {
