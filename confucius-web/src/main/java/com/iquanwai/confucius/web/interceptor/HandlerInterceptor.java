@@ -29,11 +29,9 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        logger.info("进入拦截器");
 
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
         if (platform == null || unionUserService.isDocumentRequest(request)) {
-            logger.info("platform 为空或者当前请求的是资源请求");
             return true;
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
@@ -55,7 +53,6 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
      * @return 是否通过拦截器
      */
     private boolean handleUnLogin(HttpServletResponse response) throws Exception {
-        logger.info("不存在 callback，特殊处理请求");
         writeUnLoginStatus(response);
         return false;
     }
