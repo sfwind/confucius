@@ -49,10 +49,6 @@ public class BackendController {
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
-    private CourseProgressService courseProgressService;
-    @Autowired
-    private OAuthService oAuthService;
-    @Autowired
     private TemplateMessageService templateMessageService;
     @Autowired
     private AccountService accountService;
@@ -101,51 +97,6 @@ public class BackendController {
                 .memo(sb.toString());
         operationLogService.log(operationLog);
         return WebUtils.success();
-    }
-
-    @RequestMapping("/t")
-    public ResponseEntity<Map<String, Object>> test(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        StringBuilder sb = new StringBuilder();
-        for (Cookie cookie : cookies) {
-            sb.append(cookie.getName())
-                    .append("=")
-                    .append(cookie.getValue())
-                    .append(";");
-        }
-        String openid = oAuthService.openId(getAccessTokenFromCookie(sb.toString()));
-        OperationLog operationLog = OperationLog.create().openid(openid)
-                .module("测试")
-                .function("测试")
-                .action("获取cookie")
-                .memo(sb.toString());
-        operationLogService.log(operationLog);
-        return WebUtils.success();
-    }
-
-    @RequestMapping("/graduate/{classId}")
-    public ResponseEntity<Map<String, Object>> graduate(@PathVariable("classId") Integer classId) {
-        logger.info("classId {} graduate start", classId);
-        ThreadPool.execute(() -> {
-            try {
-                courseProgressService.graduate(classId);
-            } catch (Exception e) {
-                logger.error("触发毕业失败", e);
-            }
-        });
-        return WebUtils.result("正在运行中");
-    }
-
-    private static String getAccessTokenFromCookie(String cookieStr) {
-        String[] cookies = cookieStr.split(";");
-        String accessToken = "";
-        for (String cookie : cookies) {
-            if (cookie.startsWith(OAuthService.WE_CHAT_STATE_COOKIE_NAME + "=")) {
-                accessToken = cookie.substring(OAuthService.WE_CHAT_STATE_COOKIE_NAME.length() + 1);
-                break;
-            }
-        }
-        return accessToken;
     }
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
@@ -304,12 +255,6 @@ public class BackendController {
             }
         });
         return WebUtils.result("正在运行中");
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/batch/open/camp")
-    public ResponseEntity<Map<String, Object>> batchForceOpenMonthlyCamp(@RequestBody BatchOpenCourseDto batchOpenCourseDto) {
-        return WebUtils.result("已废弃");
     }
 
 }

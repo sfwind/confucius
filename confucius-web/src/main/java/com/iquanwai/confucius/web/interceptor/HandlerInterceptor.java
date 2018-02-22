@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.interceptor;
 
 import com.iquanwai.confucius.biz.po.Callback;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.resolver.UnionUserService;
 import org.slf4j.Logger;
@@ -28,16 +29,21 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        logger.info("进入拦截器");
 
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
         if (platform == null || unionUserService.isDocumentRequest(request)) {
-            logger.info("platform 为空或者当前请求的是资源请求");
             return true;
         } else {
-            logger.info("platform: {}", platform);
             Callback callback = unionUserService.getCallbackByRequest(request);
-            return (callback != null && callback.getUnionId() != null) || handleUnLogin(response);
+            if (callback != null && callback.getUnionId() != null) {
+                return true;
+            } else {
+                if (ConfigUtils.isDebug()) {
+                    return true;
+                } else {
+                    return handleUnLogin(response);
+                }
+            }
         }
     }
 
@@ -47,7 +53,6 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
      * @return 是否通过拦截器
      */
     private boolean handleUnLogin(HttpServletResponse response) throws Exception {
-        logger.info("不存在 callback，特殊处理请求");
         writeUnLoginStatus(response);
         return false;
     }
