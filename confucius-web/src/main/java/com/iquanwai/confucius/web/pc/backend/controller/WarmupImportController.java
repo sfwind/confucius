@@ -55,12 +55,8 @@ public class WarmupImportController {
             if(schedule!=null){
                 warmUpPracticeDto.setChapter(schedule.getChapter());
                 warmUpPracticeDto.setSection(schedule.getSection());
-
+                warmUpPracticeDtos.add(warmUpPracticeDto);
             }
-            else{
-                logger.info("未匹配到的warmupPractice:"+warmupPractice);
-            }
-            warmUpPracticeDtos.add(warmUpPracticeDto);
         });
         //排序
         List<WarmUpPracticeDto> result = warmUpPracticeDtos.stream().sorted(Comparator.comparing(WarmUpPracticeDto::getChapter).
