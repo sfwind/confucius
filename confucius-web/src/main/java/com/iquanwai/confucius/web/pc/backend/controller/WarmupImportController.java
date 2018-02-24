@@ -48,7 +48,7 @@ public class WarmupImportController {
         List<WarmUpPracticeDto> warmUpPracticeDtos = Lists.newArrayList();
         List<WarmupPractice> warmupPractices = operationManagementService.getPracticeByProblemId(problemId);
         List<ProblemSchedule> problemSchedules = problemService.loadProblemSchedules(problemId);
-        warmupPractices.stream().forEach(warmupPractice -> {
+        warmupPractices.stream().filter(warmupPractice -> warmupPractice.getExample()==false).forEach(warmupPractice -> {
             WarmUpPracticeDto warmUpPracticeDto = new WarmUpPracticeDto();
             BeanUtils.copyProperties(warmupPractice,warmUpPracticeDto);
             ProblemSchedule schedule = problemSchedules.stream().filter(problemSchedule -> problemSchedule.getKnowledgeId().equals(warmupPractice.getKnowledgeId()) && problemSchedule.getDel()==0).findAny().orElse(null);
@@ -60,8 +60,7 @@ public class WarmupImportController {
         });
         //排序
         List<WarmUpPracticeDto> result = warmUpPracticeDtos.stream().sorted(
-                Comparator.comparing(WarmUpPracticeDto::getExample).reversed().
-                thenComparing(Comparator.comparing(WarmUpPracticeDto::getChapter)).
+                Comparator.comparing(WarmUpPracticeDto::getChapter).
                 thenComparing(Comparator.comparing(WarmUpPracticeDto::getSection).
                 thenComparing(Comparator.comparing(WarmUpPracticeDto::getSequence))))
                 .collect(Collectors.toList());
