@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.dto.backend;
+package com.iquanwai.confucius.web.pc.backend.dto;
 
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
@@ -11,7 +11,7 @@ import java.util.List;
  * 返回给前端的商学院申请Dto
  */
 @Data
-public class ApplicationDto {
+public class BusinessApplicationDto {
     private Integer id;
     /**
      * 最终支付状态
@@ -126,5 +126,10 @@ public class ApplicationDto {
      * 是否已经面试过
      */
     private String isInterviewed;
+
+    /**
+     * 职位层级
+     */
+    private String level;
 
 }

@@ -15,7 +15,7 @@ public class CookieUtils {
      * @param name cookie的key
      * @param value cookie的value
      * @param domain domain
-     * ＠param  path path
+     * @param path path
      * @param maxage 最长存活时间 单位为秒
      */
     public static void addCookie(String name, String value, String domain,
@@ -32,7 +32,7 @@ public class CookieUtils {
 
     /**
      * 往根下面存一个cookie
-     * * @param name cookie的key
+     * @param name cookie的key
      * @param value cookie的value
      * @param domain domain
      * @param maxage 最长存活时间 单位为秒
@@ -43,8 +43,17 @@ public class CookieUtils {
     }
 
     /**
+     * 往根下面存一个会话级cookie
+     * @param name cookie的key
+     * @param value cookie的value
+     */
+    public static void addCookie(String name, String value, HttpServletResponse response) {
+        addCookie(name, value, ConfigUtils.realDomainName(), -1, "/", response);
+    }
+
+    /**
      * 往根下面存一个cookie
-     * * @param name cookie的key
+     * @param name cookie的key
      * @param value cookie的value
      * @param maxage 最长存活时间 单位为秒
      */

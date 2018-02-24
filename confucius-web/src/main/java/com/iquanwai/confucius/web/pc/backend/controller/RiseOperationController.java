@@ -26,14 +26,10 @@ import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.course.dto.backend.ApplicationDto;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
-import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
-import com.iquanwai.confucius.web.pc.backend.dto.AssignDto;
-import com.iquanwai.confucius.web.pc.backend.dto.ProblemCatalogDto;
-import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -261,7 +257,7 @@ public class RiseOperationController {
 
         List<BusinessSchoolApplication> applications = businessSchoolService.loadBusinessSchoolList(page);
         Assert.notNull(applications);
-        TableDto<ApplicationDto> result = new TableDto<>();
+        TableDto<BusinessApplicationDto> result = new TableDto<>();
         result.setPage(page);
         result.setData(getApplicationDto(applications));
         return WebUtils.result(result);
@@ -390,8 +386,8 @@ public class RiseOperationController {
         }
     }
 
-    private ApplicationDto initApplicationDto(BusinessSchoolApplication application) {
-        ApplicationDto dto = new ApplicationDto();
+    private BusinessApplicationDto initApplicationDto(BusinessSchoolApplication application) {
+        BusinessApplicationDto dto = new BusinessApplicationDto();
         dto.setSubmitId(application.getSubmitId());
         dto.setIsDuplicate(application.getIsDuplicate() ? "是" : "否");
         if (application.getCoupon() != null) {
@@ -488,7 +484,7 @@ public class RiseOperationController {
 
 
 
-    private List<ApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications){
+    private List<BusinessApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications){
         final List<String> openidList;
         if (applications != null && applications.size() > 0) {
             //获取黑名单用户
@@ -496,10 +492,14 @@ public class RiseOperationController {
         } else {
             openidList = null;
         }
-        List<ApplicationDto> dtoGroup = applications.stream().map(application -> {
+        List<BusinessApplicationDto> dtoGroup = applications.stream().map(application -> {
             Profile profile = accountService.getProfile(application.getProfileId());
-            ApplicationDto dto = this.initApplicationDto(application);
+            BusinessApplicationDto dto = this.initApplicationDto(application);
             List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
+            BusinessApplyQuestion levelQuestion = questions.get(3);
+            if(levelQuestion!=null){
+                dto.setLevel(levelQuestion.getAnswer());
+            }
             dto.setQuestionList(questions);
             // 查询是否会员
             RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
