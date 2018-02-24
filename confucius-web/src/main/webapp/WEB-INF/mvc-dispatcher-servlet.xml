@@ -22,11 +22,7 @@
     <context:component-scan base-package="com.iquanwai.confucius.web"/>
     <context:component-scan base-package="com.iquanwai.confucius.mq"/>
     <mvc:resources location="/image/" mapping="/image/**"/>
-    <mvc:resources location="/static/images/" mapping="/images/**"/>
-    <mvc:resources location="/static/vendor/" mapping="/vendor/**"/>
-    <mvc:resources location="/static/js/" mapping="/js/**"/>
-    <mvc:resources location="/static/css/" mapping="/css/**"/>
-    <mvc:resources location="/static/fonts/" mapping="/fonts/**"/>
+    <mvc:resources location="/static/local/" mapping="/local/**"/>
 
     <mvc:annotation-driven>
         <mvc:message-converters register-defaults="false">

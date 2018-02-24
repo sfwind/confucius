@@ -55,14 +55,14 @@
 /*------- menu ------*/
 @import url('../vendor/menu/dist/css/slimmenu.css');
 /*----font awesome -------*/
-@import url('../fonts/font-awesome/css/font-awesome.min.css');
+@import url('../../local/fonts/font-awesome/css/font-awesome.min.css');
 /*----owl-carousel css----*/
 @import url('../vendor/owl-carousel/owl.carousel.css');
 @import url('../vendor/owl-carousel/owl.theme.css');
 /*-------- animated css ------*/
 @import url('../vendor/WOW-master/css/libs/animate.css');
 /*--------- flat-icon ---------*/
-@import url('../fonts/icon/font/flaticon.css');
+@import url('../../local/fonts/icon/font/flaticon.css');
 /*-------Hover Css --------*/
 @import url('../vendor/hover.css');
 
@@ -93,7 +93,7 @@
 }
 
 #loader {
-    background: url(../images/1.gif);
+    background: url(../../local/images/1.gif);
     width: 64px;
     height: 64px;
     position: relative;
@@ -134,8 +134,8 @@
 
 @font-face {
     font-family: 'font-awesome';
-    src: url('../fonts/font-awesome/fonts/fontawesome-webfont.ttf');
-    src: url('../fonts/font-awesome/fonts/fontawesome-webfont.eot'), /* IE9 Compat Modes */ url('../fonts/font-awesome/fonts/fontawesome-webfont.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/font-awesome/fonts/fontawesome-webfont.woff') format('woff'), /* Pretty Modern Browsers */ url('../fonts/font-awesome/fonts/fontawesome-webfont.svg') format('svg'); /* Legacy iOS */
+    src: url('../../local/fonts/font-awesome/fonts/fontawesome-webfont.ttf');
+    src: url('../../local/fonts/font-awesome/fonts/fontawesome-webfont.eot'), /* IE9 Compat Modes */ url('../../local/fonts/font-awesome/fonts/fontawesome-webfont.woff2') format('woff2'), /* Super Modern Browsers */ url('../../local/fonts/font-awesome/fonts/fontawesome-webfont.woff') format('woff'), /* Pretty Modern Browsers */ url('../local/fonts/font-awesome/fonts/fontawesome-webfont.svg') format('svg'); /* Legacy iOS */
 }
 
 body {
@@ -825,7 +825,7 @@ body .button-seven {
 
 /* ------------------------------ Theme Client Slider --------------------------*/
 .seo-theme .client-slider {
-    background: url(../images/home/bg.jpg) no-repeat center;
+    background: url(../../local/images/home/bg.jpg) no-repeat center;
     background-size: cover;
     padding: 80px 0 65px 0;
     margin-bottom: 100px;
@@ -918,12 +918,12 @@ body .button-seven {
 }
 
 .seo-theme .client-slider .slider-container .item .clearfix .lft {
-    background: url("../images/icon/bu_comment_lft.png") 0 0 no-repeat;
+    background: url("../../local/images/icon/bu_comment_lft.png") 0 0 no-repeat;
     background-size: 30px;
 }
 
 .seo-theme .client-slider .slider-container .item .clearfix .rgt {
-    background: url("../images/icon/bu_comment_rgt.png") 100% 100% no-repeat;
+    background: url("../../local/images/icon/bu_comment_rgt.png") 100% 100% no-repeat;
     background-size: 30px;
     padding: 0 60px;
 }
@@ -1068,7 +1068,7 @@ body .button-seven {
 
 /*--------------------------- SEO Counter ---------------------*/
 .seo-theme .seo-counter {
-    background: url(../images/home/8.jpg) no-repeat center;
+    background: url(../../local/images/home/8.jpg) no-repeat center;
     background-size: cover;
     background-attachment: fixed;
     position: relative;
@@ -1171,7 +1171,7 @@ body .button-seven {
 .default-footer {
     padding: 55px 0 0 0;
     position: relative;
-    background: url(../images/home/8.jpg) no-repeat center;
+    background: url(../../local/images/home/8.jpg) no-repeat center;
     background-size: cover;
     z-index: 1;
     color: #FFF;
@@ -1374,7 +1374,7 @@ footer.seo-footer p {
 
 /* ---------------------------- Theme Inner Banner ------------------------*/
 .seo-theme .theme-inner-banner {
-    background: url(../images/inner-page/banner-3.jpg) no-repeat center;
+    background: url(../../local/images/inner-page/banner-3.jpg) no-repeat center;
     background-size: cover;
     margin-bottom: 120px;
 }
@@ -3400,7 +3400,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 .you-work-win {
     padding: 114px 0 0 0;
     position: relative;
-    background: url(../images/home/8.jpg) no-repeat center;
+    background: url(../../local/images/home/8.jpg) no-repeat center;
     background-size: cover;
     z-index: 1;
 }

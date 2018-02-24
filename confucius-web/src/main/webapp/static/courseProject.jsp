@@ -12,17 +12,17 @@
     <title>圈外</title>
 
     <!-- Main style sheet -->
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="local/css/style.css">
     <!-- responsive style sheet -->
-    <link rel="stylesheet" type="text/css" href="css/responsive.css">
+    <link rel="stylesheet" type="text/css" href="local/css/responsive.css">
 
 
     <!-- Fix Internet Explorer ______________________________________-->
 
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <script src="vendor/html5shiv.js"></script>
-    <script src="vendor/respond.js"></script>
+    <script src="local/vendor/html5shiv.js"></script>
+    <script src="local/vendor/respond.js"></script>
     <![endif]-->
 
 </head>
@@ -52,7 +52,7 @@
                             <img src="https://www.iqycamp.com/images/logo.png"
                                  style="display:inline-block;width:50px;height:50px;vertical-align: middle;"/>
                             <span style="vertical-align: middle;">圈外同学</span>
-                            <!--<img src="images/logo/logo4.png" alt="Logo">-->
+                            <!--<img src="local/images/logo/logo4.png" alt="Logo">-->
                         </a>
                     </div>
 
@@ -85,7 +85,7 @@
                 <div class="col-md-3 col-xs-12 text-center">
                     <div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp"
-                            onclick="jScrollTo('#point1',1000)">
+                            onclick="local/jscrollTo('#point1',1000)">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>核心能力项目</h5>
                         <ul class="ul-style text-left">
@@ -98,7 +98,7 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point2',1000)"
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="local/jscrollTo('#point2',1000)"
                          data-wow-delay="0.1s">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>商业进阶项目</h5>
@@ -112,7 +112,7 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point3',1000)"
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="local/jscrollTo('#point3',1000)"
                          data-wow-delay="0.2s" >
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>专项课</h5>
@@ -125,7 +125,7 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12  text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point4',1000)"
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="local/jscrollTo('#point4',1000)"
                          data-wow-delay="0.2s">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>企业定制方案</h5>
@@ -158,7 +158,7 @@
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
                         data-title="01" data-description="">
                         <!-- MAIN IMAGE -->
-                        <img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
+                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
                              data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
                              data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
                              data-scaleend="100" data-scalestart="140">
@@ -389,7 +389,7 @@
     <!--</a>-->
     <!--</div>-->
     <!--</div> &lt;!&ndash; /.col- &ndash;&gt;-->
-    <!--<div class="col-lg-6 col-md-5 col-xs-12"><img src="images/home/object2.png" alt="Image"></div>-->
+    <!--<div class="col-lg-6 col-md-5 col-xs-12"><img src="local/images/home/object2.png" alt="Image"></div>-->
     <!--</div> &lt;!&ndash; /.row &ndash;&gt;-->
     <!--</div> &lt;!&ndash; /.wrapper &ndash;&gt;-->
     <!--</div> &lt;!&ndash; /.container &ndash;&gt;-->
@@ -406,7 +406,7 @@
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
                         data-title="01" data-description="">
                         <!-- MAIN IMAGE -->
-                        <img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
+                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
                              data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
                              data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
                              data-scaleend="100" data-scalestart="140">
@@ -506,7 +506,7 @@
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
                         data-title="01" data-description="">
                         <!-- MAIN IMAGE -->
-                        <img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
+                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
                              data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
                              data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
                              data-scaleend="100" data-scalestart="140">
@@ -613,7 +613,7 @@
     <!--data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"-->
     <!--data-title="01" data-description="">-->
     <!--&lt;!&ndash; MAIN IMAGE &ndash;&gt;-->
-    <!--<img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"-->
+    <!--<img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"-->
     <!--data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"-->
     <!--data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"-->
     <!--data-scaleend="100" data-scalestart="140">-->
@@ -729,7 +729,7 @@
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
                         data-title="01" data-description="">
                         <!-- MAIN IMAGE -->
-                        <img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
+                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
                              data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
                              data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
                              data-scaleend="100" data-scalestart="140">
@@ -909,43 +909,43 @@
 
     <!-- Js File_________________________________ -->
     <!-- j Query -->
-    <script type="text/javascript" src="vendor/jquery.2.2.3.min.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.2.2.3.min.js"></script>
 
     <!-- Bootstrap JS -->
-    <script type="text/javascript" src="vendor/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="local/vendor/bootstrap/bootstrap.min.js"></script>
 
     <!-- revolution -->
-    <script src="vendor/revolution/jquery.themepunch.tools.min.js"></script>
-    <script src="vendor/revolution/jquery.themepunch.revolution.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.slideanims.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.layeranimation.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.navigation.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.kenburn.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.actions.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.parallax.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.migration.min.js"></script>
-    <!-- Vendor js _________ -->
+    <script src="local/vendor/revolution/jquery.themepunch.tools.min.js"></script>
+    <script src="local/vendor/revolution/jquery.themepunch.revolution.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.slideanims.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.layeranimation.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.navigation.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.kenburn.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.actions.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.parallax.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.migration.min.js"></script>
+    <!-- local/vendor js _________ -->
     <!-- menu  -->
-    <script type="text/javascript" src="vendor/menu/src/js/jquery.slimmenu.js"></script>
-    <script type="text/javascript" src="vendor/jquery.easing.1.3.js"></script>
+    <script type="text/javascript" src="local/vendor/menu/src/js/jquery.slimmenu.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.easing.1.3.js"></script>
 
     <!-- MixitUp -->
-    <script type="text/javascript" src="vendor/jquery.mixitup.min.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.mixitup.min.js"></script>
 
     <!-- WOW js -->
-    <script type="text/javascript" src="vendor/WOW-master/dist/wow.min.js"></script>
+    <script type="text/javascript" src="local/vendor/WOW-master/dist/wow.min.js"></script>
     <!-- owl.carousel -->
-    <script type="text/javascript" src="vendor/owl-carousel/owl.carousel.min.js"></script>
+    <script type="text/javascript" src="local/vendor/owl-carousel/owl.carousel.min.js"></script>
 
     <!-- Theme js -->
-    <script type="text/javascript" src="js/theme.js"></script>
+    <script type="text/javascript" src="local/js/theme.js"></script>
 
 </div> <!-- /.main-page-wrapper -->
 <div id="business-apply" class="popup-layer">
     <div class="mask" onclick="hiddenDialog('#business-apply')"></div>
     <div class="inner">
         <div class="close" onclick="hiddenDialog('#business-apply')">
-            <img src="images/icon/close.png"/>
+            <img src="local/images/icon/close.png"/>
         </div>
         <div class="qr-code text-center">
             <img src="https://static.iqycamp.com/images/fragment/home_to_apply_4.jpg?imageslim" class="qr-img">
@@ -960,7 +960,7 @@
     <div class="mask" onclick="hiddenDialog('#business-plus')"></div>
     <div class="inner">
         <div class="close" onclick="hiddenDialog('#business-plus')">
-            <img src="images/icon/close.png"/>
+            <img src="local/images/icon/close.png"/>
         </div>
         <div class="qr-code text-center">
             <img src="https://static.iqycamp.com/images/fragment/business_plus_order.png?imageslim" class="qr-img">
@@ -976,7 +976,7 @@
     <div class="mask" onclick="hiddenDialog('#camp-jghbd-order')"></div>
     <div class="inner">
         <div class="close" onclick="hiddenDialog('#camp-jghbd-order')">
-            <img src="images/icon/close.png"/>
+            <img src="local/images/icon/close.png"/>
         </div>
         <div class="qr-code text-center">
             <img src="https://static.iqycamp.com/images/fragment/camp_jghbd_order_1.png?imageslim" class="qr-img">

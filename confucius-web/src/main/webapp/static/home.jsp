@@ -12,17 +12,17 @@
     <title>圈外</title>
 
     <!-- Main style sheet -->
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="local/css/style.css">
     <!-- responsive style sheet -->
-    <link rel="stylesheet" type="text/css" href="css/responsive.css">
+    <link rel="stylesheet" type="text/css" href="local/css/responsive.css">
 
 
     <!-- Fix Internet Explorer ______________________________________-->
 
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <script src="vendor/html5shiv.js"></script>
-    <script src="vendor/respond.js"></script>
+    <script src="local/vendor/html5shiv.js"></script>
+    <script src="local/vendor/respond.js"></script>
     <![endif]-->
 
 </head>
@@ -52,7 +52,7 @@
                             <img src="https://www.iqycamp.com/images/logo.png"
                                  style="display:inline-block;width:50px;height:50px;vertical-align: middle;"/>
                             <span style="vertical-align: middle;">圈外同学</span>
-                            <!--<img src="images/logo/logo4.png" alt="Logo">-->
+                            <!--<img src="local/images/logo/logo4.png" alt="Logo">-->
                         </a>
                     </div>
 
@@ -89,7 +89,7 @@
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
                         data-title="01" data-description="">
                         <!-- MAIN IMAGE -->
-                        <img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
+                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
                              data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
                              data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
                              data-scaleend="100" data-scalestart="140">
@@ -313,7 +313,7 @@
                 <div class="col-md-4 col-xs-12">
                     <div class="icon-word-wrapper">
                         <div class="icon">
-                            <img src="images/icon/97per.png" alt="97%"/>
+                            <img src="local/images/icon/97per.png" alt="97%"/>
                         </div>
                         <div class="word">
                             <div class="number">
@@ -328,7 +328,7 @@
                 <div class="col-md-4 col-xs-12">
                     <div class="icon-word-wrapper">
                         <div class="icon">
-                            <img src="images/icon/19per.png" alt="97%"/>
+                            <img src="local/images/icon/19per.png" alt="97%"/>
                         </div>
                         <div class="word">
                             <div class="number">
@@ -343,7 +343,7 @@
                 <div class="col-md-4 col-xs-12">
                     <div class="icon-word-wrapper">
                         <div class="icon">
-                            <img src="images/icon/27per.png" alt="97%"/>
+                            <img src="local/images/icon/27per.png" alt="97%"/>
                         </div>
                         <div class="word">
                             <div class="number">
@@ -360,7 +360,7 @@
                 <div class="col-md-4 col-xs-12">
                     <div class="icon-word-wrapper">
                         <div class="icon">
-                            <img src="images/icon/48per.png" alt="97%"/>
+                            <img src="local/images/icon/48per.png" alt="97%"/>
                         </div>
                         <div class="word">
                             <div class="number">
@@ -375,7 +375,7 @@
                 <div class="col-md-4 col-xs-12">
                     <div class="icon-word-wrapper">
                         <div class="icon">
-                            <img src="images/icon/5年.png" alt="97%"/>
+                            <img src="local/images/icon/5年.png" alt="97%"/>
                         </div>
                         <div class="word">
                             <div class="number">
@@ -390,7 +390,7 @@
                 <div class="col-md-4 col-xs-12">
                     <div class="icon-word-wrapper">
                         <div class="icon">
-                            <img src="images/icon/12.6万.png" alt="97%"/>
+                            <img src="local/images/icon/12.6万.png" alt="97%"/>
                         </div>
                         <div class="word">
                             <div class="number">
@@ -416,7 +416,7 @@
     -->
     <div class="seo-counter">
         <div class="main-content">
-            <img src="images/home/object3.png" alt="Image">
+            <img src="local/images/home/object3.png" alt="Image">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
@@ -645,48 +645,48 @@
 
     <!-- Js File_________________________________ -->
     <!-- j Query -->
-    <script type="text/javascript" src="vendor/jquery.2.2.3.min.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.2.2.3.min.js"></script>
 
     <!-- Bootstrap JS -->
-    <script type="text/javascript" src="vendor/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="local/vendor/bootstrap/bootstrap.min.js"></script>
 
-    <!-- Vendor js _________ -->
+    <!-- local/vendor js _________ -->
     <!-- revolution -->
-    <script src="vendor/revolution/jquery.themepunch.tools.min.js"></script>
-    <script src="vendor/revolution/jquery.themepunch.revolution.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.slideanims.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.layeranimation.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.navigation.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.kenburn.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.actions.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.parallax.min.js"></script>
-    <script type="text/javascript" src="vendor/revolution/revolution.extension.migration.min.js"></script>
+    <script src="local/vendor/revolution/jquery.themepunch.tools.min.js"></script>
+    <script src="local/vendor/revolution/jquery.themepunch.revolution.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.slideanims.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.layeranimation.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.navigation.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.kenburn.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.actions.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.parallax.min.js"></script>
+    <script type="text/javascript" src="local/vendor/revolution/revolution.extension.migration.min.js"></script>
     <!-- menu  -->
-    <script type="text/javascript" src="vendor/menu/src/js/jquery.slimmenu.js"></script>
-    <script type="text/javascript" src="vendor/jquery.easing.1.3.js"></script>
+    <script type="text/javascript" src="local/vendor/menu/src/js/jquery.slimmenu.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.easing.1.3.js"></script>
     <!-- fancy box -->
-    <script type="text/javascript" src="vendor/fancy-box/jquery.fancybox.pack.js"></script>
+    <script type="text/javascript" src="local/vendor/fancy-box/jquery.fancybox.pack.js"></script>
     <!-- MixitUp -->
-    <script type="text/javascript" src="vendor/jquery.mixitup.min.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.mixitup.min.js"></script>
 
     <!-- WOW js -->
-    <script type="text/javascript" src="vendor/WOW-master/dist/wow.min.js"></script>
+    <script type="text/javascript" src="local/vendor/WOW-master/dist/wow.min.js"></script>
     <!-- owl.carousel -->
-    <script type="text/javascript" src="vendor/owl-carousel/owl.carousel.min.js"></script>
+    <script type="text/javascript" src="local/vendor/owl-carousel/owl.carousel.min.js"></script>
     <!-- js count to -->
-    <script type="text/javascript" src="vendor/jquery.appear.js"></script>
-    <script type="text/javascript" src="vendor/jquery.countTo.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.appear.js"></script>
+    <script type="text/javascript" src="local/vendor/jquery.countTo.js"></script>
 
 
     <!-- Theme js -->
-    <script type="text/javascript" src="js/theme.js"></script>
+    <script type="text/javascript" src="local/js/theme.js"></script>
 
 </div> <!-- /.main-page-wrapper -->
 <div id="business-apply" class="popup-layer">
     <div class="mask" onclick="hiddenDialog('#business-apply')"></div>
     <div class="inner">
         <div class="close" onclick="hiddenDialog('#business-apply')">
-            <img src="images/icon/close.png"/>
+            <img src="local/images/icon/close.png"/>
         </div>
         <div class="qr-code text-center">
             <img src="https://static.iqycamp.com/images/fragment/home_to_apply_4.jpg?imageslim" class="qr-img">
