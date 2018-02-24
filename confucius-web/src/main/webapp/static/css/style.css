@@ -204,6 +204,7 @@ a {
 a:hover, a:focus, a:visited {
     text-decoration: none;
     outline: none;
+    color:inherit;
 }
 
 img {
@@ -1163,7 +1164,7 @@ body .button-seven {
 }
 
 .seo-theme #partner-logo {
-    padding: 60px 300px;
+    padding: 0 60px;
 }
 
 /* ------------------------------ Theme Footer --------------------------*/
@@ -3192,36 +3193,62 @@ footer.seo-footer p {
     display: none;
 }
 
-#business-apply {
-    width: 300px;
-    height: 300px;
-    background-color: white;
-    border: 1px solid #666;
-    border-radius: 5px 5px 0 0
+.popup-layer {
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
 }
 
-#business-apply .qr-code {
-    padding: 20px 15px;
-
+.popup-layer .mask {
+    position: absolute;
+    z-index: 0;
+    opacity: .8;
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+    background-color: #000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
-#business-apply .qr-code .qr-img {
-    width: 200px;
-    height: 200px;
-    display: inline-block;
+.popup-layer .inner {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    z-index: 4;
+    width: 225px;
+    height: 308px;
+    margin-top: -184px;
+    margin-left: -162px;
+    padding-top: 50px;
+    padding-left: 50px;
+    padding-right: 50px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-sizing: content-box;
 }
 
-#business-apply .close {
+.popup-layer .inner .close {
     position: absolute;
     top: 0;
-    right: 0;
-    border: 1px solid #333;
-    border-radius: 30px;
-    width: 25px;
-    height: 25px;
-    line-height: 25px;
-    text-align: center;
+    right: -68px;
+    cursor: pointer;
+    width:26px;
+    height:26px;
 }
+
+
+.popup-layer .qr-code {
+    width: 225px;
+    height: 225px;
+    margin-bottom: 20px;
+    background-color: #f2f2f2;
+}
+
 
 .our-service .wrapper .single-service:hover {
     box-shadow: none;
@@ -3301,10 +3328,15 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     font-weight: bolder;
     color: #333;
 }
+.article-nav .nav-item a {
+    padding-bottom: 10px;
+}
+
 
 .article-nav .nav-item a.active {
-    border-bottom: 4px solid #666;
+    border-bottom: 4px solid #ffc323;
     font-weight: bolder;
+    color:#ffc323;
 }
 
 .article-nav .nav-item + .nav-item {
@@ -3312,7 +3344,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 }
 
 .container .content-item {
-    padding: 20px;
+    padding: 20px 20px 20px 0;
 }
 
 .container .content-item .article + .article {
@@ -3323,11 +3355,12 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     height: 200px;
     overflow: hidden;
     position: relative;
+    cursor: pointer;
 }
 
 .container .content-item .article .float-left {
     width: 350px;
-    padding: 0 30px;
+    padding: 0 30px 0 0;
 }
 
 .container .content-item .article .content {
@@ -3346,18 +3379,21 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 }
 
 .container .content-item .article .content .prew-words {
+    margin-top:10px;
     font-size: 18px;
     color: #999;
 }
 
-.container .content-item .article .content .prew-words .time {
+.container .content-item .article .content  .time {
     font-size: 18px;
+    color: #999;
 }
 
-.container .content-item .article .content .prew-words .article-label {
+.container .content-item .article .content .article-label {
     font-size: 20px;
     font-weight: bolder;
-    color: #333;
+    color: #666;
+    margin-left:10px;
 }
 
 /******************* 你负责努力，我们负责帮你赢 ******************/
@@ -3438,17 +3474,6 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     margin-bottom: 104px;
 }
 
-#seo-main-banner > ul > li > div:nth-child(7) > div > div > div > a {
-    /*background: #ffc323;*/
-    /*color: #FFF;*/
+.tp-caption a {
     border: 2px solid #ffc323;
 }
-
-#seo-main-banner > ul > li > div:nth-child(7) > div > div > div > a:hover {
-    /*background: #3e60c2;*/
-}
-
-#seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a {
-    border: 2px solid #ffc323;
-}
-

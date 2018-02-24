@@ -83,7 +83,9 @@
             <h2 class="text-center">圈外商学院课程项目</h2>
             <div class="row">
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp">
+                    <div
+                            class="single-goal text-center hvr-float-shadow wow fadeInUp"
+                            onclick="jScrollTo('#point1',1000)">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>核心能力项目</h5>
                         <ul class="ul-style text-left">
@@ -96,7 +98,8 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point2',1000)"
+                         data-wow-delay="0.1s">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>商业进阶项目</h5>
                         <ul class="ul-style text-left">
@@ -109,7 +112,8 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point3',1000)"
+                         data-wow-delay="0.2s" >
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>专项课</h5>
                         <ul class="ul-style text-left">
@@ -121,7 +125,8 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12  text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point4',1000)"
+                         data-wow-delay="0.2s">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>企业定制方案</h5>
                         <ul class="ul-style text-left">
@@ -144,7 +149,7 @@
   -->
 
     <div id="banner">
-        <div class="rev_slider_wrapper">
+        <div class="rev_slider_wrapper" id="point1">
             <!-- START REVOLUTION SLIDER 5.0.7 auto mode -->
             <div id="seo-main-banner" class="rev_slider" data-version="5.0.7">
                 <ul>
@@ -203,7 +208,7 @@
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['0','0','15','5']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','130']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['140','140','140','140']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
                              data-transform_in="x:[-100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
@@ -212,12 +217,12 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="service.html" class="service-button button-two">立即申请</a>
+                            <a href="javascript:showDialog('#business-apply')" class="service-button button-two">立即申请</a>
                         </div>
                         <!-- LAYER NR. 4 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['170','170','185','5']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','220']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['140','140','140','140']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
                              data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
@@ -226,7 +231,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="about-us.html" class="about-button button-two">了解更多</a>
+                            <a href="javascript:jScrollTo('#point5',1000)" class="about-button button-two">了解更多</a>
                         </div>
                         <!-- LAYER NR. 5 -->
                         <div class="tp-caption rs-parallaxlevel-3"
@@ -256,7 +261,7 @@
       Client slider
     ==============================================
     -->
-    <div class="client-slider">
+    <div class="client-slider" id="point5">
         <div class="container">
             <h2 class="text-center">最实用的体系课程</h2>
             <div class="sldier-wrapper">
@@ -326,10 +331,10 @@
                 </div> <!-- /.seo-client-slider -->
             </div> <!-- /.sldier-wrapper -->
             <div class="button-container text-center tp-caption">
-                <a class="service-button button-two" onclick="alert('hello');">
+                <a class="service-button button-two"  href="javascript:showDialog('#business-apply')">
                     立即申请
                 </a>
-                <a class="service-button button-two">
+                <a class="service-button button-two" href="javascript:_MEIQIA('showPanel')">
                     课程咨询
                 </a>
             </div>
@@ -392,7 +397,7 @@
     <!--</div> &lt;!&ndash; /.welcome-seo &ndash;&gt;-->
 
     <div id="bs-banner">
-        <div class="rev_slider_wrapper">
+        <div class="rev_slider_wrapper" id="point2">
             <!-- START REVOLUTION SLIDER 5.0.7 auto mode -->
             <div id="seo-bs-banner" class="rev_slider" data-version="5.0.7">
                 <ul>
@@ -423,7 +428,9 @@
                              data-splitout="none"
                              data-responsive_offset="on"
                              style="z-index: 6;">
-                            <h3>商业进阶项目<br/>
+                            <h3 style="    width: 312px;
+    float: right;
+    text-align: left;">商业进阶项目<br/>
                                 <span class="gray">（即将推出）</span>
                             </h3>
                         </div>
@@ -455,7 +462,7 @@
                         </div>
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
-                             data-x="['right','right','right','right']" data-hoffset="['160','160','160','160']"
+                             data-x="['right','right','right','right']" data-hoffset="['195','195','195','195']"
                              data-y="['middle','middle','middle','middle']" data-voffset="['170','170','170','170']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
@@ -465,7 +472,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="service.html" class="button button-two">预约报名</a>
+                            <a href="javascript:showDialog('#business-plus')" class="button button-two">预约报名</a>
                         </div>
                         <!-- LAYER NR. 5 -->
                         <div class="tp-caption rs-parallaxlevel-3"
@@ -490,7 +497,7 @@
 
 
     <div id="camp-banner">
-        <div class="rev_slider_wrapper">
+        <div class="rev_slider_wrapper" id="point3">
             <!-- START REVOLUTION SLIDER 5.0.7 auto mode -->
             <div id="seo-camp-banner" class="rev_slider" data-version="5.0.7">
                 <ul>
@@ -506,8 +513,8 @@
                         <!-- LAYERS -->
                         <!-- LAYER NR. 1 -->
                         <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['40','40','40','40']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['-150','-150','-150','-150']"
+                             data-x="['left','left','left','left']" data-hoffset="['-10','-10','-10','-10']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['-100','-100','-100','-100']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
@@ -521,7 +528,7 @@
                              data-splitout="none"
                              data-responsive_offset="on"
                              style="z-index: 6;">
-                            <h3 class="right">[专项课]结构化表达</h3>
+                            <h3 class="right">【专项课】结构化表达</h3>
                         </div>
                         <!-- LAYER NR. 2 -->
                         <div class="tp-caption"
@@ -549,7 +556,7 @@
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['0','0','15','5']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['170','170','170','170']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['130','130','130','130']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
                              data-transform_in="x:[-100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
@@ -558,12 +565,12 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="service.html" class="button button-two">立即申请</a>
+                            <a href="javascript:showDialog('#camp-jghbd-order')" class="button button-two">立即报名</a>
                         </div>
                         <!-- LAYER NR. 4 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['170','170','185','5']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['170','170','170','170']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['130','130','130','130']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
                              data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
@@ -572,7 +579,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="about-us.html" class="button button-two">了解更多</a>
+                            <a href="javascript:_MEIQIA('showPanel')" class="button button-two">了解更多</a>
                         </div>
                         <!-- LAYER NR. 5 -->
                         <div class="tp-caption rs-parallaxlevel-3"
@@ -595,117 +602,117 @@
         </div><!-- END REVOLUTION SLIDER -->
     </div> <!--  /#banner -->
 
-    <div id="camp-two-banner">
-        <div class="wrapper">
-            <div class="rev_slider_wrapper">
-                <!-- START REVOLUTION SLIDER 5.0.7 auto mode -->
-                <div id="seo-camp-two-banner" class="rev_slider" data-version="5.0.7">
-                    <ul>
-                        <!-- SLIDE1  -->
-                        <li data-index="rs-280" data-transition="zoomout" data-slotamount="default" data-easein="Power4.easeInOut"
-                            data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
-                            data-title="01" data-description="">
-                            <!-- MAIN IMAGE -->
-                            <img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
-                                 data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
-                                 data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
-                                 data-scaleend="100" data-scalestart="140">
-                            <!-- LAYERS -->
-                            <!-- LAYER NR. 1 -->
-                            <div class="tp-caption text-right"
-                                 data-x="['right','right','right','right']" data-hoffset="['40','40','40','40']"
-                                 data-y="['middle','middle','middle','middle']" data-voffset="['-150','-150','-150','-150']"
-                                 data-width="full"
-                                 data-height="none"
-                                 data-whitespace="normal"
-                                 data-transform_idle="o:1;"
-                                 data-transform_in="y:[100%];z:0;rX:0deg;rY:0;rZ:0;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2000;e:Power4.easeInOut;"
-                                 data-transform_out="y:[100%];s:1000;e:Power2.easeInOut;s:1000;e:Power2.easeInOut;"
-                                 data-mask_in="x:0px;y:[100%];"
-                                 data-mask_out="x:inherit;y:inherit;"
-                                 data-start="500"
-                                 data-splitin="none"
-                                 data-splitout="none"
-                                 data-responsive_offset="on"
-                                 style="z-index: 6;">
-                                <h3>
-                                    <span class="grey">[专项课]高效学习</span>
-                                </h3>
-                            </div>
-                            <!-- LAYER NR. 2 -->
-                            <div class="tp-caption text-right"
-                                 data-x="['right','right','right','right']" data-hoffset="['0','0','15','5']"
-                                 data-y="['middle','middle','middle','middle']" data-voffset="['10','10','10','0']"
-                                 data-width="full"
-                                 data-height="none"
-                                 data-whitespace="normal"
-                                 data-transform_idle="o:1;"
-                                 data-transform_in="y:[100%];z:0;rX:0deg;rY:0;rZ:0;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2000;e:Power4.easeInOut;"
-                                 data-transform_out="y:[100%];s:1000;e:Power2.easeInOut;s:1000;e:Power2.easeInOut;"
-                                 data-mask_in="x:0px;y:[100%];"
-                                 data-mask_out="x:inherit;y:inherit;"
-                                 data-start="1500"
-                                 data-splitin="none"
-                                 data-splitout="none"
-                                 style="z-index: 6;">
-                                <div class="d-ib tips text-left">
-                                    <p>
-                                        •  专项能力提升<br/>
-                                        •  30天烧脑训练营<br/>
-                                        •  24小时移动端学习<br/>
-                                        •  全程督学，超高完课率
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- LAYER NR. 3 -->
-                            <div class="tp-caption"
-                                 data-x="['right','right','right','right']" data-hoffset="['0','0','15','5']"
-                                 data-y="['middle','middle','middle','middle']" data-voffset="['170','170','170','170']"
-                                 data-transform_idle="o:1;"
-                                 data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
-                                 data-transform_in="x:[-100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
-                                 data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"
-                                 data-start="2000"
-                                 data-splitin="none"
-                                 data-splitout="none"
-                                 data-responsive_offset="on">
-                                <a href="service.html" class="button button-two">立即申请</a>
-                            </div>
-                            <!-- LAYER NR. 4 -->
-                            <div class="tp-caption"
-                                 data-x="['right','right','right','right']" data-hoffset="['170','170','185','5']"
-                                 data-y="['middle','middle','middle','middle']" data-voffset="['170','170','170','170']"
-                                 data-transform_idle="o:1;"
-                                 data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
-                                 data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
-                                 data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"
-                                 data-start="2000"
-                                 data-splitin="none"
-                                 data-splitout="none"
-                                 data-responsive_offset="on">
-                                <a href="about-us.html" class="button button-two">了解更多</a>
-                            </div>
-                            <!-- LAYER NR. 5 -->
-                            <div class="tp-caption rs-parallaxlevel-3"
-                                 data-x="['left','left','left','left']" data-hoffset="['0','0','-60','0']"
-                                 data-y="['middle','middle','bottom','middle']" data-voffset="['0','0','0','0']"
-                                 data-transform_idle="o:1;"
-                                 data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
-                                 data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
-                                 data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"
-                                 data-start="2200"
-                                 data-splitin="none"
-                                 data-splitout="none"
-                                 data-responsive_offset="on">
-                                <img class="tp-banner"
-                                     src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_4.png?imageslim" alt="image">
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div><!-- END REVOLUTION SLIDER -->
-        </div>
-    </div> <!--  /#banner -->
+    <!--<div id="camp-two-banner">-->
+    <!--<div class="wrapper" >-->
+    <!--<div class="rev_slider_wrapper">-->
+    <!--&lt;!&ndash; START REVOLUTION SLIDER 5.0.7 auto mode &ndash;&gt;-->
+    <!--<div id="seo-camp-two-banner" class="rev_slider" data-version="5.0.7">-->
+    <!--<ul>-->
+    <!--&lt;!&ndash; SLIDE1  &ndash;&gt;-->
+    <!--<li data-index="rs-280" data-transition="zoomout" data-slotamount="default" data-easein="Power4.easeInOut"-->
+    <!--data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"-->
+    <!--data-title="01" data-description="">-->
+    <!--&lt;!&ndash; MAIN IMAGE &ndash;&gt;-->
+    <!--<img src="images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"-->
+    <!--data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"-->
+    <!--data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"-->
+    <!--data-scaleend="100" data-scalestart="140">-->
+    <!--&lt;!&ndash; LAYERS &ndash;&gt;-->
+    <!--&lt;!&ndash; LAYER NR. 1 &ndash;&gt;-->
+    <!--<div class="tp-caption text-right"-->
+    <!--data-x="['right','right','right','right']" data-hoffset="['40','40','40','40']"-->
+    <!--data-y="['middle','middle','middle','middle']" data-voffset="['-100','-100','-100','-100']"-->
+    <!--data-width="full"-->
+    <!--data-height="none"-->
+    <!--data-whitespace="normal"-->
+    <!--data-transform_idle="o:1;"-->
+    <!--data-transform_in="y:[100%];z:0;rX:0deg;rY:0;rZ:0;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2000;e:Power4.easeInOut;"-->
+    <!--data-transform_out="y:[100%];s:1000;e:Power2.easeInOut;s:1000;e:Power2.easeInOut;"-->
+    <!--data-mask_in="x:0px;y:[100%];"-->
+    <!--data-mask_out="x:inherit;y:inherit;"-->
+    <!--data-start="500"-->
+    <!--data-splitin="none"-->
+    <!--data-splitout="none"-->
+    <!--data-responsive_offset="on"-->
+    <!--style="z-index: 6;">-->
+    <!--<h3>-->
+    <!--<span class="grey">【专项课】高效学习</span>-->
+    <!--</h3>-->
+    <!--</div>-->
+    <!--&lt;!&ndash; LAYER NR. 2 &ndash;&gt;-->
+    <!--<div class="tp-caption text-right"-->
+    <!--data-x="['right','right','right','right']" data-hoffset="['0','0','15','5']"-->
+    <!--data-y="['middle','middle','middle','middle']" data-voffset="['10','10','10','0']"-->
+    <!--data-width="full"-->
+    <!--data-height="none"-->
+    <!--data-whitespace="normal"-->
+    <!--data-transform_idle="o:1;"-->
+    <!--data-transform_in="y:[100%];z:0;rX:0deg;rY:0;rZ:0;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2000;e:Power4.easeInOut;"-->
+    <!--data-transform_out="y:[100%];s:1000;e:Power2.easeInOut;s:1000;e:Power2.easeInOut;"-->
+    <!--data-mask_in="x:0px;y:[100%];"-->
+    <!--data-mask_out="x:inherit;y:inherit;"-->
+    <!--data-start="1500"-->
+    <!--data-splitin="none"-->
+    <!--data-splitout="none"-->
+    <!--style="z-index: 6;">-->
+    <!--<div class="d-ib tips text-left">-->
+    <!--<p>-->
+    <!--•  专项能力提升<br/>-->
+    <!--•  30天烧脑训练营<br/>-->
+    <!--•  24小时移动端学习<br/>-->
+    <!--•  全程督学，超高完课率-->
+    <!--</p>-->
+    <!--</div>-->
+    <!--</div>-->
+    <!--&lt;!&ndash; LAYER NR. 3 &ndash;&gt;-->
+    <!--<div class="tp-caption"-->
+    <!--data-x="['right','right','right','right']" data-hoffset="['0','0','15','5']"-->
+    <!--data-y="['middle','middle','middle','middle']" data-voffset="['130','130','130','130']"-->
+    <!--data-transform_idle="o:1;"-->
+    <!--data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"-->
+    <!--data-transform_in="x:[-100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"-->
+    <!--data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"-->
+    <!--data-start="2000"-->
+    <!--data-splitin="none"-->
+    <!--data-splitout="none"-->
+    <!--data-responsive_offset="on">-->
+    <!--<a href="service.html" class="button button-two">立即报名</a>-->
+    <!--</div>-->
+    <!--&lt;!&ndash; LAYER NR. 4 &ndash;&gt;-->
+    <!--<div class="tp-caption"-->
+    <!--data-x="['right','right','right','right']" data-hoffset="['170','170','185','5']"-->
+    <!--data-y="['middle','middle','middle','middle']" data-voffset="['130','130','130','130']"-->
+    <!--data-transform_idle="o:1;"-->
+    <!--data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"-->
+    <!--data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"-->
+    <!--data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"-->
+    <!--data-start="2000"-->
+    <!--data-splitin="none"-->
+    <!--data-splitout="none"-->
+    <!--data-responsive_offset="on">-->
+    <!--<a href="about-us.html" class="button button-two">课程咨询</a>-->
+    <!--</div>-->
+    <!--&lt;!&ndash; LAYER NR. 5 &ndash;&gt;-->
+    <!--<div class="tp-caption rs-parallaxlevel-3"-->
+    <!--data-x="['left','left','left','left']" data-hoffset="['0','0','-60','0']"-->
+    <!--data-y="['middle','middle','bottom','middle']" data-voffset="['0','0','0','0']"-->
+    <!--data-transform_idle="o:1;"-->
+    <!--data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"-->
+    <!--data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"-->
+    <!--data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"-->
+    <!--data-start="2200"-->
+    <!--data-splitin="none"-->
+    <!--data-splitout="none"-->
+    <!--data-responsive_offset="on">-->
+    <!--<img class="tp-banner"-->
+    <!--src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_4.png?imageslim" alt="image">-->
+    <!--</div>-->
+    <!--</li>-->
+    <!--</ul>-->
+    <!--</div>-->
+    <!--</div>&lt;!&ndash; END REVOLUTION SLIDER &ndash;&gt;-->
+    <!--</div>-->
+    <!--</div> &lt;!&ndash;  /#banner &ndash;&gt;-->
 
     <!--
     =============================================
@@ -713,7 +720,7 @@
     ==============================================
     -->
     <div id="company-banner">
-        <div class="rev_slider_wrapper">
+        <div class="rev_slider_wrapper" id="point4">
             <!-- START REVOLUTION SLIDER 5.0.7 auto mode -->
             <div id="seo-company-banner" class="rev_slider" data-version="5.0.7">
                 <ul>
@@ -786,7 +793,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="service.html" class="button button-two">企业方案咨询</a>
+                            <a href="javascript:_MEIQIA('showPanel')" class="button button-two">企业方案咨询</a>
                         </div>
                         <!-- LAYER NR. 5 -->
                         <div class="tp-caption rs-parallaxlevel-3"
@@ -872,61 +879,27 @@
 
             <div class="row">
                 <div id="partner-logo">
-                    <div class="item"><img src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_tongcheng_0213.png?imageslim" alt="logo"></div>
-                    <div class="item"><img src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_yinlian_0213.png?imageslim" alt="logo"></div>
+                    <div class="item"><img
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_tongcheng_0213.png?imageslim" alt="logo">
+                    </div>
+                    <div class="item"><img
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_yinlian_0213.png?imageslim" alt="logo">
+                    </div>
+                    <div class="item"><img
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_jumen_0223_1.png?imageslim" alt="logo">
+                    </div>
                 </div> <!-- End .partner_logo -->
             </div>
         </div>
     </div>
-
 
     <!--
     =============================================
       Footer
     ==============================================
     -->
-    <footer class="default-footer seo-footer">
-        <div class="container">
-            <div class="top-footer row">
-                <div class="col-md-6 col-sm-12 footer-left">
-                    <!--<a href="index.html"><img src="images/logo/logo3.png" alt="Logo"></a>-->
-                    <p class="footer-title"><span class="company">圈外同学</span> 你负责努力，我们负责帮你赢</p>
-                    <div class="link-container">
-                        <span class="item"><a href="course_project.html?jump=#company-banner">企业合作</a></span>
-                        <span class="item">意见反馈</span>
-                        <span class="item"><a target="_blank" href="https://book.douban.com/subject/26936065/">圈圈的书</a></span>
-                        <span class="item"><a target="_blank"
-                                              href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=504191235&idx=1&sn=27dc7eba4ce96e23f995a114687bcec7">正在招聘</a></span>
-                    </div>
-                </div> <!-- /.footer-logo -->
-                <div class="col-md-6 col-sm-12 footer-right">
-                    <!--<a href="index.html"><img src="images/logo/logo3.png" alt="Logo"></a>-->
-                    <div class="qr-code-container text-left">
-                        <div class="item text-center">
-                            <img src="images/team/4.jpg" alt="圈外孙圈圈">
-                            <div class="name">圈外孙圈圈</div>
-                        </div>
-                        <div class="item text-center">
-                            <img src="images/team/4.jpg" alt="圈外同学">
-                            <div class="name">圈外同学</div>
-                        </div>
-                        <div class="item text-center">
-                            <img src="images/team/4.jpg" alt="申请商学院">
-                            <div class="name">申请商学院</div>
-                        </div>
-                    </div>
-                </div> <!-- /.footer-logo -->
-            </div> <!-- /.container -->
+    <%@include file="footer.html"%>
 
-            <div class="bottom-footer">
-                <div class="container">
-                    <div class="wrapper clearfix">
-                        <p class="float-left">沪ICP备15006409号</p>
-                    </div> <!-- /.wrapper -->
-                </div> <!-- /.container -->
-            </div> <!-- /.bottom-footer -->
-        </div>
-    </footer>
 
     <!-- Scroll Top Button -->
     <button class="scroll-top tran3s hvr-shutter-out-horizontal">
@@ -968,7 +941,68 @@
     <script type="text/javascript" src="js/theme.js"></script>
 
 </div> <!-- /.main-page-wrapper -->
+<div id="business-apply" class="popup-layer">
+    <div class="mask" onclick="hiddenDialog('#business-apply')"></div>
+    <div class="inner">
+        <div class="close" onclick="hiddenDialog('#business-apply')">
+            <img src="images/icon/close.png"/>
+        </div>
+        <div class="qr-code text-center">
+            <img src="https://static.iqycamp.com/images/fragment/home_to_apply_4.jpg?imageslim" class="qr-img">
+        </div>
+        <div class="tips text-center">
+            暂时只支持微信申请
+        </div>
+    </div>
+</div>
 
+<div id="business-plus" class="popup-layer">
+    <div class="mask" onclick="hiddenDialog('#business-plus')"></div>
+    <div class="inner">
+        <div class="close" onclick="hiddenDialog('#business-plus')">
+            <img src="images/icon/close.png"/>
+        </div>
+        <div class="qr-code text-center">
+            <img src="https://static.iqycamp.com/images/fragment/business_plus_order.png?imageslim" class="qr-img">
+        </div>
+        <div class="tips text-center">
+            预约商学院进阶课
+        </div>
+    </div>
+</div>
+
+
+<div id="camp-jghbd-order" class="popup-layer">
+    <div class="mask" onclick="hiddenDialog('#camp-jghbd-order')"></div>
+    <div class="inner">
+        <div class="close" onclick="hiddenDialog('#camp-jghbd-order')">
+            <img src="images/icon/close.png"/>
+        </div>
+        <div class="qr-code text-center">
+            <img src="https://static.iqycamp.com/images/fragment/camp_jghbd_order_1.png?imageslim" class="qr-img">
+        </div>
+        <div class="tips text-center">
+            报名结构化表达专项课
+        </div>
+    </div>
+</div>
+
+<script type='text/javascript'>
+    (function(m, ei, q, i, a, j, s) {
+        m[i] = m[i] || function() {
+            (m[i].a = m[i].a || []).push(arguments)
+        };
+        j = ei.createElement(q),
+            s = ei.getElementsByTagName(q)[0];
+        j.async = true;
+        j.charset = 'UTF-8';
+        j.src = 'https://static.meiqia.com/dist/meiqia.js?_=t';
+        s.parentNode.insertBefore(j, s);
+    })(window, document, 'script', '_MEIQIA');
+    _MEIQIA('entId', 80143);
+    _MEIQIA('withoutBtn');
+    _MEIQIA('init');
+</script>
 <script>
     var display = '<%=ConfigUtils.domainName()%>'
     if(display === 'http://www.iquanwai.com' || display === 'https://www.iquanwai.com') {

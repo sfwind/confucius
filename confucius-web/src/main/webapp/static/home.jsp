@@ -157,7 +157,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="about-us.html" class="about-button button-two">课程咨询</a>
+                            <a href="javascript:_MEIQIA('showPanel')" class="about-button button-two">课程咨询</a>
                         </div>
                         <!-- LAYER NR. 4 -->
                         <div class="tp-caption"
@@ -242,7 +242,8 @@
             <h2 class="text-center">圈外商学院课程项目</h2>
             <div class="row">
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp">
+                    <a target="_blank" href="course_project.html?jump=point1"> <div
+                            class="single-goal text-center hvr-float-shadow wow fadeInUp">
                         <div class="img-icon round-border"><img
                                 src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="Icon"
                                 class="round-border"></div>
@@ -254,10 +255,11 @@
                             <li>24小时移动端学习</li>
                             <li>80%学员高完课率，数据定期跟踪反馈</li>
                         </ul>
-                    </div> <!-- /.single-goal -->
+                    </div></a> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.1s">
+                    <a target="_blank" href="course_project.html?jump=point2"><div
+                            class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.1s">
                         <div class="img-icon round-border"><img
                                 src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="Icon"
                                 class="round-border"></div>
@@ -269,10 +271,11 @@
                             <li>24小时移动端学习</li>
                             <li>顶尖商学院教授授课，定期考核和反馈</li>
                         </ul>
-                    </div> <!-- /.single-goal -->
+                    </div></a> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
+                    <a target="_blank" href="course_project.html?jump=point3"><div
+                            class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
                         <div class="img-icon round-border"><img
                                 src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="Icon"
                                 class="round-border"></div>
@@ -283,10 +286,11 @@
                             <li>24小时移动端学习</li>
                             <li>全程督学，超高完课率</li>
                         </ul>
-                    </div> <!-- /.single-goal -->
+                    </div></a> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12  text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
+                    <a target="_blank" href="course_project.html?jump=point4"><div
+                            class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
                         <div class="img-icon round-border"><img
                                 src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim"
                                 alt="Icon" class="round-border"></div>
@@ -297,7 +301,7 @@
                             <li>专业能力测评，科学诊断指导</li>
                             <li>专属教练配备，全程督学辅导</li>
                         </ul>
-                    </div> <!-- /.single-goal -->
+                    </div></a> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
             </div> <!-- /.row -->
         </div> <!-- /.container -->
@@ -469,7 +473,7 @@
                             <img src="https://static.iqycamp.com/images/fragment/pc_icon_quanwei_0214.png?imageslim" alt="icon">
                             <h2>02</h2>
                             <h5><a class="tran4s">权威教育心理学专家</a></h5>
-                            <p>课程体系基于100家各行业龙游已额的人才需求设计，并可定制自己的学习计划</p>
+                            <p>负责整体教学方法设计，提供最科学有效的学习方式</p>
                         </div> <!-- /.single-service -->
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.2s">
@@ -477,7 +481,7 @@
                             <img src="https://static.iqycamp.com/images/fragment/pc_icon_fanzhuan_0214.png?imageslim" alt="icon">
                             <h2>03</h2>
                             <h5><a class="tran4s">翻转课堂</a></h5>
-                            <p>课程体系基于100家各行业龙游已额的人才需求设计，并可定制自己的学习计划</p>
+                            <p>充分利用碎片化时间，平均每天30分钟，3个月即对职业发展有明显效果</p>
                         </div> <!-- /.single-service -->
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.1s">
@@ -485,7 +489,7 @@
                             <img src="https://static.iqycamp.com/images/fragment/pc_icon_baiban_0214.png?imageslim" alt="icon">
                             <h2>04</h2>
                             <h5><a class="tran4s">案例式教学</a></h5>
-                            <p>课程体系基于100家各行业龙游已额的人才需求设计，并可定制自己的学习计划</p>
+                            <p>结合创投大赛、咨询案例赛等方式，让学习更有趣</p>
                         </div> <!-- /.single-service -->
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.2s">
@@ -493,7 +497,7 @@
                             <img src="https://static.iqycamp.com/images/fragment/pc_icon_price_0214.png?imageslim" alt="icon">
                             <h2>05</h2>
                             <h5><a class="tran4s">奖学金多</a></h5>
-                            <p>课程体系基于100家各行业龙游已额的人才需求设计，并可定制自己的学习计划</p>
+                            <p>还有机会成为圈外合作助教，让学习更易坚持</p>
                         </div> <!-- /.single-service -->
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.3s">
@@ -501,7 +505,7 @@
                             <img src="https://static.iqycamp.com/images/fragment/pc_icon_shangxueyuan_0214.png?imageslim" alt="icon">
                             <h2>06</h2>
                             <h5><a class="tran4s">顶级商学院</a></h5>
-                            <p>课程体系基于100家各行业龙游已额的人才需求设计，并可定制自己的学习计划</p>
+                            <p>戈壁挑战赛的首个受邀在线商学院，为学员对接中欧、长江等MBA/EMBA等资源</p>
                         </div> <!-- /.single-service -->
                     </div> <!-- /.col- -->
                 </div>
@@ -537,7 +541,7 @@
                政府/公共事业、房地产、通信/电子、快消品、机械/重工、能源/化工、人力资源、法律等</span>
                     </div> <!-- /.col- -->
                     <div class="col-lg-6 col-md-5 col-xs-12"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_industry_0222_1.png?imageslim" alt="Image"></div>
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_industry_0222_2.png?imageslim" alt="Image"></div>
                 </div> <!-- /.row -->
             </div> <!-- /.wrapper -->
         </div> <!-- /.container -->
@@ -615,6 +619,9 @@
                     <div class="item"><img
                             src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_yinlian_0213.png?imageslim" alt="logo">
                     </div>
+                    <div class="item"><img
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_jumen_0223_1.png?imageslim" alt="logo">
+                    </div>
                 </div> <!-- End .partner_logo -->
             </div>
         </div>
@@ -626,48 +633,7 @@
       Footer
     ==============================================
     -->
-    <footer class="default-footer seo-footer">
-        <div class="container">
-            <div class="top-footer row clearfix">
-                <div class="col-md-6 col-sm-12 footer-left">
-                    <!--<a href="index.html"><img src="images/logo/logo3.png" alt="Logo"></a>-->
-                    <p class="footer-title"><span class="company">圈外同学</span> 你负责努力，我们负责帮你赢</p>
-                    <div class="link-container">
-                        <span class="item"><a href="course_project.html?jump=#company-banner">企业合作</a></span>
-                        <span class="item">意见反馈</span>
-                        <span class="item"><a target="_blank" href="https://book.douban.com/subject/26936065/">圈圈的书</a></span>
-                        <span class="item"><a target="_blank"
-                                              href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=504191235&idx=1&sn=27dc7eba4ce96e23f995a114687bcec7">正在招聘</a></span>
-                    </div>
-                </div> <!-- /.footer-logo -->
-                <div class="col-md-6 col-sm-12 footer-right">
-                    <!--<a href="index.html"><img src="images/logo/logo3.png" alt="Logo"></a>-->
-                    <div class="qr-code-container text-left">
-                        <div class="item text-center">
-                            <img src="https://www.iqycamp.com/images/subscribeCode.jpg" alt="圈外孙圈圈">
-                            <div class="name">圈外孙圈圈</div>
-                        </div>
-                        <div class="item text-center">
-                            <img src="https://static.iqycamp.com/images/fragment/home_bottom.jpeg?imageslim" alt="圈外同学">
-                            <div class="name">圈外同学</div>
-                        </div>
-                        <div class="item text-center">
-                            <img src="images/team/4.jpg" alt="申请商学院">
-                            <div class="name">申请商学院</div>
-                        </div>
-                    </div>
-                </div> <!-- /.footer-logo -->
-            </div> <!-- /.container -->
-
-            <div class="bottom-footer">
-                <div class="container">
-                    <div class="wrapper clearfix">
-                        <p class="float-left">沪ICP备15006409号</p>
-                    </div> <!-- /.wrapper -->
-                </div> <!-- /.container -->
-            </div> <!-- /.bottom-footer -->
-        </div>
-    </footer>
+    <%@include file="footer.html"%>
 
 
     <!-- Scroll Top Button -->
@@ -675,15 +641,7 @@
         <i class="fa fa-angle-up" aria-hidden="true"></i>
     </button>
 
-    <div id="business-apply" class="fixed-bottom-right">
-        <div class="close" onclick="hiddenDialog('#business-apply')">X</div>
-        <div class="qr-code text-center">
-            <img src="https://static.iqycamp.com/images/fragment/home_bottom.jpeg?imageslim" class="qr-img">
-        </div>
-        <div class="tips text-center">
-            暂时只支持移动端申请
-        </div>
-    </div>
+
 
     <!-- Js File_________________________________ -->
     <!-- j Query -->
@@ -724,6 +682,36 @@
     <script type="text/javascript" src="js/theme.js"></script>
 
 </div> <!-- /.main-page-wrapper -->
+<div id="business-apply" class="popup-layer">
+    <div class="mask" onclick="hiddenDialog('#business-apply')"></div>
+    <div class="inner">
+        <div class="close" onclick="hiddenDialog('#business-apply')">
+            <img src="images/icon/close.png"/>
+        </div>
+        <div class="qr-code text-center">
+            <img src="https://static.iqycamp.com/images/fragment/home_to_apply_4.jpg?imageslim" class="qr-img">
+        </div>
+        <div class="tips text-center">
+            暂时只支持微信申请
+        </div>
+    </div>
+</div>
+<script type='text/javascript'>
+    (function(m, ei, q, i, a, j, s) {
+        m[i] = m[i] || function() {
+            (m[i].a = m[i].a || []).push(arguments)
+        };
+        j = ei.createElement(q),
+            s = ei.getElementsByTagName(q)[0];
+        j.async = true;
+        j.charset = 'UTF-8';
+        j.src = 'https://static.meiqia.com/dist/meiqia.js?_=t';
+        s.parentNode.insertBefore(j, s);
+    })(window, document, 'script', '_MEIQIA');
+    _MEIQIA('entId', 80143);
+    _MEIQIA('withoutBtn');
+    _MEIQIA('init');
+</script>
 <script>
     var display = '<%=ConfigUtils.domainName()%>'
     if(display === 'http://www.iquanwai.com' || display === 'https://www.iquanwai.com') {
