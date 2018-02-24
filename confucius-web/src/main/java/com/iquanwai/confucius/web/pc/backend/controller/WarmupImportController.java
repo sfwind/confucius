@@ -61,7 +61,7 @@ public class WarmupImportController {
         //排序
         List<WarmUpPracticeDto> result = warmUpPracticeDtos.stream().sorted(Comparator.comparing(WarmUpPracticeDto::getChapter).
                 thenComparing(Comparator.comparing(WarmUpPracticeDto::getSection).
-                        thenComparing(Comparator.comparing(WarmUpPracticeDto::getExample)).
+                        thenComparing(Comparator.comparing(WarmUpPracticeDto::getExample)).reversed().
                         thenComparing(Comparator.comparing(WarmUpPracticeDto::getSequence)))).collect(Collectors.toList());
 
 
