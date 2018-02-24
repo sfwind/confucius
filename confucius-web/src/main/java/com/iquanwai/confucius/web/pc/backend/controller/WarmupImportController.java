@@ -12,6 +12,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.web.pc.backend.dto.WarmUpPracticeDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,8 @@ public class WarmupImportController {
     @Autowired
     private PracticeService practiceService;
 
+    private  final Logger logger = LoggerFactory.getLogger(getClass());
+
     @RequestMapping("/list/{problemId}")
     public ResponseEntity<Map<String, Object>> getProblemWarmupPractice(PCLoginUser loginUser,
                                                                         @PathVariable Integer problemId) {
@@ -48,10 +52,13 @@ public class WarmupImportController {
             WarmUpPracticeDto warmUpPracticeDto = new WarmUpPracticeDto();
             BeanUtils.copyProperties(warmupPractice,warmUpPracticeDto);
             ProblemSchedule schedule = problemSchedules.stream().filter(problemSchedule -> problemSchedule.getKnowledgeId().equals(warmupPractice.getKnowledgeId()) && problemSchedule.getDel()==0).findAny().orElse(null);
+            logger.info("匹配到的problemSchedule:"+schedule);
             if(schedule!=null){
                 warmUpPracticeDto.setChapter(schedule.getChapter());
                 warmUpPracticeDto.setSection(schedule.getSection());
+
             }
+            logger.info("warmupDto:"+warmUpPracticeDto);
             warmUpPracticeDtos.add(warmUpPracticeDto);
         });
         //排序
