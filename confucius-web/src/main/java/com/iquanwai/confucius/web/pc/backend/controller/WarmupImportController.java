@@ -59,11 +59,12 @@ public class WarmupImportController {
             }
         });
         //排序
-        List<WarmUpPracticeDto> result = warmUpPracticeDtos.stream().sorted(Comparator.comparing(WarmUpPracticeDto::getChapter).
+        List<WarmUpPracticeDto> result = warmUpPracticeDtos.stream().sorted(
+                Comparator.comparing(WarmUpPracticeDto::getExample).reversed().
+                thenComparing(Comparator.comparing(WarmUpPracticeDto::getChapter)).
                 thenComparing(Comparator.comparing(WarmUpPracticeDto::getSection).
-                        thenComparing(Comparator.comparing(WarmUpPracticeDto::getExample)).reversed().
-                        thenComparing(Comparator.comparing(WarmUpPracticeDto::getSequence)))).collect(Collectors.toList());
-
+                thenComparing(Comparator.comparing(WarmUpPracticeDto::getSequence))))
+                .collect(Collectors.toList());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
