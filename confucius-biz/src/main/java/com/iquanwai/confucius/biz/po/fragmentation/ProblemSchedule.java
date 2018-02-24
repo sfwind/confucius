@@ -15,6 +15,7 @@ public class ProblemSchedule  {
     private Integer knowledgeId; //知识点id
     private Integer chapter; //课程第几章
     private Integer series; //序号
+    private Integer del;
 
 
     /**

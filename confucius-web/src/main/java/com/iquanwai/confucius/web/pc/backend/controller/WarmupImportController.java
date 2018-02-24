@@ -1,21 +1,29 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupChoice;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
+import com.iquanwai.confucius.web.pc.backend.dto.WarmUpPracticeDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 2017/9/15.
@@ -32,10 +40,30 @@ public class WarmupImportController {
     @Autowired
     private PracticeService practiceService;
 
+    private  final Logger logger = LoggerFactory.getLogger(getClass());
+
     @RequestMapping("/list/{problemId}")
     public ResponseEntity<Map<String, Object>> getProblemWarmupPractice(PCLoginUser loginUser,
                                                                         @PathVariable Integer problemId) {
+        List<WarmUpPracticeDto> warmUpPracticeDtos = Lists.newArrayList();
         List<WarmupPractice> warmupPractices = operationManagementService.getPracticeByProblemId(problemId);
+        List<ProblemSchedule> problemSchedules = problemService.loadProblemSchedules(problemId);
+        warmupPractices.stream().filter(warmupPractice -> warmupPractice.getExample()==false).forEach(warmupPractice -> {
+            WarmUpPracticeDto warmUpPracticeDto = new WarmUpPracticeDto();
+            BeanUtils.copyProperties(warmupPractice,warmUpPracticeDto);
+            ProblemSchedule schedule = problemSchedules.stream().filter(problemSchedule -> problemSchedule.getKnowledgeId().equals(warmupPractice.getKnowledgeId()) && problemSchedule.getDel()==0).findAny().orElse(null);
+            if(schedule!=null){
+                warmUpPracticeDto.setChapter(schedule.getChapter());
+                warmUpPracticeDto.setSection(schedule.getSection());
+                warmUpPracticeDtos.add(warmUpPracticeDto);
+            }
+        });
+        //排序
+        List<WarmUpPracticeDto> result = warmUpPracticeDtos.stream().sorted(
+                Comparator.comparing(WarmUpPracticeDto::getChapter).
+                thenComparing(Comparator.comparing(WarmUpPracticeDto::getSection).
+                thenComparing(Comparator.comparing(WarmUpPracticeDto::getSequence))))
+                .collect(Collectors.toList());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
@@ -43,7 +71,7 @@ public class WarmupImportController {
                 .action("加载课程的巩固练习");
         operationLogService.log(operationLog);
 
-        return WebUtils.result(warmupPractices);
+        return WebUtils.result(result);
     }
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
