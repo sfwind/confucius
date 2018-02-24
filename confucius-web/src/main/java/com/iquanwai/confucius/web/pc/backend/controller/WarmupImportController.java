@@ -52,13 +52,14 @@ public class WarmupImportController {
             WarmUpPracticeDto warmUpPracticeDto = new WarmUpPracticeDto();
             BeanUtils.copyProperties(warmupPractice,warmUpPracticeDto);
             ProblemSchedule schedule = problemSchedules.stream().filter(problemSchedule -> problemSchedule.getKnowledgeId().equals(warmupPractice.getKnowledgeId()) && problemSchedule.getDel()==0).findAny().orElse(null);
-            logger.info("匹配到的problemSchedule:"+schedule);
             if(schedule!=null){
                 warmUpPracticeDto.setChapter(schedule.getChapter());
                 warmUpPracticeDto.setSection(schedule.getSection());
 
             }
-            logger.info("warmupDto:"+warmUpPracticeDto);
+            else{
+                logger.info("未匹配到的warmupPractice:"+warmupPractice);
+            }
             warmUpPracticeDtos.add(warmUpPracticeDto);
         });
         //排序
