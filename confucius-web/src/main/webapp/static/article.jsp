@@ -48,10 +48,10 @@
             <div class="container">
                 <div class="main-container clearfix">
                     <div class="logo float-left">
-                        <a href="index.html">
+                        <a href="/">
                             <img src="https://www.iqycamp.com/images/logo.png"
                                  style="display:inline-block;width:50px;height:50px;vertical-align: middle;"></img>
-                            <span style="vertical-align: middle;">圈外同学</span>
+                            <span style="vertical-align: middle;margin-left:10px;">圈外同学</span>
                             <!--<img src="local/images/logo/logo4.png" alt="Logo">-->
                         </a>
                     </div>
