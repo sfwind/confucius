@@ -50,8 +50,8 @@
                     <div class="logo float-left">
                         <a href="/">
                             <img src="https://www.iqycamp.com/images/logo.png"
-                                 style="display:inline-block;width:50px;height:50px;vertical-align: middle;"/>
-                            <span style="vertical-align: middle;margin-left:10px;">圈外同学</span>
+                                 style="display:inline-block;width:60px;height:60px;vertical-align: middle;"/>
+                            <span style="vertical-align: middle;margin-left:10px;font-size:30px">圈外同学</span>
                             <!--<img src="local/images/logo/logo4.png" alt="Logo">-->
                         </a>
                     </div>
@@ -221,12 +221,12 @@
         <div class="container">
             <h4 class="float-left">手机端随时随地升级自己，利用碎片化时间，学习体系化知识</h4>
             <div class="tips clearfix hidden-xs">
-                <!--<a href="contact-us.html" class="button-four float-right">扫码关注</a>-->
+                <a class="hover-to-show button-four float-right">扫码关注</a>
                 <img class="qr-code" src="https://static.iqycamp.com/images/fragment/home_middle.jpeg?imageslim" alt="">
-                <div class="words">
-                    <span>微信扫码</span><br/>
-                    <span>关注学习</span>
-                </div>
+            <%--<div class="words">--%>
+                    <%--<span>微信扫码</span><br/>--%>
+                    <%--<span>关注学习</span>--%>
+                <%--</div>--%>
             </div>
         </div> <!-- /.container -->
     </div> <!-- /.short-banner -->
@@ -470,7 +470,7 @@
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.1s">
                         <div class="single-service tran4s">
-                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_quanwei_0214.png?imageslim" alt="icon">
+                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_quanwei_0214_2.png?imageslim" alt="icon">
                             <h2>02</h2>
                             <h5><a class="tran4s">权威教育心理学专家</a></h5>
                             <p>负责整体教学方法设计，提供最科学有效的学习方式</p>
@@ -536,7 +536,7 @@
                     <div class="col-lg-6 col-md-7 col-xs-12 text wow fadeInRight float-left">
                         <h2>学员行业一览</h2>
                         <span>50%学员来自于以下行业:<br/>
-               互联网/IT、金融行业、科研/学生、咨询行业、医疗行业 <br/>
+               互联网/IT、金融行业、科研/学生、咨询行业、医疗行业 <br/><br/>
               其他行业：<br/>
                政府/公共事业、房地产、通信/电子、快消品、机械/重工、能源/化工、人力资源、法律等</span>
                     </div> <!-- /.col- -->
@@ -589,6 +589,25 @@
                                 <h4 class="name">LANLAN</h4>
                                 <p class="tips">
                                     大学教授
+                                </p>
+                            </div>
+                        </div> <!-- /.clearfix -->
+                    </div> <!-- /.item -->
+
+                    <div class="item">
+                        <div class="clearfix">
+                            <div class="text text-left lft">
+                                <p class="rgt">
+                                    这个时代最重要的职场核心竞争力就是学习力。如今的知识量以几何级增长，只有掌握了底层逻辑才能在面对不同种类的知识时都做到游刃有余。<br/><br/>
+                                    那么如何做到呢？圈外商学院给了我们最好的答案。它着眼于通用能力的打造，从根基上帮我们塑造了横跨行业的学习技能，让人受益良多。<br/><br/>
+                                    而圈圈也是我认识的，少有的逻辑清晰，思维全面的人。她非常善于提炼和总结，大家能在这里学到许多学校和公司里学不到的知识，因此Boy 在这里强烈推荐！
+                                </p>
+                            </div>
+                            <div class="role-info text-center text">
+                                <img src="https://static.iqycamp.com/images/case_headimage_3.png?imageslim" class="round-border"/>
+                                <h4 class="name">张良计张鹏</h4>
+                                <p class="tips">
+                                    知名广告公司品牌战略负责人
                                 </p>
                             </div>
                         </div> <!-- /.clearfix -->
@@ -692,7 +711,7 @@
             <img src="local/images/icon/close.png"/>
         </div>
         <div class="qr-code text-center">
-            <img src="https://static.iqycamp.com/images/fragment/home_to_apply_4.jpg?imageslim" class="qr-img">
+            <img src="https://static.iqycamp.com/images/fragment/home_to_apply_5.png?imageslim" class="qr-img">
         </div>
         <div class="tips text-center">
             暂时只支持微信申请
