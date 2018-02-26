@@ -135,7 +135,7 @@ function CampBannerSlider() {
     var banner = $("#seo-camp-banner");
     if(banner.length) {
         var temp = JSON.parse(JSON.stringify(bannerParam));
-        temp.gridheight = [400,400,400,400];
+        temp.gridheight = [450,450,450,450];
         banner.revolution(temp);
     }
     ;
@@ -152,7 +152,9 @@ function CampBannerTwoSlider() {
 function CompanyBannerTwoSlider() {
     var banner = $("#seo-company-banner");
     if(banner.length) {
-        banner.revolution(bannerParam);
+        var temp = JSON.parse(JSON.stringify(bannerParam));
+        temp.gridheight = [450,450,450,450];
+        banner.revolution(temp);
     }
     ;
 }
