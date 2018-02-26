@@ -6,6 +6,8 @@ import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 
 import java.util.List;
 
@@ -99,6 +101,7 @@ public interface AccountService {
      */
     List<Profile> loadProfilesByNickName(String nickName);
 
+
     /**
      * 根据昵称模糊查询用户的详细信息(所有)
      */
@@ -137,4 +140,17 @@ public interface AccountService {
 
     int updateHeadImageUrl(Integer profileId, String headImgUrl);
 
+    /**
+     * 获得最新的学号
+     * @param profileId
+     * @return
+     */
+    RiseClassMember getLatestMemberId(Integer profileId);
+
+    /**
+     * 获取当前有效的RiseMember
+     * @param profileId
+     * @return
+     */
+    RiseMember getCurrentRiseMember(Integer profileId);
 }

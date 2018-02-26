@@ -47,7 +47,8 @@ import java.util.*;
  * Created by justin on 16/8/10.
  */
 @Service
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements AccountService
+{
     @Autowired
     public RestfulHelper restfulHelper;
     @Autowired
@@ -686,5 +687,17 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
         return profileDao.updateHeadImgUrl(profileId, headImgUrl);
+    }
+
+    @Override
+    public RiseClassMember getLatestMemberId(Integer profileId) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryByProfileId(profileId);
+        RiseClassMember riseClassMember = riseClassMembers.stream().max(Comparator.comparing(RiseClassMember::getId)).orElse(null);
+        return riseClassMember;
+    }
+
+    @Override
+    public RiseMember getCurrentRiseMember(Integer profileId) {
+        return riseMemberDao.loadValidRiseMember(profileId);
     }
 }
