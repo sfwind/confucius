@@ -67,6 +67,7 @@ function searchBox() {
     }
 }
 
+
 var bannerParam = {
     sliderType: "standard",
     dottedOverlay: "none",
@@ -133,7 +134,9 @@ function bsBannnerSlider() {
 function CampBannerSlider() {
     var banner = $("#seo-camp-banner");
     if(banner.length) {
-        banner.revolution(bannerParam);
+        var temp = JSON.parse(JSON.stringify(bannerParam));
+        temp.gridheight = [400,400,400,400];
+        banner.revolution(temp);
     }
     ;
 }
