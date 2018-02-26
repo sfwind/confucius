@@ -18,10 +18,6 @@ public class Role {
     public static final Integer STRANGE = 0; //陌生人
     public static final Integer STUDENT = 1; //普通用户
     public static final Integer EMPLOYEE = 2; //工作人员
-//    public static final Integer COACH_LEVEL_1 = 3; //见习教练
-//    public static final Integer COACH_LEVEL_2 = 4; //教练
-//    public static final Integer COACH_LEVEL_3 = 5; //高级教练
-//    public static final Integer COACH_LEVEL_4 = 6; //首席教练
     public static final Integer COACH_LEVEL_1 = 3;//见习
     public static final Integer COACH_LEVEL_2 = 4;//I级教练
     public static final Integer COACH_LEVEL_3 = 12;//II级教练
