@@ -623,7 +623,8 @@ body .button-seven {
 }
 
 .theme-main-menu.fixed #mega-menu-holder > ul > li > a:hover {
-    color: #ffc323;
+    background-color: #f5f5f5;
+    border-radius: 5px;
 }
 
 /* ---------------------------------- Theme Main Banner ----------------------------- */
@@ -3492,11 +3493,21 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 #mega-menu-holder > ul > li > a {
     font-size: 20px !important;
     font-weight: 900 !important;
+    padding: 9px 20px 10px 20px !important;
+    margin-bottom: 40px !important;;
 }
 
 #mega-menu-holder > ul > li > a:hover {
     color: #ffc323;
 }
+
+@media (max-width: 991px) {
+    #mega-menu-holder > ul > li > a {
+        padding: 0 15px !important;
+        margin: 0 !important;
+    }
+}
+
 
 body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > h4 {
     font-size: 26px;
@@ -3527,4 +3538,8 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 
 #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
     width:500px;
+}
+
+#mega-menu-holder>ul> li> a {
+
 }
