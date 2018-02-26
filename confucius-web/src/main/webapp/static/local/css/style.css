@@ -556,7 +556,7 @@ body .button-seven {
 }
 
 .seo-theme .theme-main-menu {
-    padding-top: 36px;
+    /*padding-top: 36px;*/
 }
 
 #mega-menu-holder li > ul.dropdown {
@@ -610,14 +610,22 @@ body .button-seven {
     left: 0;
     z-index: 999;
     background: #fff;
-    padding-top: 10px;
+    /*padding-top: 10px;*/
     margin: 0;
     -webkit-box-shadow: 0px 13px 25px -12px rgba(0, 0, 0, 0.15);
     box-shadow: 0px 13px 25px -12px rgba(0, 0, 0, 0.15);
     -webkit-animation: menu_sticky 0.70s ease-in-out;
     animation: menu_sticky 0.70s ease-in-out;
 }
-
+.theme-main-menu fixed .main-container {
+    position: relative;
+}
+.theme-main-menu fixed .main-container .logo {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
 .theme-main-menu.fixed #mega-menu-holder > ul > li > a {
     padding-bottom: 30px;
 }
@@ -3493,8 +3501,8 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 #mega-menu-holder > ul > li > a {
     font-size: 20px !important;
     font-weight: 900 !important;
-    padding: 9px 20px 10px 20px !important;
-    margin-bottom: 40px !important;;
+    padding: 10px 20px 10px 20px !important;
+    margin: 20px 0 !important;;
 }
 
 #mega-menu-holder > ul > li > a:hover {
