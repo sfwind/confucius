@@ -3523,3 +3523,8 @@ body > div.main-page-wrapper > section > div > div > div > a {
 body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     border-bottom:none;
 }
+
+
+#seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
+    width:500px;
+}

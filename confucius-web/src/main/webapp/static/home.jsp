@@ -10,7 +10,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>圈外</title>
-
+    <meta name="keywords" content="圈外,圈外同学,圈外商学院">
+    <meta name="description" content="圈外商学院">
+    <link href="//www.iqycamp.com/images/logo.png" rel="shortcut icon">
     <!-- Main style sheet -->
     <link rel="stylesheet" type="text/css" href="local/css/style.css">
     <!-- responsive style sheet -->
@@ -642,7 +644,7 @@
                             src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_jumen_0223_1.png?imageslim" alt="logo">
                     </div>
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_changjiang_0224_1.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_changjiang_0226_2.png?imageslim" alt="logo">
                     </div>
                 </div> <!-- End .partner_logo -->
             </div>

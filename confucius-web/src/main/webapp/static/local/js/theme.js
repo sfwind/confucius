@@ -242,7 +242,7 @@ function courseSlider() {
             navContainer: '.seo-theme .client-slider .sldier-wrapper .slider-controller',
             navClass: [ 'nav-pre btn_prev flex-prev', 'nav-next btn_next flex-next' ],
             navText: [ '<i class="arr-left"/>', '<i class="arr-right"/>' ],
-            autoplay: false,
+            autoplay: true,
             autoplayTimeout: 5000,
             autoplaySpeed: 1200,
             dragEndSpeed: 1000,
