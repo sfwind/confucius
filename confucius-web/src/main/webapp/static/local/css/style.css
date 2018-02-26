@@ -3327,8 +3327,8 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 
 /************* 文章 ************/
 .article-nav {
-    font-size: 35px;
-    line-height: 35px;
+    font-size: 18px;
+    line-height: 30px;
     padding-top: 50px;
     padding-bottom: 30px;
 }
@@ -3340,12 +3340,9 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     color: #333;
 }
 
-.article-nav .nav-item a {
-    padding-bottom: 10px;
-}
 
 .article-nav .nav-item a.active {
-    border-bottom: 4px solid #ffc323;
+    border-bottom: 3px solid #ffc323;
     font-weight: bolder;
     color: #ffc323;
 }
@@ -3363,10 +3360,14 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 }
 
 .container .content-item .article {
-    height: 200px;
+    height: 150px;
     overflow: hidden;
     position: relative;
     cursor: pointer;
+}
+
+.container .content-item .article:hover {
+    background-color: #f6f6f6;
 }
 
 .container .content-item .article .float-left {
@@ -3379,7 +3380,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 }
 
 .container .content-item .article .content .title {
-    font-size: 26px;
+    font-size: 18px;
     color: #333;
 }
 
@@ -3391,17 +3392,18 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 
 .container .content-item .article .content .prew-words {
     margin-top: 10px;
-    font-size: 18px;
+    line-height: 22px;
+    font-size: 13px;
     color: #999;
 }
 
 .container .content-item .article .content .time {
-    font-size: 18px;
+    font-size: 16px;
     color: #999;
 }
 
 .container .content-item .article .content .article-label {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bolder;
     color: #666;
     margin-left: 10px;
