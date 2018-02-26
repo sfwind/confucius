@@ -51,7 +51,7 @@
                 <div class="main-container clearfix">
                     <div class="logo float-left">
                         <a href="/">
-                            <img src="https://www.iqycamp.com/images/logo.png"
+                            <img src="https://www.iqycamp.com/images/fragment/logo2x.jpg"
                                  style="display:inline-block;width:60px;height:60px;vertical-align: middle;"/>
                             <span style="vertical-align: middle;margin-left:10px;font-size:30px">圈外同学</span>
                             <!--<img src="local/images/logo/logo4.png" alt="Logo">-->
@@ -131,7 +131,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              style="z-index: 6;">
-                            <p>一所创新型在线商学院，为职场人士提供最实用的课程、最适合的发展机会，<br/>让每一个有潜力的人，在这个时代拥有自己的职场话语权。</p>
+                            <p>一所创新型在线商学院，为职场人士提供最实用的课程、最适合的发展机会。<br/>让每一个有潜力的人，在这个时代拥有自己的职场话语权。</p>
                         </div>
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
@@ -179,20 +179,20 @@
                         </div>
 
                         <!-- LAYER NR. 4 -->
-                        <div class="tp-caption"
-                             data-x="['right','right','right','right']" data-hoffset="['50','50','50','50']"
-                             data-y="['bottom','bottom','bottom','bottom']" data-voffset="['50','50','50','50']"
-                             data-transform_idle="o:1;"
-                             data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
-                             data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
-                             data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"
-                             data-start="2000"
-                             data-splitin="none"
-                             data-splitout="none"
-                             data-responsive_offset="on">
-                            <a href="javascript:showDialog('#business-apply')"
-                               class="about-button button-two">立即申请</a>
-                        </div>
+                        <%--<div class="tp-caption"--%>
+                             <%--data-x="['right','right','right','right']" data-hoffset="['50','50','50','50']"--%>
+                             <%--data-y="['bottom','bottom','bottom','bottom']" data-voffset="['50','50','50','50']"--%>
+                             <%--data-transform_idle="o:1;"--%>
+                             <%--data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"--%>
+                             <%--data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"--%>
+                             <%--data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"--%>
+                             <%--data-start="2000"--%>
+                             <%--data-splitin="none"--%>
+                             <%--data-splitout="none"--%>
+                             <%--data-responsive_offset="on">--%>
+                            <%--<a href="javascript:showDialog('#business-apply')"--%>
+                               <%--class="about-button button-two">立即申请</a>--%>
+                        <%--</div>--%>
                         <!-- LAYER NR. 5 -->
                         <div class="tp-caption rs-parallaxlevel-3"
                              data-x="['right','right','right','right']" data-hoffset="['0','0','-60','0']"
@@ -213,7 +213,8 @@
         </div><!-- END REVOLUTION SLIDER -->
     </div> <!--  /#banner -->
 
-
+    <a id="quick-apply" href="javascript:showDialog('#business-apply')"
+       class="about-button button-two">立即申请</a>
     <!--
   =============================================
   Short Banner
@@ -467,7 +468,7 @@
                             <img src="https://static.iqycamp.com/images/fragment/pc_icon_tixi_0214.png?imageslim" alt="icon">
                             <h2>01</h2>
                             <h5><a class="tran4s">课程体系</a></h5>
-                            <p>课程体系基于100家各行业龙游已额的人才需求设计，并可定制自己的学习计划</p>
+                            <p>课程体系基于100家各行业龙头企业的人才需求设计，并可定制自己的学习计划</p>
                         </div> <!-- /.single-service -->
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.1s">

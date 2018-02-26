@@ -3420,7 +3420,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 
 /******************* 你负责努力，我们负责帮你赢 ******************/
 .you-work-win {
-    padding: 114px 0 0 0;
+    padding: 57px 0 0 0;
     position: relative;
     background: url(../../local/images/home/8.jpg) no-repeat center;
     background-size: cover;
@@ -3522,8 +3522,11 @@ body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > 
     font-size: 26px;
 }
 
-body > div.main-page-wrapper > section > div > div > div:nth-child(1) > a > div > ul {
-    list-style-type: none;
+body > div.main-page-wrapper > section > div > div > div > a > div > ul {
+    font-size: 14px;
+}
+
+body > div.main-page-wrapper > section > div > div > div > div > ul > li {
     font-size: 14px;
 }
 
@@ -3551,4 +3554,29 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 
 #mega-menu-holder>ul> li> a {
 
+}
+
+
+#quick-apply {
+    position: fixed;
+    right: 130px;
+    top: 70%;
+    width: 100px;
+    height: 100px;
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    border-radius: 100px;
+    line-height: 100px;
+    color: #222222;
+    background: #fff;
+    font-size: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 99;
+}
+
+@media (max-width: 991px) {
+    #quick-apply {
+        right: 10px;
+        top: 60%;
+    }
 }

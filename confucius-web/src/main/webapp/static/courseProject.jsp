@@ -51,7 +51,7 @@
                 <div class="main-container clearfix">
                     <div class="logo float-left">
                         <a href="/">
-                            <img src="https://www.iqycamp.com/images/logo.png"
+                            <img src="https://www.iqycamp.com/images/fragment/logo2x.jpg"
                                  style="display:inline-block;width:60px;height:60px;vertical-align: middle;"/>
                             <span style="vertical-align: middle;margin-left:10px;font-size:30px">圈外同学</span>
                             <!--<img src="local/images/logo/logo4.png" alt="Logo">-->
@@ -430,10 +430,10 @@
                              data-splitout="none"
                              data-responsive_offset="on"
                              style="z-index: 6;">
-                            <h3 style="    width: 312px;
+                            <h3 style="    width: 315px;
     float: right;
     text-align: left;">商业进阶项目<br/>
-                                <span class="gray">（即将推出）</span>
+                                <span class="gray" style="font-size: 15px;">（即将推出）</span>
                             </h3>
                         </div>
                         <!-- LAYER NR. 2 -->
@@ -721,25 +721,26 @@
       Our Service
     ==============================================
     -->
+
     <div id="company-banner">
         <div class="rev_slider_wrapper" id="point4">
             <!-- START REVOLUTION SLIDER 5.0.7 auto mode -->
-            <div id="seo-company-banner" class="rev_slider" data-version="5.0.7">
+            <div iid="seo-company-banner" class="rev_slider" data-version="5.0.7">
                 <ul>
                     <!-- SLIDE1  -->
                     <li data-index="rs-280" data-transition="zoomout" data-slotamount="default" data-easein="Power4.easeInOut"
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
-                        data-title="01" data-description="">
+                        data-title="01" data-description="" style="background:#fafafa;">
                         <!-- MAIN IMAGE -->
-                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
-                             data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
-                             data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
-                             data-scaleend="100" data-scalestart="140">
+                        <%--<img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"--%>
+                             <%--data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"--%>
+                             <%--data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"--%>
+                             <%--data-scaleend="100" data-scalestart="140">--%>
                         <!-- LAYERS -->
                         <!-- LAYER NR. 1 -->
-                        <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['0','0','15','5']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['-100','-100','-100','-100']"
+                        <div class="tp-caption text-right"
+                             data-x="['right','right','right','right']" data-hoffset="['40','40','40','40']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['-150','-150','-150','-150']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
@@ -753,13 +754,11 @@
                              data-splitout="none"
                              data-responsive_offset="on"
                              style="z-index: 6;">
-                            <h3>
-                                <span class="grey">企业解决方案</span>
-                            </h3>
+                            <h3>企业解决方案</h3>
                         </div>
                         <!-- LAYER NR. 2 -->
-                        <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['0','0','15','5']"
+                        <div class="tp-caption text-right"
+                             data-x="['right','right','right','right']" data-hoffset="['0','0','15','5']"
                              data-y="['middle','middle','middle','middle']" data-voffset="['10','10','10','0']"
                              data-width="full"
                              data-height="none"
@@ -773,17 +772,19 @@
                              data-splitin="none"
                              data-splitout="none"
                              style="z-index: 6;">
-                            <p>
-                                •  大规模提升培训效率，99%成本节省<br/>
-                                •  80%的高完课率，学习数据可监测<br/>
-                                •  线上线下结合，灵活学习时间<br/>
-                                •  贴近工作场景，提供最适合企业的前沿实用课程<br/>
-                            </p>
+                            <div class="d-ib tips text-left">
+                                <p>
+                                    •  大规模提升培训效率，99%成本节省<br/>
+                                    •  80%的高完课率，学习数据可监测<br/>
+                                    •  线上线下结合，灵活学习时间<br/>
+                                    •  贴近工作场景，提供最适合企业的前沿实用课程<br/>
+                                </p>
+                            </div>
                         </div>
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['0','0','0','0']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['130','130','130','130']"
+                             data-x="['right','right','right','right']" data-hoffset="['195','195','195','195']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['170','170','170','170']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
                              data-transform_in="x:[-100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
@@ -796,7 +797,7 @@
                         </div>
                         <!-- LAYER NR. 5 -->
                         <div class="tp-caption rs-parallaxlevel-3"
-                             data-x="['right','right','right','right']" data-hoffset="['0','0','-60','0']"
+                             data-x="['left','left','left','left']" data-hoffset="['0','0','-60','0']"
                              data-y="['middle','middle','bottom','middle']" data-voffset="['0','0','0','0']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
@@ -806,14 +807,15 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <img class="tp-banner"
-                                 src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_5.png?imageslim" alt="image">
+                            <img  class="tp-banner"
+                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_5.png?imageslim"  alt="image">
                         </div>
                     </li>
                 </ul>
             </div>
         </div><!-- END REVOLUTION SLIDER -->
     </div> <!--  /#banner -->
+
     <div class="our-service bg-color">
         <div class="container">
             <!--<div class="seo-title-one text-center">-->

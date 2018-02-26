@@ -51,7 +51,7 @@
                 <div class="main-container clearfix">
                     <div class="logo float-left">
                         <a href="/">
-                            <img src="https://www.iqycamp.com/images/logo.png"
+                            <img src="https://www.iqycamp.com/images/fragment/logo2x.jpg"
                                  style="display:inline-block;width:60px;height:60px;vertical-align: middle;"/>
                             <span style="vertical-align: middle;margin-left:10px;font-size:30px">圈外同学</span>
                             <!--<img src="local/images/logo/logo4.png" alt="Logo">-->
