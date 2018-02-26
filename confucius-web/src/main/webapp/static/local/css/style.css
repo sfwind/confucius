@@ -622,6 +622,10 @@ body .button-seven {
     padding-bottom: 30px;
 }
 
+.theme-main-menu.fixed #mega-menu-holder > ul > li > a:hover {
+    color: #ffc323;
+}
+
 /* ---------------------------------- Theme Main Banner ----------------------------- */
 .tp-caption h1 {
     color: #222222;
@@ -1240,6 +1244,10 @@ footer.seo-footer p {
 
 .default-footer .top-footer .footer-left .link-container .item a {
     color: #FFF;
+}
+
+.default-footer .top-footer .footer-left .link-container .item a:hover {
+    color:#ffc323;
 }
 
 .default-footer .top-footer .footer-right {
