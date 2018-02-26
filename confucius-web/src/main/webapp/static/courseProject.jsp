@@ -504,12 +504,12 @@
                     <!-- SLIDE1  -->
                     <li data-index="rs-280" data-transition="zoomout" data-slotamount="default" data-easein="Power4.easeInOut"
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
-                        data-title="01" data-description="">
+                        data-title="01" data-description="" style="background:#FFF">
                         <!-- MAIN IMAGE -->
-                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
-                             data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
-                             data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
-                             data-scaleend="100" data-scalestart="140">
+                        <%--<img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"--%>
+                             <%--data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"--%>
+                             <%--data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"--%>
+                             <%--data-scaleend="100" data-scalestart="140">--%>
                         <!-- LAYERS -->
                         <!-- LAYER NR. 1 -->
                         <div class="tp-caption"
