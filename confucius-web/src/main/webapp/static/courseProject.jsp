@@ -355,7 +355,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <img class="d-ib" src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222.png?imageslim" alt=""/>
+                    <img class="d-ib" src="https://static.iqycamp.com/images/fragment/pc_icon_course_0226_1.png?imageslim" alt=""/>
                 </div>
             </div>
 

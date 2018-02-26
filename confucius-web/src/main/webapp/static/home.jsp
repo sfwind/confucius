@@ -530,7 +530,7 @@
                         <span>覆盖亚洲、北美、欧洲和澳洲4大洲，205个城市</span>
                     </div> <!-- /.col- -->
                     <div class="col-lg-6 col-md-5 col-xs-12"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_area_0222_1.png?imageslim" alt="Image"></div>
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_area_0222_2.png?imageslim" alt="Image"></div>
                 </div> <!-- /.row -->
                 <div class="row">
                     <div class="col-lg-6 col-md-7 col-xs-12 text wow fadeInRight float-left">
