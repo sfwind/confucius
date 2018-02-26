@@ -617,10 +617,10 @@ body .button-seven {
     -webkit-animation: menu_sticky 0.70s ease-in-out;
     animation: menu_sticky 0.70s ease-in-out;
 }
-.theme-main-menu fixed .main-container {
+.theme-main-menu .main-container {
     position: relative;
 }
-.theme-main-menu fixed .main-container .logo {
+.theme-main-menu .main-container .logo {
     position: absolute;
     top: 50%;
     left: 0;
