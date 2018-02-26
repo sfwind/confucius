@@ -44,8 +44,7 @@ public class PCIndexController {
      */
     @RequestMapping(value = {"/home", "/"}, method = RequestMethod.GET)
     public ModelAndView getHome(HttpServletRequest request, HttpServletResponse response) {
-//        return ConfigUtils.isDevelopment() ? new ModelAndView("index") : new ModelAndView("home");
-        return new ModelAndView("static/home");
+        return ConfigUtils.isDevelopment() ? new ModelAndView("index") : new ModelAndView("static/home");
     }
 
     /**
