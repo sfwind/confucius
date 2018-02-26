@@ -7,7 +7,7 @@ import java.util.Date;
 @Data
 public class UserDto {
     private String openid;
-    private String nickName;
+    private String nickname;
     private String city;
     private String address;
     private String country;
