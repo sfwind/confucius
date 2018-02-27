@@ -556,7 +556,7 @@
       Client slider
     ==============================================
     -->
-    <div class="client-slider">
+    <div class="client-slider student-comment">
         <div class="container">
             <h2 class="text-center">学员评价</h2>
             <div class="sldier-wrapper">

@@ -839,7 +839,7 @@ body .button-seven {
 .seo-theme .client-slider {
     background: url(../../local/images/home/bg.jpg) no-repeat center;
     background-size: cover;
-    padding: 0 0 65px 0;
+    padding: 60px 0 65px 0;
     /*margin-bottom: 100px;*/
 }
 
@@ -1653,7 +1653,7 @@ footer.seo-footer p {
 
 /* --------------------- Theme Professional-Course --------------*/
 .seo-theme .professional-course {
-    /*margin: 50px 0 70px 0;*/
+    margin: 50px 0 0 0;
 
 }
 
@@ -3602,4 +3602,8 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     display: inline-block;
     border: 1px solid #efefef;
     border-radius: 5px;
+}
+
+.student-comment {
+    padding-top:60px;
 }
