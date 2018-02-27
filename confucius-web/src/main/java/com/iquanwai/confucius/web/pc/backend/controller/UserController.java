@@ -40,7 +40,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/search")
-    public ResponseEntity<Map<String, Object>> searchUserInfo(UnionUser unionUser, @RequestParam("search") String search) {
+    public ResponseEntity<Map<String, Object>> searchUserInfo(UnionUser unionUser, @RequestParam("searchId") String search) {
 
         OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId()).module("内容运营").action("用户信息").action("查询用户信息");
         operationLogService.log(operationLog);
