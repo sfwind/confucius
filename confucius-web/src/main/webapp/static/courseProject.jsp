@@ -432,7 +432,7 @@
                              style="z-index: 6;">
                             <h3 style="    width: 315px;
     float: right;
-    text-align: left;">商业进阶项目<br/>
+    text-align: left;">商业进阶项目
                                 <span class="gray" style="font-size: 15px;">（即将推出）</span>
                             </h3>
                         </div>
