@@ -87,7 +87,7 @@
                 <div class="col-md-3 col-xs-12 text-center">
                     <div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp"
-                            onclick="local/jscrollTo('#point1',1000)">
+                            onclick="jScrollTo('#point1',1000)">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>核心能力项目</h5>
                         <ul class="ul-style text-left">
@@ -100,7 +100,7 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="local/jscrollTo('#point2',1000)"
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point2',1000)"
                          data-wow-delay="0.1s">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>商业进阶项目</h5>
@@ -114,7 +114,7 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12 text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="local/jscrollTo('#point3',1000)"
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point3',1000)"
                          data-wow-delay="0.2s" >
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>专项课</h5>
@@ -127,7 +127,7 @@
                     </div> <!-- /.single-goal -->
                 </div> <!-- /.col- -->
                 <div class="col-md-3 col-xs-12  text-center">
-                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="local/jscrollTo('#point4',1000)"
+                    <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point4',1000)"
                          data-wow-delay="0.2s">
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim" alt="Icon" class="round-border"></div>
                         <h5>企业定制方案</h5>
@@ -725,7 +725,7 @@
     <div id="company-banner">
         <div class="rev_slider_wrapper" id="point4">
             <!-- START REVOLUTION SLIDER 5.0.7 auto mode -->
-            <div iid="seo-company-banner" class="rev_slider" data-version="5.0.7">
+            <div id="seo-company-banner" class="rev_slider" data-version="5.0.7">
                 <ul>
                     <!-- SLIDE1  -->
                     <li data-index="rs-280" data-transition="zoomout" data-slotamount="default" data-easein="Power4.easeInOut"
