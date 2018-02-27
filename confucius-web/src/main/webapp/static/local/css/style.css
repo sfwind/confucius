@@ -3577,7 +3577,9 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 
 #quick-apply:hover {
     background: #ffc323;
+    color:#FFFFFF;
 }
+
 
 @media (max-width: 991px) {
     #quick-apply {
