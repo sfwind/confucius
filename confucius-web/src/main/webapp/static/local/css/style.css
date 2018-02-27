@@ -3363,6 +3363,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 .container .content-item {
     padding: 20px 20px 20px 0;
     max-width:830px;
+    display: inline-block;
 }
 
 .container .content-item .article + .article {
