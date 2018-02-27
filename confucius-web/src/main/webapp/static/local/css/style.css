@@ -620,6 +620,7 @@ body .button-seven {
 .theme-main-menu .main-container {
     position: relative;
 }
+
 .theme-main-menu .main-container .logo {
     position: absolute;
     top: 50%;
@@ -633,6 +634,16 @@ body .button-seven {
 .theme-main-menu.fixed #mega-menu-holder > ul > li > a:hover {
     background-color: #f5f5f5;
     border-radius: 5px;
+}
+
+@media (max-width: 991px) {
+    .theme-main-menu .main-container .logo {
+        top: 26px;
+    }
+
+    body > div.main-page-wrapper > header > div > div > div > div.logo.float-left > a > img {
+        margin-left: 40px;
+    }
 }
 
 /* ---------------------------------- Theme Main Banner ----------------------------- */
