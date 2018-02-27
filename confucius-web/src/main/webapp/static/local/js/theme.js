@@ -281,10 +281,10 @@ function partnersLogo() {
             dragEndSpeed: 1000,
             responsive: {
                 0: {
-                    items: 4
+                    items: 2
                 },
                 700: {
-                    items: 4
+                    items: 2
                 },
                 992: {
                     items: 4
