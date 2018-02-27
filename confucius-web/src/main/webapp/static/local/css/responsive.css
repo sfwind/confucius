@@ -590,7 +590,7 @@
 }
 
 @media (max-width: 500px) {
-    #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
+     {
         width: 300px;
     }
 }
@@ -623,7 +623,8 @@
         font-size:30px;
     }
 
-    #seo-bs-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+    #seo-bs-ba u
+     “æ…ner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
         display: none;
     }
 
@@ -639,6 +640,10 @@
         color: #333333;
         font-size: 16px;
         line-height: 28px;
+    }
+
+    .owl-carousel {
+        display: none;
     }
 
 }
