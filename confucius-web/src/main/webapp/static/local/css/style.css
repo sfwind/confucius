@@ -3588,4 +3588,6 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     float: right;
     width: 300px;
     display: inline-block;
+    border: 1px solid #efefef;
+    border-radius: 5px;
 }
