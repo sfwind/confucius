@@ -605,11 +605,11 @@
     }
 
     .seo-theme .client-slider .slider-container .item .clearfix .lft {
-        display: none;
+        background: none;
     }
 
     .seo-theme .client-slider .slider-container .item .clearfix .rgt {
-        display: none;
+        background: none;
     }
 
     .default-footer .top-footer .footer-right .qr-code-container {
