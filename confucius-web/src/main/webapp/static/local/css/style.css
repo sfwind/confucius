@@ -3580,3 +3580,11 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
         top: 60%;
     }
 }
+
+
+
+.banner-box {
+    float: right;
+    width: 300px;
+    display: inline-block;
+}

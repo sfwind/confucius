@@ -131,7 +131,7 @@
                         <div class="title">这4个灵魂问题，解决你80%的困境</div>
                         <div class="prew-words">
                             假如你是一位咨询顾问，受Q公司CEO的邀请，参与竞标一个咨询项目，项目内容是：为Q公司重新制定一套奖金方案，提升员工积极性。<br/>
-                            现在，你需要提交一份项目建议书，即：你建议如何来设计和落地这个方案，以及所需的时间和费用等。……
+                            现在，你需要提交一份项目建议书，即：你建议如何来设计和落地这个方案，以及所需的时间和费用等。
                         </div>
                         <div class="article-info">
                             <span class="time">2016-12-09</span>
@@ -151,7 +151,7 @@
                         <div class="title">请把这支笔卖给我</div>
                         <div class="prew-words">
                             《华尔街之狼》里面，毒品销售跟莱昂纳多饰演的 Jordan说，他可以卖出任何东西。然后Jordan随手把一支笔扔给他，让他卖出去。<br/>
-                            如果你没看过这部电影，可以试想一下：你会怎么卖出这支笔？……
+                            如果你没看过这部电影，可以试想一下：你会怎么卖出这支笔？
                         </div>
                         <div class="article-info">
                             <span class="time">2016-11-04</span>
@@ -171,7 +171,7 @@
                         <div class="title">情商低不会说话？这是个伪命题</div>
                         <div class="prew-words">
                             如果你问身边的人，什么是情商，就会发现，大部分人对情商的理解就是：会说话、人脉广、世故，有时还成了智商的反义词。<br/>
-                            情商这个概念，真的是被严重扭曲了……
+                            情商这个概念，真的是被严重扭曲了。
                         </div>
                         <div class="article-info">
                             <span class="time">2016-07-06</span>
@@ -230,7 +230,7 @@
                         <div class="prew-words">
                             多年来，我妈为了让我多喝水，没少操心。<br/>
                             比如，她买了个我专用的3L的保温壶，然后在周末的早上，过来烧一壶水，晚上再过来看看剩多少，以此来监督我每天的饮水量。<br/>
-                            然后一般来说，晚上还会剩下2L水……
+                            然后一般来说，晚上还会剩下2L水。
                         </div>
                         <div class="article-info">
                             <span class="time">2017-02-23</span>
@@ -248,7 +248,7 @@
                     <div class="content">
                         <div class="title">大多数人，都是怎样挥霍自己天赋的</div>
                         <div class="prew-words">
-                            要论天赋如何发挥，我们先要搞清楚什么是天赋。80%以上的人，对天赋的理解基本都是错的，至少存在以下三个误区……
+                            要论天赋如何发挥，我们先要搞清楚什么是天赋。80%以上的人，对天赋的理解基本都是错的，至少存在以下三个误区。
                         </div>
                         <div class="article-info">
                             <span class="time">2016-09-29</span>
@@ -305,7 +305,7 @@
                         <div class="title">未来，你可能不属于任何公司</div>
                         <div class="prew-words">
                             最近又有几个朋友辞职做自由职业者了，咨询顾问自己单干，倒也不少见。<br/>
-                            这次略有不同，几个先后“单飞”的朋友，联合在一起，用同一个公司的名义走法律、财务流程。一个人接到需求之后，如果不是自己的擅长领域，就拉上其他擅长的顾问，抱团儿谈项目，项目下来之后再分工合作……
+                            这次略有不同，几个先后“单飞”的朋友，联合在一起，用同一个公司的名义走法律、财务流程。一个人接到需求之后，如果不是自己的擅长领域，就拉上其他擅长的顾问，抱团儿谈项目，项目下来之后再分工合作。
                         </div>
                         <div class="article-info">
                             <span class="time">2016-11-04</span>
@@ -325,7 +325,7 @@
                         <div class="title">作为个人，你的商业模式有没有问题</div>
                         <div class="prew-words">
                             今天，介绍一个规划工具——个人商业模式画布，这是我自己用过并非常推荐的工具。<br/>
-                            借助它，有利于我们拔高思维高度，去思考策略层面的事情
+                            借助它，有利于我们拔高思维高度，去思考策略层面的事情。
                         </div>
                         <div class="article-info">
                             <span class="time">2016-08-12</span>
@@ -432,6 +432,11 @@
                         </div>
                     </div>
                 </a>
+            </div>
+        </div>
+        <div class="banner-box">
+            <div class="img">
+                <img src="https://static.iqycamp.com/images/fragment/dyh_banner_1.jpeg" alt="圈外订阅号">
             </div>
         </div>
     </div>
