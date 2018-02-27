@@ -615,4 +615,7 @@
     .default-footer .top-footer .footer-right .qr-code-container {
         width: 370px;
     }
+    .seo-theme #partner-logo {
+        padding:0;
+    }
 }
