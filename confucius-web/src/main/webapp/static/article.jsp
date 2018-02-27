@@ -184,7 +184,7 @@
             <div class="article">
                 <a target="_blank" href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673277&idx=1&sn=c90f28fbc1e27ce017f6744866e8d2e8&chksm=8b6a39d1bc1db0c7faa69867ceef6116e2c178093202cb1d741205296810af5a7411674fedcc&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_11.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_11_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">穿别人的鞋，才能走好自己的路</div>
@@ -204,7 +204,7 @@
             <div class="article">
                 <a target="_blank" href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673646&idx=1&sn=562e8d4007fc648ad12b092e19ba576d&chksm=8b6a3f42bc1db65402aebfbed692599a9a717107cf73e092628fdd521ef4767529ddb52f710c&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_12.png" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_12_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">为什么滑雪教练可以教出网球高手</div>
@@ -223,7 +223,7 @@
             <div class="article">
                 <a target="_blank" href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673620&idx=1&sn=59a5561b8cd088047f59f996e21e6aac&chksm=8b6a3f78bc1db66e6b41ef1439311ad51d40d8dc838739dc772d2cc2525aad56a35869ba4031&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_13.png" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_13_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">说了那么多遍，你怎么才能改？</div>
@@ -243,7 +243,7 @@
             <div class="article">
                 <a target="_blank" href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673287&idx=1&sn=8ccb43fb45660c7eb5966ea961116bf8&chksm=8b6a39abbc1db0bdb4e49fc2594506b8cc8eb520264e12e1423395a05778555992052f5ce892&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_14.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_14_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">大多数人，都是怎样挥霍自己天赋的</div>
@@ -261,7 +261,7 @@
             <div class="article">
                 <a target="_blank" href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673405&idx=1&sn=c05fdb674cd709208a0a1ed4aa782474&chksm=8b6a3851bc1db147618172464b3f96422afaae776d7833c1ea27438c5829dbc8014441dc87a3&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_15.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_15_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">这个时代的年轻人，还能怎么逆袭</div>
@@ -279,7 +279,7 @@
             <div class="article">
                 <a target="_blank" href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651674311&idx=1&sn=4bb70289e637fb9008c8a8518e8a38ee&chksm=8b6a3dabbc1db4bd39e518faf7d82f02d467142b8ec23bf10825fb74f04f0cfc0c4d0b8d26c0&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_16.png" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_16_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">最赚钱的事情，都不辛苦</div>
@@ -299,7 +299,7 @@
                 <a target="_blank"
                    href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673121&idx=1&sn=095726bd4eca7bda57f6823c905d4df1&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_07.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_07_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">未来，你可能不属于任何公司</div>
@@ -319,7 +319,7 @@
                 <a target="_blank"
                    href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673141&idx=1&sn=6a5a9b58512ec3d4c95ab3cfccf98e85&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_08.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_08_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">作为个人，你的商业模式有没有问题</div>
@@ -359,7 +359,7 @@
                 <a target="_blank"
                    href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673607&idx=1&sn=1694c9c07782a1985ef09be3bde7f433&chksm=8b6a3f6bbc1db67d0b7d60e98d6034b700e326cd3cecb00f1d792d7f8e824889c12bf0175238&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_09.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_09_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">这种单一视角，阻碍了你的发展</div>
@@ -379,7 +379,7 @@
                 <a target="_blank"
                    href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651674356&idx=1&sn=95fe54a2d2299aa82f58e91271374670&chksm=8b6a3d98bc1db48e9785ae98c3fa1e85a0bdfa9c7e287852b50ac3dcdaf192c0ab08999625a6&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_17.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_17_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">如何才能知道自己值多少钱?</div>
@@ -419,7 +419,7 @@
                 <a target="_blank"
                    href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673091&idx=1&sn=cee106d517cf656ba2f34841fcac305f&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_18.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_18_1.jpg" alt=""/>
                     </div>
                     <div class="content">
                         <div class="title">我有3招，让你不再越规划越迷茫</div>

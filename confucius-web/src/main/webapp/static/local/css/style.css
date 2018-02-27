@@ -3408,14 +3408,13 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 }
 
 .container .content-item .article .content .time {
-    font-size: 16px;
+    font-size: 13px;
     color: #999;
 }
 
 .container .content-item .article .content .article-label {
-    font-size: 16px;
-    font-weight: bolder;
-    color: #666;
+    font-size: 13px;
+    color: #999;
     margin-left: 10px;
 }
 
