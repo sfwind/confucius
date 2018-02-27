@@ -834,7 +834,7 @@
                 </div> <!-- /.col- -->
                 <div class="col-md-6 col-sm-6 col-xs-12 wow fadeInUp" data-wow-delay="0.1s">
                     <div class="single-service tran4s">
-                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_7.png?imageslim" alt="icon">
+                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_7_2.png?imageslim" alt="icon">
                         <h2>02</h2>
                         <h5><a href="service-details.html" class="tran4s">2. Mini-MBA项目（6个月，线上+线下）</a></h5>
                         <p>与国内外顶尖商科院校联合开发的商业管理课程， 针对企业技术精英、中高管理层</p>
