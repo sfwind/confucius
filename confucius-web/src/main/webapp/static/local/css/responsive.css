@@ -602,4 +602,10 @@
     .seo-theme .client-slider .sldier-wrapper {
         margin: 70px 0 0 0;
     }
+    .seo-theme .client-slider .slider-container .item .clearfix .lft {
+        display: none;
+    }
+    .seo-theme .client-slider .slider-container .item .clearfix .rgt {
+        display: none;
+    }
 }
