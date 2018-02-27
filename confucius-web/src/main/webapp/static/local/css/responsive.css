@@ -636,6 +636,10 @@
         display: none;
     }
 
+    #seo-bs-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+
     #banner .tp-caption .p {
         font-weight: 300;
         color: #333333;
