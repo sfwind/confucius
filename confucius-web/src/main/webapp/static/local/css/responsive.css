@@ -662,4 +662,9 @@
     .container .content-item .article .content {
         margin-left: 125px;
     }
+
+    .banner-box {
+        float: left;
+        margin: 30px 0;
+    }
 }
