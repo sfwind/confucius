@@ -1233,7 +1233,7 @@ footer.seo-footer p {
 .default-footer .top-footer .footer-left .footer-title {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 15px;
 }
 
 .default-footer .top-footer .footer-left .company {
@@ -1245,7 +1245,7 @@ footer.seo-footer p {
 .default-footer .top-footer .footer-left .link-container {
     position: absolute;
     bottom: 0;
-    left: 0;
+    left: 15px;
 }
 
 .default-footer .top-footer .footer-left .link-container .item {
