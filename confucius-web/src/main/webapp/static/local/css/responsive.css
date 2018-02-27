@@ -646,4 +646,15 @@
         display: none;
     }
 
+    .container .content-item .article .content .prew-words {
+        display: none;
+    }
+
+    .container .content-item .article .article-info {
+        display: none;
+    }
+
+    .container .content-item .article .float-left {
+        width:110px;
+    }
 }

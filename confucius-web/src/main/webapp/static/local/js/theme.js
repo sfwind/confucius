@@ -290,7 +290,7 @@ function partnersLogo() {
                     items: 4
                 }
             }
-        })
+        }) ≤µ≤ /
     }
 }
 
