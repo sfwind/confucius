@@ -591,7 +591,7 @@
 
 @media (max-width: 500px) {
     #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
-        width: 370px;
+        width: 300px;
     }
 }
 
@@ -613,7 +613,7 @@
     }
 
     .default-footer .top-footer .footer-right .qr-code-container {
-        width: 370px;
+        width: 320px;
     }
     .seo-theme #partner-logo {
         padding:0;
