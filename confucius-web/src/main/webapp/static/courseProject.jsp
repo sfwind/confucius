@@ -357,7 +357,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <img class="d-ib" src="https://static.iqycamp.com/images/fragment/pc_icon_course_0226_1.png?imageslim" alt=""/>
+                    <img class="d-ib" src="https://static.iqycamp.com/images/fragment/pc_icon_course_0226_2.png?imageslim" alt=""/>
                 </div>
             </div>
 
@@ -990,6 +990,9 @@
         </div>
     </div>
 </div>
+
+<a id="quick-apply" href="javascript:showDialog('#business-apply')"
+   class="about-button button-two">立即申请</a>
 
 <script type='text/javascript'>
     (function(m, ei, q, i, a, j, s) {

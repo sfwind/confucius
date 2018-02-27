@@ -839,8 +839,8 @@ body .button-seven {
 .seo-theme .client-slider {
     background: url(../../local/images/home/bg.jpg) no-repeat center;
     background-size: cover;
-    padding: 80px 0 65px 0;
-    margin-bottom: 100px;
+    padding: 0 0 65px 0;
+    /*margin-bottom: 100px;*/
 }
 
 .seo-theme .client-slider h2 {
@@ -1085,7 +1085,7 @@ body .button-seven {
     background-size: cover;
     background-attachment: fixed;
     position: relative;
-    margin: 20px 0 110px 0;
+    margin: 0 0 110px 0;
 }
 
 .seo-theme .seo-counter:before {
@@ -1173,7 +1173,7 @@ body .button-seven {
 
 .seo-theme .partners-section {
     padding: 60px 0;
-    border-top: 1px solid #ececec;
+    /*border-top: 1px solid #ececec;*/
 }
 
 .seo-theme #partner-logo {
@@ -3573,6 +3573,10 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     font-size: 16px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     z-index: 99;
+}
+
+#quick-apply:hover {
+    background: #ffc323;
 }
 
 @media (max-width: 991px) {
