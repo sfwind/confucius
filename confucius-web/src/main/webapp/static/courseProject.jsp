@@ -200,12 +200,13 @@
                              data-splitin="none"
                              data-splitout="none"
                              style="z-index: 6;">
-                            <p>
+                            <div class="p">
                                 •   针对企业高潜人才<br/>
                                 •   一年体系化课程<br/>
                                 •   三大核心能力模块：管理|思维|沟通<br/>
                                 •   24小时移动端学习<br/>
-                                •   80%学员高完课率，数据定期跟踪反馈</p>
+                                •   80%学员高完课率，数据定期跟踪反馈
+                            </div>
                         </div>
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"

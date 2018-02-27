@@ -618,4 +618,27 @@
     .seo-theme #partner-logo {
         padding:0;
     }
+
+    body > div.main-page-wrapper > div.partners-section > div > div.seo-title-one.text-center > h2 {
+        font-size:30px;
+    }
+
+    #seo-bs-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+
+    #seo-camp-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+
+    #seo-company-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+    #banner .tp-caption .p {
+        font-weight: 300;
+        color: #333333;
+        font-size: 16px;
+        line-height: 28px;
+    }
+
 }
