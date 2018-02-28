@@ -32,7 +32,7 @@ public class UserController {
     @Autowired
     private AccountService accountService;
 
-    private final Logger logger= LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
 
     /**
@@ -47,6 +47,8 @@ public class UserController {
         OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId()).module("内容运营").action("用户信息").action("查询用户信息");
         operationLogService.log(operationLog);
 
+        List<UserDto> userDtos = Lists.newArrayList();
+
         Profile profile = accountService.loadProfileByMemberId(search);
         if (profile == null) {
             profile = accountService.getProfileByRiseId(search);
@@ -56,17 +58,27 @@ public class UserController {
                 profile = accountService.getProfile(Integer.valueOf(search));
             }
         }
+        if (profile == null) {
+            //根据昵称查找
+            List<Profile> profiles = accountService.loadProfilesByNickName(search);
+            profiles.stream().forEach(profile1 -> {
+                UserDto userDto = new UserDto();
+                if (userDto != null) {
+                    userDtos.add(userDto);
+                }
+            });
+            return WebUtils.result(userDtos);
+        }
 
         UserDto userDto = generateUserDto(profile);
-
         if (userDto == null) {
             return WebUtils.error("找不到该用户");
         }
-        return WebUtils.result(userDto);
+        return WebUtils.result(userDtos.add(userDto));
     }
 
     @RequestMapping("/class/search")
-    public ResponseEntity<Map<String,Object>> searchUserInfoByClass(UnionUser unionUser,@RequestParam("className")String className,@RequestParam("groupId")String groupId){
+    public ResponseEntity<Map<String, Object>> searchUserInfoByClass(UnionUser unionUser, @RequestParam("className") String className, @RequestParam("groupId") String groupId) {
 
         OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId()).module("内容运营").action("用户信息").action("查询班级用户信息");
         operationLogService.log(operationLog);
@@ -77,7 +89,7 @@ public class UserController {
             Integer profileId = riseClassMember.getProfileId();
             Profile profile = accountService.getProfile(profileId);
             UserDto userDto = generateUserDto(profile);
-            if(userDto!=null){
+            if (userDto != null) {
                 userDtos.add(userDto);
             }
         });
