@@ -62,12 +62,11 @@ public class UserController {
             //根据昵称查找
             List<Profile> profiles = accountService.loadProfilesByNickName(search);
             profiles.stream().forEach(profile1 -> {
-                UserDto userDto = new UserDto();
+                UserDto userDto = generateUserDto(profile1);
                 if (userDto != null) {
                     userDtos.add(userDto);
                 }
             });
-            logger.info("昵称查询："+userDtos.toString());
             return WebUtils.result(userDtos);
         }
         UserDto userDto = generateUserDto(profile);
@@ -75,7 +74,6 @@ public class UserController {
             return WebUtils.error("找不到该用户");
         }
         userDtos.add(userDto);
-        logger.info(userDtos.toString());
         return WebUtils.result(userDtos);
     }
 
