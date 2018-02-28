@@ -221,7 +221,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="javascript:showDialog('#business-apply')" class="service-button button-two">立即申请</a>
+                            <a href="javascript:showDialog('#business-apply')" class="service-button"></a>
                         </div>
                         <!-- LAYER NR. 4 -->
                         <div class="tp-caption"
