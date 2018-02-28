@@ -564,7 +564,7 @@ body .button-seven {
 }
 
 #mega-menu-holder > ul > li {
-    margin-left: 10px;
+    /*margin-left: 10px;*/
     margin-right: 10px;
 }
 
@@ -3660,4 +3660,8 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 #seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a > img:hover {
     width:110px !important;
     height:101px !important;
+}
+
+#mega-menu-holder>ul> li:first-child> a {
+    border-top:0;
 }
