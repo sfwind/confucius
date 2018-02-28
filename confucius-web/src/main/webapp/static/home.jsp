@@ -30,7 +30,7 @@
 </head>
 
 <body class="seo-theme">
-<%=request.getServerName()%>
+<%="www.confucius.mobi".equals(request.getServerName())?"":"<div name=\"robots\" content=\"noindex\"/>"%>
 <div class="main-page-wrapper">
 
     <!-- ===================================================
