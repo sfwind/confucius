@@ -418,7 +418,7 @@
                         <!-- LAYER NR. 1 -->
                         <div class="tp-caption text-right"
                              data-x="['right','right','right','right']" data-hoffset="['40','40','40','40']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['-150','-150','-150','-150']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['-100','-100','-100','-100']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
@@ -742,7 +742,7 @@
                         <!-- LAYER NR. 1 -->
                         <div class="tp-caption text-right"
                              data-x="['right','right','right','right']" data-hoffset="['40','40','40','40']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['-150','-150','-150','-150']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['-100','-100','-100','-100']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
