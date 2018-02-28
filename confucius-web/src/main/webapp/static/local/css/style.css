@@ -640,10 +640,6 @@ body .button-seven {
     .theme-main-menu .main-container .logo {
         top: 26px;
     }
-
-    body > div.main-page-wrapper > header > div > div > div > div.logo.float-left > a > img {
-        margin-left: 40px;
-    }
 }
 
 /* ---------------------------------- Theme Main Banner ----------------------------- */

@@ -89,7 +89,7 @@
                     <div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp"
                             onclick="jScrollTo('#point1',1000)">
-                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="Icon" class="round-border"></div>
+                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="核心能力项目" class="round-border"></div>
                         <h5>核心能力项目</h5>
                         <ul class="ul-style text-left">
                             <li>针对企业高潜人才</li>
@@ -103,7 +103,7 @@
                 <div class="col-md-3 col-xs-12 text-center">
                     <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point2',1000)"
                          data-wow-delay="0.1s">
-                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="Icon" class="round-border"></div>
+                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="商业进阶项目" class="round-border"></div>
                         <h5>商业进阶项目</h5>
                         <ul class="ul-style text-left">
                             <li>针对企业技术精英和中高管</li>
@@ -117,7 +117,7 @@
                 <div class="col-md-3 col-xs-12 text-center">
                     <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point3',1000)"
                          data-wow-delay="0.2s" >
-                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="Icon" class="round-border"></div>
+                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="专项课" class="round-border"></div>
                         <h5>专项课</h5>
                         <ul class="ul-style text-left">
                             <li>专项能力提升</li>
@@ -130,7 +130,7 @@
                 <div class="col-md-3 col-xs-12  text-center">
                     <div class="single-goal text-center hvr-float-shadow wow fadeInUp"  onclick="jScrollTo('#point4',1000)"
                          data-wow-delay="0.2s">
-                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim" alt="Icon" class="round-border"></div>
+                        <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim" alt="企业定制方案" class="round-border"></div>
                         <h5>企业定制方案</h5>
                         <ul class="ul-style text-left">
                             <li>思维提升|商业案例|领导力|创业投资</li>
@@ -251,7 +251,7 @@
                              data-responsive_offset="on">
                             <img class="tp-banner"
                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_big_core_0213_1.png?imageslim"
-                                 alt="image">
+                                 alt="核心能力项目">
                         </div>
                     </li>
                 </ul>
@@ -359,7 +359,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <img class="d-ib" src="https://static.iqycamp.com/images/fragment/pc_icon_course_0226_2.png?imageslim" alt=""/>
+                    <img class="d-ib" src="https://static.iqycamp.com/images/fragment/pc_icon_course_0226_2.png?imageslim" alt="权威专家设计和精选课程"/>
                 </div>
             </div>
 
@@ -491,7 +491,7 @@
                              data-splitout="none"
                              data-responsive_offset="on">
                             <img  class="tp-banner"
-                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_2.png?imageslim" alt="image">
+                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_2.png?imageslim" alt="商业进阶项目">
                         </div>
                     </li>
                 </ul>
@@ -598,7 +598,7 @@
                              data-splitout="none"
                              data-responsive_offset="on">
                             <img  class="tp-banner"
-                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_3.png?imageslim" alt="image">
+                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_3.png?imageslim" alt="结构化表达">
                         </div>
                     </li>
                 </ul>
@@ -810,7 +810,7 @@
                              data-splitout="none"
                              data-responsive_offset="on">
                             <img  class="tp-banner"
-                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_5.png?imageslim"  alt="image">
+                                  src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_5.png?imageslim"  alt="企业解决方案">
                         </div>
                     </li>
                 </ul>
@@ -827,7 +827,7 @@
             <div class="row">
                 <div class="col-md-6 col-sm-6 col-xs-12 wow fadeInUp">
                     <div class="single-service tran4s">
-                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_6.png?imageslim" alt="icon">
+                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_6.png?imageslim" alt="商学院项目">
                         <h2>01</h2>
                         <h5><a href="service-details.html" class="tran4s">1.商学院项目（1-2年，线上）</a></h5>
                         <p>1.1 核心能力项目 - 针对有2-8年职场经验的核心员工和管理人员</p>
@@ -836,7 +836,7 @@
                 </div> <!-- /.col- -->
                 <div class="col-md-6 col-sm-6 col-xs-12 wow fadeInUp" data-wow-delay="0.1s">
                     <div class="single-service tran4s">
-                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_7_2.png?imageslim" alt="icon">
+                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_7_2.png?imageslim" alt="MBA项目">
                         <h2>02</h2>
                         <h5><a href="service-details.html" class="tran4s">2. Mini-MBA项目（6个月，线上+线下）</a></h5>
                         <p>与国内外顶尖商科院校联合开发的商业管理课程， 针对企业技术精英、中高管理层</p>
@@ -844,7 +844,7 @@
                 </div> <!-- /.col- -->
                 <div class="col-md-6 col-sm-6 col-xs-12 wow fadeInUp" data-wow-delay="0.2s">
                     <div class="single-service tran4s">
-                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_8.png?imageslim" alt="icon">
+                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_8.png?imageslim" alt="定制化企业培训">
                         <h2>03</h2>
                         <h5><a href="service-details.html" class="tran4s">3. 定制化企业培训</a></h5>
                         <p>思维提升、商业案例、领导力等模块化精品课程，精准触达企业痛点</p>
@@ -852,7 +852,7 @@
                 </div> <!-- /.col- -->
                 <div class="col-md-6 col-sm-6 col-xs-12 wow fadeInUp" data-wow-delay="0.1s">
                     <div class="single-service tran4s">
-                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_9.png?imageslim" alt="icon">
+                        <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_9.png?imageslim" alt="私董会">
                         <h2>04</h2>
                         <h5><a href="service-details.html" class="tran4s">4. 私董会</a></h5>
                         <p>
@@ -883,16 +883,16 @@
             <div class="row">
                 <div id="partner-logo">
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_tongcheng_0213.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_tongcheng_0213.png?imageslim" alt="合作企业">
                     </div>
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_yinlian_0213.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_yinlian_0213.png?imageslim" alt="合作企业">
                     </div>
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_jumen_0223_1.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_jumen_0223_1.png?imageslim" alt="合作企业">
                     </div>
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_changjiang_0226_2.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_changjiang_0226_2.png?imageslim" alt="合作企业">
                     </div>
                 </div> <!-- End .partner_logo -->
             </div>

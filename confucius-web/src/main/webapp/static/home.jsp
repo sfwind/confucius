@@ -92,7 +92,7 @@
                         data-easeout="Power4.easeInOut" data-masterspeed="2000" data-rotate="0" data-saveperformance="off"
                         data-title="01" data-description="">
                         <!-- MAIN IMAGE -->
-                        <img src="local/images/home/slide-7.jpg" alt="image" class="rev-slidebg" data-bgparallax="3"
+                        <img src="local/images/home/slide-7.jpg" alt="背景图" class="rev-slidebg" data-bgparallax="3"
                              data-bgposition="center center" data-duration="20000" data-ease="Linear.easeNone" data-kenburns="on"
                              data-no-retina="" data-offsetend="0 0" data-offsetstart="0 0" data-rotateend="0" data-rotatestart="0"
                              data-scaleend="100" data-scalestart="140">
@@ -249,7 +249,7 @@
                     <a target="_blank" href="course_project.html?jump=point1"> <div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp">
                         <div class="img-icon round-border"><img
-                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="圈外商学院"
+                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="核心能力项目"
                                 class="round-border"></div>
                         <h5>核心能力项目</h5>
                         <ul class="ul-style text-left">
@@ -265,7 +265,7 @@
                     <a target="_blank" href="course_project.html?jump=point2"><div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.1s">
                         <div class="img-icon round-border"><img
-                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="圈外商学院"
+                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="商业进阶项目"
                                 class="round-border"></div>
                         <h5>商业进阶项目</h5>
                         <ul class="ul-style text-left">
@@ -281,7 +281,7 @@
                     <a target="_blank" href="course_project.html?jump=point3"><div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
                         <div class="img-icon round-border"><img
-                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="Icon"
+                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_camp_0213.png?imageslim" alt="专项课"
                                 class="round-border"></div>
                         <h5>专项课</h5>
                         <ul class="ul-style text-left">
@@ -297,7 +297,7 @@
                             class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.2s">
                         <div class="img-icon round-border"><img
                                 src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim"
-                                alt="Icon" class="round-border"></div>
+                                alt="企业定制方案" class="round-border"></div>
                         <h5>企业定制方案</h5>
                         <ul class="ul-style text-left">
                             <li>思维提升|商业案例|领导力|创业投资</li>
@@ -420,7 +420,7 @@
     -->
     <div class="seo-counter">
         <div class="main-content">
-            <img src="local/images/home/object3.png" alt="Image">
+            <img src="local/images/home/object3.png" alt="背景图">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
@@ -466,7 +466,7 @@
                 <div class="row">
                     <div class="col-md-4 col-sm-6 col-xs-12">
                         <div class="single-service tran4s">
-                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_tixi_0214.png?imageslim" alt="icon">
+                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_tixi_0214.png?imageslim" alt="课程体系">
                             <h2>01</h2>
                             <h5><a class="tran4s">课程体系</a></h5>
                             <p>课程体系基于100家各行业龙头企业的人才需求设计，并可定制自己的学习计划</p>
@@ -474,7 +474,7 @@
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.1s">
                         <div class="single-service tran4s">
-                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_quanwei_0214_2.png?imageslim" alt="icon">
+                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_quanwei_0214_2.png?imageslim" alt="权威教育心理学专家">
                             <h2>02</h2>
                             <h5><a class="tran4s">权威教育心理学专家</a></h5>
                             <p>负责整体教学方法设计，提供最科学有效的学习方式</p>
@@ -482,7 +482,7 @@
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.2s">
                         <div class="single-service tran4s">
-                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_fanzhuan_0214.png?imageslim" alt="icon">
+                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_fanzhuan_0214.png?imageslim" alt="翻转课堂">
                             <h2>03</h2>
                             <h5><a class="tran4s">翻转课堂</a></h5>
                             <p>充分利用碎片化时间，平均每天30分钟，3个月即对职业发展有明显效果</p>
@@ -490,7 +490,7 @@
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.1s">
                         <div class="single-service tran4s">
-                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_baiban_0214.png?imageslim" alt="icon">
+                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_baiban_0214.png?imageslim" alt="案例式教学">
                             <h2>04</h2>
                             <h5><a class="tran4s">案例式教学</a></h5>
                             <p>结合创投大赛、咨询案例赛等方式，让学习更有趣</p>
@@ -498,7 +498,7 @@
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.2s">
                         <div class="single-service tran4s">
-                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_price_0214.png?imageslim" alt="icon">
+                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_price_0214.png?imageslim" alt="奖学金多">
                             <h2>05</h2>
                             <h5><a class="tran4s">奖学金多</a></h5>
                             <p>还有机会成为圈外合作助教，让学习更易坚持</p>
@@ -506,7 +506,7 @@
                     </div> <!-- /.col- -->
                     <div class="col-md-4 col-sm-6 col-xs-12" data-wow-delay="0.3s">
                         <div class="single-service tran4s">
-                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_shangxueyuan_0214.png?imageslim" alt="icon">
+                            <img src="https://static.iqycamp.com/images/fragment/pc_icon_shangxueyuan_0214.png?imageslim" alt="顶级商学院">
                             <h2>06</h2>
                             <h5><a class="tran4s">顶级商学院</a></h5>
                             <p>戈壁挑战赛的首个受邀在线商学院，为学员对接中欧、长江等MBA/EMBA等资源</p>
@@ -534,7 +534,7 @@
                         <span>覆盖亚洲、北美、欧洲和澳洲4大洲，205个城市</span>
                     </div> <!-- /.col- -->
                     <div class="col-lg-6 col-md-5 col-xs-12"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_area_0222_2.png?imageslim" alt="Image"></div>
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_area_0222_2.png?imageslim" alt="学员坐标一览"></div>
                 </div> <!-- /.row -->
                 <div class="row">
                     <div class="col-lg-6 col-md-7 col-xs-12 text wow fadeInRight float-left">
@@ -545,7 +545,7 @@
                政府/公共事业、房地产、通信/电子、快消品、机械/重工、能源/化工、人力资源、法律等</span>
                     </div> <!-- /.col- -->
                     <div class="col-lg-6 col-md-5 col-xs-12"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_industry_0222_2.png?imageslim" alt="Image"></div>
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_industry_0222_2.png?imageslim" alt="学员行业一览"></div>
                 </div> <!-- /.row -->
             </div> <!-- /.wrapper -->
         </div> <!-- /.container -->
@@ -637,16 +637,16 @@
             <div class="row">
                 <div id="partner-logo">
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_tongcheng_0213.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_tongcheng_0213.png?imageslim" alt="合作企业">
                     </div>
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_yinlian_0213.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_yinlian_0213.png?imageslim" alt="合作企业">
                     </div>
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_jumen_0223_1.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_jumen_0223_1.png?imageslim" alt="合作企业">
                     </div>
                     <div class="item"><img
-                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_changjiang_0226_2.png?imageslim" alt="logo">
+                            src="https://static.iqycamp.com/images/fragment/pc_icon_enterprise_changjiang_0226_2.png?imageslim" alt="合作企业">
                     </div>
                 </div> <!-- End .partner_logo -->
             </div>

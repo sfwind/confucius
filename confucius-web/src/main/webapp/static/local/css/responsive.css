@@ -706,4 +706,8 @@
     #seo-main-banner > ul > li > div:nth-child(1) > div > div {
         margin-top:-10px;
     }
+    .theme-main-menu .main-container .logo {
+        left:40px;
+    }
+
 }
