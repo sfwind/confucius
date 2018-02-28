@@ -120,6 +120,7 @@
 
     .seo-theme .theme-main-menu {
         padding-top: 20px;
+        padding-bottom:15px;
     }
 
     .seo-theme .company-goal {
@@ -194,6 +195,7 @@
 
     .seo-theme .theme-main-menu.fixed {
         padding-top: 0;
+        padding-bottom:0;
     }
 }
 
