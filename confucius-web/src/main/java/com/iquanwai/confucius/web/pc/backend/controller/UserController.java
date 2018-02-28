@@ -73,12 +73,10 @@ public class UserController {
 
         List<UserDto> userDtos = Lists.newArrayList();
         List<RiseClassMember> riseClassMembers = accountService.getRiseClassMembers(className, groupId);
-        logger.info(riseClassMembers.toString());
         riseClassMembers.stream().forEach(riseClassMember -> {
             Integer profileId = riseClassMember.getProfileId();
             Profile profile = accountService.getProfile(profileId);
             UserDto userDto = generateUserDto(profile);
-            logger.info(userDto.toString());
             if(userDto!=null){
                 userDtos.add(userDto);
             }
