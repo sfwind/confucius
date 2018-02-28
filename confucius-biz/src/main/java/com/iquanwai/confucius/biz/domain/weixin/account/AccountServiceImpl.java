@@ -700,4 +700,9 @@ public class AccountServiceImpl implements AccountService
     public RiseMember getCurrentRiseMember(Integer profileId) {
         return riseMemberDao.loadValidRiseMember(profileId);
     }
+
+    @Override
+    public List<RiseClassMember> getRiseClassMembers(String className, String groupId) {
+        return riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className,groupId);
+    }
 }

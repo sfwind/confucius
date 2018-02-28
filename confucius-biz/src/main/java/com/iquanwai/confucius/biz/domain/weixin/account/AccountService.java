@@ -153,4 +153,6 @@ public interface AccountService {
      * @return
      */
     RiseMember getCurrentRiseMember(Integer profileId);
+
+    List<RiseClassMember> getRiseClassMembers(String className,String groupId);
 }
