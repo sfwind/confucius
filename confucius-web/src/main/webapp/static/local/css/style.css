@@ -3629,3 +3629,8 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     float: right;
     text-align: left;
 }
+
+#seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a {
+    border:none;
+    background:none;
+}
