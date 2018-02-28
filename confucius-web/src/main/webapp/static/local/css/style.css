@@ -3571,20 +3571,8 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     top: 70%;
     width: 100px;
     height: 100px;
-    -webkit-border-radius: 100px;
-    -moz-border-radius: 100px;
-    border-radius: 100px;
-    line-height: 100px;
-    color: #222222;
-    background:url("https://www.iqycamp.com/images/fragment/zhaopin_0228_5.png") no-repeat center center/100% auto;
-    font-size: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background:url("https://www.iqycamp.com/images/fragment/apply_0228_1.png") no-repeat center center/100% auto;
     z-index: 99;
-}
-
-#quick-apply:hover {
-    background: #ffc323;
-    color:#FFFFFF;
 }
 
 

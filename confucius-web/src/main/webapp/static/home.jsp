@@ -216,7 +216,7 @@
     </div> <!--  /#banner -->
 
     <a id="quick-apply" href="javascript:showDialog('#business-apply')"
-       class="about-button button-two">立即申请</a>
+       class="about-button"></a>
     <!--
   =============================================
   Short Banner
