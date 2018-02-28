@@ -12,7 +12,7 @@
     <title>圈外</title>
     <meta name="keywords" content="圈外,圈外同学,圈外商学院,商学院">
     <meta name="description" content="圈外商学院">
-    <%="www.confucius.mobi".equals(request.getServerName())?"":"<meta name=\"robots\" content=\"noindex\">"%>
+    <%="www.iquanwai.com".equals(request.getServerName())?"":"<meta name=\"robots\" content=\"noindex\">"%>
     <link href="//www.iqycamp.com/images/logo.png" rel="shortcut icon">
     <!-- Main style sheet -->
     <link rel="stylesheet" type="text/css" href="local/css/style.css">
