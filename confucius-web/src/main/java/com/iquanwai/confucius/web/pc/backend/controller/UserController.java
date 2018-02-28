@@ -11,6 +11,8 @@ import com.iquanwai.confucius.biz.util.DataUtils;
 import com.iquanwai.confucius.web.pc.backend.dto.UserDto;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +32,7 @@ public class UserController {
     @Autowired
     private AccountService accountService;
 
-    private static final Integer memberType = 1;
-    private static final Integer profileIdType = 2;
-    private static final Integer riseIdType = 3;
+    private final Logger logger= LoggerFactory.getLogger(getClass());
 
 
     /**
@@ -73,10 +73,12 @@ public class UserController {
 
         List<UserDto> userDtos = Lists.newArrayList();
         List<RiseClassMember> riseClassMembers = accountService.getRiseClassMembers(className, groupId);
+        logger.info(riseClassMembers.toString());
         riseClassMembers.stream().forEach(riseClassMember -> {
             Integer profileId = riseClassMember.getProfileId();
             Profile profile = accountService.getProfile(profileId);
             UserDto userDto = generateUserDto(profile);
+            logger.info(userDto.toString());
             if(userDto!=null){
                 userDtos.add(userDto);
             }
