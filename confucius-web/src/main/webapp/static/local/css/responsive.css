@@ -668,8 +668,7 @@
     }
 
     .banner-box {
-        float: left;
-        margin: 30px 0;
+        display: none;
     }
 
     #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
@@ -692,4 +691,17 @@
     #seo-company-banner > ul > li > div:nth-child(3) > div > div {
         margin-left: -50px;
     }
+    #mega-menu-holder > ul {
+        background:rgba(35, 52, 78, 0.97);
+    }
+    #camp-banner {
+        margin-left:17px;
+    }
+    #banner {
+        margin-left:17px;
+    }
+    #seo-main-banner > ul > li > div:nth-child(1) > div > div {
+        margin-top:-10px;
+    }
+
 }

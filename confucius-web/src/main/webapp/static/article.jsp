@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>圈外</title>
-    <meta name="keywords" content="圈外,圈外同学,圈外商学院">
+    <meta name="keywords" content="圈外,圈外同学,圈外商学院,商学院">
     <meta name="description" content="圈外商学院">
     <link href="//www.iqycamp.com/images/logo.png" rel="shortcut icon">
     <!-- Main style sheet -->
@@ -106,7 +106,7 @@
             <div class="article">
                 <a target="_blank" href="https://mp.weixin.qq.com/s?__biz=MzA5ODI5NTI5OQ==&mid=2651673236&idx=1&sn=c4bec7b2206d789df1f441c172cde469&scene=21#wechat_redirect">
                     <div class="float-left">
-                        <img src="https://static.iqycamp.com/images/fragment/page_preview_04.jpeg" alt=""/>
+                        <img src="https://static.iqycamp.com/images/fragment/page_preview_04.jpeg" alt="思维定式"/>
                     </div>
                     <div class="content">
                         <div class="title">这3个思维定式，将我们牢牢困住</div>

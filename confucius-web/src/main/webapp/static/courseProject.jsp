@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>圈外</title>
-    <meta name="keywords" content="圈外,圈外同学,圈外商学院">
+    <meta name="keywords" content="圈外,圈外同学,圈外商学院,商学院">
     <meta name="description" content="圈外商学院">
     <link href="//www.iqycamp.com/images/logo.png" rel="shortcut icon">
     <!-- Main style sheet -->
