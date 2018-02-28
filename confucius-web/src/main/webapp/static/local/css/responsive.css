@@ -676,7 +676,7 @@
         width:300px;
     }
 
-    #seo-bs-banner > ul > li > div:nth-child(4) > div > div > div > a {
+    #seo-bs-banner > ul > li > div:nth-child(4) > div > div{
         margin-left: -50px;
     }
     #seo-bs-banner > ul > li > div:nth-child(2) > div > div {
@@ -687,5 +687,9 @@
     }
     #seo-company-banner > ul > li > div:nth-child(1) > div > div {
         margin-top:-10px;
+    }
+
+    #seo-company-banner > ul > li > div:nth-child(3) > div > div {
+        margin-left: -50px;
     }
 }
