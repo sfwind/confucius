@@ -994,7 +994,9 @@
 </div>
 
 <a id="quick-apply" href="javascript:showDialog('#business-apply')"
-   class="about-button"></a>
+   class="about-button">
+     <span>立即申请</span>
+</a>
 
 <script type='text/javascript'>
     (function(m, ei, q, i, a, j, s) {

@@ -217,10 +217,7 @@
 
     <a id="quick-apply" href="javascript:showDialog('#business-apply')"
        class="about-button">
-        <span>
-            立即申请
-        </span>
-
+        <span>立即申请</span>
     </a>
     <!--
   =============================================
