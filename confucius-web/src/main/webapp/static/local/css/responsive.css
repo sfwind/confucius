@@ -711,3 +711,11 @@
     }
 
 }
+
+@media (max-width: 340px) {
+    .seo-theme .client-slider .button-container .service-button + .service-button {
+        margin-left:0;
+        margin-top:10px;
+    }
+
+}
