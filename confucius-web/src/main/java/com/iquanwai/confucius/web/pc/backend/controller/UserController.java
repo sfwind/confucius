@@ -67,6 +67,7 @@ public class UserController {
                     userDtos.add(userDto);
                 }
             });
+            logger.info("昵称查询："+userDtos.toString());
             return WebUtils.result(userDtos);
         }
         UserDto userDto = generateUserDto(profile);
@@ -74,6 +75,7 @@ public class UserController {
             return WebUtils.error("找不到该用户");
         }
         userDtos.add(userDto);
+        logger.info(userDtos.toString());
         return WebUtils.result(userDtos);
     }
 
