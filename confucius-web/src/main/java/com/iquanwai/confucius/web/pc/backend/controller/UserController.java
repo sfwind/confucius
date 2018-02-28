@@ -69,12 +69,12 @@ public class UserController {
             });
             return WebUtils.result(userDtos);
         }
-
         UserDto userDto = generateUserDto(profile);
         if (userDto == null) {
             return WebUtils.error("找不到该用户");
         }
-        return WebUtils.result(userDtos.add(userDto));
+        userDtos.add(userDto);
+        return WebUtils.result(userDtos);
     }
 
     @RequestMapping("/class/search")
