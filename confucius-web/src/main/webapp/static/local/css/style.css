@@ -3626,3 +3626,10 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     font-size: 18px;
     font-weight: 300;
 }
+
+
+#seo-company-banner > ul > li > div:nth-child(1) > div > div > div > h3 {
+    width: 310px;
+    float: right;
+    text-align: left;
+}

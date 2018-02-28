@@ -123,7 +123,7 @@
     }
 
     .seo-theme .company-goal {
-        margin-bottom: 100px;
+        /*margin-bottom: 100px;*/
     }
 
     .seo-theme .welcome-seo img {
@@ -674,5 +674,18 @@
 
     #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
         width:300px;
+    }
+
+    #seo-bs-banner > ul > li > div:nth-child(4) > div > div > div > a {
+        margin-left: -50px;
+    }
+    #seo-bs-banner > ul > li > div:nth-child(2) > div > div {
+        margin-top:-10px;
+    }
+    #seo-camp-banner > ul > li > div:nth-child(1) > div > div {
+        margin-top:-12px;
+    }
+    #seo-company-banner > ul > li > div:nth-child(1) > div > div {
+        margin-top:-10px;
     }
 }
