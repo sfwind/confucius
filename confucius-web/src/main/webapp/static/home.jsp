@@ -30,6 +30,7 @@
 </head>
 
 <body class="seo-theme">
+<%=request.getServerName()%>
 <div class="main-page-wrapper">
 
     <!-- ===================================================
@@ -205,7 +206,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <img src="https://static.iqycamp.com/images/fragment/earth-article.jpg?imageslim" alt="image">
+                            <img src="https://static.iqycamp.com/images/fragment/earth-article.jpg?imageslim" alt="圈外商学院">
                         </div>
                     </li>
                 </ul>
@@ -225,7 +226,7 @@
             <h4 class="float-left">手机端随时随地升级自己，利用碎片化时间，学习体系化知识</h4>
             <div class="tips clearfix hidden-xs">
                 <a class="hover-to-show button-four float-right">扫码关注</a>
-                <img class="qr-code" src="https://static.iqycamp.com/images/fragment/home_middle.jpeg?imageslim" alt="">
+                <img class="qr-code" src="https://static.iqycamp.com/images/fragment/home_middle.jpeg?imageslim" alt="圈外商学院">
             <%--<div class="words">--%>
                     <%--<span>微信扫码</span><br/>--%>
                     <%--<span>关注学习</span>--%>
@@ -248,7 +249,7 @@
                     <a target="_blank" href="course_project.html?jump=point1"> <div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp">
                         <div class="img-icon round-border"><img
-                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="Icon"
+                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_core_0213.png?imageslim" alt="圈外商学院"
                                 class="round-border"></div>
                         <h5>核心能力项目</h5>
                         <ul class="ul-style text-left">
@@ -264,7 +265,7 @@
                     <a target="_blank" href="course_project.html?jump=point2"><div
                             class="single-goal text-center hvr-float-shadow wow fadeInUp" data-wow-delay="0.1s">
                         <div class="img-icon round-border"><img
-                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="Icon"
+                                src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_biz_0213.png?imageslim" alt="圈外商学院"
                                 class="round-border"></div>
                         <h5>商业进阶项目</h5>
                         <ul class="ul-style text-left">
