@@ -3639,6 +3639,6 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     transition: all 0.3s;
 }
 #seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a > img:hover {
-    width:110px;
-    height:101px;
+    width:110px !important;
+    height:101px !important;
 }
