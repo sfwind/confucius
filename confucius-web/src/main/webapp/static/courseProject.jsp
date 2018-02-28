@@ -221,7 +221,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="javascript:showDialog('#business-apply')" class="service-button"></a>
+                            <a href="javascript:showDialog('#business-apply')" class="service-button button-two">立即申请</a>
                         </div>
                         <!-- LAYER NR. 4 -->
                         <div class="tp-caption"
@@ -994,7 +994,7 @@
 </div>
 
 <a id="quick-apply" href="javascript:showDialog('#business-apply')"
-   class="about-button button-two">立即申请</a>
+   class="about-button"></a>
 
 <script type='text/javascript'>
     (function(m, ei, q, i, a, j, s) {
