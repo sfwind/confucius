@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.aspect;
 
 import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
 import com.iquanwai.confucius.web.util.CookieUtils;
-import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +37,7 @@ public class ExceptionAspect {
                 ",userAgent:" + req.getHeader("user-agent") +
                 ",ip:" + req.getHeader("X-Forwarded-For") +
                 ",cookie:"+cookie, e);
-        return WebUtils.error("服务器伐开心,我们正在想办法");
+        throw e;
+//        return WebUtils.error("服务器伐开心,我们正在想办法");
     }
 }
