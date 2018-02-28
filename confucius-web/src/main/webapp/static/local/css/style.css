@@ -3566,6 +3566,11 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 
 
 #quick-apply {
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    -ms-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    transition: all 0.3s;
     position: fixed;
     right: 90px;
     top: 70%;
@@ -3573,6 +3578,11 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     height: 100px;
     background:url("https://www.iqycamp.com/images/fragment/apply_0228_2.png") no-repeat center center/100% auto;
     z-index: 99;
+}
+
+#quick-apply:hover {
+    width:110px;
+    height:110px;
 }
 
 
@@ -3621,4 +3631,15 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 #seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a {
     border:none;
     background:none;
+}
+#seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a > img {
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    -ms-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    transition: all 0.3s;
+}
+#seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a > img:hover {
+    width:110px;
+    height:101px;
 }
