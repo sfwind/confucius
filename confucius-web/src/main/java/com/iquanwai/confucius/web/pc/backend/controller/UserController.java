@@ -84,7 +84,8 @@ public class UserController {
     @RequestMapping("/class/search")
     public ResponseEntity<Map<String, Object>> searchUserInfoByClass(UnionUser unionUser, @ModelAttribute Page page, @RequestParam("className") String className, @RequestParam("groupId") String groupId) {
         //如果小组号为空，则只根据班级查询
-
+        logger.info("page:"+page.toString());
+        logger.info("groupId:"+groupId);
 
         OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId()).module("内容运营").action("用户信息").action("查询班级用户信息");
         operationLogService.log(operationLog);
@@ -96,8 +97,10 @@ public class UserController {
         page.setPageSize(20);
         List<RiseClassMember> riseClassMembers;
         if (groupId.equals("")) {
+            logger.info("进入只根据classname查询");
             riseClassMembers = accountService.getByClassName(page, className);
         } else {
+            logger.info("进入classname和groupId查询");
             riseClassMembers = accountService.getByClassNameGroupId(page, className, groupId);
         }
         riseClassMembers.stream().forEach(riseClassMember -> {

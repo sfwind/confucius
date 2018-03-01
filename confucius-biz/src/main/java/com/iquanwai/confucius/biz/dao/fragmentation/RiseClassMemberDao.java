@@ -295,7 +295,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<RiseClassMember> getByClassNameGroupId(Page page,String className,String groupId){
+    public List<RiseClassMember> getByClassNameGroupId(Page page, String className, String groupId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? and GroupId = ?  and Del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
