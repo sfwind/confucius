@@ -93,7 +93,7 @@ public class UserController {
         if (page == null) {
             page = new Page();
         }
-        page.setPageSize(2);
+        page.setPageSize(20);
         List<RiseClassMember> riseClassMembers;
         if (groupId.equals("")) {
             riseClassMembers = accountService.getByClassName(page, className);
