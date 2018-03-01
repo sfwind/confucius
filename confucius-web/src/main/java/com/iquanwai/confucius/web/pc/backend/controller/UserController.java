@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.TableDto;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
@@ -107,7 +108,10 @@ public class UserController {
                 userDtos.add(userDto);
             }
         });
-        return WebUtils.result(userDtos);
+        TableDto<UserDto> result = new TableDto<>();
+        result.setPage(page);
+        result.setData(userDtos);
+        return WebUtils.result(result);
     }
 
     /**
