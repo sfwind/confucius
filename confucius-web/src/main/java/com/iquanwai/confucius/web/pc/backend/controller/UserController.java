@@ -82,7 +82,7 @@ public class UserController {
     }
 
     @RequestMapping("/class/search")
-    public ResponseEntity<Map<String, Object>> searchUserInfoByClass(UnionUser unionUser, @ModelAttribute Page page, @RequestParam("className") String className, @RequestParam("groupId") String groupId) {
+    public ResponseEntity<Map<String, Object>> searchUserInfoByClass(UnionUser unionUser, @RequestParam Page page, @RequestParam("className") String className, @RequestParam("groupId") String groupId) {
         //如果小组号为空，则只根据班级查询
 
 
@@ -93,7 +93,7 @@ public class UserController {
         if (page == null) {
             page = new Page();
         }
-        page.setPageSize(20);
+        page.setPageSize(2);
         List<RiseClassMember> riseClassMembers;
         if (groupId.equals("")) {
             riseClassMembers = accountService.getByClassName(page, className);
