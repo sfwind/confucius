@@ -640,7 +640,12 @@ body .button-seven {
     .theme-main-menu .main-container .logo {
         top: 30px;
     }
+    .theme-main-menu .main-container .logo  span {
+        vertical-align: middle !important;
+        vertical-align: -webkit-baseline-middle !important;
+    }
 }
+
 
 /* ---------------------------------- Theme Main Banner ----------------------------- */
 .tp-caption h1 {
