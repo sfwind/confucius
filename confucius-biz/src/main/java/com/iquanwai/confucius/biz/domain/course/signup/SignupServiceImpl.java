@@ -242,7 +242,7 @@ public class SignupServiceImpl implements SignupService {
 
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
         int sellingMonth = monthlyCampConfig.getSellingMonth();
-
+        int sellingYear = monthlyCampConfig.getSellingYear();
         Double fee = memberType.getFee();
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
 
@@ -253,6 +253,7 @@ public class SignupServiceImpl implements SignupService {
         MonthlyCampOrder monthlyCampOrder = new MonthlyCampOrder();
         monthlyCampOrder.setOrderId(orderPair.getLeft());
         monthlyCampOrder.setProfileId(profileId);
+        monthlyCampOrder.setYear(sellingYear);
         monthlyCampOrder.setMonth(sellingMonth);
         monthlyCampOrderDao.insert(monthlyCampOrder);
         return quanwaiOrder;
