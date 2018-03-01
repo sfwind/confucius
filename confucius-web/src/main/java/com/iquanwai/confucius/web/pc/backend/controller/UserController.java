@@ -10,6 +10,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.DataUtils;
 import com.iquanwai.confucius.web.pc.backend.dto.UserDto;
 import com.iquanwai.confucius.web.resolver.UnionUser;
+import com.iquanwai.confucius.web.util.RiseMemberUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,7 @@ public class UserController {
         RiseMember riseMember = accountService.getCurrentRiseMember(profile.getId());
         if (riseMember != null) {
             userDto.setOpenDate(riseMember.getOpenDate());
-            userDto.setMemberType(riseMember.getMemberTypeId());
+            userDto.setMemberType(RiseMemberUtils.convert(riseMember.getMemberTypeId()));
         }
         return userDto;
     }

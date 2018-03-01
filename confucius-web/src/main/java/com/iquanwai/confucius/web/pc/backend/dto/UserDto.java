@@ -19,6 +19,6 @@ public class UserDto {
     private String married;
     private String riseId;
     private String memberId;
-    private Integer memberType;
+    private String memberType;
     private Date openDate;
 }
