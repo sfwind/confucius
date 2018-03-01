@@ -29,6 +29,7 @@ import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -687,4 +688,33 @@ public class AccountServiceImpl implements AccountService {
     public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
         return profileDao.updateHeadImgUrl(profileId, headImgUrl);
     }
+
+    @Override
+    public RiseClassMember getLatestMemberId(Integer profileId) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryByProfileId(profileId);
+        RiseClassMember riseClassMember = riseClassMembers.stream().max(Comparator.comparing(RiseClassMember::getId)).orElse(null);
+        return riseClassMember;
+    }
+
+    @Override
+    public RiseMember getCurrentRiseMember(Integer profileId) {
+        return riseMemberDao.loadValidRiseMember(profileId);
+    }
+
+    @Override
+    public List<RiseClassMember> getByClassName(Page page, String className) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.getByClassName(className,page);
+        page.setTotal(riseClassMemberDao.getCountByClass(className));
+
+        return riseClassMembers;
+    }
+
+    @Override
+    public List<RiseClassMember> getByClassNameGroupId(Page page,String className, String groupId) {
+        List<RiseClassMember> riseClassMembers =  riseClassMemberDao.getByClassNameGroupId(page,className, groupId);
+        page.setTotal(riseClassMemberDao.getCountByClassNameGroupId(className,groupId));
+
+        return riseClassMembers;
+    }
+
 }
