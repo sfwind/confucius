@@ -829,7 +829,7 @@
                     <div class="single-service tran4s">
                         <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_6.png?imageslim" alt="商学院项目">
                         <h2>01</h2>
-                        <h5><a href="service-details.html" class="tran4s">1.商学院项目（1-2年，线上）</a></h5>
+                        <h5><a  class="tran4s">1.商学院项目（1-2年，线上）</a></h5>
                         <p>1.1 核心能力项目 - 针对有2-8年职场经验的核心员工和管理人员</p>
                         <p>1.2 商业管理项目 - 针对有5-10年职场经验的中高级管理层</p>
                     </div> <!-- /.single-service -->
@@ -838,7 +838,7 @@
                     <div class="single-service tran4s">
                         <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_7_2.png?imageslim" alt="MBA项目">
                         <h2>02</h2>
-                        <h5><a href="service-details.html" class="tran4s">2. Mini-MBA项目（6个月，线上+线下）</a></h5>
+                        <h5><a  class="tran4s">2. Mini-MBA项目（6个月，线上+线下）</a></h5>
                         <p>与国内外顶尖商科院校联合开发的商业管理课程， 针对企业技术精英、中高管理层</p>
                     </div> <!-- /.single-service -->
                 </div> <!-- /.col- -->
@@ -846,7 +846,7 @@
                     <div class="single-service tran4s">
                         <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_8.png?imageslim" alt="定制化企业培训">
                         <h2>03</h2>
-                        <h5><a href="service-details.html" class="tran4s">3. 定制化企业培训</a></h5>
+                        <h5><a class="tran4s">3. 定制化企业培训</a></h5>
                         <p>思维提升、商业案例、领导力等模块化精品课程，精准触达企业痛点</p>
                     </div> <!-- /.single-service -->
                 </div> <!-- /.col- -->
@@ -854,7 +854,7 @@
                     <div class="single-service tran4s">
                         <img src="https://static.iqycamp.com/images/fragment/pc_icon_course_0222_9.png?imageslim" alt="私董会">
                         <h2>04</h2>
-                        <h5><a href="service-details.html" class="tran4s">4. 私董会</a></h5>
+                        <h5><a class="tran4s">4. 私董会</a></h5>
                         <p>
                             针对企业高管和行业专家<br/>
                             会员制度，定期认知升级<br/>
