@@ -711,7 +711,10 @@
     .theme-main-menu .main-container .logo {
         left:40px;
     }
-
+    body > div.main-page-wrapper > header > div > div > div > div.logo.float-left > a > img {
+        width:45px !important;
+        height:45px !important;
+    }
 }
 
 @media (max-width: 340px) {
