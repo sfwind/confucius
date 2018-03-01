@@ -672,11 +672,12 @@ body .button-seven {
 }
 
 .tp-caption a {
-    border: none;
+    /*border: none;*/
     width: 155px;
     color: #222222;
     background: #fff;
     font-size: 16px;
+    border: 2px solid #fec425;
 }
 
 .tp-caption a {
@@ -3669,4 +3670,13 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 
 #mega-menu-holder>ul> li:first-child> a {
     border-top:0;
+}
+
+body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > div > a {
+    box-shadow: -3px 3px 2px rgba(0,0,0,.3);
+    background: #1d3374;
+}
+
+#point5 > div > div.sldier-wrapper > div.seo-course-slider.slider-container.owl-carousel.owl-theme.owl-loaded > div.owl-stage-outer > div > div > div {
+    border: 1px solid rgba(0,0,0,.1);
 }
