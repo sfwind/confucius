@@ -279,7 +279,23 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     /**
      * 根据班级和小组获得用户
      */
-    public List<RiseClassMember> getRiseClassMemberByClassNameGroupId(Page page, String className, String groupId) {
+    /**
+     * 根据班级和小组获得用户
+     */
+    public List<RiseClassMember> getRiseClassMemberByClassNameGroupId(String className, String groupId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from RiseClassMember where ClassName = ? and GroupId = ? and Active = 1 and Del = 0";
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+
+        try {
+            return runner.query(sql, h, className, groupId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<RiseClassMember> getByClassNameGroupId(Page page,String className,String groupId){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? and GroupId = ?  and Del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);

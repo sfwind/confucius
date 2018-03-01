@@ -711,7 +711,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<RiseClassMember> getByClassNameGroupId(Page page,String className, String groupId) {
-        List<RiseClassMember> riseClassMembers =  riseClassMemberDao.getRiseClassMemberByClassNameGroupId(page,className, groupId);
+        List<RiseClassMember> riseClassMembers =  riseClassMemberDao.getByClassNameGroupId(page,className, groupId);
         page.setTotal(riseClassMemberDao.getCountByClassNameGroupId(className,groupId));
 
         return riseClassMembers;
