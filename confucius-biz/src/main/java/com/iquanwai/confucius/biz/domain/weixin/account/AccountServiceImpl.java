@@ -704,7 +704,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<RiseClassMember> getByClassName(Page page, String className) {
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.getByClassName(className,page);
-        logger.info("总数为："+riseClassMemberDao.getCountByClass(className));
         page.setTotal(riseClassMemberDao.getCountByClass(className));
 
         return riseClassMembers;
@@ -713,7 +712,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<RiseClassMember> getByClassNameGroupId(Page page,String className, String groupId) {
         List<RiseClassMember> riseClassMembers =  riseClassMemberDao.getByClassNameGroupId(page,className, groupId);
-        logger.info("总数为："+riseClassMemberDao.getCountByClassNameGroupId(className,groupId));
         page.setTotal(riseClassMemberDao.getCountByClassNameGroupId(className,groupId));
 
         return riseClassMembers;
