@@ -29,6 +29,7 @@ import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -47,8 +48,7 @@ import java.util.*;
  * Created by justin on 16/8/10.
  */
 @Service
-public class AccountServiceImpl implements AccountService
-{
+public class AccountServiceImpl implements AccountService {
     @Autowired
     public RestfulHelper restfulHelper;
     @Autowired
@@ -702,7 +702,19 @@ public class AccountServiceImpl implements AccountService
     }
 
     @Override
-    public List<RiseClassMember> getRiseClassMembers(String className, String groupId) {
-        return riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className,groupId);
+    public List<RiseClassMember> getByClassName(Page page, String className) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.getByClassName(className,page);
+        page.setTotal(riseClassMemberDao.getCountByClass(className));
+
+        return riseClassMembers;
     }
+
+    @Override
+    public List<RiseClassMember> getByClassNameGroupId(Page page,String className, String groupId) {
+        List<RiseClassMember> riseClassMembers =  riseClassMemberDao.getRiseClassMemberByClassNameGroupId(page,className, groupId);
+        page.setTotal(riseClassMemberDao.getCountByClassNameGroupId(className,groupId));
+
+        return riseClassMembers;
+    }
+
 }

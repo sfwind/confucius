@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.util.page.Page;
 
 import java.util.List;
 
@@ -154,5 +155,20 @@ public interface AccountService {
      */
     RiseMember getCurrentRiseMember(Integer profileId);
 
-    List<RiseClassMember> getRiseClassMembers(String className,String groupId);
+    /**
+     * 根据班级和小组进行查询（分页）
+     * @param className
+     * @param groupId
+     * @return
+     */
+    List<RiseClassMember> getByClassNameGroupId(Page page, String className, String groupId);
+
+    /**
+     * 根据班级名进行查询（分页）
+     * @param className
+     * @return
+     */
+    List<RiseClassMember> getByClassName(Page page,String className);
+
+
 }
