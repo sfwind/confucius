@@ -112,6 +112,8 @@ public class UserController {
         RiseClassMember riseClassMember = accountService.getLatestMemberId(profile.getId());
         if (riseClassMember != null) {
             userDto.setMemberId(riseClassMember.getMemberId());
+            userDto.setClassName(riseClassMember.getClassName());
+            userDto.setGroupId(riseClassMember.getGroupId());
         }
         RiseMember riseMember = accountService.getCurrentRiseMember(profile.getId());
         if (riseMember != null) {
