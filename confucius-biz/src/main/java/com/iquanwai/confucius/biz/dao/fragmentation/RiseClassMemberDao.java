@@ -300,6 +300,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? and GroupId = ?  and Del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
+            logger.info(sql);
             return runner.query(sql, h, className, groupId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
