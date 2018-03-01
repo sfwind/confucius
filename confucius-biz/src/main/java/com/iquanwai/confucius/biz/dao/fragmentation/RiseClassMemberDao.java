@@ -94,9 +94,10 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     /**
      * 单笔查询
+     *
      * @param profileId 用户 id
-     * @param year 年份
-     * @param month 月份
+     * @param year      年份
+     * @param month     月份
      */
     public RiseClassMember queryByProfileIdAndTime(Integer profileId, Integer year, Integer month) {
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -278,6 +279,9 @@ public class RiseClassMemberDao extends PracticeDBUtil {
     /**
      * 根据班级和小组获得用户
      */
+    /**
+     * 根据班级和小组获得用户
+     */
     public List<RiseClassMember> getRiseClassMemberByClassNameGroupId(String className, String groupId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseClassMember where ClassName = ? and GroupId = ? and Active = 1 and Del = 0";
@@ -291,8 +295,56 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<RiseClassMember> getByClassNameGroupId(Page page, String className, String groupId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? and GroupId = ?  and Del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, className, groupId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public Integer getCountByClassNameGroupId(String className, String groupId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT COUNT(*) FROM RiseClassMember WHERE CLASSNAME = ? AND GROUPID = ? AND DEL = 0 ";
+        try {
+            return runner.query(sql, new ScalarHandler<Long>(), className, groupId).intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public List<RiseClassMember> getByClassName(String className, Page page) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember Where ClassName = ? AND DEL = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
+        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, className);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public Integer getCountByClass(String className) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT COUNT(*) FROM RiseClassMember WHERE CLASSNAME=? AND DEL = 0";
+
+        try {
+           return runner.query(sql, new ScalarHandler<Long>(), className).intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
     /**
      * 根据 MemberId 查询 RiseClassMember 记录，只是为了发证书
+     *
      * @param memberIds 学号集合
      */
     public List<RiseClassMember> queryForCertificateMemberIds(List<String> memberIds) {

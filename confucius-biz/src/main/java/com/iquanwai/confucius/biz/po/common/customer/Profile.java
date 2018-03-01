@@ -29,6 +29,10 @@ public class Profile {
     private Integer isFull;
     private String riseId;
     private String unionid;    //只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段。详见：获取用户个人信息（UnionID机制）
+    private String address;//地址
+    private String married;
+    private String receiver;
+    private String weixinId;
 
     private Integer riseMember; //0-免费用户,1-会员,2-课程单买用户
     private Integer role;//非db字段 用户角色
