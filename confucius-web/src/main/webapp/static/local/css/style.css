@@ -3380,7 +3380,9 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 }
 
 .container .content-item .article + .article {
-    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(0,0,0,.1);
+    margin-top: 10px;
 }
 
 .container .content-item .article {
@@ -3391,7 +3393,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 }
 
 .container .content-item .article:hover {
-    background-color: #f6f6f6;
+    /*background-color: #f6f6f6;*/
 }
 
 .container .content-item .article .float-left {
