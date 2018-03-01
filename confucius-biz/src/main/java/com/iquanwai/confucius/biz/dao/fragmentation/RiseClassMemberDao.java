@@ -335,7 +335,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         String sql = "SELECT COUNT(*) FROM RiseClassMember WHERE CLASSNAME=? AND DEL = 0";
 
         try {
-            runner.query(sql, new ScalarHandler<Long>(), className).intValue();
+           return runner.query(sql, new ScalarHandler<Long>(), className).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
