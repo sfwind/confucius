@@ -732,6 +732,12 @@
         height: 310px;
 
     }
+
+    .tp-caption a {
+        width: 100px;
+        line-height: 30px;
+        font-size: 14px;
+    }
 }
 
 @media (max-width: 340px) {
