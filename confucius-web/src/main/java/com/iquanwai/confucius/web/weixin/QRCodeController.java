@@ -26,15 +26,14 @@ public class QRCodeController {
                                                         @RequestParam(name="p", required = false) String permanent,
                                                         @RequestParam(name="s", required = false) Integer seconds) {
         QRResponse response;
+        if(qrCodeService.checkScence(scene)){
+            return WebUtils.error("场景值重复");
+        }
         if(permanent!=null){
             response = qrCodeService.generatePermanentQRCode(scene);
         }else{
             response = qrCodeService.generateTemporaryQRCode(scene, seconds);
         }
-        if(response.getTicket()!=null){
-
-        }
-
         return WebUtils.result(response);
     }
 

@@ -42,6 +42,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         String json = new Gson().toJson(qrRequest);
         QRResponse response = generate(json);
         if (response.getTicket() != null) {
+            logger.info("插入二维码表");
             qrCodeDao.insert(scene);
         }
         return response;
@@ -61,6 +62,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         String json = new Gson().toJson(qrRequest);
         QRResponse response = generate(json);
         if (response.getTicket() != null) {
+            logger.info("插入二维码表");
             qrCodeDao.insert(scene);
         }
         return response;
