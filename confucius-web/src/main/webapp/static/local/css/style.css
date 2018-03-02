@@ -3613,13 +3613,6 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 }
 
 
-@media (max-width: 991px) {
-    #quick-apply {
-        right: 10px;
-        top: 60%;
-    }
-}
-
 @media (max-width: 1200px) {
     .banner-box {
         display: none;

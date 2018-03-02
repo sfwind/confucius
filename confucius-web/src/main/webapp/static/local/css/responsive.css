@@ -625,8 +625,7 @@
         font-size: 30px;
     }
 
-    #seo-bs-ba u
-    “æ…ner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+    #seo-bs-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
         display: none;
     }
 
@@ -718,6 +717,15 @@
 
     h2 {
         font-size:30px !important;
+    }
+
+    #quick-apply {
+        right: 10px;
+        top: 60%;
+        width:50px;
+    }
+    #quick-apply span {
+        font-size:9px;
     }
 }
 
