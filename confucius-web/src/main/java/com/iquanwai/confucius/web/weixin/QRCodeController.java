@@ -31,7 +31,11 @@ public class QRCodeController {
         }else{
             response = qrCodeService.generateTemporaryQRCode(scene, seconds);
         }
+        if(response.getTicket()!=null){
+
+        }
 
         return WebUtils.result(response);
     }
+
 }

@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.qrcode;
 
 
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.wx.QrCodeDao;
 import com.iquanwai.confucius.biz.util.ImageUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import okhttp3.ResponseBody;
@@ -24,6 +25,8 @@ import java.io.InputStream;
 public class QRCodeServiceImpl implements QRCodeService {
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private QrCodeDao qrCodeDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -37,6 +40,8 @@ public class QRCodeServiceImpl implements QRCodeService {
         QRTemporaryRequest qrRequest = new QRTemporaryRequest(scene, expire_seconds);
         String json = new Gson().toJson(qrRequest);
         return generate(json);
+
+
     }
 
     @Override
@@ -69,6 +74,7 @@ public class QRCodeServiceImpl implements QRCodeService {
     }
 
     private QRResponse generate(String json) {
+        logger.info("json为:"+json);
         String body = restfulHelper.post(GEN_QRCODE_URL, json);
         System.out.println("return message " + body);
         Gson gson = new Gson();
