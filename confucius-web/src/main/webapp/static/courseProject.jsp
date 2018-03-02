@@ -169,7 +169,7 @@
                         <!-- LAYER NR. 1 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['0','0','15','5']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['0','-140','-120','-120']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['-120','-120','-150','-150']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
