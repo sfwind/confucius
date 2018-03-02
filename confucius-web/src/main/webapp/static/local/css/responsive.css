@@ -753,8 +753,8 @@
         float: left;
     }
 
-    .seo-theme .theme-main-menu.fixed .container {
-        padding-bottom: 15px;
+    #mega-menu-holder {
+        margin-bottom: 15px;
     }
 }
 
