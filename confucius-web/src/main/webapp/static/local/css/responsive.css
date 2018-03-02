@@ -715,6 +715,9 @@
     h2 {
         font-size:30px !important;
     }
+    h3 {
+        font-size:25px !important;
+    }
 
     #quick-apply {
         right: 10px;
@@ -742,6 +745,11 @@
 
     .tp-caption .text-right {
         text-align: left !important;
+    }
+
+    .tp-caption p {
+        font-size:16px;
+        line-height: 28px;
     }
 }
 
