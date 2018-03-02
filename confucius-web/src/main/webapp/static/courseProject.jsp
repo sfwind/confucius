@@ -537,7 +537,7 @@
                         <!-- LAYER NR. 2 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['0','0','15','5']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['10','10','10','0']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['10','10','-90','-90']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
