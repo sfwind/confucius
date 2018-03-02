@@ -734,6 +734,14 @@
     #seo-bs-banner > ul > li > div:nth-child(3) > div > div > div > div {
         float: left;
     }
+
+    #seo-company-banner > ul > li > div:nth-child(1) > div > div > div > h3 {
+        float:inherit !important;
+    }
+
+    #seo-company-banner > ul > li > div:nth-child(2) > div > div > div > div {
+        float: left;
+    }
 }
 
 @media (max-width: 340px) {
