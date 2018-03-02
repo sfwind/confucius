@@ -99,7 +99,7 @@
                         <!-- LAYERS -->
                         <!-- LAYER NR. 1 -->
                         <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['15','15','15','5']"
+                             data-x="['left','left','left','left']" data-hoffset="['15','15','30','30']"
                              data-y="['middle','middle','middle','middle']" data-voffset="['-120','-120','-120','-120']"
                              data-width="full"
                              data-height="none"
@@ -118,7 +118,7 @@
                         </div>
                         <!-- LAYER NR. 2 -->
                         <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['15','15','15','5']"
+                             data-x="['left','left','left','left']" data-hoffset="['15','15','30','30']"
                              data-y="['middle','middle','middle','middle']" data-voffset="['10','10','10','0']"
                              data-width="full"
                              data-height="none"
@@ -136,7 +136,7 @@
                         </div>
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['15','15','15','5']"
+                             data-x="['left','left','left','left']" data-hoffset="['15','15','30','30']"
                              data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','130']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
@@ -150,7 +150,7 @@
                         </div>
                         <!-- LAYER NR. 4 -->
                         <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['185','185','185','5']"
+                             data-x="['left','left','left','left']" data-hoffset="['185','185','30','30']"
                              data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','220']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
