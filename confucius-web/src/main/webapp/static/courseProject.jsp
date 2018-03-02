@@ -183,7 +183,7 @@
                              data-splitout="none"
                              data-responsive_offset="on"
                              style="z-index: 6;">
-                            <h2>核心能力项目</h2>
+                            <h3>核心能力项目</h3>
                         </div>
                         <!-- LAYER NR. 2 -->
                         <div class="tp-caption"
@@ -432,11 +432,11 @@
                              data-splitout="none"
                              data-responsive_offset="on"
                              style="z-index: 6;">
-                            <h2 style="    width: 315px;
+                            <h3 style="    width: 315px;
     float: right;
     text-align: left;">商业进阶项目
                                 <span class="gray" style="font-size: 15px;">（即将推出）</span>
-                            </h2>
+                            </h3>
                         </div>
                         <!-- LAYER NR. 2 -->
                         <div class="tp-caption text-right"
