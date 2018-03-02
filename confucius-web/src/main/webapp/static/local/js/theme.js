@@ -589,7 +589,7 @@ var hiddenDialog = (function ($) {
 
 var jScrollTo = (function ($) {
     return function (dialogSelector, time) {
-        $('html, body').animate({ scrollTop: $(dialogSelector).offset().top - 190 }, time || 1500);
+        $('html, body').animate({ scrollTop: $(dialogSelector).offset().top - 100 }, time || 1500);
     }
 })(jQuery)
 
