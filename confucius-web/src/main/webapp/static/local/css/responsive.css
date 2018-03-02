@@ -715,6 +715,10 @@
         width:45px !important;
         height:45px !important;
     }
+
+    h2 {
+        font-size:30px !important;
+    }
 }
 
 @media (max-width: 340px) {
