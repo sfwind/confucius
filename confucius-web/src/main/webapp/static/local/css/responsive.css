@@ -738,6 +738,10 @@
         line-height: 30px;
         font-size: 14px;
     }
+
+    .tp-caption {
+        float:inherit !important;
+    }
 }
 
 @media (max-width: 340px) {
