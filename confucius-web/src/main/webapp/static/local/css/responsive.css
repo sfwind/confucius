@@ -676,9 +676,6 @@
         width:300px;
     }
 
-    #seo-bs-banner > ul > li > div:nth-child(4) > div > div{
-        margin-left: -50px;
-    }
     #seo-bs-banner > ul > li > div:nth-child(2) > div > div {
         margin-top:-10px;
     }
@@ -741,6 +738,10 @@
 
     .tp-caption {
         float:inherit !important;
+    }
+
+    .tp-caption .text-right {
+        text-align: left !important;
     }
 }
 
