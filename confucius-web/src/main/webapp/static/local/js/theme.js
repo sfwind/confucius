@@ -137,7 +137,7 @@ function CampBannerSlider() {
     var banner = $("#seo-camp-banner");
     if(banner.length) {
         var temp = JSON.parse(JSON.stringify(bannerParam));
-        temp.gridheight = [450,450,450,450];
+        temp.gridheight = [500,500,500,500];
         banner.revolution(temp);
     }
     ;
