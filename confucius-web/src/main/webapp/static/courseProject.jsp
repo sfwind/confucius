@@ -66,7 +66,7 @@
                                 <li><a href="/">首页</a></li>
                                 <li class="active"><a href="/course_project">课程项目</a></li>
                                 <li><a href="/article">文章</a></li>
-                                <li><a href="/fragment/rise">线上学习</a></li>
+                                <li  class="hidden-xs"><a href="/fragment/rise">线上学习</a></li>
                                 <!--<li><a href="contact-us.html">Contact us</a></li>-->
                             </ul>
                         </nav> <!-- /#mega-menu-holder -->
