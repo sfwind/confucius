@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.weixin.qrcode;
 
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QrCodeDao;
+import com.iquanwai.confucius.biz.po.QrCode;
 import com.iquanwai.confucius.biz.util.ImageUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import okhttp3.ResponseBody;
@@ -39,16 +40,30 @@ public class QRCodeServiceImpl implements QRCodeService {
         }
         QRTemporaryRequest qrRequest = new QRTemporaryRequest(scene, expire_seconds);
         String json = new Gson().toJson(qrRequest);
-        return generate(json);
+        QRResponse response = generate(json);
+        if (response.getTicket() != null) {
+            qrCodeDao.insert(scene);
+        }
+        return response;
+    }
 
-
+    @Override
+    public boolean checkScence(String scene) {
+        if (qrCodeDao.getByScene(scene) != null) {
+            return true;
+        }
+        return false;
     }
 
     @Override
     public QRResponse generatePermanentQRCode(String scene) {
         QRPermanentRequest qrRequest = new QRPermanentRequest(scene);
         String json = new Gson().toJson(qrRequest);
-        return generate(json);
+        QRResponse response = generate(json);
+        if (response.getTicket() != null) {
+            qrCodeDao.insert(scene);
+        }
+        return response;
     }
 
     @Override
@@ -74,7 +89,7 @@ public class QRCodeServiceImpl implements QRCodeService {
     }
 
     private QRResponse generate(String json) {
-        logger.info("json为:"+json);
+        logger.info("json为:" + json);
         String body = restfulHelper.post(GEN_QRCODE_URL, json);
         System.out.println("return message " + body);
         Gson gson = new Gson();

@@ -7,6 +7,13 @@ package com.iquanwai.confucius.biz.domain.weixin.qrcode;
 public interface QRCodeService {
 
     /**
+     * 检查scene是否重复
+     * @param scene
+     * @return
+     */
+    boolean checkScence(String scene);
+
+    /**
      * 生成永久二维码
      *
      * @param scene 场景值
