@@ -120,7 +120,9 @@ var bannerParam = {
 function BannerSlider() {
     var banner = $("#seo-main-banner");
     if(banner.length) {
-        banner.revolution(bannerParam);
+        var temp = JSON.parse(JSON.stringify(bannerParam));
+        temp.gridheight = [500,500,500,500];
+        banner.revolution(temp);
     }
 }
 
