@@ -727,6 +727,11 @@
     #quick-apply span {
         font-size:9px;
     }
+    .seo-theme .company-goal .single-goal {
+        padding: 80px 10px 20px 10px;
+        height: 310px;
+
+    }
 }
 
 @media (max-width: 340px) {
