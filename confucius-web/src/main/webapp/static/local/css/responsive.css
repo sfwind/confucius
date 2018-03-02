@@ -676,31 +676,7 @@
         width:300px;
     }
 
-    #seo-bs-banner > ul > li > div:nth-child(2) > div > div {
-        margin-top:-10px;
-    }
-    #seo-camp-banner > ul > li > div:nth-child(1) > div > div {
-        margin-top:-12px;
-    }
-    #seo-company-banner > ul > li > div:nth-child(1) > div > div {
-        margin-top:-10px;
-    }
 
-    #seo-company-banner > ul > li > div:nth-child(3) > div > div {
-        margin-left: -50px;
-    }
-    #mega-menu-holder > ul {
-        background:rgba(35, 52, 78, 0.97);
-    }
-    #camp-banner {
-        margin-left:17px;
-    }
-    #banner {
-        margin-left:17px;
-    }
-    #banner.no-mg {
-        margin-left:0;
-    }
     #seo-main-banner > ul > li > div:nth-child(1) > div > div {
         margin-top:-10px;
     }
@@ -750,6 +726,13 @@
     .tp-caption p {
         font-size:16px;
         line-height: 28px;
+    }
+
+    #seo-bs-banner > ul > li > div:nth-child(2) > div > div > div > h3 {
+        float:inherit !important;
+    }
+    #seo-bs-banner > ul > li > div:nth-child(3) > div > div > div > div {
+        float: left;
     }
 }
 
