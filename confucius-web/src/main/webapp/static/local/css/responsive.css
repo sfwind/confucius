@@ -757,6 +757,23 @@
         margin-bottom: 15px;
         background: #1b2d5f !important;
     }
+
+    #seo-main-banner > ul > li > div:nth-child(2) > div > div > div > h1 {
+        font-size:28px;
+    }
+
+    body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > h4 {
+        font-size:20px;
+    }
+
+    body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 {
+        padding: 20px 0;
+    }
+
+    body > div.main-page-wrapper > section > div > h2 {
+        margin-bottom:85px;
+    }
+
 }
 
 @media (max-width: 340px) {

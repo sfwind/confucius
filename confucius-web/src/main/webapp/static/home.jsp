@@ -100,7 +100,7 @@
                         <!-- LAYER NR. 1 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['15','15','20','20']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['-120','-120','-120','-120']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['-120','-120','-120','-170']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
@@ -119,7 +119,7 @@
                         <!-- LAYER NR. 2 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['15','15','20','20']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['10','10','10','0']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['10','10','10','-50']"
                              data-width="full"
                              data-height="none"
                              data-whitespace="normal"
@@ -137,7 +137,7 @@
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['15','15','20','20']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','130']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','80']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
                              data-transform_in="x:[-100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
@@ -151,7 +151,7 @@
                         <!-- LAYER NR. 4 -->
                         <div class="tp-caption"
                              data-x="['left','left','left','left']" data-hoffset="['185','185','20','20']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','220']"
+                             data-y="['middle','middle','middle','middle']" data-voffset="['115','115','115','170']"
                              data-transform_idle="o:1;"
                              data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
                              data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
