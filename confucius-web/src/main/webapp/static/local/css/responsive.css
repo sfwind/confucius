@@ -690,11 +690,11 @@
     }
 
     h2 {
-        font-size: 30px !important;
+        font-size: 28px !important;
     }
 
     h3 {
-        font-size: 25px !important;
+        font-size: 24px !important;
     }
 
     #quick-apply {
@@ -874,6 +874,12 @@
 
     .default-footer .top-footer .footer-left .company {
         font-size:28px;
+    }
+    .seo-theme .our-service .single-service {
+        margin-bottom:15px;
+    }
+    .seo-theme .company-goal {
+        padding-top:0;
     }
 
 }
