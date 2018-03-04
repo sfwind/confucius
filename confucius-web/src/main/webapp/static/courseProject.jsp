@@ -818,7 +818,7 @@
         </div><!-- END REVOLUTION SLIDER -->
     </div> <!--  /#banner -->
 
-    <div class="our-service bg-color">
+    <div class="our-service bg-color special">
         <div class="container">
             <!--<div class="seo-title-one text-center">-->
             <!--<h2>Service We Provide</h2>-->
