@@ -773,6 +773,10 @@
     body > div.main-page-wrapper > section > div > h2 {
         margin-bottom:85px;
     }
+    body > div.main-page-wrapper > div.you-work-win > div > h2 {
+        font-size: 28px !important;
+        margin-bottom: 30px;
+    }
 
 }
 
