@@ -771,7 +771,8 @@
     }
 
     body > div.main-page-wrapper > section > div > h2 {
-        margin-bottom:85px;
+        margin-bottom:85px !important;
+        padding-top:42px !important;
     }
     body > div.main-page-wrapper > div.you-work-win > div > h2 {
         font-size: 28px !important;
@@ -815,6 +816,10 @@
     }
     .seo-theme .our-service .single-service p {
         font-size:14px;
+    }
+
+    .seo-theme .our-service .single-service img {
+        top:10px;
     }
 
 }
