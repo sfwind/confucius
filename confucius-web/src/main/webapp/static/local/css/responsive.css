@@ -805,6 +805,11 @@
     .seo-theme .our-service .seo-title-one {
         margin-bottom:20px;
     }
+    .seo-theme .our-service .single-service {
+        margin-bottom: 30px;
+        height: 150px;
+        padding-top:20px;
+    }
     .seo-theme .our-service .single-service h5 a {
         font-size:20px;
     }
