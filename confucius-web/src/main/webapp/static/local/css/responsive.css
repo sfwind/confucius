@@ -776,8 +776,21 @@
     body > div.main-page-wrapper > div.you-work-win > div > h2 {
         font-size: 28px !important;
         margin-bottom: 30px;
+        line-height:35px;
     }
-
+    .you-work-win .icon-word-wrapper {
+        padding-bottom: 40px;
+    }
+    .you-work-win .icon-word-wrapper .icon {
+        width:80px;
+        height:80px;
+    }
+    .you-work-win .icon-word-wrapper .word .number {
+        font-size:28px;
+    }
+    .you-work-win .icon-word-wrapper .word .desc {
+        font-size:14px;
+    }
 }
 
 @media (max-width: 340px) {
