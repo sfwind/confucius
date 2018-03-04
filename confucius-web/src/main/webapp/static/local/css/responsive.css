@@ -120,7 +120,7 @@
 
     .seo-theme .theme-main-menu {
         padding-top: 20px;
-        padding-bottom:15px;
+        padding-bottom: 15px;
     }
 
     .seo-theme .company-goal {
@@ -195,7 +195,7 @@
 
     .seo-theme .theme-main-menu.fixed {
         padding-top: 0;
-        padding-bottom:0;
+        padding-bottom: 0;
     }
 }
 
@@ -673,32 +673,34 @@
     }
 
     #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
-        width:300px;
+        width: 300px;
     }
-
 
     #seo-main-banner > ul > li > div:nth-child(1) > div > div {
-        margin-top:-10px;
+        margin-top: -10px;
     }
+
     .theme-main-menu .main-container .logo {
-        left:40px;
+        left: 40px;
     }
+
     body > div.main-page-wrapper > header > div > div > div > div.logo.float-left > a > img {
-        width:45px !important;
-        height:45px !important;
+        width: 45px !important;
+        height: 45px !important;
     }
 
     h2 {
-        font-size:30px !important;
+        font-size: 30px !important;
     }
+
     h3 {
-        font-size:25px !important;
+        font-size: 25px !important;
     }
 
     #quick-apply {
         right: 10px;
         top: 60%;
-        width:50px;
+        width: 50px;
         height: 50px;
     }
 
@@ -706,13 +708,15 @@
         width: 60px;
         height: 60px;
     }
+
     #quick-apply:hover span {
-        font-size:10px;
+        font-size: 10px;
     }
 
     #quick-apply span {
-        font-size:9px;
+        font-size: 9px;
     }
+
     .seo-theme .company-goal .single-goal {
         padding: 80px 10px 20px 10px;
         height: 310px;
@@ -726,7 +730,7 @@
     }
 
     .tp-caption {
-        float:inherit !important;
+        float: inherit !important;
     }
 
     .tp-caption .text-right {
@@ -734,19 +738,20 @@
     }
 
     .tp-caption p {
-        font-size:16px;
+        font-size: 16px;
         line-height: 28px;
     }
 
     #seo-bs-banner > ul > li > div:nth-child(2) > div > div > div > h3 {
-        float:inherit !important;
+        float: inherit !important;
     }
+
     #seo-bs-banner > ul > li > div:nth-child(3) > div > div > div > div {
         float: left;
     }
 
     #seo-company-banner > ul > li > div:nth-child(1) > div > div > div > h3 {
-        float:inherit !important;
+        float: inherit !important;
     }
 
     #seo-company-banner > ul > li > div:nth-child(2) > div > div > div > div {
@@ -759,11 +764,11 @@
     }
 
     #seo-main-banner > ul > li > div:nth-child(2) > div > div > div > h1 {
-        font-size:28px;
+        font-size: 28px;
     }
 
     body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > h4 {
-        font-size:20px;
+        font-size: 20px;
     }
 
     body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 {
@@ -771,76 +776,116 @@
     }
 
     body > div.main-page-wrapper > section > div > h2 {
-        margin-bottom:85px !important;
-        padding-top:42px !important;
+        margin-bottom: 85px !important;
+        padding-top: 42px !important;
     }
+
     body > div.main-page-wrapper > div.you-work-win > div > h2 {
         font-size: 28px !important;
         margin-bottom: 30px;
-        line-height:35px;
+        line-height: 35px;
     }
+
     .you-work-win .icon-word-wrapper {
         padding-bottom: 40px;
     }
+
     .you-work-win .icon-word-wrapper .icon {
-        width:80px;
-        height:80px;
+        width: 80px;
+        height: 80px;
     }
+
     .you-work-win .icon-word-wrapper .word .number {
-        font-size:28px;
+        font-size: 28px;
     }
+
     .you-work-win .icon-word-wrapper .word .desc {
-        font-size:14px;
+        font-size: 14px;
     }
+
     .seo-theme .seo-counter .main-content {
         padding-bottom: 30px;
     }
 
     body > div.main-page-wrapper > div.seo-counter {
-        margin-bottom:57px;
+        margin-bottom: 57px;
     }
+
     body > div.main-page-wrapper > div.our-service > div > div.seo-title-one.text-center > h2 {
         font-size: 28px !important;
         line-height: 34px;
     }
+
     .seo-theme .our-service .seo-title-one {
-        margin-bottom:20px;
+        margin-bottom: 20px;
     }
+
     .seo-theme .our-service .single-service {
         margin-bottom: 30px;
         height: 150px;
-        padding-top:20px;
+        padding-top: 20px;
     }
+
     .seo-theme .our-service .single-service h5 a {
-        font-size:20px;
+        font-size: 20px;
     }
+
     .seo-theme .our-service .single-service p {
-        font-size:14px;
+        font-size: 14px;
     }
 
     .seo-theme .our-service .single-service img {
-        top:10px;
+        top: 10px;
     }
 
     .seo-theme .company-goal .single-goal {
-        padding-top:70px;
+        padding-top: 70px;
     }
+
     .seo-theme .company-goal .single-goal .img-icon {
         top: -45px;
         margin-left: -45px;
         width: 90px;
     }
 
+    .seo-theme .our-service .wrapper {
+        padding-bottom: 40px;
+    }
+
+    .class-mate .class-mate-title h2 {
+        font-size: 28px !important;
+        line-height: 35px;
+        margin-bottom: 40px;
+    }
+
+    body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper > div:nth-child(1) > div.col-lg-6.col-md-7.col-xs-12.text.wow.fadeInRight.float-right > h2 {
+        font-size: 20px;
+    }
+
+    .seo-theme .welcome-seo .text span {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+    }
+
+    .seo-theme .client-slider .slider-container .item .clearfix .role-info .name {
+        font-size: 20px;
+    }
+
+    .default-footer .top-footer .footer-left .company {
+        font-size:28px;
+    }
+
 }
 
 @media (max-width: 340px) {
     .seo-theme .client-slider .button-container .service-button + .service-button {
-        margin-left:0;
-        margin-top:10px;
+        margin-left: 0;
+        margin-top: 10px;
     }
 
     #seo-camp-banner > ul > li > div:nth-child(1) {
-        top:34px !important;
+        top: 34px !important;
     }
 
 }
