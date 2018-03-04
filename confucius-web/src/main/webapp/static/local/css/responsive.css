@@ -791,6 +791,27 @@
     .you-work-win .icon-word-wrapper .word .desc {
         font-size:14px;
     }
+    .seo-theme .seo-counter .main-content {
+        padding-bottom: 30px;
+    }
+
+    body > div.main-page-wrapper > div.seo-counter {
+        margin-bottom:57px;
+    }
+    body > div.main-page-wrapper > div.our-service > div > div.seo-title-one.text-center > h2 {
+        font-size: 28px !important;
+        line-height: 34px;
+    }
+    .seo-theme .our-service .seo-title-one {
+        margin-bottom:20px;
+    }
+    .seo-theme .our-service .single-service h5 a {
+        font-size:20px;
+    }
+    .seo-theme .our-service .single-service p {
+        font-size:14px;
+    }
+
 }
 
 @media (max-width: 340px) {
