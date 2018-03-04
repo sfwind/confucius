@@ -825,7 +825,7 @@
         height: 150px;
         padding-top: 20px;
     }
-    .seo-theme.special .our-service .single-service {
+    .seo-theme .our-service.special .single-service {
         height: 200px;
     }
 
@@ -840,8 +840,8 @@
     .seo-theme .our-service .single-service img {
         top: 10px;
     }
-    .seo-theme.special .our-service .single-service img {
-        topo:20px;
+    .seo-theme .our-service.special .single-service img {
+        top:20px;
     }
 
     .seo-theme .company-goal .single-goal {
