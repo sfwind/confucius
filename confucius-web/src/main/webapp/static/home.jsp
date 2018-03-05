@@ -363,53 +363,53 @@
                     </div>
                 </div>
             </div><!-- /.row -->
-            <%--<div class="row">--%>
-                <%--<div class="col-md-4 col-xs-12">--%>
-                    <%--<div class="icon-word-wrapper">--%>
-                        <%--<div class="icon">--%>
-                            <%--<img src="local/images/icon/48per.png" alt="97%"/>--%>
-                        <%--</div>--%>
-                        <%--<div class="word">--%>
-                            <%--<div class="number">--%>
-                                <%--48%--%>
-                            <%--</div>--%>
-                            <%--<div class="desc">--%>
-                                <%--学员为资深员工与管理层--%>
-                            <%--</div>--%>
-                        <%--</div>--%>
-                    <%--</div>--%>
-                <%--</div>--%>
-                <%--<div class="col-md-4 col-xs-12">--%>
-                    <%--<div class="icon-word-wrapper">--%>
-                        <%--<div class="icon">--%>
-                            <%--<img src="local/images/icon/5年.png" alt="97%"/>--%>
-                        <%--</div>--%>
-                        <%--<div class="word">--%>
-                            <%--<div class="number">--%>
-                                <%--5<span class="unit">年</span>--%>
-                            <%--</div>--%>
-                            <%--<div class="desc">--%>
-                                <%--学员平均工作年限--%>
-                            <%--</div>--%>
-                        <%--</div>--%>
-                    <%--</div>--%>
-                <%--</div>--%>
-                <%--<div class="col-md-4 col-xs-12">--%>
-                    <%--<div class="icon-word-wrapper">--%>
-                        <%--<div class="icon">--%>
-                            <%--<img src="local/images/icon/12.6万.png" alt="97%"/>--%>
-                        <%--</div>--%>
-                        <%--<div class="word">--%>
-                            <%--<div class="number">--%>
-                                <%--13<span class="unit">万</span>--%>
-                            <%--</div>--%>
-                            <%--<div class="desc">--%>
-                                <%--学员平均年薪--%>
-                            <%--</div>--%>
-                        <%--</div>--%>
-                    <%--</div>--%>
-                <%--</div>--%>
-            <%--</div>--%>
+            <div class="row">
+                <div class="col-md-4 col-xs-12">
+                    <div class="icon-word-wrapper">
+                        <div class="icon">
+                            <img src="local/images/icon/48per.png" alt="97%"/>
+                        </div>
+                        <div class="word">
+                            <div class="number">
+                                48%
+                            </div>
+                            <div class="desc">
+                                学员为资深员工与管理层
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xs-12">
+                    <div class="icon-word-wrapper">
+                        <div class="icon">
+                            <img src="local/images/icon/5年.png" alt="97%"/>
+                        </div>
+                        <div class="word">
+                            <div class="number">
+                                5<span class="unit">年</span>
+                            </div>
+                            <div class="desc">
+                                学员平均工作年限
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xs-12">
+                    <div class="icon-word-wrapper">
+                        <div class="icon">
+                            <img src="local/images/icon/12.6万.png" alt="97%"/>
+                        </div>
+                        <div class="word">
+                            <div class="number">
+                                13<span class="unit">万</span>
+                            </div>
+                            <div class="desc">
+                                学员平均年薪
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
 
@@ -421,36 +421,36 @@
       SEO Counter
     ==============================================
     -->
-    <div class="seo-counter">
-        <div class="main-content">
-            <img src="local/images/home/object3.png" alt="背景图">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                        <div class="single-box">
-                            <h2 class="number"><span class="timer" data-from="0" data-to="48" data-speed="1000"
-                                                     data-refresh-interval="5">0</span>%</h2>
-                            <p>学员为资深员工与管理层</p>
-                        </div> <!-- /.single-box -->
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                        <div class="single-box">
-                            <h2 class="number"><span class="timer" data-from="0" data-to="5" data-speed="1000"
-                                                     data-refresh-interval="5">0</span>年</h2>
-                            <p>学员平均工作年限</p>
-                        </div> <!-- /.single-box -->
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                        <div class="single-box border-fix">
-                            <h2 class="number"><span class="timer" data-from="0" data-to="13" data-speed="1000"
-                                                     data-refresh-interval="5">0</span>万</h2>
-                            <p>学员平均年薪</p>
-                        </div> <!-- /.single-box -->
-                    </div>
-                </div> <!-- /.row -->
-            </div> <!-- /.container -->
-        </div> <!-- /.main-content -->
-    </div> <!-- /.seo-counter -->
+    <%--<div class="seo-counter">--%>
+        <%--<div class="main-content">--%>
+            <%--<img src="local/images/home/object3.png" alt="背景图">--%>
+            <%--<div class="container">--%>
+                <%--<div class="row">--%>
+                    <%--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">--%>
+                        <%--<div class="single-box">--%>
+                            <%--<h2 class="number"><span class="timer" data-from="0" data-to="48" data-speed="1000"--%>
+                                                     <%--data-refresh-interval="5">0</span>%</h2>--%>
+                            <%--<p>学员为资深员工与管理层</p>--%>
+                        <%--</div> <!-- /.single-box -->--%>
+                    <%--</div>--%>
+                    <%--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">--%>
+                        <%--<div class="single-box">--%>
+                            <%--<h2 class="number"><span class="timer" data-from="0" data-to="5" data-speed="1000"--%>
+                                                     <%--data-refresh-interval="5">0</span>年</h2>--%>
+                            <%--<p>学员平均工作年限</p>--%>
+                        <%--</div> <!-- /.single-box -->--%>
+                    <%--</div>--%>
+                    <%--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">--%>
+                        <%--<div class="single-box border-fix">--%>
+                            <%--<h2 class="number"><span class="timer" data-from="0" data-to="13" data-speed="1000"--%>
+                                                     <%--data-refresh-interval="5">0</span>万</h2>--%>
+                            <%--<p>学员平均年薪</p>--%>
+                        <%--</div> <!-- /.single-box -->--%>
+                    <%--</div>--%>
+                <%--</div> <!-- /.row -->--%>
+            <%--</div> <!-- /.container -->--%>
+        <%--</div> <!-- /.main-content -->--%>
+    <%--</div> <!-- /.seo-counter -->--%>
 
     <!--
     =============================================
