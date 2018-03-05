@@ -38,8 +38,6 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         if (callback == null) return null;
 
         UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-        LoginUser loginUser = adapterUnionUser(unionUser);
-        logger.info("获取 adapter loginUser 用户，id：{}", loginUser.getId());
         return adapterUnionUser(unionUser);
     }
 
