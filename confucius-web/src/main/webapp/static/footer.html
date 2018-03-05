@@ -16,15 +16,15 @@
             <div class="col-md-6 col-sm-12 footer-right">
                 <!--<a href="index.html"><img src="local/images/logo/logo3.png" alt="Logo"></a>-->
                 <div class="qr-code-container text-left">
-                    <div class="item text-center">
+                    <div class="item text-center" onclick="showDialog('#subscribe-code')">
                         <img src="https://www.iqycamp.com/images/subscribeCode.jpg" alt="圈外孙圈圈">
                         <div class="name">圈外孙圈圈</div>
                     </div>
-                    <div class="item text-center">
+                    <div class="item text-center" onclick="showDialog('#home-bottom')">
                         <img src="https://static.iqycamp.com/images/fragment/home_bottom_3.jpg?imageslim" alt="圈外同学">
                         <div class="name">圈外同学</div>
                     </div>
-                    <div class="item text-center">
+                    <div class="item text-center" onclick="showDialog('#home-to-apply')">
                         <img src="https://static.iqycamp.com/images/fragment/home_to_apply_5.png?imageslim" alt="申请商学院">
                         <div class="name">申请商学院</div>
                     </div>
@@ -41,3 +41,49 @@
         </div> <!-- /.bottom-footer -->
     </div>
 </footer>
+
+<div id="subscribe-code" class="popup-layer">
+    <div class="mask" onclick="hiddenDialog('#subscribe-code')"></div>
+    <div class="inner">
+        <div class="close" onclick="hiddenDialog('#subscribe-code')">
+            <img src="local/images/icon/close.png"/>
+        </div>
+        <div class="qr-code text-center">
+            <img src="https://www.iqycamp.com/images/subscribeCode.jpg" class="qr-img">
+        </div>
+        <div class="tips text-center">
+            手机端请截屏后，用微信扫码
+        </div>
+    </div>
+</div>
+
+
+<div id="home-bottom" class="popup-layer">
+    <div class="mask" onclick="hiddenDialog('#home-bottom')"></div>
+    <div class="inner">
+        <div class="close" onclick="hiddenDialog('#home-bottom')">
+            <img src="local/images/icon/close.png"/>
+        </div>
+        <div class="qr-code text-center">
+            <img src="https://static.iqycamp.com/images/fragment/home_bottom_3.jpg?imageslim" class="qr-img">
+        </div>
+        <div class="tips text-center">
+            手机端请截屏后，用微信扫码
+        </div>
+    </div>
+</div>
+
+<div id="home-to-apply" class="popup-layer">
+    <div class="mask" onclick="hiddenDialog('#home-to-apply')"></div>
+    <div class="inner">
+        <div class="close" onclick="hiddenDialog('#home-to-apply')">
+            <img src="local/images/icon/close.png"/>
+        </div>
+        <div class="qr-code text-center">
+            <img src="https://static.iqycamp.com/images/fragment/home_to_apply_5.png?imageslim" class="qr-img">
+        </div>
+        <div class="tips text-center">
+            手机端请截屏后，用微信扫码
+        </div>
+    </div>
+</div>
