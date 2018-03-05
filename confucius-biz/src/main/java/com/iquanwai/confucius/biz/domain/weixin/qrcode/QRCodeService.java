@@ -32,6 +32,8 @@ public interface QRCodeService {
 
     String loadQrBase64(String scene);
 
+    String loadPerQrBase64(String scene);
+
     /* 获取二维码的链接 */
     String GEN_QRCODE_URL = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token={access_token}";
 

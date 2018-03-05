@@ -2,9 +2,10 @@ package com.iquanwai.confucius.biz.domain.weixin.qrcode;
 
 
 import com.google.gson.Gson;
-import com.iquanwai.confucius.biz.dao.wx.QrCodeDao;
-import com.iquanwai.confucius.biz.po.QrCode;
+import com.iquanwai.confucius.biz.dao.wx.PromotionCodeDao;
+import com.iquanwai.confucius.biz.po.PromotionQrCode;
 import com.iquanwai.confucius.biz.util.ImageUtils;
+import com.iquanwai.confucius.biz.util.QiNiuUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class QRCodeServiceImpl implements QRCodeService {
     @Autowired
     private RestfulHelper restfulHelper;
     @Autowired
-    private QrCodeDao qrCodeDao;
+    private PromotionCodeDao promotionCodeDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -41,15 +42,15 @@ public class QRCodeServiceImpl implements QRCodeService {
         QRTemporaryRequest qrRequest = new QRTemporaryRequest(scene, expire_seconds);
         String json = new Gson().toJson(qrRequest);
         QRResponse response = generate(json);
-        if (response.getTicket() != null) {
-            qrCodeDao.insert(scene);
-        }
+
+        //TODO:上传七牛云=>存入sql
+
         return response;
     }
 
     @Override
     public boolean checkScence(String scene) {
-        if (qrCodeDao.getByScene(scene) != null) {
+        if (promotionCodeDao.getByScene(scene) != null) {
             return true;
         }
         return false;
@@ -60,9 +61,6 @@ public class QRCodeServiceImpl implements QRCodeService {
         QRPermanentRequest qrRequest = new QRPermanentRequest(scene);
         String json = new Gson().toJson(qrRequest);
         QRResponse response = generate(json);
-        if (response.getTicket() != null) {
-            qrCodeDao.insert(scene);
-        }
         return response;
     }
 
@@ -78,6 +76,36 @@ public class QRCodeServiceImpl implements QRCodeService {
         BASE64Encoder encoder = new BASE64Encoder();
         try {
             return "data:image/jpg;base64," + encoder.encode(outputStream.toByteArray());
+        } finally {
+            try {
+                inputStream.close();
+                outputStream.close();
+            } catch (IOException e) {
+                logger.error("os close failed", e);
+            }
+        }
+    }
+
+    @Override
+    public String loadPerQrBase64(String scene) {
+        QRResponse response = generatePermanentQRCode(scene);
+        InputStream inputStream = showQRCode(response.getTicket());
+        BufferedImage bufferedImage = ImageUtils.getBufferedImageByInputStream(inputStream);
+        Assert.notNull(bufferedImage, "生成图片不能为空");
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageUtils.writeToOutputStream(bufferedImage, "jpg", outputStream);
+        BASE64Encoder encoder = new BASE64Encoder();
+        try {
+            PromotionQrCode promotionQrCode = new PromotionQrCode();
+            promotionQrCode.setScene(scene);
+            promotionQrCode.setRemark("123");
+            if(QiNiuUtils.uploadFile("/data/static/image/qrcode/",inputStream)){
+                promotionQrCode.setUrl("https://static.iqycamp.com/images/qrcode/"+scene+".png");
+            }
+            promotionCodeDao.insert(promotionQrCode);
+            return "data:image/jpg;base64," + encoder.encode(outputStream.toByteArray());
+
         } finally {
             try {
                 inputStream.close();

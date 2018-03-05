@@ -2,7 +2,7 @@ package com.iquanwai.confucius.biz.dao.wx;
 
 
 import com.iquanwai.confucius.biz.dao.DBUtil;
-import com.iquanwai.confucius.biz.po.QrCode;
+import com.iquanwai.confucius.biz.po.PromotionQrCode;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -14,14 +14,14 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 
 @Repository
-public class QrCodeDao extends DBUtil{
+public class PromotionCodeDao extends DBUtil{
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public QrCode getByScene(String scene){
+    public PromotionQrCode getByScene(String scene){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM QrCode WHERE SCENE = ? AND DEL = 0";
-        ResultSetHandler<QrCode> h = new BeanHandler<>(QrCode.class);
+        String sql = "SELECT * FROM PromotionCodeDao WHERE SCENE = ? AND DEL = 0";
+        ResultSetHandler<PromotionQrCode> h = new BeanHandler<>(PromotionQrCode.class);
         try {
             return runner.query(sql,h,scene);
         } catch (SQLException e) {
@@ -31,12 +31,12 @@ public class QrCodeDao extends DBUtil{
     }
 
 
-    public Integer insert(String scene){
+    public Integer insert(PromotionQrCode promotionQrCode){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO QrCode(Scene) VALUES(?) ";
+        String sql = "INSERT INTO PromotionCodeDao(Scene,Url,Remark) VALUES(?,?,?) ";
 
         try {
-            Long result =  runner.insert(sql,new ScalarHandler<>(),scene);
+            Long result =  runner.insert(sql,new ScalarHandler<>(),promotionQrCode.getScene(),promotionQrCode.getUrl(),promotionQrCode.getRemark());
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(),e);

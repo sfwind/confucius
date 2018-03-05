@@ -56,4 +56,9 @@ public class SubscribeRouterServiceImpl implements SubscribeRouterService {
         return qrCodeService.loadQrBase64(scene);
     }
 
+    @Override
+    public String loadPerSubscribeQrCode(String scene) {
+        return qrCodeService.loadPerQrBase64(scene);
+    }
+
 }
