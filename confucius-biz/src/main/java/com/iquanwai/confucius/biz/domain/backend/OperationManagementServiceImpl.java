@@ -13,6 +13,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -56,6 +58,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
     private static final String SYSTEM_MESSAGE = "AUTO";
 
+    private final Logger logger= LoggerFactory.getLogger(getClass());
+
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
         List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.getPracticeSubmit(practiceId, page);
@@ -90,6 +94,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public WarmupPractice getWarmupPractice(Integer practiceId) {
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
         List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadDiscuss(practiceId);
+        logger.info(warmupPracticeDiscusses.toString());
         warmupPracticeDiscusses.stream().forEach(discuss -> {
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
