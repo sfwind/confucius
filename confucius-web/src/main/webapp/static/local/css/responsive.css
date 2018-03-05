@@ -889,6 +889,9 @@
     .you-work-win {
         margin-bottom: 40px;
     }
+    body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper > div:nth-child(2) > div.col-lg-6.col-md-7.col-xs-12.text.wow.fadeInRight.float-left > h2 {
+        font-size: 20px !important;
+    }
 
 }
 
