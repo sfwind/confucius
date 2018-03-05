@@ -954,7 +954,7 @@
             <img src="local/images/icon/close.png"/>
         </div>
         <div class="qr-code text-center">
-            <img src="https://static.iqycamp.com/images/fragment/home_to_apply_5.jpg?imageslim" class="qr-img">
+            <img src="https://static.iqycamp.com/images/fragment/home_to_apply_5.png?imageslim" class="qr-img">
         </div>
         <div class="tips text-center">
             暂时只支持微信申请
