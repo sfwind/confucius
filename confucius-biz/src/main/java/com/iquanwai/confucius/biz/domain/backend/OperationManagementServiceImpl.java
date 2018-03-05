@@ -94,7 +94,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public WarmupPractice getWarmupPractice(Integer practiceId) {
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
         List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadDiscuss(practiceId);
-        logger.info(warmupPracticeDiscusses.toString());
+
         warmupPracticeDiscusses.stream().forEach(discuss -> {
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
@@ -102,6 +102,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 discuss.setAvatar(profile.getHeadimgurl());
                 discuss.setName(profile.getNickname());
             }
+            discuss.setDiscussTime(discuss.getAddTime().toString());
         });
         warmupPractice.setDiscussList(warmupPracticeDiscusses);
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
