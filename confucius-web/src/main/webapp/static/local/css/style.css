@@ -3442,6 +3442,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     background: url(../../local/images/home/8.jpg) no-repeat center;
     background-size: cover;
     z-index: 1;
+    margin-bottom:80px;
 }
 
 .you-work-win:before {
