@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -13,8 +12,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -57,8 +54,6 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private static final int HIGHLIGHT_LIMIT = 10;
 
     private static final String SYSTEM_MESSAGE = "AUTO";
-
-    private final Logger logger= LoggerFactory.getLogger(getClass());
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
