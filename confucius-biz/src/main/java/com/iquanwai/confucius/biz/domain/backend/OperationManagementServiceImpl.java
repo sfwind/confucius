@@ -102,7 +102,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 discuss.setAvatar(profile.getHeadimgurl());
                 discuss.setName(profile.getNickname());
             }
-            discuss.setDiscussTime(discuss.getAddTime().toString());
+            discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
         });
         warmupPractice.setDiscussList(warmupPracticeDiscusses);
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
