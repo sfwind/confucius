@@ -41,9 +41,7 @@ public class UnionUserResolver implements HandlerMethodArgumentResolver {
         Assert.notNull(callback, "callback 不能为空");
         Assert.notNull(callback.getUnionId(), "callback 的 UnionId 不能为空");
 
-        UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-        logger.info("加载 UnionUserId: {}, UnionId: {}", unionUser.getId(), unionUser.getUnionId());
-        return unionUser;
+        return unionUserService.getUnionUserByCallback(callback);
     }
 
 }
