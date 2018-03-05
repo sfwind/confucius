@@ -128,7 +128,7 @@
     }
 
     .seo-theme .welcome-seo img {
-        margin: 70px auto 0 auto;
+        margin: 0 auto 0 auto;
     }
 
     .seo-theme .seo-counter .single-box p {
@@ -696,8 +696,8 @@
     #quick-apply {
         right: 10px;
         top: 60%;
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
     }
 
     #quick-apply:hover {
@@ -861,7 +861,7 @@
     }
 
     body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper > div:nth-child(1) > div.col-lg-6.col-md-7.col-xs-12.text.wow.fadeInRight.float-right > h2 {
-        font-size: 20px;
+        font-size: 20px !important;
     }
 
     .seo-theme .welcome-seo .text span {
@@ -882,6 +882,9 @@
     }
     .seo-theme .company-goal {
         padding-top:0;
+    }
+    body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
+        padding-bottom:0;
     }
 
 }
