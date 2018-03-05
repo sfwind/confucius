@@ -1,7 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -90,6 +89,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public WarmupPractice getWarmupPractice(Integer practiceId) {
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
         List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadDiscuss(practiceId);
+
         warmupPracticeDiscusses.stream().forEach(discuss -> {
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
@@ -97,6 +97,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 discuss.setAvatar(profile.getHeadimgurl());
                 discuss.setName(profile.getNickname());
             }
+            discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
         });
         warmupPractice.setDiscussList(warmupPracticeDiscusses);
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
