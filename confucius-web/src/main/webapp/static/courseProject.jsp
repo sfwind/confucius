@@ -94,7 +94,7 @@
                         <ul class="ul-style text-left">
                             <li>针对企业高潜人才</li>
                             <li>一年体系化课程</li>
-                            <li>三大核心能力模块：管理|思维|沟通</li>
+                            <li>三大核心能力模块：管理、思维、沟通</li>
                             <li>24小时移动端学习</li>
                             <li>80%学员高完课率，数据定期跟踪反馈</li>
                         </ul>
@@ -133,7 +133,7 @@
                         <div class="img-icon round-border"><img src="https://static.iqycamp.com/images/fragment/pc_icon_course_project_enterprise_0213.png?imageslim" alt="企业定制方案" class="round-border"></div>
                         <h5>企业定制方案</h5>
                         <ul class="ul-style text-left">
-                            <li>思维提升|商业案例|领导力|创业投资</li>
+                            <li>思维提升、商业案例、领导力、创业投资</li>
                             <li>线上+线下结合，形式更灵活</li>
                             <li>专业能力测评，科学诊断指导</li>
                             <li>专属教练配备，全程督学辅导</li>
@@ -204,7 +204,7 @@
                             <div class="p">
                                 •&nbsp;针对企业高潜人才<br/>
                                 •&nbsp;一年体系化课程<br/>
-                                •&nbsp;三大核心能力模块：管理|思维|沟通<br/>
+                                •&nbsp;三大核心能力模块：管理、思维、沟通<br/>
                                 •&nbsp;24小时移动端学习<br/>
                                 •&nbsp;80%学员高完课率，数据定期跟踪反馈
                             </div>

@@ -132,7 +132,7 @@
                              data-splitin="none"
                              data-splitout="none"
                              style="z-index: 6;">
-                            <p>一所创新型在线商学院，为职场人士提供最实用的课程、最适合的发展机会。<br/>让每一个有潜力的人，在这个时代拥有自己的职场话语权。</p>
+                            <p>一所创新型在线商学院，为职场人士提供最实用的课程、最适合的发展机会。让每一个有潜力的人，在这个时代拥有自己的职场话语权。</p>
                         </div>
                         <!-- LAYER NR. 3 -->
                         <div class="tp-caption"
@@ -258,7 +258,7 @@
                         <ul class="ul-style text-left">
                             <li>针对企业高潜人才</li>
                             <li>一年体系化课程</li>
-                            <li>三大核心能力模块：管理|思维|沟通</li>
+                            <li>三大核心能力模块：管理、思维、沟通</li>
                             <li>24小时移动端学习</li>
                             <li>80%学员高完课率，数据定期跟踪反馈</li>
                         </ul>
@@ -303,7 +303,7 @@
                                 alt="企业定制方案" class="round-border"></div>
                         <h5>企业定制方案</h5>
                         <ul class="ul-style text-left">
-                            <li>思维提升|商业案例|领导力|创业投资</li>
+                            <li>思维提升、商业案例、领导力、创业投资</li>
                             <li>线上+线下结合，形式更灵活</li>
                             <li>专业能力测评，科学诊断指导</li>
                             <li>专属教练配备，全程督学辅导</li>
@@ -363,53 +363,53 @@
                     </div>
                 </div>
             </div><!-- /.row -->
-            <div class="row">
-                <div class="col-md-4 col-xs-12">
-                    <div class="icon-word-wrapper">
-                        <div class="icon">
-                            <img src="local/images/icon/48per.png" alt="97%"/>
-                        </div>
-                        <div class="word">
-                            <div class="number">
-                                48%
-                            </div>
-                            <div class="desc">
-                                学员为资深员工与管理层
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-xs-12">
-                    <div class="icon-word-wrapper">
-                        <div class="icon">
-                            <img src="local/images/icon/5年.png" alt="97%"/>
-                        </div>
-                        <div class="word">
-                            <div class="number">
-                                5<span class="unit">年</span>
-                            </div>
-                            <div class="desc">
-                                学员平均工作年限
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-xs-12">
-                    <div class="icon-word-wrapper">
-                        <div class="icon">
-                            <img src="local/images/icon/12.6万.png" alt="97%"/>
-                        </div>
-                        <div class="word">
-                            <div class="number">
-                                13<span class="unit">万</span>
-                            </div>
-                            <div class="desc">
-                                学员平均年薪
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <%--<div class="row">--%>
+                <%--<div class="col-md-4 col-xs-12">--%>
+                    <%--<div class="icon-word-wrapper">--%>
+                        <%--<div class="icon">--%>
+                            <%--<img src="local/images/icon/48per.png" alt="97%"/>--%>
+                        <%--</div>--%>
+                        <%--<div class="word">--%>
+                            <%--<div class="number">--%>
+                                <%--48%--%>
+                            <%--</div>--%>
+                            <%--<div class="desc">--%>
+                                <%--学员为资深员工与管理层--%>
+                            <%--</div>--%>
+                        <%--</div>--%>
+                    <%--</div>--%>
+                <%--</div>--%>
+                <%--<div class="col-md-4 col-xs-12">--%>
+                    <%--<div class="icon-word-wrapper">--%>
+                        <%--<div class="icon">--%>
+                            <%--<img src="local/images/icon/5年.png" alt="97%"/>--%>
+                        <%--</div>--%>
+                        <%--<div class="word">--%>
+                            <%--<div class="number">--%>
+                                <%--5<span class="unit">年</span>--%>
+                            <%--</div>--%>
+                            <%--<div class="desc">--%>
+                                <%--学员平均工作年限--%>
+                            <%--</div>--%>
+                        <%--</div>--%>
+                    <%--</div>--%>
+                <%--</div>--%>
+                <%--<div class="col-md-4 col-xs-12">--%>
+                    <%--<div class="icon-word-wrapper">--%>
+                        <%--<div class="icon">--%>
+                            <%--<img src="local/images/icon/12.6万.png" alt="97%"/>--%>
+                        <%--</div>--%>
+                        <%--<div class="word">--%>
+                            <%--<div class="number">--%>
+                                <%--13<span class="unit">万</span>--%>
+                            <%--</div>--%>
+                            <%--<div class="desc">--%>
+                                <%--学员平均年薪--%>
+                            <%--</div>--%>
+                        <%--</div>--%>
+                    <%--</div>--%>
+                <%--</div>--%>
+            <%--</div>--%>
 
         </div>
 
