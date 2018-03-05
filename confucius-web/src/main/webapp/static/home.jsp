@@ -542,8 +542,13 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-7 col-xs-12 text wow fadeInRight float-left">
                         <h2>学员行业一览</h2>
-                        <span>50%学员来自于以下行业:<br/> 互联网/IT、金融行业、科研/学生、咨询行业、医疗行业 <br/><br/>
-              其他行业：<br/>政府/公共事业、房地产、通信/电子、快消品、机械/重工、能源/化工、人力资源、法律等</span>
+                        <span>
+                            50%学员来自于以下行业:
+                            <br/> 互联网/IT、金融行业、科研/学生、咨询行业、医疗行业 
+                            <br/>
+                            <br/>其他行业：
+                            <br/>政府/公共事业、房地产、通信/电子、快消品、机械/重工、能源/化工、人力资源、法律等
+                        </span>
                     </div> <!-- /.col- -->
                     <div class="col-lg-6 col-md-5 col-xs-12"><img
                             src="https://static.iqycamp.com/images/fragment/pc_icon_industry_0222_2.png?imageslim" alt="学员行业一览"></div>
