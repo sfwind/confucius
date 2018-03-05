@@ -227,7 +227,7 @@ function seoClientSlider() {
             navClass: [ 'nav-pre btn_prev flex-prev', 'nav-next btn_next flex-next' ],
             navText: [ '<i class="arr-left"/>', '<i class="arr-right"/>' ],
             navElement: 'a',
-            autoplay: false,
+            autoplay: true,
             autoplayTimeout: 5000,
             autoplaySpeed: 1200,
             dragEndSpeed: 1000,

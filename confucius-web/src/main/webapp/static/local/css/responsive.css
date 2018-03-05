@@ -597,9 +597,6 @@
 }
 
 @media (max-width: 500px) {
-    .seo-theme .client-slider .slider-container .item .clearfix .rgt {
-        padding: 0;
-    }
 
     .seo-theme .client-slider .sldier-wrapper {
         margin: 70px 0 0 0;
@@ -611,6 +608,8 @@
 
     .seo-theme .client-slider .slider-container .item .clearfix .rgt {
         background: none;
+        height:400px;
+        padding: 0;
     }
 
     .default-footer .top-footer .footer-right .qr-code-container {
@@ -648,9 +647,6 @@
         line-height: 28px;
     }
 
-    .owl-controls {
-        display: none;
-    }
 
     .container .content-item .article .content .prew-words {
         display: none;
