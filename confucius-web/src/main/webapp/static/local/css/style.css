@@ -617,6 +617,7 @@ body .button-seven {
     -webkit-animation: menu_sticky 0.70s ease-in-out;
     animation: menu_sticky 0.70s ease-in-out;
 }
+
 .theme-main-menu .main-container {
     position: relative;
 }
@@ -627,6 +628,7 @@ body .button-seven {
     left: 0;
     transform: translateY(-50%);
 }
+
 .theme-main-menu.fixed #mega-menu-holder > ul > li > a {
     padding-bottom: 30px;
 }
@@ -640,12 +642,12 @@ body .button-seven {
     .theme-main-menu .main-container .logo {
         top: 30px;
     }
-    .theme-main-menu .main-container .logo  span {
+
+    .theme-main-menu .main-container .logo span {
         vertical-align: middle !important;
         vertical-align: -webkit-baseline-middle !important;
     }
 }
-
 
 /* ---------------------------------- Theme Main Banner ----------------------------- */
 .tp-caption h1 {
@@ -951,7 +953,7 @@ body .button-seven {
     background: url("../../local/images/icon/bu_comment_rgt.png") 100% 100% no-repeat;
     background-size: 30px;
     padding: 0 60px;
-    height:250px;
+    height: 250px;
 }
 
 .seo-theme .client-slider .slider-container .item .clearfix .text h5 {
@@ -1062,7 +1064,7 @@ body .button-seven {
 .seo-theme .welcome-seo .text h2 {
     font-weight: 500;
     line-height: 50px;
-    font-size:40px;
+    font-size: 40px;
 }
 
 .seo-theme .welcome-seo .text span {
@@ -1270,7 +1272,7 @@ footer.seo-footer p {
 }
 
 .default-footer .top-footer .footer-left .link-container .item a:hover {
-    color:#ffc323;
+    color: #ffc323;
 }
 
 .default-footer .top-footer .footer-right {
@@ -1292,8 +1294,8 @@ footer.seo-footer p {
 }
 
 .default-footer .top-footer .footer-right .qr-code-container .item .name {
-    font-size:14px;
-    font-weight:100;
+    font-size: 14px;
+    font-weight: 100;
 }
 
 .default-footer .top-footer .footer-list {
@@ -3277,10 +3279,14 @@ footer.seo-footer p {
     height: 26px;
 }
 
+.popup-layer .inner .tips {
+    margin: 0 30px;
+}
+
 .popup-layer .qr-code {
     width: 225px;
     height: 225px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     background-color: #f2f2f2;
 }
 
@@ -3363,7 +3369,6 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     color: #333;
 }
 
-
 .article-nav .nav-item a.active {
     border-bottom: 3px solid #ffc323;
     font-weight: bolder;
@@ -3376,13 +3381,13 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 
 .container .content-item {
     padding: 0 0 20px 0;
-    max-width:830px;
+    max-width: 830px;
     display: inline-block;
 }
 
 .container .content-item .article + .article {
     padding-top: 30px;
-    border-top: 1px solid rgba(0,0,0,.1);
+    border-top: 1px solid rgba(0, 0, 0, .1);
     margin-top: 10px;
 }
 
@@ -3414,7 +3419,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     position: absolute;
     bottom: 0;
     left: 310px;
-    line-height:16px;
+    line-height: 16px;
 }
 
 .container .content-item .article .content .prew-words {
@@ -3442,7 +3447,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     background: url(../../local/images/home/8.jpg) no-repeat center;
     background-size: cover;
     z-index: 1;
-    margin-bottom:80px;
+    margin-bottom: 80px;
 }
 
 .you-work-win:before {
@@ -3496,7 +3501,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 .you-work-win .icon-word-wrapper .word .number .unit {
     font-size: 25px;
     font-weight: normal;
-    line-height:0;
+    line-height: 0;
 }
 
 .you-work-win .icon-word-wrapper .word .desc {
@@ -3514,7 +3519,6 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     line-height: 50px;
     margin-bottom: 104px;
 }
-
 
 #mega-menu-holder > ul > li > a {
     font-size: 20px !important;
@@ -3535,15 +3539,14 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
     }
 }
 
-
 body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > h4 {
     font-size: 24px;
-    margin:0;
+    margin: 0;
 }
 
 body > div.main-page-wrapper > section > div > div > div > a > div > ul {
     font-size: 14px;
-    color:#000;
+    color: #000;
 }
 
 body > div.main-page-wrapper > section > div > div > div > div > ul > li {
@@ -3562,20 +3565,17 @@ body > div.main-page-wrapper > section > div > div > div > a {
     margin-top: 25px;
 }
 
-
 body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
-    border-bottom:none;
+    border-bottom: none;
 }
-
 
 #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
-    width:500px;
+    width: 500px;
 }
 
-#mega-menu-holder>ul> li> a {
+#mega-menu-holder > ul > li > a {
 
 }
-
 
 #quick-apply {
     -webkit-transition: all 0.3s;
@@ -3588,7 +3588,7 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     top: 70%;
     width: 100px;
     height: 100px;
-    background:url("https://www.iqycamp.com/images/fragment/apply_0228_5.png") no-repeat center center/100% auto;
+    background: url("https://www.iqycamp.com/images/fragment/apply_0228_5.png") no-repeat center center/100% auto;
     z-index: 99;
 }
 
@@ -3597,7 +3597,7 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     top: 50%;
     left: 50%;
     width: 100%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     text-align: center;
     font-size: 18px;
     font-weight: bolder;
@@ -3606,24 +3606,23 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     -ms-transition: all 0.3s;
     -o-transition: all 0.3s;
     transition: all 0.3s;
-    color:#000;
-}
-#quick-apply:hover span {
-    font-size:19px;
-}
-#quick-apply:hover {
-    width:110px;
-    height:110px;
+    color: #000;
 }
 
+#quick-apply:hover span {
+    font-size: 19px;
+}
+
+#quick-apply:hover {
+    width: 110px;
+    height: 110px;
+}
 
 @media (max-width: 1200px) {
     .banner-box {
         display: none;
     }
 }
-
-
 
 .banner-box {
     float: right;
@@ -3634,16 +3633,14 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 }
 
 .student-comment {
-    padding-top:60px;
+    padding-top: 60px;
 }
-
 
 #banner .tp-caption .p {
     font-weight: 300;
     color: #333333;
     font-size: 18px;
 }
-
 
 #seo-company-banner > ul > li > div:nth-child(1) > div > div > div > h3 {
     width: 310px;
@@ -3652,9 +3649,10 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 }
 
 #seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a {
-    border:none;
-    background:none;
+    border: none;
+    background: none;
 }
+
 #seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a > img {
     -webkit-transition: all 0.3s;
     -moz-transition: all 0.3s;
@@ -3662,20 +3660,21 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
     -o-transition: all 0.3s;
     transition: all 0.3s;
 }
+
 #seo-main-banner > ul > li > div:nth-child(6) > div > div > div > a > img:hover {
-    width:110px !important;
-    height:101px !important;
+    width: 110px !important;
+    height: 101px !important;
 }
 
-#mega-menu-holder>ul> li:first-child> a {
-    border-top:0;
+#mega-menu-holder > ul > li:first-child > a {
+    border-top: 0;
 }
 
 body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > div > a {
-    box-shadow: -3px 3px 2px rgba(0,0,0,.3);
+    box-shadow: -3px 3px 2px rgba(0, 0, 0, .3);
     background: #1d3374;
 }
 
 #point5 > div > div.sldier-wrapper > div.seo-course-slider.slider-container.owl-carousel.owl-theme.owl-loaded > div.owl-stage-outer > div > div > div {
-    border: 1px solid rgba(0,0,0,.1);
+    border: 1px solid rgba(0, 0, 0, .1);
 }

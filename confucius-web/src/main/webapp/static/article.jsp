@@ -93,8 +93,7 @@
                     <div class="content">
                         <div class="title">我们的独立思考：既不独立，也不思考</div>
                         <div class="prew-words">
-                            前两天又有热点事件霸屏了，起因是女游客在八达岭野生动物园擅自下车，被老虎咬致一死一伤。<br/>
-                            这件事发生以后，有人说不要跟易怒的人结婚，有人说不该蔑视规则，有人说公园管理失误，也有人说男人懦弱……
+                            我们关心的从来都是“观点和立场”，从来都不是“事实和真相”
                         </div>
                         <div class="article-info">
                             <span class="time">2016-07-28</span>
@@ -112,8 +111,7 @@
                     <div class="content">
                         <div class="title">这3个思维定式，将我们牢牢困住</div>
                         <div class="prew-words">
-                            不知你们有没看过这个纸牌魔术：魔术师让一个观众上台，他/她一边洗牌，一边让观众回答自己一些问题，同时让观众按自己的要求做些事情。
-                            然后魔术师将纸牌放下，要观众心里想一张牌，之后魔术师重新洗牌，让观众掀开最上面那张，竟然真的是观众之前想的那张牌……
+                            希望我们每个人，都不再做纸牌魔术里的那个观众。
                         </div>
                         <div class="article-info">
                             <span class="time">2016-09-08</span>
@@ -131,8 +129,7 @@
                     <div class="content">
                         <div class="title">这4个灵魂问题，解决你80%的困境</div>
                         <div class="prew-words">
-                            假如你是一位咨询顾问，受Q公司CEO的邀请，参与竞标一个咨询项目，项目内容是：为Q公司重新制定一套奖金方案，提升员工积极性。<br/>
-                            现在，你需要提交一份项目建议书，即：你建议如何来设计和落地这个方案，以及所需的时间和费用等。
+                            我个人私藏的4个灵魂问题，现在顺着wifi去找你~
                         </div>
                         <div class="article-info">
                             <span class="time">2016-12-09</span>
@@ -151,8 +148,7 @@
                     <div class="content">
                         <div class="title">请把这支笔卖给我</div>
                         <div class="prew-words">
-                            《华尔街之狼》里面，毒品销售跟莱昂纳多饰演的 Jordan说，他可以卖出任何东西。然后Jordan随手把一支笔扔给他，让他卖出去。<br/>
-                            如果你没看过这部电影，可以试想一下：你会怎么卖出这支笔？
+                            出来混，我们都是卖笔的~
                         </div>
                         <div class="article-info">
                             <span class="time">2016-11-04</span>
@@ -171,8 +167,7 @@
                     <div class="content">
                         <div class="title">情商低不会说话？这是个伪命题</div>
                         <div class="prew-words">
-                            如果你问身边的人，什么是情商，就会发现，大部分人对情商的理解就是：会说话、人脉广、世故，有时还成了智商的反义词。<br/>
-                            情商这个概念，真的是被严重扭曲了。
+                            你所知道的情商，都是错的……
                         </div>
                         <div class="article-info">
                             <span class="time">2016-07-06</span>
@@ -190,8 +185,7 @@
                     <div class="content">
                         <div class="title">穿别人的鞋，才能走好自己的路</div>
                         <div class="prew-words">
-                            前几天又有大新闻，不仅朋友圈，微博都快瘫痪了。男星乔任梁去世，先有传言说SM而死，后来又有辟谣说是抑郁症。<br/>
-                            事情刚出来的时候，SM致死被当成丑闻，抑郁症被骂洗白，甚至好友陈乔恩也因为没发微博悼念而被骂上了热搜第一。
+                            如何把“我”，变成“我们”
                         </div>
                         <div class="article-info">
                             <span class="time">2016-09-21</span>
@@ -210,7 +204,7 @@
                     <div class="content">
                         <div class="title">为什么滑雪教练可以教出网球高手</div>
                         <div class="prew-words">
-                            70年代，哈佛大学网球队的队长Timothy Gallwey，在他开设的网球训练课程中，意外地发现：一位临时借来的滑雪教练教出的网球学员，竟然比专业网球教练教出的学员进步更快！
+                            普通人如何学会做教练，帮朋友提建议、帮客户解决问题、让孩子更爱学习……
                         </div>
                         <div class="article-info">
                             <span class="time">2017-03-16</span>
@@ -229,9 +223,7 @@
                     <div class="content">
                         <div class="title">说了那么多遍，你怎么才能改？</div>
                         <div class="prew-words">
-                            多年来，我妈为了让我多喝水，没少操心。<br/>
-                            比如，她买了个我专用的3L的保温壶，然后在周末的早上，过来烧一壶水，晚上再过来看看剩多少，以此来监督我每天的饮水量。<br/>
-                            然后一般来说，晚上还会剩下2L水。
+                            不要再说：听过很多道理，却仍然过不好一生
                         </div>
                         <div class="article-info">
                             <span class="time">2017-02-23</span>
@@ -249,7 +241,7 @@
                     <div class="content">
                         <div class="title">大多数人，都是怎样挥霍自己天赋的</div>
                         <div class="prew-words">
-                            要论天赋如何发挥，我们先要搞清楚什么是天赋。80%以上的人，对天赋的理解基本都是错的，至少存在以下三个误区。
+                            对号入座，你是怎样挥霍自己天赋的
                         </div>
                         <div class="article-info">
                             <span class="time">2016-09-29</span>
@@ -267,7 +259,7 @@
                     <div class="content">
                         <div class="title">这个时代的年轻人，还能怎么逆袭</div>
                         <div class="prew-words">
-                            我是典型的80后，因为刚好是85年生。刚工作的时候，中二愤青一枚，经常跟朋友一起吐槽社会，其中吐槽次数最多的，是生不逢时。
+                            如果这个世界还像多年前的体制内一样，靠经验、论资排辈，那还有年轻人什么事儿呢？
                         </div>
                         <div class="article-info">
                             <span class="time">2016-12-02</span>
@@ -285,7 +277,7 @@
                     <div class="content">
                         <div class="title">最赚钱的事情，都不辛苦</div>
                         <div class="prew-words">
-                            一个多月之前，亚马逊创始人贝佐斯曾经短暂地成为了世界首富。而亚马逊这家神奇的公司，20年都不赚钱，但贝佐斯却有能力说服华尔街接受这一点，市值还不断升高。
+                            遇到一个几乎让我跪了的司机，让我理解：最赚钱的事情，都不辛苦
                         </div>
                         <div class="article-info">
                             <span class="time">2017-09-19</span>
@@ -305,8 +297,7 @@
                     <div class="content">
                         <div class="title">未来，你可能不属于任何公司</div>
                         <div class="prew-words">
-                            最近又有几个朋友辞职做自由职业者了，咨询顾问自己单干，倒也不少见。<br/>
-                            这次略有不同，几个先后“单飞”的朋友，联合在一起，用同一个公司的名义走法律、财务流程。一个人接到需求之后，如果不是自己的擅长领域，就拉上其他擅长的顾问，抱团儿谈项目，项目下来之后再分工合作。
+                            这是最好的时代，这也是最坏的时代。你要怎么做，才能让它成为你的好时代？
                         </div>
                         <div class="article-info">
                             <span class="time">2016-11-04</span>
@@ -325,8 +316,7 @@
                     <div class="content">
                         <div class="title">作为个人，你的商业模式有没有问题</div>
                         <div class="prew-words">
-                            今天，介绍一个规划工具——个人商业模式画布，这是我自己用过并非常推荐的工具。<br/>
-                            借助它，有利于我们拔高思维高度，去思考策略层面的事情。
+                            一个工具，解决三大问题
                         </div>
                         <div class="article-info">
                             <span class="time">2016-08-12</span>
@@ -345,8 +335,7 @@
                     <div class="content">
                         <div class="title">转型期迷茫？这样思考，就不困扰</div>
                         <div class="prew-words">
-                            知乎上曾有个经典问答：“你心中的完美爱情是怎么样的”，点赞最高的回答是“可以有不完美”。<br/>
-                            正式交往前，彼此都是“情人眼里出西施”的状态，满满地全是爱，天天给你打电话，那是“关心”；迷迷糊糊不认路，那是“萌”。
+                            究竟该如何看待转行或跳槽？又该以什么样的姿势，才能做出正确的选择呢？
                         </div>
                         <div class="article-info">
                             <span class="time">2016-08-12</span>
@@ -365,8 +354,7 @@
                     <div class="content">
                         <div class="title">这种单一视角，阻碍了你的发展</div>
                         <div class="prew-words">
-                            这张图非常经典：如果只看镜头里面的视角，会发现是左边的人想要伤害右边的人。但如果看到全部视角，才会发现，原来事实恰恰相反。<br/>
-                            只看到局部，和能够看到整体，两者之间的差异是巨大的。而你所处的视角，决定了你能看到事物的哪一部分。
+                            个人成长和发展的“月经”问题， 90%以上都是因为视角的不全面
                         </div>
                         <div class="article-info">
                             <span class="time">2017-02-16</span>
@@ -385,7 +373,7 @@
                     <div class="content">
                         <div class="title">如何才能知道自己值多少钱?</div>
                         <div class="prew-words">
-                            前两个月，有位读者通过在行约我。他在一家公司待了10年，老板对他也不错，但最近夫妻俩有了宝宝，觉得这个收入很难给孩子优越的条件，所以想要改变现在的处境。
+                            找工作不是为了跳槽，而是为了增加市场敏感度！
                         </div>
                         <div class="article-info">
                             <span class="time">2017-09-26</span>
@@ -404,9 +392,7 @@
                     <div class="content">
                         <div class="title">跳槽还是跳坑？你真的能分清？</div>
                         <div class="prew-words">
-                            所谓 “金三银四”，是找工作的最佳季节。为什么呢？<br/>
-                            因为这个时候刚开年，各大公司手头预算都宽裕，不像年底那么抠；而员工呢，该拿的年终奖到手了，该升的职也升了，薪资也调整过了，这时候跳槽，机会成本最低了。<br/>
-                            但，你是跳槽还是跳坑，这就很难说了。
+                            猜猜看，哪些是坑？
                         </div>
                         <div class="article-info">
                             <span class="time">2017-03-03</span>
@@ -425,7 +411,7 @@
                     <div class="content">
                         <div class="title">我有3招，让你不再越规划越迷茫</div>
                         <div class="prew-words">
-                            职业规划的主题分享包含两部分：什么是正确的规划以及如何做正确的规划。今天主要说什么是正确的职业规划，下次的分享，谈谈如何结合企业发展趋势做个人的职业规划。
+                            什么是正确的规划以及如何做正确的规划
                         </div>
                         <div class="article-info">
                             <span class="time">2016-07-20</span>
