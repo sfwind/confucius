@@ -3,6 +3,8 @@ package com.iquanwai.confucius.biz.domain.weixin.qrcode;
 
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.PromotionCodeDao;
+import com.iquanwai.confucius.biz.domain.course.file.PictureService;
+import com.iquanwai.confucius.biz.exception.UploadException;
 import com.iquanwai.confucius.biz.po.PromotionQrCode;
 import com.iquanwai.confucius.biz.util.ImageUtils;
 import com.iquanwai.confucius.biz.util.QiNiuUtils;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
 
 import java.awt.image.BufferedImage;
@@ -29,6 +32,8 @@ public class QRCodeServiceImpl implements QRCodeService {
     private RestfulHelper restfulHelper;
     @Autowired
     private PromotionCodeDao promotionCodeDao;
+    @Autowired
+    private PictureService pictureService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -100,14 +105,24 @@ public class QRCodeServiceImpl implements QRCodeService {
             PromotionQrCode promotionQrCode = new PromotionQrCode();
             promotionQrCode.setScene(scene);
             promotionQrCode.setRemark("123");
-            logger.info("开始上传文件");
-            if(QiNiuUtils.uploadFile("/data/static/image/qrcode/",inputStream)){
-                logger.info("上传文件成功");
-                promotionQrCode.setUrl("https://static.iqycamp.com/images/qrcode/"+scene+".jpg");
 
-            }else{
-                logger.info("上传文件失败");
+            try {
+                logger.info("开始上传文件");
+              String url =   pictureService.uploadPic((MultipartFile) outputStream);
+              promotionQrCode.setUrl(url);
+              logger.info("上传文件成功");
+            } catch (UploadException e) {
+                e.printStackTrace();
             }
+
+//            logger.info("开始上传文件");
+//            if(QiNiuUtils.uploadFile("/data/static/image/qrcode/",inputStream)){
+//                logger.info("上传文件成功");
+//                promotionQrCode.setUrl("https://static.iqycamp.com/images/qrcode/"+scene+".jpg");
+//
+//            }else{
+//                logger.info("上传文件失败");
+//            }
             promotionCodeDao.insert(promotionQrCode);
             return "data:image/jpg;base64," + encoder.encode(outputStream.toByteArray());
 
