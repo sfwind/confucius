@@ -44,7 +44,23 @@ public class PCIndexController {
      */
     @RequestMapping(value = {"/home", "/"}, method = RequestMethod.GET)
     public ModelAndView getHome(HttpServletRequest request, HttpServletResponse response) {
-        return ConfigUtils.isDevelopment() ? new ModelAndView("index") : new ModelAndView("home");
+        return ConfigUtils.isDevelopment() ? new ModelAndView("index") : new ModelAndView("static/home");
+    }
+
+    /**
+     * 前往home页面
+     */
+    @RequestMapping(value = {"/course_project"}, method = RequestMethod.GET)
+    public ModelAndView getCourseProject(HttpServletRequest request, HttpServletResponse response) {
+        return new ModelAndView("static/courseProject");
+    }
+
+    /**
+     * 前往home页面
+     */
+    @RequestMapping(value = {"/article"}, method = RequestMethod.GET)
+    public ModelAndView getArticle(HttpServletRequest request, HttpServletResponse response) {
+        return new ModelAndView("static/article");
     }
 
     /**
