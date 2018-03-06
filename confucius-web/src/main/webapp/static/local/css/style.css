@@ -3381,7 +3381,7 @@ body > div.main-page-wrapper > div.client-slider > div > div.sldier-wrapper > di
 
 .container .content-item {
     padding: 0 0 20px 0;
-    max-width: 830px;
+    max-width: 700px;
     display: inline-block;
 }
 
@@ -3627,6 +3627,7 @@ body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
 .banner-box {
     float: right;
     width: 300px;
+    margin-right: 25px;
     display: inline-block;
     border: 1px solid #efefef;
     border-radius: 5px;

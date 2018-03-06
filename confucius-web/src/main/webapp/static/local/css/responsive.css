@@ -649,7 +649,7 @@
 
 
     .container .content-item .article .content .prew-words {
-        display: none;
+        /*display: none;*/
     }
 
     .container .content-item .article .article-info {
