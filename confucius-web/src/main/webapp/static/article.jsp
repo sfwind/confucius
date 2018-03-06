@@ -96,7 +96,6 @@
                             我们关心的从来都是“观点和立场”，从来都不是“事实和真相”
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-07-28</span>
                             <span class="article-label">#破除思维定式</span>
                         </div>
                     </div>
@@ -114,7 +113,6 @@
                             希望我们每个人，都不再做纸牌魔术里的那个观众。
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-09-08</span>
                             <span class="article-label">#破除思维定式</span>
                         </div>
                     </div>
@@ -132,7 +130,6 @@
                             我个人私藏的4个灵魂问题，现在顺着wifi去找你~
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-12-09</span>
                             <span class="article-label">#破除思维定式</span>
                         </div>
                     </div>
@@ -151,7 +148,6 @@
                             出来混，我们都是卖笔的~
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-11-04</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -170,7 +166,6 @@
                             你所知道的情商，都是错的……
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-07-06</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -188,7 +183,6 @@
                             如何把“我”，变成“我们”
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-09-21</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -207,7 +201,6 @@
                             普通人如何学会做教练，帮朋友提建议、帮客户解决问题、让孩子更爱学习……
                         </div>
                         <div class="article-info">
-                            <span class="time">2017-03-16</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -226,7 +219,6 @@
                             不要再说：听过很多道理，却仍然过不好一生
                         </div>
                         <div class="article-info">
-                            <span class="time">2017-02-23</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -244,7 +236,6 @@
                             对号入座，你是怎样挥霍自己天赋的
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-09-29</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -262,7 +253,6 @@
                             如果这个世界还像多年前的体制内一样，靠经验、论资排辈，那还有年轻人什么事儿呢？
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-12-02</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -280,7 +270,6 @@
                             遇到一个几乎让我跪了的司机，让我理解：最赚钱的事情，都不辛苦
                         </div>
                         <div class="article-info">
-                            <span class="time">2017-09-19</span>
                             <span class="article-label">#学会与人沟通</span>
                         </div>
                     </div>
@@ -300,7 +289,6 @@
                             这是最好的时代，这也是最坏的时代。你要怎么做，才能让它成为你的好时代？
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-11-04</span>
                             <span class="article-label">#选择行业</span>
                         </div>
                     </div>
@@ -319,7 +307,6 @@
                             一个工具，解决三大问题
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-08-12</span>
                             <span class="article-label">#选择行业</span>
                         </div>
                     </div>
@@ -338,7 +325,6 @@
                             究竟该如何看待转行或跳槽？又该以什么样的姿势，才能做出正确的选择呢？
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-08-12</span>
                             <span class="article-label">#如何转型</span>
                         </div>
                     </div>
@@ -357,7 +343,6 @@
                             个人成长和发展的“月经”问题， 90%以上都是因为视角的不全面
                         </div>
                         <div class="article-info">
-                            <span class="time">2017-02-16</span>
                             <span class="article-label">#未来规划</span>
                         </div>
                     </div>
@@ -376,7 +361,6 @@
                             找工作不是为了跳槽，而是为了增加市场敏感度！
                         </div>
                         <div class="article-info">
-                            <span class="time">2017-09-26</span>
                             <span class="article-label">#未来规划</span>
                         </div>
                     </div>
@@ -395,7 +379,6 @@
                             猜猜看，哪些是坑？
                         </div>
                         <div class="article-info">
-                            <span class="time">2017-03-03</span>
                             <span class="article-label">#未来规划</span>
                         </div>
                     </div>
@@ -414,7 +397,6 @@
                             什么是正确的规划以及如何做正确的规划
                         </div>
                         <div class="article-info">
-                            <span class="time">2016-07-20</span>
                             <span class="article-label">#未来规划</span>
                         </div>
                     </div>
