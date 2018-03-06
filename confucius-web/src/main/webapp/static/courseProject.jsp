@@ -957,7 +957,7 @@
             <img src="https://static.iqycamp.com/images/fragment/home_to_apply_5.png?imageslim" class="qr-img">
         </div>
         <div class="tips text-center">
-            暂时只支持微信申请
+            长按保存，微信扫码即可申请
         </div>
     </div>
 </div>
@@ -972,7 +972,7 @@
             <img src="https://static.iqycamp.com/images/fragment/business_plus_order.png?imageslim" class="qr-img">
         </div>
         <div class="tips text-center">
-            预约商学院进阶课
+            长按保存，微信扫码即可预约商学院进阶课
         </div>
     </div>
 </div>
@@ -988,7 +988,7 @@
             <img src="https://static.iqycamp.com/images/fragment/camp_jghbd_order_1.png?imageslim" class="qr-img">
         </div>
         <div class="tips text-center">
-            报名结构化表达专项课
+            长按保存，微信扫码即可报名结构化表达专项课
         </div>
     </div>
 </div>

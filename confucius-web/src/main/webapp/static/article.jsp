@@ -463,7 +463,7 @@
             <img src="local/images/home/9.jpg" class="qr-img">
         </div>
         <div class="tips text-center">
-            暂时只支持移动端申请
+            长按保存，微信扫码即可申请
         </div>
     </div>
 
