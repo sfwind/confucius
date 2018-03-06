@@ -30,7 +30,6 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-
         if (ConfigUtils.isDebug()) {
             return WeMiniLoginUser.defaultUser();
         }
@@ -41,7 +40,6 @@ public class WeMiniLoginUserResolver implements HandlerMethodArgumentResolver {
         if (callback == null) return null;
 
         UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-        logger.info("获取 adapter weMiniLoginUser 用户，id：{}", unionUser.getId());
         return adapterUnionUser(unionUser);
     }
 

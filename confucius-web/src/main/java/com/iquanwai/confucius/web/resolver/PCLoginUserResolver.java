@@ -36,14 +36,11 @@ public class PCLoginUserResolver implements HandlerMethodArgumentResolver {
         }
 
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-
         Callback callback = unionUserService.getCallbackByRequest(request);
         if (callback == null) return null;
 
         UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-        PCLoginUser pcLoginUser = adapterUnionUser(unionUser);
-        logger.info("获取 adapter pcLoginUser 用户，id：{}", pcLoginUser.getId());
-        return pcLoginUser;
+        return adapterUnionUser(unionUser);
     }
 
     private PCLoginUser adapterUnionUser(UnionUser unionUser) {

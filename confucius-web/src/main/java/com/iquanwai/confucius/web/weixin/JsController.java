@@ -21,7 +21,7 @@ import java.util.Map;
 @RequestMapping("/wx/js")
 @Controller
 public class JsController {
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private JsSignatureService jsSignatureService;
@@ -30,10 +30,9 @@ public class JsController {
     public ResponseEntity<Map<String, Object>> signature(@RequestParam("url") String url, LoginUser loginUser) throws IOException {
         try {
             JsSignature jsSignature = jsSignatureService.getJsSignature(url, false);
-            LOGGER.info("user:{} js config,url:{}", loginUser != null ? loginUser.getWeixinName() : null, url);
             return WebUtils.result(jsSignature);
-        }catch (Exception e){
-            LOGGER.error("js signature failed", e);
+        } catch (Exception e) {
+            logger.error("js signature failed", e);
         }
         return WebUtils.error("js signature failed");
     }

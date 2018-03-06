@@ -28,8 +28,8 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
-    public List<ImprovementPlan> getUserPlans(Integer profileId) {
-        return improvementPlanDao.loadAllPlans(profileId);
+    public List<ImprovementPlan> getPlans(Integer profileId) {
+        return improvementPlanDao.loadPlans(profileId);
     }
 
     @Override

@@ -23,6 +23,18 @@ import java.util.List;
 public class ImprovementPlanDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    public List<ImprovementPlan> loadPlans(Integer profileId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql ="SELECT * FROM ImprovementPlan WHERE ProfileId = ?";
+        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
+        try {
+            return runner.query(sql,h,profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<ImprovementPlan> loadAllPlans(Integer profileId){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ImprovementPlan WHERE ProfileId=? and Del=0";
