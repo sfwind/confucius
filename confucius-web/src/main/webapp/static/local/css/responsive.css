@@ -608,7 +608,7 @@
 
     .seo-theme .client-slider .slider-container .item .clearfix .rgt {
         background: none;
-        height:400px;
+        height: 400px;
         padding: 0;
     }
 
@@ -647,9 +647,18 @@
         line-height: 28px;
     }
 
-
     .container .content-item .article .content .prew-words {
-        /*display: none;*/
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 14px;
+    }
+
+    .container .content-item .article .content .title {
+        font-size: 14px;
+        line-height: 16px;
     }
 
     .container .content-item .article .article-info {
@@ -657,7 +666,7 @@
     }
 
     .container .content-item .article .float-left {
-        width: 110px;
+        width: 115px;
     }
 
     .container .content-item .article .content {
@@ -821,6 +830,7 @@
         height: 150px;
         padding-top: 20px;
     }
+
     .seo-theme .our-service.special .single-service {
         height: 200px;
     }
@@ -836,8 +846,9 @@
     .seo-theme .our-service .single-service img {
         top: 10px;
     }
+
     .seo-theme .our-service.special .single-service img {
-        top:20px;
+        top: 20px;
     }
 
     .seo-theme .company-goal .single-goal {
@@ -875,20 +886,25 @@
     }
 
     .default-footer .top-footer .footer-left .company {
-        font-size:28px;
+        font-size: 28px;
     }
+
     .seo-theme .our-service .single-service {
-        margin-bottom:15px;
+        margin-bottom: 15px;
     }
+
     .seo-theme .company-goal {
-        padding-top:0;
+        padding-top: 0;
     }
+
     body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
-        padding-bottom:0;
+        padding-bottom: 0;
     }
+
     .you-work-win {
         margin-bottom: 40px;
     }
+
     body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper > div:nth-child(2) > div.col-lg-6.col-md-7.col-xs-12.text.wow.fadeInRight.float-left > h2 {
         font-size: 20px !important;
     }
