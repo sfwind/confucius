@@ -100,8 +100,13 @@ public class QRCodeServiceImpl implements QRCodeService {
             PromotionQrCode promotionQrCode = new PromotionQrCode();
             promotionQrCode.setScene(scene);
             promotionQrCode.setRemark("123");
+            logger.info("开始上传文件");
             if(QiNiuUtils.uploadFile("/data/static/image/qrcode/",inputStream)){
-                promotionQrCode.setUrl("https://static.iqycamp.com/images/qrcode/"+scene+".png");
+                logger.info("上传文件成功");
+                promotionQrCode.setUrl("https://static.iqycamp.com/images/qrcode/"+scene+".jpg");
+
+            }else{
+                logger.info("上传文件失败");
             }
             promotionCodeDao.insert(promotionQrCode);
             return "data:image/jpg;base64," + encoder.encode(outputStream.toByteArray());
