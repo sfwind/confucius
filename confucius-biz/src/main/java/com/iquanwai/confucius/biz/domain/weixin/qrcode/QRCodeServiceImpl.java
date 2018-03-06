@@ -106,14 +106,12 @@ public class QRCodeServiceImpl implements QRCodeService {
             promotionQrCode.setScene(scene);
             promotionQrCode.setRemark("123");
 
-            try {
-                logger.info("开始上传文件");
-              String url =   pictureService.uploadPic((MultipartFile) outputStream);
-              promotionQrCode.setUrl(url);
-              logger.info("上传文件成功");
-            } catch (UploadException e) {
-                e.printStackTrace();
+            logger.info("开始上传文件");
+            boolean isSuccess = QiNiuUtils.uploadFile("/data/static/image/qrcode/", inputStream);
+            if (isSuccess) {
+                promotionQrCode.setUrl("hello");
             }
+            logger.info("上传文件成功");
 
 //            logger.info("开始上传文件");
 //            if(QiNiuUtils.uploadFile("/data/static/image/qrcode/",inputStream)){
