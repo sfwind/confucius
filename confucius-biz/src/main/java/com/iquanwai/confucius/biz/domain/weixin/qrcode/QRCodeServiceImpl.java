@@ -6,9 +6,8 @@ import com.iquanwai.confucius.biz.dao.wx.PromotionCodeDao;
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.exception.UploadException;
 import com.iquanwai.confucius.biz.po.PromotionQrCode;
-import com.iquanwai.confucius.biz.util.ImageUtils;
-import com.iquanwai.confucius.biz.util.QiNiuUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.*;
+import com.iquanwai.confucius.biz.util.zk.ZKConfigUtils;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +93,7 @@ public class QRCodeServiceImpl implements QRCodeService {
 
     @Override
     public String loadPerQrBase64(String scene) {
+        String realName = CommonUtils.randomString(32)+".jpg";
         QRResponse response = generatePermanentQRCode(scene);
         InputStream inputStream = showQRCode(response.getTicket());
         BufferedImage bufferedImage = ImageUtils.getBufferedImageByInputStream(inputStream);
@@ -109,21 +109,11 @@ public class QRCodeServiceImpl implements QRCodeService {
 
             ByteArrayInputStream swapStream = new ByteArrayInputStream(outputStream.toByteArray());
 
-            logger.info("开始上传文件");
-            boolean isSuccess = QiNiuUtils.uploadFile("challenge-20180307115220-td5joddb2.jpeg", swapStream);
-            if (isSuccess) {
-                promotionQrCode.setUrl("hello");
+            boolean isSuccess = QiNiuUtils.uploadFile(realName, swapStream);
+            if(isSuccess){
+                promotionQrCode.setUrl(ConfigUtils.getPicturePrefix()+realName);
             }
-            logger.info("上传文件成功");
 
-//            logger.info("开始上传文件");
-//            if(QiNiuUtils.uploadFile("/data/static/image/qrcode/",inputStream)){
-//                logger.info("上传文件成功");
-//                promotionQrCode.setUrl("https://static.iqycamp.com/images/qrcode/"+scene+".jpg");
-//
-//            }else{
-//                logger.info("上传文件失败");
-//            }
             promotionCodeDao.insert(promotionQrCode);
             return "data:image/jpg;base64," + encoder.encode(outputStream.toByteArray());
 
