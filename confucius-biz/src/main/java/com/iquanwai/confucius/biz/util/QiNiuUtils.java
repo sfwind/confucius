@@ -21,6 +21,7 @@ public class QiNiuUtils {
     private static Logger logger = LoggerFactory.getLogger(QiNiuUtils.class);
 
     public static boolean uploadFile(String filename, InputStream is){
+        logger.info("开始上传文件");
         //构造一个带指定Zone对象的配置类
         Configuration cfg = new Configuration(Zone.zone0());
 //...其他参数参考类注释
@@ -37,6 +38,7 @@ public class QiNiuUtils {
             //解析上传成功的结果
             DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
             logger.info("upload file {} successful, hash is {}", putRet.key, putRet.hash);
+            logger.info("上传文件成功");
             return true;
         } catch (QiniuException ex) {
             Response r = ex.response;
