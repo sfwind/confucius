@@ -130,7 +130,6 @@ public class PictureServiceImpl implements PictureService {
         Date today = new Date();
         String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + suffix;
         boolean result = false;
-        logger.info("图片名字:"+realName);
         try {
             result = QiNiuUtils.uploadFile(realName, file.getInputStream());
         } catch (Exception e) {
@@ -143,7 +142,6 @@ public class PictureServiceImpl implements PictureService {
     @Override
     public String uploadPic(MultipartFile file) throws UploadException{
         String realName = CommonUtils.randomString(32);
-        logger.info("图片名字:"+realName);
         Long fileSize = file.getSize();
         if (fileSize > MAX_PIC_SIZE) {
             throw new UploadException("图片文件过大，请压缩后上传");
