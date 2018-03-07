@@ -107,10 +107,10 @@ public class QRCodeServiceImpl implements QRCodeService {
             promotionQrCode.setRemark("123");
 
             logger.info("开始上传文件");
-            boolean isSuccess = QiNiuUtils.uploadFile("test-123.jpeg", inputStream);
-            if (isSuccess) {
-                promotionQrCode.setUrl("hello");
-            }
+//            boolean isSuccess = QiNiuUtils.uploadFile("test-123.jpeg", inputStream);
+//            if (isSuccess) {
+//                promotionQrCode.setUrl("hello");
+//            }
             logger.info("上传文件成功");
 
 //            logger.info("开始上传文件");
