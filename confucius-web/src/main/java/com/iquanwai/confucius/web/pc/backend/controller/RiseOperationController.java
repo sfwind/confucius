@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
@@ -9,6 +11,8 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
+import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.OperationLog;
@@ -41,6 +45,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -78,6 +83,8 @@ public class RiseOperationController {
     private PayService payService;
     @Autowired
     private AssistantCoachService assistantCoachService;
+    @Autowired
+    private TemplateMessageService templateMessageService;
 
 
     private static final String SEARCH_TOPIC = "business_school_application_search";
@@ -483,7 +490,132 @@ public class RiseOperationController {
     @RequestMapping(value = "/send/template/msg",method = RequestMethod.POST)
     public ResponseEntity<Map<String,Object>> sendTemplateMsg(UnionUser unionUser,@RequestBody TemplateDto templateDto){
         LOGGER.info(templateDto.toString());
-        List<String> sendOpenIds= Arrays.asList(templateDto.getOpenIds().split(","));
+        List<String> openIds= Arrays.asList(templateDto.getOpenIds().split(","));
+
+        List<String> blackLists = accountService.loadBlackListOpenIds();
+        //过滤黑名单用户
+        List<String> sendLists = openIds.stream().distinct().filter(openId->!blackLists.contains(openId)).collect(Collectors.toList());
+
+        sendLists.forEach(openid->{
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTouser(openid);
+
+            //templateMessage.setTemplate_id(templateMessage.getMessageId());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            if (templateDto.getFirst() != null) {
+                String first = templateDto.getFirst();
+                if (first.contains("{username}")) {
+                    first = replaceNickname(openid, first);
+                }
+                data.put("first", new TemplateMessage.Keyword(first));
+            }
+            if (templateDto.getKeyword1() != null) {
+                String keyword1 = templateDto.getKeyword1();
+                if (keyword1.contains("{username}")) {
+                    keyword1 = replaceNickname(openid, keyword1);
+                }
+                data.put("keyword1", new TemplateMessage.Keyword(keyword1));
+            }
+            if (templateDto.getKeyword2() != null) {
+                String keyword2 = templateDto.getKeyword2();
+                if (keyword2.contains("{username}")) {
+                    keyword2 = replaceNickname(openid, keyword2);
+                }
+                data.put("keyword2", new TemplateMessage.Keyword(keyword2));
+            }
+            if (templateDto.getKeyword3() != null) {
+                String keyword3 = templateDto.getKeyword3();
+                if (keyword3.contains("{username}")) {
+                    keyword3 = replaceNickname(openid, keyword3);
+                }
+                data.put("keyword3", new TemplateMessage.Keyword(keyword3));
+            }
+            if (templateDto.getRemark() != null) {
+                String remark = templateDto.getRemark();
+                if (remark.contains("{username}")) {
+                    remark = replaceNickname(openid, remark);
+                }
+                data.put("remark", new TemplateMessage.Keyword(remark));
+//                if (!StringUtils.isEmpty(templateDto.getRemarkColor())) {
+//                    data.put("remark", new TemplateMessage.Keyword(remark, templateDto.getRemarkColor()));
+//                } else {
+//                    data.put("remark", new TemplateMessage.Keyword(remark));
+//                }
+            }
+            if (templateDto.getUrl() != null) {
+                templateMessage.setUrl(templateDto.getUrl());
+            }
+            templateMessage.setComment(templateDto.getComment());
+
+            // 非主动推送不会进行校验
+            templateMessageService.sendMessage(templateMessage);
+
+        });
+
+
+//            TemplateMessage templateMessage = new TemplateMessage();
+//            templateMessage.setTouser(openid);
+//            templateMessage.setTemplate_id(noticeMsgDto.getMessageId());
+//            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+//            templateMessage.setData(data);
+//            if (noticeMsgDto.getFirst() != null) {
+//                String first = noticeMsgDto.getFirst();
+//                if (first.contains("{username}")) {
+//                    first = replaceNickname(openid, first);
+//                }
+//                data.put("first", new TemplateMessage.Keyword(first));
+//            }
+//            if (noticeMsgDto.getKeyword1() != null) {
+//                String keyword1 = noticeMsgDto.getKeyword1();
+//                if (keyword1.contains("{username}")) {
+//                    keyword1 = replaceNickname(openid, keyword1);
+//                }
+//                data.put("keyword1", new TemplateMessage.Keyword(keyword1));
+//            }
+//            if (noticeMsgDto.getKeyword2() != null) {
+//                String keyword2 = noticeMsgDto.getKeyword2();
+//                if (keyword2.contains("{username}")) {
+//                    keyword2 = replaceNickname(openid, keyword2);
+//                }
+//                data.put("keyword2", new TemplateMessage.Keyword(keyword2));
+//            }
+//            if (noticeMsgDto.getKeyword3() != null) {
+//                String keyword3 = noticeMsgDto.getKeyword3();
+//                if (keyword3.contains("{username}")) {
+//                    keyword3 = replaceNickname(openid, keyword3);
+//                }
+//                data.put("keyword3", new TemplateMessage.Keyword(keyword3));
+//            }
+//            if (noticeMsgDto.getKeyword4() != null) {
+//                String keyword4 = noticeMsgDto.getKeyword4();
+//                if (keyword4.contains("{username}")) {
+//                    keyword4 = replaceNickname(openid, keyword4);
+//                }
+//                data.put("keyword4", new TemplateMessage.Keyword(keyword4));
+//            }
+//            if (noticeMsgDto.getRemark() != null) {
+//                String remark = noticeMsgDto.getRemark();
+//                if (remark.contains("{username}")) {
+//                    remark = replaceNickname(openid, remark);
+//                }
+//                if (!StringUtils.isEmpty(noticeMsgDto.getRemarkColor())) {
+//                    data.put("remark", new TemplateMessage.Keyword(remark, noticeMsgDto.getRemarkColor()));
+//                } else {
+//                    data.put("remark", new TemplateMessage.Keyword(remark));
+//                }
+//            }
+//            if (noticeMsgDto.getUrl() != null) {
+//                templateMessage.setUrl(noticeMsgDto.getUrl());
+//            }
+//            templateMessage.setComment(noticeMsgDto.getComment());
+//
+//            Boolean forcePush = noticeMsgDto.getForcePush();
+//            // forcePush： 强制推送  forwardlyPush：主动推送
+//            // 非主动推送不会进行校验
+//            templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush);
+//        });
+
 
 
         return WebUtils.success();
@@ -591,5 +723,12 @@ public class RiseOperationController {
         interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
 
         return interviewRecord;
+    }
+
+
+    private String replaceNickname(String openid, String message) {
+        Profile profile = accountService.getProfile(openid, false);
+        String name = profile != null ? profile.getNickname() : "";
+        return message.replace("{username}", name);
     }
 }
