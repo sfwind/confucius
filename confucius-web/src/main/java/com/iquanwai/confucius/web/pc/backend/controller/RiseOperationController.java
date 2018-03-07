@@ -26,6 +26,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
@@ -499,8 +500,10 @@ public class RiseOperationController {
         sendLists.forEach(openid->{
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
-
-            //templateMessage.setTemplate_id(templateMessage.getMessageId());
+            //代办事项
+            if(templateDto.getTemplateId()==0){
+                templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+            }
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
             if (templateDto.getFirst() != null) {
@@ -537,11 +540,6 @@ public class RiseOperationController {
                     remark = replaceNickname(openid, remark);
                 }
                 data.put("remark", new TemplateMessage.Keyword(remark));
-//                if (!StringUtils.isEmpty(templateDto.getRemarkColor())) {
-//                    data.put("remark", new TemplateMessage.Keyword(remark, templateDto.getRemarkColor()));
-//                } else {
-//                    data.put("remark", new TemplateMessage.Keyword(remark));
-//                }
             }
             if (templateDto.getUrl() != null) {
                 templateMessage.setUrl(templateDto.getUrl());
@@ -552,71 +550,6 @@ public class RiseOperationController {
             templateMessageService.sendMessage(templateMessage);
 
         });
-
-
-//            TemplateMessage templateMessage = new TemplateMessage();
-//            templateMessage.setTouser(openid);
-//            templateMessage.setTemplate_id(noticeMsgDto.getMessageId());
-//            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-//            templateMessage.setData(data);
-//            if (noticeMsgDto.getFirst() != null) {
-//                String first = noticeMsgDto.getFirst();
-//                if (first.contains("{username}")) {
-//                    first = replaceNickname(openid, first);
-//                }
-//                data.put("first", new TemplateMessage.Keyword(first));
-//            }
-//            if (noticeMsgDto.getKeyword1() != null) {
-//                String keyword1 = noticeMsgDto.getKeyword1();
-//                if (keyword1.contains("{username}")) {
-//                    keyword1 = replaceNickname(openid, keyword1);
-//                }
-//                data.put("keyword1", new TemplateMessage.Keyword(keyword1));
-//            }
-//            if (noticeMsgDto.getKeyword2() != null) {
-//                String keyword2 = noticeMsgDto.getKeyword2();
-//                if (keyword2.contains("{username}")) {
-//                    keyword2 = replaceNickname(openid, keyword2);
-//                }
-//                data.put("keyword2", new TemplateMessage.Keyword(keyword2));
-//            }
-//            if (noticeMsgDto.getKeyword3() != null) {
-//                String keyword3 = noticeMsgDto.getKeyword3();
-//                if (keyword3.contains("{username}")) {
-//                    keyword3 = replaceNickname(openid, keyword3);
-//                }
-//                data.put("keyword3", new TemplateMessage.Keyword(keyword3));
-//            }
-//            if (noticeMsgDto.getKeyword4() != null) {
-//                String keyword4 = noticeMsgDto.getKeyword4();
-//                if (keyword4.contains("{username}")) {
-//                    keyword4 = replaceNickname(openid, keyword4);
-//                }
-//                data.put("keyword4", new TemplateMessage.Keyword(keyword4));
-//            }
-//            if (noticeMsgDto.getRemark() != null) {
-//                String remark = noticeMsgDto.getRemark();
-//                if (remark.contains("{username}")) {
-//                    remark = replaceNickname(openid, remark);
-//                }
-//                if (!StringUtils.isEmpty(noticeMsgDto.getRemarkColor())) {
-//                    data.put("remark", new TemplateMessage.Keyword(remark, noticeMsgDto.getRemarkColor()));
-//                } else {
-//                    data.put("remark", new TemplateMessage.Keyword(remark));
-//                }
-//            }
-//            if (noticeMsgDto.getUrl() != null) {
-//                templateMessage.setUrl(noticeMsgDto.getUrl());
-//            }
-//            templateMessage.setComment(noticeMsgDto.getComment());
-//
-//            Boolean forcePush = noticeMsgDto.getForcePush();
-//            // forcePush： 强制推送  forwardlyPush：主动推送
-//            // 非主动推送不会进行校验
-//            templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush);
-//        });
-
-
 
         return WebUtils.success();
     }
