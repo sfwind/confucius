@@ -17,11 +17,12 @@ public interface PlanService {
     List<ImprovementPlan> loadUserPlans(Integer profileId);
 
     /**
-     * 获得用户所有的plans
+     * 获得所有的计划（包括已经删除的）
      * @param profileId
      * @return
      */
-    List<ImprovementPlan> getUserPlans(Integer profileId);
+    List<ImprovementPlan> getPlans(Integer profileId);
+
 
     List<PracticePlan> loadPracticePlans(Integer PlanId);
 

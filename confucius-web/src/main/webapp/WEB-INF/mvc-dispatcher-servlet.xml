@@ -21,7 +21,7 @@
     <context:component-scan base-package="com.iquanwai.confucius.web"/>
     <context:component-scan base-package="com.iquanwai.confucius.mq"/>
     <mvc:resources location="/image/" mapping="/image/**"/>
-    <mvc:resources location="/js/" mapping="/js/**"/>
+    <mvc:resources location="/static/local/" mapping="/local/**"/>
 
     <mvc:annotation-driven>
         <mvc:message-converters register-defaults="false">
@@ -71,6 +71,10 @@
             <mvc:exclude-mapping path="/heartbeat"/>
             <mvc:exclude-mapping path="/home"/>
             <mvc:exclude-mapping path="/image/**"/>
+            <mvc:exclude-mapping path="/images/**"/>
+            <mvc:exclude-mapping path="/css/**"/>
+            <mvc:exclude-mapping path="/fonts/**"/>
+            <mvc:exclude-mapping path="/vendor/**"/>
             <mvc:exclude-mapping path="/internal/**"/>
             <mvc:exclude-mapping path="/js/**"/>
             <mvc:exclude-mapping path="/servercode"/>

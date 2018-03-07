@@ -1,0 +1,924 @@
+/* Responsive CSS Document */
+
+/* 
+    Created on   : 22/08/2017. 
+    Theme        : SEO+ - SEO & Business HTML Template!.
+    Category     : SEO.
+    Author       : @Unifytheme.
+    Designed By  : @Unifytheme.
+    Developed By : @Unifytheme.
+   
+*/
+
+@media (min-width: 992px) {
+    .container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+@media (max-width: 1199px) {
+    .shop-details .single-product-details .product-order-details {
+        width: 100%;
+        padding: 40px 0 0 0;
+    }
+
+    .default-footer .top-footer .footer-list, .default-footer .top-footer .footer-latest-news,
+    .default-footer .top-footer .footer-subscribe {
+        padding-left: 15px;
+    }
+
+    .seo-theme .latest-blog .grid-blog-wrapper .single-blog .post {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+}
+
+/*(max-width: 1199px)*/
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .shop-details .review-tab .nav-tabs > li > a {
+        padding: 0 25px;
+    }
+
+    .theme-main-menu .logo {
+        width: 30%;
+    }
+
+    #mega-menu-holder > ul > li > a {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    #mega-menu-holder li .sub-toggle {
+        right: 0;
+    }
+
+    .seo-theme .company-goal .single-goal {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .seo-theme .service-large-sidebar .image-content img {
+        width: 48%;
+    }
+
+    .seo-theme .service-large-sidebar .image-content .right-side {
+        padding-left: 30px;
+        width: 52%;
+    }
+
+    .seo-theme .seo-sidebar .wrapper ul li a {
+        padding-left: 35px;
+    }
+
+    .seo-theme .seo-sidebar .wrapper ul li a:before {
+        left: 18px;
+    }
+
+    .seo-theme .service-large-sidebar .project-analaysis .score-list li {
+        width: 33.33333%;
+    }
+
+    .theme-blog-sidebarOne {
+        width: 26%;
+    }
+
+    .theme-blog-large-sideOne {
+        width: 74%;
+        padding-right: 40px;
+    }
+
+    #banner .tp-caption img {
+        -webkit-transform: scale(0.7);
+        transform: scale(0.7);
+    }
+
+    #banner .tp-caption h1 {
+        font-size: 56px;
+    }
+}
+
+/*(min-width: 992px) and (max-width: 1199px)*/
+
+@media (max-width: 991px) {
+    .shop-product {
+        margin-bottom: 80px;
+    }
+
+    .theme-main-menu .menu-wrapper {
+        float: none;
+        width: 100%;
+        clear: both;
+    }
+
+    .theme-main-menu .menu-wrapper:after {
+        content: '';
+        clear: both;
+        display: table;
+    }
+
+    .seo-theme .theme-main-menu {
+        padding-top: 20px;
+        padding-bottom: 15px;
+    }
+
+    .seo-theme .company-goal {
+        /*margin-bottom: 100px;*/
+    }
+
+    .seo-theme .welcome-seo img {
+        margin: 0 auto 0 auto;
+    }
+
+    .seo-theme .seo-counter .single-box p {
+        font-size: 18px;
+    }
+
+    .seo-theme .our-project .mixitUp-menu li {
+        padding: 0 10px;
+        margin: 5px 4px;
+    }
+
+    .seo-theme .client-slider .sldier-wrapper {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .default-footer .top-footer [class*="col-"] {
+        margin-bottom: 45px;
+    }
+
+    .default-footer .bottom-footer {
+        margin-top: 15px;
+    }
+
+    .seo-theme .theme-large-sidebar {
+        width: 100%;
+        padding: 0 0 60px 0;
+    }
+
+    .seo-theme .service-large-sidebar .image-content .right-side {
+        width: 100%;
+        padding: 40px 0 0 0;
+    }
+
+    .seo-theme .service-large-sidebar .project-analaysis .col-xs-12 {
+        margin-bottom: 40px;
+    }
+
+    .seo-theme .our-service-details {
+        margin-bottom: 100px;
+    }
+
+    .seo-theme .our-project.project-v1 #mixitUp-item .mix,
+    .seo-theme .our-project.project-v2 .row .mix {
+        width: 50%;
+    }
+
+    .theme-blog-large-sideOne {
+        width: 100%;
+        padding: 0 0 70px 0;
+    }
+
+    .theme-contact-page-styleOne .contactUs-address {
+        padding: 50px 0 0 0;
+    }
+
+    .theme-main-menu.fixed .logo, .theme-main-menu.fixed .right-content {
+        display: none;
+    }
+
+    .theme-main-menu.fixed #mega-menu-holder > ul > li > a {
+        padding-bottom: 0;
+    }
+
+    .seo-theme .theme-main-menu.fixed {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+/*(max-width: 991px)*/
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .shop-details .review-tab .nav-tabs > li > a {
+        padding: 0 40px;
+    }
+
+    .seo-theme .short-banner h4 {
+        font-size: 20px;
+    }
+
+    .seo-theme .short-banner a {
+        line-height: 42px;
+    }
+
+    .seo-theme .our-service .single-service h5 a {
+        font-size: 19px;
+    }
+
+    .seo-theme .pricing-plan .single-price-table {
+        width: 50%;
+    }
+
+    .seo-theme .our-project .row .mix {
+        width: 33.33333%;
+    }
+
+    .seo-theme .client-slider .seo-client-slider .item .clearfix {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .seo-theme .latest-blog .grid-blog-wrapper .single-blog {
+        width: 50%;
+    }
+
+    .bottom-footer-banner h3 {
+        font-size: 34px;
+    }
+
+    .seo-theme .seo-sidebar, .theme-blog-sidebarOne {
+        width: 50%;
+    }
+
+    .seo-theme .service-large-sidebar .project-analaysis .score-list li {
+        width: 33.33333%;
+    }
+
+    #banner .tp-caption h1 {
+        font-size: 50px;
+    }
+
+    #banner .tp-caption img {
+        -webkit-transform: scale(0.5);
+        transform: scale(0.5);
+    }
+}
+
+/*(min-width: 768px) and (max-width: 991px)*/
+
+@media (max-width: 767px) {
+    .shop-details .review-tab .nav-tabs > li > a {
+        padding: 0;
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .shop-details .review-tab .nav-tabs > li {
+        width: 33.333333%;
+        text-align: center;
+        padding: 0 1px;
+    }
+
+    #searchWrapper #close-button {
+        font-size: 20px;
+        top: 0;
+        right: 0;
+    }
+
+    .seo-header .top-header div {
+        float: none;
+        text-align: center;
+    }
+
+    .seo-header .top-header .left-side ul li {
+        margin: 0 4px;
+    }
+
+    .seo-header .top-header .right-side ul li,
+    .seo-header .top-header .right-side ul li:last-child {
+        border: none;
+        margin-top: 10px;
+    }
+
+    .seo-theme .short-banner h4, .bottom-footer-banner h3 {
+        float: none;
+        text-align: center;
+        margin: 0 0 20px 0;
+        font-size: 25px;
+        line-height: 35px;
+    }
+
+    .seo-theme .short-banner a, .bottom-footer-banner .button-five {
+        display: block;
+        float: none;
+        margin: 0 auto;
+    }
+
+    .seo-theme .company-goal h2 br, .seo-title-one h6 br,
+    .seo-theme .welcome-seo .text h2 br {
+        display: none;
+    }
+
+    .seo-theme .company-goal h2 {
+        font-size: 40px;
+    }
+
+    .seo-theme .our-service .seo-title-one a {
+        position: static;
+        margin-top: 30px;
+    }
+
+    .seo-theme .our-service .single-service h2 {
+        bottom: 20px;
+    }
+
+    .seo-theme .seo-counter .single-box {
+        margin-top: 20px;
+    }
+
+    .seo-theme .pricing-plan .single-price-table,
+    .seo-theme .latest-blog .grid-blog-wrapper .single-blog, .seo-theme .seo-sidebar {
+        width: 100%;
+    }
+
+    .seo-theme .our-project .row .mix {
+        width: 50%;
+    }
+
+    .default-footer .bottom-footer p, .default-footer .bottom-footer ul {
+        float: none;
+        text-align: center;
+    }
+
+    .default-footer .bottom-footer ul li {
+        margin: 15px 3px 0 3px;
+    }
+
+    .theme-default-project-details .project-large-sidebar .bottom-text .left-side,
+    .theme-default-project-details .project-large-sidebar .bottom-text .right-side,
+    .theme-blog-sidebarOne {
+        width: 100%;
+    }
+
+    .theme-default-project-details .project-large-sidebar .bottom-text .right-side {
+        padding: 40px 0 0 0;
+    }
+
+    #banner .tp-caption img, #banner .tp-caption p br {
+        display: none;
+    }
+
+    #banner .tp-caption h1 {
+        font-size: 35px;
+        line-height: 40px;
+    }
+
+    #banner .tp-caption p {
+        font-size: 16px;
+        line-height: 28px;
+    }
+}
+
+/*(max-width: 767px)*/
+
+@media (max-width: 650px) {
+    #success, #error {
+        width: 84%;
+        height: auto;
+        top: calc(50% - 50px);
+        left: 8%;
+        padding: 30px 10px;
+    }
+
+    .shop-product .single-product .info h6 a {
+        font-size: 16px;
+    }
+
+    .shop-details .review-tab .nav-tabs > li {
+        width: 100%;
+        padding: 2px 0;
+    }
+
+    .seo-theme .error-page a {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .seo-theme .error-page span.or {
+        display: block;
+        margin: 20px 0;
+    }
+
+    .theme-blog-large-sideOne .comment-area .main-comment {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .theme-blog-large-sideOne .comment-area .single-comment.reply-comment {
+        margin-left: 40px;
+    }
+}
+
+@media (max-width: 600px) {
+    .seo-theme .welcome-seo .text ul li {
+        width: 100%;
+    }
+
+    .seo-theme .error-page h3 {
+        font-size: 45px;
+    }
+}
+
+@media (max-width: 550px) {
+    .shop-page .shop-product .col-xs-6 {
+        width: 100%;
+    }
+
+    #searchWrapper form {
+        height: 50px;
+    }
+
+    #searchWrapper form button {
+        width: 60px;
+        font-size: 18px;
+    }
+
+    #searchWrapper form input {
+        font-size: 18px;
+        padding-right: 62px;
+    }
+
+    .theme-main-menu .right-content {
+        position: absolute;
+        top: 88px;
+        right: 15px;
+        z-index: 9;
+    }
+
+    .theme-main-menu .logo {
+        margin-bottom: 20px;
+    }
+
+    .seo-title-one h6 br {
+        display: none;
+    }
+
+    .seo-theme .latest-blog .seo-title-one a {
+        position: static;
+        margin-top: 30px;
+    }
+
+    .seo-theme .service-large-sidebar .image-content img {
+        width: 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    .seo-theme .theme-inner-banner h2, .seo-theme .theme-inner-banner ul {
+        float: none;
+        text-align: center;
+    }
+
+    .seo-theme .latest-blog .single-blog .post .post-tag ul li {
+        float: none;
+        display: block;
+    }
+
+    .seo-theme .latest-blog .theme-blog-large-sideOne .single-blog .post .post-tag ul li.float-right a {
+        width: auto;
+        text-align: left;
+        border: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .shop-page .top-select-section {
+        margin-bottom: 40px;
+    }
+
+    .shop-page .top-select-section > li {
+        float: none;
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 450px) {
+    .shop-details .single-product-details img, .seo-theme .error-page form {
+        width: 100%;
+    }
+
+    .seo-theme .our-project .row .mix, .seo-theme .our-project.project-v1 #mixitUp-item .mix,
+    .seo-theme .our-project.project-v2 .row .mix, .theme-team-style-one .col-xs-6 {
+        width: 100%;
+    }
+
+    .seo-theme .service-large-sidebar .project-analaysis .info {
+        width: 100%;
+        padding: 40px 0 0 0;
+    }
+
+    .seo-theme .service-large-sidebar .project-analaysis .score-list {
+        margin-top: 30px;
+    }
+
+    .seo-theme .service-large-sidebar .project-analaysis .score-list li i {
+        left: 15px;
+    }
+
+    .seo-theme .service-large-sidebar .project-analaysis .score-list li {
+        padding-left: 80px;
+        margin-bottom: 20px;
+    }
+
+    .theme-blog-large-sideOne .comment-area .single-comment button {
+        position: static;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 400px) {
+    .shop-details .single-product-details .product-order-details .clearfix ul {
+        width: 100%;
+    }
+
+    .shop-details .single-product-details .product-order-details .clearfix a {
+        float: left;
+        margin-top: 20px;
+    }
+
+    .seo-theme .theme-main-menu .right-content a {
+        width: 150px;
+        border-width: 1px;
+        font-size: 13px;
+    }
+
+    .seo-theme .theme-main-menu .right-content #search-button {
+        width: 40px;
+        height: 40px;
+        margin: 0;
+    }
+
+    .seo-theme .theme-main-menu .right-content a {
+        margin-left: 8px;
+    }
+
+    .seo-theme .our-service .single-service img,
+    .seo-theme .our-service .single-service h2 {
+        left: 10px;
+    }
+
+    .seo-theme .our-service .single-service {
+        padding-left: 75px;
+        padding-right: 10px;
+    }
+
+    .seo-theme .seo-counter .single-box .number {
+        font-size: 45px;
+    }
+
+    .seo-theme .seo-counter .single-box p {
+        font-size: 15px;
+    }
+
+    .seo-theme .client-slider .seo-client-slider .item .clearfix {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .seo-theme .our-service.m-fix .single-service img {
+        left: 10px;
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media (max-width: 360px) {
+    .seo-theme .error-page h2 {
+        font-size: 135px;
+    }
+}
+
+@media (max-width: 500px) { {
+    width: 300px;
+}
+}
+
+@media (max-width: 500px) {
+
+    .seo-theme .client-slider .sldier-wrapper {
+        margin: 70px 0 0 0;
+    }
+
+    .seo-theme .client-slider .slider-container .item .clearfix .lft {
+        background: none;
+    }
+
+    .seo-theme .client-slider .slider-container .item .clearfix .rgt {
+        background: none;
+        height: 400px;
+        padding: 0;
+    }
+
+    .default-footer .top-footer .footer-right .qr-code-container {
+        width: 320px;
+    }
+
+    .seo-theme #partner-logo {
+        padding: 0;
+    }
+
+    body > div.main-page-wrapper > div.partners-section > div > div.seo-title-one.text-center > h2 {
+        font-size: 30px;
+    }
+
+    #seo-bs-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+
+    #seo-camp-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+
+    #seo-company-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+
+    #seo-bs-banner > ul > li > div.tp-parallax-wrap.tp-parallax-container > div > div > div {
+        display: none;
+    }
+
+    #banner .tp-caption .p {
+        font-weight: 300;
+        color: #333333;
+        font-size: 16px;
+        line-height: 28px;
+    }
+
+    .container .content-item .article .content .prew-words {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 14px;
+    }
+
+    .container .content-item .article .content .title {
+        font-size: 14px;
+        line-height: 16px;
+    }
+
+    .container .content-item .article .article-info {
+        display: none;
+    }
+
+    .container .content-item .article .float-left {
+        width: 115px;
+    }
+
+    .container .content-item .article .content {
+        margin-left: 125px;
+    }
+
+    .banner-box {
+        display: none;
+    }
+
+    #seo-main-banner > ul > li > div:nth-child(3) > div > div > div > p {
+        width: 300px;
+    }
+
+    #seo-main-banner > ul > li > div:nth-child(1) > div > div {
+        margin-top: -10px;
+    }
+
+    .theme-main-menu .main-container .logo {
+        left: 40px;
+    }
+
+    body > div.main-page-wrapper > header > div > div > div > div.logo.float-left > a > img {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    h2 {
+        font-size: 28px !important;
+    }
+
+    h3 {
+        font-size: 24px !important;
+    }
+
+    #quick-apply {
+        right: 10px;
+        top: 60%;
+        width: 60px;
+        height: 60px;
+    }
+
+    #quick-apply:hover {
+        width: 60px;
+        height: 60px;
+    }
+
+    #quick-apply:hover span {
+        font-size: 10px;
+    }
+
+    #quick-apply span {
+        font-size: 9px;
+    }
+
+    .seo-theme .company-goal .single-goal {
+        padding: 80px 10px 20px 10px;
+        height: 310px;
+
+    }
+
+    .tp-caption a {
+        width: 100px;
+        line-height: 30px;
+        font-size: 14px;
+    }
+
+    .tp-caption {
+        float: inherit !important;
+    }
+
+    .tp-caption .text-right {
+        text-align: left !important;
+    }
+
+    .tp-caption p {
+        font-size: 16px;
+        line-height: 28px;
+    }
+
+    #seo-bs-banner > ul > li > div:nth-child(2) > div > div > div > h3 {
+        float: inherit !important;
+    }
+
+    #seo-bs-banner > ul > li > div:nth-child(3) > div > div > div > div {
+        float: left;
+    }
+
+    #seo-company-banner > ul > li > div:nth-child(1) > div > div > div > h3 {
+        float: inherit !important;
+    }
+
+    #seo-company-banner > ul > li > div:nth-child(2) > div > div > div > div {
+        float: left;
+    }
+
+    #mega-menu-holder {
+        margin-bottom: 15px;
+        background: #1b2d5f !important;
+    }
+
+    #seo-main-banner > ul > li > div:nth-child(2) > div > div > div > h1 {
+        font-size: 28px;
+    }
+
+    body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 > div > h4 {
+        font-size: 20px;
+    }
+
+    body > div.main-page-wrapper > div.short-banner.se-p-bg-color.m-bottom0 {
+        padding: 20px 0;
+    }
+
+    body > div.main-page-wrapper > section > div > h2 {
+        margin-bottom: 85px !important;
+        padding-top: 42px !important;
+    }
+
+    body > div.main-page-wrapper > div.you-work-win > div > h2 {
+        font-size: 28px !important;
+        margin-bottom: 30px;
+        line-height: 35px;
+    }
+
+    .you-work-win .icon-word-wrapper {
+        padding-bottom: 40px;
+    }
+
+    .you-work-win .icon-word-wrapper .icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    .you-work-win .icon-word-wrapper .word .number {
+        font-size: 28px;
+    }
+
+    .you-work-win .icon-word-wrapper .word .desc {
+        font-size: 14px;
+    }
+
+    .seo-theme .seo-counter .main-content {
+        padding-bottom: 30px;
+    }
+
+    body > div.main-page-wrapper > div.seo-counter {
+        margin-bottom: 57px;
+    }
+
+    body > div.main-page-wrapper > div.our-service > div > div.seo-title-one.text-center > h2 {
+        font-size: 28px !important;
+        line-height: 34px;
+    }
+
+    .seo-theme .our-service .seo-title-one {
+        margin-bottom: 20px;
+    }
+
+    .seo-theme .our-service .single-service {
+        margin-bottom: 30px;
+        height: 150px;
+        padding-top: 20px;
+    }
+
+    .seo-theme .our-service.special .single-service {
+        height: 200px;
+    }
+
+    .seo-theme .our-service .single-service h5 a {
+        font-size: 20px;
+    }
+
+    .seo-theme .our-service .single-service p {
+        font-size: 14px;
+    }
+
+    .seo-theme .our-service .single-service img {
+        top: 10px;
+    }
+
+    .seo-theme .our-service.special .single-service img {
+        top: 20px;
+    }
+
+    .seo-theme .company-goal .single-goal {
+        padding-top: 70px;
+    }
+
+    .seo-theme .company-goal .single-goal .img-icon {
+        top: -45px;
+        margin-left: -45px;
+        width: 90px;
+    }
+
+    .seo-theme .our-service .wrapper {
+        padding-bottom: 40px;
+    }
+
+    .class-mate .class-mate-title h2 {
+        font-size: 28px !important;
+        line-height: 35px;
+        margin-bottom: 20px;
+    }
+
+    body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper > div:nth-child(1) > div.col-lg-6.col-md-7.col-xs-12.text.wow.fadeInRight.float-right > h2 {
+        font-size: 20px !important;
+    }
+
+    .seo-theme .welcome-seo .text span {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+    }
+
+    .seo-theme .client-slider .slider-container .item .clearfix .role-info .name {
+        font-size: 20px;
+    }
+
+    .default-footer .top-footer .footer-left .company {
+        font-size: 28px;
+    }
+
+    .seo-theme .our-service .single-service {
+        margin-bottom: 15px;
+    }
+
+    .seo-theme .company-goal {
+        padding-top: 0;
+    }
+
+    body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper {
+        padding-bottom: 0;
+    }
+
+    .you-work-win {
+        margin-bottom: 40px;
+    }
+
+    body > div.main-page-wrapper > div.welcome-seo.class-mate > div > div.wrapper > div:nth-child(2) > div.col-lg-6.col-md-7.col-xs-12.text.wow.fadeInRight.float-left > h2 {
+        font-size: 20px !important;
+    }
+
+}
+
+@media (max-width: 340px) {
+    .seo-theme .client-slider .button-container .service-button + .service-button {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    #seo-camp-banner > ul > li > div:nth-child(1) {
+        top: 34px !important;
+    }
+
+}
