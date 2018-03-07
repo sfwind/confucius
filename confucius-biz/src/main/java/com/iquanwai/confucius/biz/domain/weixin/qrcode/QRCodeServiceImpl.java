@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,8 +107,10 @@ public class QRCodeServiceImpl implements QRCodeService {
             promotionQrCode.setScene(scene);
             promotionQrCode.setRemark("123");
 
+            ByteArrayInputStream swapStream = new ByteArrayInputStream(outputStream.toByteArray());
+
             logger.info("开始上传文件");
-            boolean isSuccess = QiNiuUtils.uploadFile("challenge-20180307115220-td5joddb2.jpeg", inputStream);
+            boolean isSuccess = QiNiuUtils.uploadFile("challenge-20180307115220-td5joddb2.jpeg", swapStream);
             if (isSuccess) {
                 promotionQrCode.setUrl("hello");
             }
