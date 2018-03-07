@@ -232,7 +232,8 @@ public class RiseOperationController {
 
     /**
      * 碎片化总任务列表加载
-     * @param problemId 问题id
+     *
+     * @param problemId   问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
@@ -488,24 +489,21 @@ public class RiseOperationController {
         }
     }
 
-    @RequestMapping(value = "/send/template/msg",method = RequestMethod.POST)
-    public ResponseEntity<Map<String,Object>> sendTemplateMsg(UnionUser unionUser,@RequestBody TemplateDto templateDto){
+    @RequestMapping(value = "/send/template/msg", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> sendTemplateMsg(UnionUser unionUser, @RequestBody TemplateDto templateDto) {
         LOGGER.info(templateDto.toString());
-        List<String> openIds= Arrays.asList(templateDto.getOpenIds().split(","));
+        List<String> openIds = Arrays.asList(templateDto.getOpenIds().split(","));
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
         //过滤黑名单用户
-        List<String> sendLists = openIds.stream().distinct().filter(openId->!blackLists.contains(openId)).collect(Collectors.toList());
+        List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
 
-        sendLists.forEach(openid->{
+        for(String openid:sendLists){
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
             //代办事项
-            if(templateDto.getTemplateId()==0){
+            if (templateDto.getTemplateId() == 0) {
                 templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
-            }
-            else if(templateDto.getTemplateId()==1){
-                templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
             }
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
@@ -550,15 +548,16 @@ public class RiseOperationController {
             templateMessage.setComment(templateDto.getComment());
 
             // 非主动推送不会进行校验
-           templateMessageService.sendMessage(templateMessage);
-        });
+            if (!templateMessageService.sendMessage(templateMessage)) {
+                return WebUtils.error("发送出现错误，请联系技术人员");
+            }
+        }
 
         return WebUtils.result("已经全部发送完毕");
     }
 
 
-
-    private List<BusinessApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications){
+    private List<BusinessApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications) {
         final List<String> openidList;
         if (applications != null && applications.size() > 0) {
             //获取黑名单用户
@@ -571,7 +570,7 @@ public class RiseOperationController {
             BusinessApplicationDto dto = this.initApplicationDto(application);
             List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
             BusinessApplyQuestion levelQuestion = questions.get(3);
-            if(levelQuestion!=null){
+            if (levelQuestion != null) {
                 dto.setLevel(levelQuestion.getAnswer());
             }
             dto.setQuestionList(questions);
