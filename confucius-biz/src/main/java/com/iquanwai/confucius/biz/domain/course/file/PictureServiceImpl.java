@@ -130,6 +130,7 @@ public class PictureServiceImpl implements PictureService {
         Date today = new Date();
         String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + suffix;
         boolean result = false;
+        logger.info("图片名字:"+realName);
         try {
             result = QiNiuUtils.uploadFile(realName, file.getInputStream());
         } catch (Exception e) {
@@ -153,7 +154,6 @@ public class PictureServiceImpl implements PictureService {
             logger.error(e.getLocalizedMessage(), e);
             throw new UploadException("图片上传失败,请调整网络后重新上传");
         }
-        logger.info("文件全名："+ConfigUtils.getPicturePrefix()+realName);
         return ConfigUtils.getPicturePrefix() + realName;
     }
 
