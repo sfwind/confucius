@@ -2,7 +2,6 @@ package com.iquanwai.confucius.web.pc.backend.dto;
 
 import lombok.Data;
 
-import java.util.List;
 
 @Data
 public class TemplateDto {
@@ -14,5 +13,5 @@ public class TemplateDto {
     private String keyword1;
     private String keyword2;
     private String keyword3;
-    private List<String> openIds;
+    private String openIds;
 }
