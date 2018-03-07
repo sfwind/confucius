@@ -113,7 +113,6 @@ public class QRCodeServiceImpl implements QRCodeService {
             if(isSuccess){
                 promotionQrCode.setUrl(ConfigUtils.getPicturePrefix()+realName);
             }
-
             promotionCodeDao.insert(promotionQrCode);
             return "data:image/jpg;base64," + encoder.encode(outputStream.toByteArray());
 

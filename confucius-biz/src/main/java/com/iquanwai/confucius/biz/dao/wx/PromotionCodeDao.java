@@ -33,7 +33,7 @@ public class PromotionCodeDao extends DBUtil{
 
     public Integer insert(PromotionQrCode promotionQrCode){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO PromotionCodeDao(Scene,Url,Remark) VALUES(?,?,?) ";
+        String sql = "INSERT INTO PromotionQrCode(Scene,Url,Remark) VALUES(?,?,?) ";
 
         try {
             Long result =  runner.insert(sql,new ScalarHandler<>(),promotionQrCode.getScene(),promotionQrCode.getUrl(),promotionQrCode.getRemark());
