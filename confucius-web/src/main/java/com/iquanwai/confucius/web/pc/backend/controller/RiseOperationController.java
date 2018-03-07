@@ -46,10 +46,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.net.ConnectException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -486,6 +483,8 @@ public class RiseOperationController {
     @RequestMapping(value = "/send/template/msg",method = RequestMethod.POST)
     public ResponseEntity<Map<String,Object>> sendTemplateMsg(UnionUser unionUser,@RequestBody TemplateDto templateDto){
         LOGGER.info(templateDto.toString());
+        List<String> sendOpenIds= Arrays.asList(templateDto.getOpenIds().split(","));
+
 
         return WebUtils.success();
     }
