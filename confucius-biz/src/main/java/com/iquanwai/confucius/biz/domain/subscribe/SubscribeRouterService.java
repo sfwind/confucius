@@ -16,7 +16,8 @@ public interface SubscribeRouterService {
     /**
      * 根据场景号获取生成永久二维码的base64
      * @param scene
+     * @param remark
      * @return
      */
-    String loadPerSubscribeQrCode(String scene);
+    String loadPerSubscribeQrCode(String scene,String remark);
 }

@@ -92,7 +92,7 @@ public class QRCodeServiceImpl implements QRCodeService {
     }
 
     @Override
-    public String loadPerQrBase64(String scene) {
+    public String loadPerQrBase64(String scene,String remark) {
         String realName = CommonUtils.randomString(32)+".jpg";
         QRResponse response = generatePermanentQRCode(scene);
         InputStream inputStream = showQRCode(response.getTicket());
@@ -105,7 +105,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         try {
             PromotionQrCode promotionQrCode = new PromotionQrCode();
             promotionQrCode.setScene(scene);
-            promotionQrCode.setRemark("123");
+            promotionQrCode.setRemark(remark);
 
             ByteArrayInputStream swapStream = new ByteArrayInputStream(outputStream.toByteArray());
 

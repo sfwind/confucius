@@ -31,8 +31,8 @@ public class SubscribeController {
     }
 
     @RequestMapping("/per/qrCode")
-    public ResponseEntity<Map<String,Object>> loadPerQrCode(@RequestParam("scene")String scene){
-        String qrCodeBase64 = subscribeRouterService.loadPerSubscribeQrCode(scene);
+    public ResponseEntity<Map<String,Object>> loadPerQrCode(@RequestParam("scene")String scene,@RequestParam("remark") String remark){
+        String qrCodeBase64 = subscribeRouterService.loadPerSubscribeQrCode(scene,remark);
         if (qrCodeBase64 == null) {
             return WebUtils.error("当前场景值不存在");
         }
