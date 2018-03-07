@@ -32,6 +32,7 @@ import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -99,7 +100,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/search/bs/application/{date}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> searchApplication(PCLoginUser loginUser, @PathVariable String date) {
+    public ResponseEntity<Map<String, Object>> searchApplication(UnionUser loginUser, @PathVariable String date) {
         LOGGER.info("搜索{} 申请", date);
         try {
             searchPublisher.publish(date);
@@ -111,7 +112,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/notice/bs/application/{date}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> noticeApplication(PCLoginUser loginUser, @PathVariable String date) {
+    public ResponseEntity<Map<String, Object>> noticeApplication(UnionUser loginUser, @PathVariable String date) {
         LOGGER.info("发送{} 提醒", date);
         try {
             noticePublisher.publish(date);
@@ -146,7 +147,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> highlightDiscuss(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> highlightDiscuss(UnionUser loginUser,
                                                                 @PathVariable Integer discussId) {
 
         operationManagementService.highlightDiscuss(discussId);
@@ -160,7 +161,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/applicationSubmit/{practiceId}/{submitId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> highlightApplicationSubmit(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> highlightApplicationSubmit(UnionUser loginUser,
                                                                           @PathVariable Integer practiceId,
                                                                           @PathVariable Integer submitId) {
 
@@ -175,7 +176,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping("/problem/list")
-    public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
+    public ResponseEntity<Map<String, Object>> loadProblems(UnionUser pcLoginUser) {
 
         List<Problem> problems = problemService.loadProblems();
         List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
@@ -207,7 +208,7 @@ public class RiseOperationController {
      * 删除助教的巩固练习评论
      */
     @RequestMapping("/warmup/discuss/del/{discussId}")
-    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
+    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(UnionUser loginUser, @PathVariable Integer discussId) {
         Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
@@ -230,7 +231,7 @@ public class RiseOperationController {
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
-    public ResponseEntity<Map<String, Object>> getProblemHomeworkList(@PathVariable Integer problemId, PCLoginUser pcLoginUser) {
+    public ResponseEntity<Map<String, Object>> getProblemHomeworkList(@PathVariable Integer problemId, UnionUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户信息能不能为空");
         List<ApplicationPractice> applicationPractices = practiceService.loadApplicationByProblemId(problemId);
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
@@ -244,7 +245,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/list", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page, LoginUser loginUser) {
+    public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page, UnionUser loginUser) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -467,7 +468,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/assign/interviewer", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> assignInterviewer(PCLoginUser loginUser, @RequestBody AssignDto assignDto) {
+    public ResponseEntity<Map<String, Object>> assignInterviewer(UnionUser loginUser, @RequestBody AssignDto assignDto) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理")
@@ -480,6 +481,13 @@ public class RiseOperationController {
         } else {
             return WebUtils.error("分配失败");
         }
+    }
+
+    @RequestMapping(value = "/send/template/msg",method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> sendTemplateMsg(UnionUser unionUser,@RequestBody TemplateDto templateDto){
+        LOGGER.info(templateDto.toString());
+
+        return WebUtils.success();
     }
 
 
