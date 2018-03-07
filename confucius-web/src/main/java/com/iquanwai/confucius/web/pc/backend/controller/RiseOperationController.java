@@ -550,11 +550,10 @@ public class RiseOperationController {
             templateMessage.setComment(templateDto.getComment());
 
             // 非主动推送不会进行校验
-            templateMessageService.sendMessage(templateMessage);
-
+           templateMessageService.sendMessage(templateMessage);
         });
 
-        return WebUtils.success();
+        return WebUtils.result("已经全部发送完毕");
     }
 
 
