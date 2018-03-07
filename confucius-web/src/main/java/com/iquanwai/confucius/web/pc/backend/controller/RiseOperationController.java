@@ -502,6 +502,7 @@ public class RiseOperationController {
             templateMessage.setTouser(openid);
             //代办事项
             if(templateDto.getTemplateId()==0){
+                LOGGER.info("进入模板消息");
                 templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
             }
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
