@@ -142,6 +142,7 @@ public class PictureServiceImpl implements PictureService {
     @Override
     public String uploadPic(MultipartFile file) throws UploadException{
         String realName = CommonUtils.randomString(32);
+        logger.info("图片名字:"+realName);
         Long fileSize = file.getSize();
         if (fileSize > MAX_PIC_SIZE) {
             throw new UploadException("图片文件过大，请压缩后上传");
@@ -152,6 +153,7 @@ public class PictureServiceImpl implements PictureService {
             logger.error(e.getLocalizedMessage(), e);
             throw new UploadException("图片上传失败,请调整网络后重新上传");
         }
+        logger.info("文件全名："+ConfigUtils.getPicturePrefix()+realName);
         return ConfigUtils.getPicturePrefix() + realName;
     }
 
