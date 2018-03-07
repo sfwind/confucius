@@ -11,6 +11,8 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private CustomerMessageLogDao customerMessageLogDao;
     @Autowired
     private AccountService accountService;
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage) {
@@ -52,6 +56,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         if (sendTag) {
             String json = new Gson().toJson(templateMessage);
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
+            logger.info("返回的body:"+body);
         }
         return StringUtils.isNoneEmpty(body);
     }
