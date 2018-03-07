@@ -24,6 +24,8 @@ public class ApplicationSubmit {
     private Boolean feedback; // 教练是否已点评
     private Integer length; //字数
     private Integer problemId;//课程id
+    private Date requestTime;//求点评时间
+    private Date feedBackTime;//首次点评时间
 
     private String upTime; //非db字段 提交时间
     private String headPic; //非db字段 提交人头像

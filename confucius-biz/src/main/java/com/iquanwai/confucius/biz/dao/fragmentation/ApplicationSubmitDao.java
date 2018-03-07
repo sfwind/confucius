@@ -177,6 +177,18 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
     }
 
+    public void asstFeedbackAndTime(Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "update ApplicationSubmit set Feedback=1,FeedBackTime=CURRENT_TIMESTAMP where Id=?";
+        try {
+            runner.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+
+
     public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(Integer problemId, int size, Date date,
                                                                               List<Integer> profileIds) {
         if (CollectionUtils.isEmpty(profileIds)) {
