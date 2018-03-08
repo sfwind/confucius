@@ -46,11 +46,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         }
         QRTemporaryRequest qrRequest = new QRTemporaryRequest(scene, expire_seconds);
         String json = new Gson().toJson(qrRequest);
-        QRResponse response = generate(json);
-
-        //TODO:上传七牛云=>存入sql
-
-        return response;
+        return generate(json);
     }
 
     @Override
@@ -65,8 +61,7 @@ public class QRCodeServiceImpl implements QRCodeService {
     public QRResponse generatePermanentQRCode(String scene) {
         QRPermanentRequest qrRequest = new QRPermanentRequest(scene);
         String json = new Gson().toJson(qrRequest);
-        QRResponse response = generate(json);
-        return response;
+        return generate(json);
     }
 
     @Override
@@ -127,7 +122,6 @@ public class QRCodeServiceImpl implements QRCodeService {
     }
 
     private QRResponse generate(String json) {
-        logger.info("json为:" + json);
         String body = restfulHelper.post(GEN_QRCODE_URL, json);
         System.out.println("return message " + body);
         Gson gson = new Gson();
