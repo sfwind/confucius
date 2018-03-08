@@ -20,7 +20,7 @@ public class PromotionCodeDao extends DBUtil{
 
     public PromotionQrCode getByScene(String scene){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM PromotionCodeDao WHERE SCENE = ? AND DEL = 0";
+        String sql = "SELECT * FROM PromotionQrCode WHERE SCENE = ? AND DEL = 0";
         ResultSetHandler<PromotionQrCode> h = new BeanHandler<>(PromotionQrCode.class);
         try {
             return runner.query(sql,h,scene);
