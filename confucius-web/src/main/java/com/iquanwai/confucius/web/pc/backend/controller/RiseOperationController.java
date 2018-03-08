@@ -512,7 +512,7 @@ public class RiseOperationController {
                 if (first.contains("{username}")) {
                     first = replaceNickname(openid, first);
                 }
-                data.put("first", new TemplateMessage.Keyword(first+"\\n"));
+                data.put("first", new TemplateMessage.Keyword(first));
             }
             if (templateDto.getKeyword1() != null) {
                 String keyword1 = templateDto.getKeyword1();

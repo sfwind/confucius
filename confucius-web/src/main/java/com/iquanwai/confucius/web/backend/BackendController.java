@@ -101,6 +101,7 @@ public class BackendController {
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
+        logger.info(noticeMsgDto.toString());
         ThreadPool.execute(() -> {
             try {
                 // 所有待发人员名单
