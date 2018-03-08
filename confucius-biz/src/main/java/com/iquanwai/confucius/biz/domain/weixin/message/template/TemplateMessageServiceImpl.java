@@ -59,15 +59,15 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             String json = new Gson().toJson(templateMessage);
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
             logger.info("返回的body:"+body);
+            //TODO:判断是否发送成功
+            JSONObject jsonObject = JSON.parseObject(body);
+            logger.info("errcode:"+jsonObject.get("errcode"));
+            if(jsonObject.get("errcode").equals(0)){
+                return true;
+            }
+            return false;
         }
-        //TODO:判断是否发送成功
-        JSONObject jsonObject = JSON.parseObject(body);
-        logger.info("errcode:"+jsonObject.get("errcode"));
-        if(jsonObject.get("errcode").equals(0)){
-            return true;
-        }
-        return false;
-        //return StringUtils.isNoneEmpty(body);
+        return StringUtils.isNoneEmpty(body);
     }
 
     @Override
