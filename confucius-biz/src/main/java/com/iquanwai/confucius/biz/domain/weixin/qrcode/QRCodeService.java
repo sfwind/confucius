@@ -7,6 +7,13 @@ package com.iquanwai.confucius.biz.domain.weixin.qrcode;
 public interface QRCodeService {
 
     /**
+     * 检查scene是否重复
+     * @param scene
+     * @return
+     */
+    boolean checkScence(String scene);
+
+    /**
      * 生成永久二维码
      *
      * @param scene 场景值
@@ -24,6 +31,8 @@ public interface QRCodeService {
     QRResponse generateTemporaryQRCode(String scene, Integer expire_seconds);
 
     String loadQrBase64(String scene);
+
+    String loadPerQrBase64(String scene,String remark);
 
     /* 获取二维码的链接 */
     String GEN_QRCODE_URL = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token={access_token}";

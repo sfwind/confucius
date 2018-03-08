@@ -26,12 +26,12 @@ public class QRCodeController {
                                                         @RequestParam(name="p", required = false) String permanent,
                                                         @RequestParam(name="s", required = false) Integer seconds) {
         QRResponse response;
-        if(permanent!=null){
+        if (permanent != null) {
             response = qrCodeService.generatePermanentQRCode(scene);
-        }else{
+        } else {
             response = qrCodeService.generateTemporaryQRCode(scene, seconds);
         }
-
         return WebUtils.result(response);
     }
+
 }
