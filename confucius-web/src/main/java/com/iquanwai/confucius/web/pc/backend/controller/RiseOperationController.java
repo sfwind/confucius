@@ -489,16 +489,27 @@ public class RiseOperationController {
         }
     }
 
+    /**
+     * 运营后台发送模板消息接口
+     * @param unionUser
+     * @param templateDto
+     * @return
+     */
     @RequestMapping(value = "/send/template/msg", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> sendTemplateMsg(UnionUser unionUser, @RequestBody TemplateDto templateDto) {
+        String comment = templateDto.getComment();
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
+                .module("运营功能").function("发送模板消息").action(comment);
+
+        operationLogService.log(operationLog);
+
         LOGGER.info(templateDto.toString());
         List<String> openIds = Arrays.asList(templateDto.getOpenIds().split(","));
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
         //过滤黑名单用户
         List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
-
-        for(String openid:sendLists){
+        for (String openid : sendLists) {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
             //代办事项
@@ -546,9 +557,9 @@ public class RiseOperationController {
                 templateMessage.setUrl(templateDto.getUrl());
             }
             templateMessage.setComment(templateDto.getComment());
+            Boolean forcePush = templateDto.getForcePush();
 
-            // 非主动推送不会进行校验
-            if (!templateMessageService.sendMessage(templateMessage)) {
+            if (!templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush)) {
                 return WebUtils.error("发送出现错误，请联系技术人员");
             }
         }

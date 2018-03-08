@@ -14,4 +14,6 @@ public class TemplateDto {
     private String keyword2;
     private String keyword3;
     private String openIds;
+    private String remarkColor;
+    private Boolean forcePush;
 }
