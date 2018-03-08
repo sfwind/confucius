@@ -23,12 +23,9 @@ public class QRCodeController {
 
     @RequestMapping("/{scene}")
     public ResponseEntity<Map<String, Object>> generate(@PathVariable String scene,
-                                                        @RequestParam(name = "p", required = false) String permanent,
-                                                        @RequestParam(name = "s", required = false) Integer seconds) {
+                                                        @RequestParam(name="p", required = false) String permanent,
+                                                        @RequestParam(name="s", required = false) Integer seconds) {
         QRResponse response;
-        if (qrCodeService.checkScence(scene)) {
-            return WebUtils.error("场景值重复");
-        }
         if (permanent != null) {
             response = qrCodeService.generatePermanentQRCode(scene);
         } else {
