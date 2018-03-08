@@ -508,9 +508,11 @@ public class RiseOperationController {
         List<String> openIds = Arrays.asList(templateDto.getOpenIds().split(","));
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
+        Boolean forcePush = templateDto.getForcePush();
         //过滤黑名单用户
         List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
-        for (String openid : sendLists) {
+//        for (String openid : sendLists) {
+        sendLists.forEach(openid -> {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
             //代办事项
@@ -552,19 +554,19 @@ public class RiseOperationController {
                 if (remark.contains("{username}")) {
                     remark = replaceNickname(openid, remark);
                 }
-                data.put("remark",new TemplateMessage.Keyword(remark,"#FFA500"));
+                data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
             }
 
             if (templateDto.getUrl() != null) {
                 templateMessage.setUrl(templateDto.getUrl());
             }
             templateMessage.setComment(templateDto.getComment());
-            Boolean forcePush = templateDto.getForcePush();
 
-            if (!templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush)) {
-                return WebUtils.error("发送出现错误，请联系技术人员");
-            }
-        }
+            templateMessageService.sendMessage(templateMessage,forcePush==null||!forcePush);
+//            if (!templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush)) {
+//            }
+        });
+        //}
 
         return WebUtils.result("已经全部发送完毕");
     }

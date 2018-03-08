@@ -58,11 +58,11 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         if (sendTag) {
             String json = new Gson().toJson(templateMessage);
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
-            JSONObject jsonObject = JSON.parseObject(body);
-            if(jsonObject.get("errcode").equals(0)){
-                return true;
-            }
-            return false;
+//            JSONObject jsonObject = JSON.parseObject(body);
+//            if(jsonObject.get("errcode").equals(0)){
+//                return true;
+//            }
+//            return false;
         }
         return StringUtils.isNoneEmpty(body);
     }
