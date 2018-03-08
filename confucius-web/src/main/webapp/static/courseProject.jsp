@@ -569,22 +569,23 @@
                              data-splitin="none"
                              data-splitout="none"
                              data-responsive_offset="on">
-                            <a href="javascript:showDialog('#camp-jghbd-order')" class="button button-two">立即报名</a>
-                        </div>
-                        <!-- LAYER NR. 4 -->
-                        <div class="tp-caption"
-                             data-x="['left','left','left','left']" data-hoffset="['170','170','30','30']"
-                             data-y="['middle','middle','middle','middle']" data-voffset="['130','130','155','155']"
-                             data-transform_idle="o:1;"
-                             data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"
-                             data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"
-                             data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"
-                             data-start="2000"
-                             data-splitin="none"
-                             data-splitout="none"
-                             data-responsive_offset="on">
                             <a href="javascript:_MEIQIA('showPanel')" class="button button-two">了解更多</a>
-                        </div>
+                            <%--<a href="javascript:showDialog('#camp-jghbd-order')" class="button button-two">立即报名</a>--%>
+、                        </div>
+                        <!-- LAYER NR. 4 -->
+                        <%--<div class="tp-caption"--%>
+                             <%--data-x="['left','left','left','left']" data-hoffset="['170','170','30','30']"--%>
+                             <%--data-y="['middle','middle','middle','middle']" data-voffset="['130','130','155','155']"--%>
+                             <%--data-transform_idle="o:1;"--%>
+                             <%--data-transform_hover="o:1;rX:0;rY:0;rZ:0;z:0;s:300;e:Power1.easeInOut;"--%>
+                             <%--data-transform_in="x:[100%];z:0;rX:0deg;rY:0deg;rZ:0deg;sX:1;sY:1;skX:0;skY:0;opacity:0;s:2500;e:Power3.easeInOut;"--%>
+                             <%--data-transform_out="auto:auto;s:1000;e:Power2.easeInOut;"--%>
+                             <%--data-start="2000"--%>
+                             <%--data-splitin="none"--%>
+                             <%--data-splitout="none"--%>
+                             <%--data-responsive_offset="on">--%>
+                            <%--<a href="javascript:_MEIQIA('showPanel')" class="button button-two">了解更多</a>--%>
+                        <%--</div>--%>
                         <!-- LAYER NR. 5 -->
                         <div class="tp-caption rs-parallaxlevel-3"
                              data-x="['right','right','right','right']" data-hoffset="['0','0','-60','0']"
@@ -985,7 +986,7 @@
             <img src="local/images/icon/close.png"/>
         </div>
         <div class="qr-code text-center">
-            <img src="https://static.iqycamp.com/images/fragment/camp_jghbd_order_1.png?imageslim" class="qr-img">
+            <%--<img src="" class="qr-img">--%>
         </div>
         <div class="tips text-center">
             长按保存，微信扫码即可报名结构化表达专项课
