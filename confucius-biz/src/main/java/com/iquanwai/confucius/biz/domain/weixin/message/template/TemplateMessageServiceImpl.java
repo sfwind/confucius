@@ -62,8 +62,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         }
         //TODO:判断是否发送成功
         JSONObject jsonObject = JSON.parseObject(body);
-        logger.info("errmsg:"+jsonObject.get("errmsg"));
-        if(jsonObject.get("errmsg").equals("0")){
+        logger.info("errcode:"+jsonObject.get("errcode"));
+        if(jsonObject.get("errcode").equals("0")){
             return true;
         }
         return false;
