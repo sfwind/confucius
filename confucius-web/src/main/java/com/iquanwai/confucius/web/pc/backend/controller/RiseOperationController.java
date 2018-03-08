@@ -568,7 +568,7 @@ public class RiseOperationController {
         });
         //}
 
-        return WebUtils.result("已经全部发送完毕");
+        return WebUtils.result("发送结束");
     }
 
 
