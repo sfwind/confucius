@@ -491,6 +491,7 @@ public class RiseOperationController {
 
     /**
      * 运营后台发送模板消息接口
+     *
      * @param unionUser
      * @param templateDto
      * @return
@@ -551,11 +552,7 @@ public class RiseOperationController {
                 if (remark.contains("{username}")) {
                     remark = replaceNickname(openid, remark);
                 }
-                if (!StringUtils.isEmpty(templateDto.getRemarkColor())) {
-                    data.put("remark", new TemplateMessage.Keyword(remark, templateDto.getRemarkColor()));
-                } else {
-                    data.put("remark", new TemplateMessage.Keyword(remark));
-                }
+                data.put("remark",new TemplateMessage.Keyword(remark,"#FFA500"));
             }
 
             if (templateDto.getUrl() != null) {
