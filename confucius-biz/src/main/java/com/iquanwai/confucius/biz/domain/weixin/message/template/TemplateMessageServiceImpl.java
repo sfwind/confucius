@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.template;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.common.message.CustomerMessageLogDao;
@@ -58,7 +60,14 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
             logger.info("返回的body:"+body);
         }
-        return StringUtils.isNoneEmpty(body);
+        //TODO:判断是否发送成功
+        JSONObject jsonObject = JSON.parseObject(body);
+        logger.info("errmsg:"+jsonObject.get("errmsg"));
+        if(jsonObject.get("errmsg").equals("0")){
+            return true;
+        }
+        return false;
+        //return StringUtils.isNoneEmpty(body);
     }
 
     @Override
