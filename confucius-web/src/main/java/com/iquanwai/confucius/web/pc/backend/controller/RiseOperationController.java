@@ -551,8 +551,13 @@ public class RiseOperationController {
                 if (remark.contains("{username}")) {
                     remark = replaceNickname(openid, remark);
                 }
-                data.put("remark", new TemplateMessage.Keyword(remark));
+                if (!StringUtils.isEmpty(templateDto.getRemarkColor())) {
+                    data.put("remark", new TemplateMessage.Keyword(remark, templateDto.getRemarkColor()));
+                } else {
+                    data.put("remark", new TemplateMessage.Keyword(remark));
+                }
             }
+
             if (templateDto.getUrl() != null) {
                 templateMessage.setUrl(templateDto.getUrl());
             }
