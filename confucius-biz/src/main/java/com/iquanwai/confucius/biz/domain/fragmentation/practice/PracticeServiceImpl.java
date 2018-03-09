@@ -316,4 +316,9 @@ public class PracticeServiceImpl implements PracticeService {
         return applicationSubmitDao.load(ApplicationSubmit.class, applicationSubmitId);
     }
 
+    @Override
+    public Integer deleteExamples(Integer id) {
+       return warmupPracticeDao.delWarmupPractice(id);
+    }
+
 }

@@ -157,6 +157,21 @@ public class WarmupPracticeDao extends PracticeDBUtil {
         }
     }
 
+    /**
+     * 删除题目
+     * @param id
+     */
+    public Integer delWarmupPractice(Integer id){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update WarmupPractice SET DEL = 1,Updated = 1 WHERE ID = ?";
+        try {
+            return runner.update(sql,id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return -1;
+    }
+
 
     private boolean isOriginUpdatedEquals2(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
