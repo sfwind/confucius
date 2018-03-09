@@ -505,9 +505,8 @@ public class RiseOperationController {
         operationLogService.log(operationLog);
 
         LOGGER.info(templateDto.toString());
-        List<String> openIds = Arrays.asList(templateDto.getOpenIds().split(","));
+        List<String> openIds = Arrays.asList(templateDto.getOpenIds().split("\n\r"));
         Integer templateId = templateDto.getTemplateId();
-        LOGGER.info("templateId:"+templateId);
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
         Boolean forcePush = templateDto.getForcePush();
@@ -517,10 +516,8 @@ public class RiseOperationController {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
             if (templateId ==0) {
-                LOGGER.info("待办事项提醒");
                 templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
             }else if(templateId==1){
-                LOGGER.info("账户变动提醒");
                 templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
             }
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
