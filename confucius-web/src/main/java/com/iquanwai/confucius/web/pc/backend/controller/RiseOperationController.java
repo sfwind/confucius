@@ -505,7 +505,7 @@ public class RiseOperationController {
         operationLogService.log(operationLog);
 
         LOGGER.info(templateDto.toString());
-        List<String> openIds = Arrays.asList(templateDto.getOpenIds().split("\n\r"));
+        List<String> openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         Integer templateId = templateDto.getTemplateId();
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
