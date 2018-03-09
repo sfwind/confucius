@@ -38,6 +38,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush) {
+        addHook(templateMessage);
         boolean sendTag = true;
         if (forwardlyPush) {
             // 发送权限校验
@@ -154,4 +155,15 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         customerMessageLogDao.insert(customerMessageLog);
     }
 
+    private void addHook(TemplateMessage templateMessage) {
+        if (templateMessage.getUrl() != null) {
+            String url = templateMessage.getUrl();
+            if(url.contains("?")){
+                url = url + "&_tm=template_message";
+            }else{
+                url = url + "?_tm=template_message";
+            }
+            templateMessage.setUrl(url);
+        }
+    }
 }
