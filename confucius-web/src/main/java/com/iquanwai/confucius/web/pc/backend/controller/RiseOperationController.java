@@ -515,9 +515,9 @@ public class RiseOperationController {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
             //代办事项
-            if (templateDto.getTemplateId() == 0) {
+            if (templateDto.getTemplateId().equals(0)) {
                 templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
-            }else if(templateDto.getTemplateId()==1){
+            }else if(templateDto.getTemplateId().equals(1)){
                 templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
             }
             LOGGER.info("template_id:"+templateMessage.getTemplate_id());
