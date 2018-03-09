@@ -511,14 +511,16 @@ public class RiseOperationController {
         Boolean forcePush = templateDto.getForcePush();
         //过滤黑名单用户
         List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
-//        for (String openid : sendLists) {
         sendLists.forEach(openid -> {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
             //代办事项
             if (templateDto.getTemplateId() == 0) {
                 templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+            }else if(templateDto.getTemplateId()==1){
+                templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
             }
+            LOGGER.info("template_id:"+templateMessage.getTemplate_id());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
             if (templateDto.getFirst() != null) {
@@ -563,10 +565,7 @@ public class RiseOperationController {
             templateMessage.setComment(templateDto.getComment());
 
             templateMessageService.sendMessage(templateMessage,forcePush==null||!forcePush);
-//            if (!templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush)) {
-//            }
         });
-        //}
 
         return WebUtils.result("发送结束");
     }
