@@ -21,6 +21,7 @@ public class NoticeMsgDto {
     private String remark;
     private String remarkColor; // remark 备注颜色
     private String url; // 点击跳转 url
+    private String source; //跟踪打开率的场景值
     private List<String> openids; // 发送通知名单
     private List<String> excludes; // 需要排除的人员名单
 

@@ -176,7 +176,8 @@ public class BackendController {
                     Boolean forcePush = noticeMsgDto.getForcePush();
                     // forcePush： 强制推送  forwardlyPush：主动推送
                     // 非主动推送不会进行校验
-                    templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush);
+                    templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush,
+                            noticeMsgDto.getSource());
                 });
             } catch (Exception e) {
                 logger.error("发送通知失败", e);
