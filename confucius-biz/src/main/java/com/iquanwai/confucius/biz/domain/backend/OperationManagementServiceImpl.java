@@ -111,6 +111,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
         //TODO:获得某个评论的从头开始的回复
         List<Integer> origins = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getOriginDiscussId).distinct().collect(Collectors.toList());
+
         List<WarmupPracticeDiscuss> originDiscusses = warmupPracticeDiscussDao.loadDiscussByOrigins(origins);
         warmupPracticeDiscusses.forEach(discuss->{
             Integer profileId = discuss.getProfileId();
