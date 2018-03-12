@@ -36,19 +36,6 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         if (platform == null || unionUserService.isDocumentRequest(request)) {
             return true;
         } else {
-            // if (ConfigUtils.isDebug()) {
-            //     String requestUrl = request.getRequestURI();
-            //     Callback callback = new Callback();
-            //     callback.setState("qrm4zqjlqlrjlr9oo8qfuqy6t1kan6k8");
-            //     callback.setUnionId("os8zavwgXriKmPo0Crjcl0Kn8Nq8");
-            //     UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-            //     boolean permission = permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
-            //     if (!permission) {
-            //         writeNoAuthority(response);
-            //         return false;
-            //     }
-            // }
-
             Callback callback = unionUserService.getCallbackByRequest(request);
             if (callback != null && callback.getUnionId() != null) {
                 // 校验是否有权限访问页面
