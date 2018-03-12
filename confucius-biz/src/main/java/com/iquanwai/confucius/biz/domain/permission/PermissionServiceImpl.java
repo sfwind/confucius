@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.permission;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.permission.PermissionDao;
 import com.iquanwai.confucius.biz.dao.common.permission.RoleDao;
@@ -37,6 +38,8 @@ public class PermissionServiceImpl implements PermissionService {
 
     private Map<Integer, List<Authority>> rolePermissions = Maps.newConcurrentMap();
 
+    private List<String> uriPatterns = Lists.newArrayList();
+
     @PostConstruct
     @Override
     public void initPermission() {
@@ -49,6 +52,7 @@ public class PermissionServiceImpl implements PermissionService {
                 Authority authority = new Authority();
                 authority.setRoleId(role.getId());
                 authority.setPermission(permission);
+                uriPatterns.add(permission.getRegExUri());
                 try {
                     Pattern pattern = Pattern.compile(permission.getRegExUri());
                     authority.setPattern(pattern);
@@ -68,19 +72,32 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Boolean checkPermission(Integer roleId, String uri) {
-        List<Authority> permissions = this.loadPermissions(roleId);
-        if (permissions == null) {
-            logger.error("roleId:{} don't have permissions: {}", roleId, uri);
-            return false;
-        } else {
-            for (Authority permission : permissions) {
-                if (permission.getPattern().matcher(uri).matches()) {
-                    return true;
+        for (String regExUri : uriPatterns) {
+            try {
+                Pattern pattern = Pattern.compile(regExUri);
+                // 如果url有权限控制,查看用户有没有权限
+                if (pattern.matcher(uri).matches()) {
+                    List<Authority> permissions = this.loadPermissions(roleId);
+                    if (permissions == null) {
+                        logger.error("roleId:{} don't have permission: {}", roleId, uri);
+                        return false;
+                    }else{
+                        for (Authority permission : permissions) {
+                            if (permission.getPattern().matcher(uri).matches()) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }
                 }
+            } catch (PatternSyntaxException e) {
+                logger.error("正则表达式异常:{}", regExUri);
+                return false;
             }
         }
-        logger.error("roleId:{} don't have permissions: {} , permission size:{}", roleId, uri, permissions.size());
-        return false;
+
+        return true;
     }
 
     @Override
