@@ -45,7 +45,7 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
     public List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId,String currentDate){
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
-        String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE WarmupPracticeId = ? AND ADDTIME LIKE ? AND  DEL = 0";
+        String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE WarmupPracticeId = ? AND AddTime LIKE ? AND  DEL = 0";
 
         try {
             return runner.query(sql,h,practiceId,"%"+currentDate+"%");

@@ -121,7 +121,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 discuss.setName(profile.getNickname());
             }
             discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
-            List<AbstractComment> discusses = originDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getOriginDiscussId().equals(discuss.getOriginDiscussId()) && warmupPracticeDiscuss.getId()<discuss.getId()).collect(Collectors.toList());
+            List<AbstractComment> discusses = originDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getOriginDiscussId().equals(discuss.getOriginDiscussId()) && warmupPracticeDiscuss.getId()<=discuss.getId()).collect(Collectors.toList());
             discuss.setDiscusses(discusses);
         });
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
