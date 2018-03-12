@@ -3,12 +3,16 @@ package com.iquanwai.confucius.web.pc.backend.controller;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
+import com.iquanwai.confucius.biz.domain.fragmentation.practice.DiscussService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.util.EmployeeService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupChoice;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
+import com.iquanwai.confucius.biz.po.quanwai.QuanwaiEmployee;
 import com.iquanwai.confucius.web.pc.backend.dto.WarmUpPracticeDto;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -39,6 +43,11 @@ public class WarmupImportController {
     private ProblemService problemService;
     @Autowired
     private PracticeService practiceService;
+    @Autowired
+    private DiscussService discussService;
+    @Autowired
+    private EmployeeService employeeService;
+
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -195,5 +204,44 @@ public class WarmupImportController {
         return WebUtils.error("删除失败");
 
     }
+
+    @RequestMapping(value = "/load/today", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(UnionUser unionUser) {
+
+        List<WarmupPracticeDiscuss> discusses = discussService.loadTodayDiscuss();
+        List<WarmupPractice> warmupPractices = getTodayWarmup(discusses);
+
+        return WebUtils.result(warmupPractices);
+    }
+
+
+    private List<WarmupPractice> getTodayWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
+        //过滤员工评论
+        warmupPracticeDiscusses = filterEmployeeDiscuss(warmupPracticeDiscusses);
+        List<Integer> practiceIds = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getWarmupPracticeId).distinct().collect(Collectors.toList());
+        //查看今天的选择题
+        List<WarmupPractice> warmupPractices = practiceService.loadWarmupPractices(practiceIds);
+
+        return warmupPractices;
+    }
+
+
+    /**
+     * 过滤工作人员评论
+     *
+     * @param warmupPracticeDiscusses
+     * @return
+     */
+    private List<WarmupPracticeDiscuss> filterEmployeeDiscuss(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
+        List<QuanwaiEmployee> quanwaiEmployees = employeeService.getEmployees();
+        return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
+            if (quanwaiEmployees.stream().filter(quanwaiEmployee -> quanwaiEmployee.getProfileId().equals(warmupPracticeDiscuss.getProfileId())).count() == 0) {
+                return warmupPracticeDiscuss;
+            } else {
+                return null;
+            }
+        }).filter(warmupPracticeDiscuss -> warmupPracticeDiscuss != null).collect(Collectors.toList());
+    }
+
 
 }

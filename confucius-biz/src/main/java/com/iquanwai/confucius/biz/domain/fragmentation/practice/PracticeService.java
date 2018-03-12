@@ -109,4 +109,6 @@ public interface PracticeService {
     ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId);
 
     Integer deleteExamples(Integer id);
+
+    List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds);
 }

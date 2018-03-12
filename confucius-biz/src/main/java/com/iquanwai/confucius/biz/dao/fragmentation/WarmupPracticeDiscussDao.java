@@ -25,24 +25,7 @@ import java.util.List;
 public class WarmupPracticeDiscussDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public int insert(WarmupPracticeDiscuss discuss){
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into WarmupPracticeDiscuss(WarmupPracticeId, Profileid, RepliedId, Comment, " +
-                "Priority, Del, RepliedProfileid, RepliedComment, OriginDiscussId) " +
-                "values(?,?,?,?,?,?,?,?,?)";
-        try {
-            Long result = runner.insert(sql, new ScalarHandler<>(),
-                    discuss.getWarmupPracticeId(), discuss.getProfileId(),
-                    discuss.getRepliedId(), discuss.getComment(), discuss.getPriority(), discuss.getDel(),
-                    discuss.getRepliedProfileId(), discuss.getRepliedComment(), discuss.getOriginDiscussId());
 
-            return result.intValue();
-        }catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-
-        return -1;
-    }
 
     public List<WarmupPracticeDiscuss> loadDiscuss(Integer practiceId) {
         QueryRunner run = new QueryRunner(getDataSource());
@@ -70,6 +53,40 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public List<WarmupPracticeDiscuss> loadTodayDiscuss(){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<WarmupPracticeDiscuss>(WarmupPracticeDiscuss.class);
+        String sql = "SELECT * from fragmentCourse.WarmupPracticeDiscuss WHERE AddTime >date_format(now(),'%y-%m-%d')";
+
+        try {
+            return runner.query(sql,h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+
+    public int insert(WarmupPracticeDiscuss discuss){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "insert into WarmupPracticeDiscuss(WarmupPracticeId, Profileid, RepliedId, Comment, " +
+                "Priority, Del, RepliedProfileid, RepliedComment, OriginDiscussId) " +
+                "values(?,?,?,?,?,?,?,?,?)";
+        try {
+            Long result = runner.insert(sql, new ScalarHandler<>(),
+                    discuss.getWarmupPracticeId(), discuss.getProfileId(),
+                    discuss.getRepliedId(), discuss.getComment(), discuss.getPriority(), discuss.getDel(),
+                    discuss.getRepliedProfileId(), discuss.getRepliedComment(), discuss.getOriginDiscussId());
+
+            return result.intValue();
+        }catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return -1;
     }
 
     public void highlight(int id){

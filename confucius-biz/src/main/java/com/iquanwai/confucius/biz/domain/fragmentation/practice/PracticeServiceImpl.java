@@ -132,9 +132,9 @@ public class PracticeServiceImpl implements PracticeService {
             }
             //更新助教评论状态
             if (isAsst) {
-                if(load.getFeedBackTime()==null){
+                if (load.getFeedBackTime() == null) {
                     applicationSubmitDao.asstFeedbackAndTime(load.getId());
-                }else {
+                } else {
                     applicationSubmitDao.asstFeedback(load.getId());
                 }
                 asstCoachComment(load.getProfileId(), load.getProblemId());
@@ -318,7 +318,13 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public Integer deleteExamples(Integer id) {
-       return warmupPracticeDao.delWarmupPractice(id);
+        return warmupPracticeDao.delWarmupPractice(id);
     }
+
+    @Override
+    public List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds) {
+        return warmupPracticeDao.loadPractices(practiceIds);
+    }
+
 
 }
