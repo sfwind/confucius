@@ -180,7 +180,6 @@ public class UnionUserService {
         unionUser.setNickName(profile.getNickname());
         unionUser.setHeadImgUrl(profile.getHeadimgurl());
 
-        // TODO 因为需要权限校验，添加 roleId 做作为缓存，耗费资源
         Role role = accountService.getUserRole(profile.getId());
         if (role != null) {
             unionUser.setRoleId(role.getId());

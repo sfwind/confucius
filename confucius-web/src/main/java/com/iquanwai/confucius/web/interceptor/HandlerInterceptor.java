@@ -21,6 +21,8 @@ import java.io.Writer;
 public class HandlerInterceptor extends HandlerInterceptorAdapter {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+    private static final int UNLOGIIN_STATUS = 700;
+    private static final int NOAUTHORITY_STATUS = 701;
 
     @Autowired
     private UnionUserService unionUserService;
@@ -66,7 +68,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
     private void writeUnLoginStatus(HttpServletResponse response) throws IOException {
         Writer writer = null;
         try {
-            response.setStatus(700);
+            response.setStatus(UNLOGIIN_STATUS);
             writer = response.getWriter();
             writer.flush();
         } finally {
@@ -82,7 +84,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
     private void writeNoAuthority(HttpServletResponse response) throws IOException {
         Writer writer = null;
         try {
-            response.setStatus(701);
+            response.setStatus(NOAUTHORITY_STATUS);
             writer = response.getWriter();
             writer.flush();
         } finally {
