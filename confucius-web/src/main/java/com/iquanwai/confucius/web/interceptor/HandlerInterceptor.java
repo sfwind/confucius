@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.interceptor;
 
+import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.UnionUser;
@@ -23,38 +24,34 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
 
     @Autowired
     private UnionUserService unionUserService;
+    @Autowired
+    private PermissionService permissionService;
 
     /**
      * 只校验 callback 是否存在，对于 callback 是否过期的情况，需要在 resolver 里面自行重新刷新、或者让用户重新授权
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
         if (platform == null || unionUserService.isDocumentRequest(request)) {
             return true;
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
             if (callback != null && callback.getUnionId() != null) {
-                return true;
+                // 校验是否有权限访问页面
+                String requestUrl = request.getRequestURI();
+                logger.info(requestUrl);
+                UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
+                return unionUser != null && permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
             } else {
                 if (ConfigUtils.isDebug()) {
                     return true;
                 } else {
-                    return handleUnLogin(response);
+                    writeUnLoginStatus(response);
+                    return false;
                 }
             }
         }
-    }
-
-    /**
-     * 对于 ajax 请求，不存在 callback 请求的处理
-     * @param response 响应
-     * @return 是否通过拦截器
-     */
-    private boolean handleUnLogin(HttpServletResponse response) throws Exception {
-        writeUnLoginStatus(response);
-        return false;
     }
 
     /**
