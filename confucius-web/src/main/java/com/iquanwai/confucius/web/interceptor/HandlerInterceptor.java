@@ -40,17 +40,19 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
             if (callback != null && callback.getUnionId() != null) {
-                // // 校验是否有权限访问页面
-                // String requestUrl = request.getRequestURI();
-                // logger.info(requestUrl);
-                // UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-                // if (unionUser != null) {
-                //     boolean authority = permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
-                //     if (!authority) {
-                //         writeNoAuthority(response);
-                //         return false;
-                //     }
-                // }
+                // 校验是否有权限访问页面
+                String requestUrl = request.getRequestURI();
+                logger.info(requestUrl);
+                UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
+                if (unionUser != null) {
+                    boolean authority = permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
+                    if (!authority) {
+                        writeNoAuthority(response);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
                 return true;
             } else {
                 if (ConfigUtils.isDebug()) {
