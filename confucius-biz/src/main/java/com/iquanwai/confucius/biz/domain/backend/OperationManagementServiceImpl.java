@@ -116,6 +116,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         List<Integer> origins = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getOriginDiscussId).distinct().collect(Collectors.toList());
         logger.info("origin:"+origins);
         List<WarmupPracticeDiscuss> originDiscusses = warmupPracticeDiscussDao.loadDiscussByOrigins(origins);
+        logger.info("originDiscuesses:"+originDiscusses);
         warmupPracticeDiscusses.forEach(discuss->{
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
