@@ -36,21 +36,40 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         if (platform == null || unionUserService.isDocumentRequest(request)) {
             return true;
         } else {
+            // if (ConfigUtils.isDebug()) {
+            //     String requestUrl = request.getRequestURI();
+            //     Callback callback = new Callback();
+            //     callback.setState("qrm4zqjlqlrjlr9oo8qfuqy6t1kan6k8");
+            //     callback.setUnionId("os8zavwgXriKmPo0Crjcl0Kn8Nq8");
+            //     UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
+            //     boolean permission = permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
+            //     if (!permission) {
+            //         writeNoAuthority(response);
+            //         return false;
+            //     }
+            // }
+
             Callback callback = unionUserService.getCallbackByRequest(request);
             if (callback != null && callback.getUnionId() != null) {
                 // 校验是否有权限访问页面
                 String requestUrl = request.getRequestURI();
                 logger.info(requestUrl);
                 UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
-                return unionUser != null && permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
+                if (unionUser != null) {
+                    boolean authority = permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
+                    if (!authority) {
+                        writeNoAuthority(response);
+                        return false;
+                    }
+                }
             } else {
                 if (ConfigUtils.isDebug()) {
                     return true;
-                } else {
-                    writeUnLoginStatus(response);
-                    return false;
                 }
+                writeUnLoginStatus(response);
+                return false;
             }
+            return false;
         }
     }
 
@@ -61,6 +80,22 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         Writer writer = null;
         try {
             response.setStatus(700);
+            writer = response.getWriter();
+            writer.flush();
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }
+
+    /**
+     * ajax 请求接口没有权限，返回 701 状态码
+     */
+    private void writeNoAuthority(HttpServletResponse response) throws IOException {
+        Writer writer = null;
+        try {
+            response.setStatus(701);
             writer = response.getWriter();
             writer.flush();
         } finally {
