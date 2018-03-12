@@ -129,6 +129,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
            logger.info("discusses:"+discusses);
             discuss.setDiscusses(discusses);
         });
+        warmupPractice.setDiscusses(warmupPracticeDiscusses);
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
         return warmupPractice;
     }
