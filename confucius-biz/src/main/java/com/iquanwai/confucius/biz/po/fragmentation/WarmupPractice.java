@@ -35,5 +35,5 @@ public class WarmupPractice {
      * 新增巩固练习
      */
     private List<WarmupChoice> choices; // 所有选项
-    private List<WarmupPracticeDiscuss> discusses;
+    private List<WarmupPracticeDiscuss> warmupPracticeDiscusses;
 }
