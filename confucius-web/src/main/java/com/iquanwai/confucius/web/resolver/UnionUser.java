@@ -18,6 +18,7 @@ public class UnionUser {
     private String unionId;
     private String nickName;
     private String headImgUrl;
+    private Integer roleId;
 
     public static UnionUser defaultUser() {
         return new UnionUser(
@@ -25,7 +26,8 @@ public class UnionUser {
                 ConfigUtils.getDefaultOpenid(),
                 ConfigUtils.getDefaultUnionId(),
                 "三十文",
-                "http://wx.qlogo.cn/mmopen/Q3auHgzwzM7wkhob9zgicD3IJxG1tLVSSe9qdzR1qUGXz6BwPv73sr67iaTEibcA1sNic3Roib4DgXCVG4IWe0zPAKJnlo5r4NibezssS6naic6dkM/0"
+                "http://wx.qlogo.cn/mmopen/Q3auHgzwzM7wkhob9zgicD3IJxG1tLVSSe9qdzR1qUGXz6BwPv73sr67iaTEibcA1sNic3Roib4DgXCVG4IWe0zPAKJnlo5r4NibezssS6naic6dkM/0",
+                9
         );
     }
 
