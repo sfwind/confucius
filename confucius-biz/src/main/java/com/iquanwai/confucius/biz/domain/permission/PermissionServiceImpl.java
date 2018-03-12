@@ -82,6 +82,7 @@ public class PermissionServiceImpl implements PermissionService {
                         logger.error("roleId:{} don't have permission: {}", roleId, uri);
                         return false;
                     }else{
+                        // 遍历用户的权限,如果用户有相关权限,返回true,反之返回false
                         for (Authority permission : permissions) {
                             if (permission.getPattern().matcher(uri).matches()) {
                                 return true;
