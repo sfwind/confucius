@@ -110,12 +110,11 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Override
     public WarmupPractice getTargetPractice(Integer practiceId,String currentDate) {
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class,practiceId);
-        //获取当天的所有评论
-        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadTargetDiscuss(practiceId,currentDate);
-        List<Integer> origins = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getOriginDiscussId).distinct().collect(Collectors.toList());
-        List<WarmupPracticeDiscuss> originsDiscusses = warmupPracticeDiscussDao.loadDiscussByOrigins(origins);
 
-        warmupPracticeDiscusses.forEach(discuss->{
+        //获取当天的所有评论
+        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadTargetDiscuss(practiceId, currentDate);
+
+        warmupPracticeDiscusses.stream().forEach(discuss -> {
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
             if(profile != null) {
@@ -123,13 +122,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                 discuss.setName(profile.getNickname());
             }
             discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
-            //获得当前评论的所有对应回复
-            List<AbstractComment> discusses = originsDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getOriginDiscussId().equals(discuss.getOriginDiscussId())&& warmupPracticeDiscuss.getId()<=discuss.getId()).collect(Collectors.toList());
-           logger.info("discusses:"+discusses);
-            discuss.setDiscusses(discusses);
         });
-
-        warmupPractice.setWarmupPracticeDiscusses(warmupPracticeDiscusses);
+        warmupPractice.setDiscussList(warmupPracticeDiscusses);
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
         return warmupPractice;
     }

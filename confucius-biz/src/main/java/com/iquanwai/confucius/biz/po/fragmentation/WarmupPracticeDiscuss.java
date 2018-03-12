@@ -12,6 +12,4 @@ import java.util.List;
 public class WarmupPracticeDiscuss extends AbstractComment{
     private Integer warmupPracticeId; //巩固练习id
     private Integer originDiscussId; //讨论最早发起的评论id
-    //之前的讨论集合
-    private List<AbstractComment> discusses;
 }
