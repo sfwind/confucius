@@ -107,4 +107,6 @@ public interface PracticeService {
     void initCommentEvaluation(Integer submitId, Integer commentId);
 
     ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId);
+
+    Integer deleteExamples(Integer id);
 }
