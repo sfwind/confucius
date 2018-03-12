@@ -30,6 +30,13 @@ public interface OperationManagementService {
     WarmupPractice getWarmupPractice(Integer practiceId);
 
     /**
+     * 获取指定某天的评论
+     * @param practiceId
+     * @return
+     */
+    WarmupPractice getTargetPractice(Integer practiceId,String currentDate);
+
+    /**
      * 内容运营回复某个巩固练习
      *
      * @param profileId           发表讨论的用户id
@@ -87,5 +94,8 @@ public interface OperationManagementService {
      * -1：数据异常
      */
     Integer deleteAsstWarmupDiscuss(Integer discussId);
+
+
+
 
 }

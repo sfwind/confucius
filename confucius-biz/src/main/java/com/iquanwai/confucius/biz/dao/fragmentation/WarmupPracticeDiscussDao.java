@@ -41,6 +41,37 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
     }
 
 
+
+    public List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId,String currentDate){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
+        String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE WarmupPracticeId = ? AND ADDTIME LIKE ? AND  DEL = 0";
+
+        try {
+            return runner.query(sql,h,practiceId,"%"+currentDate+"%");
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<WarmupPracticeDiscuss> loadDiscussByOrigins(List<Integer> origins){
+        if(origins.size()==0){
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(origins.size());
+        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
+        String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE OriginDiscussId in ( "+questionMark +") AND DEL = 0 ";
+
+        try {
+            return runner.query(sql, h, origins.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<Integer> loadHotWarmupPracticeDiscussLastNDay(int day, Page page){
         QueryRunner run = new QueryRunner(getDataSource());
         Date date = DateUtils.beforeDays(new Date(), day);

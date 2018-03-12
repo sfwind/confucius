@@ -105,6 +105,29 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
+    public WarmupPractice getTargetPractice(Integer practiceId,String currentDate) {
+        WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
+        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadTargetDiscuss(practiceId,currentDate);
+
+        //TODO:获得某个评论的从头开始的回复
+        List<Integer> origins = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getOriginDiscussId).distinct().collect(Collectors.toList());
+        List<WarmupPracticeDiscuss> originDiscusses = warmupPracticeDiscussDao.loadDiscussByOrigins(origins);
+        warmupPracticeDiscusses.forEach(discuss->{
+            Integer profileId = discuss.getProfileId();
+            Profile profile = accountService.getProfile(profileId);
+            if(profile != null) {
+                discuss.setAvatar(profile.getHeadimgurl());
+                discuss.setName(profile.getNickname());
+            }
+            discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
+            List<AbstractComment> discusses = originDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getOriginDiscussId().equals(discuss.getOriginDiscussId()) && warmupPracticeDiscuss.getId()<discuss.getId()).collect(Collectors.toList());
+            discuss.setDiscusses(discusses);
+        });
+        warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
+        return warmupPractice;
+    }
+
+    @Override
     public void discuss(Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId) {
         WarmupPracticeDiscuss warmupPracticeDiscuss = new WarmupPracticeDiscuss();
         warmupPracticeDiscuss.setWarmupPracticeId(warmupPracticeId);

@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.po.fragmentation;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by justin on 17/2/8.
@@ -11,4 +12,6 @@ import java.util.Date;
 public class WarmupPracticeDiscuss extends AbstractComment{
     private Integer warmupPracticeId; //巩固练习id
     private Integer originDiscussId; //讨论最早发起的评论id
+    //之前的讨论集合
+    private List<AbstractComment> discusses;
 }

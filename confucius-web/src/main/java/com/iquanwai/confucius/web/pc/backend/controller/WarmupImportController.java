@@ -214,6 +214,13 @@ public class WarmupImportController {
         return WebUtils.result(warmupPractices);
     }
 
+    @RequestMapping(value = "/load/target/{warmupPracticeId}",method = RequestMethod.GET)
+     public ResponseEntity<Map<String,Object>> loadTargetPractice(UnionUser unionUser,@PathVariable Integer warmupPracticeId, @RequestParam("currentDate")String currentDate){
+        WarmupPractice warmupPractice =   operationManagementService.getTargetPractice(warmupPracticeId,currentDate);
+        return WebUtils.result(warmupPractice);
+    }
+
+
 
     private List<WarmupPractice> getTodayWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
         //过滤员工评论
