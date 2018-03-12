@@ -24,8 +24,8 @@ public class CustomerMessageLogDao extends DBUtil {
 
     public int insert(CustomerMessageLog messageLog) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO CustomerMessageLog (Openid, PublishTime, Comment, ContentHash, ForwardlyPush, ValidPush) " +
-                "VALUES ( ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO CustomerMessageLog (Openid, PublishTime, Comment, ContentHash, ForwardlyPush, ValidPush, Source) " +
+                "VALUES ( ?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     messageLog.getOpenId(),
@@ -33,7 +33,8 @@ public class CustomerMessageLogDao extends DBUtil {
                     messageLog.getComment(),
                     messageLog.getContentHash(),
                     messageLog.getForwardlyPush(),
-                    messageLog.getValidPush());
+                    messageLog.getValidPush(),
+                    messageLog.getSource());
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
