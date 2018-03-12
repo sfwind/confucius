@@ -44,7 +44,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             // 发送权限校验
             boolean validPush = checkTemplateMessageAuthority(templateMessage, true);
             // 模板消息发送记录
-            saveTemplateMessageSendLog(templateMessage, true, validPush);
+            saveTemplateMessageSendLog(templateMessage, true, validPush, source);
             if (!validPush) {
                 sendTag = false;
             }
@@ -117,7 +117,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
         // 3. 手动发送内容一样的消息，同一个用户最多只能收到一次
         {
-            Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getContentHash().equals(Integer.toString(templateMessage.getContent().hashCode()))).count();
+            Long result = customerMessageLogs.stream()
+                    .filter(messageLog -> messageLog.getContentHash().equals(Integer.toString(templateMessage.getContent().hashCode()))).count();
             authority = result.intValue() < 1;
             if (!authority) {
                 return false;
@@ -136,7 +137,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         // 5. 用户三小时内最多收到1条消息
         {
             Date distanceTime = DateUtils.afterHours(new Date(), -3);
-            Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getPublishTime().compareTo(distanceTime) > 0).count();
+            Long result = customerMessageLogs.stream()
+                    .filter(messageLog -> messageLog.getPublishTime().compareTo(distanceTime) > 0).count();
             authority = result.intValue() < 1;
             if (!authority) {
                 return false;
@@ -145,7 +147,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         return true;
     }
 
-    private void saveTemplateMessageSendLog(TemplateMessage templateMessage, boolean forwardlyPush, boolean validPush) {
+    private void saveTemplateMessageSendLog(TemplateMessage templateMessage, boolean forwardlyPush,
+                                            boolean validPush, String source) {
         CustomerMessageLog customerMessageLog = new CustomerMessageLog();
         customerMessageLog.setOpenId(templateMessage.getTouser());
         customerMessageLog.setPublishTime(new Date());
@@ -153,6 +156,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         customerMessageLog.setContentHash(Integer.toString(templateMessage.getContent().hashCode()));
         customerMessageLog.setForwardlyPush(forwardlyPush ? 1 : 0);
         customerMessageLog.setValidPush(validPush ? 1 : 0);
+        customerMessageLog.setSource(source);
         customerMessageLogDao.insert(customerMessageLog);
     }
 
