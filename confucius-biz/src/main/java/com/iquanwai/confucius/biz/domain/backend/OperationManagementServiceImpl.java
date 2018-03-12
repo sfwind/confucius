@@ -12,6 +12,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -54,6 +56,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private static final int HIGHLIGHT_LIMIT = 10;
 
     private static final String SYSTEM_MESSAGE = "AUTO";
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
@@ -108,10 +111,10 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public WarmupPractice getTargetPractice(Integer practiceId,String currentDate) {
         WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
         List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadTargetDiscuss(practiceId,currentDate);
-
+        logger.info("warmupDiscuss:"+warmupPracticeDiscusses);
         //TODO:获得某个评论的从头开始的回复
         List<Integer> origins = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getOriginDiscussId).distinct().collect(Collectors.toList());
-
+        logger.info("origin:"+origins);
         List<WarmupPracticeDiscuss> originDiscusses = warmupPracticeDiscussDao.loadDiscussByOrigins(origins);
         warmupPracticeDiscusses.forEach(discuss->{
             Integer profileId = discuss.getProfileId();
@@ -122,6 +125,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             }
             discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
             List<AbstractComment> discusses = originDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getOriginDiscussId().equals(discuss.getOriginDiscussId()) && warmupPracticeDiscuss.getId()<=discuss.getId()).collect(Collectors.toList());
+           logger.info("discusses:"+discusses);
             discuss.setDiscusses(discusses);
         });
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
