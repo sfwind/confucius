@@ -229,7 +229,7 @@ public class WarmupImportController {
         if (ignoreString == null) {
             redisUtil.set(currentDate, id, new Long(EXPIRED_TIME));
         } else {
-            ignoreString += ',' + id;
+            ignoreString = ignoreString+"," + id;
             redisUtil.set(currentDate, ignoreString, new Long(EXPIRED_TIME));
         }
 
