@@ -292,8 +292,9 @@ public class WarmupImportController {
         }
         //过滤被员工评论过的评论
         return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
-
+            logger.info(replayList.toString());
             for (WarmupPracticeDiscuss reply : replayList) {
+                logger.info("reply:"+reply.getRepliedId());
                 if (warmupPracticeDiscuss.getId() == reply.getRepliedId() && emplyeeProfileIds.contains(reply.getProfileId())) {
                     return null;
                 }
