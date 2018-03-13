@@ -26,7 +26,6 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
 
-
     public List<WarmupPracticeDiscuss> loadDiscuss(Integer practiceId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
@@ -41,43 +40,42 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
     }
 
 
-
-    public List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId,String currentDate){
+    public List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId, String currentDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
         String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE WarmupPracticeId = ? AND AddTime LIKE ? AND  DEL = 0";
 
         try {
-            return runner.query(sql,h,practiceId,"%"+currentDate+"%");
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public List<WarmupPracticeDiscuss> loadDiscussByOrigins(List<Integer> origins){
-        if(origins.size()==0){
-            return Lists.newArrayList();
-        }
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String questionMark = produceQuestionMark(origins.size());
-        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
-        String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE OriginDiscussId in ( "+questionMark +") AND DEL = 0 ";
-
-        try {
-            return runner.query(sql, h, origins.toArray());
+            return runner.query(sql, h, practiceId, "%" + currentDate + "%");
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-    public List<Integer> loadHotWarmupPracticeDiscussLastNDay(int day, Page page){
+//    public List<WarmupPracticeDiscuss> loadDiscussByOrigins(List<Integer> origins){
+//        if(origins.size()==0){
+//            return Lists.newArrayList();
+//        }
+//        QueryRunner runner = new QueryRunner(getDataSource());
+//        String questionMark = produceQuestionMark(origins.size());
+//        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
+//        String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE OriginDiscussId in ( "+questionMark +") AND DEL = 0 ";
+//
+//        try {
+//            return runner.query(sql, h, origins.toArray());
+//        } catch (SQLException e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
+//        return Lists.newArrayList();
+//    }
+
+    public List<Integer> loadHotWarmupPracticeDiscussLastNDay(int day, Page page) {
         QueryRunner run = new QueryRunner(getDataSource());
         Date date = DateUtils.beforeDays(new Date(), day);
         ResultSetHandler<List<Integer>> h = new ColumnListHandler<>("WarmupPracticeId");
         String sql = "SELECT WarmupPracticeId FROM WarmupPracticeDiscuss where AddTime > ? group by WarmupPracticeId " +
-                "order by Count(*) desc limit "+ page.getOffset() + "," + page.getLimit();
+                "order by Count(*) desc limit " + page.getOffset() + "," + page.getLimit();
         try {
             return run.query(sql, h, date);
         } catch (SQLException e) {
@@ -86,22 +84,39 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<WarmupPracticeDiscuss> loadTodayDiscuss(){
+    public List<WarmupPracticeDiscuss> loadTodayDiscuss() {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<WarmupPracticeDiscuss>(WarmupPracticeDiscuss.class);
         String sql = "SELECT * from fragmentCourse.WarmupPracticeDiscuss WHERE AddTime >date_format(now(),'%y-%m-%d')";
 
         try {
-            return runner.query(sql,h);
+            return runner.query(sql, h);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
 
+    public List<WarmupPracticeDiscuss> loadByRelays(List<Integer> replays) {
+        if (replays.size() == 0) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(replays.size());
+        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
+        String sql = "SELECT * FROM WarmupPracticeDiscuss WHERE RepliedId in (" + questionMark + " ) AND DEL = 0";
 
-    public int insert(WarmupPracticeDiscuss discuss){
+        try {
+            return runner.query(sql, h, replays.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+    public int insert(WarmupPracticeDiscuss discuss) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "insert into WarmupPracticeDiscuss(WarmupPracticeId, Profileid, RepliedId, Comment, " +
                 "Priority, Del, RepliedProfileid, RepliedComment, OriginDiscussId) " +
@@ -113,14 +128,14 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
                     discuss.getRepliedProfileId(), discuss.getRepliedComment(), discuss.getOriginDiscussId());
 
             return result.intValue();
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
         return -1;
     }
 
-    public void highlight(int id){
+    public void highlight(int id) {
         QueryRunner run = new QueryRunner(getDataSource());
         String sql = "Update WarmupPracticeDiscuss set Priority=1 where Id = ?";
         try {

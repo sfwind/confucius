@@ -108,13 +108,9 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     }
 
     @Override
-    public WarmupPractice getTargetPractice(Integer practiceId,String currentDate) {
-        WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class,practiceId);
-
-        //获取当天的所有评论
-        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadTargetDiscuss(practiceId, currentDate);
-
-        warmupPracticeDiscusses.stream().forEach(discuss -> {
+    public WarmupPractice getTargetPractice(Integer practiceId, List<WarmupPracticeDiscuss> warmupPracticeDiscuss) {
+        WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
+        warmupPracticeDiscuss.stream().forEach(discuss -> {
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
             if(profile != null) {
@@ -123,10 +119,12 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             }
             discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
         });
-        warmupPractice.setDiscussList(warmupPracticeDiscusses);
+        warmupPractice.setDiscussList(warmupPracticeDiscuss);
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
         return warmupPractice;
+
     }
+
 
     @Override
     public void discuss(Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId) {

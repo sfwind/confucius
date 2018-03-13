@@ -15,6 +15,18 @@ public interface DiscussService {
      */
     public List<WarmupPracticeDiscuss> loadTodayDiscuss();
 
+    /**
+     * 获取该评论的所有回复
+     * @param replys
+     * @return
+     */
+    public List<WarmupPracticeDiscuss> loadByReplys(List<Integer> replys);
 
-
+    /**
+     * 获取某天选择题对应的评论
+     * @param practiceId
+     * @param currentDate
+     * @return
+     */
+    public List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId,String currentDate);
 }

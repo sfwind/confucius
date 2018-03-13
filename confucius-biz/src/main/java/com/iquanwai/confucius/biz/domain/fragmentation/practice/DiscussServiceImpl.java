@@ -16,4 +16,14 @@ public class DiscussServiceImpl implements DiscussService{
     public List<WarmupPracticeDiscuss> loadTodayDiscuss() {
         return warmupPracticeDiscussDao.loadTodayDiscuss();
     }
+
+    @Override
+    public List<WarmupPracticeDiscuss> loadByReplys(List<Integer> replys) {
+        return warmupPracticeDiscussDao.loadByRelays(replys);
+    }
+
+    @Override
+    public List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId, String currentDate) {
+        return warmupPracticeDiscussDao.loadTargetDiscuss(practiceId,currentDate);
+    }
 }

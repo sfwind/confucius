@@ -209,23 +209,23 @@ public class WarmupImportController {
     public ResponseEntity<Map<String, Object>> loadTodayDiscuss(UnionUser unionUser) {
 
         List<WarmupPracticeDiscuss> discusses = discussService.loadTodayDiscuss();
-        List<WarmupPractice> warmupPractices = getTodayWarmup(discusses);
+        List<WarmupPractice> warmupPractices = getTargetWarmup(discusses);
 
         return WebUtils.result(warmupPractices);
     }
 
     @RequestMapping(value = "/load/target/{warmupPracticeId}",method = RequestMethod.GET)
      public ResponseEntity<Map<String,Object>> loadTargetPractice(UnionUser unionUser,@PathVariable Integer warmupPracticeId, @RequestParam("currentDate")String currentDate){
-        WarmupPractice warmupPractice =   operationManagementService.getTargetPractice(warmupPracticeId,currentDate);
-        logger.info("warmUpPractice:"+warmupPractice.toString());
+        List<WarmupPracticeDiscuss> warmupPracticeDiscusses =  discussService.loadTargetDiscuss(warmupPracticeId,currentDate);
+        warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses);
+        WarmupPractice warmupPractice =   operationManagementService.getTargetPractice(warmupPracticeId,warmupPracticeDiscusses);
         return WebUtils.result(warmupPractice);
     }
 
+    private List<WarmupPractice> getTargetWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
+        //过滤评论
+        warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses);
 
-
-    private List<WarmupPractice> getTodayWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
-        //过滤员工评论
-        warmupPracticeDiscusses = filterEmployeeDiscuss(warmupPracticeDiscusses);
         List<Integer> practiceIds = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getWarmupPracticeId).distinct().collect(Collectors.toList());
         //查看今天的选择题
         List<WarmupPractice> warmupPractices = practiceService.loadWarmupPractices(practiceIds);
@@ -235,21 +235,36 @@ public class WarmupImportController {
 
 
     /**
-     * 过滤工作人员评论
+     * 过滤不需要展示的评论（员工评论或者被员工评论过的评论）
      *
      * @param warmupPracticeDiscusses
      * @return
      */
-    private List<WarmupPracticeDiscuss> filterEmployeeDiscuss(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
+    private List<WarmupPracticeDiscuss> filterDiscuss(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
         List<QuanwaiEmployee> quanwaiEmployees = employeeService.getEmployees();
-        return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
+        warmupPracticeDiscusses = warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
             if (quanwaiEmployees.stream().filter(quanwaiEmployee -> quanwaiEmployee.getProfileId().equals(warmupPracticeDiscuss.getProfileId())).count() == 0) {
                 return warmupPracticeDiscuss;
             } else {
                 return null;
             }
         }).filter(warmupPracticeDiscuss -> warmupPracticeDiscuss != null).collect(Collectors.toList());
-    }
 
+        List<Integer> replyIds = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getId).collect(Collectors.toList());
+
+        List<WarmupPracticeDiscuss> replayList = discussService.loadByReplys(replyIds);
+        List<Integer> emplyeeProfileIds = quanwaiEmployees.stream().map(QuanwaiEmployee::getProfileId).distinct().collect(Collectors.toList());
+
+        //过滤被员工评论过的评论
+        return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
+
+           for(WarmupPracticeDiscuss reply: replayList){
+               if(warmupPracticeDiscuss.getId()==reply.getRepliedId() && emplyeeProfileIds.contains(reply.getProfileId())){
+                   return null;
+               }
+           }
+           return warmupPracticeDiscuss;
+        }).filter(warmupPracticeDiscuss -> warmupPracticeDiscuss!=null).collect(Collectors.toList());
+    }
 
 }
