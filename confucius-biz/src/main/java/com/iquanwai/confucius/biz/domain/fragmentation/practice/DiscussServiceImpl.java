@@ -13,8 +13,8 @@ public class DiscussServiceImpl implements DiscussService{
     private WarmupPracticeDiscussDao warmupPracticeDiscussDao;
 
     @Override
-    public List<WarmupPracticeDiscuss> loadCurrentDayDiscuss(String currentDay) {
-        return warmupPracticeDiscussDao.loadCurrentDayDiscuss(currentDay);
+    public List<WarmupPracticeDiscuss> loadCurrentDayDiscuss(String currentDate) {
+        return warmupPracticeDiscussDao.loadCurrentDayDiscuss(currentDate);
     }
 
     @Override

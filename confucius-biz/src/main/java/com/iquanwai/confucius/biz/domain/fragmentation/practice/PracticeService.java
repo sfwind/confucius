@@ -110,5 +110,10 @@ public interface PracticeService {
 
     Integer deleteExamples(Integer id);
 
+    /**
+     * 获得选择题
+     * @param practiceIds
+     * @return
+     */
     List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds);
 }

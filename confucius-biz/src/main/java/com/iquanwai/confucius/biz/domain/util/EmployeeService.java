@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface EmployeeService {
 
-
-    public List<QuanwaiEmployee> getEmployees();
+    /**
+     * 获得圈外员工
+     * @return
+     */
+     List<QuanwaiEmployee> getEmployees();
 
 }

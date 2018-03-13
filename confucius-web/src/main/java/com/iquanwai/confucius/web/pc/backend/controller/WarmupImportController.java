@@ -211,10 +211,11 @@ public class WarmupImportController {
 
 
     @RequestMapping(value = "/load/discuss", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(@RequestParam("interval") Integer interval) {
+    public ResponseEntity<Map<String, Object>> loadTargetDiscuss(@RequestParam("interval") Integer interval) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
 
         List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDate);
+        //获取过滤后待评论的选择题
         List<WarmupPractice> warmupPractices = getTargetWarmup(discusses, currentDate);
 
         return WebUtils.result(warmupPractices);
@@ -222,7 +223,6 @@ public class WarmupImportController {
 
     @RequestMapping(value = "/ignore/discuss", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> ignoreDiscuss(@RequestParam("discussId") Integer id, @RequestParam("interval") Integer interval) {
-        //忽略discuss
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
 
         String ignoreString = redisUtil.get(currentDate);
@@ -232,12 +232,11 @@ public class WarmupImportController {
             ignoreString = ignoreString+"," + id;
             redisUtil.set(currentDate, ignoreString, new Long(EXPIRED_TIME));
         }
-
         return WebUtils.success();
     }
 
     @RequestMapping(value = "/load/target/{warmupPracticeId}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadTargetPractice(UnionUser unionUser, @PathVariable Integer warmupPracticeId, @RequestParam("interval") Integer interval) {
+    public ResponseEntity<Map<String, Object>> loadTargetPractice(@PathVariable Integer warmupPracticeId, @RequestParam("interval") Integer interval) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
         List<WarmupPracticeDiscuss> warmupPracticeDiscusses = discussService.loadTargetDiscuss(warmupPracticeId, currentDate);
         warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses, currentDate);
@@ -248,7 +247,7 @@ public class WarmupImportController {
     private List<WarmupPractice> getTargetWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses, String currentDate) {
         //过滤评论
         warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses, currentDate);
-
+        //获取过滤后的选择题id
         List<Integer> practiceIds = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getWarmupPracticeId).distinct().collect(Collectors.toList());
         //查看今天的选择题
         List<WarmupPractice> warmupPractices = practiceService.loadWarmupPractices(practiceIds);
@@ -258,13 +257,15 @@ public class WarmupImportController {
 
 
     /**
-     * 过滤不需要展示的评论（员工评论或者被员工评论过的评论）
+     * 过滤不需要展示的评论（员工评论或者被员工评论过的评论或者被忽略的评论）
      *
      * @param warmupPracticeDiscusses
      * @return
      */
     private List<WarmupPracticeDiscuss> filterDiscuss(List<WarmupPracticeDiscuss> warmupPracticeDiscusses, String currentDate) {
+        //获得员工
         List<QuanwaiEmployee> quanwaiEmployees = employeeService.getEmployees();
+
         warmupPracticeDiscusses = warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
             if (quanwaiEmployees.stream().filter(quanwaiEmployee -> quanwaiEmployee.getProfileId().equals(warmupPracticeDiscuss.getProfileId())).count() == 0) {
                 return warmupPracticeDiscuss;
@@ -280,7 +281,6 @@ public class WarmupImportController {
         //过滤被忽略的discuss
         String ignoreStrings = redisUtil.get(currentDate);
         if (ignoreStrings != null) {
-            logger.info("currentDate:"+currentDate+" ignoreDiscuss:"+ignoreStrings);
             String[] ignoreDiscusses = ignoreStrings.split(",");
             warmupPracticeDiscusses = warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
                 for (String ignore : ignoreDiscusses) {

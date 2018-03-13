@@ -13,7 +13,7 @@ public interface DiscussService {
      * 获得某天的选择题评论
      * @return
      */
-    public List<WarmupPracticeDiscuss> loadCurrentDayDiscuss(String currentDay);
+    List<WarmupPracticeDiscuss> loadCurrentDayDiscuss(String currentDate);
 
 
 
@@ -22,7 +22,7 @@ public interface DiscussService {
      * @param replys
      * @return
      */
-    public List<WarmupPracticeDiscuss> loadByReplys(List<Integer> replys);
+   List<WarmupPracticeDiscuss> loadByReplys(List<Integer> replys);
 
     /**
      * 获取某天选择题对应的评论
@@ -30,5 +30,5 @@ public interface DiscussService {
      * @param currentDate
      * @return
      */
-    public List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId,String currentDate);
+   List<WarmupPracticeDiscuss> loadTargetDiscuss(Integer practiceId,String currentDate);
 }
