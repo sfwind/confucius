@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.google.common.collect.Lists;
+import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
 import com.iquanwai.confucius.biz.domain.backend.ProblemService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.DiscussService;
@@ -49,6 +50,8 @@ public class WarmupImportController {
     private DiscussService discussService;
     @Autowired
     private EmployeeService employeeService;
+    @Autowired
+    private RedisUtil redisUtil;
 
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -207,14 +210,24 @@ public class WarmupImportController {
 
     }
 
+
     @RequestMapping(value = "/load/discuss", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(UnionUser unionUser,@RequestParam("interval")Integer interval) {
+    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(@RequestParam("interval")Integer interval) {
         String currentDay = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),interval));
 
         List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDay);
         List<WarmupPractice> warmupPractices = getTargetWarmup(discusses);
 
         return WebUtils.result(warmupPractices);
+    }
+
+    @RequestMapping(value = "/ignore/discuss",method = RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> ignoreDiscuss(@RequestParam("discussId")Integer id){
+     //忽略discuss
+        //TODO:将discuss存储到Redis
+        redisUtil.set("remove",id);
+
+        return WebUtils.success();
     }
 
     @RequestMapping(value = "/load/target/{warmupPracticeId}",method = RequestMethod.GET)
@@ -258,6 +271,10 @@ public class WarmupImportController {
 
         List<WarmupPracticeDiscuss> replayList = discussService.loadByReplys(replyIds);
         List<Integer> emplyeeProfileIds = quanwaiEmployees.stream().map(QuanwaiEmployee::getProfileId).distinct().collect(Collectors.toList());
+
+        //过滤被忽略的discuss
+        Integer discussId = Integer.valueOf(redisUtil.get("remove"));
+        warmupPracticeDiscusses = warmupPracticeDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getId()!=discussId).collect(Collectors.toList());
 
         //过滤被员工评论过的评论
         return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
