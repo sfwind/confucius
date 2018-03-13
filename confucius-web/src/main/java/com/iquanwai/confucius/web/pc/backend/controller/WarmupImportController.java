@@ -26,10 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +49,8 @@ public class WarmupImportController {
     private EmployeeService employeeService;
     @Autowired
     private RedisUtil redisUtil;
+
+    private static final long EXPIRED_TIME = 24 * 60 * 60 * 7;
 
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -212,36 +211,43 @@ public class WarmupImportController {
 
 
     @RequestMapping(value = "/load/discuss", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(@RequestParam("interval")Integer interval) {
-        String currentDay = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),interval));
+    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(@RequestParam("interval") Integer interval) {
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
 
-        List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDay);
-        List<WarmupPractice> warmupPractices = getTargetWarmup(discusses);
+        List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDate);
+        List<WarmupPractice> warmupPractices = getTargetWarmup(discusses,currentDate);
 
         return WebUtils.result(warmupPractices);
     }
 
-    @RequestMapping(value = "/ignore/discuss",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> ignoreDiscuss(@RequestParam("discussId")Integer id){
-     //忽略discuss
-        //TODO:将discuss存储到Redis
-        redisUtil.set("remove",id);
+    @RequestMapping(value = "/ignore/discuss", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> ignoreDiscuss(@RequestParam("discussId") Integer id, @RequestParam("interval") Integer interval) {
+        //忽略discuss
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
+
+        String ignoreString = redisUtil.get(currentDate);
+        if (ignoreString == null) {
+            redisUtil.set(currentDate, id, new Long(EXPIRED_TIME));
+        } else {
+            ignoreString += ',' + id;
+            redisUtil.set(currentDate, ignoreString, new Long(EXPIRED_TIME));
+        }
 
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/load/target/{warmupPracticeId}",method = RequestMethod.GET)
-     public ResponseEntity<Map<String,Object>> loadTargetPractice(UnionUser unionUser,@PathVariable Integer warmupPracticeId, @RequestParam("interval")Integer interval){
-        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),interval));
-        List<WarmupPracticeDiscuss> warmupPracticeDiscusses =  discussService.loadTargetDiscuss(warmupPracticeId,currentDate);
-        warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses);
-        WarmupPractice warmupPractice =   operationManagementService.getTargetPractice(warmupPracticeId,warmupPracticeDiscusses);
+    @RequestMapping(value = "/load/target/{warmupPracticeId}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadTargetPractice(UnionUser unionUser, @PathVariable Integer warmupPracticeId, @RequestParam("interval") Integer interval) {
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
+        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = discussService.loadTargetDiscuss(warmupPracticeId, currentDate);
+        warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses, currentDate);
+        WarmupPractice warmupPractice = operationManagementService.getTargetPractice(warmupPracticeId, warmupPracticeDiscusses);
         return WebUtils.result(warmupPractice);
     }
 
-    private List<WarmupPractice> getTargetWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
+    private List<WarmupPractice> getTargetWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses,String currentDate) {
         //过滤评论
-        warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses);
+        warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses, currentDate);
 
         List<Integer> practiceIds = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getWarmupPracticeId).distinct().collect(Collectors.toList());
         //查看今天的选择题
@@ -257,7 +263,7 @@ public class WarmupImportController {
      * @param warmupPracticeDiscusses
      * @return
      */
-    private List<WarmupPracticeDiscuss> filterDiscuss(List<WarmupPracticeDiscuss> warmupPracticeDiscusses) {
+    private List<WarmupPracticeDiscuss> filterDiscuss(List<WarmupPracticeDiscuss> warmupPracticeDiscusses, String currentDate) {
         List<QuanwaiEmployee> quanwaiEmployees = employeeService.getEmployees();
         warmupPracticeDiscusses = warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
             if (quanwaiEmployees.stream().filter(quanwaiEmployee -> quanwaiEmployee.getProfileId().equals(warmupPracticeDiscuss.getProfileId())).count() == 0) {
@@ -271,22 +277,29 @@ public class WarmupImportController {
 
         List<WarmupPracticeDiscuss> replayList = discussService.loadByReplys(replyIds);
         List<Integer> emplyeeProfileIds = quanwaiEmployees.stream().map(QuanwaiEmployee::getProfileId).distinct().collect(Collectors.toList());
-
         //过滤被忽略的discuss
-        if(redisUtil.get("remove")!=null) {
-            Integer discussId = Integer.valueOf(redisUtil.get("remove"));
-            warmupPracticeDiscusses = warmupPracticeDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getId() != discussId).collect(Collectors.toList());
+        String ignoreStrings = redisUtil.get(currentDate);
+        if (ignoreStrings != null) {
+            String[] ignoreDiscusses = ignoreStrings.split(",");
+            warmupPracticeDiscusses = warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
+                for (String ignore : ignoreDiscusses) {
+                    if (warmupPracticeDiscuss.getId() == Integer.valueOf(ignore)) {
+                        return null;
+                    }
+                }
+                return warmupPracticeDiscuss;
+            }).collect(Collectors.toList());
         }
         //过滤被员工评论过的评论
         return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
 
-           for(WarmupPracticeDiscuss reply: replayList){
-               if(warmupPracticeDiscuss.getId()==reply.getRepliedId() && emplyeeProfileIds.contains(reply.getProfileId())){
-                   return null;
-               }
-           }
-           return warmupPracticeDiscuss;
-        }).filter(warmupPracticeDiscuss -> warmupPracticeDiscuss!=null).collect(Collectors.toList());
+            for (WarmupPracticeDiscuss reply : replayList) {
+                if (warmupPracticeDiscuss.getId() == reply.getRepliedId() && emplyeeProfileIds.contains(reply.getProfileId())) {
+                    return null;
+                }
+            }
+            return warmupPracticeDiscuss;
+        }).filter(warmupPracticeDiscuss -> warmupPracticeDiscuss != null).collect(Collectors.toList());
     }
 
 }
