@@ -273,9 +273,10 @@ public class WarmupImportController {
         List<Integer> emplyeeProfileIds = quanwaiEmployees.stream().map(QuanwaiEmployee::getProfileId).distinct().collect(Collectors.toList());
 
         //过滤被忽略的discuss
-        Integer discussId = Integer.valueOf(redisUtil.get("remove"));
-        warmupPracticeDiscusses = warmupPracticeDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getId()!=discussId).collect(Collectors.toList());
-
+        if(redisUtil.get("remove")!=null) {
+            Integer discussId = Integer.valueOf(redisUtil.get("remove"));
+            warmupPracticeDiscusses = warmupPracticeDiscusses.stream().filter(warmupPracticeDiscuss -> warmupPracticeDiscuss.getId() != discussId).collect(Collectors.toList());
+        }
         //过滤被员工评论过的评论
         return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
 
