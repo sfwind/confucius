@@ -218,7 +218,8 @@ public class WarmupImportController {
     }
 
     @RequestMapping(value = "/load/target/{warmupPracticeId}",method = RequestMethod.GET)
-     public ResponseEntity<Map<String,Object>> loadTargetPractice(UnionUser unionUser,@PathVariable Integer warmupPracticeId, @RequestParam("currentDate")String currentDate){
+     public ResponseEntity<Map<String,Object>> loadTargetPractice(UnionUser unionUser,@PathVariable Integer warmupPracticeId, @RequestParam("interval")Integer interval){
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),interval));
         List<WarmupPracticeDiscuss> warmupPracticeDiscusses =  discussService.loadTargetDiscuss(warmupPracticeId,currentDate);
         warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses);
         WarmupPractice warmupPractice =   operationManagementService.getTargetPractice(warmupPracticeId,warmupPracticeDiscusses);
