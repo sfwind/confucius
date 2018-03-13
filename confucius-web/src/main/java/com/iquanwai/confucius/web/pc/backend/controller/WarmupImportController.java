@@ -215,7 +215,7 @@ public class WarmupImportController {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
 
         List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDate);
-        List<WarmupPractice> warmupPractices = getTargetWarmup(discusses,currentDate);
+        List<WarmupPractice> warmupPractices = getTargetWarmup(discusses, currentDate);
 
         return WebUtils.result(warmupPractices);
     }
@@ -245,7 +245,7 @@ public class WarmupImportController {
         return WebUtils.result(warmupPractice);
     }
 
-    private List<WarmupPractice> getTargetWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses,String currentDate) {
+    private List<WarmupPractice> getTargetWarmup(List<WarmupPracticeDiscuss> warmupPracticeDiscusses, String currentDate) {
         //过滤评论
         warmupPracticeDiscusses = filterDiscuss(warmupPracticeDiscusses, currentDate);
 
@@ -280,6 +280,7 @@ public class WarmupImportController {
         //过滤被忽略的discuss
         String ignoreStrings = redisUtil.get(currentDate);
         if (ignoreStrings != null) {
+            logger.info("currentDate:"+currentDate+" ignoreDiscuss:"+ignoreStrings);
             String[] ignoreDiscusses = ignoreStrings.split(",");
             warmupPracticeDiscusses = warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
                 for (String ignore : ignoreDiscusses) {
@@ -288,7 +289,7 @@ public class WarmupImportController {
                     }
                 }
                 return warmupPracticeDiscuss;
-            }).filter(warmupPracticeDiscuss -> warmupPracticeDiscuss!=null).collect(Collectors.toList());
+            }).filter(warmupPracticeDiscuss -> warmupPracticeDiscuss != null).collect(Collectors.toList());
         }
         //过滤被员工评论过的评论
         return warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
