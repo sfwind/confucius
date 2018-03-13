@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.WarmupChoice;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
 import com.iquanwai.confucius.biz.po.quanwai.QuanwaiEmployee;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.pc.backend.dto.WarmUpPracticeDto;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -25,6 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -205,10 +207,11 @@ public class WarmupImportController {
 
     }
 
-    @RequestMapping(value = "/load/today", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(UnionUser unionUser) {
+    @RequestMapping(value = "/load/discuss", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadTodayDiscuss(UnionUser unionUser,@RequestParam("interval")Integer interval) {
+        String currentDay = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),interval));
 
-        List<WarmupPracticeDiscuss> discusses = discussService.loadTodayDiscuss();
+        List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDay);
         List<WarmupPractice> warmupPractices = getTargetWarmup(discusses);
 
         return WebUtils.result(warmupPractices);

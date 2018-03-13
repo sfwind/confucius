@@ -10,10 +10,12 @@ import java.util.List;
 public interface DiscussService {
 
     /**
-     * 获得当天的选择题评论
+     * 获得某天的选择题评论
      * @return
      */
-    public List<WarmupPracticeDiscuss> loadTodayDiscuss();
+    public List<WarmupPracticeDiscuss> loadCurrentDayDiscuss(String currentDay);
+
+
 
     /**
      * 获取该评论的所有回复
