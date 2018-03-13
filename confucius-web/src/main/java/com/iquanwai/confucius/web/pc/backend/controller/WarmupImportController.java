@@ -214,14 +214,7 @@ public class WarmupImportController {
     @RequestMapping(value = "/load/discuss", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadTargetDiscuss(@RequestParam("interval") Integer interval) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
-
-        List<WarmupPracticeDiscuss> discusses = (List<WarmupPracticeDiscuss>)redisUtil.get(currentDate+cache_all,List.class);
-
-        if(discusses==null){
-            logger.info("读取数据库");
-            discusses = discussService.loadCurrentDayDiscuss(currentDate);
-            redisUtil.set(currentDate+cache_all,discusses,EXPIRED_TIME);
-        }
+        List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDate);
         //获取过滤后待评论的选择题
         List<WarmupPractice> warmupPractices = getTargetWarmup(discusses, currentDate);
 
