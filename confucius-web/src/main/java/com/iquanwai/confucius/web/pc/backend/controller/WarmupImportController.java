@@ -51,7 +51,8 @@ public class WarmupImportController {
     private RedisUtil redisUtil;
 
     private static final long EXPIRED_TIME = 24 * 60 * 60 * 7;
-
+    private static final String cache_all = "_discuss_all";
+    private static final String cache_ignore = "_discuss_ignore";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -214,7 +215,13 @@ public class WarmupImportController {
     public ResponseEntity<Map<String, Object>> loadTargetDiscuss(@RequestParam("interval") Integer interval) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
 
-        List<WarmupPracticeDiscuss> discusses = discussService.loadCurrentDayDiscuss(currentDate);
+        List<WarmupPracticeDiscuss> discusses = redisUtil.get(currentDate+cache_all,List.class);
+
+        if(discusses==null){
+            logger.info("读取数据库");
+            discusses = discussService.loadCurrentDayDiscuss(currentDate);
+            redisUtil.set(currentDate+cache_all,discusses,EXPIRED_TIME);
+        }
         //获取过滤后待评论的选择题
         List<WarmupPractice> warmupPractices = getTargetWarmup(discusses, currentDate);
 
@@ -225,12 +232,12 @@ public class WarmupImportController {
     public ResponseEntity<Map<String, Object>> ignoreDiscuss(@RequestParam("discussId") Integer id, @RequestParam("interval") Integer interval) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
 
-        String ignoreString = redisUtil.get(currentDate);
+        String ignoreString = redisUtil.get(currentDate+cache_ignore);
         if (ignoreString == null) {
-            redisUtil.set(currentDate, id, new Long(EXPIRED_TIME));
+            redisUtil.set(currentDate+cache_ignore, id, new Long(EXPIRED_TIME));
         } else {
             ignoreString = ignoreString+"," + id;
-            redisUtil.set(currentDate, ignoreString, new Long(EXPIRED_TIME));
+            redisUtil.set(currentDate+cache_ignore, ignoreString, new Long(EXPIRED_TIME));
         }
         return WebUtils.success();
     }
@@ -279,7 +286,7 @@ public class WarmupImportController {
         List<WarmupPracticeDiscuss> replayList = discussService.loadByReplys(replyIds);
         List<Integer> emplyeeProfileIds = quanwaiEmployees.stream().map(QuanwaiEmployee::getProfileId).distinct().collect(Collectors.toList());
         //过滤被忽略的discuss
-        String ignoreStrings = redisUtil.get(currentDate);
+        String ignoreStrings = redisUtil.get(currentDate+cache_ignore);
         if (ignoreStrings != null) {
             String[] ignoreDiscusses = ignoreStrings.split(",");
             warmupPracticeDiscusses = warmupPracticeDiscusses.stream().map(warmupPracticeDiscuss -> {
