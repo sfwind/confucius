@@ -215,7 +215,7 @@ public class WarmupImportController {
     public ResponseEntity<Map<String, Object>> loadTargetDiscuss(@RequestParam("interval") Integer interval) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), interval));
 
-        List<WarmupPracticeDiscuss> discusses = redisUtil.get(currentDate+cache_all,List.class);
+        List<WarmupPracticeDiscuss> discusses = (List<WarmupPracticeDiscuss>)redisUtil.get(currentDate+cache_all,List.class);
 
         if(discusses==null){
             logger.info("读取数据库");
