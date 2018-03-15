@@ -186,6 +186,7 @@ public class RiseOperationController {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
+                        problemList.setAbbreviation(problem.getAbbreviation());
                         return problemList;
                     }).collect(Collectors.toList());
             dto.setProblems(collect);
