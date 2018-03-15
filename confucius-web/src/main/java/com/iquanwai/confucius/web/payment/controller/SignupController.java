@@ -553,11 +553,11 @@ public class SignupController {
                 return WebUtils.success();
             } else {
                 dto.setButtonStr("立即入学");
-                dto.setAuditionStr("点击预约");
+                dto.setAuditionStr("预约体验");
             }
         } else {
             dto.setButtonStr("立即入学");
-            dto.setAuditionStr("点击预约");
+            dto.setAuditionStr("预约体验");
         }
 
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
