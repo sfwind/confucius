@@ -336,10 +336,16 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public List<WarmupPracticeDiscuss> loadYesterdayCommentsByProblem(Problem problem) {
-        List<WarmupPractice> warmupPracticeList = warmupPracticeDao.loadPracticesByProblemId(problem.getId());
+    public boolean loadYesterdayCommentsByProblem(Problem problem) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
-        return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmups(currentDate,warmupPracticeList);
+        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPracticesByProblemId(problem.getId());
+
+        for(WarmupPractice warmupPractice:warmupPractices){
+            if(warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice).size()>0){
+                return true;
+            }
+        }
+        return false;
     }
 
 

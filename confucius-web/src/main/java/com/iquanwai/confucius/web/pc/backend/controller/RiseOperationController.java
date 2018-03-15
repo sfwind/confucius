@@ -186,8 +186,7 @@ public class RiseOperationController {
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
                         problemList.setAbbreviation(problem.getAbbreviation());
-                        Integer count = practiceService.loadYesterdayCommentsByProblem(problem).size();
-                        problemList.setHasNewComments(count>0);
+                        problemList.setHasNewComments(practiceService.loadYesterdayCommentsByProblem(problem));
                         return problemList;
                     }).collect(Collectors.toList());
             dto.setProblems(collect);

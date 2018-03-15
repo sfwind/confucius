@@ -129,6 +129,6 @@ public interface PracticeService {
      * @param problem
      * @return
      */
-    List<WarmupPracticeDiscuss> loadYesterdayCommentsByProblem(Problem problem);
+    boolean loadYesterdayCommentsByProblem(Problem problem);
 
 }
