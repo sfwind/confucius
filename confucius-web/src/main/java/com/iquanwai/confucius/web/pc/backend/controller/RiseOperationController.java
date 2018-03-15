@@ -81,7 +81,6 @@ public class RiseOperationController {
     @Autowired
     private AssistantCoachService assistantCoachService;
 
-
     private static final String SEARCH_TOPIC = "business_school_application_search";
     private static final String NOTICE_TOPIC = "business_school_application_notice";
 
@@ -186,6 +185,8 @@ public class RiseOperationController {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
+                        problemList.setAbbreviation(problem.getAbbreviation());
+                        problemList.setHasNewComments(practiceService.loadYesterdayCommentsByProblem(problem));
                         return problemList;
                     }).collect(Collectors.toList());
             dto.setProblems(collect);

@@ -44,4 +44,9 @@ public class WarmUpPracticeDto {
      * 节
      */
     private Integer section;
+
+    /**
+     * 判断是否有新评论
+     */
+    private boolean hasNewComment;
 }

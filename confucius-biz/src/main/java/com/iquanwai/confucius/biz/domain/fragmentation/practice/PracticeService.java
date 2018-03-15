@@ -109,4 +109,26 @@ public interface PracticeService {
     ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId);
 
     Integer deleteExamples(Integer id);
+
+    /**
+     * 获得选择题
+     * @param practiceIds
+     * @return
+     */
+    List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds);
+
+    /**
+     * 加载昨天的评论
+     * @param warmupPractice
+     * @return
+     */
+    List<WarmupPracticeDiscuss> loadYesterdayCommentsByPractice(WarmupPractice warmupPractice);
+
+    /**
+     * 根据课程查看是否有昨日评论
+     * @param problem
+     * @return
+     */
+    boolean loadYesterdayCommentsByProblem(Problem problem);
+
 }

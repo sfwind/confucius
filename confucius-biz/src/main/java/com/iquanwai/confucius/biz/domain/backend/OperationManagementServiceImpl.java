@@ -12,6 +12,8 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -54,6 +56,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private static final int HIGHLIGHT_LIMIT = 10;
 
     private static final String SYSTEM_MESSAGE = "AUTO";
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
@@ -103,6 +106,25 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
         return warmupPractice;
     }
+
+    @Override
+    public WarmupPractice getTargetPractice(Integer practiceId, List<WarmupPracticeDiscuss> warmupPracticeDiscuss) {
+        WarmupPractice warmupPractice = warmupPracticeDao.load(WarmupPractice.class, practiceId);
+        warmupPracticeDiscuss.stream().forEach(discuss -> {
+            Integer profileId = discuss.getProfileId();
+            Profile profile = accountService.getProfile(profileId);
+            if(profile != null) {
+                discuss.setAvatar(profile.getHeadimgurl());
+                discuss.setName(profile.getNickname());
+            }
+            discuss.setDiscussTime(DateUtils.parseDateToString(discuss.getAddTime()));
+        });
+        warmupPractice.setDiscussList(warmupPracticeDiscuss);
+        warmupPractice.setChoiceList(warmupChoiceDao.loadChoices(practiceId));
+        return warmupPractice;
+
+    }
+
 
     @Override
     public void discuss(Integer profileId, Integer warmupPracticeId, String comment, Integer repliedId) {

@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.po.fragmentation;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by justin on 17/2/8.
