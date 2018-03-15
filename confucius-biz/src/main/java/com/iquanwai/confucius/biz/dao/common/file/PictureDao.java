@@ -3,19 +3,16 @@ package com.iquanwai.confucius.biz.dao.common.file;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.po.Picture;
-import com.iquanwai.confucius.biz.util.ThreadPool;
-import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * Created by nethunder on 2016/12/15.
@@ -24,42 +21,26 @@ import java.util.concurrent.Future;
 public class PictureDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public List<Picture> picture(Integer moduleId,Integer referId){
+    public List<Picture> picture(Integer moduleId, Integer referId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Picture>> h = new BeanListHandler<>(Picture.class);
-        try{
+        try {
             List<Picture> pictureList = run.query("select * from Picture where ModuleId=? and ReferencedId=?", h, moduleId, referId);
             return pictureList;
-        } catch (SQLException e){
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-    public int upload(Picture picture){
+    public int upload(Picture picture) {
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(ThreadPool.getThreadExecutor(), run);
         String insertSql = "INSERT INTO Picture(ModuleId, ReferencedId , RemoteIp,  RealName, Length, Type, Thumbnail) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try{
-            Future<Integer> result = asyncRun.update(insertSql,
-                    picture.getModuleId(),picture.getReferencedId(),picture.getRemoteIp(),picture.getRealName(),picture.getLength(),picture.getType(),picture.getThumbnail());
-            return result.get();
-        } catch (SQLException e){
-            logger.error(e.getLocalizedMessage(), e);
-        } catch (InterruptedException e){
-            // ignore
-        } catch (ExecutionException e){
-            logger.error(e.getMessage(), e);
-        }
-        return -1;
-    }
-
-    public int updateReference(String name,Integer referencedId){
-        QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "update Picture set ReferencedId = ? where RealName=?";
-        try{
-            return run.update(sql, referencedId, name);
+        try {
+            return run.insert(insertSql, new ScalarHandler<Long>(),
+                    picture.getModuleId(), picture.getReferencedId(), picture.getRemoteIp(), picture.getRealName(),
+                    picture.getLength(), picture.getType(), picture.getThumbnail()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
