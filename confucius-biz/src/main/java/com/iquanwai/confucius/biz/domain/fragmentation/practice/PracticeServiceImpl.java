@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,6 +54,8 @@ public class PracticeServiceImpl implements PracticeService {
     private WarmupChoiceDao warmupChoiceDao;
     @Autowired
     private CommentEvaluationDao commentEvaluationDao;
+    @Autowired
+    private WarmupPracticeDiscussDao warmupPracticeDiscussDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -324,6 +328,12 @@ public class PracticeServiceImpl implements PracticeService {
     @Override
     public List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds) {
         return warmupPracticeDao.loadPractices(practiceIds);
+    }
+
+    @Override
+    public List<WarmupPracticeDiscuss> loadYesterdayComments(WarmupPractice warmupPractice) {
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
+       return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice);
     }
 
 

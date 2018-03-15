@@ -51,7 +51,6 @@ public class WarmupImportController {
     private RedisUtil redisUtil;
 
     private static final long EXPIRED_TIME = 24 * 60 * 60 * 7;
-    private static final String cache_all = "_discuss_all";
     private static final String cache_ignore = "_discuss_ignore";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -71,6 +70,8 @@ public class WarmupImportController {
                 warmUpPracticeDto.setSection(schedule.getSection());
                 warmUpPracticeDtos.add(warmUpPracticeDto);
             }
+            List<WarmupPracticeDiscuss> warmupPracticeDiscusses = practiceService.loadYesterdayComments(warmupPractice);
+            warmUpPracticeDto.setHasNewComment(warmupPracticeDiscusses.size()>0);
         });
         //排序
         List<WarmUpPracticeDto> result = warmUpPracticeDtos.stream().sorted(

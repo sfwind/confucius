@@ -116,4 +116,12 @@ public interface PracticeService {
      * @return
      */
     List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds);
+
+    /**
+     * 加载昨天的评论
+     * @param warmupPractice
+     * @return
+     */
+    List<WarmupPracticeDiscuss> loadYesterdayComments(WarmupPractice warmupPractice);
+
 }

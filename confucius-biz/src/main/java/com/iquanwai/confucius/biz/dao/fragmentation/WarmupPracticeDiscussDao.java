@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
+import com.iquanwai.confucius.biz.po.fragmentation.WarmupPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.WarmupPracticeDiscuss;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -74,6 +75,19 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
 
         try {
             return runner.query(sql, h,currentDate+"%");
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<WarmupPracticeDiscuss> loadCurrentDayDiscussByWarmUp(String currentDate, WarmupPractice warmupPractice) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
+        String sql = "SELECT * from WarmupPracticeDiscuss WHERE WarmupPracticeId = ? AND  AddTime like ? AND DEL = 0 ";
+
+        try {
+            return runner.query(sql, h,warmupPractice.getId(),currentDate+"%");
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
