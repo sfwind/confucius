@@ -56,7 +56,6 @@ public class PracticeServiceImpl implements PracticeService {
     private CommentEvaluationDao commentEvaluationDao;
     @Autowired
     private WarmupPracticeDiscussDao warmupPracticeDiscussDao;
-
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -331,9 +330,16 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public List<WarmupPracticeDiscuss> loadYesterdayComments(WarmupPractice warmupPractice) {
+    public List<WarmupPracticeDiscuss> loadYesterdayCommentsByPractice(WarmupPractice warmupPractice) {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
        return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice);
+    }
+
+    @Override
+    public List<WarmupPracticeDiscuss> loadYesterdayCommentsByProblem(Problem problem) {
+        List<WarmupPractice> warmupPracticeList = warmupPracticeDao.loadPracticesByProblemId(problem.getId());
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
+        return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmups(currentDate,warmupPracticeList);
     }
 
 

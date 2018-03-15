@@ -14,4 +14,5 @@ public class ProblemListDto {
     private Boolean trial; //是否试用
     private Integer underCommentCount; //求点评数量
     private String abbreviation;//缩略
+    private boolean hasNewComments;//是否有新增评论
 }

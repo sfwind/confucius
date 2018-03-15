@@ -70,7 +70,7 @@ public class WarmupImportController {
                 warmUpPracticeDto.setSection(schedule.getSection());
                 warmUpPracticeDtos.add(warmUpPracticeDto);
             }
-            List<WarmupPracticeDiscuss> warmupPracticeDiscusses = practiceService.loadYesterdayComments(warmupPractice);
+            List<WarmupPracticeDiscuss> warmupPracticeDiscusses = practiceService.loadYesterdayCommentsByPractice(warmupPractice);
             warmUpPracticeDto.setHasNewComment(warmupPracticeDiscusses.size()>0);
         });
         //排序

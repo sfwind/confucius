@@ -81,6 +81,25 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+
+    public List<WarmupPracticeDiscuss> loadCurrentDayDiscussByWarmups(String currentDate,List<WarmupPractice> warmupPractices){
+        if(warmupPractices.size()==0){
+            return Lists.newArrayList();
+        }
+        QueryRunner run = new QueryRunner(getDataSource());
+        String questionMark = produceQuestionMark(warmupPractices.size());
+        ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);
+        String sql = "SELECT * FROM WarmupPracticeDiscuss where WarmupPracticeId in (" + questionMark + ") AND AddTime like ? AND DEL = 0 ";
+        try {
+            return run.query(sql, h,warmupPractices.toArray(),currentDate+"%");
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+
     public List<WarmupPracticeDiscuss> loadCurrentDayDiscussByWarmUp(String currentDate, WarmupPractice warmupPractice) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<WarmupPracticeDiscuss>> h = new BeanListHandler<>(WarmupPracticeDiscuss.class);

@@ -122,6 +122,13 @@ public interface PracticeService {
      * @param warmupPractice
      * @return
      */
-    List<WarmupPracticeDiscuss> loadYesterdayComments(WarmupPractice warmupPractice);
+    List<WarmupPracticeDiscuss> loadYesterdayCommentsByPractice(WarmupPractice warmupPractice);
+
+    /**
+     * 根据课程查看是否有昨日评论
+     * @param problem
+     * @return
+     */
+    List<WarmupPracticeDiscuss> loadYesterdayCommentsByProblem(Problem problem);
 
 }
