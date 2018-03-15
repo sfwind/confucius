@@ -553,11 +553,11 @@ public class SignupController {
                 return WebUtils.success();
             } else {
                 dto.setButtonStr("立即入学");
-//                dto.setAuditionStr("商学院宣讲");
+                dto.setAuditionStr("商学院宣讲");
             }
         } else {
             dto.setButtonStr("立即入学");
-//            dto.setAuditionStr("商学院宣讲");
+            dto.setAuditionStr("商学院宣讲");
         }
 
         Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
