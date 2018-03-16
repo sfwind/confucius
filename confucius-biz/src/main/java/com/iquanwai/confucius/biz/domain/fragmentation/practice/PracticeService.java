@@ -125,10 +125,8 @@ public interface PracticeService {
     List<WarmupPracticeDiscuss> loadYesterdayCommentsByPractice(WarmupPractice warmupPractice);
 
     /**
-     * 根据课程查看是否有昨日评论
-     * @param problem
+     * 查看昨日有评论的课程
      * @return
      */
-    boolean loadYesterdayCommentsByProblem(Problem problem);
-
+    List<Integer> loadProblemsByYesterdayComments();
 }
