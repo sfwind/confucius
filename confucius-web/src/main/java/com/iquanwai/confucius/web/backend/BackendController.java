@@ -101,6 +101,9 @@ public class BackendController {
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
+        if (noticeMsgDto.getSource() == null) {
+            return WebUtils.error("source是必填字段!");
+        }
         ThreadPool.execute(() -> {
             try {
                 // 所有待发人员名单
