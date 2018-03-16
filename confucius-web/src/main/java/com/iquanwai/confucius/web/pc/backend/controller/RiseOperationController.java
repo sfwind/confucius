@@ -177,6 +177,7 @@ public class RiseOperationController {
     public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
 
         List<Problem> problems = problemService.loadProblems();
+        List<Integer> yesterdayProblems = practiceService.loadProblemsByYesterdayComments();
         List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
@@ -186,7 +187,8 @@ public class RiseOperationController {
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
                         problemList.setAbbreviation(problem.getAbbreviation());
-                        problemList.setHasNewComments(practiceService.loadYesterdayCommentsByProblem(problem));
+                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId->problemId.equals(problem.getId())).count()>0);
+
                         return problemList;
                     }).collect(Collectors.toList());
             dto.setProblems(collect);
