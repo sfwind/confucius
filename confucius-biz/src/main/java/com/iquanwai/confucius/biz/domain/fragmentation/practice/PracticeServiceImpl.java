@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/12/11.
@@ -331,21 +332,30 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public List<WarmupPracticeDiscuss> loadYesterdayCommentsByPractice(WarmupPractice warmupPractice) {
-        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
-       return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice);
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), 1));
+        return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate, warmupPractice);
     }
 
+    //    @Override
+//    public boolean loadYesterdayCommentsByProblem(Problem problem) {
+//        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
+//        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPracticesByProblemId(problem.getId());
+//
+//        for(WarmupPractice warmupPractice:warmupPractices){
+//            if(warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice).size()>0){
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
     @Override
-    public boolean loadYesterdayCommentsByProblem(Problem problem) {
-        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
-        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPracticesByProblemId(problem.getId());
+    public List<Integer> loadProblemsByYesterdayComments() {
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), 1));
+        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadCurrentDayDiscuss(currentDate);
+        List<Integer> warmupPractices = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getWarmupPracticeId).distinct().collect(Collectors.toList());
 
-        for(WarmupPractice warmupPractice:warmupPractices){
-            if(warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice).size()>0){
-                return true;
-            }
-        }
-        return false;
+        List<WarmupPractice> practices = warmupPracticeDao.loadPractices(warmupPractices);
+        return practices.stream().map(WarmupPractice::getProblemId).distinct().collect(Collectors.toList());
     }
 
 
