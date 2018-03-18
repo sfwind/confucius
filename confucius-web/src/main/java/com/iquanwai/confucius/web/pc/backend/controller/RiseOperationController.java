@@ -517,11 +517,8 @@ public class RiseOperationController {
             templateDto.setForcePush(true);
             openIds.add(unionUser.getOpenId());
         }else{
-
+            openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         }
-
-        LOGGER.info(templateDto.toString());
-       // List<String> openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         Integer templateId = templateDto.getTemplateId();
 
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
@@ -572,8 +569,8 @@ public class RiseOperationController {
                 }
                 data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
             }
-
-            if (templateDto.getUrl() != null) {
+            String url = templateDto.getUrl();
+            if (url!= null && url.length()>0) {
                 templateMessage.setUrl(templateDto.getUrl());
             }
             templateMessage.setComment(templateDto.getComment());
