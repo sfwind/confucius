@@ -519,7 +519,7 @@ public class RiseOperationController {
         }else{
             openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         }
-        LOGGER.info("openid:"+openIds);
+        LOGGER.info("openids:"+openIds);
         Integer templateId = templateDto.getTemplateId();
 
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
@@ -529,6 +529,7 @@ public class RiseOperationController {
         //过滤黑名单用户
         List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
         sendLists.forEach(openid -> {
+            LOGGER.info("openid:"+openid);
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
 
