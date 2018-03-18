@@ -519,6 +519,7 @@ public class RiseOperationController {
         }else{
             openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         }
+        LOGGER.info("openid:"+openIds);
         Integer templateId = templateDto.getTemplateId();
 
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
