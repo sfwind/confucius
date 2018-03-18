@@ -29,6 +29,7 @@ public interface OperationManagementService {
      */
     WarmupPractice getWarmupPractice(Integer practiceId);
 
+    WarmupPractice getTargetPractice(Integer practiceId,List<WarmupPracticeDiscuss> warmupPracticeDiscuss);
     /**
      * 内容运营回复某个巩固练习
      *
@@ -87,5 +88,8 @@ public interface OperationManagementService {
      * -1：数据异常
      */
     Integer deleteAsstWarmupDiscuss(Integer discussId);
+
+
+
 
 }

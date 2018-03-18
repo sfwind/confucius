@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.interceptor;
 
+import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.UnionUser;
@@ -20,41 +21,47 @@ import java.io.Writer;
 public class HandlerInterceptor extends HandlerInterceptorAdapter {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+    private static final int UNLOGIIN_STATUS = 700;
+    private static final int NOAUTHORITY_STATUS = 701;
 
     @Autowired
     private UnionUserService unionUserService;
+    @Autowired
+    private PermissionService permissionService;
 
     /**
      * 只校验 callback 是否存在，对于 callback 是否过期的情况，需要在 resolver 里面自行重新刷新、或者让用户重新授权
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
         if (platform == null || unionUserService.isDocumentRequest(request)) {
             return true;
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
             if (callback != null && callback.getUnionId() != null) {
+                // 校验是否有权限访问页面
+                String requestUrl = request.getRequestURI();
+                logger.info(requestUrl);
+                UnionUser unionUser = unionUserService.getUnionUserByCallback(callback);
+                if (unionUser != null) {
+                    boolean authority = permissionService.checkPermission(unionUser.getRoleId(), requestUrl);
+                    if (!authority) {
+                        writeNoAuthority(response);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
                 return true;
             } else {
                 if (ConfigUtils.isDebug()) {
                     return true;
-                } else {
-                    return handleUnLogin(response);
                 }
+                writeUnLoginStatus(response);
+                return false;
             }
         }
-    }
-
-    /**
-     * 对于 ajax 请求，不存在 callback 请求的处理
-     * @param response 响应
-     * @return 是否通过拦截器
-     */
-    private boolean handleUnLogin(HttpServletResponse response) throws Exception {
-        writeUnLoginStatus(response);
-        return false;
     }
 
     /**
@@ -63,7 +70,23 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
     private void writeUnLoginStatus(HttpServletResponse response) throws IOException {
         Writer writer = null;
         try {
-            response.setStatus(700);
+            response.setStatus(UNLOGIIN_STATUS);
+            writer = response.getWriter();
+            writer.flush();
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }
+
+    /**
+     * ajax 请求接口没有权限，返回 701 状态码
+     */
+    private void writeNoAuthority(HttpServletResponse response) throws IOException {
+        Writer writer = null;
+        try {
+            response.setStatus(NOAUTHORITY_STATUS);
             writer = response.getWriter();
             writer.flush();
         } finally {

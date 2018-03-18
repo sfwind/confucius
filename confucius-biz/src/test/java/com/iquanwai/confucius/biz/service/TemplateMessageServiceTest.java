@@ -22,28 +22,20 @@ public class TemplateMessageServiceTest extends TestBase {
 
     @Test
     public void testSend(){
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser("o-Es21RVF3WCFQMOtl07Di_O9NVo");
 
-        String[] arrs = {
-                "o5h6ywsiXYMcLlex2xt7DRAgQX-A",
-        };
-
-        for(String openid:arrs) {
-            try {
-                TemplateMessage templateMessage = new TemplateMessage();
-                templateMessage.setTouser(openid);
-
-                templateMessage.setTemplate_id(ConfigUtils.willCloseMsgKey());
-                Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-                templateMessage.setData(data);
-                data.put("first", new TemplateMessage.Keyword("RISE试用期即将结束。"));
-                data.put("keyword1", new TemplateMessage.Keyword("RISE"));
-                data.put("keyword2", new TemplateMessage.Keyword("2017-02-28"));
-                data.put("remark", new TemplateMessage.Keyword("试用期截止日当天积分前100名的用户，RISE继续开放，其余用户到期后关闭。当前排名详见管理员通知。"));
-                templateMessageService.sendMessage(templateMessage);
-            }catch (Exception e){
-                System.out.println(e);
-            }
-        }
+        templateMessage.setTemplate_id(ConfigUtils.coursePassMsgKey());
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        templateMessage.setUrl("https://www.confucius.mobi/rise/static/plan/study?planId=6");
+        templateMessage.setData(data);
+        String first = "记住这个号码：111；你是这个号码学员的天使哦！";
+        String remark = "对了，课程结束前，不要互相交流号码信息~\n还没加群？点击查看群二维码。";
+        data.put("first", new TemplateMessage.Keyword(first));
+        data.put("keyword1", new TemplateMessage.Keyword("结构化思维明天开始"));
+        data.put("keyword2", new TemplateMessage.Keyword("明天凌晨"));
+        data.put("remark", new TemplateMessage.Keyword(remark));
+        templateMessageService.sendMessage(templateMessage);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.permission;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.permission.PermissionDao;
 import com.iquanwai.confucius.biz.dao.common.permission.RoleDao;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class PermissionServiceImpl implements PermissionService {
+
     @Autowired
     private RoleDao roleDao;
     @Autowired
@@ -36,27 +38,30 @@ public class PermissionServiceImpl implements PermissionService {
 
     private Map<Integer, List<Authority>> rolePermissions = Maps.newConcurrentMap();
 
+    private List<String> uriPatterns = Lists.newArrayList();
+
     @PostConstruct
     @Override
     public void initPermission() {
         List<Role> roles = roleDao.loadAll(Role.class);
-        logger.info("roles:{}",roles);
-        roles.forEach(role->{
+        logger.info("roles:{}", roles);
+        roles.forEach(role -> {
             List<Permission> permissions = permissionDao.loadPermissions(role.getLevel());
-            logger.info("permission:{} for role {}",permissions, role.getName());
+            logger.info("permission:{} for role {}", permissions, role.getName());
             rolePermissions.put(role.getId(), permissions.stream().map(permission -> {
                 Authority authority = new Authority();
                 authority.setRoleId(role.getId());
                 authority.setPermission(permission);
-                try{
+                uriPatterns.add(permission.getRegExUri());
+                try {
                     Pattern pattern = Pattern.compile(permission.getRegExUri());
                     authority.setPattern(pattern);
-                } catch (PatternSyntaxException e){
-                    logger.error("正则表达式异常,permission:{}",permission);
+                } catch (PatternSyntaxException e) {
+                    logger.error("正则表达式异常,permission:{}", permission);
                     return null;
                 }
                 return authority;
-            }).filter(item-> item.getPattern()!=null).collect(Collectors.toList()));
+            }).filter(item -> item.getPattern() != null).collect(Collectors.toList()));
         });
     }
 
@@ -67,33 +72,47 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Boolean checkPermission(Integer roleId, String uri) {
-        List<Authority> permissions = this.loadPermissions(roleId);
-        if(permissions==null){
-            logger.error("roleId:{} don't have permissions: {}", roleId, uri);
-            return false;
-        } else {
-            for(Authority permission:permissions){
-                if(permission.getPattern().matcher(uri).matches()){
-                    return true;
+        for (String regExUri : uriPatterns) {
+            try {
+                Pattern pattern = Pattern.compile(regExUri);
+                // 如果url有权限控制,查看用户有没有权限
+                if (pattern.matcher(uri).matches()) {
+                    List<Authority> permissions = this.loadPermissions(roleId);
+                    if (permissions == null) {
+                        logger.error("roleId:{} don't have permission: {}", roleId, uri);
+                        return false;
+                    }else{
+                        // 遍历用户的权限,如果用户有相关权限,返回true,反之返回false
+                        for (Authority permission : permissions) {
+                            if (permission.getPattern().matcher(uri).matches()) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }
                 }
+            } catch (PatternSyntaxException e) {
+                logger.error("正则表达式异常:{}", regExUri);
+                return false;
             }
         }
-        logger.error("roleId:{} don't have permissions: {} , permission size:{}", roleId, uri, permissions.size());
-        return false;
+
+        return true;
     }
 
     @Override
-    public void reloadPermission(){
+    public void reloadPermission() {
         rolePermissions.clear();
         initPermission();
     }
 
     @Override
-    public Role getRole(Integer profileId){
+    public Role getRole(Integer profileId) {
         List<UserRole> userRoles = userRoleDao.getRoles(profileId);
-        if(CollectionUtils.isEmpty(userRoles)){
+        if (CollectionUtils.isEmpty(userRoles)) {
             return null;
-        }else{
+        } else {
             Integer roleId = userRoles.get(0).getRoleId();
             return roleDao.load(Role.class, roleId);
         }

@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import org.slf4j.Logger;
@@ -82,7 +83,7 @@ public class UnionUserService {
     /** 根据请求获取 callback 数据 */
     public Callback getCallbackByRequest(HttpServletRequest request) {
         UnionUser.Platform platform = getPlatformType(request);
-        if (platform == null){
+        if (platform == null) {
             return null;
         }
         switch (platform) {
@@ -178,6 +179,11 @@ public class UnionUserService {
         unionUser.setUnionId(profile.getUnionid());
         unionUser.setNickName(profile.getNickname());
         unionUser.setHeadImgUrl(profile.getHeadimgurl());
+
+        Role role = accountService.getUserRole(profile.getId());
+        if (role != null) {
+            unionUser.setRoleId(role.getId());
+        }
         return unionUser;
     }
 

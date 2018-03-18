@@ -107,4 +107,26 @@ public interface PracticeService {
     void initCommentEvaluation(Integer submitId, Integer commentId);
 
     ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId);
+
+    Integer deleteExamples(Integer id);
+
+    /**
+     * 获得选择题
+     * @param practiceIds
+     * @return
+     */
+    List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds);
+
+    /**
+     * 加载昨天的评论
+     * @param warmupPractice
+     * @return
+     */
+    List<WarmupPracticeDiscuss> loadYesterdayCommentsByPractice(WarmupPractice warmupPractice);
+
+    /**
+     * 查看昨日有评论的课程
+     * @return
+     */
+    List<Integer> loadProblemsByYesterdayComments();
 }

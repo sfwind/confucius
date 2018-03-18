@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,7 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/12/11.
@@ -52,7 +55,8 @@ public class PracticeServiceImpl implements PracticeService {
     private WarmupChoiceDao warmupChoiceDao;
     @Autowired
     private CommentEvaluationDao commentEvaluationDao;
-
+    @Autowired
+    private WarmupPracticeDiscussDao warmupPracticeDiscussDao;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -132,9 +136,9 @@ public class PracticeServiceImpl implements PracticeService {
             }
             //更新助教评论状态
             if (isAsst) {
-                if(load.getFeedBackTime()==null){
+                if (load.getFeedBackTime() == null) {
                     applicationSubmitDao.asstFeedbackAndTime(load.getId());
-                }else {
+                } else {
                     applicationSubmitDao.asstFeedback(load.getId());
                 }
                 asstCoachComment(load.getProfileId(), load.getProblemId());
@@ -315,5 +319,44 @@ public class PracticeServiceImpl implements PracticeService {
     public ApplicationSubmit loadApplicationSubmitById(Integer applicationSubmitId) {
         return applicationSubmitDao.load(ApplicationSubmit.class, applicationSubmitId);
     }
+
+    @Override
+    public Integer deleteExamples(Integer id) {
+        return warmupPracticeDao.delWarmupPractice(id);
+    }
+
+    @Override
+    public List<WarmupPractice> loadWarmupPractices(List<Integer> practiceIds) {
+        return warmupPracticeDao.loadPractices(practiceIds);
+    }
+
+    @Override
+    public List<WarmupPracticeDiscuss> loadYesterdayCommentsByPractice(WarmupPractice warmupPractice) {
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), 1));
+        return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate, warmupPractice);
+    }
+
+    //    @Override
+//    public boolean loadYesterdayCommentsByProblem(Problem problem) {
+//        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
+//        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPracticesByProblemId(problem.getId());
+//
+//        for(WarmupPractice warmupPractice:warmupPractices){
+//            if(warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice).size()>0){
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+    @Override
+    public List<Integer> loadProblemsByYesterdayComments() {
+        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), 1));
+        List<WarmupPracticeDiscuss> warmupPracticeDiscusses = warmupPracticeDiscussDao.loadCurrentDayDiscuss(currentDate);
+        List<Integer> warmupPractices = warmupPracticeDiscusses.stream().map(WarmupPracticeDiscuss::getWarmupPracticeId).distinct().collect(Collectors.toList());
+
+        List<WarmupPractice> practices = warmupPracticeDao.loadPractices(warmupPractices);
+        return practices.stream().map(WarmupPractice::getProblemId).distinct().collect(Collectors.toList());
+    }
+
 
 }

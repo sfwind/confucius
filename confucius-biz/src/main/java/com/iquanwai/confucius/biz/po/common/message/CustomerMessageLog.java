@@ -11,11 +11,12 @@ import java.util.Date;
 public class CustomerMessageLog {
 
     private Integer id;
-    private String openId;
-    private Date publishTime;
-    private String comment;
+    private String openId;  //用户openid
+    private Date publishTime; //发送时间
+    private String comment; //消息发送目的
     private String contentHash; // 发送内容的 hash 值
     private Integer forwardlyPush; // 用户无触发推送
     private Integer validPush; // 有效的推送
+    private String source; //跟踪消息打开率
 
 }

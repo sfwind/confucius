@@ -87,7 +87,6 @@ public class RiseOperationController {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-
     private static final String SEARCH_TOPIC = "business_school_application_search";
     private static final String NOTICE_TOPIC = "business_school_application_notice";
 
@@ -184,6 +183,7 @@ public class RiseOperationController {
     public ResponseEntity<Map<String, Object>> loadProblems(UnionUser pcLoginUser) {
 
         List<Problem> problems = problemService.loadProblems();
+        List<Integer> yesterdayProblems = practiceService.loadProblemsByYesterdayComments();
         List<ProblemCatalog> catalogs = problemService.loadAllCatalogs();
         List<ProblemCatalogDto> result = catalogs.stream().map(item -> {
             ProblemCatalogDto dto = new ProblemCatalogDto();
@@ -192,6 +192,9 @@ public class RiseOperationController {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
+                        problemList.setAbbreviation(problem.getAbbreviation());
+                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId->problemId.equals(problem.getId())).count()>0);
+
                         return problemList;
                     }).collect(Collectors.toList());
             dto.setProblems(collect);

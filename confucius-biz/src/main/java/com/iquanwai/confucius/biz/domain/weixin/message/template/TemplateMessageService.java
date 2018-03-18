@@ -13,8 +13,9 @@ public interface TemplateMessageService {
     /**
      * @param templateMessage 模板消息对象
      * @param forwardlyPush 是否主动推送
+     * @param source 跟踪来源的场景值
      */
-    boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush);
+    boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush, String source);
 
     /**
      * 根据模板库中的编号获取模板真实id
