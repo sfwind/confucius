@@ -4,8 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.dao.common.message.CustomerMessageLogDao;
+import com.iquanwai.confucius.biz.dao.common.message.TemplateMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.TemplateMsg;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.message.CustomerMessageLog;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -26,7 +29,8 @@ import java.util.Map;
  * Created by justin on 16/8/10.
  */
 @Service
-public class TemplateMessageServiceImpl implements TemplateMessageService {
+public class TemplateMessageServiceImpl implements TemplateMessageService
+{
 
     @Autowired
     private RestfulHelper restfulHelper;
@@ -34,6 +38,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private CustomerMessageLogDao customerMessageLogDao;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private TemplateMessageDao templateMessageDao;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -78,6 +84,11 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
         Map<String, Object> response = CommonUtils.jsonToMap(body);
         return (String) response.get("template_id");
+    }
+
+    @Override
+    public String getTemplateIdByDB(Integer id) {
+        return templateMessageDao.load(TemplateMsg.class,id).getMessageId();
     }
 
     /**

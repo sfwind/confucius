@@ -16,4 +16,6 @@ public class TemplateDto {
     private String openIds;
     private String remarkColor;
     private Boolean forcePush;
+    private Boolean isMime;
+    private String source;
 }

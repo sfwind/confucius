@@ -24,5 +24,9 @@ public interface TemplateMessageService {
      * */
     String getTemplateId(String templateShortId);
 
+
+    String getTemplateIdByDB(Integer id);
+
+
     String SEND_MESSAGE_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={access_token}";
 }

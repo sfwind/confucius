@@ -28,9 +28,11 @@ import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import com.iquanwai.confucius.web.backend.dto.NoticeMsgDto;
 import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
@@ -506,10 +508,23 @@ public class RiseOperationController {
                 .module("运营功能").function("发送模板消息").action(comment);
 
         operationLogService.log(operationLog);
+        String source = templateDto.getSource();
+        if (source == null) {
+            return WebUtils.error("source是必填字段,值不能含中文!");
+        }
+       List<String> openIds =  Lists.newArrayList();
+        if(templateDto.getIsMime()){
+            templateDto.setForcePush(true);
+            openIds.add(unionUser.getOpenId());
+        }else{
+
+        }
 
         LOGGER.info(templateDto.toString());
-        List<String> openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
+       // List<String> openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         Integer templateId = templateDto.getTemplateId();
+
+        String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
         Boolean forcePush = templateDto.getForcePush();
@@ -518,11 +533,8 @@ public class RiseOperationController {
         sendLists.forEach(openid -> {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(openid);
-            if (templateId ==0) {
-                templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
-            }else if(templateId==1){
-                templateMessage.setTemplate_id(ConfigUtils.accountChangeMsgKey());
-            }
+
+            templateMessage.setTemplate_id(templateMsgId);
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
             if (templateDto.getFirst() != null) {
@@ -566,7 +578,7 @@ public class RiseOperationController {
             }
             templateMessage.setComment(templateDto.getComment());
 
-            templateMessageService.sendMessage(templateMessage,forcePush==null||!forcePush);
+            templateMessageService.sendMessage(templateMessage,forcePush==null||!forcePush,source);
         });
 
         return WebUtils.result("发送结束");
