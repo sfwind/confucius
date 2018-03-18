@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -20,9 +19,7 @@ import org.springframework.util.Assert;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Created by justin on 17/3/16.
@@ -47,13 +44,9 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private UserRoleDao userRoleDao;
     @Autowired
     private ProblemDao problemDao;
-    @Autowired
-    private KnowledgeDao knowledgeDao;
-    @Autowired
-    private ProblemScheduleDao problemScheduleDao;
 
     //每个练习的精华上限
-    private static final int HIGHLIGHT_LIMIT = 10;
+    private static final int HIGHLIGHT_LIMIT = 100;
 
     private static final String SYSTEM_MESSAGE = "AUTO";
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -174,28 +167,35 @@ public class OperationManagementServiceImpl implements OperationManagementServic
                     SYSTEM_MESSAGE, url);
 
             //通知所有参与过讨论的用户
-            List<WarmupPracticeDiscuss> warmupPracticeDiscussList = warmupPracticeDiscussDao.loadDiscuss(practiceId);
-
-            List<Integer> participants = Lists.newArrayList();
-            warmupPracticeDiscussList.stream().forEach(discuss -> {
-                if(!participants.contains(discuss.getProfileId())) {
-                    participants.add(discuss.getProfileId());
-                }
-            });
-
-            participants.stream().filter(participant -> !participant.equals(highlightOne)).forEach(participant -> {
-                String url2 = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
-                url2 = MessageFormat.format(url2, Objects.toString(discussId), Objects.toString(practiceId));
-                String message2 = "你关注的选择题，有一个解答被官方认证了，点击看看吧";
-                messageService.sendMessage(message2, Objects.toString(participant),
-                        SYSTEM_MESSAGE, url2);
-            });
+//            List<WarmupPracticeDiscuss> warmupPracticeDiscussList = warmupPracticeDiscussDao.loadDiscuss(practiceId);
+//
+//            List<Integer> participants = Lists.newArrayList();
+//            warmupPracticeDiscussList.stream().forEach(discuss -> {
+//                if(!participants.contains(discuss.getProfileId())) {
+//                    participants.add(discuss.getProfileId());
+//                }
+//            });
+//
+//            participants.stream().filter(participant -> !participant.equals(highlightOne)).forEach(participant -> {
+//                String url2 = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
+//                url2 = MessageFormat.format(url2, Objects.toString(discussId), Objects.toString(practiceId));
+//                String message2 = "你关注的选择题，有一个解答被官方认证了，点击看看吧";
+//                messageService.sendMessage(message2, Objects.toString(participant),
+//                        SYSTEM_MESSAGE, url2);
+//            });
         }
     }
 
+
     @Override
-    public void highlightApplicationSubmit(Integer practiceId, Integer submitId) {
-        List<ApplicationSubmit> highlights = applicationSubmitDao.getHighlightSubmit(practiceId);
+    public void unhighlightDiscuss(Integer discussId) {
+        warmupPracticeDiscussDao.unhighlight(discussId);
+    }
+
+    @Override
+    public void highlightApplicationSubmit(Integer submitId) {
+        ApplicationSubmit submit = applicationSubmitDao.load(ApplicationSubmit.class, submitId);
+        List<ApplicationSubmit> highlights = applicationSubmitDao.getHighlightSubmit(submit.getApplicationId());
 
         //精华数超过上限时,把最先加精的作业去精
         if(highlights.size() >= HIGHLIGHT_LIMIT) {
@@ -211,11 +211,16 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             }
 
             if(oldest != null) {
-                applicationSubmitDao.unHighlight(oldest.getId());
+                applicationSubmitDao.unhighlight(oldest.getId());
             }
         }
 
         applicationSubmitDao.highlight(submitId);
+    }
+
+    @Override
+    public void unhighlightApplicationSubmit(Integer submitId) {
+        applicationSubmitDao.unhighlight(submitId);
     }
 
     @Override

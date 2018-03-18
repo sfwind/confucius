@@ -158,12 +158,39 @@ public class RiseOperationController {
         return WebUtils.success();
     }
 
-    @RequestMapping(value = "/highlight/applicationSubmit/{practiceId}/{submitId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/highlight/cancel/discuss/{discussId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> unhighlightDiscuss(PCLoginUser loginUser,
+                                                                @PathVariable Integer discussId) {
+
+        operationManagementService.unhighlightDiscuss(discussId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("巩固练习")
+                .action("取消加精")
+                .memo(discussId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/highlight/applicationSubmit/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> highlightApplicationSubmit(PCLoginUser loginUser,
-                                                                          @PathVariable Integer practiceId,
                                                                           @PathVariable Integer submitId) {
 
-        operationManagementService.highlightApplicationSubmit(practiceId, submitId);
+        operationManagementService.highlightApplicationSubmit(submitId);
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("内容运营")
+                .function("应用练习")
+                .action("加精优秀的作业")
+                .memo(submitId.toString());
+        operationLogService.log(operationLog);
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/highlight/cancel/applicationSubmit/{submitId}", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> unhighlightApplicationSubmit(PCLoginUser loginUser,
+                                                                          @PathVariable Integer submitId) {
+
+        operationManagementService.unhighlightApplicationSubmit(submitId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习")

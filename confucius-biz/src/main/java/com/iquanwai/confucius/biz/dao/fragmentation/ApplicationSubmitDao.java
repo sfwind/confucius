@@ -156,7 +156,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
     }
 
-    public void unHighlight(Integer submitId) {
+    public void unhighlight(Integer submitId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update ApplicationSubmit set Priority=0 where Id=?";
         try {
