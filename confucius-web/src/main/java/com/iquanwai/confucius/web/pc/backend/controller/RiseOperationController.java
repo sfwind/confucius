@@ -18,6 +18,7 @@ import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.TableDto;
+import com.iquanwai.confucius.biz.po.TemplateMsg;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
@@ -492,6 +493,14 @@ public class RiseOperationController {
         } else {
             return WebUtils.error("分配失败");
         }
+    }
+
+
+    @RequestMapping(value = "/load/templates",method = RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> loadTemplates(UnionUser unionUser){
+        List<TemplateMsg> templateMsgList = templateMessageService.loadTemplateMsgs();
+
+        return WebUtils.result(templateMsgList);
     }
 
     /**

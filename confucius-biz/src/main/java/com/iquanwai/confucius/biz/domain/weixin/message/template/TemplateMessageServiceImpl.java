@@ -24,13 +24,13 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/10.
  */
 @Service
-public class TemplateMessageServiceImpl implements TemplateMessageService
-{
+public class TemplateMessageServiceImpl implements TemplateMessageService {
 
     @Autowired
     private RestfulHelper restfulHelper;
@@ -65,11 +65,6 @@ public class TemplateMessageServiceImpl implements TemplateMessageService
         if (sendTag) {
             String json = new Gson().toJson(templateMessage);
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
-//            JSONObject jsonObject = JSON.parseObject(body);
-//            if(jsonObject.get("errcode").equals(0)){
-//                return true;
-//            }
-//            return false;
         }
         return StringUtils.isNoneEmpty(body);
     }
@@ -88,7 +83,12 @@ public class TemplateMessageServiceImpl implements TemplateMessageService
 
     @Override
     public String getTemplateIdByDB(Integer id) {
-        return templateMessageDao.load(TemplateMsg.class,id).getMessageId();
+        return templateMessageDao.load(TemplateMsg.class, id).getMessageId();
+    }
+
+    @Override
+    public List<TemplateMsg> loadTemplateMsgs() {
+        return templateMessageDao.loadAll(TemplateMsg.class).stream().filter(templateMsg -> templateMsg.getDel()==0).collect(Collectors.toList());
     }
 
     /**
