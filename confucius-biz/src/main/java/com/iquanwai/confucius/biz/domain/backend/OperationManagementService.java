@@ -47,12 +47,22 @@ public interface OperationManagementService {
     void highlightDiscuss(Integer discussId);
 
     /**
+     * 回复取消加精
+     * @param discussId 讨论id
+     */
+    void unhighlightDiscuss(Integer discussId);
+
+    /**
      * 提交作业加精
-     * @param practiceId 练习id
      * @param submitId 提交id
      */
-    void highlightApplicationSubmit(Integer practiceId, Integer submitId);
+    void highlightApplicationSubmit(Integer submitId);
 
+    /**
+     * 提交作业取消加精
+     * @param submitId 提交id
+     */
+    void unhighlightApplicationSubmit(Integer submitId);
 
     /**
      * 作业是否已评论

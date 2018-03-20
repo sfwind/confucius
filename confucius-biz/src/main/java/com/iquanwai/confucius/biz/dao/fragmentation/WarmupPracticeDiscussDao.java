@@ -160,6 +160,16 @@ public class WarmupPracticeDiscussDao extends PracticeDBUtil {
         }
     }
 
+    public void unhighlight(int id) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        String sql = "Update WarmupPracticeDiscuss set Priority=0 where Id = ?";
+        try {
+            run.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public int deleteDiscussById(int id) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update WarmupPracticeDiscuss set Del = 1 where Id = ?";

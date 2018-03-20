@@ -108,7 +108,8 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     public List<ApplicationSubmit> getPracticeSubmit(Integer practiceId, Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ApplicationSubmit where ApplicationId=? and Content is not null and Del=0 order by UpdateTime desc limit "
+        String sql = "select * from ApplicationSubmit where ApplicationId=? and Content is not null and Del=0 " +
+                "order by Priority desc, Length desc limit "
                 + page.getOffset() + "," + page.getLimit();
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
@@ -156,7 +157,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         }
     }
 
-    public void unHighlight(Integer submitId) {
+    public void unhighlight(Integer submitId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "update ApplicationSubmit set Priority=0 where Id=?";
         try {
