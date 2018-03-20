@@ -22,12 +22,14 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -201,14 +203,16 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 
     @Override
     public List<UserRole> loadInterviewer() {
-        List<WhiteList> whiteLists = whiteListDao.loadWhiteList(WhiteList.INTERVIEWER);
-        return whiteLists.stream().map(item -> {
-            UserRole role = userRoleDao.loadAssist(item.getProfileId());
+        List<String> interviewers = Arrays.asList(ConfigUtils.getInterviewers().split(","));
+
+        return interviewers.stream().map(item -> {
+            Integer profileId = Integer.parseInt(item);
+            UserRole role = userRoleDao.loadAssist(profileId);
             if (role != null) {
                 return role;
             } else {
                 role = new UserRole();
-                role.setProfileId(item.getProfileId());
+                role.setProfileId(profileId);
                 return role;
             }
         }).collect(Collectors.toList());

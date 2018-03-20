@@ -111,6 +111,8 @@ public class ConfigUtils {
         return getValue("app.domainname");
     }
 
+    public static String getInterviewers(){return  getValue("interviewers");}
+
     public static String staticResourceUrl(String domainName) {
         String url = getValue("static.resource.url");
         //测试环境防浏览器缓存，添加随机参数
