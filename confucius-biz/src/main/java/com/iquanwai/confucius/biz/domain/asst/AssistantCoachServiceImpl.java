@@ -482,7 +482,10 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         Integer applyId = interviewRecord.getApplyId();
         InterviewRecord existInterviewRecord = interviewRecordDao.queryByApplyId(applyId);
         if (existInterviewRecord == null) {
-            interviewRecord.setInterviewerId(interviewRecord.getApprovalId());
+            //判断是否是后台直接审批
+            if(interviewRecord.getApprovalId()!=null){
+                interviewRecord.setInterviewerId(interviewRecord.getApprovalId());
+            }
             return interviewRecordDao.insert(interviewRecord);
         } else {
             interviewRecord.setId(existInterviewRecord.getId());
