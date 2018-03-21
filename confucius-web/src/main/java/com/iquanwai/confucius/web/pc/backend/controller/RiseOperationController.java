@@ -556,7 +556,8 @@ public class RiseOperationController {
             openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         }
         Integer templateId = templateDto.getTemplateId();
-
+        //添加技术Openid
+        openIds.addAll(ConfigUtils.getAlarmList());
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
