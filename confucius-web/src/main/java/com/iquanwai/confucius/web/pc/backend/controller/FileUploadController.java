@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.domain.backend.FlowDataService;
 import com.iquanwai.confucius.biz.po.RichText;
 import com.iquanwai.confucius.biz.po.fragmentation.Audio;
 import com.iquanwai.confucius.web.pc.backend.dto.AudioUploadDto;
+import com.iquanwai.confucius.web.pc.backend.dto.RichTextUploadDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -67,8 +68,8 @@ public class FileUploadController {
     }
 
     @RequestMapping(value = "/richText", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> uploadRichText(@RequestParam("title") String title, @RequestParam("content") String content) {
-        RichText richText = flowDataService.insertRichText(title, content);
+    public ResponseEntity<Map<String, Object>> uploadRichText(@RequestBody RichTextUploadDto dto) {
+        RichText richText = flowDataService.insertRichText(dto.getTitle(), dto.getContent());
         if (richText == null) {
             return WebUtils.error("富文本存储错误，请重试");
         } else {
