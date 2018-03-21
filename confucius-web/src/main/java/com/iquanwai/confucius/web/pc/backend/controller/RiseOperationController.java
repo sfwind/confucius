@@ -169,7 +169,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/cancel/discuss/{discussId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> unhighlightDiscuss(PCLoginUser loginUser,
-                                                                @PathVariable Integer discussId) {
+                                                                  @PathVariable Integer discussId) {
 
         operationManagementService.unhighlightDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -197,7 +197,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/cancel/applicationSubmit/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> unhighlightApplicationSubmit(PCLoginUser loginUser,
-                                                                          @PathVariable Integer submitId) {
+                                                                            @PathVariable Integer submitId) {
 
         operationManagementService.unhighlightApplicationSubmit(submitId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -223,7 +223,7 @@ public class RiseOperationController {
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
                         problemList.setAbbreviation(problem.getAbbreviation());
-                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId->problemId.equals(problem.getId())).count()>0);
+                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId -> problemId.equals(problem.getId())).count() > 0);
 
                         return problemList;
                     }).collect(Collectors.toList());
@@ -523,8 +523,8 @@ public class RiseOperationController {
     }
 
 
-    @RequestMapping(value = "/load/templates",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> loadTemplates(UnionUser unionUser){
+    @RequestMapping(value = "/load/templates", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadTemplates(UnionUser unionUser) {
         List<TemplateMsg> templateMsgList = templateMessageService.loadTemplateMsgs();
 
         return WebUtils.result(templateMsgList);
@@ -548,11 +548,11 @@ public class RiseOperationController {
         if (source == null) {
             return WebUtils.error("source是必填字段,值不能含中文!");
         }
-       List<String> openIds =  Lists.newArrayList();
-        if(templateDto.getIsMime()){
+        List<String> openIds = Lists.newArrayList();
+        if (templateDto.getIsMime()) {
             templateDto.setForcePush(true);
             openIds.add(unionUser.getOpenId());
-        }else{
+        } else {
             openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         }
         Integer templateId = templateDto.getTemplateId();
@@ -563,58 +563,63 @@ public class RiseOperationController {
         Boolean forcePush = templateDto.getForcePush();
         //过滤黑名单用户
         List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
-        sendLists.forEach(openid -> {
-            TemplateMessage templateMessage = new TemplateMessage();
-            templateMessage.setTouser(openid);
+        ThreadPool.execute(()-> {
+            try {
+                sendLists.forEach(openid -> {
+                    TemplateMessage templateMessage = new TemplateMessage();
+                    templateMessage.setTouser(openid);
 
-            templateMessage.setTemplate_id(templateMsgId);
-            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-            templateMessage.setData(data);
-            if (templateDto.getFirst() != null) {
-                String first = templateDto.getFirst();
-                if (first.contains("{username}")) {
-                    first = replaceNickname(openid, first);
-                }
-                data.put("first", new TemplateMessage.Keyword(first));
-            }
-            if (templateDto.getKeyword1() != null) {
-                String keyword1 = templateDto.getKeyword1();
-                if (keyword1.contains("{username}")) {
-                    keyword1 = replaceNickname(openid, keyword1);
-                }
-                data.put("keyword1", new TemplateMessage.Keyword(keyword1));
-            }
-            if (templateDto.getKeyword2() != null) {
-                String keyword2 = templateDto.getKeyword2();
-                if (keyword2.contains("{username}")) {
-                    keyword2 = replaceNickname(openid, keyword2);
-                }
-                data.put("keyword2", new TemplateMessage.Keyword(keyword2));
-            }
-            if (templateDto.getKeyword3() != null) {
-                String keyword3 = templateDto.getKeyword3();
-                if (keyword3.contains("{username}")) {
-                    keyword3 = replaceNickname(openid, keyword3);
-                }
-                data.put("keyword3", new TemplateMessage.Keyword(keyword3));
-            }
-            if (templateDto.getRemark() != null) {
-                String remark = templateDto.getRemark();
-                if (remark.contains("{username}")) {
-                    remark = replaceNickname(openid, remark);
-                }
-                data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
-            }
-            String url = templateDto.getUrl();
-            if (url!= null && url.length()>0) {
-                templateMessage.setUrl(templateDto.getUrl());
-            }
-            templateMessage.setComment(templateDto.getComment());
+                    templateMessage.setTemplate_id(templateMsgId);
+                    Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                    templateMessage.setData(data);
+                    if (templateDto.getFirst() != null) {
+                        String first = templateDto.getFirst();
+                        if (first.contains("{username}")) {
+                            first = replaceNickname(openid, first);
+                        }
+                        data.put("first", new TemplateMessage.Keyword(first));
+                    }
+                    if (templateDto.getKeyword1() != null) {
+                        String keyword1 = templateDto.getKeyword1();
+                        if (keyword1.contains("{username}")) {
+                            keyword1 = replaceNickname(openid, keyword1);
+                        }
+                        data.put("keyword1", new TemplateMessage.Keyword(keyword1));
+                    }
+                    if (templateDto.getKeyword2() != null) {
+                        String keyword2 = templateDto.getKeyword2();
+                        if (keyword2.contains("{username}")) {
+                            keyword2 = replaceNickname(openid, keyword2);
+                        }
+                        data.put("keyword2", new TemplateMessage.Keyword(keyword2));
+                    }
+                    if (templateDto.getKeyword3() != null) {
+                        String keyword3 = templateDto.getKeyword3();
+                        if (keyword3.contains("{username}")) {
+                            keyword3 = replaceNickname(openid, keyword3);
+                        }
+                        data.put("keyword3", new TemplateMessage.Keyword(keyword3));
+                    }
+                    if (templateDto.getRemark() != null) {
+                        String remark = templateDto.getRemark();
+                        if (remark.contains("{username}")) {
+                            remark = replaceNickname(openid, remark);
+                        }
+                        data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
+                    }
+                    String url = templateDto.getUrl();
+                    if (url != null && url.length() > 0) {
+                        templateMessage.setUrl(templateDto.getUrl());
+                    }
+                    templateMessage.setComment(templateDto.getComment());
 
-            templateMessageService.sendMessage(templateMessage,forcePush==null||!forcePush,source);
+                    templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
+                });
+            } catch (Exception e) {
+                LOGGER.error("发送通知失败", e);
+            }
         });
-
-        return WebUtils.result("发送结束");
+        return WebUtils.result("发送模板消息请求成功");
     }
 
 
