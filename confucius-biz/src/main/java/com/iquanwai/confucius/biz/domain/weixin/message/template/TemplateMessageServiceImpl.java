@@ -61,6 +61,10 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
                 sendTag = false;
             }
         }
+        //强推也需要记录发送记录
+        else if(source!=null){
+            saveTemplateMessageSendLog(templateMessage, false, true, source);
+        }
         String body = "";
         if (sendTag) {
             String json = new Gson().toJson(templateMessage);
