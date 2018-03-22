@@ -35,6 +35,17 @@ public class RiseMemberDao extends DBUtil {
         }
     }
 
+    public int updateVipFields(Integer profileId, Boolean vip, String memo) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE RiseMember SET Vip = ?, Memo = ? WHERE ProfileId = ?";
+        try {
+            return runner.update(sql, vip, memo, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
     public int insert(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "insert into RiseMember(ProfileId, OrderId, MemberTypeId, ExpireDate, Expired, Memo, OpenDate) " +

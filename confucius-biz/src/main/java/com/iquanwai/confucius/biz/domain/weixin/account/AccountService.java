@@ -143,32 +143,26 @@ public interface AccountService {
 
     /**
      * 获得最新的学号
-     * @param profileId
-     * @return
      */
     RiseClassMember getLatestMemberId(Integer profileId);
 
     /**
      * 获取当前有效的RiseMember
-     * @param profileId
-     * @return
      */
     RiseMember getCurrentRiseMember(Integer profileId);
 
     /**
      * 根据班级和小组进行查询（分页）
-     * @param className
-     * @param groupId
-     * @return
      */
     List<RiseClassMember> getByClassNameGroupId(Page page, String className, String groupId);
 
     /**
      * 根据班级名进行查询（分页）
-     * @param className
-     * @return
      */
-    List<RiseClassMember> getByClassName(Page page,String className);
+    List<RiseClassMember> getByClassName(Page page, String className);
 
-
+    /**
+     * 给用户添加 vip 会员身份
+     */
+    int addVipRiseMember(String riseId, String memo, Integer monthLength);
 }

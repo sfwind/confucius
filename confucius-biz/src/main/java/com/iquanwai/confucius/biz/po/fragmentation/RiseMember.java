@@ -16,6 +16,7 @@ public class RiseMember {
     private Date expireDate; //过期时间
     private Boolean expired; //是否过期（0-否,1-是）
     private String memo;
+    private Boolean vip; // 是否是 vip
     private Integer del;
     private Date addTime; //添加时间
     /**

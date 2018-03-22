@@ -15,10 +15,7 @@ import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.RefundException;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.TableDto;
-import com.iquanwai.confucius.biz.po.TemplateMsg;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
@@ -27,18 +24,14 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.backend.dto.NoticeMsgDto;
-import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
-import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -49,7 +42,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -169,7 +161,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/cancel/discuss/{discussId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> unhighlightDiscuss(PCLoginUser loginUser,
-                                                                @PathVariable Integer discussId) {
+                                                                  @PathVariable Integer discussId) {
 
         operationManagementService.unhighlightDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -197,7 +189,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/cancel/applicationSubmit/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> unhighlightApplicationSubmit(PCLoginUser loginUser,
-                                                                          @PathVariable Integer submitId) {
+                                                                            @PathVariable Integer submitId) {
 
         operationManagementService.unhighlightApplicationSubmit(submitId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -223,7 +215,7 @@ public class RiseOperationController {
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
                         problemList.setAbbreviation(problem.getAbbreviation());
-                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId->problemId.equals(problem.getId())).count()>0);
+                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId -> problemId.equals(problem.getId())).count() > 0);
 
                         return problemList;
                     }).collect(Collectors.toList());
@@ -265,8 +257,7 @@ public class RiseOperationController {
 
     /**
      * 碎片化总任务列表加载
-     *
-     * @param problemId   问题id
+     * @param problemId 问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
@@ -523,8 +514,8 @@ public class RiseOperationController {
     }
 
 
-    @RequestMapping(value = "/load/templates",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> loadTemplates(UnionUser unionUser){
+    @RequestMapping(value = "/load/templates", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadTemplates(UnionUser unionUser) {
         List<TemplateMsg> templateMsgList = templateMessageService.loadTemplateMsgs();
 
         return WebUtils.result(templateMsgList);
@@ -532,10 +523,6 @@ public class RiseOperationController {
 
     /**
      * 运营后台发送模板消息接口
-     *
-     * @param unionUser
-     * @param templateDto
-     * @return
      */
     @RequestMapping(value = "/send/template/msg", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> sendTemplateMsg(UnionUser unionUser, @RequestBody TemplateDto templateDto) {
@@ -548,11 +535,11 @@ public class RiseOperationController {
         if (source == null) {
             return WebUtils.error("source是必填字段,值不能含中文!");
         }
-       List<String> openIds =  Lists.newArrayList();
-        if(templateDto.getIsMime()){
+        List<String> openIds = Lists.newArrayList();
+        if (templateDto.getIsMime()) {
             templateDto.setForcePush(true);
             openIds.add(unionUser.getOpenId());
-        }else{
+        } else {
             openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
         }
         Integer templateId = templateDto.getTemplateId();
@@ -606,17 +593,37 @@ public class RiseOperationController {
                 data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
             }
             String url = templateDto.getUrl();
-            if (url!= null && url.length()>0) {
+            if (url != null && url.length() > 0) {
                 templateMessage.setUrl(templateDto.getUrl());
             }
             templateMessage.setComment(templateDto.getComment());
 
-            templateMessageService.sendMessage(templateMessage,forcePush==null||!forcePush,source);
+            templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
         });
 
         return WebUtils.result("发送结束");
     }
 
+    /**
+     * 给用户开通 vip 级别的会员身份
+     */
+    @RequestMapping(value = "/add/member/vip", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> addVipRiseMember(UnionUser unionUser,
+                                                                @RequestParam("riseId") String riseId,
+                                                                @RequestParam("memo") String memo,
+                                                                @RequestParam("month") Integer month) {
+        int result = accountService.addVipRiseMember(riseId, memo, month);
+        if (result > 0) {
+            ActionLog actionLog = ActionLog.create()
+                    .uid(unionUser.getId()).module("打点")
+                    .action("后台操作").function("添加 vip 会员")
+                    .memo("riseid：" + riseId + "，month：" + month);
+            operationLogService.log(actionLog);
+            return WebUtils.success();
+        } else {
+            return WebUtils.error("vip 会员开启失败，请练习管理员重试");
+        }
+    }
 
     private List<BusinessApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications) {
         final List<String> openidList;
