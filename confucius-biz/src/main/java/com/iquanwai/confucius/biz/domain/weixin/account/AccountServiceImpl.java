@@ -34,6 +34,8 @@ import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -719,13 +721,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int addVipRiseMember(String riseId, String memo, Integer monthLength) {
+    public Pair<Integer, String> addVipRiseMember(String riseId, String memo, Integer monthLength) {
         Profile profile = getProfileByRiseId(riseId);
         int profileId = profile.getId();
 
         RiseMember currentRiseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (currentRiseMember != null) {
-            riseMemberDao.updateExpiredAhead(profileId);
+            return new MutablePair<>(-1, "该用户已经是会员");
         }
         RiseMember riseMember = new RiseMember();
         riseMember.setProfileId(profileId);
@@ -737,7 +739,7 @@ public class AccountServiceImpl implements AccountService {
         riseMember.setMemo(memo);
         riseMember.setVip(true);
         int result = riseMemberDao.insert(riseMember);
-        return result;
+        return new MutablePair<>(result, null);
     }
 
 }

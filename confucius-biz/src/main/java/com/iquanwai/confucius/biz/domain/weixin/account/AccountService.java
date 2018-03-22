@@ -9,6 +9,7 @@ import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
@@ -161,8 +162,5 @@ public interface AccountService {
      */
     List<RiseClassMember> getByClassName(Page page, String className);
 
-    /**
-     * 给用户添加 vip 会员身份
-     */
-    int addVipRiseMember(String riseId, String memo, Integer monthLength);
+    Pair<Integer, String> addVipRiseMember(String riseId, String memo, Integer monthLength);
 }

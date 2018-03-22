@@ -36,6 +36,7 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -612,8 +613,8 @@ public class RiseOperationController {
                                                                 @RequestParam("riseId") String riseId,
                                                                 @RequestParam("memo") String memo,
                                                                 @RequestParam("month") Integer month) {
-        int result = accountService.addVipRiseMember(riseId, memo, month);
-        if (result > 0) {
+        Pair<Integer, String> pair = accountService.addVipRiseMember(riseId, memo, month);
+        if (pair.getLeft() > 0) {
             ActionLog actionLog = ActionLog.create()
                     .uid(unionUser.getId()).module("打点")
                     .action("后台操作").function("添加 vip 会员")
@@ -621,7 +622,7 @@ public class RiseOperationController {
             operationLogService.log(actionLog);
             return WebUtils.success();
         } else {
-            return WebUtils.error("vip 会员开启失败，请练习管理员重试");
+            return WebUtils.error(pair.getRight());
         }
     }
 
