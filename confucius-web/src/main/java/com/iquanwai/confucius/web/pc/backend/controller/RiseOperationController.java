@@ -554,7 +554,8 @@ public class RiseOperationController {
             templateDto.setForcePush(true);
             openIds.add(unionUser.getOpenId());
         } else {
-            openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
+            List tempList = Arrays.asList(templateDto.getOpenIds().split("\n"));
+            openIds = new ArrayList<>(tempList);
             openIds.add(unionUser.getOpenId());
         }
         Integer templateId = templateDto.getTemplateId();
