@@ -554,6 +554,7 @@ public class RiseOperationController {
             openIds.add(unionUser.getOpenId());
         } else {
             openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
+            openIds.add(unionUser.getOpenId());
         }
         Integer templateId = templateDto.getTemplateId();
         //添加技术Openid
@@ -613,8 +614,11 @@ public class RiseOperationController {
                         templateMessage.setUrl(templateDto.getUrl());
                     }
                     templateMessage.setComment(templateDto.getComment());
-
-                    templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
+                    if(openid.equals(unionUser.getOpenId())){
+                        templateMessageService.sendMessage(templateMessage, false, source);
+                    }else {
+                        templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
+                    }
                 });
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
