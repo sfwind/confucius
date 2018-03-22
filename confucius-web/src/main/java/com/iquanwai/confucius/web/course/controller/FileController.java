@@ -1,14 +1,10 @@
 package com.iquanwai.confucius.web.course.controller;
 
-import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
-import com.iquanwai.confucius.biz.exception.UploadException;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,97 +31,6 @@ public class FileController {
     @Autowired
     private PictureService pictureService;
 
-
-    /**
-     * 上传图片
-     *
-     * @param moduleId 图片的模块
-     * @param referId  图片依赖的id
-     * @param file     上传的文件
-     * @return 响应
-     */
-    @RequestMapping(value = "/image/upload/{moduleId}/{referId}", method = {RequestMethod.POST, RequestMethod.OPTIONS})
-    public ResponseEntity<Map<String, Object>> imageUpload(@PathVariable("moduleId") Integer moduleId,
-                                                           @PathVariable("referId") Integer referId,
-                                                           @RequestParam("file") MultipartFile file,
-                                                           HttpServletRequest request,
-                                                           PCLoginUser pcLoginUser
-    ) {
-//            Assert.notNull(pcLoginUser,"用户不能为空");
-        if (moduleId != null && file != null && !file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
-            Long fileSize = file.getSize();
-            String contentType = file.getContentType();
-            String remoteIp = request.getHeader("X-Forwarded-For");
-            PictureModule pictureModule = pictureService.getPictureModule(moduleId);
-            Picture picture = new Picture(fileSize, referId, contentType, remoteIp);
-            if (pictureModule != null) {
-                Pair<Integer, String> checkResult = pictureService.checkAvaliable(pictureModule, picture);
-                if (checkResult.getLeft() == 1) {
-                    // 可上传
-                    try {
-                        OperationLog operationLog = OperationLog.create().openid(pcLoginUser != null ? pcLoginUser.getOpenId() : "")
-                                .module("文件")
-                                .function("上传图片")
-                                .action("PC上传图片")
-                                .memo(moduleId + "");
-                        operationLogService.log(operationLog);
-                        picture = pictureService.uploadPicture(pictureModule, referId, remoteIp, fileName, fileSize, contentType, file);
-                    } catch (FileNotFoundException e) {
-                        LOGGER.error("upload image error:上传图片失败，模块目录:" + pictureModule.getModuleName() + "未创建!", e);
-                        return WebUtils.error("该模块目录未创建");
-                    } catch (Exception e) {
-                        LOGGER.error("upload image error:上传图片失败", e);
-                        return WebUtils.error(e.getLocalizedMessage());
-                    }
-                    String url = pictureService.getModulePrefix(moduleId) + picture.getRealName();
-                    Map<String, Object> map = Maps.newHashMap();
-                    map.put("picUrl", url);
-                    return WebUtils.result(map);
-                } else {
-                    // 不可上传
-                    LOGGER.error("upload image error:上传校验失败," + checkResult.getRight());
-                    return WebUtils.error(checkResult.getRight());
-                }
-            } else {
-                LOGGER.error("upload image error:无该图片模块," + moduleId);
-                return WebUtils.error("无该模块:" + moduleId);
-            }
-        } else {
-            // 模块名为空,禁止上传
-            if (moduleId == null) {
-                LOGGER.error("upload image error:moduleId为空");
-                return WebUtils.error("请求异常，请重试");
-            } else {
-                LOGGER.error("upload image error:文件解析失败");
-                return WebUtils.error("该图片无法解析，请重新选择");
-            }
-        }
-
-    }
-
-    @RequestMapping(value = "/image/upload", method = {RequestMethod.POST})
-    public ResponseEntity<Map<String, Object>> imgUploadNoModuleId(@RequestParam("file") MultipartFile file,
-                                                                   HttpServletRequest request, LoginUser loginUser) {
-        OperationLog operationLog = OperationLog.create().openid(loginUser != null ? loginUser.getOpenId() : "")
-                .module("文件")
-                .function("上传图片")
-                .action("上传图片")
-                .memo("无moduleId");
-        operationLogService.log(operationLog);
-        if (file != null && !file.isEmpty()) {
-            try {
-                String url = pictureService.uploadPic(file);
-                return WebUtils.result(url);
-            } catch (UploadException e) {
-                return WebUtils.error(e.getErrMsg());
-            }
-        } else {
-            LOGGER.info("图片上传失败");
-            return WebUtils.error("图片上传失败，请检查网络后重新上传");
-        }
-    }
-
     /**
      * 上传图片
      *
@@ -145,6 +50,7 @@ public class FileController {
             String remoteIp = request.getHeader("X-Forwarded-For");
             PictureModule pictureModule = pictureService.getPictureModule(moduleId);
             Picture picture = new Picture(fileSize, -1, contentType, remoteIp);
+            picture.setModuleId(moduleId);
             if (pictureModule != null) {
                 Pair<Integer, String> checkResult = pictureService.checkAvaliable(pictureModule, picture);
                 if (checkResult.getLeft() == 1) {
@@ -156,11 +62,8 @@ public class FileController {
                                 .action("PC上传图片")
                                 .memo(moduleId + "");
                         operationLogService.log(operationLog);
-                        Pair<Boolean, String> upload = pictureService.uploadPic(pictureModule, fileName, file);
-                        if (upload.getLeft()) {
-                            String url = ConfigUtils.getPicturePrefix() + upload.getRight();
-                            Map<String, Object> map = Maps.newHashMap();
-                            map.put("picUrl", url);
+                        Map<String, Object> map = pictureService.uploadPic(picture, fileName, file);
+                        if (map.get("result").equals(true)) {
                             return WebUtils.result(map);
                         } else {
                             return WebUtils.error("上传失败");
