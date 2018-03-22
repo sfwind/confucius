@@ -170,7 +170,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
                     Integer problemId = courseScheduleDefault.getProblemId();
                     Problem problem = problemDao.load(Problem.class, problemId);
                     if (problem != null) {
-                        problemName = problem.getProblem();
+                        problemName = problem.getAbbreviation();
                     }
                 }
 
