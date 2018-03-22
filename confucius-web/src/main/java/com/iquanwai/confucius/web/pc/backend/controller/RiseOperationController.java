@@ -627,7 +627,7 @@ public class RiseOperationController {
                 LOGGER.error("发送通知失败", e);
             }
         });
-        return WebUtils.result("发送模板消息请求成功");
+        return WebUtils.result("正在发送中，如果你收到模板消息，则已经全部发送结束");
     }
 
 
