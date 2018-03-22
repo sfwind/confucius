@@ -540,6 +540,7 @@ public class RiseOperationController {
     @RequestMapping(value = "/send/template/msg", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> sendTemplateMsg(UnionUser unionUser, @RequestBody TemplateDto templateDto) {
         String comment = templateDto.getComment();
+        LOGGER.info(unionUser.toString());
         OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("运营功能").function("发送模板消息").action(comment);
 
