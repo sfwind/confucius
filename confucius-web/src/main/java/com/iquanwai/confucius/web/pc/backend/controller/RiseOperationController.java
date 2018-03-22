@@ -559,8 +559,9 @@ public class RiseOperationController {
             openIds.add(unionUser.getOpenId());
         }
         Integer templateId = templateDto.getTemplateId();
+        List<String> developerList =  ConfigUtils.getAlarmList();
         //添加技术Openid
-        openIds.addAll(ConfigUtils.getAlarmList());
+        openIds.addAll(developerList);
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
@@ -616,7 +617,7 @@ public class RiseOperationController {
                         templateMessage.setUrl(templateDto.getUrl());
                     }
                     templateMessage.setComment(templateDto.getComment());
-                    if(openid.equals(unionUser.getOpenId())){
+                    if(openid.equals(unionUser.getOpenId()) ||developerList.contains(openid) ){
                         templateMessageService.sendMessage(templateMessage, false, source);
                     }else {
                         templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
