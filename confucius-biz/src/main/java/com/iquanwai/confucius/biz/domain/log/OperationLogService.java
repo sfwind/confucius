@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.log;
 
+import com.iquanwai.confucius.biz.po.ActionLog;
 import com.iquanwai.confucius.biz.po.OperationLog;
 
 /**
@@ -8,4 +9,6 @@ import com.iquanwai.confucius.biz.po.OperationLog;
 public interface OperationLogService {
 
     void log(OperationLog operationLog);
+
+    void log(ActionLog actionLog);
 }

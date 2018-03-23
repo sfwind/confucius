@@ -15,10 +15,7 @@ import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.RefundException;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.TableDto;
-import com.iquanwai.confucius.biz.po.TemplateMsg;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
@@ -38,18 +35,18 @@ import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
-import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -265,8 +262,7 @@ public class RiseOperationController {
 
     /**
      * 碎片化总任务列表加载
-     *
-     * @param problemId   问题id
+     * @param problemId 问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
@@ -532,15 +528,10 @@ public class RiseOperationController {
 
     /**
      * 运营后台发送模板消息接口
-     *
-     * @param unionUser
-     * @param templateDto
-     * @return
      */
     @RequestMapping(value = "/send/template/msg", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> sendTemplateMsg(UnionUser unionUser, @RequestBody TemplateDto templateDto) {
         String comment = templateDto.getComment();
-        LOGGER.info(unionUser.toString());
         OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("运营功能").function("发送模板消息").action(comment);
 
@@ -630,6 +621,26 @@ public class RiseOperationController {
         return WebUtils.result("正在发送中，如果你收到模板消息，则已经全部发送结束");
     }
 
+    /**
+     * 给用户开通 vip 级别的会员身份
+     */
+    @RequestMapping(value = "/add/member/vip", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> addVipRiseMember(UnionUser unionUser,
+                                                                @RequestParam("riseId") String riseId,
+                                                                @RequestParam("memo") String memo,
+                                                                @RequestParam("month") Integer month) {
+        Pair<Integer, String> pair = accountService.addVipRiseMember(riseId, memo, month);
+        if (pair.getLeft() > 0) {
+            ActionLog actionLog = ActionLog.create()
+                    .uid(unionUser.getId()).module("打点")
+                    .action("后台操作").function("添加 vip 会员")
+                    .memo("riseid：" + riseId + "，month：" + month);
+            operationLogService.log(actionLog);
+            return WebUtils.success();
+        } else {
+            return WebUtils.error(pair.getRight());
+        }
+    }
 
     private List<BusinessApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications) {
         final List<String> openidList;
