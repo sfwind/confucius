@@ -350,7 +350,7 @@ public class AccountServiceImpl implements AccountService {
                 throw new NotFollowingException();
             }
 
-            redisUtil.lock("lock:wx:user:insert", (lock) -> {
+            redisUtil.lock("lock:wx:user:insert:profile", (lock) -> {
                 Account existAccount = followUserDao.queryByOpenid(openid);
                 logger.info("existAccount: {}", existAccount);
                 if (existAccount == null) {
