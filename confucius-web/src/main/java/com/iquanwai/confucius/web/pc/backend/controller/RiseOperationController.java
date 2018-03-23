@@ -24,10 +24,14 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import com.iquanwai.confucius.web.backend.dto.NoticeMsgDto;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
@@ -541,68 +545,80 @@ public class RiseOperationController {
             templateDto.setForcePush(true);
             openIds.add(unionUser.getOpenId());
         } else {
-            openIds = Arrays.asList(templateDto.getOpenIds().split("\n"));
+            List tempList = Arrays.asList(templateDto.getOpenIds().split("\n"));
+            openIds = new ArrayList<>(tempList);
+            openIds.add(unionUser.getOpenId());
         }
         Integer templateId = templateDto.getTemplateId();
-
+        List<String> developerList =  ConfigUtils.getAlarmList();
+        //添加技术Openid
+        openIds.addAll(developerList);
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
         Boolean forcePush = templateDto.getForcePush();
         //过滤黑名单用户
         List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
-        sendLists.forEach(openid -> {
-            TemplateMessage templateMessage = new TemplateMessage();
-            templateMessage.setTouser(openid);
+        ThreadPool.execute(()-> {
+            try {
+                sendLists.forEach(openid -> {
+                    TemplateMessage templateMessage = new TemplateMessage();
+                    templateMessage.setTouser(openid);
 
-            templateMessage.setTemplate_id(templateMsgId);
-            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-            templateMessage.setData(data);
-            if (templateDto.getFirst() != null) {
-                String first = templateDto.getFirst();
-                if (first.contains("{username}")) {
-                    first = replaceNickname(openid, first);
-                }
-                data.put("first", new TemplateMessage.Keyword(first));
+                    templateMessage.setTemplate_id(templateMsgId);
+                    Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                    templateMessage.setData(data);
+                    if (templateDto.getFirst() != null) {
+                        String first = templateDto.getFirst();
+                        if (first.contains("{username}")) {
+                            first = replaceNickname(openid, first);
+                        }
+                        data.put("first", new TemplateMessage.Keyword(first));
+                    }
+                    if (templateDto.getKeyword1() != null) {
+                        String keyword1 = templateDto.getKeyword1();
+                        if (keyword1.contains("{username}")) {
+                            keyword1 = replaceNickname(openid, keyword1);
+                        }
+                        data.put("keyword1", new TemplateMessage.Keyword(keyword1));
+                    }
+                    if (templateDto.getKeyword2() != null) {
+                        String keyword2 = templateDto.getKeyword2();
+                        if (keyword2.contains("{username}")) {
+                            keyword2 = replaceNickname(openid, keyword2);
+                        }
+                        data.put("keyword2", new TemplateMessage.Keyword(keyword2));
+                    }
+                    if (templateDto.getKeyword3() != null) {
+                        String keyword3 = templateDto.getKeyword3();
+                        if (keyword3.contains("{username}")) {
+                            keyword3 = replaceNickname(openid, keyword3);
+                        }
+                        data.put("keyword3", new TemplateMessage.Keyword(keyword3));
+                    }
+                    if (templateDto.getRemark() != null) {
+                        String remark = templateDto.getRemark();
+                        if (remark.contains("{username}")) {
+                            remark = replaceNickname(openid, remark);
+                        }
+                        data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
+                    }
+                    String url = templateDto.getUrl();
+                    if (url != null && url.length() > 0) {
+                        templateMessage.setUrl(templateDto.getUrl());
+                    }
+                    templateMessage.setComment(templateDto.getComment());
+                    if(openid.equals(unionUser.getOpenId()) ||developerList.contains(openid) ){
+                        templateMessageService.sendMessage(templateMessage, false, source);
+                    }else {
+                        templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.error("发送通知失败", e);
             }
-            if (templateDto.getKeyword1() != null) {
-                String keyword1 = templateDto.getKeyword1();
-                if (keyword1.contains("{username}")) {
-                    keyword1 = replaceNickname(openid, keyword1);
-                }
-                data.put("keyword1", new TemplateMessage.Keyword(keyword1));
-            }
-            if (templateDto.getKeyword2() != null) {
-                String keyword2 = templateDto.getKeyword2();
-                if (keyword2.contains("{username}")) {
-                    keyword2 = replaceNickname(openid, keyword2);
-                }
-                data.put("keyword2", new TemplateMessage.Keyword(keyword2));
-            }
-            if (templateDto.getKeyword3() != null) {
-                String keyword3 = templateDto.getKeyword3();
-                if (keyword3.contains("{username}")) {
-                    keyword3 = replaceNickname(openid, keyword3);
-                }
-                data.put("keyword3", new TemplateMessage.Keyword(keyword3));
-            }
-            if (templateDto.getRemark() != null) {
-                String remark = templateDto.getRemark();
-                if (remark.contains("{username}")) {
-                    remark = replaceNickname(openid, remark);
-                }
-                data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
-            }
-            String url = templateDto.getUrl();
-            if (url != null && url.length() > 0) {
-                templateMessage.setUrl(templateDto.getUrl());
-            }
-            templateMessage.setComment(templateDto.getComment());
-
-            templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
         });
-
-        return WebUtils.result("发送结束");
+        return WebUtils.result("正在发送中，如果你收到模板消息，则已经全部发送结束");
     }
 
     /**
