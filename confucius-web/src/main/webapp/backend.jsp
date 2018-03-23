@@ -3,7 +3,7 @@
          pageEncoding="UTF-8" %>
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8" lang="zh-CN">
+    <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>圈外</title>
     <link href="//www.iqycamp.com/images/logo.png" rel="shortcut icon">
