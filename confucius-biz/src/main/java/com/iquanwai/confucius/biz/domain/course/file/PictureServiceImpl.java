@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.course.file;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.file.PictureDao;
-import com.iquanwai.confucius.biz.exception.UploadException;
 import com.iquanwai.confucius.biz.po.Picture;
 import com.iquanwai.confucius.biz.po.PictureModule;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -11,7 +10,6 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QiNiuUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +33,6 @@ public class PictureServiceImpl implements PictureService {
 
     private static final Long MAX_PIC_SIZE = 10485760L;
 
-
     @Autowired
     private PictureDao pictureDao;
 
@@ -49,7 +44,6 @@ public class PictureServiceImpl implements PictureService {
                 moduleMap.put(item.getId(), item);
                 prefixMap.put(item.getId(), ConfigUtils.getUploadDomain() + "/images/" + item.getModuleName() + "/");
             });
-
         }
 
     }
@@ -66,108 +60,51 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    public void reloadModule() {
-        initPictureModule();
-    }
-
-    @Override
     public Pair<Integer, String> checkAvaliable(PictureModule pictureModule, Picture picture) {
-        Map<String, String> map = Maps.newHashMap();
-        Integer sizeLimit = pictureModule.getSizeLimit();
         if (picture.getLength() == null) {
-            return new ImmutablePair<Integer, String>(0, "该图片大小未知，无法上传");
+            return new ImmutablePair<>(0, "该图片大小未知，无法上传");
         }
         if (picture.getType() == null) {
-            return new ImmutablePair<Integer, String>(0, "该图片类型未知，无法上传");
+            return new ImmutablePair<>(0, "该图片类型未知，无法上传");
         }
 
-        if (sizeLimit != null && picture.getLength() > sizeLimit) {
-            return new ImmutablePair<Integer, String>(0, "该图片过大，请压缩后上传");
+        if (picture.getLength() > MAX_PIC_SIZE) {
+            return new ImmutablePair<>(0, "该图片过大，请压缩后上传");
         }
-        List<String> typeList = pictureModule.getTypeLimit() == null ? Lists.newArrayList() : Lists.newArrayList(pictureModule.getTypeLimit().split(","));
+        List<String> typeList = pictureModule.getTypeLimit() == null ?
+                Lists.newArrayList() : Lists.newArrayList(pictureModule.getTypeLimit().split(","));
         long matchTypeCount = typeList.stream().filter(contentType -> contentType.equals(picture.getType())).count();
         if (matchTypeCount == 0) {
-            return new ImmutablePair<Integer, String>(0, pictureModule.getModuleName() + "模块不支持该图片类型");
+            return new ImmutablePair<>(0, pictureModule.getModuleName() + "模块不支持该图片类型");
         }
         // 通过校验开始上传
-        return new ImmutablePair<Integer, String>(1, null);
+        return new ImmutablePair<>(1, null);
     }
 
+
     @Override
-    public Picture uploadPicture(PictureModule pictureModule, Integer referId, String remoteIp, String fileName, Long fileSize, String contentType, MultipartFile file) throws Exception {
-        // 获取模块名对应的路径
-        String path = pictureModule.getPath();
-        // 文件名
+    public Map<String, Object> uploadPic(Picture picture, String fileName, MultipartFile file) throws Exception {
+        Map<String, Object> resultMap = Maps.newHashMap();
         String suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
-        // 命名规则 {module}-{date}-{rand(8)}-{referId}.{filename的后缀}
-        Date today = new Date();
-        String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + "-" + referId + suffix;
-        //获取该文件的文件名
-        File targetFile = new File(path, realName);
-        // 保存
-        try {
-            file.transferTo(targetFile);
-        } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-            throw e;
-        }
-        // 创建成功，返回Picture
-        Picture picture = new Picture();
-        picture.setLength(fileSize);
-        picture.setModuleId(pictureModule.getId());
-        picture.setReferencedId(referId);
-        picture.setRemoteIp(remoteIp);
-        picture.setType(contentType);
+        PictureModule pictureModule = moduleMap.get(picture.getModuleId());
+        String realName = pictureModule.getModuleName() + "-" +
+                DateUtils.parseDateToString3(new Date()) + "-" + CommonUtils.randomString(9) + suffix;
         picture.setRealName(realName);
-        // 插入到数据库
-        pictureDao.upload(picture);
-        return picture;
-    }
+        String url = ConfigUtils.getPicturePrefix() + realName;
 
-    @Override
-    public Pair<Boolean, String> uploadPic(PictureModule pictureModule, String fileName, MultipartFile file) throws Exception {
-        String suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
-        Date today = new Date();
-        String realName = pictureModule.getModuleName() + "-" + DateUtils.parseDateToString3(today) + "-" + CommonUtils.randomString(9) + suffix;
-        boolean result = false;
+        int id = pictureDao.upload(picture);
+        boolean result;
         try {
             result = QiNiuUtils.uploadFile(realName, file.getInputStream());
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
             throw e;
         }
-        return new MutablePair<Boolean, String>(result, realName);
-    }
 
-    @Override
-    public String uploadPic(MultipartFile file) throws UploadException{
-        String realName = CommonUtils.randomString(32);
-        Long fileSize = file.getSize();
-        if (fileSize > MAX_PIC_SIZE) {
-            throw new UploadException("图片文件过大，请压缩后上传");
-        }
-        try {
-            QiNiuUtils.uploadFile(realName, file.getInputStream());
-        } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(), e);
-            throw new UploadException("图片上传失败,请调整网络后重新上传");
-        }
-        return ConfigUtils.getPicturePrefix() + realName;
-    }
-
-
-    @Override
-    public String getModulePrefix(Integer moduleId) {
-        String prefix = prefixMap.get(moduleId);
-        if (prefix == null) {
-            logger.error("moduleId: {} is invalid", moduleId);
-        }
-        return prefix;
-    }
-
-    @Override
-    public List<Picture> loadPicture(Integer moduleId, Integer referencedId) {
-        return pictureDao.picture(moduleId, referencedId);
+        resultMap.put("result", result);
+        resultMap.put("picUrl", url);
+        resultMap.put("picId", id);
+        return resultMap;
     }
 
 }

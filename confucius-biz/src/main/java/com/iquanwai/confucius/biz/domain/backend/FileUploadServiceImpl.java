@@ -4,6 +4,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.AudioDao;
 import com.iquanwai.confucius.biz.po.fragmentation.Audio;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.QiNiuUtils;
 import com.iquanwai.confucius.biz.util.SFTPUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import java.io.InputStream;
  */
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
+
     @Autowired
     private AudioDao audioDao;
 
@@ -38,14 +40,13 @@ public class FileUploadServiceImpl implements FileUploadService {
         return targetFileName;
     }
 
-
     @Override
     public int uploadAudio(Integer audioId, String name, String url, String words) {
         Audio audio = new Audio();
         audio.setName(name);
         audio.setUrl(AUDIO_RESOURCE_PREFIX + url);
         audio.setWords(words);
-        if(audioId==null){
+        if (audioId == null) {
             return audioDao.insertAudio(audio);
         }
         if (audioId > 0) {
@@ -66,6 +67,17 @@ public class FileUploadServiceImpl implements FileUploadService {
             return audioId;
         } else {
             return audioDao.insertAudio(audio);
+        }
+    }
+
+    @Override
+    public String uploadFile(String fileName, InputStream inputStream) {
+        int dotIndex = fileName.indexOf(".");
+        fileName = fileName.substring(0, dotIndex) + "-" + CommonUtils.randomString(8) + fileName.substring(dotIndex);
+        if (QiNiuUtils.uploadFile(fileName, inputStream)) {
+            return ConfigUtils.getPicturePrefix() + fileName;
+        } else {
+            return null;
         }
     }
 
