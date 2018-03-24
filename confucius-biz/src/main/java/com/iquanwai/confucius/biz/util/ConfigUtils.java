@@ -87,6 +87,10 @@ public class ConfigUtils {
         return getValue("incomplete.task.msg");
     }
 
+    public static String accountChangeMsgKey(){
+        return getValue("account.change.message");
+    }
+
     public static String coursePassMsgKey() {
         return getValue("course.pass.msg");
     }
@@ -106,6 +110,8 @@ public class ConfigUtils {
     public static String realDomainName() {
         return getValue("app.domainname");
     }
+
+    public static String getInterviewers(){return  getValue("interviewers");}
 
     public static String staticResourceUrl(String domainName) {
         String url = getValue("static.resource.url");

@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.po.asst.AsstUpStandard;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.PracticePlan;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
@@ -21,6 +22,7 @@ import com.iquanwai.confucius.web.pc.asst.dto.UpGradeDto;
 import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.pc.datahelper.AsstHelper;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,7 @@ public class AssistController {
      * 加载所有的教练
      */
     @RequestMapping("/load")
-    public ResponseEntity<Map<String, Object>> loadAssists(PCLoginUser loginUser) {
+    public ResponseEntity<Map<String, Object>> loadAssists(UnionUser loginUser) {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("加载教练").action("加载所有教练");
         operationLogService.log(operationLog);
@@ -102,7 +104,7 @@ public class AssistController {
      * 加载教练类别
      */
     @RequestMapping("/load/catalog")
-    public ResponseEntity<Map<String, Object>> loadAssistCatalogs(PCLoginUser loginUser) {
+    public ResponseEntity<Map<String, Object>> loadAssistCatalogs(UnionUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("加载教练类别").action("加载所有教练类别");
         operationLogService.log(operationLog);
         List<AssistCatalogDto> assistCatalogDtoList = Lists.newArrayList();
@@ -120,7 +122,7 @@ public class AssistController {
      * 修改教练状态
      */
     @RequestMapping("update")
-    public ResponseEntity<Map<String, Object>> updateAssist(PCLoginUser loginUser, @RequestParam("riseId") String riseId, @RequestParam("assist") Integer assistId, @RequestParam("catalog") Integer roleId) {
+    public ResponseEntity<Map<String, Object>> updateAssist(UnionUser loginUser, @RequestParam("riseId") String riseId, @RequestParam("assist") Integer assistId, @RequestParam("catalog") Integer roleId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("教练升降级").action("教练升降级");
         operationLogService.log(operationLog);
 
@@ -160,25 +162,31 @@ public class AssistController {
 
 
     /**
-     * 根据NickName加载非教练人员
+     * 加载非教练人员
      */
-    @RequestMapping("load/unassist/{nickName}")
-    public ResponseEntity<Map<String, Object>> loadUnAssistByNickName(PCLoginUser loginUser, @PathVariable String nickName) {
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("加载非教练人员").action("加载非教练人员");
-        operationLogService.log(operationLog);
-
-        List<Profile> profiles = assistantCoachService.loadUnAssistByNickName(nickName);
-
+    @RequestMapping("load/unassist/{commonId}")
+    public ResponseEntity<Map<String, Object>> loadUnAssistByNickName(UnionUser loginUser, @PathVariable String commonId) {
+        List<Profile> profiles = Lists.newArrayList();
+        Profile profile = accountService.getProfileByRiseId(commonId);
+        if(profile!=null){
+            profiles.add(profile);
+        }else {
+            profile = accountService.loadProfileByMemberId(commonId);
+            if(profile!=null){
+                profiles.add(profile);
+            }else{
+                profiles = assistantCoachService.loadUnAssistByNickName(commonId);
+            }
+        }
         List<AssistDto> assistDtos = Lists.newArrayList();
 
-        profiles.stream().forEach(profile -> {
+        profiles.stream().forEach(item -> {
             AssistDto assistDto = new AssistDto();
             assistDto.setId(-1);
-            assistDto.setHeadImageUrl(profile.getHeadimgurl());
+            assistDto.setHeadImageUrl(item.getHeadimgurl());
             assistDto.setRoleId(11);
-            assistDto.setRiseId(profile.getRiseId());
-            assistDto.setNickName(profile.getNickname());
-
+            assistDto.setRiseId(item.getRiseId());
+            assistDto.setNickName(item.getNickname());
             assistDtos.add(assistDto);
         });
 
@@ -186,7 +194,7 @@ public class AssistController {
     }
 
     @RequestMapping("add/{riseId}/{assistCatalog}")
-    public ResponseEntity<Map<String, Object>> addAssist(PCLoginUser loginUser, @PathVariable String riseId, @PathVariable("assistCatalog") Integer roleId) {
+    public ResponseEntity<Map<String, Object>> addAssist(UnionUser loginUser, @PathVariable String riseId, @PathVariable("assistCatalog") Integer roleId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("教练管理").function("添加教练").action("添加教练");
         operationLogService.log(operationLog);
 
@@ -224,7 +232,7 @@ public class AssistController {
      * @return
      */
     @RequestMapping("/standard/search/load")
-    public ResponseEntity<Map<String, Object>> loadSearchStandard(@ModelAttribute Page page, PCLoginUser loginUser, @RequestParam("riseId") String riseId) {
+    public ResponseEntity<Map<String, Object>> loadSearchStandard(@ModelAttribute Page page, UnionUser loginUser, @RequestParam("riseId") String riseId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("查询标准情况");
         operationLogService.log(operationLog);
@@ -248,7 +256,7 @@ public class AssistController {
      * @return
      */
     @RequestMapping("/standard/load")
-    public ResponseEntity<Map<String, Object>> loadAssistStandard(@ModelAttribute Page page, PCLoginUser loginUser) {
+    public ResponseEntity<Map<String, Object>> loadAssistStandard(@ModelAttribute Page page, UnionUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台管理").function("教练管理").action("加载评判标准");
         operationLogService.log(operationLog);
         if (page == null) {
@@ -263,7 +271,7 @@ public class AssistController {
     }
 
     @RequestMapping(value = "/standard/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> updateAssistStandard(PCLoginUser loginUser, @RequestBody AsstStandardDto asstStandardDto) {
+    public ResponseEntity<Map<String, Object>> updateAssistStandard(UnionUser loginUser, @RequestBody AsstStandardDto asstStandardDto) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("更新教练实际标准");
 
@@ -279,7 +287,7 @@ public class AssistController {
     }
 
     @RequestMapping("/default/load")
-    public ResponseEntity<Map<String, Object>> loadAssistDefault(PCLoginUser loginUser) {
+    public ResponseEntity<Map<String, Object>> loadAssistDefault(UnionUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("加载助教默认标准");
         operationLogService.log(operationLog);
@@ -289,7 +297,7 @@ public class AssistController {
 
 
     @RequestMapping("/execution/load")
-    public ResponseEntity<Map<String, Object>> loadAssistsExecution(@ModelAttribute Page page, PCLoginUser loginUser) {
+    public ResponseEntity<Map<String, Object>> loadAssistsExecution(@ModelAttribute Page page, UnionUser loginUser) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("加载助教完成情况");
         operationLogService.log(operationLog);
@@ -306,7 +314,7 @@ public class AssistController {
     }
 
     @RequestMapping("/execution/search/load")
-    public ResponseEntity<Map<String, Object>> loadSearchExecution(PCLoginUser loginUser, @RequestParam("riseId") String riseId) {
+    public ResponseEntity<Map<String, Object>> loadSearchExecution(UnionUser loginUser, @RequestParam("riseId") String riseId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("查询完成情况");
         operationLogService.log(operationLog);
@@ -323,7 +331,7 @@ public class AssistController {
     }
 
     @RequestMapping(value = "/execution/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> updateAssistExecution(PCLoginUser loginUser, @RequestBody AsstExecutionDto asstExecutionDto) {
+    public ResponseEntity<Map<String, Object>> updateAssistExecution(UnionUser loginUser, @RequestBody AsstExecutionDto asstExecutionDto) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("更新助教完成情况");
 
@@ -344,7 +352,7 @@ public class AssistController {
     }
 
     @RequestMapping(value = "/execution/file/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> updateAssistExecution(PCLoginUser loginUser, @RequestParam(value = "file") MultipartFile excelFile) {
+    public ResponseEntity<Map<String, Object>> updateAssistExecution(UnionUser loginUser, @RequestParam(value = "file") MultipartFile excelFile) {
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理").function("助教管理").action("更新助教完成情况");

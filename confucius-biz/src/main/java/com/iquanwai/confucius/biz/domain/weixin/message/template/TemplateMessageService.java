@@ -1,5 +1,9 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.template;
 
+import com.iquanwai.confucius.biz.po.TemplateMsg;
+
+import java.util.List;
+
 /**
  * Created by justin on 16/8/10.
  */
@@ -23,6 +27,12 @@ public interface TemplateMessageService {
      * 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式
      * */
     String getTemplateId(String templateShortId);
+
+
+    String getTemplateIdByDB(Integer id);
+
+    List<TemplateMsg> loadTemplateMsgs();
+
 
     String SEND_MESSAGE_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={access_token}";
 }

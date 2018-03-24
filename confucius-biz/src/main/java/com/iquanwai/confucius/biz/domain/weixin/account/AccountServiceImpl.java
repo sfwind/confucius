@@ -28,11 +28,14 @@ import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -703,18 +706,40 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<RiseClassMember> getByClassName(Page page, String className) {
-        List<RiseClassMember> riseClassMembers = riseClassMemberDao.getByClassName(className,page);
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.getByClassName(className, page);
         page.setTotal(riseClassMemberDao.getCountByClass(className));
 
         return riseClassMembers;
     }
 
     @Override
-    public List<RiseClassMember> getByClassNameGroupId(Page page,String className, String groupId) {
-        List<RiseClassMember> riseClassMembers =  riseClassMemberDao.getByClassNameGroupId(page,className, groupId);
-        page.setTotal(riseClassMemberDao.getCountByClassNameGroupId(className,groupId));
+    public List<RiseClassMember> getByClassNameGroupId(Page page, String className, String groupId) {
+        List<RiseClassMember> riseClassMembers = riseClassMemberDao.getByClassNameGroupId(page, className, groupId);
+        page.setTotal(riseClassMemberDao.getCountByClassNameGroupId(className, groupId));
 
         return riseClassMembers;
+    }
+
+    @Override
+    public Pair<Integer, String> addVipRiseMember(String riseId, String memo, Integer monthLength) {
+        Profile profile = getProfileByRiseId(riseId);
+        int profileId = profile.getId();
+
+        RiseMember currentRiseMember = riseMemberDao.loadValidRiseMember(profileId);
+        if (currentRiseMember != null) {
+            return new MutablePair<>(-1, "该用户已经是会员");
+        }
+        RiseMember riseMember = new RiseMember();
+        riseMember.setProfileId(profileId);
+        riseMember.setOrderId("manual");
+        riseMember.setMemberTypeId(RiseMember.ELITE);
+        riseMember.setOpenDate(new Date());
+        riseMember.setExpireDate(DateUtils.afterMonths(new Date(), monthLength));
+        riseMember.setExpired(false);
+        riseMember.setMemo(memo);
+        riseMember.setVip(true);
+        int result = riseMemberDao.insert(riseMember);
+        return new MutablePair<>(result, null);
     }
 
 }

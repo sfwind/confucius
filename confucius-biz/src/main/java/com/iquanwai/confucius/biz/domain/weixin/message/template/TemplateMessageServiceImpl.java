@@ -1,9 +1,14 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.template;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.dao.common.message.CustomerMessageLogDao;
+import com.iquanwai.confucius.biz.dao.common.message.TemplateMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.TemplateMsg;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.message.CustomerMessageLog;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -11,12 +16,15 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/10.
@@ -30,6 +38,10 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private CustomerMessageLogDao customerMessageLogDao;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private TemplateMessageDao templateMessageDao;
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage) {
@@ -49,6 +61,10 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
                 sendTag = false;
             }
         }
+        //强推也需要记录发送记录
+        else if(source!=null){
+            saveTemplateMessageSendLog(templateMessage, false, true, source);
+        }
         String body = "";
         if (sendTag) {
             String json = new Gson().toJson(templateMessage);
@@ -67,6 +83,16 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
         Map<String, Object> response = CommonUtils.jsonToMap(body);
         return (String) response.get("template_id");
+    }
+
+    @Override
+    public String getTemplateIdByDB(Integer id) {
+        return templateMessageDao.load(TemplateMsg.class, id).getMessageId();
+    }
+
+    @Override
+    public List<TemplateMsg> loadTemplateMsgs() {
+        return templateMessageDao.loadAll(TemplateMsg.class).stream().filter(templateMsg -> templateMsg.getDel()==0).collect(Collectors.toList());
     }
 
     /**

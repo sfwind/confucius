@@ -1,5 +1,7 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.asst.AssistantCoachService;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.backend.OperationManagementService;
@@ -9,11 +11,11 @@ import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.survey.SurveyService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
+import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.RefundException;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.TableDto;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
@@ -22,18 +24,23 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
+import com.iquanwai.confucius.web.backend.dto.NoticeMsgDto;
 import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
-import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -45,10 +52,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.net.ConnectException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -80,6 +84,8 @@ public class RiseOperationController {
     private PayService payService;
     @Autowired
     private AssistantCoachService assistantCoachService;
+    @Autowired
+    private TemplateMessageService templateMessageService;
 
     private static final String SEARCH_TOPIC = "business_school_application_search";
     private static final String NOTICE_TOPIC = "business_school_application_notice";
@@ -98,7 +104,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/search/bs/application/{date}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> searchApplication(PCLoginUser loginUser, @PathVariable String date) {
+    public ResponseEntity<Map<String, Object>> searchApplication(UnionUser loginUser, @PathVariable String date) {
         LOGGER.info("搜索{} 申请", date);
         try {
             searchPublisher.publish(date);
@@ -110,7 +116,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/notice/bs/application/{date}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> noticeApplication(PCLoginUser loginUser, @PathVariable String date) {
+    public ResponseEntity<Map<String, Object>> noticeApplication(UnionUser loginUser, @PathVariable String date) {
         LOGGER.info("发送{} 提醒", date);
         try {
             noticePublisher.publish(date);
@@ -145,7 +151,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> highlightDiscuss(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> highlightDiscuss(UnionUser loginUser,
                                                                 @PathVariable Integer discussId) {
 
         operationManagementService.highlightDiscuss(discussId);
@@ -160,7 +166,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/cancel/discuss/{discussId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> unhighlightDiscuss(PCLoginUser loginUser,
-                                                                @PathVariable Integer discussId) {
+                                                                  @PathVariable Integer discussId) {
 
         operationManagementService.unhighlightDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -188,7 +194,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/highlight/cancel/applicationSubmit/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> unhighlightApplicationSubmit(PCLoginUser loginUser,
-                                                                          @PathVariable Integer submitId) {
+                                                                            @PathVariable Integer submitId) {
 
         operationManagementService.unhighlightApplicationSubmit(submitId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
@@ -201,7 +207,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping("/problem/list")
-    public ResponseEntity<Map<String, Object>> loadProblems(PCLoginUser pcLoginUser) {
+    public ResponseEntity<Map<String, Object>> loadProblems(UnionUser pcLoginUser) {
 
         List<Problem> problems = problemService.loadProblems();
         List<Integer> yesterdayProblems = practiceService.loadProblemsByYesterdayComments();
@@ -214,7 +220,7 @@ public class RiseOperationController {
                         problemList.setId(problem.getId());
                         problemList.setProblem(problem.getProblem());
                         problemList.setAbbreviation(problem.getAbbreviation());
-                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId->problemId.equals(problem.getId())).count()>0);
+                        problemList.setHasNewComments(yesterdayProblems.stream().filter(problemId -> problemId.equals(problem.getId())).count() > 0);
 
                         return problemList;
                     }).collect(Collectors.toList());
@@ -237,7 +243,7 @@ public class RiseOperationController {
      * 删除助教的巩固练习评论
      */
     @RequestMapping("/warmup/discuss/del/{discussId}")
-    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(PCLoginUser loginUser, @PathVariable Integer discussId) {
+    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(UnionUser loginUser, @PathVariable Integer discussId) {
         Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
@@ -260,7 +266,7 @@ public class RiseOperationController {
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
-    public ResponseEntity<Map<String, Object>> getProblemHomeworkList(@PathVariable Integer problemId, PCLoginUser pcLoginUser) {
+    public ResponseEntity<Map<String, Object>> getProblemHomeworkList(@PathVariable Integer problemId, UnionUser pcLoginUser) {
         Assert.notNull(pcLoginUser, "用户信息能不能为空");
         List<ApplicationPractice> applicationPractices = practiceService.loadApplicationByProblemId(problemId);
         OperationLog operationLog = OperationLog.create().openid(pcLoginUser.getOpenId())
@@ -274,7 +280,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/list", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page, LoginUser loginUser) {
+    public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page, UnionUser loginUser) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -497,7 +503,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/assign/interviewer", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> assignInterviewer(PCLoginUser loginUser, @RequestBody AssignDto assignDto) {
+    public ResponseEntity<Map<String, Object>> assignInterviewer(UnionUser loginUser, @RequestBody AssignDto assignDto) {
         Assert.notNull(loginUser, "用户不能为空");
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台管理")
@@ -513,8 +519,130 @@ public class RiseOperationController {
     }
 
 
+    @RequestMapping(value = "/load/templates", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadTemplates(UnionUser unionUser) {
+        List<TemplateMsg> templateMsgList = templateMessageService.loadTemplateMsgs();
 
-    private List<BusinessApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications){
+        return WebUtils.result(templateMsgList);
+    }
+
+    /**
+     * 运营后台发送模板消息接口
+     */
+    @RequestMapping(value = "/send/template/msg", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> sendTemplateMsg(UnionUser unionUser, @RequestBody TemplateDto templateDto) {
+        String comment = templateDto.getComment();
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
+                .module("运营功能").function("发送模板消息").action(comment);
+
+        operationLogService.log(operationLog);
+        String source = templateDto.getSource();
+        if (source == null) {
+            return WebUtils.error("source是必填字段,值不能含中文!");
+        }
+        List<String> openIds = Lists.newArrayList();
+        if (templateDto.getIsMime()) {
+            templateDto.setForcePush(true);
+            openIds.add(unionUser.getOpenId());
+        } else {
+            List tempList = Arrays.asList(templateDto.getOpenIds().split("\n"));
+            openIds = new ArrayList<>(tempList);
+            openIds.add(unionUser.getOpenId());
+        }
+        Integer templateId = templateDto.getTemplateId();
+        List<String> developerList =  ConfigUtils.getAlarmList();
+        //添加技术Openid
+        openIds.addAll(developerList);
+        String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
+
+        List<String> blackLists = accountService.loadBlackListOpenIds();
+        Boolean forcePush = templateDto.getForcePush();
+        //过滤黑名单用户
+        List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
+        ThreadPool.execute(()-> {
+            try {
+                sendLists.forEach(openid -> {
+                    TemplateMessage templateMessage = new TemplateMessage();
+                    templateMessage.setTouser(openid);
+
+                    templateMessage.setTemplate_id(templateMsgId);
+                    Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                    templateMessage.setData(data);
+                    if (templateDto.getFirst() != null) {
+                        String first = templateDto.getFirst();
+                        if (first.contains("{username}")) {
+                            first = replaceNickname(openid, first);
+                        }
+                        data.put("first", new TemplateMessage.Keyword(first));
+                    }
+                    if (templateDto.getKeyword1() != null) {
+                        String keyword1 = templateDto.getKeyword1();
+                        if (keyword1.contains("{username}")) {
+                            keyword1 = replaceNickname(openid, keyword1);
+                        }
+                        data.put("keyword1", new TemplateMessage.Keyword(keyword1));
+                    }
+                    if (templateDto.getKeyword2() != null) {
+                        String keyword2 = templateDto.getKeyword2();
+                        if (keyword2.contains("{username}")) {
+                            keyword2 = replaceNickname(openid, keyword2);
+                        }
+                        data.put("keyword2", new TemplateMessage.Keyword(keyword2));
+                    }
+                    if (templateDto.getKeyword3() != null) {
+                        String keyword3 = templateDto.getKeyword3();
+                        if (keyword3.contains("{username}")) {
+                            keyword3 = replaceNickname(openid, keyword3);
+                        }
+                        data.put("keyword3", new TemplateMessage.Keyword(keyword3));
+                    }
+                    if (templateDto.getRemark() != null) {
+                        String remark = templateDto.getRemark();
+                        if (remark.contains("{username}")) {
+                            remark = replaceNickname(openid, remark);
+                        }
+                        data.put("remark", new TemplateMessage.Keyword(remark, "#FFA500"));
+                    }
+                    String url = templateDto.getUrl();
+                    if (url != null && url.length() > 0) {
+                        templateMessage.setUrl(templateDto.getUrl());
+                    }
+                    templateMessage.setComment(templateDto.getComment());
+                    if(openid.equals(unionUser.getOpenId()) ||developerList.contains(openid) ){
+                        templateMessageService.sendMessage(templateMessage, false, source);
+                    }else {
+                        templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.error("发送通知失败", e);
+            }
+        });
+        return WebUtils.result("正在发送中，如果你收到模板消息，则已经全部发送结束");
+    }
+
+    /**
+     * 给用户开通 vip 级别的会员身份
+     */
+    @RequestMapping(value = "/add/member/vip", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> addVipRiseMember(UnionUser unionUser,
+                                                                @RequestParam("riseId") String riseId,
+                                                                @RequestParam("memo") String memo,
+                                                                @RequestParam("month") Integer month) {
+        Pair<Integer, String> pair = accountService.addVipRiseMember(riseId, memo, month);
+        if (pair.getLeft() > 0) {
+            ActionLog actionLog = ActionLog.create()
+                    .uid(unionUser.getId()).module("打点")
+                    .action("后台操作").function("添加 vip 会员")
+                    .memo("riseid：" + riseId + "，month：" + month);
+            operationLogService.log(actionLog);
+            return WebUtils.success();
+        } else {
+            return WebUtils.error(pair.getRight());
+        }
+    }
+
+    private List<BusinessApplicationDto> getApplicationDto(List<BusinessSchoolApplication> applications) {
         final List<String> openidList;
         if (applications != null && applications.size() > 0) {
             //获取黑名单用户
@@ -527,7 +655,7 @@ public class RiseOperationController {
             BusinessApplicationDto dto = this.initApplicationDto(application);
             List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
             BusinessApplyQuestion levelQuestion = questions.get(3);
-            if(levelQuestion!=null){
+            if (levelQuestion != null) {
                 dto.setLevel(levelQuestion.getAnswer());
             }
             dto.setQuestionList(questions);
@@ -614,5 +742,12 @@ public class RiseOperationController {
         interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
 
         return interviewRecord;
+    }
+
+
+    private String replaceNickname(String openid, String message) {
+        Profile profile = accountService.getProfile(openid, false);
+        String name = profile != null ? profile.getNickname() : "";
+        return message.replace("{username}", name);
     }
 }

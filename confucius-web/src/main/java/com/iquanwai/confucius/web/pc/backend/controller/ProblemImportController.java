@@ -33,7 +33,7 @@ public class ProblemImportController {
     public ResponseEntity<Map<String, Object>> getSimpleProblem(PCLoginUser loginUser) {
         List<SimpleProblem> simpleProblems = problemService.loadProblems().stream()
                 .filter(problem -> !problem.getDel())
-                .map(problem -> new SimpleProblem(problem.getId(), problem.getProblem()))
+                .map(problem -> new SimpleProblem(problem.getId(), problem.getProblem(),problem.getAbbreviation()))
                 .collect(Collectors.toList());
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())

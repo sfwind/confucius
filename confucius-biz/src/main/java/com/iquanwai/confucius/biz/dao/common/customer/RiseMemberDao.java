@@ -37,8 +37,8 @@ public class RiseMemberDao extends DBUtil {
 
     public int insert(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into RiseMember(ProfileId, OrderId, MemberTypeId, ExpireDate, Expired, Memo, OpenDate) " +
-                " VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "insert into RiseMember(ProfileId, OrderId, MemberTypeId, ExpireDate, Expired, Memo, OpenDate, Vip) " +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             Long insertRs = runner.insert(sql, new ScalarHandler<>(),
@@ -48,7 +48,8 @@ public class RiseMemberDao extends DBUtil {
                     riseMember.getExpireDate(),
                     riseMember.getExpired(),
                     riseMember.getMemo(),
-                    riseMember.getOpenDate()
+                    riseMember.getOpenDate(),
+                    riseMember.getVip()
             );
             return insertRs.intValue();
         } catch (SQLException e) {
