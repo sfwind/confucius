@@ -47,7 +47,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    //TODO:改造成消息队列
     public void sendMessage(String message, String toUser, String fromUser, String url) {
         NotifyMessage notifyMessage = new NotifyMessage();
         notifyMessage.setFromUser(fromUser);
@@ -57,6 +56,7 @@ public class MessageServiceImpl implements MessageService {
         notifyMessage.setOld(false);
         notifyMessage.setSendTime(DateUtils.parseDateTimeToString(new Date()));
         notifyMessage.setUrl(url);
+        addHook(notifyMessage);
 
         notifyMessageDao.insert(notifyMessage);
     }
@@ -82,6 +82,18 @@ public class MessageServiceImpl implements MessageService {
             data.put("remark", new TemplateMessage.Keyword(message));
             templateMessageService.sendMessage(templateMessage);
         });
+    }
+
+    private void addHook(NotifyMessage notifyMessage) {
+        if (notifyMessage.getUrl() != null) {
+            String url = notifyMessage.getUrl();
+            if (url.contains("?") && !url.contains("_tm")){
+                url = url + "&_tm=notify_message";
+            }else{
+                url = url + "?_tm=notify_message";
+            }
+            notifyMessage.setUrl(url);
+        }
     }
 
 }

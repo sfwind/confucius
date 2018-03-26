@@ -1,10 +1,7 @@
 package com.iquanwai.confucius.biz.domain.weixin.message.template;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.iquanwai.confucius.biz.dao.DBUtil;
 import com.iquanwai.confucius.biz.dao.common.message.CustomerMessageLogDao;
 import com.iquanwai.confucius.biz.dao.common.message.TemplateMessageDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -191,7 +188,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         if (templateMessage.getUrl() != null) {
             String url = templateMessage.getUrl();
             String tm = source == null ? "template_message" : source;
-            if (url.contains("?")) {
+            if (url.contains("?") && !url.contains("_tm")) {
                 url = url + "&_tm=" + tm;
             } else {
                 url = url + "?_tm=" + tm;
