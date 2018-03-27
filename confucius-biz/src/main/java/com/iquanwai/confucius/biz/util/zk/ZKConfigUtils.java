@@ -53,7 +53,7 @@ public class ZKConfigUtils {
     }
 
     public void init(){
-//        config();
+        config();
         try {
             zooKeeper = new RobustZooKeeper(zkAddress);
             zk = zooKeeper.getClient();
@@ -66,16 +66,16 @@ public class ZKConfigUtils {
         CONFIG_CACHE = CacheBuilder.newBuilder()
                 .expireAfterWrite(1L, TimeUnit.MINUTES)
                 .build();
-        File file = new File(ZK_CONFIG_PATH);
-        if(file.exists()){
-            Properties p = new Properties();
-            try {
-                p.load(new FileReader(file));
-                zkAddress = p.getProperty(ZK_ADDRESS_KEY);
-            } catch (IOException e) {
-                // ignore
-            }
-        }
+//        File file = new File(ZK_CONFIG_PATH);
+//        if(file.exists()){
+//            Properties p = new Properties();
+//            try {
+//                p.load(new FileReader(file));
+//                zkAddress = p.getProperty(ZK_ADDRESS_KEY);
+//            } catch (IOException e) {
+//                // ignore
+//            }
+//        }
     }
 
     public void destroy(){
