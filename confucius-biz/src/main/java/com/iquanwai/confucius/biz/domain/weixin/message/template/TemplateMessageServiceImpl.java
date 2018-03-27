@@ -41,6 +41,19 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
+    public boolean sendSelfCompleteMessage(String eventName, String openId) {
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTouser(openId);
+        templateMessage.setTemplate_id(ConfigUtils.incompleteTaskMsgKey());
+        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+        data.put("keyword1", new TemplateMessage.Keyword(eventName));
+        data.put("keyword2", new TemplateMessage.Keyword("处理完成"));
+        data.put("keyword3", new TemplateMessage.Keyword(DateUtils.parseDateTimeToString(new Date())));
+        templateMessage.setData(data);
+        return sendMessage(templateMessage);
+    }
+
+    @Override
     public boolean sendMessage(TemplateMessage templateMessage) {
         return sendMessage(templateMessage, false, null);
     }
@@ -59,7 +72,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             }
         }
         //强推也需要记录发送记录
-        else if(source!=null){
+        else if (source != null) {
             saveTemplateMessageSendLog(templateMessage, false, true, source);
         }
         String body = "";
@@ -89,7 +102,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
     @Override
     public List<TemplateMsg> loadTemplateMsgs() {
-        return templateMessageDao.loadAll(TemplateMsg.class).stream().filter(templateMsg -> templateMsg.getDel()==0).collect(Collectors.toList());
+        return templateMessageDao.loadAll(TemplateMsg.class).stream().filter(templateMsg -> templateMsg.getDel() == 0).collect(Collectors.toList());
     }
 
     /**
@@ -101,7 +114,6 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
      * 5. 用户每天最多收到2条消息
      * 6. 用户三小时内最多收到1条消息
      * 7. 活动提醒通知，文字尽量简洁，不要用推销的口吻
-     *
      * @return 是否允许发送模板消息
      */
     private boolean checkTemplateMessageAuthority(TemplateMessage templateMessage, boolean forwardlyPush) {
@@ -170,8 +182,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         return true;
     }
 
-    private void saveTemplateMessageSendLog(TemplateMessage templateMessage, boolean forwardlyPush,
-                                            boolean validPush, String source) {
+    private void saveTemplateMessageSendLog(TemplateMessage templateMessage, boolean forwardlyPush, boolean validPush, String source) {
         CustomerMessageLog customerMessageLog = new CustomerMessageLog();
         customerMessageLog.setOpenId(templateMessage.getTouser());
         customerMessageLog.setPublishTime(new Date());
