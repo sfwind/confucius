@@ -359,8 +359,13 @@ public class RiseOperationController {
                     }
                 }
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
-                        () -> OperationLogService.props().add("checkStatus", BusinessSchoolApplication.REJECT)
-                                .add("auditor", approveDto.getInterviewDto().getInterviewerId()));
+                        () -> {
+                            OperationLogService.Prop prop = OperationLogService.props().add("checkStatus", BusinessSchoolApplication.REJECT);
+                            if (approveDto.getInterviewDto().getInterviewerId() != null) {
+                                prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
+                            }
+                            return prop;
+                        });
 
                 return WebUtils.success();
             } else {
@@ -394,8 +399,13 @@ public class RiseOperationController {
             boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(), "");
             if (approve) {
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
-                        () -> OperationLogService.props().add("checkStatus", BusinessSchoolApplication.APPROVE)
-                                .add("auditor", approveDto.getInterviewDto().getInterviewerId()));
+                        () -> {
+                            OperationLogService.Prop prop = OperationLogService.props().add("checkStatus", BusinessSchoolApplication.APPROVE);
+                            if (approveDto.getInterviewDto().getInterviewerId() != null) {
+                                prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
+                            }
+                            return prop;
+                        });
 
                 return WebUtils.success();
             } else {
@@ -427,8 +437,13 @@ public class RiseOperationController {
             boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(), "");
             if (approve) {
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
-                        () -> OperationLogService.props().add("checkStatus", BusinessSchoolApplication.IGNORE)
-                                .add("auditor", approveDto.getInterviewDto().getInterviewerId()));
+                        () -> {
+                            OperationLogService.Prop prop = OperationLogService.props().add("checkStatus", BusinessSchoolApplication.IGNORE);
+                            if (approveDto.getInterviewDto().getInterviewerId() != null) {
+                                prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
+                            }
+                            return prop;
+                        });
                 return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
