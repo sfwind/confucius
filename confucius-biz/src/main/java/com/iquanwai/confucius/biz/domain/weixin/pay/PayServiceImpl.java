@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.RefundException;
@@ -58,6 +59,8 @@ public class PayServiceImpl implements PayService {
     private RabbitMQFactory rabbitMQFactory;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private RabbitMQPublisher paySuccessPublisher;
 
@@ -172,6 +175,13 @@ public class PayServiceImpl implements PayService {
             paidTime = DateUtils.parseStringToDate3(paidTimeStr);
         }
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
+
+        operationLogService.trace(order.getProfileId(), "payMember",
+                () -> OperationLogService
+                        .props().add("goodsType", order.getGoodsType())
+                        .add("goodsId", order.getGoodsId())
+                        .add("fee", order.getPrice())
+                        .add("payType", order.getPayType()));
     }
 
     @Override
@@ -426,6 +436,13 @@ public class PayServiceImpl implements PayService {
             // 支付宝
             this.refundAliPay(quanwaiOrder, fee);
         }
+        operationLogService.trace(quanwaiOrder.getProfileId(), "refund",
+                () -> OperationLogService.props()
+                        .add("goodsType", quanwaiOrder.getGoodsType())
+                        .add("goodsId", quanwaiOrder.getGoodsId())
+                        .add("refundFee", fee)
+                        .add("fee", quanwaiOrder.getPrice())
+                        .add("payType", quanwaiOrder.getPayType()));
     }
 
     private void refundAliPay(QuanwaiOrder quanwaiOrder, Double fee) {

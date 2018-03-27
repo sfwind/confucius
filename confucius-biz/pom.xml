@@ -221,6 +221,10 @@
             <groupId>org.unidal.framework</groupId>
             <artifactId>foundation-service</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sensorsdata.analytics.javasdk</groupId>
+            <artifactId>SensorsAnalyticsSDK</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
