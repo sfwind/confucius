@@ -12,6 +12,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
 import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Comment;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.systematism.HomeworkVote;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -28,7 +29,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
@@ -56,6 +62,7 @@ public class AssistantApplicationController {
 
     /**
      * 点赞或者取消点赞
+     *
      * @param vote 1：点赞，2：取消点赞
      */
     @RequestMapping(value = "/pc/asst/vote", method = RequestMethod.POST)
@@ -133,10 +140,11 @@ public class AssistantApplicationController {
     /**
      * 评论
      * TODO 根据角色设置评论类型
+     *
      * @param loginUser 登陆人
-     * @param moduleId 评论模块
-     * @param submitId 文章id
-     * @param dto 评论内容
+     * @param moduleId  评论模块
+     * @param submitId  文章id
+     * @param dto       评论内容
      */
     @RequestMapping(value = "/pc/asst/comment/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> comment(PCLoginUser loginUser,
@@ -172,6 +180,17 @@ public class AssistantApplicationController {
                 practiceService.initCommentEvaluation(submitId, resultDto.getId());
             }
 
+            operationLogService.trace(loginUser.getProfileId(), "commentApplication", () -> {
+                OperationLogService.Prop prop = OperationLogService.props();
+                RiseMember riseMember = accountService.getCurrentRiseMember(applicationSubmit.getProfileId());
+                if (riseMember != null) {
+                    prop.add("discussedRolename", riseMember.getMemberTypeId());
+                }
+                prop.add("applicationId", applicationSubmit.getApplicationId());
+                prop.add("discussedProfileId", applicationSubmit.getProfileId());
+                prop.add("problemId", applicationSubmit.getProblemId());
+                return prop;
+            });
             return WebUtils.result(resultDto);
         } else {
             return WebUtils.error("评论失败");
@@ -181,10 +200,11 @@ public class AssistantApplicationController {
 
     /**
      * 评论回复
+     *
      * @param loginUser 登录人
-     * @param moduleId 评论模块
-     * @param submitId 文章id
-     * @param dto 评论内容，回复评论id
+     * @param moduleId  评论模块
+     * @param submitId  文章id
+     * @param dto       评论内容，回复评论id
      */
     @RequestMapping(value = "/pc/asst/comment/reply/{moduleId}/{submitId}", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> commentReply(PCLoginUser loginUser,
@@ -291,7 +311,7 @@ public class AssistantApplicationController {
                 .memo(loginUser.getOpenId() + " look " + submitId);
         operationLogService.log(operationLog);
         ApplicationSubmit submit = applicationService.loadSubmit(submitId);
-        if(submit == null) {
+        if (submit == null) {
             logger.error("{} has no application submit", loginUser.getOpenId());
             return WebUtils.error(404, "无该提交记录");
         } else {
@@ -303,7 +323,7 @@ public class AssistantApplicationController {
             show.setType("application");
             show.setRequest(submit.getRequestFeedback());
             // 查询这个openid的数据
-            if(loginUser.getProfileId().equals(submit.getProfileId())) {
+            if (loginUser.getProfileId().equals(submit.getProfileId())) {
                 // 是自己的
                 show.setIsMine(true);
                 show.setUpName(loginUser.getWeixin().getWeixinName());
@@ -313,7 +333,7 @@ public class AssistantApplicationController {
                 show.setRequestCommentCount(practiceService.hasRequestComment(submit.getPlanId()));
             } else {
                 Profile account = accountService.getProfile(submit.getProfileId());
-                if(account != null) {
+                if (account != null) {
                     show.setUpName(account.getNickname());
                     show.setHeadImg(account.getHeadimgurl());
                     show.setSignature(account.getSignature());
@@ -326,7 +346,7 @@ public class AssistantApplicationController {
             // 查询我对它的点赞状态
             HomeworkVote myVote = practiceService.loadVoteRecord(Constants.VoteType.APPLICATION, submit.getId(),
                     loginUser.getProfileId());
-            if(myVote != null && myVote.getDel() == 0) {
+            if (myVote != null && myVote.getDel() == 0) {
                 // 点赞中
                 show.setVoteStatus(1);
             } else {
@@ -337,7 +357,7 @@ public class AssistantApplicationController {
             show.setTitle(applicationPractice.getTopic());
             show.setDesc(applicationPractice.getDescription());
             boolean integrated = Knowledge.isReview(applicationPractice.getKnowledgeId());
-            if(!integrated) {
+            if (!integrated) {
                 show.setKnowledgeId(applicationPractice.getKnowledgeId());
             }
             return WebUtils.result(show);
