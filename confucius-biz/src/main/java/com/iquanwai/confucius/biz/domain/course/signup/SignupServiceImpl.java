@@ -10,7 +10,7 @@ import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.course.CouponDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolApplicationOrderDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
+import com.iquanwai.confuzzcius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.OperateRotateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;

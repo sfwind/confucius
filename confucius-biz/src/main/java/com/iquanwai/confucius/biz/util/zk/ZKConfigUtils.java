@@ -33,7 +33,7 @@ public class ZKConfigUtils {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String zkAddress = "101.132.185.195:2181";
+    private static String zkAddress = "172.19.10.215:12181";
 
     private static Cache<String, String> CONFIG_CACHE;
 
@@ -53,7 +53,7 @@ public class ZKConfigUtils {
     }
 
     public void init(){
-        config();
+//        config();
         try {
             zooKeeper = new RobustZooKeeper(zkAddress);
             zk = zooKeeper.getClient();
