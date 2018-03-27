@@ -224,6 +224,12 @@
         <dependency>
             <groupId>com.sensorsdata.analytics.javasdk</groupId>
             <artifactId>SensorsAnalyticsSDK</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>httpclient</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
