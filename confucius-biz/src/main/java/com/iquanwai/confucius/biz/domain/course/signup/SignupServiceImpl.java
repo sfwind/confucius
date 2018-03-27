@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
@@ -109,6 +110,8 @@ public class SignupServiceImpl implements SignupService {
     private BusinessSchoolApplicationOrderDao businessSchoolApplicationOrderDao;
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private final static int PROBLEM_MAX_LENGTH = 30; //课程最长开放时间
 
@@ -935,6 +938,9 @@ public class SignupServiceImpl implements SignupService {
             // 更新最后一次无效申请
             businessSchoolApplicationDao.validApply(orderId, apply.getId());
             businessSchoolApplicationOrderDao.paid(orderId);
+
+            // 提交有效申请
+            operationLogService.trace(order.getProfileId(), "submitValidApply");
         }
 
     }

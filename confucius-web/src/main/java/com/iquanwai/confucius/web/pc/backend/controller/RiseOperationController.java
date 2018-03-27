@@ -15,7 +15,11 @@ import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.exception.RefundException;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.ActionLog;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.TableDto;
+import com.iquanwai.confucius.biz.po.TemplateMsg;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
@@ -23,19 +27,26 @@ import com.iquanwai.confucius.biz.po.apply.InterviewRecord;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.common.survey.SurveyHref;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
+import com.iquanwai.confucius.biz.po.fragmentation.Problem;
+import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.backend.dto.NoticeMsgDto;
-import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
-import com.iquanwai.confucius.web.pc.backend.dto.*;
+import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
+import com.iquanwai.confucius.web.pc.backend.dto.AssignDto;
+import com.iquanwai.confucius.web.pc.backend.dto.BusinessApplicationDto;
+import com.iquanwai.confucius.web.pc.backend.dto.ProblemCatalogDto;
+import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
+import com.iquanwai.confucius.web.pc.backend.dto.TemplateDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -47,12 +58,23 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.net.ConnectException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -262,7 +284,8 @@ public class RiseOperationController {
 
     /**
      * 碎片化总任务列表加载
-     * @param problemId 问题id
+     *
+     * @param problemId   问题id
      * @param pcLoginUser 登陆人
      */
     @RequestMapping("/homework/{problemId}")
@@ -335,6 +358,10 @@ public class RiseOperationController {
                         }
                     }
                 }
+                operationLogService.trace(application.getProfileId(), "phoneCheck",
+                        () -> OperationLogService.props().add("checkStatus", BusinessSchoolApplication.REJECT)
+                                .add("auditor", approveDto.getInterviewDto().getInterviewerId()));
+
                 return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
@@ -366,6 +393,10 @@ public class RiseOperationController {
             }
             boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(), "");
             if (approve) {
+                operationLogService.trace(application.getProfileId(), "phoneCheck",
+                        () -> OperationLogService.props().add("checkStatus", BusinessSchoolApplication.APPROVE)
+                                .add("auditor", approveDto.getInterviewDto().getInterviewerId()));
+
                 return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
@@ -395,6 +426,9 @@ public class RiseOperationController {
             }
             boolean approve = businessSchoolService.ignoreApplication(approveDto.getId(), "");
             if (approve) {
+                operationLogService.trace(application.getProfileId(), "phoneCheck",
+                        () -> OperationLogService.props().add("checkStatus", BusinessSchoolApplication.IGNORE)
+                                .add("auditor", approveDto.getInterviewDto().getInterviewerId()));
                 return WebUtils.success();
             } else {
                 return WebUtils.error("更新失败");
@@ -550,7 +584,7 @@ public class RiseOperationController {
             openIds.add(unionUser.getOpenId());
         }
         Integer templateId = templateDto.getTemplateId();
-        List<String> developerList =  ConfigUtils.getAlarmList();
+        List<String> developerList = ConfigUtils.getAlarmList();
         //添加技术Openid
         openIds.addAll(developerList);
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
@@ -559,7 +593,7 @@ public class RiseOperationController {
         Boolean forcePush = templateDto.getForcePush();
         //过滤黑名单用户
         List<String> sendLists = openIds.stream().distinct().filter(openId -> !blackLists.contains(openId)).collect(Collectors.toList());
-        ThreadPool.execute(()-> {
+        ThreadPool.execute(() -> {
             try {
                 sendLists.forEach(openid -> {
                     TemplateMessage templateMessage = new TemplateMessage();
@@ -608,9 +642,9 @@ public class RiseOperationController {
                         templateMessage.setUrl(templateDto.getUrl());
                     }
                     templateMessage.setComment(templateDto.getComment());
-                    if(openid.equals(unionUser.getOpenId()) ||developerList.contains(openid) ){
+                    if (openid.equals(unionUser.getOpenId()) || developerList.contains(openid)) {
                         templateMessageService.sendMessage(templateMessage, false, source);
-                    }else {
+                    } else {
                         templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
                     }
                 });
