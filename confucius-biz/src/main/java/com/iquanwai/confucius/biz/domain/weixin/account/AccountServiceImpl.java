@@ -140,7 +140,9 @@ public class AccountServiceImpl implements AccountService {
                     case MOBILE:
                         account.setOpenid(openId);
                         account.setSubscribe_time(new Date());
-                        account.setSubscribe(subscribe);
+                        if (subscribe != null) {
+                            account.setSubscribe(subscribe);
+                        }
                         break;
                     case PC:
                         account.setSubscribe(0);
@@ -163,8 +165,10 @@ public class AccountServiceImpl implements AccountService {
                 switch (profileType) {
                     case MOBILE:
                         account.setOpenid(openId);
-                        account.setSubscribe(subscribe);
                         account.setSubscribe_time(new Date());
+                        if (subscribe != null) {
+                            account.setSubscribe(subscribe);
+                        }
                         break;
                     case PC:
                         account.setSubscribe(0);
