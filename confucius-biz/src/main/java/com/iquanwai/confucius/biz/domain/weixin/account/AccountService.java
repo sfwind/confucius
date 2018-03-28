@@ -39,11 +39,6 @@ public interface AccountService {
     Account getAccountByUnionId(String unionId);
 
     /**
-     * 根据openid获取用户的详细信息
-     */
-    Account getAccount(String openid, boolean realTime) throws NotFollowingException;
-
-    /**
      * 根据riseid获取用户的详细信息
      */
     Profile getProfileByRiseId(String riseId);

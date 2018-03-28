@@ -243,25 +243,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account getAccount(String openid, boolean realTime) throws NotFollowingException {
-        if (realTime) {
-            return getAccountFromWeixin(openid);
-        } else {
-            //先从数据库查询account对象
-            Account account = followUserDao.queryByOpenid(openid);
-            if (account != null) {
-                if (account.getSubscribe() == 0) {
-                    // 曾经关注，现在取关的人
-                    throw new NotFollowingException();
-                }
-                return account;
-            }
-            //从微信处获取
-            return getAccountFromWeixin(openid);
-        }
-    }
-
-    @Override
     public Profile getProfile(String openid, boolean realTime) {
         return getProfileFromDB(openid);
     }
@@ -340,75 +321,75 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private Account getAccountFromWeixin(String openid) throws NotFollowingException {
-        // 调用api查询用户详情
-        String url = USER_INFO_URL;
-        Map<String, String> map = Maps.newHashMap();
-        map.put("openid", openid);
-        logger.info("请求用户信息:{}", openid);
-        url = CommonUtils.placeholderReplace(url, map);
-        String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}", body);
-        Map<String, Object> result = CommonUtils.jsonToMap(body);
-
-        Account account = new Account();
-        try {
-            ConvertUtils.register((aClass, value) -> {
-                if (value == null) {
-                    return null;
-                }
-                if (!(value instanceof Double)) {
-                    logger.error("不是日期类型");
-                    throw new ConversionException("不是日期类型");
-                }
-                Double time = (Double) value * 1000;
-                return new DateTime(time.longValue()).toDate();
-            }, Date.class);
-            BeanUtils.populate(account, result);
-            if (account.getSubscribe() != null && account.getSubscribe() == 0) {
-                //未关注直接抛异常
-                throw new NotFollowingException();
-            }
-
-            redisUtil.lock("lock:wx:user:insert:profile", (lock) -> {
-                Account existAccount = followUserDao.queryByOpenid(openid);
-                logger.info("existAccount: {}", existAccount);
-                if (existAccount == null) {
-                    logger.info("插入用户信息:{}", account);
-                    followUserDao.insert(account);
-                    // 插入profile表
-                    Profile profile = getProfileFromDB(account.getOpenid());
-                    if (profile == null) {
-                        ModelMapper modelMapper = new ModelMapper();
-                        profile = modelMapper.map(account, Profile.class);
-                        try {
-                            logger.info("插入Profile表信息:{}", profile);
-                            profile.setRiseId(CommonUtils.randomString(7));
-                            profileDao.insertProfile(profile);
-                        } catch (SQLException err) {
-                            profile.setRiseId(CommonUtils.randomString(7));
-                            try {
-                                profileDao.insertProfile(profile);
-                            } catch (SQLException subErr) {
-                                logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
-                            }
-                        }
-                    } else {
-                        ModelMapper modelMapper = new ModelMapper();
-                        profile = modelMapper.map(account, Profile.class);
-                        profileDao.updateOAuthFields(profile);
-                    }
-                } else {
-                    followUserDao.updateOAuthFields(account);
-                }
-            });
-        } catch (NotFollowingException e1) {
-            throw new NotFollowingException();
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return account;
-    }
+    // private Account getAccountFromWeixin(String openid) throws NotFollowingException {
+    //     // 调用api查询用户详情
+    //     String url = USER_INFO_URL;
+    //     Map<String, String> map = Maps.newHashMap();
+    //     map.put("openid", openid);
+    //     logger.info("请求用户信息:{}", openid);
+    //     url = CommonUtils.placeholderReplace(url, map);
+    //     String body = restfulHelper.get(url);
+    //     logger.info("请求用户信息结果:{}", body);
+    //     Map<String, Object> result = CommonUtils.jsonToMap(body);
+    //
+    //     Account account = new Account();
+    //     try {
+    //         ConvertUtils.register((aClass, value) -> {
+    //             if (value == null) {
+    //                 return null;
+    //             }
+    //             if (!(value instanceof Double)) {
+    //                 logger.error("不是日期类型");
+    //                 throw new ConversionException("不是日期类型");
+    //             }
+    //             Double time = (Double) value * 1000;
+    //             return new DateTime(time.longValue()).toDate();
+    //         }, Date.class);
+    //         BeanUtils.populate(account, result);
+    //         if (account.getSubscribe() != null && account.getSubscribe() == 0) {
+    //             //未关注直接抛异常
+    //             throw new NotFollowingException();
+    //         }
+    //
+    //         redisUtil.lock("lock:wx:user:insert:profile", (lock) -> {
+    //             Account existAccount = followUserDao.queryByOpenid(openid);
+    //             logger.info("existAccount: {}", existAccount);
+    //             if (existAccount == null) {
+    //                 logger.info("插入用户信息:{}", account);
+    //                 followUserDao.insert(account);
+    //                 // 插入profile表
+    //                 Profile profile = getProfileFromDB(account.getOpenid());
+    //                 if (profile == null) {
+    //                     ModelMapper modelMapper = new ModelMapper();
+    //                     profile = modelMapper.map(account, Profile.class);
+    //                     try {
+    //                         logger.info("插入Profile表信息:{}", profile);
+    //                         profile.setRiseId(CommonUtils.randomString(7));
+    //                         profileDao.insertProfile(profile);
+    //                     } catch (SQLException err) {
+    //                         profile.setRiseId(CommonUtils.randomString(7));
+    //                         try {
+    //                             profileDao.insertProfile(profile);
+    //                         } catch (SQLException subErr) {
+    //                             logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
+    //                         }
+    //                     }
+    //                 } else {
+    //                     ModelMapper modelMapper = new ModelMapper();
+    //                     profile = modelMapper.map(account, Profile.class);
+    //                     profileDao.updateOAuthFields(profile);
+    //                 }
+    //             } else {
+    //                 followUserDao.updateOAuthFields(account);
+    //             }
+    //         });
+    //     } catch (NotFollowingException e1) {
+    //         throw new NotFollowingException();
+    //     } catch (Exception e) {
+    //         logger.error(e.getMessage(), e);
+    //     }
+    //     return account;
+    // }
 
     @Override
     public String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException {
