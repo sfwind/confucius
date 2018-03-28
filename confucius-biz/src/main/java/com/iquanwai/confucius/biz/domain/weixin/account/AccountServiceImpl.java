@@ -142,6 +142,8 @@ public class AccountServiceImpl implements AccountService {
                         account.setSubscribe_time(new Date());
                         if (subscribe != null) {
                             account.setSubscribe(subscribe);
+                        } else {
+                            account.setSubscribe(0);
                         }
                         break;
                     case PC:
