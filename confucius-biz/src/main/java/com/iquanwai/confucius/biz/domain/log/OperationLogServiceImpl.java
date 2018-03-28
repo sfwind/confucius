@@ -98,6 +98,8 @@ public class OperationLogServiceImpl implements OperationLogService {
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
+            // TODO 上线前删掉
+            sa.flush();
         });
     }
 
