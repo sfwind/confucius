@@ -24,7 +24,7 @@ public class FollowUserDao extends DBUtil {
 
     public int insert(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO FollowUsers(Openid, WeMiniOpenId, UnionId, Nickname, Sex, City, Country, Province, Headimgurl, Subscribe_time, Remark, Groupid)" +
+        String sql = "INSERT INTO FollowUsers(Openid, WeMiniOpenId, UnionId, Nickname, Sex, City, Country, Province, Headimgurl, Subscribe, Subscribe_time, Remark, Groupid)" +
                 " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = run.insert(sql, new ScalarHandler<>(),
@@ -37,6 +37,7 @@ public class FollowUserDao extends DBUtil {
                     account.getCountry(),
                     account.getProvince(),
                     account.getHeadimgurl(),
+                    account.getSubscribe(),
                     account.getSubscribe_time(),
                     account.getRemark(),
                     account.getGroupid());
