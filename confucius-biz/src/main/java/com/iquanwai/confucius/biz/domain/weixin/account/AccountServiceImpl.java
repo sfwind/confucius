@@ -3,7 +3,6 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
@@ -111,6 +110,20 @@ public class AccountServiceImpl implements AccountService {
                 userInfoObject = storeWeiXinUserInfo(openId, refreshTokenObject.getAccessToken(), profileType);
             }
         }
+        store(openId, userInfoObject, profileType);
+        return userInfoObject;
+    }
+
+    @Override
+    public WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId, String accessToken) {
+        WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfoByMobileApp(openId, accessToken);
+        if (userInfoObject != null) {
+            store(openId, userInfoObject, Profile.ProfileType.MOBILE);
+        }
+        return userInfoObject;
+    }
+
+    private void store(String openId, WeiXinResult.UserInfoObject userInfoObject, Profile.ProfileType profileType) {
         String unionId = userInfoObject.getUnionId();
         String nickName = userInfoObject.getNickName();
         String headImgUrl = userInfoObject.getHeadImgUrl();
@@ -209,7 +222,6 @@ public class AccountServiceImpl implements AccountService {
                 profileDao.updateOAuthFields(profile);
             }
         });
-        return userInfoObject;
     }
 
     /**
@@ -223,6 +235,11 @@ public class AccountServiceImpl implements AccountService {
             role = plans.isEmpty() ? Role.stranger() : Role.student();
         }
         return role;
+    }
+
+    @Override
+    public Account getAccountByUnionId(String unionId) {
+        return followUserDao.queryByUnionId(unionId);
     }
 
     @Override
@@ -431,68 +448,6 @@ public class AccountServiceImpl implements AccountService {
             logger.error(e.getMessage(), e);
         }
         return null;
-    }
-
-    @Override
-    public void collectUsers() {
-        //调用api查询account对象
-
-        String body = restfulHelper.get(GET_USERS_URL);
-
-        UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
-        String lastOpenid = "";
-        for (String openid : usersDto.getData().getOpenid()) {
-            lastOpenid = openid;
-            try {
-                getAccount(openid, true);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-        logger.info("最后一个openid:" + lastOpenid);
-        logger.info("处理完成");
-    }
-
-    @Override
-    public void collectNewUsers() {
-        //调用api查询account对象
-
-        String body = restfulHelper.get(GET_USERS_URL);
-
-        UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
-
-        List<String> openids = followUserDao.queryAll();
-        for (String openid : usersDto.getData().getOpenid()) {
-            if (!openids.contains(openid)) {
-                try {
-                    getAccountFromWeixin(openid);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
-        }
-        logger.info("处理完成");
-    }
-
-    @Override
-    public void collectNext(String nextOpenid) {
-        //调用api查询account对象
-        String url = GET_NEXT_USERS_URL;
-        url = url.replace("{next_openid}", nextOpenid);
-        String body = restfulHelper.get(url);
-
-        UsersDto usersDto = new Gson().fromJson(body, UsersDto.class);
-        String lastOpenid = "";
-        for (String openid : usersDto.getData().getOpenid()) {
-            lastOpenid = openid;
-            try {
-                getAccount(openid, true);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-        logger.info("最后一个openid:" + lastOpenid);
-        logger.info("处理完成");
     }
 
     @Override

@@ -29,7 +29,14 @@ public interface AccountService {
 
     WeiXinResult.UserInfoObject storeWeiXinUserInfo(String openId, String accessToken, Profile.ProfileType profileType);
 
+    WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId, String accessToken);
+
     Role getUserRole(Integer profileId);
+
+    /**
+     * 根据 UnionId 获取 Account
+     */
+    Account getAccountByUnionId(String unionId);
 
     /**
      * 根据openid获取用户的详细信息
@@ -62,21 +69,6 @@ public interface AccountService {
      * 从微信实时获取头像信息
      */
     String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException;
-
-    /**
-     * 收集所有关注用户的信息
-     */
-    void collectUsers();
-
-    /**
-     * 收集新关注用户的信息
-     */
-    void collectNewUsers();
-
-    /**
-     * 收集关注用户的信息
-     */
-    void collectNext(String openid);
 
     /**
      * 根据openid获取用户详情

@@ -255,6 +255,57 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         }
     }
 
+    /**
+     * 根据 openid 和应用级的 accessToken 调用用户信息
+     * @param openId 用户在该平台对应的 openid
+     * @param accessToken 应用级调用凭证
+     * @return 返回用户信息对象
+     */
+    @Override
+    public WeiXinResult.UserInfoObject getWeiXinUserInfoByMobileApp(String openId, String accessToken) {
+        Map<String, String> params = Maps.newHashMap();
+        params.put("openid", openId);
+        params.put("access_token", accessToken);
+        String requestUrl = CommonUtils.placeholderReplace(USER_INFO_URL, params);
+        String body = restfulHelper.getPure(requestUrl);
+        WeiXinResult.UserInfoObject userInfoObject = new WeiXinResult.UserInfoObject();
+        try {
+            if (CommonUtils.isError(body)) {
+                logger.error("微信调用用户信息接口失败：{}", body);
+                return null;
+            }
+            Map<String, Object> result = CommonUtils.jsonToMap(body);
+            String newOpenId = result.get("openid").toString();
+            String nickName = result.get("nickname").toString();
+            Integer sex = null;
+            try {
+                Double tempSex = (Double) result.get("sex");
+                if (tempSex != null) {
+                    sex = tempSex.intValue();
+                }
+            } catch (Exception e1) {
+                logger.error(e1.getLocalizedMessage(), e1);
+            }
+            String headImgUrl = result.get("headimgurl").toString();
+            String country = result.get("country").toString();
+            String province = result.get("province").toString();
+            String city = result.get("city").toString();
+            String unionId = result.get("unionid").toString();
+            userInfoObject.setOpenId(newOpenId);
+            userInfoObject.setNickName(nickName);
+            userInfoObject.setSex(sex);
+            userInfoObject.setHeadImgUrl(headImgUrl);
+            userInfoObject.setCountry(country);
+            userInfoObject.setProvince(province);
+            userInfoObject.setCity(city);
+            userInfoObject.setUnionId(unionId);
+            return userInfoObject;
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return null;
+        }
+    }
+
     @Override
     public WeiXinResult.RefreshTokenObject refreshWeiXinAccessToken(String accessToken) {
         Map<String, String> params = Maps.newHashMap();
