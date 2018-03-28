@@ -25,7 +25,7 @@ public class FollowUserDao extends DBUtil {
     public int insert(Account account) {
         QueryRunner run = new QueryRunner(getDataSource());
         String sql = "INSERT INTO FollowUsers(Openid, WeMiniOpenId, UnionId, Nickname, Sex, City, Country, Province, Headimgurl, Subscribe, Subscribe_time, Remark, Groupid)" +
-                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = run.insert(sql, new ScalarHandler<>(),
                     account.getOpenid(),
