@@ -8,15 +8,10 @@ import com.iquanwai.confucius.biz.dao.wx.AutoReplyMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.GraphicMessageDao;
 import com.iquanwai.confucius.biz.dao.wx.SubscribeMessageDao;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
-import com.iquanwai.confucius.biz.domain.message.MQService;
+import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
-import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.po.AutoReplyMessage;
-import com.iquanwai.confucius.biz.po.GraphicMessage;
-import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.biz.po.PromotionUser;
-import com.iquanwai.confucius.biz.po.SubscribeMessage;
+import com.iquanwai.confucius.biz.po.*;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.message.WechatMessage;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -65,6 +60,8 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
     private GraphicMessageDao graphicMessageDao;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private AccessTokenService accessTokenService;
     @Autowired
     private RedisUtil redisUtil;
     @Autowired
@@ -289,12 +286,9 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
         switch (event) {
             // 关注事件
             case EVENT_SUBSCRIBE:
-                try {
-                    //更新用户信息
-                    accountService.getAccount(openid, true);
-                } catch (NotFollowingException e) {
-                    // ignore
-                }
+                //更新用户信息
+                accountService.storeWeiXinUserInfoByMobileApp(openid, accessTokenService.getAccessToken());
+
                 List<SubscribeMessage> subscribeMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
