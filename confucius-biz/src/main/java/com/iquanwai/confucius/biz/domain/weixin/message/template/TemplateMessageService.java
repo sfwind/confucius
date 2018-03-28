@@ -9,6 +9,11 @@ import java.util.List;
  */
 public interface TemplateMessageService {
     /**
+     * 给自己发送事情处理成功通知
+     */
+    boolean sendSelfCompleteMessage(String eventName, String openId);
+
+    /**
      * 发送非主动推送模板消息
      * @return 返回发送结果
      * */
