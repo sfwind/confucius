@@ -673,9 +673,9 @@ public class SignupServiceImpl implements SignupService {
                         ShortMessage shortMessage = new ShortMessage();
                         shortMessage.setProfileId(profile.getId());
                         shortMessage.setContent(shortMessage.getNickname()+" 你好，欢迎加入圈外商学院。请添加你的班主任微信：MBAsalmon，接下来班主任将帮助你更好地学习。" +
-                                "快回复你的学号（学号：" + entryCode + "）向班主任报道吧！");
+                                "快回复你的学号（学号：" + entryCode + "）向班主任报道吧！回复TD退订");
                         shortMessage.setNickname(shortMessage.getNickname());
-                        shortMessage.setType(ShortMessage.MARKETING);
+                        shortMessage.setType(ShortMessage.BUSINESS);
                         shortMessage.setPhone(profile.getMobileNo());
                         shortMessageService.sendMessage(shortMessage);
                     }
