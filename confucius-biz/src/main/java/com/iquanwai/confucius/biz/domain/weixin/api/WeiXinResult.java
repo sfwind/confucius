@@ -30,6 +30,7 @@ public class WeiXinResult {
         private String province;
         private String city;
         private String unionId;
+        private Integer subscribe;
     }
 
     /**

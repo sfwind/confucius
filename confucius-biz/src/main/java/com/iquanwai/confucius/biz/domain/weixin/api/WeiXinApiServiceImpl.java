@@ -240,6 +240,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             String province = result.get("province").toString();
             String city = result.get("city").toString();
             String unionId = result.get("unionid").toString();
+            Integer subscribe = result.get("subscribe").toString() != null ? Integer.parseInt(result.get("subscribe").toString()) : 0;
             userInfoObject.setOpenId(newOpenId);
             userInfoObject.setNickName(nickName);
             userInfoObject.setSex(sex);
@@ -248,6 +249,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             userInfoObject.setProvince(province);
             userInfoObject.setCity(city);
             userInfoObject.setUnionId(unionId);
+            userInfoObject.setSubscribe(subscribe);
             return userInfoObject;
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
@@ -291,6 +293,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             String province = result.get("province").toString();
             String city = result.get("city").toString();
             String unionId = result.get("unionid").toString();
+            Integer subscribe = result.get("subscribe").toString() != null ? Integer.parseInt(result.get("subscribe").toString()) : 0;
             userInfoObject.setOpenId(newOpenId);
             userInfoObject.setNickName(nickName);
             userInfoObject.setSex(sex);
@@ -299,6 +302,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             userInfoObject.setProvince(province);
             userInfoObject.setCity(city);
             userInfoObject.setUnionId(unionId);
+            userInfoObject.setSubscribe(subscribe);
             return userInfoObject;
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);

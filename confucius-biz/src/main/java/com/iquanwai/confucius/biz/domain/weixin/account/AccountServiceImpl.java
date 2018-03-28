@@ -36,7 +36,6 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +130,7 @@ public class AccountServiceImpl implements AccountService {
         String country = userInfoObject.getCountry();
         String province = userInfoObject.getProvince();
         String city = userInfoObject.getCity();
+        Integer subscribe = userInfoObject.getSubscribe();
         redisUtil.lock("lock:wx:user:insert:followUser", lock -> {
             Account account = followUserDao.queryByUnionId(unionId);
             if (account == null) {
@@ -139,6 +139,8 @@ public class AccountServiceImpl implements AccountService {
                 switch (profileType) {
                     case MOBILE:
                         account.setOpenid(openId);
+                        account.setSubscribe(subscribe);
+                        account.setSubscribe_time(new Date());
                         break;
                     case PC:
                         break;
@@ -159,6 +161,8 @@ public class AccountServiceImpl implements AccountService {
                 switch (profileType) {
                     case MOBILE:
                         account.setOpenid(openId);
+                        account.setSubscribe(subscribe);
+                        account.setSubscribe_time(new Date());
                         break;
                     case PC:
                         break;
