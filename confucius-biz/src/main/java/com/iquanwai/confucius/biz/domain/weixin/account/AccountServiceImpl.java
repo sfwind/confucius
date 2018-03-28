@@ -139,12 +139,14 @@ public class AccountServiceImpl implements AccountService {
                 switch (profileType) {
                     case MOBILE:
                         account.setOpenid(openId);
-                        account.setSubscribe(subscribe);
                         account.setSubscribe_time(new Date());
+                        account.setSubscribe(subscribe);
                         break;
                     case PC:
+                        account.setSubscribe(0);
                         break;
                     case MINI:
+                        account.setSubscribe(0);
                         account.setWeMiniOpenId(openId);
                         break;
                     default:
@@ -165,8 +167,10 @@ public class AccountServiceImpl implements AccountService {
                         account.setSubscribe_time(new Date());
                         break;
                     case PC:
+                        account.setSubscribe(0);
                         break;
                     case MINI:
+                        account.setSubscribe(0);
                         account.setWeMiniOpenId(openId);
                         break;
                     default:
