@@ -91,7 +91,7 @@ public class InternalController {
         if (userInfoObject != null) {
             return WebUtils.result(userInfoObject.getSubscribe());
         } else {
-            return WebUtils.result(0);
+            return WebUtils.result(1);
         }
     }
 
