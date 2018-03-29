@@ -268,7 +268,6 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
     /**
      * 根据 openid 和应用级的 accessToken 调用用户信息
      * @param openId 用户在该平台对应的 openid
-     * @param accessToken 应用级调用凭证
      * @return 返回用户信息对象
      */
     @Override
@@ -277,6 +276,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
         params.put("openid", openId);
         String requestUrl = CommonUtils.placeholderReplace(USER_INFO_URL, params);
         String body = restfulHelper.get(requestUrl);
+        logger.info("请求用户信息微信返回: {}", body);
         WeiXinResult.UserInfoObject userInfoObject = new WeiXinResult.UserInfoObject();
         try {
             if (CommonUtils.isError(body)) {
@@ -300,7 +300,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             String province = result.get("province").toString();
             String city = result.get("city").toString();
             String unionId = result.get("unionid").toString();
-            Integer subscribe = 0;
+            Integer subscribe = 1;
             try {
                 Double tempSubscribe = (Double) result.get("subscribe");
                 if (tempSubscribe != null) {
