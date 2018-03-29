@@ -75,6 +75,7 @@ public class IndexController {
         } else {
             mav.addObject("resource", resource);
         }
+        mav.addObject("sensorsProject", ConfigUtils.getSensorsProject());
         return mav;
     }
 }

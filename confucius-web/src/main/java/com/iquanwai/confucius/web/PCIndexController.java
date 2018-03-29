@@ -145,6 +145,7 @@ public class PCIndexController {
         }
         mav.addObject("isDevelopment", ConfigUtils.isDevelopment());
         mav.addObject("feedBack", ConfigUtils.getFeedBackId());
+        mav.addObject("sensorsProject", ConfigUtils.getSensorsProject());
         return mav;
     }
 
