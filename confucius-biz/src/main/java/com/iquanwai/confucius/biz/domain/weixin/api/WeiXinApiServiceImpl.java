@@ -272,12 +272,11 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
      * @return 返回用户信息对象
      */
     @Override
-    public WeiXinResult.UserInfoObject getWeiXinUserInfoByMobileApp(String openId, String accessToken) {
+    public WeiXinResult.UserInfoObject getWeiXinUserInfoByMobileApp(String openId) {
         Map<String, String> params = Maps.newHashMap();
         params.put("openid", openId);
-        params.put("access_token", accessToken);
         String requestUrl = CommonUtils.placeholderReplace(USER_INFO_URL, params);
-        String body = restfulHelper.getPure(requestUrl);
+        String body = restfulHelper.get(requestUrl);
         WeiXinResult.UserInfoObject userInfoObject = new WeiXinResult.UserInfoObject();
         try {
             if (CommonUtils.isError(body)) {

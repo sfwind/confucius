@@ -20,7 +20,7 @@ public interface WeiXinApiService {
 
     WeiXinResult.UserInfoObject getWeiXinUserInfo(String openId, String accessToken);
 
-    WeiXinResult.UserInfoObject getWeiXinUserInfoByMobileApp(String openId, String accessToken);
+    WeiXinResult.UserInfoObject getWeiXinUserInfoByMobileApp(String openId);
 
     WeiXinResult.RefreshTokenObject refreshWeiXinAccessToken(String accessToken);
 }
