@@ -29,7 +29,7 @@ public interface AccountService {
 
     WeiXinResult.UserInfoObject storeWeiXinUserInfo(String openId, String accessToken, Profile.ProfileType profileType);
 
-    WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId, String accessToken);
+    WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId);
 
     Role getUserRole(Integer profileId);
 
@@ -125,7 +125,7 @@ public interface AccountService {
 
     Profile getProfileByUnionId(String unionId);
 
-    void getProfileFromWeiXinByUnionId(String unionId);
+    WeiXinResult.UserInfoObject getProfileFromWeiXinByUnionId(String unionId);
 
     int updateHeadImageUrl(Integer profileId, String headImgUrl);
 

@@ -301,7 +301,7 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             String province = result.get("province").toString();
             String city = result.get("city").toString();
             String unionId = result.get("unionid").toString();
-            Integer subscribe = null;
+            Integer subscribe = 0;
             try {
                 Double tempSubscribe = (Double) result.get("subscribe");
                 if (tempSubscribe != null) {

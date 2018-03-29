@@ -4,7 +4,7 @@ import com.iquanwai.confucius.biz.domain.message.SMSSendResult;
 import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.domain.weixin.oauth.OAuthService;
+import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.web.internal.dto.SMSDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,8 +29,6 @@ public class InternalController {
 
     @Autowired
     private ShortMessageService shortMessageService;
-    @Autowired
-    private OAuthService oAuthService;
     @Autowired
     private AccountService accountService;
 
@@ -85,6 +83,16 @@ public class InternalController {
             accountService.getProfileByUnionId(unionId);
         }
         return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/user/subscribe")
+    public ResponseEntity<Map<String, Object>> checkIsSubscribe(@RequestParam("openId") String openId) {
+        WeiXinResult.UserInfoObject userInfoObject = accountService.storeWeiXinUserInfoByMobileApp(openId);
+        if (userInfoObject != null) {
+            return WebUtils.result(userInfoObject.getSubscribe());
+        } else {
+            return WebUtils.result(0);
+        }
     }
 
 }
