@@ -30,7 +30,7 @@ public class ProfileDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
         try {
-            return run.query("SELECT * FROM Profile WHERE UnionId = ?", h, unionId);
+            return run.query("SELECT * FROM Profile WHERE UnionId = ? AND Del = 0", h, unionId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -41,7 +41,7 @@ public class ProfileDao extends DBUtil {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
         try {
-            return run.query("SELECT * FROM Profile where Openid=?", h, openId);
+            return run.query("SELECT * FROM Profile where Openid = ? AND Del = 0", h, openId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -50,7 +50,7 @@ public class ProfileDao extends DBUtil {
 
     public Profile queryByRiseId(String riseId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Profile WHERE RiseId = ?";
+        String sql = "SELECT * FROM Profile WHERE RiseId = ? AND Del = 0";
         ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
         try {
             return runner.query(sql, h, riseId);
@@ -84,7 +84,7 @@ public class ProfileDao extends DBUtil {
         String questionMarks = produceQuestionMark(openids.size());
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
-        String sql = "SELECT * FROM Profile where Openid in (" + questionMarks + ")";
+        String sql = "SELECT * FROM Profile where Openid in (" + questionMarks + ") AND Del = 0";
         try {
             return run.query(sql, h, openids.toArray());
         } catch (SQLException e) {
@@ -127,7 +127,7 @@ public class ProfileDao extends DBUtil {
 
     public int updateOAuthFields(Profile profile) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET OpenId = ? WHERE UnionId = ?";
+        String sql = "UPDATE Profile SET OpenId = ? WHERE UnionId = ? AND Del = 0";
         try {
             return runner.update(sql, profile.getOpenid(), profile.getUnionid());
         } catch (SQLException e) {
@@ -172,7 +172,7 @@ public class ProfileDao extends DBUtil {
      */
     public List<Profile> loadProfilesByNickName(String nickName) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Profile where NickName like ? limit 200";
+        String sql = "SELECT * FROM Profile where NickName like ? AND Del = 0 limit 200 ";
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
         try {
             return runner.query(sql, h, "%" + nickName + "%");
@@ -188,7 +188,7 @@ public class ProfileDao extends DBUtil {
     public List<Profile> loadAllProfilesByNickName(String nickName) {
         QueryRunner runner = new QueryRunner(getDataSource());
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
-        String sql = " select * from Profile where NickName like ?";
+        String sql = " select * from Profile where NickName like ? AND Del = 0";
         try {
             return runner.query(sql, h, "%" + nickName + "%");
         } catch (SQLException e) {

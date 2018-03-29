@@ -66,7 +66,7 @@ public class FollowUserDao extends DBUtil {
         ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
 
         try {
-            return run.query("SELECT * FROM FollowUsers where Openid=?", h, openid);
+            return run.query("SELECT * FROM FollowUsers where Openid = ? AND Del = 0", h, openid);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -76,7 +76,7 @@ public class FollowUserDao extends DBUtil {
 
     public Account queryByUnionId(String unionId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM FollowUsers WHERE UnionId = ?";
+        String sql = "SELECT * FROM FollowUsers WHERE UnionId = ? AND Del = 0";
         ResultSetHandler<Account> h = new BeanHandler<>(Account.class);
 
         try {
@@ -89,7 +89,7 @@ public class FollowUserDao extends DBUtil {
 
     public void unsubscribe(String openid) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String updateSql = "Update FollowUsers Set Subscribe=0 where Openid=?";
+        String updateSql = "Update FollowUsers Set Subscribe=0 where Openid=? AND Del = 0";
         try {
             run.update(updateSql, openid);
         } catch (SQLException e) {
