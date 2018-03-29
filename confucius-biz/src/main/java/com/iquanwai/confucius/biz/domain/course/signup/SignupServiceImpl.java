@@ -19,6 +19,8 @@ import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
+import com.iquanwai.confucius.biz.domain.message.ShortMessage;
+import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
 import com.iquanwai.confucius.biz.po.Coupon;
@@ -112,6 +114,8 @@ public class SignupServiceImpl implements SignupService {
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private ShortMessageService shortMessageService;
 
     private final static int PROBLEM_MAX_LENGTH = 30; //课程最长开放时间
 
@@ -666,6 +670,17 @@ public class SignupServiceImpl implements SignupService {
                     customerMessageService.sendCustomerMessage(profile.getOpenid(), entryCode, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
                     if (sendUrl != null) {
                         messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
+                    }
+                    // 发短信提醒
+                    if (profile.getMobileNo() != null) {
+                        ShortMessage shortMessage = new ShortMessage();
+                        shortMessage.setProfileId(profile.getId());
+                        shortMessage.setContent(profile.getNickname()+" 你好，欢迎加入圈外商学院。请添加你的班主任微信：MBAsalmon，接下来班主任将帮助你更好地学习。" +
+                                "快回复你的学号（学号：" + entryCode + "）向班主任报道吧！");
+                        shortMessage.setNickname(shortMessage.getNickname());
+                        shortMessage.setType(ShortMessage.BUSINESS);
+                        shortMessage.setPhone(profile.getMobileNo());
+                        shortMessageService.sendMessage(shortMessage);
                     }
                 });
                 break;

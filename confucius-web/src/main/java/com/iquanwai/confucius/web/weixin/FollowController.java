@@ -27,24 +27,6 @@ public class FollowController {
     @Autowired
     private AccountService accountService;
 
-    @RequestMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAll() throws IOException {
-        ThreadPool.execute(accountService::collectUsers);
-        return WebUtils.result("正在运行中");
-    }
-
-    @RequestMapping("/new")
-    public ResponseEntity<Map<String, Object>> getNew() throws IOException {
-        ThreadPool.execute(accountService::collectNewUsers);
-        return WebUtils.result("正在运行中");
-    }
-
-    @RequestMapping("/next")
-    public ResponseEntity<Map<String, Object>> getNext(@RequestParam("openid") String openid) throws IOException {
-        ThreadPool.execute(() -> accountService.collectNext(openid));
-        return WebUtils.result("正在运行中");
-    }
-
     @RequestMapping("/ip")
     public ResponseEntity<Map<String, Object>> getIp(HttpServletRequest request, LoginUser loginUser) {
         String remoteIp = request.getHeader("X-Forwarded-For");
