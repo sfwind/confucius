@@ -79,6 +79,11 @@ public class InterviewDto {
     private String remark;
 
     /**
+     *是否录取
+     */
+    private Integer admit;
+
+    /**
      * 是否删除
      */
     private Integer del;

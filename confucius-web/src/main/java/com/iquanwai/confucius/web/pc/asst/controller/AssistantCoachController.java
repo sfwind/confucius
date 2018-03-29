@@ -296,7 +296,9 @@ public class AssistantCoachController {
         InterviewRecord interviewRecord = new InterviewRecord();
         String[] str = {"interviewTime"};
         BeanUtils.copyProperties(interviewDto,interviewRecord,str);
-        interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
+        if(interviewDto.getInterviewTime()!=null) {
+            interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
+        }
         interviewRecord.setInterviewerId(loginUser.getProfileId());
 
         if(assistantCoachService.addInterviewRecord(interviewRecord)==-1){
