@@ -15,6 +15,7 @@ import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
+import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
 import com.iquanwai.confucius.biz.exception.NotFollowingException;
@@ -78,6 +79,8 @@ public class AccountServiceImpl implements AccountService {
     private PlanService planService;
     @Autowired
     private CourseScheduleDao courseScheduleDao;
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -114,8 +117,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId, String accessToken) {
-        WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfoByMobileApp(openId, accessToken);
+    public WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId) {
+        WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfoByMobileApp(openId, accessTokenService.getAccessToken());
         if (userInfoObject != null) {
             store(openId, userInfoObject, Profile.ProfileType.MOBILE);
         }
@@ -623,17 +626,19 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void getProfileFromWeiXinByUnionId(String unionId) {
+    public WeiXinResult.UserInfoObject getProfileFromWeiXinByUnionId(String unionId) {
         Callback callback = callbackDao.queryByUnionId(unionId);
         if (callback.getOpenid() != null && callback.getAccessToken() != null) {
             // 曾经手机端登录过
-            storeWeiXinUserInfo(callback.getOpenid(), callback.getAccessToken(), Profile.ProfileType.MOBILE);
+            return storeWeiXinUserInfo(callback.getOpenid(), callback.getAccessToken(), Profile.ProfileType.MOBILE);
         } else if (callback.getPcOpenid() != null && callback.getPcAccessToken() != null) {
             // 曾经 pc 端登陆过
-            storeWeiXinUserInfo(callback.getPcOpenid(), callback.getPcAccessToken(), Profile.ProfileType.PC);
+            return storeWeiXinUserInfo(callback.getPcOpenid(), callback.getPcAccessToken(), Profile.ProfileType.PC);
         } else if (callback.getWeMiniOpenid() != null && callback.getWeMiniAccessToken() != null) {
             // 曾经小程序登陆过
-            storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
+            return storeWeiXinUserInfo(callback.getWeMiniOpenid(), callback.getWeMiniAccessToken(), Profile.ProfileType.MINI);
+        } else {
+            return null;
         }
     }
 

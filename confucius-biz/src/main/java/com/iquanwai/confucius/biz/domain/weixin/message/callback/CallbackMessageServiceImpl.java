@@ -287,7 +287,7 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             // 关注事件
             case EVENT_SUBSCRIBE:
                 //更新用户信息
-                accountService.storeWeiXinUserInfoByMobileApp(openid, accessTokenService.getAccessToken());
+                accountService.storeWeiXinUserInfoByMobileApp(openid);
 
                 List<SubscribeMessage> subscribeMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
