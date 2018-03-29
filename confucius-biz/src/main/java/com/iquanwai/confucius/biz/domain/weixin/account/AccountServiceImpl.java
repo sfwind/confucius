@@ -176,10 +176,8 @@ public class AccountServiceImpl implements AccountService {
                         }
                         break;
                     case PC:
-                        account.setSubscribe(0);
                         break;
                     case MINI:
-                        account.setSubscribe(0);
                         account.setWeMiniOpenId(openId);
                         break;
                     default:
