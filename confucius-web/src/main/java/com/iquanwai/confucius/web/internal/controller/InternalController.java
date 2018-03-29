@@ -88,7 +88,11 @@ public class InternalController {
     @RequestMapping(value = "/user/subscribe")
     public ResponseEntity<Map<String, Object>> checkIsSubscribe(@RequestParam("openId") String openId) {
         WeiXinResult.UserInfoObject userInfoObject = accountService.storeWeiXinUserInfoByMobileApp(openId);
-        return WebUtils.result(userInfoObject.getSubscribe());
+        if (userInfoObject != null) {
+            return WebUtils.result(userInfoObject.getSubscribe());
+        } else {
+            return WebUtils.result(0);
+        }
     }
 
 }
