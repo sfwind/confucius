@@ -93,7 +93,7 @@ public class OperationLogServiceImpl implements OperationLogService {
                 properties.put("roleName", roleName);
                 properties.put("isAsst", role != null);
                 properties.put("riseId", profile.getRiseId());
-
+                logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, eventName, properties);
                 sa.track(profileId.toString(), true, eventName, properties);
                 // TODO 上线前删掉
                 sa.flush();
