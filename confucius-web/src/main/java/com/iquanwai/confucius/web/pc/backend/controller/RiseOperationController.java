@@ -402,7 +402,7 @@ public class RiseOperationController {
                         () -> {
                             OperationLogService.Prop prop = OperationLogService.props()
                                     .add("checkStatus", BusinessSchoolApplication.APPROVE);
-                            if (approveDto.getInterviewDto().getInterviewerId() != null) {
+                            if (approveDto.getInterviewDto() != null && approveDto.getInterviewDto().getInterviewerId() != null) {
                                 prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
                             }
                             prop.add("coupon", approveDto.getCoupon() != null ? approveDto.getCoupon() : 0);
