@@ -130,6 +130,7 @@ public class AssistantCoachController {
                     .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
+                        problemList.setAbbreviation(problem.getAbbreviation());
                         problemList.setProblem(problem.getProblem());
                         problemList.setUnderCommentCount(underCommentMap.get(problem.getId()));
                         return problemList;
