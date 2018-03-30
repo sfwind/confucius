@@ -457,6 +457,7 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
             riseMember.setExpireDate(monthlyCampConfig.getCloseDate());
             riseMember.setExpired(false);
+            riseMember.setVip(false);
             riseMemberDao.insert(riseMember);
         } else {
             // 添加会员表
@@ -466,6 +467,7 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setMemberTypeId(RiseMember.CAMP);
             riseMember.setOpenDate(monthlyCampConfig.getOpenDate());
             riseMember.setExpireDate(monthlyCampConfig.getCloseDate());
+            riseMember.setVip(false);
 
             if (existRiseMember.getMemberTypeId() == RiseMember.ANNUAL
                     || existRiseMember.getMemberTypeId() == RiseMember.HALF
@@ -478,7 +480,6 @@ public class SignupServiceImpl implements SignupService {
                 riseMemberDao.updateExpiredAhead(profile.getId());
 
                 riseMember.setExpired(false);
-                riseMemberDao.insert(riseMember);
             }
             riseMemberDao.insert(riseMember);
         }
@@ -594,6 +595,7 @@ public class SignupServiceImpl implements SignupService {
                 profileDao.initOnceRequestCommentCount(riseOrder.getProfileId());
             }
             riseMember.setExpired(false);
+            riseMember.setVip(false);
             riseMemberDao.insert(riseMember);
 
             // 所有计划设置为会员
