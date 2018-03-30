@@ -187,7 +187,8 @@ public class AssistantApplicationController {
                     prop.add("discussedRolename", riseMember.getMemberTypeId());
                 }
                 prop.add("applicationId", applicationSubmit.getApplicationId());
-                prop.add("discussedProfileId", applicationSubmit.getProfileId());
+                Profile profile = accountService.getProfile(applicationSubmit.getProfileId());
+                prop.add("discussedRiseId", profile.getRiseId());
                 prop.add("problemId", applicationSubmit.getProblemId());
                 return prop;
             });

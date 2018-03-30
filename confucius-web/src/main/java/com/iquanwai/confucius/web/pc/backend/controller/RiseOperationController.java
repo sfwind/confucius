@@ -400,7 +400,8 @@ public class RiseOperationController {
             if (approve) {
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
                         () -> {
-                            OperationLogService.Prop prop = OperationLogService.props().add("checkStatus", BusinessSchoolApplication.APPROVE);
+                            OperationLogService.Prop prop = OperationLogService.props()
+                                    .add("checkStatus", BusinessSchoolApplication.APPROVE);
                             if (approveDto.getInterviewDto().getInterviewerId() != null) {
                                 prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
                             }

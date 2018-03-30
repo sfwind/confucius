@@ -18,6 +18,8 @@ public interface OperationLogService {
 
     void trace(Integer profileId, String eventName);
 
+    void trace(Supplier<Integer> supplier, String eventName);
+
     void trace(Integer profileId, String eventName, Supplier<Prop> supplier);
 
     void trace(Supplier<Integer> profileIdSupplier, String eventName, Supplier<Prop> supplier);

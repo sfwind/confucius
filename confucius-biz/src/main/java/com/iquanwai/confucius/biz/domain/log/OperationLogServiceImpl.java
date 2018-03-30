@@ -109,6 +109,11 @@ public class OperationLogServiceImpl implements OperationLogService {
     }
 
     @Override
+    public void trace(Supplier<Integer> supplier, String eventName) {
+        this.trace(supplier, eventName, OperationLogService::props);
+    }
+
+    @Override
     public void trace(Integer profileId, String eventName, Supplier<Prop> supplier) {
         this.trace(() -> profileId, eventName, supplier);
     }
