@@ -23,7 +23,7 @@ public class ProblemScheduleDao extends PracticeDBUtil {
     public List<ProblemSchedule> loadProblemSchedule(Integer problemId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<ProblemSchedule>> h = new BeanListHandler<>(ProblemSchedule.class);
-        String sql = "SELECT * FROM ProblemSchedule where ProblemId=?";
+        String sql = "SELECT * FROM ProblemSchedule where ProblemId = ? AND Del = 0";
         try {
             return run.query(sql, h, problemId);
         } catch (SQLException e) {
@@ -35,7 +35,7 @@ public class ProblemScheduleDao extends PracticeDBUtil {
     public ProblemSchedule loadProblemScheduleByKnowledge(Integer knowledgeId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ProblemSchedule> h = new BeanHandler<>(ProblemSchedule.class);
-        String sql = "SELECT * FROM ProblemSchedule where KnowledgeId=?";
+        String sql = "SELECT * FROM ProblemSchedule where KnowledgeId = ? AND Del = 0";
         try {
             return run.query(sql, h, knowledgeId);
         } catch (SQLException e) {
@@ -47,7 +47,7 @@ public class ProblemScheduleDao extends PracticeDBUtil {
     public ProblemSchedule loadProblemSchedule(Integer problemId, Integer chapter, Integer section) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<ProblemSchedule> h = new BeanHandler<>(ProblemSchedule.class);
-        String sql = "SELECT * FROM ProblemSchedule where ProblemId=? and Chapter=? and Section=?";
+        String sql = "SELECT * FROM ProblemSchedule where ProblemId=? and Chapter=? and Section=? AND Del = 0";
         try {
             return run.query(sql, h, problemId, chapter, section);
         } catch (SQLException e) {
@@ -72,8 +72,6 @@ public class ProblemScheduleDao extends PracticeDBUtil {
 
     /**
      * 更新
-     *
-     * @param problemSchedule
      */
     public void update(ProblemSchedule problemSchedule) {
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -89,9 +87,6 @@ public class ProblemScheduleDao extends PracticeDBUtil {
 
     /**
      * 获得对应的复习ProblemSchedule
-     *
-     * @param problemId
-     * @return
      */
     public List<ProblemSchedule> getReviewProblemSchedule(Integer problemId) {
         QueryRunner runner = new QueryRunner(getDataSource());

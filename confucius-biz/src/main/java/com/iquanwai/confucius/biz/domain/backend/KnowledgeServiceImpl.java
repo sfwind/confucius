@@ -3,15 +3,18 @@ package com.iquanwai.confucius.biz.domain.backend;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.fragmentation.KnowledgeDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.KnowledgeDiscussDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemScheduleDao;
 import com.iquanwai.confucius.biz.po.fragmentation.Knowledge;
+import com.iquanwai.confucius.biz.po.fragmentation.KnowledgeDiscuss;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,9 +31,10 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     private KnowledgeDao knowledgeDao;
     @Autowired
     private ProblemDao problemDao;
+    @Autowired
+    private KnowledgeDiscussDao knowledgeDiscussDao;
 
     private final static int REVIEW_KNOWLEDGE_ID = 59;
-
 
     @Override
     public Knowledge loadKnowledge(Integer knowledgeId) {
@@ -58,10 +62,10 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     @Override
     public Integer updateKnowledge(Knowledge knowledge, Integer problemId) {
         if (knowledge.getId() != 0) {
-            Knowledge updateKnowledge = knowledgeDao.load(Knowledge.class,knowledge.getId());
-            if(updateKnowledge.getUpdated() == 2){
+            Knowledge updateKnowledge = knowledgeDao.load(Knowledge.class, knowledge.getId());
+            if (updateKnowledge.getUpdated() == 2) {
                 knowledge.setUpdated(2);
-            }else{
+            } else {
                 knowledge.setUpdated(1);
             }
             return knowledgeDao.updateKnowledge(knowledge);
@@ -108,9 +112,6 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     /**
      * 插入目标ProblemSchedule
-     *
-     * @param knowledge
-     * @param problemId
      */
     private void insertProblemSchedule(Knowledge knowledge, Integer problemId) {
         ProblemSchedule schedule = new ProblemSchedule();
@@ -130,9 +131,6 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     /**
      * 更新
-     *
-     * @param id
-     * @param chapter
      */
     private void updateProblemSchedule(Integer id, Integer chapter, Integer series, Integer problemId) {
         ProblemSchedule schedule = new ProblemSchedule();
@@ -179,7 +177,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             List<Knowledge> targetKnowledges = Lists.newArrayList();
             relatedKnowledgeIds.forEach(relatedKnowledgeId -> {
                 Knowledge targetKnowledge = knowledgeMap.get(relatedKnowledgeId);
-                if(targetKnowledge != null) {
+                if (targetKnowledge != null) {
                     targetKnowledges.add(targetKnowledge);
                 }
             });
@@ -187,6 +185,25 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             return targetProblemSchedule;
         }).collect(Collectors.toList());
         return problemAndKnowledges;
+    }
+
+    @Override
+    public List<Knowledge> loadKnowledgesByProblemId(Integer problemId) {
+        List<ProblemSchedule> problemSchedules = problemScheduleDao.loadProblemSchedule(problemId);
+        List<Integer> knowledgeIds = problemSchedules.stream().map(ProblemSchedule::getKnowledgeId).collect(Collectors.toList());
+        List<Knowledge> knowledges = knowledgeDao.queryByKnowledgeIds(knowledgeIds);
+        return knowledges;
+    }
+
+    @Override
+    public List<KnowledgeDiscuss> loadKnowledgeDiscussByKnowledgeId(Integer knowledgeId) {
+        List<KnowledgeDiscuss> knowledgeDiscusses = knowledgeDiscussDao.loadByKnowledgeId(knowledgeId);
+        return knowledgeDiscusses.stream().sorted(Comparator.comparing(KnowledgeDiscuss::getPriority).reversed()).collect(Collectors.toList());
+    }
+
+    @Override
+    public int updatePriority(Integer discussId, Boolean priority) {
+        return knowledgeDiscussDao.voteKnowledgeDiscuss(discussId, priority);
     }
 }
 
