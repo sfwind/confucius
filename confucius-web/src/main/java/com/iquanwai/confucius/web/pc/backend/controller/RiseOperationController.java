@@ -361,8 +361,8 @@ public class RiseOperationController {
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
                         () -> {
                             OperationLogService.Prop prop = OperationLogService.props().add("checkStatus", BusinessSchoolApplication.REJECT);
-                            if (approveDto.getInterviewDto().getInterviewerId() != null) {
-                                prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
+                            if (application.getInterviewer() != null) {
+                                prop.add("auditor", application.getInterviewer());
                             }
                             return prop;
                         });
@@ -402,10 +402,10 @@ public class RiseOperationController {
                         () -> {
                             OperationLogService.Prop prop = OperationLogService.props()
                                     .add("checkStatus", BusinessSchoolApplication.APPROVE);
-                            if (approveDto.getInterviewDto() != null && approveDto.getInterviewDto().getInterviewerId() != null) {
-                                prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
+                            if (application.getInterviewer() != null) {
+                                prop.add("auditor", application.getInterviewer());
                             }
-                            prop.add("coupon", approveDto.getCoupon() != null ? approveDto.getCoupon() : 0);
+                            prop.add("coupon", application.getCoupon() != null ? application.getCoupon() : 0);
                             return prop;
                         });
 
@@ -441,8 +441,8 @@ public class RiseOperationController {
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
                         () -> {
                             OperationLogService.Prop prop = OperationLogService.props().add("checkStatus", BusinessSchoolApplication.IGNORE);
-                            if (approveDto.getInterviewDto().getInterviewerId() != null) {
-                                prop.add("auditor", approveDto.getInterviewDto().getInterviewerId());
+                            if (application.getInterviewer() != null) {
+                                prop.add("auditor", application.getInterviewer());
                             }
                             return prop;
                         });
