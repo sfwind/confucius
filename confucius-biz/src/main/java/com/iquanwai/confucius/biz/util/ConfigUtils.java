@@ -407,4 +407,7 @@ public class ConfigUtils {
         return getIntValue("learning.month");
     }
 
+    public static String getSensorsProject() {
+        return getValue("sensors.project");
+    }
 }

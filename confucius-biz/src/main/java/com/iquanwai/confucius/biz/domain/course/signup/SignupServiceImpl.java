@@ -17,6 +17,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
@@ -111,6 +112,8 @@ public class SignupServiceImpl implements SignupService {
     private BusinessSchoolApplicationOrderDao businessSchoolApplicationOrderDao;
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
+    @Autowired
+    private OperationLogService operationLogService;
     @Autowired
     private ShortMessageService shortMessageService;
 
@@ -952,6 +955,9 @@ public class SignupServiceImpl implements SignupService {
             // 更新最后一次无效申请
             businessSchoolApplicationDao.validApply(orderId, apply.getId());
             businessSchoolApplicationOrderDao.paid(orderId);
+
+            // 提交有效申请
+            operationLogService.trace(order.getProfileId(), "submitValidApply");
         }
 
     }

@@ -10,7 +10,8 @@
 <body>
 <script>
     window.ENV = {
-        reactMountPoint: "react-app"
+        reactMountPoint: "react-app",
+        sensorsProject:"${sensorsProject}",
     }
 </script>
 

@@ -13,7 +13,8 @@
 <script>
     window.ENV = {
         reactMountPoint: "react-app",
-        isDevelopment:${isDevelopment}
+        isDevelopment:${isDevelopment},
+        sensorsProject:"${sensorsProject}",
     }
 </script>
 <%--userName: "${userName}",--%>

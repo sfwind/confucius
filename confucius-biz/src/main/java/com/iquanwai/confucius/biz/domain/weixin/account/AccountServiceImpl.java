@@ -26,11 +26,18 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
+import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
+import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -44,7 +51,12 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 16/8/10.
@@ -81,6 +93,8 @@ public class AccountServiceImpl implements AccountService {
     private CourseScheduleDao courseScheduleDao;
     @Autowired
     private AccessTokenService accessTokenService;
+    @Autowired
+    private SensorsAnalytics sa;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -237,7 +251,16 @@ public class AccountServiceImpl implements AccountService {
                 profileDao.updateOAuthFields(profile);
             }
         });
+        ThreadPool.execute(() -> {
+            Profile profile = profileDao.queryByUnionId(unionId);
+            try {
+                sa.profileSet(profile.getRiseId(), true, "nickname", profile.getNickname());
+            } catch (InvalidArgumentException e) {
+                logger.error("更新神策profile失败{}", profile);
+            }
+        });
     }
+
 
     /**
      * 获取用户角色信息

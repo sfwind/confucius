@@ -11,7 +11,11 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
-import com.iquanwai.confucius.biz.po.*;
+import com.iquanwai.confucius.biz.po.AutoReplyMessage;
+import com.iquanwai.confucius.biz.po.GraphicMessage;
+import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.PromotionUser;
+import com.iquanwai.confucius.biz.po.SubscribeMessage;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.message.WechatMessage;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -288,7 +292,14 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             case EVENT_SUBSCRIBE:
                 //更新用户信息
                 accountService.storeWeiXinUserInfoByMobileApp(openid);
-
+                operationLogService.trace(() -> {
+                    Profile profile = accountService.getProfile(openid);
+                    return profile.getId();
+                }, "wechatSubscribe", () -> {
+                    OperationLogService.Prop prop = OperationLogService.props();
+                    prop.add("subscribeChannel", eventKey.substring(8));
+                    return prop;
+                });
                 List<SubscribeMessage> subscribeMessages;
                 if (StringUtils.isNotEmpty(eventKey)) {
                     logger.info("event key is {}", eventKey);
@@ -325,6 +336,10 @@ public class CallbackMessageServiceImpl implements CallbackMessageService {
             // 取消关注事件
             case EVENT_UNSUBSCRIBE:
                 accountService.unfollow(openid);
+                operationLogService.trace(() -> {
+                    Profile profile = accountService.getProfile(openid);
+                    return profile.getId();
+                }, "wechatUnSubscribe");
                 break;
             // 扫描事件
             case EVENT_SCAN:
