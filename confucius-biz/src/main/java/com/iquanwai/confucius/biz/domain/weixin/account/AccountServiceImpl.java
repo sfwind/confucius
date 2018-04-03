@@ -132,7 +132,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId) {
-        WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfoByMobileApp(openId, accessTokenService.getAccessToken());
+        WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfoByMobileApp(openId);
         if (userInfoObject != null) {
             store(openId, userInfoObject, Profile.ProfileType.MOBILE);
         }

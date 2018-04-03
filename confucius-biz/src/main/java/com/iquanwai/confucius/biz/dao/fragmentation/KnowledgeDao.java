@@ -48,7 +48,7 @@ public class KnowledgeDao extends PracticeDBUtil {
             return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),
                     knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
                     knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
-                    knowledge.getKeynoteAudioId(), knowledge.getAudioId(),knowledge.getUpdated(),knowledge.getId());
+                    knowledge.getKeynoteAudioId(), knowledge.getAudioId(), knowledge.getUpdated(), knowledge.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -57,15 +57,29 @@ public class KnowledgeDao extends PracticeDBUtil {
 
     /**
      * 查询所有知识点
-     * @return
      */
-    public List<Knowledge> queryAllKnowledges(){
+    public List<Knowledge> queryAllKnowledges() {
         QueryRunner runner = new QueryRunner(getDataSource());
 
         ResultSetHandler<List<Knowledge>> h = new BeanListHandler<>(Knowledge.class);
         String sql = "SELECT * FROM Knowledge";
         try {
             return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<Knowledge> queryByKnowledgeIds(List<Integer> ids) {
+        if (ids.size() == 0) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Knowledge WHERE Id IN (" + produceQuestionMark(ids.size()) + ");";
+        ResultSetHandler<List<Knowledge>> h = new BeanListHandler<>(Knowledge.class);
+        try {
+            return runner.query(sql, h, ids.toArray());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

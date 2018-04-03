@@ -35,6 +35,8 @@ import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +69,8 @@ public class AssistantCoachController {
     private AsstUpService asstUpService;
     @Autowired
     private PlanService planService;
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @RequestMapping("/application/{problemId}")
     public ResponseEntity<Map<String, Object>> getUnderCommentApplication(PCLoginUser pcLoginUser,
@@ -126,6 +130,7 @@ public class AssistantCoachController {
                     .filter(problem -> Objects.equals(problem.getCatalogId(), item.getId())).map(problem -> {
                         ProblemListDto problemList = new ProblemListDto();
                         problemList.setId(problem.getId());
+                        problemList.setAbbreviation(problem.getAbbreviation());
                         problemList.setProblem(problem.getProblem());
                         problemList.setUnderCommentCount(underCommentMap.get(problem.getId()));
                         return problemList;
@@ -283,6 +288,7 @@ public class AssistantCoachController {
 
     @RequestMapping(value = "/add/interview/record",method = RequestMethod.POST)
     public ResponseEntity<Map<String,Object>> addInterviewRecord(PCLoginUser loginUser, @RequestBody InterviewDto interviewDto){
+        logger.info(interviewDto.toString());
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("助教管理")
@@ -291,7 +297,9 @@ public class AssistantCoachController {
         InterviewRecord interviewRecord = new InterviewRecord();
         String[] str = {"interviewTime"};
         BeanUtils.copyProperties(interviewDto,interviewRecord,str);
-        interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
+        if(interviewDto.getInterviewTime()!=null) {
+            interviewRecord.setInterviewTime(DateUtils.parseDateTimeToString(interviewDto.getInterviewTime()));
+        }
         interviewRecord.setInterviewerId(loginUser.getProfileId());
 
         if(assistantCoachService.addInterviewRecord(interviewRecord)==-1){
