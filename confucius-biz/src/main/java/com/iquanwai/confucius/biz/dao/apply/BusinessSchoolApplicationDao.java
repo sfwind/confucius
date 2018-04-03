@@ -124,7 +124,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public Integer assignInterviewer(Integer applyId, Integer interviewer) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE BusinessSchoolApplication SET Interviewer = ? WHERE Id = ?";
+        String sql = "UPDATE BusinessSchoolApplication SET Interviewer = ?,AssignTime= now() WHERE Id = ?";
         try {
             return runner.update(sql, interviewer, applyId);
         } catch (SQLException e) {
