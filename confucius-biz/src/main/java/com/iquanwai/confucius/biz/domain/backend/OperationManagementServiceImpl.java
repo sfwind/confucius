@@ -232,13 +232,13 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         }
 
         Integer problemId = submit.getProblemId();
-        if (problemId != null && profileId!= null) {
+        if (problemId != null && profileId != null) {
             List<ImprovementPlan> improvementPlans = improvementPlanDao.loadAllPlans(profileId);
-            ImprovementPlan improvementPlan = improvementPlans.stream().filter(improvement->problemId.equals(improvement.getProblemId())).findFirst().orElse(null);
-            if(improvementPlan!=null){
+            ImprovementPlan improvementPlan = improvementPlans.stream().filter(improvement -> problemId.equals(improvement.getProblemId())).findFirst().orElse(null);
+            if (improvementPlan != null) {
                 Integer point = improvementPlan.getPoint();
                 point = addPoint(point);
-                improvementPlanDao.updatePoint(improvementPlan.getId(),point);
+                improvementPlanDao.updatePoint(improvementPlan.getId(), point);
             }
         }
     }
@@ -257,13 +257,13 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         }
 
         Integer problemId = submit.getProblemId();
-        if (problemId != null && profileId!= null) {
+        if (problemId != null && profileId != null) {
             List<ImprovementPlan> improvementPlans = improvementPlanDao.loadAllPlans(profileId);
-            ImprovementPlan improvementPlan = improvementPlans.stream().filter(improvement->problemId.equals(improvement.getProblemId())).findFirst().orElse(null);
-            if(improvementPlan!=null){
+            ImprovementPlan improvementPlan = improvementPlans.stream().filter(improvement -> problemId.equals(improvement.getProblemId())).findFirst().orElse(null);
+            if (improvementPlan != null) {
                 Integer point = improvementPlan.getPoint();
                 point = desPoint(point);
-                improvementPlanDao.updatePoint(improvementPlan.getId(),point);
+                improvementPlanDao.updatePoint(improvementPlan.getId(), point);
             }
         }
 
@@ -346,10 +346,11 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
     /**
      * 添加分数
+     *
      * @param point
      * @return
      */
-    private Integer addPoint(Integer point){
+    private Integer addPoint(Integer point) {
         if (point != null) {
             point = point + Profile.ADD_POINT;
         } else {
@@ -360,16 +361,17 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
     /**
      * 减少分数
+     *
      * @param point
      * @return
      */
-    private Integer desPoint(Integer point){
-        if(point!=null){
-            point = point-Profile.ADD_POINT;
-            if(point<0){
+    private Integer desPoint(Integer point) {
+        if (point != null) {
+            point = point - Profile.ADD_POINT;
+            if (point < 0) {
                 point = 0;
             }
-        }else{
+        } else {
             point = 0;
         }
         return point;
