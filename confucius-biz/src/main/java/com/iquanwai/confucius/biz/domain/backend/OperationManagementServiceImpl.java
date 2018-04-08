@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
+import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -44,6 +45,10 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private UserRoleDao userRoleDao;
     @Autowired
     private ProblemDao problemDao;
+    @Autowired
+    private ProfileDao profileDao;
+    @Autowired
+    private ImprovementPlanDao improvementPlanDao;
 
     //每个练习的精华上限
     private static final int HIGHLIGHT_LIMIT = 100;
@@ -57,7 +62,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         applicationSubmitList.stream().forEach(applicationSubmit -> {
             Integer profileId = applicationSubmit.getProfileId();
             Profile profile = accountService.getProfile(profileId);
-            if(profile != null) {
+            if (profile != null) {
                 applicationSubmit.setUpName(profile.getNickname());
                 applicationSubmit.setHeadPic(profile.getHeadimgurl());
             }
@@ -74,7 +79,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
         warmupPractices.forEach(warmupPractice -> {
             Problem problem = problemDao.load(Problem.class, warmupPractice.getProblemId());
-            if(problem != null) {
+            if (problem != null) {
                 warmupPractice.setProblemName(problem.getProblem());
             }
         });
@@ -89,7 +94,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         warmupPracticeDiscusses.stream().forEach(discuss -> {
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
-            if(profile != null) {
+            if (profile != null) {
                 discuss.setAvatar(profile.getHeadimgurl());
                 discuss.setName(profile.getNickname());
             }
@@ -106,7 +111,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         warmupPracticeDiscuss.stream().forEach(discuss -> {
             Integer profileId = discuss.getProfileId();
             Profile profile = accountService.getProfile(profileId);
-            if(profile != null) {
+            if (profile != null) {
                 discuss.setAvatar(profile.getHeadimgurl());
                 discuss.setName(profile.getNickname());
             }
@@ -127,9 +132,9 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         warmupPracticeDiscuss.setDel(0);
         warmupPracticeDiscuss.setPriority(0);
         warmupPracticeDiscuss.setProfileId(profileId);
-        if(repliedId != null) {
+        if (repliedId != null) {
             WarmupPracticeDiscuss repliedDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, repliedId);
-            if(repliedDiscuss != null) {
+            if (repliedDiscuss != null) {
                 warmupPracticeDiscuss.setRepliedId(repliedId);
                 warmupPracticeDiscuss.setRepliedComment(repliedDiscuss.getComment());
                 warmupPracticeDiscuss.setRepliedProfileId(repliedDiscuss.getProfileId());
@@ -139,7 +144,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         Integer id = warmupPracticeDiscussDao.insert(warmupPracticeDiscuss);
 
         //发送回复通知
-        if(repliedId != null && !profileId.equals(warmupPracticeDiscuss.getRepliedProfileId())) {
+        if (repliedId != null && !profileId.equals(warmupPracticeDiscuss.getRepliedProfileId())) {
             String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
             url = MessageFormat.format(url, Objects.toString(id), Objects.toString(warmupPracticeId));
             String message = "回复了我的选择题问题";
@@ -154,7 +159,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
         WarmupPracticeDiscuss warmupPracticeDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, discussId);
 
-        if(warmupPracticeDiscuss != null) {
+        if (warmupPracticeDiscuss != null) {
             Integer practiceId = warmupPracticeDiscuss.getWarmupPracticeId();
 
             //通知被认证者
@@ -198,29 +203,70 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         List<ApplicationSubmit> highlights = applicationSubmitDao.getHighlightSubmit(submit.getApplicationId());
 
         //精华数超过上限时,把最先加精的作业去精
-        if(highlights.size() >= HIGHLIGHT_LIMIT) {
+        if (highlights.size() >= HIGHLIGHT_LIMIT) {
             ApplicationSubmit oldest = null;
-            for(ApplicationSubmit applicationSubmit : highlights) {
-                if(oldest == null) {
+            for (ApplicationSubmit applicationSubmit : highlights) {
+                if (oldest == null) {
                     oldest = applicationSubmit;
                 } else {
-                    if(applicationSubmit.getHighlightTime().before(oldest.getHighlightTime())) {
+                    if (applicationSubmit.getHighlightTime().before(oldest.getHighlightTime())) {
                         oldest = applicationSubmit;
                     }
                 }
             }
 
-            if(oldest != null) {
+            if (oldest != null) {
                 applicationSubmitDao.unhighlight(oldest.getId());
             }
         }
 
         applicationSubmitDao.highlight(submitId);
+
+        //profile加精
+        Integer profileId = submit.getProfileId();
+        if (profileId != null) {
+            Profile profile = profileDao.load(Profile.class, profileId);
+            Integer point = profile.getPoint();
+            point = addPoint(point);
+            profileDao.updatePoint(profileId, point);
+        }
+
+        Integer problemId = submit.getProblemId();
+        if (problemId != null && profileId!= null) {
+            List<ImprovementPlan> improvementPlans = improvementPlanDao.loadAllPlans(profileId);
+            ImprovementPlan improvementPlan = improvementPlans.stream().filter(improvement->problemId.equals(improvement.getProblemId())).findFirst().orElse(null);
+            if(improvementPlan!=null){
+                Integer point = improvementPlan.getPoint();
+                point = addPoint(point);
+                improvementPlanDao.updatePoint(improvementPlan.getId(),point);
+            }
+        }
     }
 
     @Override
     public void unhighlightApplicationSubmit(Integer submitId) {
+        ApplicationSubmit submit = applicationSubmitDao.load(ApplicationSubmit.class, submitId);
         applicationSubmitDao.unhighlight(submitId);
+        //profile加精
+        Integer profileId = submit.getProfileId();
+        if (profileId != null) {
+            Profile profile = profileDao.load(Profile.class, profileId);
+            Integer point = profile.getPoint();
+            point = desPoint(point);
+            profileDao.updatePoint(profileId, point);
+        }
+
+        Integer problemId = submit.getProblemId();
+        if (problemId != null && profileId!= null) {
+            List<ImprovementPlan> improvementPlans = improvementPlanDao.loadAllPlans(profileId);
+            ImprovementPlan improvementPlan = improvementPlans.stream().filter(improvement->problemId.equals(improvement.getProblemId())).findFirst().orElse(null);
+            if(improvementPlan!=null){
+                Integer point = improvementPlan.getPoint();
+                point = desPoint(point);
+                improvementPlanDao.updatePoint(improvementPlan.getId(),point);
+            }
+        }
+
     }
 
     @Override
@@ -239,10 +285,10 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public void save(WarmupPractice warmupPractice) {
         Assert.notNull(warmupPractice, "待保存的练习不能为空");
         WarmupPractice origin = warmupPracticeDao.load(WarmupPractice.class, warmupPractice.getId());
-        if(origin != null) {
+        if (origin != null) {
 
             //解析或者题干有修改时,更新题目
-            if(!warmupPractice.getAnalysis().equals(origin.getAnalysis()) ||
+            if (!warmupPractice.getAnalysis().equals(origin.getAnalysis()) ||
                     !warmupPractice.getQuestion().equals(origin.getQuestion())) {
                 warmupPracticeDao.updateWarmupPractice(warmupPractice);
             }
@@ -254,8 +300,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
             List<WarmupChoice> originChoices = warmupChoiceDao.loadChoices(origin.getId());
             warmupPractice.getChoiceList().forEach(warmupChoice -> {
                 originChoices.stream().forEach(originChoice -> {
-                    if(originChoice.getId() == warmupChoice.getId()) {
-                        if(!originChoice.getIsRight().equals(warmupChoice.getIsRight()) ||
+                    if (originChoice.getId() == warmupChoice.getId()) {
+                        if (!originChoice.getIsRight().equals(warmupChoice.getIsRight()) ||
                                 !originChoice.getSubject().equals(warmupChoice.getSubject())) {
                             warmupChoiceDao.updateChoice(warmupChoice);
                         }
@@ -269,7 +315,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     @Override
     public WarmupPractice getNextPractice(Integer problemId, Integer prePracticeId) {
         WarmupPractice warmupPractice = warmupPracticeDao.loadNextPractice(problemId, prePracticeId);
-        if(warmupPractice != null) {
+        if (warmupPractice != null) {
             List<WarmupChoice> choices = warmupChoiceDao.loadChoices(warmupPractice.getId());
             warmupPractice.setChoiceList(choices);
         }
@@ -280,10 +326,10 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     public Integer deleteAsstWarmupDiscuss(Integer discussId) {
         WarmupPracticeDiscuss warmupPracticeDiscuss = warmupPracticeDiscussDao.load(WarmupPracticeDiscuss.class, discussId);
         Integer profileId = warmupPracticeDiscuss.getProfileId();
-        if(profileId != null) {
+        if (profileId != null) {
             List<UserRole> userRoleList = userRoleDao.getRoles(profileId);
             Long cnt = userRoleList.stream().filter(userRole -> Role.isAsst(userRole.getRoleId())).count();
-            if(cnt > 0) {
+            if (cnt > 0) {
                 warmupPracticeDiscussDao.deleteDiscussById(discussId);
                 String url = "/rise/static/message/warmup/reply?commentId={0}&warmupPracticeId={1}";
                 url = MessageFormat.format(url, Objects.toString(warmupPracticeDiscuss.getId()), Objects.toString(warmupPracticeDiscuss.getWarmupPracticeId()));
@@ -296,6 +342,37 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         } else {
             return -1;
         }
+    }
+
+    /**
+     * 添加分数
+     * @param point
+     * @return
+     */
+    private Integer addPoint(Integer point){
+        if (point != null) {
+            point = point + Profile.ADD_POINT;
+        } else {
+            point = Profile.ADD_POINT;
+        }
+        return point;
+    }
+
+    /**
+     * 减少分数
+     * @param point
+     * @return
+     */
+    private Integer desPoint(Integer point){
+        if(point!=null){
+            point = point-Profile.ADD_POINT;
+            if(point<0){
+                point = 0;
+            }
+        }else{
+            point = 0;
+        }
+        return point;
     }
 
 }
