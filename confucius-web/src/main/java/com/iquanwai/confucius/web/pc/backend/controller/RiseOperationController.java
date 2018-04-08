@@ -599,7 +599,9 @@ public class RiseOperationController {
         } else {
             List tempList = Arrays.asList(templateDto.getOpenIds().split("\n"));
             openIds = new ArrayList<>(tempList);
-            openIds.add(unionUser.getOpenId());
+            List excludeList = Arrays.asList(templateDto.getExcludeOpenIds().split("\n"));
+            //排除人数
+            openIds = openIds.stream().filter(openId->!excludeList.contains(openId)).collect(Collectors.toList());
         }
         Integer templateId = templateDto.getTemplateId();
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
