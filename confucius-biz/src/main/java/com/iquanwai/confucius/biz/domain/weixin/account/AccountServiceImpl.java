@@ -270,7 +270,8 @@ public class AccountServiceImpl implements AccountService {
         Role role = permissionService.getRole(profileId);
         if (role == null) {
             List<ImprovementPlan> plans = planService.loadUserPlans(profileId);
-            role = plans.isEmpty() ? Role.stranger() : Role.student();
+            List<RiseMember> allMember = riseMemberDao.loadPersonalAll(profileId);
+            role = plans.isEmpty() && allMember.isEmpty() ? Role.stranger() : Role.student();
         }
         return role;
     }
