@@ -223,13 +223,12 @@ public class OperationManagementServiceImpl implements OperationManagementServic
         applicationSubmitDao.highlight(submitId);
 
         Integer highlightOne = submit.getProfileId();
-        String url = "/rise/static/";
+        String url = "/rise/static/message/application/highlight?submitId={0}&applicationId={1}&planId={2}&problemId={3}";
 
-        //url = MessageFormat.format(url, Objects.toString(discussId), Objects.toString(practiceId));
+        url = MessageFormat.format(url, Objects.toString(submitId), Objects.toString(submit.getApplicationId()),Objects.toString(submit.getPlanId()),Objects.toString(submit.getProblemId()));
         String message = "你有一道应用题解答很棒，得到了官方的认证，点击看看吧";
         messageService.sendMessage(message, Objects.toString(highlightOne),
                 SYSTEM_MESSAGE, url);
-
 
         //profile加精
         Integer profileId = submit.getProfileId();
