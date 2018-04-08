@@ -101,7 +101,8 @@ public class BackendController {
 
     @RequestMapping(value = "/notice", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> notice(@RequestBody NoticeMsgDto noticeMsgDto) {
-        if (noticeMsgDto.getSource() == null) {
+        String source = noticeMsgDto.getSource();
+        if (source == null || com.iquanwai.confucius.web.util.StringUtils.hasChinese(source)) {
             return WebUtils.error("source是必填字段,值不能含中文!");
         }
         ThreadPool.execute(() -> {

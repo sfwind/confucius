@@ -49,6 +49,7 @@ import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.pc.backend.dto.TemplateDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
+import com.iquanwai.confucius.web.util.StringUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -588,8 +589,8 @@ public class RiseOperationController {
 
         operationLogService.log(operationLog);
         String source = templateDto.getSource();
-        if (source == null) {
-            return WebUtils.error("source是必填字段,值不能含中文!");
+        if (source == null || StringUtils.hasChinese(source)) {
+            return WebUtils.error("英文消息用途是必填字段并且值不能含中文!");
         }
         List<String> openIds = Lists.newArrayList();
         if (templateDto.getIsMime()) {
