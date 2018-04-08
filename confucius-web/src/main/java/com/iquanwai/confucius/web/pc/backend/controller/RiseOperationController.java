@@ -32,7 +32,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -49,7 +48,7 @@ import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.pc.backend.dto.TemplateDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
-import com.iquanwai.confucius.web.util.StringUtils;
+import com.iquanwai.confucius.web.util.HandleStringUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -589,7 +588,7 @@ public class RiseOperationController {
 
         operationLogService.log(operationLog);
         String source = templateDto.getSource();
-        if (source == null || StringUtils.hasChinese(source)) {
+        if (source == null || HandleStringUtils.hasChinese(source)) {
             return WebUtils.error("英文消息用途是必填字段并且值不能含中文!");
         }
         List<String> openIds = Lists.newArrayList();

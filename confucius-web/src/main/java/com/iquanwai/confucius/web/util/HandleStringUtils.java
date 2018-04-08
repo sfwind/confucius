@@ -1,6 +1,6 @@
 package com.iquanwai.confucius.web.util;
 
-public class StringUtils {
+public class HandleStringUtils {
 
     public static boolean hasChinese(String str){
        if(str==null){
