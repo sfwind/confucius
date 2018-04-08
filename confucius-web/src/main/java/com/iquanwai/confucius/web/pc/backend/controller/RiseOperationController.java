@@ -602,9 +602,6 @@ public class RiseOperationController {
             openIds.add(unionUser.getOpenId());
         }
         Integer templateId = templateDto.getTemplateId();
-        List<String> developerList = ConfigUtils.getAlarmList();
-        //添加技术Openid
-        openIds.addAll(developerList);
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
@@ -660,12 +657,15 @@ public class RiseOperationController {
                         templateMessage.setUrl(templateDto.getUrl());
                     }
                     templateMessage.setComment(templateDto.getComment());
-                    if (openid.equals(unionUser.getOpenId()) || developerList.contains(openid)) {
+                    if (openid.equals(unionUser.getOpenId())) {
                         templateMessageService.sendMessage(templateMessage, false, source);
                     } else {
                         templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
                     }
                 });
+                if(!templateDto.getIsMime()){
+                    templateMessageService.sendSelfCompleteMessage(templateDto.getKeyword1(),unionUser.getOpenId());
+                }
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }
