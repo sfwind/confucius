@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -50,6 +51,7 @@ public interface AccountService {
 
     /**
      * 获得会员类型
+     *
      * @param profileId 用户id
      * @return <p>
      * 0:非会员<br/>
@@ -101,6 +103,8 @@ public interface AccountService {
      */
     Profile loadProfileByMemberId(String memberId);
 
+    Boolean hasPrivilegeForMiniMBA(Integer profileId);
+
     Boolean hasPrivilegeForBusinessSchool(Integer profileId);
 
     /**
@@ -111,12 +115,14 @@ public interface AccountService {
 
     /**
      * 批量拉黑用户
+     *
      * @param openidList 拉黑用户列表
      */
     boolean batchBlackList(List<String> openidList);
 
     /**
      * 取消拉黑用户
+     *
      * @param openidList 取消拉黑用户列表
      */
     boolean batchUnBlackList(List<String> openidList);
@@ -150,4 +156,10 @@ public interface AccountService {
     List<RiseClassMember> getByClassName(Page page, String className);
 
     Pair<Integer, String> addVipRiseMember(String riseId, String memo, Integer monthLength);
+
+    /**
+     * 获取用户最后一次审批通过的商学院申请的通过时间
+     */
+    Date loadLastApplicationDealTime(Integer profileId, Integer project);
+
 }

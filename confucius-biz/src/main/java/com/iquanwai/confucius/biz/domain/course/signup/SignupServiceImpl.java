@@ -677,7 +677,7 @@ public class SignupServiceImpl implements SignupService {
                     if (profile.getMobileNo() != null) {
                         ShortMessage shortMessage = new ShortMessage();
                         shortMessage.setProfileId(profile.getId());
-                        shortMessage.setContent(profile.getNickname()+" 你好，欢迎加入圈外商学院。请添加你的班主任微信：MBAsalmon，接下来班主任将帮助你更好地学习。" +
+                        shortMessage.setContent(profile.getNickname() + " 你好，欢迎加入圈外商学院。请添加你的班主任微信：MBAsalmon，接下来班主任将帮助你更好地学习。" +
                                 "快回复你的学号（学号：" + entryCode + "）向班主任报道吧！");
                         shortMessage.setNickname(shortMessage.getNickname());
                         shortMessage.setType(ShortMessage.BUSINESS);
@@ -840,6 +840,16 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
+    public List<RiseMember> currentRiseMembers(Integer profileId) {
+        List<RiseMember> riseMembers = riseMemberDao.loadValidRiseMembers(profileId);
+        riseMembers.forEach(riseMember -> {
+            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getAddTime()));
+            riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
+        });
+        return riseMembers;
+    }
+
+    @Override
     public Integer loadCurrentCampMonth(MonthlyCampConfig monthlyCampConfig) {
         return monthlyCampConfig.getSellingMonth();
     }
@@ -965,12 +975,6 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId) {
         return businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(orderId);
-    }
-
-    @Override
-    public boolean isAppliedBefore(Integer profileId) {
-        BusinessSchoolApplicationOrder businessSchoolApplicationOrder = businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationNoAppliedOrder(profileId);
-        return businessSchoolApplicationOrder != null;
     }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, Profile profile, String orderId) {
@@ -1108,4 +1112,5 @@ public class SignupServiceImpl implements SignupService {
         }
         return list;
     }
+
 }

@@ -36,4 +36,9 @@ public class BusinessSchoolApplication {
     public static final int IGNORE = 3;
     public static final int AUTO_CLOSE = 4;
 
+    public static interface Project {
+        int CORE = 1;
+        int MBA = 2;
+    }
+
 }

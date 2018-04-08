@@ -8,7 +8,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -133,6 +132,8 @@ public interface SignupService {
      */
     RiseMember currentRiseMember(Integer profileId);
 
+    List<RiseMember> currentRiseMembers(Integer profileId);
+
     /**
      * 当月专项课
      */
@@ -178,10 +179,6 @@ public interface SignupService {
      */
     BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
 
-    /**
-     * 获取商学院申请订单
-     */
-    boolean isAppliedBefore(Integer profileId);
 
     /**
      * 根据商品类型和售价智能选择优惠券

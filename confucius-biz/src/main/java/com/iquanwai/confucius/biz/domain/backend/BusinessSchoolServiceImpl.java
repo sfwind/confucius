@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -141,20 +140,11 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         return riseMember;
     }
 
-    @Override
-    public Date loadLastApplicationDealTime(Integer profileId) {
-        BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao
-                .loadLastApproveApplication(profileId);
-        if (businessSchoolApplication != null) {
-            return businessSchoolApplication.getDealTime();
-        } else {
-            return null;
-        }
-    }
+
 
     @Override
-    public void expireApplication(Integer profileId) {
-        customerStatusDao.delStatus(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+    public void expireApplication(Integer profileId,Integer project) {
+        customerStatusDao.delStatus(profileId, project);
     }
 
     @Override

@@ -23,17 +23,19 @@ import java.util.List;
 public class BusinessSchoolApplicationDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId) {
+    // TODO wait
+    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId,Integer project) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 1 AND Valid = 1 Order by Id desc";
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Project = ? AND Del = 0 AND Status = 1 AND Valid = 1 Order by Id desc";
         try {
-            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId, project);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }
 
+    // TODO wait
     public List<BusinessSchoolApplication> loadList(Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM BusinessSchoolApplication WHERE Status = 0 AND Del =0 AND Valid = 1 LIMIT " + page.getOffset() + "," + page.getLimit();
@@ -45,6 +47,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    // TODO wait
     public Integer loadCount() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT count(*) from BusinessSchoolApplication WHERE Status = 0 AND Del =0 AND Valid = 1";
@@ -89,6 +92,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         return -1;
     }
 
+    // TODO wait
     public BusinessSchoolApplication loadCheckingApplication(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 0 AND Valid = 1 Order by Id desc";
@@ -100,6 +104,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         return null;
     }
 
+    // TODO wait
     public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from BusinessSchoolApplication where ProfileId = ? and Valid = 0 and Del = 0 order by Id desc limit 1";
@@ -138,6 +143,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
      * @param interviewer
      * @return
      */
+    // TODO wait
     public List<BusinessSchoolApplication> loadByInterviewer(Integer interviewer,Page page){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from BusinessSchoolApplication where interviewer = ? and status = 0 and del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
@@ -150,6 +156,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    // TODO wait
     public Integer loadAssistBACount(Integer interviewer) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT count(*) from BusinessSchoolApplication WHERE interviewer = ? and status = 0 AND Del =0";
