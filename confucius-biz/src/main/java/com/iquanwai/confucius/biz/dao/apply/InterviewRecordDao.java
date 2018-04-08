@@ -39,10 +39,10 @@ public class InterviewRecordDao extends DBUtil {
 
     public Integer updateByAssist(InterviewRecord interviewRecord) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = " UPDATE InterviewRecord SET InterviewTime =?,Question =?,FocusChannel = ?,FocusChannelName = ? ,TouchDuration=?,TouchDurationName=?,ApplyEvent=?,ApplyEventName = ?,LearningWill = ?,  " +
+        String sql = " UPDATE InterviewRecord SET InterviewerId= ?, InterviewTime =?,Question =?,FocusChannel = ?,FocusChannelName = ? ,TouchDuration=?,TouchDurationName=?,ApplyEvent=?,ApplyEventName = ?,LearningWill = ?,  " +
                 "  PotentialScore = ?,ApplyAward = ?,ApplyReason = ?,Admit = ?,Remark = ? WHERE ID = ? ";
         try {
-           return runner.update(sql,interviewRecord.getInterviewTime(),interviewRecord.getQuestion(),interviewRecord.getFocusChannel(),
+           return runner.update(sql,interviewRecord.getInterviewerId(),interviewRecord.getInterviewTime(),interviewRecord.getQuestion(),interviewRecord.getFocusChannel(),
                    interviewRecord.getFocusChannelName(),interviewRecord.getTouchDuration(),interviewRecord.getTouchDurationName(),
                    interviewRecord.getApplyEvent(),interviewRecord.getApplyEventName(),
                     interviewRecord.getLearningWill(),interviewRecord.getPotentialScore(),interviewRecord.getApplyAward(),interviewRecord.getApplyReason(),interviewRecord.getAdmit(),interviewRecord.getRemark(),interviewRecord.getId());
