@@ -29,26 +29,14 @@ public interface SignupService {
     QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId, Integer payType);
 
     /**
-     * 报名商学院, 不生成预付订单
-     */
-    QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup);
-
-    /**
      * 报名专项课, 不生成预付订单
      */
     QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType);
 
     /**
-     * 报名专项课, 不生成预付订单
+     * 申请商学院, 不生成预付订单
      */
-    QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId);
-
     QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType);
-
-    /**
-     * 商学院申请, 不生成预付订单
-     */
-    QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId);
 
     /**
      * 购买完专项课后续操作
@@ -60,11 +48,6 @@ public interface SignupService {
      * 6、发送购买成功信息，开课信息（可以合并）
      */
     void payMonthlyCampSuccess(String orderId);
-
-    /**
-     * 后台解锁专项课
-     */
-    void unlockMonthlyCamp(Integer profileId);
 
     /**
      * 获取专项课订单

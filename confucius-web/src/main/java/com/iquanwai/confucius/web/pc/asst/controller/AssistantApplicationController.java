@@ -71,7 +71,6 @@ public class AssistantApplicationController {
         Assert.isTrue(vote.getStatus() == 1 || vote.getStatus() == 2, "点赞状态异常");
         Integer refer = vote.getReferencedId();
         Integer status = vote.getStatus();
-        String openId = loginUser.getOpenId();
 
         if (status == 1) {
             practiceService.vote(vote.getType(), refer, loginUser.getProfileId());
@@ -182,6 +181,7 @@ public class AssistantApplicationController {
 
             operationLogService.trace(loginUser.getProfileId(), "commentApplication", () -> {
                 OperationLogService.Prop prop = OperationLogService.props();
+                // TODO: 子康
                 RiseMember riseMember = accountService.getCurrentRiseMember(applicationSubmit.getProfileId());
                 if (riseMember != null) {
                     prop.add("discussedRolename", riseMember.getMemberTypeId());

@@ -105,6 +105,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 
     @Override
     public String queryFinalPayStatus(Integer profileId) {
+        // TODO: 杨仁
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         QuanwaiOrder order = quanwaiOrderDao.loadCampOrBusinessOrder(profileId);
         if (riseMember == null) {
@@ -131,6 +132,7 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 
     @Override
     public RiseMember getUserRiseMember(Integer profileId) {
+        // TODO: 杨仁
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember != null) {
             MemberType memberType = memberTypeDao.load(MemberType.class, riseMember.getMemberTypeId());

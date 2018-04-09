@@ -14,6 +14,7 @@ import com.iquanwai.confucius.web.pc.backend.dto.UserDto;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.RiseMemberUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -93,7 +94,7 @@ public class UserController {
         page.setPageSize(20);
         List<RiseClassMember> riseClassMembers;
         //只根据班级查询
-        if (groupId.equals("")) {
+        if (StringUtils.isEmpty(groupId)) {
             riseClassMembers = accountService.getByClassName(page, className);
         } else {
             riseClassMembers = accountService.getByClassNameGroupId(page, className, groupId);
@@ -129,6 +130,7 @@ public class UserController {
             userDto.setClassName(riseClassMember.getClassName());
             userDto.setGroupId(riseClassMember.getGroupId());
         }
+        // TODO: 杨仁
         RiseMember riseMember = accountService.getCurrentRiseMember(profile.getId());
         if (riseMember != null) {
             userDto.setOpenDate(riseMember.getOpenDate());

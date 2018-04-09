@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -45,8 +44,6 @@ public class PracticeServiceImpl implements PracticeService {
     private AsstCoachCommentDao asstCoachCommentDao;
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
-    @Autowired
-    private RiseMemberDao riseMemberDao;
     @Autowired
     private PointRepo pointRepo;
     @Autowired
@@ -240,20 +237,7 @@ public class PracticeServiceImpl implements PracticeService {
         if (improvementPlan == null) {
             return null;
         }
-        if (improvementPlan.getRequestCommentCount() > 0) {
-            return improvementPlan.getRequestCommentCount();
-        } else {
-            RiseMember riseMember = riseMemberDao.loadValidRiseMember(improvementPlan.getProfileId());
-            if (riseMember == null) {
-                // 已经不是会员了就返回null
-                return null;
-            }
-            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
-                return 0;
-            }
-        }
-        //非精英用户返回null
-        return null;
+        return improvementPlan.getRequestCommentCount();
     }
 
     @Override
@@ -336,18 +320,6 @@ public class PracticeServiceImpl implements PracticeService {
         return warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate, warmupPractice);
     }
 
-    //    @Override
-//    public boolean loadYesterdayCommentsByProblem(Problem problem) {
-//        String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(),1));
-//        List<WarmupPractice> warmupPractices = warmupPracticeDao.loadPracticesByProblemId(problem.getId());
-//
-//        for(WarmupPractice warmupPractice:warmupPractices){
-//            if(warmupPracticeDiscussDao.loadCurrentDayDiscussByWarmUp(currentDate,warmupPractice).size()>0){
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
     @Override
     public List<Integer> loadProblemsByYesterdayComments() {
         String currentDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), 1));

@@ -238,37 +238,6 @@ public class SignupController {
     }
 
     /**
-     * 检查用户权限，如果通过了，则返回GoodsType以及GoodsId
-     */
-    @RequestMapping(value = "/check/business/school/privilege", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> checkBusinessSchoolPrivilege(LoginUser loginUser) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("商学院")
-                .action("检查商学院报名权限");
-        operationLogService.log(operationLog);
-        // 检查状态
-        Boolean check = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-        BusinessSchoolDto dto = new BusinessSchoolDto();
-        dto.setPrivilege(check);
-        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
-        if (riseMember == null) {
-            // 其他 -1
-            dto.setRiseMember(-1);
-        } else {
-            if (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
-                // 精英版 1
-                dto.setRiseMember(1);
-            } else {
-                // 非精英版 2
-                dto.setRiseMember(2);
-            }
-        }
-        return WebUtils.result(dto);
-    }
-
-    /**
      * 获取商品信息
      *
      * @param loginUser    用户
@@ -543,11 +512,6 @@ public class SignupController {
             if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
                 dto.setButtonStr("升级商学院");
                 dto.setTip("优秀学员学费已减免，一键升级商学院");
-            } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
-                // TODO 精英版半年升级商学院
-                dto.setTip(null);
-                dto.setButtonStr("续费商学院");
             } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
                 //商学院用户不显示按钮
                 return WebUtils.success();
