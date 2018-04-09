@@ -32,7 +32,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -49,6 +48,7 @@ import com.iquanwai.confucius.web.pc.backend.dto.ProblemListDto;
 import com.iquanwai.confucius.web.pc.backend.dto.TemplateDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
+import com.iquanwai.confucius.web.util.HandleStringUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -588,8 +588,8 @@ public class RiseOperationController {
 
         operationLogService.log(operationLog);
         String source = templateDto.getSource();
-        if (source == null) {
-            return WebUtils.error("source是必填字段,值不能含中文!");
+        if (source == null || HandleStringUtils.hasChinese(source)) {
+            return WebUtils.error("英文消息用途是必填字段并且值不能含中文!");
         }
         List<String> openIds = Lists.newArrayList();
         if (templateDto.getIsMime()) {
@@ -598,12 +598,11 @@ public class RiseOperationController {
         } else {
             List tempList = Arrays.asList(templateDto.getOpenIds().split("\n"));
             openIds = new ArrayList<>(tempList);
-            openIds.add(unionUser.getOpenId());
+            List excludeList = Arrays.asList(templateDto.getExcludeOpenIds().split("\n"));
+            //排除人数
+            openIds = openIds.stream().filter(openId->!excludeList.contains(openId)).collect(Collectors.toList());
         }
         Integer templateId = templateDto.getTemplateId();
-        List<String> developerList = ConfigUtils.getAlarmList();
-        //添加技术Openid
-        openIds.addAll(developerList);
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
 
         List<String> blackLists = accountService.loadBlackListOpenIds();
@@ -659,12 +658,15 @@ public class RiseOperationController {
                         templateMessage.setUrl(templateDto.getUrl());
                     }
                     templateMessage.setComment(templateDto.getComment());
-                    if (openid.equals(unionUser.getOpenId()) || developerList.contains(openid)) {
+                    if (openid.equals(unionUser.getOpenId())) {
                         templateMessageService.sendMessage(templateMessage, false, source);
                     } else {
                         templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
                     }
                 });
+                if(!templateDto.getIsMime()){
+                    templateMessageService.sendSelfCompleteMessage(templateDto.getKeyword1(),unionUser.getOpenId());
+                }
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
             }

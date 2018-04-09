@@ -14,6 +14,10 @@ public class TemplateDto {
     private String keyword2;
     private String keyword3;
     private String openIds;
+    /**
+     * 排除人数
+     */
+    private String excludeOpenIds;
     private String remarkColor;
     private Boolean forcePush;
     private Boolean isMime;
