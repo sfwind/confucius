@@ -2,25 +2,20 @@ package com.iquanwai.confucius.web.pc.backend.controller;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.backend.MonthlyCampService;
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
-import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
-import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
-import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.ThreadPool;
-import com.iquanwai.confucius.biz.util.page.Page;
-import com.iquanwai.confucius.web.pc.backend.dto.*;
+import com.iquanwai.confucius.web.pc.backend.dto.CampRiseCertificateDao;
+import com.iquanwai.confucius.web.pc.backend.dto.MonthlyCampDto;
+import com.iquanwai.confucius.web.pc.backend.dto.MonthlyCampDtoGroup;
+import com.iquanwai.confucius.web.pc.backend.dto.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
@@ -38,13 +33,7 @@ public class MonthlyCampController {
     @Autowired
     private MonthlyCampService monthlyCampService;
     @Autowired
-    private SignupService signupService;
-    @Autowired
     private AccountService accountService;
-    @Autowired
-    private CacheService cacheService;
-    @Autowired
-    private OperationLogService operationLogService;
 
     private static final int PAGE_SIZE = 20;
 
@@ -147,141 +136,6 @@ public class MonthlyCampController {
         }).collect(Collectors.toList()));
 
         return WebUtils.result(monthlyCampDtos);
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/load/ungroup", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadUnGroupMonthlyCamp(@ModelAttribute Page page) {
-        page.setPageSize(PAGE_SIZE);
-
-        List<RiseClassMember> riseClassMembers = monthlyCampService.loadUnGroupRiseClassMember(page);
-        List<Integer> profileIds = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
-        List<Profile> profiles = accountService.getProfiles(profileIds);
-
-        if (riseClassMembers.size() != profiles.size()) {
-            return WebUtils.error("人员不匹配");
-        }
-
-        MonthlyCampPageDto monthlyCampPageDto = new MonthlyCampPageDto();
-        List<MonthlyCampDto> monthlyCampDtos = Lists.newArrayList();
-        for (int i = 0; i < riseClassMembers.size(); i++) {
-            Integer profileId = riseClassMembers.get(i).getProfileId();
-            Profile profile = profiles.stream().filter(item -> profileId.equals(item.getId())).findFirst().orElse(null);
-            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMembers.get(i), profile);
-            monthlyCampDtos.add(campDto);
-        }
-        monthlyCampPageDto.setMonthlyCampDtoList(monthlyCampDtos);
-        monthlyCampPageDto.setPage(page);
-        return WebUtils.result(monthlyCampPageDto);
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/modify/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> modifyMonthlyCamp(@RequestBody MonthlyCampDto monthlyCampDto) {
-        String RiseId = monthlyCampDto.getRiseId();
-        if (RiseId != null) {
-            Profile profile = accountService.getProfileByRiseId(RiseId);
-            OperationLog operationLog = OperationLog.create()
-                    .memo(monthlyCampDto.getTips() + "-" + monthlyCampDto.toString())
-                    .openid(profile.getOpenid()).module("训练营")
-                    .function("信息修改").action("信息修改");
-            operationLogService.log(operationLog);
-        }
-
-        RiseClassMember riseClassMember = new RiseClassMember();
-        riseClassMember.setId(monthlyCampDto.getRiseClassMemberId());
-        riseClassMember.setClassName(monthlyCampDto.getClassName());
-        riseClassMember.setActive(monthlyCampDto.getActive());
-        if (monthlyCampDto.getGroupId() == null || "".equals(monthlyCampDto.getGroupId())) {
-            riseClassMember.setGroupId(null);
-        } else {
-            String groupId = monthlyCampDto.getGroupId();
-            riseClassMember.setGroupId(groupId.length() == 1 ? "0" + groupId : groupId);
-        }
-        RiseClassMember updatedRiseClassMember = monthlyCampService.updateRiseClassMemberById(riseClassMember);
-        if (updatedRiseClassMember != null) {
-            Profile profile = accountService.getProfile(updatedRiseClassMember.getProfileId());
-            MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(updatedRiseClassMember, profile);
-            return WebUtils.result(campDto);
-        } else {
-            return WebUtils.error("更新失败");
-        }
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/modify/batch/update", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> batchModifyMonthlyCampGroupId(@PathParam("groupId") String groupId, @RequestBody List<Integer> batchRiseClassMemberIds) {
-        OperationLog operationLog = OperationLog.create()
-                .memo("Ids:" + batchRiseClassMemberIds.toString() + "groupId:" + groupId)
-                .openid("").module("训练营")
-                .function("信息修改").action("批量小组信息修改");
-        operationLogService.log(operationLog);
-
-        String formatGroupId = groupId.length() == 1 ? "0" + groupId : groupId;
-        Integer result = monthlyCampService.batchUpdateRiseClassMemberByIds(batchRiseClassMemberIds, formatGroupId);
-        if (result > 0) {
-            return WebUtils.result(result);
-        } else {
-            return WebUtils.error("更新失败");
-        }
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/modify/add", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> modifyAddMonthlyCamp(@RequestBody MonthlyCampDto monthlyCampDto) {
-        Profile profile = accountService.getProfileByRiseId(monthlyCampDto.getRiseId());
-        OperationLog operationLog = OperationLog.create()
-                .memo("className:" + monthlyCampDto.getClassName() + ", groupId:" + monthlyCampDto.getGroupId())
-                .openid(profile.getOpenid()).module("训练营").function("信息新增").action("训练营用户新增");
-        operationLogService.log(operationLog);
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-        int sellingYear = monthlyCampConfig.getSellingYear();
-        int sellingMonth = monthlyCampConfig.getSellingMonth();
-
-        Integer riseClassMemberId = monthlyCampDto.getRiseClassMemberId();
-        RiseClassMember riseClassMember = monthlyCampService.loadRiseClassMemberById(riseClassMemberId);
-        RiseMember riseMember = signupService.currentRiseMember(profile.getId());
-        if (riseClassMember == null && riseMember != null) {
-            riseClassMember = new RiseClassMember();
-
-            String memberId;
-            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                memberId = signupService.generateMemberId(sellingYear, sellingMonth, RiseClassMember.BUSINESS_MEMBERSHIP);
-            } else {
-                memberId = signupService.generateMemberId(sellingYear, sellingMonth, RiseClassMember.MONTHLY_CAMP);
-            }
-
-            riseClassMember.setClassName(monthlyCampDto.getClassName());
-            riseClassMember.setMemberId(memberId);
-            riseClassMember.setGroupId(monthlyCampDto.getGroupId());
-            riseClassMember.setProfileId(profile.getId());
-            riseClassMember.setYear(sellingYear);
-            riseClassMember.setMonth(sellingMonth);
-            riseClassMember.setActive(monthlyCampDto.getActive());
-            int result = monthlyCampService.initRiseClassMember(riseClassMember);
-            if (result > 0) {
-                riseClassMember.setId(result);
-                MonthlyCampDto campDto = convertRiseClassMemberToMonthlyCampDto(riseClassMember, profile);
-                return WebUtils.result(campDto);
-            } else {
-                return WebUtils.error("用户新增失败，请及时联系管理员");
-            }
-        } else {
-            return WebUtils.error("当前用户已经是训练营用户");
-        }
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/unlock/{riseId}")
-    public ResponseEntity<Map<String, Object>> unlockMonthlyCampAuthority(@PathVariable String riseId) {
-        Assert.notNull(riseId, "解锁用户的 RiseId 不能为空");
-        Profile profile = accountService.getProfileByRiseId(riseId);
-        OperationLog operationLog = OperationLog.create()
-                .openid(profile.getOpenid()).module("训练营")
-                .function("开启训练营").action("后台增加训练营身份");
-        operationLogService.log(operationLog);
-        monthlyCampService.unlockMonthlyCampAuthority(riseId);
-        return WebUtils.success();
     }
 
     @RequestMapping(value = "/switch")

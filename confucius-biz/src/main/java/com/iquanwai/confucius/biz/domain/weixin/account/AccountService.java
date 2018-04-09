@@ -63,11 +63,6 @@ public interface AccountService {
     Integer getRiseMember(Integer profileId);
 
     /**
-     * 从微信实时获取头像信息
-     */
-    String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException;
-
-    /**
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);
@@ -143,6 +138,7 @@ public interface AccountService {
     /**
      * 获取当前有效的RiseMember
      */
+    @Deprecated
     RiseMember getCurrentRiseMember(Integer profileId);
 
     /**

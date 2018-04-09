@@ -25,6 +25,23 @@ public class RiseMemberDao extends DBUtil {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    public List<RiseMember> loadValidRiseMemberByMemberTypeId(Integer profileId, List<Integer> memberTypes) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String mask = produceQuestionMark(memberTypes.size());
+        List<Object> params = Lists.newArrayList();
+        params.add(profileId);
+        params.addAll(memberTypes);
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND memberTypeId in ("
+                + mask + ") AND Expired=0 AND Del = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, params.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public void updateExpiredAhead(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE RiseMember SET Expired = 1, Memo = '商学院提前过期' WHERE ProfileId = ? AND Expired = 0 AND Del = 0";
@@ -58,6 +75,7 @@ public class RiseMemberDao extends DBUtil {
         return -1;
     }
 
+    @Deprecated
     public RiseMember loadValidRiseMember(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where ProfileId = ? and Expired = 0 AND Del = 0";

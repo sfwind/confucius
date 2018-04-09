@@ -1,20 +1,12 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
-import com.iquanwai.confucius.biz.dao.course.CouponDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolApplicationOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.OperateRotateDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.*;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -28,16 +20,7 @@ import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
-import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.systematism.CourseIntroduction;
 import com.iquanwai.confucius.biz.po.systematism.QuanwaiClass;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -58,11 +41,7 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.lang.ref.SoftReference;
 import java.net.ConnectException;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -74,8 +53,6 @@ public class SignupServiceImpl implements SignupService {
 
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
-    @Autowired
-    private CouponDao couponDao;
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
@@ -120,10 +97,6 @@ public class SignupServiceImpl implements SignupService {
     private final static int PROBLEM_MAX_LENGTH = 30; //课程最长开放时间
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    /**
-     * 专项课购买之后送的优惠券
-     */
-    private final static double MONTHLY_CAMP_COUPON = 100;
 
     private Map<Integer, SoftReference<QuanwaiClass>> classMap = Maps.newHashMap();
     private Map<Integer, CourseIntroduction> courseMap = Maps.newHashMap();
@@ -131,7 +104,6 @@ public class SignupServiceImpl implements SignupService {
     private RabbitMQPublisher rabbitMQPublisher;
     private RabbitMQPublisher paySuccessPublisher;
     private RabbitMQPublisher freshLoginUserPublisher;
-    private RabbitMQPublisher openProblemPublisher;
 
     private static final String RISEMEMBER_OPERATEROTATE_SCENE_CODE = "rise_member_pay_success";
     private static final String MONTHLYCAMP_OPERATEROTATE_SCENE_CODE = "monthly_camp_pay_success";
@@ -147,7 +119,6 @@ public class SignupServiceImpl implements SignupService {
         paySuccessPublisher = rabbitMQFactory.initFanoutPublisher("rise_pay_success_topic");
         freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher("login_user_reload");
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher("camp_order_topic");
-        openProblemPublisher = rabbitMQFactory.initFanoutPublisher("monthly_camp_force_open_topic");
     }
 
     @Override
@@ -237,11 +208,6 @@ public class SignupServiceImpl implements SignupService {
 
 
     @Override
-    public QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId) {
-        return this.signUpRiseMember(profileId, memberTypeId, couponId, QuanwaiOrder.PAY_WECHAT);
-    }
-
-    @Override
     public QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买专项课，配置 zk，查看当前月份
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
@@ -267,12 +233,6 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId) {
-        return this.signUpMonthlyCamp(profileId, memberTypeId, couponId, QuanwaiOrder.PAY_WECHAT);
-    }
-
-
-    @Override
     public QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买专项课，配置 zk，查看当前月份
         MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
@@ -291,11 +251,6 @@ public class SignupServiceImpl implements SignupService {
         bsOrder.setProfileId(profileId);
         businessSchoolApplicationOrderDao.insert(bsOrder);
         return quanwaiOrder;
-    }
-
-    @Override
-    public QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId) {
-        return this.signupBusinessSchoolApplication(profileId, memberTypeId, couponId, QuanwaiOrder.PAY_WECHAT);
     }
 
     @Override
@@ -341,53 +296,6 @@ public class SignupServiceImpl implements SignupService {
         sendPurchaseMessage(profile, RiseMember.CAMP, orderId, year, month);
         // 刷新相关状态
         refreshStatus(quanwaiOrderDao.loadOrder(orderId), profile, orderId);
-    }
-
-    @Override
-    public void unlockMonthlyCamp(Integer profileId) {
-        Assert.notNull(profileId, "开课用户不能为空");
-
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-
-        Profile profile = accountService.getProfile(profileId);
-
-        // RiseClassMember 新增记录
-        insertMonthlyCampRiseClassMember(profileId);
-
-        // 更新 RiseMember 表中信息
-        updateMonthlyCampRiseMemberStatus(profile, null);
-
-        // 赠送优惠券
-        insertCampCoupon(profile);
-
-        // 强开课程
-        Integer monthlyCampSellingMonth = monthlyCampConfig.getSellingMonth();
-        Integer category = accountService.loadUserScheduleCategory(profileId);
-        List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao.loadMajorCourseScheduleDefaultByCategory(category);
-        List<Integer> problemIds = courseScheduleDefaults.stream()
-                .filter(scheduleDefault -> monthlyCampSellingMonth.equals(scheduleDefault.getMonth()))
-                .map(CourseScheduleDefault::getProblemId)
-                .collect(Collectors.toList());
-
-        problemIds.forEach(problemId -> {
-            JSONObject json = new JSONObject();
-            json.put("profileId", profileId);
-            json.put("startDate", monthlyCampConfig.getOpenDate());
-            json.put("closeDate", monthlyCampConfig.getCloseDate());
-            json.put("problemId", problemId);
-            try {
-                openProblemPublisher.publish(json.toJSONString());
-            } catch (ConnectException e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-        });
-
-        // 刷新用户的会员状态
-        try {
-            freshLoginUserPublisher.publish(profile.getUnionid());
-        } catch (ConnectException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
     }
 
     /**
@@ -488,21 +396,6 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
-    /**
-     * 放入专项课优惠券，金额 100，自购买起，两个月内过期
-     *
-     * @param profile 用户 Profile
-     */
-    private void insertCampCoupon(Profile profile) {
-        // 送优惠券
-        Coupon coupon = new Coupon();
-        coupon.setProfileId(profile.getId());
-        coupon.setAmount(MONTHLY_CAMP_COUPON);
-        coupon.setUsed(Coupon.UNUSED);
-        coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 2));
-        coupon.setDescription("优惠券");
-        couponDao.insert(coupon);
-    }
 
     @Override
     public MonthlyCampOrder getMonthlyCampOrder(String orderId) {
@@ -580,11 +473,6 @@ public class SignupServiceImpl implements SignupService {
 
             if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
                 riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 12));
-                // 续费，继承OpenDate
-                riseMember.setOpenDate(existRiseMember.getOpenDate());
-            } else if (existRiseMember != null && existRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                // TODO 特殊处理 查看当前身份，商学院会员升级方式保留，但是精英版半年只增加半年时间
-                riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), 6));
                 // 续费，继承OpenDate
                 riseMember.setOpenDate(existRiseMember.getOpenDate());
             } else {
@@ -790,12 +678,8 @@ public class SignupServiceImpl implements SignupService {
                 if (riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
                     // 商学院会员续费
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
-                    // TODO 精英版半年升级商学院
-                    if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                        memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), 6), 1)));
-                    } else {
-                        memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
-                    }
+                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(
+                            DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
                 } else {
                     // 商学院报名
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(businessSchoolConfig.getOpenDate()));
@@ -880,19 +764,6 @@ public class SignupServiceImpl implements SignupService {
                 case RiseMember.ELITE:
                     fee = memberType.getFee();
                     businessSchool.setIsBusinessStudent(true);
-                    break;
-                case RiseMember.HALF_ELITE:
-                    // TODO 对于精英版半年版的学员，金额更改为 1800
-                    fee = 1800.0;
-                    businessSchool.setIsBusinessStudent(true);
-                    break;
-                case RiseMember.ANNUAL:
-                case RiseMember.HALF:
-                    fee = normalMemberDiscount(riseMember, memberType.getFee());
-                    if (!ConfigUtils.reducePriceForNotElite()) {
-                        // 关闭减价，恢复原价
-                        fee = memberType.getFee();
-                    }
                     break;
                 case RiseMember.CAMP:
                     fee = memberType.getFee();

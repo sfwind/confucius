@@ -560,6 +560,40 @@ public class SignupController {
                 dto.setAuditionStr(null);
             }
         } else if (memberType.getId() == RiseMember.MINI_EMBA) {
+        } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
+            dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
+        }
+
+        if (riseMember != null && riseMember.getMemberTypeId() != null) {
+            if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
+                dto.setButtonStr("升级商学院");
+                dto.setTip("优秀学员学费已减免，一键升级商学院");
+            } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
+                //商学院用户不显示按钮
+                return WebUtils.success();
+            } else {
+                dto.setButtonStr("立即入学");
+                dto.setAuditionStr("预约体验");
+            }
+        } else {
+            dto.setButtonStr("立即入学");
+            dto.setAuditionStr("预约体验");
+        }
+
+        Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
+        calcDealTime(dealTime, dto, loginUser.getId());
+        List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
+        // 用户层级是商学院用户或者曾经是商学院用户，则不显示试听课入口
+        Long count = riseMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
+        if (count > 0) {
+            // 不显示宣讲会按钮
+            dto.setAuditionStr(null);
+        }
+        boolean privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
+        dto.setPrivilege(privilege);
+        if (privilege) {
+            // 有付费权限不显示宣讲会按钮
+            dto.setAuditionStr(null);
         }
         calcDealTime(memberTypeId, loginUser.getId());
 //        calcDealTime(dealTime, dto, loginUser.getId());

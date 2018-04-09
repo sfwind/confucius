@@ -49,5 +49,5 @@ public class RiseMember {
     public static final int CAMP = 5; // 专项课
     public static final int COURSE = 6; // 单买课程
     public static final int BS_APPLICATION = 7; // 商学院申请
-    public static final int MINI_EMBA = 8;
+    public static final int BUSINESS_THOUGHT = 8; // 商业思维
 }
