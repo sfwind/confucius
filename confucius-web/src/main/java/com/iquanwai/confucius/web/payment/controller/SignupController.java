@@ -170,11 +170,10 @@ public class SignupController {
     }
 
     private Pair<Integer, Integer> calcDealTime(Integer memberTypeId, Integer profileId) {
-        Pair<Integer, Integer> hourMinPair = null;
         Date dealTime = null;
         if (memberTypeId.equals(RiseMember.ELITE)) {
             dealTime = accountService.loadLastApplicationDealTime(profileId, BusinessSchoolApplication.Project.CORE);
-        } else if (memberTypeId.equals(RiseMember.MINI_EMBA)) {
+        } else if (memberTypeId.equals(RiseMember.BUSINESS_THOUGHT)) {
             dealTime = accountService.loadLastApplicationDealTime(profileId, BusinessSchoolApplication.Project.MBA);
         }
         if (dealTime == null) {
@@ -511,7 +510,7 @@ public class SignupController {
                 privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
                 break;
             }
-            case RiseMember.MINI_EMBA: {
+            case RiseMember.BUSINESS_THOUGHT: {
                 privilege = accountService.hasPrivilegeForMiniMBA(loginUser.getId());
                 break;
             }
@@ -528,7 +527,7 @@ public class SignupController {
         // 不同商品的特殊逻辑
         if (memberType.getId() == RiseMember.ELITE) {
             dto.setTip("开学后7天内可全额退款");
-            RiseMember noMbaRiseMember = riseMembers.stream().filter(item -> !item.getMemberTypeId().equals(RiseMember.MINI_EMBA)).findFirst().orElse(null);
+            RiseMember noMbaRiseMember = riseMembers.stream().filter(item -> !item.getMemberTypeId().equals(RiseMember.BUSINESS_THOUGHT)).findFirst().orElse(null);
             if (noMbaRiseMember != null && noMbaRiseMember.getMemberTypeId() != null) {
                 if (noMbaRiseMember.getMemberTypeId().equals(RiseMember.HALF) || noMbaRiseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
                     dto.setButtonStr("升级商学院");
@@ -559,45 +558,18 @@ public class SignupController {
                 // 有付费权限不显示宣讲会按钮
                 dto.setAuditionStr(null);
             }
-        } else if (memberType.getId() == RiseMember.MINI_EMBA) {
+        } else if (memberType.getId() == RiseMember.BUSINESS_THOUGHT) {
+            // ignore
         } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
-            dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
+            // ignore
         }
 
-        if (riseMember != null && riseMember.getMemberTypeId() != null) {
-            if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
-                dto.setButtonStr("升级商学院");
-                dto.setTip("优秀学员学费已减免，一键升级商学院");
-            } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
-                //商学院用户不显示按钮
-                return WebUtils.success();
-            } else {
-                dto.setButtonStr("立即入学");
-                dto.setAuditionStr("预约体验");
-            }
-        } else {
-            dto.setButtonStr("立即入学");
-            dto.setAuditionStr("预约体验");
-        }
-
-        Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
-        calcDealTime(dealTime, dto, loginUser.getId());
-        List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
-        // 用户层级是商学院用户或者曾经是商学院用户，则不显示试听课入口
-        Long count = riseMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
-        if (count > 0) {
-            // 不显示宣讲会按钮
-            dto.setAuditionStr(null);
-        }
-        boolean privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-        dto.setPrivilege(privilege);
-        if (privilege) {
-            // 有付费权限不显示宣讲会按钮
-            dto.setAuditionStr(null);
-        }
-        calcDealTime(memberTypeId, loginUser.getId());
-//        calcDealTime(dealTime, dto, loginUser.getId());
-
+        /**
+         * 计算过期时间
+         */
+        Pair<Integer, Integer> hourMinutes = calcDealTime(memberTypeId, loginUser.getId());
+        dto.setRemainHour(hourMinutes.getLeft());
+        dto.setRemainMinute(hourMinutes.getRight());
         return WebUtils.result(dto);
     }
 
