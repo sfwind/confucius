@@ -109,6 +109,7 @@ public class MonthlyCampController {
                 dto.setNickName(profile.getNickname());
                 dto.setRiseId(profile.getRiseId());
                 dto.setHeadImgUrl(profile.getHeadimgurl());
+                dto.setMemberId(profile.getMemberId());
             }
 
             dto.setRiseClassMemberId(riseClassMember.getId());
@@ -118,7 +119,6 @@ public class MonthlyCampController {
                 dto.setClassNameStr(className.substring(0, 2) + "月" + className.substring(2) + "班");
             }
             dto.setGroupId(riseClassMember.getGroupId());
-            dto.setMemberId(riseClassMember.getMemberId());
             Integer active = riseClassMember.getActive();
             if (active != null) {
                 dto.setActive(active);
@@ -180,7 +180,7 @@ public class MonthlyCampController {
             logger.error(e.getLocalizedMessage(), e);
         }
         campDto.setGroupId(riseClassMember.getGroupId());
-        campDto.setMemberId(riseClassMember.getMemberId());
+        campDto.setMemberId(profile.getMemberId());
         campDto.setActive(riseClassMember.getActive());
         campDto.setActiveStr(riseClassMember.getActive() == 1 ? "学习中" : "已请假");
 

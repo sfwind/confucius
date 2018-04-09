@@ -310,12 +310,14 @@ public class SignupServiceImpl implements SignupService {
         String memberId = generateMemberId(sellingYear, sellingMonth, RiseClassMember.MONTHLY_CAMP);
         RiseClassMember riseClassMember = new RiseClassMember();
         riseClassMember.setClassName(generateClassName(memberId));
-        riseClassMember.setMemberId(memberId);
+//        riseClassMember.setMemberId(memberId);
         riseClassMember.setProfileId(profileId);
         riseClassMember.setYear(monthlyCampConfig.getSellingYear());
         riseClassMember.setMonth(monthlyCampConfig.getSellingMonth());
         riseClassMember.setActive(0);
         riseClassMemberDao.insert(riseClassMember);
+
+        accountService.updateMemberId(profileId, memberId);
     }
 
     /**
@@ -337,12 +339,14 @@ public class SignupServiceImpl implements SignupService {
 
         RiseClassMember classMember = new RiseClassMember();
         classMember.setClassName(generateClassName(memberId));
-        classMember.setMemberId(memberId);
+//        classMember.setMemberId(memberId);
         classMember.setProfileId(profileId);
         classMember.setYear(businessSchoolConfig.getSellingYear());
         classMember.setMonth(businessSchoolConfig.getSellingMonth());
         classMember.setActive(0);
         riseClassMemberDao.insert(classMember);
+
+        accountService.updateMemberId(profileId, memberId);
     }
 
     /**
@@ -543,12 +547,8 @@ public class SignupServiceImpl implements SignupService {
                     OperateRotate operateRotate = riseMemberOperateRotates.get(sequence % riseMemberOperateRotates.size() == 0 ? riseMemberOperateRotates.size() - 1 : sequence % riseMemberOperateRotates.size() - 1);
                     Assert.notNull(operateRotate);
                     logger.info("operateRotate mediaId: {}", operateRotate.getMediaId());
-                    RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profile.getId(), year, month);
-                    if (riseClassMember == null) {
-                        return;
-                    }
 
-                    String entryCode = riseClassMember.getMemberId();
+                    String entryCode = profile.getMemberId();
                     logger.info("发送会员数据");
                     // 发送消息给一年精英版的用户
                     customerMessageService.sendCustomerMessage(profile.getOpenid(), operateRotate.getMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
@@ -590,11 +590,7 @@ public class SignupServiceImpl implements SignupService {
                     OperateRotate operateRotate = monthlyCampOperateRotates.get(sequence % monthlyCampOperateRotates.size() == 0 ? monthlyCampOperateRotates.size() - 1 : sequence % monthlyCampOperateRotates.size() - 1);
                     Assert.notNull(operateRotate);
 
-                    RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profile.getId(), year, month);
-                    if (riseClassMember == null) {
-                        return;
-                    }
-                    String entryCode = riseClassMember.getMemberId();
+                    String entryCode = profile.getMemberId();
 
                     logger.info("发送专项课数据");
                     // 发送消息给专项课购买用户
@@ -771,8 +767,7 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public RiseMember getCurrentRiseMemberStatus(Integer profileId) {
-        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig();
-
+        Profile profile = accountService.getProfile(profileId);
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
             riseMember.setStartTime(DateUtils.parseDateToStringByCommon(DateUtils.afterMonths(riseMember.getExpireDate(), -12)));
@@ -781,12 +776,8 @@ public class SignupServiceImpl implements SignupService {
         }
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
 
-        Integer year = businessSchoolConfig.getSellingYear();
-        Integer month = businessSchoolConfig.getSellingMonth();
-
-        RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, year, month);
-        if (riseClassMember != null) {
-            riseMember.setEntryCode(riseClassMember.getMemberId());
+        if (profile != null) {
+            riseMember.setEntryCode(profile.getMemberId());
         }
         return riseMember;
     }
@@ -795,16 +786,13 @@ public class SignupServiceImpl implements SignupService {
     public RiseMember getCurrentMonthlyCampStatus(Integer profileId) {
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
+        Profile profile = accountService.getProfile(profileId);
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
         riseMember.setEndTime(DateUtils.parseDateToStringByCommon(monthlyCampConfig.getCloseDate()));
 
-        Integer year = monthlyCampConfig.getSellingYear();
-        Integer month = monthlyCampConfig.getSellingMonth();
-
-        RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, year, month);
-        if (riseClassMember != null) {
-            riseMember.setEntryCode(riseClassMember.getMemberId());
+        if (profile != null) {
+            riseMember.setEntryCode(profile.getMemberId());
         }
         return riseMember;
     }
@@ -921,27 +909,6 @@ public class SignupServiceImpl implements SignupService {
         quanwaiOrder.setPayType(payType);
         quanwaiOrderDao.insert(quanwaiOrder);
         return quanwaiOrder;
-    }
-
-    // 专业版折价方案
-    private Double normalMemberDiscount(RiseMember riseMember, Double price) {
-        if (riseMember != null) {
-            if (riseMember.getMemberTypeId() == RiseMember.ANNUAL) {
-                // 半年版升级价格公式 = 商学院价格 - 一年版剩余天数/365*一年版原价
-                Date expireDate = riseMember.getExpireDate();
-                int remain = DateUtils.interval(expireDate);
-                price = CommonUtils.substract(price, remain / 365.0 * 880);
-            } else if (riseMember.getMemberTypeId() == RiseMember.HALF) {
-                // 半年版升级价格公式 = 商学院价格 - 半年版剩余天数/182.5*半年版原价
-                Date expireDate = riseMember.getExpireDate();
-                int remain = DateUtils.interval(expireDate);
-                price = CommonUtils.substract(price, remain / 182.5 * 580);
-            }
-        }
-        //取整
-        price = price.intValue() + 0.0d;
-
-        return price;
     }
 
     @Override

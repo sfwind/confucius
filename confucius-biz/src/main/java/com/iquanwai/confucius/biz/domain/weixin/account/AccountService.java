@@ -33,6 +33,8 @@ public interface AccountService {
 
     Role getUserRole(Integer profileId);
 
+    void updateMemberId(Integer profileId, String memberId);
+
     /**
      * 根据riseid获取用户的详细信息
      */

@@ -158,6 +158,16 @@ public class ProfileDao extends DBUtil {
         }
     }
 
+    public void updateMemberId(Integer profileId, String memberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Profile SET MemberId = ? where Id = ?";
+        try {
+            runner.update(sql, memberId, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
     public int updateHeadImgUrl(Integer profileId, String headImgUrl) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE Profile SET HeadImgUrl = ?, HeadImgUrlCheckTime = ? WHERE Id = ?";

@@ -260,6 +260,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public void updateMemberId(Integer profileId, String memberId) {
+        profileDao.updateMemberId(profileId, memberId);
+    }
+
+    @Override
     public Profile getProfile(String openid, boolean realTime) {
         return getProfileFromDB(openid);
     }

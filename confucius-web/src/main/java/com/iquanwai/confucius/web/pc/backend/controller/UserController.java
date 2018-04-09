@@ -126,7 +126,7 @@ public class UserController {
         BeanUtils.copyProperties(profile, userDto);
         RiseClassMember riseClassMember = accountService.getLatestMemberId(profile.getId());
         if (riseClassMember != null) {
-            userDto.setMemberId(riseClassMember.getMemberId());
+            userDto.setMemberId(profile.getMemberId());
             userDto.setClassName(riseClassMember.getClassName());
             userDto.setGroupId(riseClassMember.getGroupId());
         }
