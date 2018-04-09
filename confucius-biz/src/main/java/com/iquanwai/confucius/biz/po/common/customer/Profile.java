@@ -54,4 +54,6 @@ public class Profile {
         }
     }
 
+    public static final Integer ADD_POINT = 300;
+
 }
