@@ -529,6 +529,7 @@ public class AccountServiceImpl implements AccountService {
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
             //如果用户是专业版或者精英版,则无需申请
+            // TODO 精英版不能续费
             if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
                 result = true;
             }

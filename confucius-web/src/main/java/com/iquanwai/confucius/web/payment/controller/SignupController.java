@@ -521,7 +521,6 @@ public class SignupController {
         List<RiseMember> riseMembers = allUserMembers.stream().filter(item -> !item.getExpired()).collect(Collectors.toList());
 
         // 3.拼装dto
-        Date dealTime = null;
         RiseMemberDto dto = new RiseMemberDto();
         dto.setPrivilege(privilege);
 
@@ -560,9 +559,7 @@ public class SignupController {
                 // 有付费权限不显示宣讲会按钮
                 dto.setAuditionStr(null);
             }
-            dealTime = accountService.loadLastApplicationDealTime(loginUser.getId(), BusinessSchoolApplication.Project.CORE);
         } else if (memberType.getId() == RiseMember.MINI_EMBA) {
-            dealTime = accountService.loadLastApplicationDealTime(loginUser.getId(), BusinessSchoolApplication.Project.MBA);
         }
         calcDealTime(memberTypeId, loginUser.getId());
 //        calcDealTime(dealTime, dto, loginUser.getId());
