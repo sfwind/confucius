@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.web.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum KnowledgeEnums {
 
     KNOWLEDG_Duplicate_ERROR(-1,"设置的章节与现有章节重复"),
@@ -11,9 +13,4 @@ public enum KnowledgeEnums {
     private Integer code;
 
     private String msg;
-
-    KnowledgeEnums(Integer code, String msg) {
-        this.code = code;
-        this.msg = msg;
-    }
 }
