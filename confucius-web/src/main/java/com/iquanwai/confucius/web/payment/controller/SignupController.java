@@ -182,28 +182,10 @@ public class SignupController {
         } else {
             int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
             if (time <= 0) {
-                businessSchoolService.expireApplication(profileId);
+                businessSchoolService.expireApplication(profileId, memberTypeId);
                 return Pair.of(0, 0);
             } else {
                 return Pair.of(time / 60, time % 60);
-            }
-        }
-    }
-
-    private void calcDealTime(Date dealTime, RiseMemberDto dto, Integer profileId) {
-        // 默认订单开放时间是24小时
-        if (dealTime == null) {
-            dto.setRemainHour(24);
-            dto.setRemainMinute(0);
-        } else {
-            int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
-            if (time <= 0) {
-                businessSchoolService.expireApplication(profileId);
-                dto.setRemainHour(0);
-                dto.setRemainMinute(0);
-            } else {
-                dto.setRemainHour(time / 60);
-                dto.setRemainMinute(time % 60);
             }
         }
     }
@@ -582,7 +564,8 @@ public class SignupController {
         } else if (memberType.getId() == RiseMember.MINI_EMBA) {
             dealTime = accountService.loadLastApplicationDealTime(loginUser.getId(), BusinessSchoolApplication.Project.MBA);
         }
-        calcDealTime(dealTime, dto, loginUser.getId());
+        calcDealTime(memberTypeId, loginUser.getId());
+//        calcDealTime(dealTime, dto, loginUser.getId());
 
         return WebUtils.result(dto);
     }

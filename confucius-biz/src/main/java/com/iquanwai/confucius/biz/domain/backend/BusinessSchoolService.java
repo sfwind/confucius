@@ -53,12 +53,10 @@ public interface BusinessSchoolService {
      */
     RiseMember getUserRiseMember(Integer profileId);
 
-
-
     /**
      * 申请作废
      */
-    void expireApplication(Integer profileId);
+    void expireApplication(Integer profileId, Integer project);
 
     /**
      * 获取用户申请信息
@@ -103,5 +101,5 @@ public interface BusinessSchoolService {
     /**
      * 加载商学院申请提交数据
      */
-   List<BusinessApplySubmit> loadByApplyId(Integer applyId);
+    List<BusinessApplySubmit> loadByApplyId(Integer applyId);
 }
