@@ -23,6 +23,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.enums.ProjectEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.BusinessApplicationDto;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.ClassNameGroups;
@@ -32,6 +33,7 @@ import com.iquanwai.confucius.web.pc.asst.dto.UpGradeDto;
 import com.iquanwai.confucius.web.pc.backend.dto.*;
 import com.iquanwai.confucius.web.pc.datahelper.AsstHelper;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -267,18 +269,18 @@ public class AssistantCoachController {
     }
 
     @RequestMapping("/load/business/applications")
-    public ResponseEntity<Map<String,Object>> loadBusinessApplications(PCLoginUser loginUser,@ModelAttribute Page page){
+    public ResponseEntity<Map<String,Object>> loadBusinessApplications(UnionUser loginUser, @ModelAttribute Page page){
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("内容运营")
                 .function("助教管理")
-                .action("加载商学院审批");
+                .action("加载审批");
         operationLogService.log(operationLog);
         if (page == null) {
             page = new Page();
         }
         page.setPageSize(20);
 
-        List<BusinessSchoolApplication> applications = assistantCoachService.loadByInterviewer(loginUser.getProfileId(),page);
+        List<BusinessSchoolApplication> applications = assistantCoachService.loadByInterviewer(loginUser.getId(),page);
 
         TableDto<BusinessApplicationDto> result = new TableDto<>();
         result.setPage(page);
@@ -388,6 +390,10 @@ public class AssistantCoachController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
+            ProjectEnums projectEnums = ProjectEnums.getById(application.getProject());
+            if (projectEnums != null) {
+                dto.setProject(projectEnums.getProjectName());
+            }
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId())==null?"否":"是");
             businessApplySubmits.stream().forEach(businessApplySubmit -> {
