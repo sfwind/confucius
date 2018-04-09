@@ -58,7 +58,7 @@ public interface BusinessSchoolService {
     /**
      * 申请作废
      */
-    void expireApplication(Integer profileId,Integer projectId);
+    void expireApplication(Integer profileId);
 
     /**
      * 获取用户申请信息
