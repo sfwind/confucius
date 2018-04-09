@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
@@ -22,6 +23,7 @@ import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.CourseSchedule;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
@@ -95,6 +97,8 @@ public class AccountServiceImpl implements AccountService {
     private AccessTokenService accessTokenService;
     @Autowired
     private SensorsAnalytics sa;
+    @Autowired
+    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -514,6 +518,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Boolean hasPrivilegeForMiniMBA(Integer profileId) {
+        return customerStatusDao.load(profileId, CustomerStatus.APPLY_MINI_MBA_SUCCESS) != null;
+    }
+
+    @Override
     public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         Boolean result = false;
@@ -717,6 +726,16 @@ public class AccountServiceImpl implements AccountService {
         riseMember.setVip(true);
         int result = riseMemberDao.insert(riseMember);
         return new MutablePair<>(result, null);
+    }
+
+    @Override
+    public Date loadLastApplicationDealTime(Integer profileId, Integer project) {
+        BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao.loadLastApproveApplication(profileId, project);
+        if (businessSchoolApplication != null) {
+            return businessSchoolApplication.getDealTime();
+        } else {
+            return null;
+        }
     }
 
 }

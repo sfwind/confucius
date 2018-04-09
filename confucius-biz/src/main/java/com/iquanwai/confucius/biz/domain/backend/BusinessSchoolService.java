@@ -7,7 +7,6 @@ import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,10 +53,7 @@ public interface BusinessSchoolService {
      */
     RiseMember getUserRiseMember(Integer profileId);
 
-    /**
-     * 获取用户最后一次审批通过的商学院申请的通过时间
-     */
-    Date loadLastApplicationDealTime(Integer profileId);
+
 
     /**
      * 申请作废

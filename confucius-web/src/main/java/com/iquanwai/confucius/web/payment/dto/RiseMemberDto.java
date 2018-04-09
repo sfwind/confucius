@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.payment.dto;
 
-import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import lombok.Data;
 
@@ -33,6 +32,4 @@ public class RiseMemberDto {
     private int remainHour;
     /** 订单关闭剩余分钟 */
     private int remainMinute;
-    /** 是否已经报名 */
-    private boolean entry;
 }

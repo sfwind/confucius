@@ -25,12 +25,11 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
-import com.iquanwai.confucius.web.payment.dto.RiseMemberDto;
-import com.iquanwai.confucius.web.payment.dto.MonthlyCampProcessDto;
-import com.iquanwai.confucius.web.payment.dto.BusinessSchoolDto;
 import com.iquanwai.confucius.web.payment.dto.CampInfoDto;
 import com.iquanwai.confucius.web.payment.dto.GoodsInfoDto;
+import com.iquanwai.confucius.web.payment.dto.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.payment.dto.PaymentDto;
+import com.iquanwai.confucius.web.payment.dto.RiseMemberDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -52,6 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/10.
@@ -169,6 +169,27 @@ public class SignupController {
         return WebUtils.result(coupons);
     }
 
+    private Pair<Integer, Integer> calcDealTime(Integer memberTypeId, Integer profileId) {
+        Pair<Integer, Integer> hourMinPair = null;
+        Date dealTime = null;
+        if (memberTypeId.equals(RiseMember.ELITE)) {
+            dealTime = accountService.loadLastApplicationDealTime(profileId, BusinessSchoolApplication.Project.CORE);
+        } else if (memberTypeId.equals(RiseMember.MINI_EMBA)) {
+            dealTime = accountService.loadLastApplicationDealTime(profileId, BusinessSchoolApplication.Project.MBA);
+        }
+        if (dealTime == null) {
+            return Pair.of(24, 0);
+        } else {
+            int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
+            if (time <= 0) {
+                businessSchoolService.expireApplication(profileId);
+                return Pair.of(0, 0);
+            } else {
+                return Pair.of(time / 60, time % 60);
+            }
+        }
+    }
+
     private void calcDealTime(Date dealTime, RiseMemberDto dto, Integer profileId) {
         // 默认订单开放时间是24小时
         if (dealTime == null) {
@@ -237,36 +258,6 @@ public class SignupController {
         return WebUtils.success();
     }
 
-    /**
-     * 检查用户权限，如果通过了，则返回GoodsType以及GoodsId
-     */
-    @RequestMapping(value = "/check/business/school/privilege", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> checkBusinessSchoolPrivilege(LoginUser loginUser) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
-                .module("报名")
-                .function("商学院")
-                .action("检查商学院报名权限");
-        operationLogService.log(operationLog);
-        // 检查状态
-        Boolean check = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-        BusinessSchoolDto dto = new BusinessSchoolDto();
-        dto.setPrivilege(check);
-        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
-        if (riseMember == null) {
-            // 其他 -1
-            dto.setRiseMember(-1);
-        } else {
-            if (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE) {
-                // 精英版 1
-                dto.setRiseMember(1);
-            } else {
-                // 非精英版 2
-                dto.setRiseMember(2);
-            }
-        }
-        return WebUtils.result(dto);
-    }
 
     /**
      * 获取商品信息
@@ -524,57 +515,74 @@ public class SignupController {
                 .memo(memberTypeId.toString());
         operationLogService.log(operationLog);
 
+        // pre1.获取基本信息（所有会员数据、要购买商品类型）
+        List<RiseMember> allUserMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
         List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
-        MemberType memberType = memberTypesPayInfo.stream().filter(item -> item.getId().equals(memberTypeId))
-                .findAny().orElse(null);
+        MemberType memberType = memberTypesPayInfo.stream().filter(item -> item.getId().equals(memberTypeId)).findAny().orElse(null);
+        if (memberType == null) {
+            return WebUtils.error("商品类型错误");
+        }
+        // 1.检查是否有报名权限
+        boolean privilege = false;
+        switch (memberTypeId) {
+            case RiseMember.ELITE: {
+                privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
+                break;
+            }
+            case RiseMember.MINI_EMBA: {
+                privilege = accountService.hasPrivilegeForMiniMBA(loginUser.getId());
+                break;
+            }
+            default:
+        }
+        // 2.获取相关数据
+        List<RiseMember> riseMembers = allUserMembers.stream().filter(item -> !item.getExpired()).collect(Collectors.toList());
 
-        RiseMember riseMember = signupService.currentRiseMember(loginUser.getId());
+        // 3.拼装dto
+        Date dealTime = null;
         RiseMemberDto dto = new RiseMemberDto();
+        dto.setPrivilege(privilege);
+
         dto.setMemberType(memberType);
         // 不同商品的特殊逻辑
-        Assert.notNull(memberType);
         if (memberType.getId() == RiseMember.ELITE) {
             dto.setTip("开学后7天内可全额退款");
-        } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
-            dto.setEntry(signupService.isAppliedBefore(loginUser.getId()));
-        }
-
-        if (riseMember != null && riseMember.getMemberTypeId() != null) {
-            if (riseMember.getMemberTypeId().equals(RiseMember.HALF) || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
-                dto.setButtonStr("升级商学院");
-                dto.setTip("优秀学员学费已减免，一键升级商学院");
-            } else if (riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
-                // TODO 精英版半年升级商学院
-                dto.setTip(null);
-                dto.setButtonStr("续费商学院");
-            } else if (riseMember.getMemberTypeId() == RiseMember.ELITE) {
-                //商学院用户不显示按钮
-                return WebUtils.success();
+            RiseMember noMbaRiseMember = riseMembers.stream().filter(item -> !item.getMemberTypeId().equals(RiseMember.MINI_EMBA)).findFirst().orElse(null);
+            if (noMbaRiseMember != null && noMbaRiseMember.getMemberTypeId() != null) {
+                if (noMbaRiseMember.getMemberTypeId().equals(RiseMember.HALF) || noMbaRiseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
+                    dto.setButtonStr("升级商学院");
+                    dto.setTip("优秀学员学费已减免，一键升级商学院");
+                } else if (noMbaRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
+                    // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
+                    // TODO 精英版半年升级商学院
+                    dto.setTip(null);
+                    dto.setButtonStr("续费商学院");
+                } else if (noMbaRiseMember.getMemberTypeId() == RiseMember.ELITE) {
+                    //商学院用户不显示按钮
+                    return WebUtils.success();
+                } else {
+                    dto.setButtonStr("立即入学");
+                    dto.setAuditionStr("预约体验");
+                }
             } else {
                 dto.setButtonStr("立即入学");
                 dto.setAuditionStr("预约体验");
             }
-        } else {
-            dto.setButtonStr("立即入学");
-            dto.setAuditionStr("预约体验");
+            // 用户层级是商学院用户或者曾经是商学院用户，则不显示试听课入口
+            Long count = allUserMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
+            if (count > 0) {
+                // 不显示宣讲会按钮
+                dto.setAuditionStr(null);
+            }
+            if (privilege) {
+                // 有付费权限不显示宣讲会按钮
+                dto.setAuditionStr(null);
+            }
+            dealTime = accountService.loadLastApplicationDealTime(loginUser.getId(), BusinessSchoolApplication.Project.CORE);
+        } else if (memberType.getId() == RiseMember.MINI_EMBA) {
+            dealTime = accountService.loadLastApplicationDealTime(loginUser.getId(), BusinessSchoolApplication.Project.MBA);
         }
-
-        Date dealTime = businessSchoolService.loadLastApplicationDealTime(loginUser.getId());
         calcDealTime(dealTime, dto, loginUser.getId());
-        List<RiseMember> riseMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
-        // 用户层级是商学院用户或者曾经是商学院用户，则不显示试听课入口
-        Long count = riseMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
-        if (count > 0) {
-            // 不显示宣讲会按钮
-            dto.setAuditionStr(null);
-        }
-        boolean privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-        dto.setPrivilege(privilege);
-        if (privilege) {
-            // 有付费权限不显示宣讲会按钮
-            dto.setAuditionStr(null);
-        }
 
         return WebUtils.result(dto);
     }
