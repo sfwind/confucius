@@ -25,18 +25,18 @@ public class Profile {
     private String workYear;//参加工作时间
     private String realName; //真名
     private String signature; //签名
-    private Integer point;
-    private Integer isFull;
-    private String riseId;
+    private Integer point; //总积分
+    private Integer isFull; //资料是否填写完毕
+    private String riseId; //riseid
     private String unionid;    //只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段。详见：获取用户个人信息（UnionID机制）
     private String address;//地址
-    private String married;
-    private String receiver;
-    private String weixinId;
+    private String married; //婚恋情况
+    private String receiver; //收件人
+    private String weixinId; //微信id
+    private String memberId; //学号
 
     private Integer riseMember; //0-免费用户,1-会员,2-课程单买用户
     private Integer role;//非db字段 用户角色
-//    private Date ExpireDate; // 过期时间
 
     //默认头像
     public static final String DEFAULT_AVATAR = "https://static.iqycamp.com/images/default_avatar.png";
@@ -53,7 +53,5 @@ public class Profile {
             return value;
         }
     }
-
-    public static final Integer ADD_POINT = 300;
 
 }

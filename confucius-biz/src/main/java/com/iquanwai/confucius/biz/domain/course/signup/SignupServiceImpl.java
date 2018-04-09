@@ -327,7 +327,7 @@ public class SignupServiceImpl implements SignupService {
         // 查看当月是否有专项课的其他记录，如果有则删除
         Integer sellingYear = businessSchoolConfig.getSellingYear();
         Integer sellingMonth = businessSchoolConfig.getSellingMonth();
-        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, sellingYear, sellingMonth);
+        RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, sellingYear, sellingMonth);
         if (riseClassMember != null) {
             riseClassMemberDao.del(riseClassMember.getId());
         }
@@ -543,7 +543,7 @@ public class SignupServiceImpl implements SignupService {
                     OperateRotate operateRotate = riseMemberOperateRotates.get(sequence % riseMemberOperateRotates.size() == 0 ? riseMemberOperateRotates.size() - 1 : sequence % riseMemberOperateRotates.size() - 1);
                     Assert.notNull(operateRotate);
                     logger.info("operateRotate mediaId: {}", operateRotate.getMediaId());
-                    RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), year, month);
+                    RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profile.getId(), year, month);
                     if (riseClassMember == null) {
                         return;
                     }
@@ -590,7 +590,7 @@ public class SignupServiceImpl implements SignupService {
                     OperateRotate operateRotate = monthlyCampOperateRotates.get(sequence % monthlyCampOperateRotates.size() == 0 ? monthlyCampOperateRotates.size() - 1 : sequence % monthlyCampOperateRotates.size() - 1);
                     Assert.notNull(operateRotate);
 
-                    RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profile.getId(), year, month);
+                    RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profile.getId(), year, month);
                     if (riseClassMember == null) {
                         return;
                     }
@@ -784,7 +784,7 @@ public class SignupServiceImpl implements SignupService {
         Integer year = businessSchoolConfig.getSellingYear();
         Integer month = businessSchoolConfig.getSellingMonth();
 
-        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, year, month);
+        RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, year, month);
         if (riseClassMember != null) {
             riseMember.setEntryCode(riseClassMember.getMemberId());
         }
@@ -802,7 +802,7 @@ public class SignupServiceImpl implements SignupService {
         Integer year = monthlyCampConfig.getSellingYear();
         Integer month = monthlyCampConfig.getSellingMonth();
 
-        RiseClassMember riseClassMember = riseClassMemberDao.loadPurchaseRiseClassMember(profileId, year, month);
+        RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, year, month);
         if (riseClassMember != null) {
             riseMember.setEntryCode(riseClassMember.getMemberId());
         }

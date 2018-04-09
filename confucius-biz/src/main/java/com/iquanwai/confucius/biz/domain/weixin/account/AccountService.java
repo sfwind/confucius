@@ -34,11 +34,6 @@ public interface AccountService {
     Role getUserRole(Integer profileId);
 
     /**
-     * 根据 UnionId 获取 Account
-     */
-    Account getAccountByUnionId(String unionId);
-
-    /**
      * 根据riseid获取用户的详细信息
      */
     Profile getProfileByRiseId(String riseId);
@@ -49,18 +44,6 @@ public interface AccountService {
     List<Profile> getProfiles(List<Integer> profileIds);
 
     /**
-     * 获得会员类型
-     * @param profileId 用户id
-     * @return <p>
-     * 0:非会员<br/>
-     * 1:商学院，专业版 <br/>
-     * 2:99元课程<br/>
-     * 3:专项课<br/>
-     * </p>
-     */
-    Integer getRiseMember(Integer profileId);
-
-    /**
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);
@@ -69,6 +52,11 @@ public interface AccountService {
      * 根据profileId获取用户详情
      */
     Profile getProfile(Integer profileId);
+
+    /**
+     * 根据profile id 列表获取用户的详细信息
+     */
+    List<Profile> getProfilesByMemberIds(List<String> memberIds);
 
     /**
      * 根据openid获取用户详情
@@ -121,8 +109,6 @@ public interface AccountService {
     Profile getProfileByUnionId(String unionId);
 
     WeiXinResult.UserInfoObject getProfileFromWeiXinByUnionId(String unionId);
-
-    int updateHeadImageUrl(Integer profileId, String headImgUrl);
 
     /**
      * 获得最新的学号

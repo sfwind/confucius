@@ -74,6 +74,17 @@ public class RiseMemberManagerImpl implements RiseMemberManager{
     }
 
     @Override
+    public RiseMember oldMember(Integer profileId) {
+        List<Integer> members = Lists.newArrayList();
+        members.add(RiseMember.HALF);
+        members.add(RiseMember.ANNUAL);
+        members.add(RiseMember.HALF_ELITE);
+        members.add(RiseMember.ELITE);
+
+        return getRiseMember(profileId, members);
+    }
+
+    @Override
     public List<RiseMember> member(Integer profileId) {
         List<Integer> members = Lists.newArrayList();
         members.add(RiseMember.HALF);

@@ -52,6 +52,8 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
     //每个练习的精华上限
     private static final int HIGHLIGHT_LIMIT = 100;
+    // 作业加精得分
+    public static final Integer ADD_POINT = 300;
 
     private static final String SYSTEM_MESSAGE = "AUTO";
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -360,9 +362,9 @@ public class OperationManagementServiceImpl implements OperationManagementServic
      */
     private Integer addPoint(Integer point) {
         if (point != null) {
-            point = point + Profile.ADD_POINT;
+            point = point + ADD_POINT;
         } else {
-            point = Profile.ADD_POINT;
+            point = ADD_POINT;
         }
         return point;
     }
@@ -375,7 +377,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
      */
     private Integer desPoint(Integer point) {
         if (point != null) {
-            point = point - Profile.ADD_POINT;
+            point = point - ADD_POINT;
             if (point < 0) {
                 point = 0;
             }

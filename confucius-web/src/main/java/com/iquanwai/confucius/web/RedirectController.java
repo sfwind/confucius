@@ -1,9 +1,11 @@
 package com.iquanwai.confucius.web;
 
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
-import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.web.resolver.LoginUser;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @RequestMapping(value = "/redirect")
 @Controller
@@ -22,7 +25,7 @@ public class RedirectController {
     @Autowired
     private OperationLogService operationLogService;
     @Autowired
-    private AccountService accountService;
+    private RiseMemberManager riseMemberManager;
 
     /**
      * 小课洞见文章跳转区分
@@ -37,8 +40,8 @@ public class RedirectController {
                 .action("redirect")
                 .memo("" + problemId);
         operationLogService.log(operationLog);
-        Integer member = accountService.getRiseMember(loginUser.getId());
-        if (member == 1) {
+        List<RiseMember> members = riseMemberManager.businessSchoolMember(loginUser.getId());
+        if (CollectionUtils.isNotEmpty(members)) {
             // 商学院、专业版
             try {
                 response.sendRedirect("/rise/static/plan/view?id=" + problemId + "&show=true");

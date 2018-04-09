@@ -36,6 +36,11 @@ public interface RiseMemberManager {
     RiseMember proMember(Integer profileId);
 
     /**
+     * 老用户（商学院+专业版）
+     * */
+    RiseMember oldMember(Integer profileId);
+
+    /**
      * 所有用户信息
      * */
     List<RiseMember> member(Integer profileId);
