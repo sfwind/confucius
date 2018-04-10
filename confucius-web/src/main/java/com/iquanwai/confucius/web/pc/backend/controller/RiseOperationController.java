@@ -340,6 +340,7 @@ public class RiseOperationController {
                 return WebUtils.error("更新失败");
             }
             interviewRecord.setApprovalId(loginUser.getProfileId());
+            interviewRecord.setAdmit(1);
             if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
