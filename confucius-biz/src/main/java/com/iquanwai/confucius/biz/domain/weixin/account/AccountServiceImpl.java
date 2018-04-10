@@ -413,21 +413,17 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project) {
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
-        if (!this.hasAvailableApply(profileId, project)) {
-            return Pair.of(false, "请先提交申请");
-        } else {
-            if (Constants.Project.CORE_PROJECT == project) {
-                if (this.hasAvailableApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-                    return Pair.of(false, "您已有进阶课报名权限，可以联系圈外更改报名项目");
-                }
-            } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
-                if (this.hasAvailableApply(profileId, Constants.Project.CORE_PROJECT)) {
-                    return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
-                }
+        if (Constants.Project.CORE_PROJECT == project) {
+            if (this.hasAvailableApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
+                return Pair.of(false, "您已有进阶课报名权限，可以联系圈外更改报名项目");
             }
-            if (applyList.stream().anyMatch(item -> !item.getDeal())) {
-                return Pair.of(false, "您的申请正在审核中");
+        } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
+            if (this.hasAvailableApply(profileId, Constants.Project.CORE_PROJECT)) {
+                return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
             }
+        }
+        if (applyList.stream().anyMatch(item -> !item.getDeal())) {
+            return Pair.of(false, "您的申请正在审核中");
         }
         return Pair.of(true, "ok");
     }
