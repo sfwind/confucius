@@ -8,6 +8,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
@@ -90,13 +91,13 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
      */
     @Override
     public void insertRiseCertificate(Integer year, Integer month, Integer type, List<String> memberIds) {
-        List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryForCertificateMemberIds(memberIds);
+        List<Profile> profiles = accountService.getProfilesByMemberIds(memberIds);
         List<Integer> certificateNoSequence = Lists.newArrayList();
         certificateNoSequence.add(1);
 
-        riseClassMembers.forEach(riseClassMember -> {
-            logger.info("正在添加：" + riseClassMember.getMemberId());
-            Integer profileId = riseClassMember.getProfileId();
+        profiles.forEach(profile -> {
+            logger.info("正在添加：" + profile.getMemberId());
+            Integer profileId = profile.getId();
 
             List<RiseCertificate> riseCertificates = riseCertificateDao.loadRiseCertificatesByProfileId(profileId);
             RiseCertificate existRiseCertificate = riseCertificates.stream()
@@ -107,7 +108,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
 
             // 如果该类型的证书已经添加过，则不再添加
             if (existRiseCertificate == null) {
-                String groupNo = riseClassMember.getGroupId();
+                RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, year, month);
 
                 Integer category = accountService.loadUserScheduleCategory(profileId);
                 List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao
@@ -127,7 +128,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
 
                 StringBuilder certificateNoBuilder = new StringBuilder("IQW");
                 certificateNoBuilder.append(String.format("%02d", type));
-                certificateNoBuilder.append(riseClassMember.getMemberId());
+                certificateNoBuilder.append(profile.getMemberId());
                 certificateNoBuilder.append(String.format("%02d", month));
                 Integer noSequence = certificateNoSequence.get(0);
                 certificateNoSequence.clear();
@@ -142,7 +143,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
                 riseCertificate.setYear(year);
                 riseCertificate.setMonth(month);
                 try {
-                    riseCertificate.setGroupNo(Integer.parseInt(groupNo));
+                    riseCertificate.setGroupNo(Integer.parseInt(riseClassMember.getGroupId()));
                 } catch (Exception e) {
                     logger.error(e.getLocalizedMessage(), e);
                 }

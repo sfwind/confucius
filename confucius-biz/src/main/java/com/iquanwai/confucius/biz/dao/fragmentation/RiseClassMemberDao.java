@@ -41,21 +41,6 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return -1;
     }
 
-    public int update(RiseClassMember riseClassMember) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE RiseClassMember SET ClassName = ?, GroupId = ?, Active = ? WHERE Id = ?";
-        try {
-            return runner.update(sql,
-                    riseClassMember.getClassName(),
-                    riseClassMember.getGroupId(),
-                    riseClassMember.getActive(),
-                    riseClassMember.getId());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return -1;
-    }
-
     public List<RiseClassMember> queryByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND Del = 0";
@@ -66,30 +51,6 @@ public class RiseClassMemberDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
-    }
-
-    public RiseClassMember queryByMemberId(String memberId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Active = 1 AND Del = 0";
-        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h, memberId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public RiseClassMember queryValidClassMemberByMemberId(String memberId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE MemberId = ? AND Del = 0 LIMIT 1";
-        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h, memberId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
     }
 
     /**
@@ -120,18 +81,6 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, year, month);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public List<RiseClassMember> loadActiveRiseClassMembers() {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE Active = 1 AND Del = 0";
-        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -173,24 +122,6 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return -1;
     }
 
-    public int batchUpdateGroupId(List<Integer> ids, String groupId) {
-        if (ids.size() == 0) {
-            return -1;
-        }
-
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE RiseClassMember SET GroupId = ? WHERE Id IN (" + produceQuestionMark(ids.size()) + ") AND Del = 0";
-        List<Object> objects = Lists.newArrayList();
-        objects.add(groupId);
-        objects.addAll(ids);
-        try {
-            return runner.update(sql, objects.toArray());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return -1;
-    }
-
     /**
      * 将对应年月下的有效人员的 Active 字段置为 1
      */
@@ -220,64 +151,12 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<RiseClassMember> loadActiveByMemberIds(List<String> memberIds) {
-        if (memberIds.size() == 0) {
-            return Lists.newArrayList();
-        }
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE Active = 1 AND Del = 0 AND MemberId In (" + produceQuestionMark(memberIds.size()) + ")";
-        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h, memberIds.toArray());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
     public List<RiseClassMember> loadByClassName(String className) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseClassMember WHERE ClassName = ? AND (GroupId IS NOT NULL AND GroupId != '') AND Del = 0 ORDER BY ClassName, GroupId";
         ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, className);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public RiseClassMember loadPurchaseRiseClassMember(Integer profileId, Integer year, Integer month) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE ProfileId = ? AND YEAR = ? AND Month = ? AND Del = 0";
-        ResultSetHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h, profileId, year, month);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public List<RiseClassMember> loadUnGroupMember() {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE (GroupId IS NULL OR GroupId = '') AND Del = 0 ORDER BY ClassName";
-        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public List<RiseClassMember> loadUnGroupMemberPage(Page page) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE (GroupId IS NULL OR GroupId = '') AND Del = 0 ORDER BY MemberId ASC LIMIT "
-                + page.getOffset() + ", " + page.getPageSize();
-        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -300,9 +179,6 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    /**
-     * 根据班级和小组获得用户
-     */
     /**
      * 根据班级和小组获得用户
      */
@@ -364,25 +240,5 @@ public class RiseClassMemberDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
-    }
-
-    /**
-     * 根据 MemberId 查询 RiseClassMember 记录，只是为了发证书
-     *
-     * @param memberIds 学号集合
-     */
-    public List<RiseClassMember> queryForCertificateMemberIds(List<String> memberIds) {
-        if (memberIds.size() == 0) {
-            return Lists.newArrayList();
-        }
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE Del = 0 AND MemberId IN (" + produceQuestionMark(memberIds.size()) + ") GROUP BY ProfileId ORDER BY Id DESC";
-        ResultSetHandler<List<RiseClassMember>> h = new BeanListHandler<>(RiseClassMember.class);
-        try {
-            return runner.query(sql, h, memberIds.toArray());
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
     }
 }

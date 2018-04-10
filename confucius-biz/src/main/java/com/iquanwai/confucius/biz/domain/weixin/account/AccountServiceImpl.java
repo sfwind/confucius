@@ -16,10 +16,8 @@ import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
-import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
-import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.CourseSchedule;
@@ -28,11 +26,7 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -40,12 +34,8 @@ import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.ConversionException;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +43,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by justin on 16/8/10.
@@ -93,8 +78,6 @@ public class AccountServiceImpl implements AccountService {
     private PlanService planService;
     @Autowired
     private CourseScheduleDao courseScheduleDao;
-    @Autowired
-    private AccessTokenService accessTokenService;
     @Autowired
     private SensorsAnalytics sa;
     @Autowired
@@ -281,8 +264,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account getAccountByUnionId(String unionId) {
-        return followUserDao.queryByUnionId(unionId);
+    public void updateMemberId(Integer profileId, String memberId) {
+        profileDao.updateMemberId(profileId, memberId);
     }
 
     @Override
@@ -299,7 +282,6 @@ public class AccountServiceImpl implements AccountService {
     public Profile getProfile(Integer profileId) {
         Profile profile = profileDao.load(Profile.class, profileId);
         if (profile != null) {
-            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -315,19 +297,19 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Profile> getProfilesByMemberIds(List<String> memberIds) {
+        return profileDao.queryByMemberIds(memberIds);
+    }
+
+    @Override
     public Profile getProfileByRiseId(String riseId) {
-        Profile profile = profileDao.queryByRiseId(riseId);
-        if (profile != null) {
-            profile.setRiseMember(getRiseMember(profile.getId()));
-        }
-        return profile;
+        return profileDao.queryByRiseId(riseId);
     }
 
     @Override
     public List<Profile> getProfiles(List<Integer> profileIds) {
         List<Profile> profiles = profileDao.queryAccounts(profileIds);
         profiles.forEach(profile -> {
-            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -340,28 +322,6 @@ public class AccountServiceImpl implements AccountService {
             // TODO 处理头像问题
         });
         return profiles;
-    }
-
-    @Override
-    public Integer getRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember == null) {
-            return 0;
-        }
-        Integer memberTypeId = riseMember.getMemberTypeId();
-        if (memberTypeId == null) {
-            return 0;
-        }
-        // 精英或者专业版用户
-        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
-            return 1;
-        } else if (memberTypeId == RiseMember.CAMP) {
-            return 3;
-        } else if (memberTypeId == RiseMember.COURSE) {
-            return 2;
-        } else {
-            return 0;
-        }
     }
 
     @Override
@@ -381,18 +341,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Profile loadProfileByMemberId(String memberId) {
-        RiseClassMember riseClassMember = riseClassMemberDao.queryValidClassMemberByMemberId(memberId);
-        if (riseClassMember != null && riseClassMember.getProfileId() != null) {
-            return getProfile(riseClassMember.getProfileId());
-        } else {
-            return null;
-        }
+        return profileDao.queryByMemberId(memberId);
     }
 
     private Profile getProfileFromDB(String openid) {
         Profile profile = profileDao.queryByOpenId(openid);
         if (profile != null) {
-            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -566,11 +520,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
-        return profileDao.updateHeadImgUrl(profileId, headImgUrl);
-    }
-
-    @Override
     public RiseClassMember getLatestMemberId(Integer profileId) {
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryByProfileId(profileId);
         RiseClassMember riseClassMember = riseClassMembers.stream().max(Comparator.comparing(RiseClassMember::getId)).orElse(null);
@@ -603,7 +552,7 @@ public class AccountServiceImpl implements AccountService {
         Profile profile = getProfileByRiseId(riseId);
         int profileId = profile.getId();
 
-        // TODO: 增加project项目
+        // TODO: 杨仁 增加project项目
         RiseMember currentRiseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (currentRiseMember != null) {
             return new MutablePair<>(-1, "该用户已经是会员");

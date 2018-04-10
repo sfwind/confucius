@@ -85,7 +85,6 @@ public class RiseMemberDao extends DBUtil {
         return -1;
     }
 
-    @Deprecated
     public RiseMember loadValidRiseMember(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where ProfileId = ? and Expired = 0 AND Del = 0";
@@ -123,19 +122,6 @@ public class RiseMemberDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
-    }
-
-    public List<RiseMember> eliteMembers() {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where MemberTypeId in (3,4) and Expired = 0 And Del = 0";
-
-        try {
-            ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
-            return runner.query(sql, handler);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
     }
 
     public List<Integer> loadEliteMembersId() {

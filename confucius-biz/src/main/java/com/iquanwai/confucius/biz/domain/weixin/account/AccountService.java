@@ -34,10 +34,7 @@ public interface AccountService {
 
     Role getUserRole(Integer profileId);
 
-    /**
-     * 根据 UnionId 获取 Account
-     */
-    Account getAccountByUnionId(String unionId);
+    void updateMemberId(Integer profileId, String memberId);
 
     /**
      * 根据riseid获取用户的详细信息
@@ -71,6 +68,11 @@ public interface AccountService {
      * 根据profileId获取用户详情
      */
     Profile getProfile(Integer profileId);
+
+    /**
+     * 根据profile id 列表获取用户的详细信息
+     */
+    List<Profile> getProfilesByMemberIds(List<String> memberIds);
 
     /**
      * 根据openid获取用户详情
@@ -127,8 +129,6 @@ public interface AccountService {
     Profile getProfileByUnionId(String unionId);
 
     WeiXinResult.UserInfoObject getProfileFromWeiXinByUnionId(String unionId);
-
-    int updateHeadImageUrl(Integer profileId, String headImgUrl);
 
     /**
      * 获得最新的学号
