@@ -6,6 +6,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolConfigDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampConfigDao;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,14 @@ public class CacheServiceImpl implements CacheService {
 
     private MonthlyCampConfig monthlyCampConfig;
     private BusinessSchoolConfig businessSchoolConfig;
+    private BusinessSchoolConfig businessThoughtConfig;
 
     @PostConstruct
     public void init() {
         monthlyCampConfig = monthlyCampConfigDao.loadActiveConfig();
         logger.info("monthly camp configuration init complete");
-        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig();
+        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.ELITE);
+        businessThoughtConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.BUSINESS_THOUGHT);
         logger.info("business college configuration init complete");
     }
 
@@ -40,9 +43,15 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
-    public BusinessSchoolConfig loadBusinessCollegeConfig() {
-        return JSONObject.parseObject(JSON.toJSONString(businessSchoolConfig), BusinessSchoolConfig.class);
+    public BusinessSchoolConfig loadBusinessCollegeConfig(Integer memberTypeId) {
+        if (memberTypeId == RiseMember.ELITE) {
+            return JSONObject.parseObject(JSON.toJSONString(businessSchoolConfig), BusinessSchoolConfig.class);
+        } else if (memberTypeId == RiseMember.BUSINESS_THOUGHT) {
+            return JSONObject.parseObject(JSON.toJSONString(businessThoughtConfig), BusinessSchoolConfig.class);
+        }
+        return null;
     }
+
 
     @Override
     public void reload() {
@@ -56,7 +65,8 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public void reloadBusinessCollegeConfig() {
-        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig();
+        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.ELITE);
+        businessThoughtConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.BUSINESS_THOUGHT);
     }
 
 }

@@ -114,4 +114,8 @@ public interface Constants {
         int CONNECTION_TIMEOUT = 3;
         int READ_TIMEOUT = 60;
     }
+    interface Project{
+        int CORE_PROJECT = 1;
+        int BUSINESS_THOUGHT_PROJECT = 2;
+    }
 }

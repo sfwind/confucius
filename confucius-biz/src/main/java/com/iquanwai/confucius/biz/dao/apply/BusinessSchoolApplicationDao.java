@@ -105,11 +105,11 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     }
 
     // TODO wait
-    public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId) {
+    public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId,Integer project) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from BusinessSchoolApplication where ProfileId = ? and Valid = 0 and Del = 0 order by Id desc limit 1";
+        String sql = "select * from BusinessSchoolApplication where ProfileId = ? and Valid = 0 and Del = 0 and Project = ? order by Id desc limit 1";
         try {
-            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId,project);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

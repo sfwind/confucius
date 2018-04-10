@@ -16,12 +16,12 @@ public class BusinessSchoolConfigDao extends PracticeDBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public BusinessSchoolConfig loadActiveConfig() {
+    public BusinessSchoolConfig loadActiveConfig(Integer memberTypeId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolConfig WHERE Active = 1";
+        String sql = "SELECT * FROM BusinessSchoolConfig WHERE Active = 1 AND Del = 0 AND MemberTypeId = ?";
         ResultSetHandler<BusinessSchoolConfig> h = new BeanHandler<>(BusinessSchoolConfig.class);
         try {
-            return runner.query(sql, h);
+            return runner.query(sql, h, memberTypeId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
