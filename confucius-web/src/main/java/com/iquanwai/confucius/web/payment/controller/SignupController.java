@@ -560,7 +560,7 @@ public class SignupController {
                 dto.setAuditionStr(null);
             }
         } else if (memberType.getId() == RiseMember.BUSINESS_THOUGHT) {
-            // ignore
+            dto.setButtonStr("立即入学");
         } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
             // ignore
         }
