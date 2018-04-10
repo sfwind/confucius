@@ -176,6 +176,9 @@ public class SignupServiceImpl implements SignupService {
         } else if (memberTypeId == RiseMember.BS_APPLICATION) {
             left = 1;
             right = "正常";
+        } else if (memberTypeId == RiseMember.BUSINESS_THOUGHT_APPLY) {
+            left = 1;
+            right = "正常";
         }
         return new MutablePair<>(left, right);
     }
