@@ -23,6 +23,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.payment.dto.CampInfoDto;
@@ -172,9 +173,9 @@ public class SignupController {
     private Pair<Integer, Integer> calcDealTime(Integer memberTypeId, Integer profileId) {
         Date dealTime = null;
         if (memberTypeId.equals(RiseMember.ELITE)) {
-            dealTime = accountService.loadLastApplicationDealTime(profileId, BusinessSchoolApplication.Project.CORE);
+            dealTime = accountService.loadLastApplicationDealTime(profileId, Constants.Project.CORE_PROJECT);
         } else if (memberTypeId.equals(RiseMember.BUSINESS_THOUGHT)) {
-            dealTime = accountService.loadLastApplicationDealTime(profileId, BusinessSchoolApplication.Project.MBA);
+            dealTime = accountService.loadLastApplicationDealTime(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT);
         }
         if (dealTime == null) {
             return Pair.of(24, 0);
@@ -199,9 +200,9 @@ public class SignupController {
         operationLogService.log(operationLog);
 
         if (memberTypeId == RiseMember.ELITE) {
-            boolean pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-            if (!pass) {
-                return WebUtils.error(201, "请先提交申请");
+            Pair<Boolean, String> pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
+            if (!pass.getLeft()) {
+                return WebUtils.error(201, pass.getRight());
             }
         } else if (memberTypeId == RiseMember.BS_APPLICATION) {
             BusinessSchoolApplication bs = businessSchoolService.loadCheckingApply(loginUser.getId());
@@ -507,11 +508,11 @@ public class SignupController {
         boolean privilege = false;
         switch (memberTypeId) {
             case RiseMember.ELITE: {
-                privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
+                privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId()).getLeft();
                 break;
             }
             case RiseMember.BUSINESS_THOUGHT: {
-                privilege = accountService.hasPrivilegeForMiniMBA(loginUser.getId());
+                privilege = accountService.hasPrivilegeForMiniMBA(loginUser.getId()).getLeft();
                 break;
             }
             default:

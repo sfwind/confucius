@@ -2,8 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
-import com.iquanwai.confucius.biz.exception.NotFollowingException;
-import com.iquanwai.confucius.biz.po.Account;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
@@ -47,19 +46,6 @@ public interface AccountService {
     List<Profile> getProfiles(List<Integer> profileIds);
 
     /**
-     * 获得会员类型
-     *
-     * @param profileId 用户id
-     * @return <p>
-     * 0:非会员<br/>
-     * 1:商学院，专业版 <br/>
-     * 2:99元课程<br/>
-     * 3:专项课<br/>
-     * </p>
-     */
-    Integer getRiseMember(Integer profileId);
-
-    /**
      * 根据openid获取用户详情
      */
     Profile getProfile(String openid, boolean realTime);
@@ -100,9 +86,9 @@ public interface AccountService {
      */
     Profile loadProfileByMemberId(String memberId);
 
-    Boolean hasPrivilegeForMiniMBA(Integer profileId);
+    Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId);
 
-    Boolean hasPrivilegeForBusinessSchool(Integer profileId);
+    Pair<Boolean, String> hasPrivilegeForBusinessSchool(Integer profileId);
 
     /**
      * 获取黑名单列表
@@ -158,4 +144,9 @@ public interface AccountService {
      */
     Date loadLastApplicationDealTime(Integer profileId, Integer project);
 
+
+    boolean hasAvailableApply(Integer profileId, Integer project);
+
+
+    boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer project);
 }

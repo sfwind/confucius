@@ -27,6 +27,7 @@ public class BusinessSchoolApplication {
     private Integer lastVerified;
     private Integer interviewer;
     private Boolean valid;
+    private Integer project;
 
     private String originMemberTypeName;
 
@@ -35,10 +36,5 @@ public class BusinessSchoolApplication {
     public static final int REJECT = 2;
     public static final int IGNORE = 3;
     public static final int AUTO_CLOSE = 4;
-
-    public static interface Project {
-        int CORE = 1;
-        int MBA = 2;
-    }
 
 }

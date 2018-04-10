@@ -47,6 +47,22 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    /**
+     * 获得用户的有效申请
+     * @param profileId 用户id
+     * @return 有效申请列表
+     */
+    public List<BusinessSchoolApplication> loadApplyList(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Valid = 1 Order by Id desc";
+        try {
+            return runner.query(sql, new BeanListHandler<>(BusinessSchoolApplication.class), profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     // TODO wait
     public Integer loadCount() {
         QueryRunner runner = new QueryRunner(getDataSource());

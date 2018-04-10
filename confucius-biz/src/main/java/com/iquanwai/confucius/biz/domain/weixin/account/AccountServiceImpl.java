@@ -14,6 +14,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
@@ -26,8 +27,13 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
+import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.ThreadPool;
@@ -43,7 +49,14 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/10.
@@ -82,6 +95,8 @@ public class AccountServiceImpl implements AccountService {
     private SensorsAnalytics sa;
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -362,14 +377,32 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Boolean hasPrivilegeForMiniMBA(Integer profileId) {
-        return customerStatusDao.load(profileId, CustomerStatus.APPLY_MINI_MBA_SUCCESS) != null;
+    public Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId) {
+        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
+
+        if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
+            return Pair.of(false, "您已经申请核心能力项目，可联系圈外更改申请项目");
+        }
+        if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
+            return Pair.of(true, "ok");
+        } else {
+            // 查看是否有进行中的申请
+            List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> item.getStatus() == BusinessSchoolApplication.APPLYING).collect(Collectors.toList());
+            if (!checking.isEmpty()) {
+                if (checking.stream().anyMatch(item -> item.getProject() == Constants.Project.CORE_PROJECT)) {
+                    return Pair.of(false, "你已申请核心能力课，可申请调换");
+                } else {
+                    return Pair.of(false, "您的申请正在审核中");
+                }
+            } else {
+                return Pair.of(false, "请先提交申请");
+            }
+        }
     }
 
     @Override
-    public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
-        // TODO: 子康
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+    public Pair<Boolean, String> hasPrivilegeForBusinessSchool(Integer profileId) {
+        RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
         Boolean result = false;
 
         if (riseMember != null) {
@@ -381,18 +414,38 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
+        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
+        if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
+            return Pair.of(false, "您已经申请商业进阶课，可联系圈外更改申请项目");
+        }
+
+        if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
+            return Pair.of(true, "ok");
+        }
+
+
         //如果用户曾经获得证书,则无需申请
         if (!result) {
             RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
             result = riseCertificate != null;
         }
 
-        //如果用户已经通过申请,则无需再次申请
-        if (!result) {
-            result = customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
-        }
+        if (result) {
+            return Pair.of(true, "ok");
+        } else {
+            // 查看是否有进行中的申请
+            List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> item.getStatus() == BusinessSchoolApplication.APPLYING).collect(Collectors.toList());
+            if (!checking.isEmpty()) {
+                if (checking.stream().anyMatch(item -> item.getProject() == Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
+                    return Pair.of(false, "你已申请商业进阶课，可申请调换");
+                } else {
+                    return Pair.of(false, "您的申请正在审核中");
+                }
+            } else {
+                return Pair.of(false, "请先提交申请");
+            }
 
-        return result;
+        }
     }
 
     /**
@@ -578,6 +631,21 @@ public class AccountServiceImpl implements AccountService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public boolean hasAvailableApply(Integer profileId, Integer project) {
+        return this.hasAvailableApply(businessSchoolApplicationDao.loadApplyList(profileId), project);
+    }
+
+    @Override
+    public boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer project) {
+        return applyList
+                .stream()
+                .filter(item -> Objects.equals(item.getProject(), project))
+                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
+                .filter(BusinessSchoolApplication::getDeal)
+                .anyMatch(item -> DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) > 0);
     }
 
 }
