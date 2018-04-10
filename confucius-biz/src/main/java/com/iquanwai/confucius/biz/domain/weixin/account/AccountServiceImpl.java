@@ -384,6 +384,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId) {
+        RiseMember riseMember = riseMemberManager.businessThought(profileId);
+        if (riseMember != null) {
+            return Pair.of(false, "您已经是商业进阶课用户");
+        }
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
 
         if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
@@ -437,8 +441,11 @@ public class AccountServiceImpl implements AccountService {
             Integer memberTypeId = riseMember.getMemberTypeId();
             //如果用户是专业版或者精英版,则无需申请
             // TODO 精英版不能续费
-            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
+            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId) {
                 result = true;
+            }
+            if (RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
+                return Pair.of(false, "您已经是商学院用户，无需购买");
             }
         }
 
