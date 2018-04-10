@@ -20,7 +20,7 @@ public interface SignupService {
     /**
      * 商品支付资格校验
      */
-    Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberType);
+    Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberType);
 
     /**
      * 报名商学院, 不生成预付订单

@@ -127,60 +127,21 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Pair<Integer, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
-        Profile profile = accountService.getProfile(profileId);
+    public Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
+        Pair<Boolean, String> pass = Pair.of(false, "类型异常");
 
-        RiseMember riseMember = this.currentRiseMember(profileId);
-        Assert.notNull(profile, "用户不能为空");
-        Integer left = -1;
-        String right = "正常";
         if (memberTypeId == RiseMember.ELITE) {
-            // 购买会员
-            BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(RiseMember.ELITE);
-            if (!businessSchoolConfig.getPurchaseSwitch()) {
-                right = "商学院报名临时关闭\n记得及时关注开放时间哦";
-            } else if (riseMember != null && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
-                    RiseMember.ELITE == riseMember.getMemberTypeId() ||
-                    RiseMember.HALF == riseMember.getMemberTypeId() ||
-                    RiseMember.ANNUAL == riseMember.getMemberTypeId())) {
-                left = 1;
-            } else {
-                // 查看是否开放报名
-                if (ConfigUtils.getRisePayStopTime().before(new Date())) {
-                    right = "谢谢您关注圈外商学院!\n本次报名已达到限额\n记得及时关注下期开放通知哦";
-                } else {
-                    left = 1;
-                }
-            }
-        } else if (memberTypeId == RiseMember.CAMP) {
-            MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-            // 购买专项课
-            if (riseMember != null && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
-                    RiseMember.ELITE == riseMember.getMemberTypeId())) {
-                right = "您已经是圈外商学院学员，拥有主题专项课，无需重复报名\n如有疑问请在学习群咨询班长";
-            } else {
-                if (profile.getRiseMember() == Constants.RISE_MEMBER.MONTHLY_CAMP) {
-                    List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
-                    List<Integer> months = classMembers.stream().map(RiseClassMember::getMonth).collect(Collectors.toList());
-                    if (months.contains(monthlyCampConfig.getSellingMonth())) {
-                        right = "您已经是" + monthlyCampConfig.getSellingMonth() + "月专项课用户";
-                    } else {
-                        left = 1;
-                    }
-                } else if (!monthlyCampConfig.getPurchaseSwitch()) {
-                    right = "当月专项课已关闭报名";
-                } else {
-                    left = 1;
-                }
-            }
+            pass = accountService.hasPrivilegeForBusinessSchool(profileId);
         } else if (memberTypeId == RiseMember.BS_APPLICATION) {
-            left = 1;
-            right = "正常";
+            pass = accountService.hasPrivilegeForApply(profileId, Constants.Project.CORE_PROJECT);
+        } else if (memberTypeId == RiseMember.BUSINESS_THOUGHT) {
+            pass = accountService.hasPrivilegeForMiniMBA(profileId);
+        } else if (memberTypeId == RiseMember.CAMP) {
+            pass = accountService.hasPrivilegeForCamp(profileId);
         } else if (memberTypeId == RiseMember.BUSINESS_THOUGHT_APPLY) {
-            left = 1;
-            right = "正常";
+            pass = accountService.hasPrivilegeForApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT);
         }
-        return new MutablePair<>(left, right);
+        return pass;
     }
 
 

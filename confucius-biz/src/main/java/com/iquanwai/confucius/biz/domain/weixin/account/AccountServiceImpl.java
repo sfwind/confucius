@@ -15,6 +15,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
+import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
@@ -27,12 +28,15 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
+import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
+import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -97,6 +101,8 @@ public class AccountServiceImpl implements AccountService {
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
     @Autowired
     private RiseMemberManager riseMemberManager;
+    @Autowired
+    private CacheService cacheService;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -387,7 +393,7 @@ public class AccountServiceImpl implements AccountService {
             return Pair.of(true, "ok");
         } else {
             // 查看是否有进行中的申请
-            List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> item.getStatus() == BusinessSchoolApplication.APPLYING).collect(Collectors.toList());
+            List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> !item.getDeal()).collect(Collectors.toList());
             if (!checking.isEmpty()) {
                 if (checking.stream().anyMatch(item -> item.getProject() == Constants.Project.CORE_PROJECT)) {
                     return Pair.of(false, "你已申请核心能力课，可申请调换");
@@ -398,6 +404,28 @@ public class AccountServiceImpl implements AccountService {
                 return Pair.of(false, "请先提交申请");
             }
         }
+    }
+
+    @Override
+    public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project) {
+        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
+        if (!this.hasAvailableApply(profileId, project)) {
+            return Pair.of(false, "请先提交申请");
+        } else {
+            if (Constants.Project.CORE_PROJECT == project) {
+                if (this.hasAvailableApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
+                    return Pair.of(false, "您已有进阶课报名权限，可以联系圈外更改报名项目");
+                }
+            } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
+                if (this.hasAvailableApply(profileId, Constants.Project.CORE_PROJECT)) {
+                    return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
+                }
+            }
+            if (applyList.stream().anyMatch(item -> !item.getDeal())) {
+                return Pair.of(false, "您的申请正在审核中");
+            }
+        }
+        return Pair.of(true, "ok");
     }
 
     @Override
@@ -430,11 +458,23 @@ public class AccountServiceImpl implements AccountService {
             result = riseCertificate != null;
         }
 
+
+        // 购买会员
+        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(RiseMember.ELITE);
+        if (!businessSchoolConfig.getPurchaseSwitch()) {
+            return Pair.of(false, "商学院报名临时关闭\n记得及时关注开放时间哦");
+        } else {
+            // 查看是否开放报名
+            if (ConfigUtils.getRisePayStopTime().before(new Date())) {
+                return Pair.of(false, "谢谢您关注圈外商学院!\n本次报名已达到限额\n记得及时关注下期开放通知哦");
+            }
+        }
+
         if (result) {
             return Pair.of(true, "ok");
         } else {
             // 查看是否有进行中的申请
-            List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> item.getStatus() == BusinessSchoolApplication.APPLYING).collect(Collectors.toList());
+            List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> !item.getDeal()).collect(Collectors.toList());
             if (!checking.isEmpty()) {
                 if (checking.stream().anyMatch(item -> item.getProject() == Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
                     return Pair.of(false, "你已申请商业进阶课，可申请调换");
@@ -646,6 +686,27 @@ public class AccountServiceImpl implements AccountService {
                 .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
                 .filter(BusinessSchoolApplication::getDeal)
                 .anyMatch(item -> DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) > 0);
+    }
+
+    @Override
+    public Pair<Boolean, String> hasPrivilegeForCamp(Integer profileId) {
+        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+        RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
+        // 购买专项课
+        if (riseMember != null && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
+                RiseMember.ELITE == riseMember.getMemberTypeId())) {
+            return Pair.of(false, "您已经是圈外商学院学员，拥有主题专项课，无需重复报名\n如有疑问请在学习群咨询班长");
+        } else {
+            List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
+            List<Integer> months = classMembers.stream().map(RiseClassMember::getMonth).collect(Collectors.toList());
+            if (months.contains(monthlyCampConfig.getSellingMonth())) {
+                return Pair.of(false, "您已经是" + monthlyCampConfig.getSellingMonth() + "月专项课用户");
+            }
+            if (!monthlyCampConfig.getPurchaseSwitch()) {
+                return Pair.of(false, "当月专项课已关闭报名");
+            }
+        }
+        return Pair.of(true, "ok");
     }
 
 }

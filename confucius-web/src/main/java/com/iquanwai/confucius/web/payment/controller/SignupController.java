@@ -15,7 +15,6 @@ import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
-import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
@@ -199,19 +198,8 @@ public class SignupController {
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
 
-        if (memberTypeId == RiseMember.ELITE) {
-            Pair<Boolean, String> pass = accountService.hasPrivilegeForBusinessSchool(loginUser.getId());
-            if (!pass.getLeft()) {
-                return WebUtils.error(201, pass.getRight());
-            }
-        } else if (memberTypeId == RiseMember.BS_APPLICATION) {
-            BusinessSchoolApplication bs = businessSchoolService.loadCheckingApply(loginUser.getId());
-            if (bs != null) {
-                return WebUtils.error(201, "申请审核中，请耐心等待");
-            }
-        }
-        Pair<Integer, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
-        if (result.getLeft() != 1) {
+        Pair<Boolean, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
+        if (!result.getLeft()) {
             return WebUtils.error(result.getRight());
         } else {
             return WebUtils.success();
@@ -341,9 +329,9 @@ public class SignupController {
             remoteIp = ConfigUtils.getExternalIP();
         }
 
-        Pair<Integer, String> check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
+        Pair<Boolean, String> check = signupService.risePurchaseCheck(loginUser.getId(), paymentDto.getGoodsId());
 
-        if (check.getLeft() != 1) {
+        if (!check.getLeft()) {
             return WebUtils.error(check.getRight());
         }
 

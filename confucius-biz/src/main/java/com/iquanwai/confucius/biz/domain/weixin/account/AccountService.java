@@ -88,6 +88,8 @@ public interface AccountService {
 
     Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId);
 
+    Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project);
+
     Pair<Boolean, String> hasPrivilegeForBusinessSchool(Integer profileId);
 
     /**
@@ -149,4 +151,6 @@ public interface AccountService {
 
 
     boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer project);
+
+    Pair<Boolean, String> hasPrivilegeForCamp(Integer profileId);
 }
