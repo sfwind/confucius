@@ -53,10 +53,6 @@ public interface BusinessSchoolService {
      */
     RiseMember getUserRiseMember(Integer profileId);
 
-    /**
-     * 申请作废
-     */
-    void expireApplication(Integer profileId, Integer project);
 
     /**
      * 获取用户申请信息

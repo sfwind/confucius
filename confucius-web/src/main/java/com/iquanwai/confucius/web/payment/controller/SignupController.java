@@ -181,7 +181,6 @@ public class SignupController {
         } else {
             int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
             if (time <= 0) {
-                businessSchoolService.expireApplication(profileId, memberTypeId);
                 return Pair.of(0, 0);
             } else {
                 return Pair.of(time / 60, time % 60);

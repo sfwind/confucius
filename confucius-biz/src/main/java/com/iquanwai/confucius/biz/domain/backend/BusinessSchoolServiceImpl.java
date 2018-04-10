@@ -16,7 +16,6 @@ import com.iquanwai.confucius.biz.po.apply.AuditionReward;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
-import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
@@ -143,11 +142,6 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     }
 
 
-
-    @Override
-    public void expireApplication(Integer profileId) {
-        customerStatusDao.delStatus(profileId, null);
-    }
 
     @Override
     public List<BusinessApplyQuestion> loadUserQuestions(Integer applyId) {
