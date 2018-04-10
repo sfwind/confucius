@@ -27,6 +27,9 @@ public class BusinessSchoolApplication {
     private Integer lastVerified;
     private Integer interviewer;
     private Boolean valid;
+    /**
+     * 课程类型
+     */
     private Integer project;
 
     private String originMemberTypeName;

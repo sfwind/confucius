@@ -145,8 +145,8 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 
 
     @Override
-    public void expireApplication(Integer profileId,Integer project) {
-        customerStatusDao.delStatus(profileId, project);
+    public void expireApplication(Integer profileId) {
+        customerStatusDao.delStatus(profileId, null);
     }
 
     @Override

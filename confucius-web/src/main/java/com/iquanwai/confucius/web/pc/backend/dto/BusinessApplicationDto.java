@@ -132,4 +132,8 @@ public class BusinessApplicationDto {
      */
     private String level;
 
+    /**
+     * 申请类型
+     */
+    private String project;
 }

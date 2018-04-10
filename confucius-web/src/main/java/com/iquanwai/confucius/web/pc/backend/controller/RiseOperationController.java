@@ -39,6 +39,7 @@ import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
+import com.iquanwai.confucius.web.enums.ProjectEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
 import com.iquanwai.confucius.web.pc.backend.dto.AssignDto;
@@ -304,7 +305,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/bs/application/list", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page, UnionUser loginUser) {
-        OperationLog operationLog = OperationLog.create()
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台功能")
                 .function("商学院申请")
                 .action("加载申请列表");
@@ -339,6 +340,7 @@ public class RiseOperationController {
                 return WebUtils.error("更新失败");
             }
             interviewRecord.setApprovalId(loginUser.getProfileId());
+            interviewRecord.setAdmit(1);
             if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
@@ -600,7 +602,7 @@ public class RiseOperationController {
             openIds = new ArrayList<>(tempList);
             List excludeList = Arrays.asList(templateDto.getExcludeOpenIds().split("\n"));
             //排除人数
-            openIds = openIds.stream().filter(openId->!excludeList.contains(openId)).collect(Collectors.toList());
+            openIds = openIds.stream().filter(openId -> !excludeList.contains(openId)).collect(Collectors.toList());
         }
         Integer templateId = templateDto.getTemplateId();
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
@@ -664,8 +666,8 @@ public class RiseOperationController {
                         templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
                     }
                 });
-                if(!templateDto.getIsMime()){
-                    templateMessageService.sendSelfCompleteMessage(templateDto.getKeyword1(),unionUser.getOpenId());
+                if (!templateDto.getIsMime()) {
+                    templateMessageService.sendSelfCompleteMessage(templateDto.getKeyword1(), unionUser.getOpenId());
                 }
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
@@ -725,6 +727,10 @@ public class RiseOperationController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
+            ProjectEnums projectEnums = ProjectEnums.getById(application.getProject());
+            if (projectEnums != null) {
+                dto.setProject(projectEnums.getProjectName());
+            }
             dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId()) == null ? "否" : "是");
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             businessApplySubmits.stream().forEach(businessApplySubmit -> {
