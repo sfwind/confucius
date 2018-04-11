@@ -27,11 +27,12 @@ import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.course.BusinessSchoolConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.course.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
@@ -183,18 +184,9 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public QuanwaiOrder signUpRiseMember(Integer profileId, Integer memberTypeId, List<Integer> couponId, Integer payType) {
-        // 查询该openid是否是我们的用户
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        Double fee;
-        if (memberTypeId == RiseMember.ELITE) {
-            // 报名商学院
-            BusinessSchool bs = this.getSchoolInfoForPay(profileId);
-            fee = bs.getFee();
-        } else {
-            fee = memberType.getFee();
-        }
+        MemberType memberType = this.getMemberTypePayInfo(profileId, memberTypeId);
+        Double fee = memberType.getFee();
         Pair<String, Double> orderPair = generateOrderId(fee, couponId);
-
         Assert.notNull(memberType, "会员类型错误");
         Assert.notNull(payType, "支付类型错误");
         QuanwaiOrder quanwaiOrder = this.createQuanwaiOrder(profileId, orderPair.getLeft(), fee, orderPair.getRight(),
@@ -240,7 +232,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买专项课，配置 zk，查看当前月份
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        MemberType memberType = this.getMemberTypePayInfo(profileId, memberTypeId);
         Assert.notNull(memberType, "会员类型错误");
 
         Double fee = memberType.getFee();
@@ -794,11 +786,6 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public MemberType getMemberType(Integer memberType) {
-        return riseMemberTypeRepo.memberType(memberType);
-    }
-
-    @Override
     public List<Coupon> getCoupons(Integer profileId) {
         if (costRepo.hasCoupon(profileId)) {
             List<Coupon> coupons = costRepo.getCoupons(profileId);
@@ -809,74 +796,52 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public List<MemberType> getMemberTypesPayInfo() {
+    public MemberType getMemberTypePayInfo(Integer profileId, Integer memberTypeId) {
+        // TODO 获得针对这个人的真实的价格，可针对不同人实现不同价格
         MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
 
-        List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
-        // 写入会员开始和结束时间
-        memberTypes.forEach(item -> {
-            item.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-            if (item.getId().equals(RiseMember.CAMP)) {
-                item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(monthlyCampConfig.getCloseDate(), 1)));
-            } else {
-                item.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), item.getOpenMonth()), 1)));
-            }
-        });
-        return memberTypes;
-    }
-
-    @Override
-    public List<MemberType> getMemberTypesPayInfo(Integer profileId) {
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(RiseMember.ELITE);
+        // TODO 专项课也换成CourseConfig (去掉CloseDate)
+        CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
 
-        List<MemberType> memberTypes = riseMemberTypeRepo.memberTypes();
-        // 写入会员开始和结束时间
-        for (MemberType memberType : memberTypes) {
+        MemberType memberType = riseMemberTypeRepo.memberTypes().stream().filter(item -> item.getId().equals(memberTypeId)).findFirst().orElse(null);
+        if (memberType != null) {
+            // 写入会员开始和结束时间
             if (memberType.getId().equals(RiseMember.CAMP)) {
-                // 专项课类型
+                // 专项课类型 查询课程表，而不是MemberType里的
                 memberType.setStartTime(DateUtils.parseDateToStringByCommon(monthlyCampConfig.getOpenDate()));
                 memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(monthlyCampConfig.getCloseDate(), 1)));
-            } else if (memberType.getId().equals(RiseMember.ELITE) || memberType.getId().equals(RiseMember.HALF_ELITE)) {
-                // 商学院类型（一年、半年）
-                if (riseMember != null && (riseMember.getMemberTypeId().equals(RiseMember.ELITE) || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
-                    // 商学院会员续费
+            } else {
+                if (riseMember != null && riseMember.getMemberTypeId().equals(memberTypeId)) {
+                    // 会员续费
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
                     memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(
                             DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
                 } else {
-                    // 商学院报名
-                    memberType.setStartTime(DateUtils.parseDateToStringByCommon(businessSchoolConfig.getOpenDate()));
-                    memberType.setEndTime(DateUtils.parseDateToStringByCommon(
-                            DateUtils.beforeDays(DateUtils.afterMonths(businessSchoolConfig.getOpenDate(), memberType.getOpenMonth()), 1)));
+                    // 报名
+                    if (courseConfig != null) {
+                        memberType.setStartTime(DateUtils.parseDateToStringByCommon(courseConfig.getOpenDate()));
+                        memberType.setEndTime(DateUtils.parseDateToStringByCommon(
+                                DateUtils.beforeDays(DateUtils.afterMonths(courseConfig.getOpenDate(), memberType.getOpenMonth()), 1)));
+                    }
                 }
-            } else {
-                memberType.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-                memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(DateUtils.afterMonths(new Date(), memberType.getOpenMonth()), 1)));
             }
         }
-        return memberTypes;
+        return memberType;
     }
 
     @Override
     public Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup) {
         Double amount = couponIdGroup.stream().map(costRepo::getCoupon).filter(Objects::nonNull).mapToDouble(Coupon::getAmount).sum();
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
-        Double fee;
-        BusinessSchool bs = this.getSchoolInfoForPay(profileId);
-        if (memberTypeId == RiseMember.ELITE) {
-            // 报名商学院
-            fee = bs.getFee();
-        } else {
-            fee = memberType.getFee();
-        }
+        MemberType memberType = this.getMemberTypePayInfo(profileId, memberTypeId);
+        Double fee = memberType.getFee();
         if (fee >= amount) {
             return CommonUtils.substract(fee, amount);
         } else {
             return 0D;
         }
     }
+
 
     @Override
     public RiseMember currentRiseMember(Integer profileId) {
@@ -886,16 +851,6 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
         }
         return riseMember;
-    }
-
-    @Override
-    public List<RiseMember> currentRiseMembers(Integer profileId) {
-        List<RiseMember> riseMembers = riseMemberDao.loadValidRiseMembers(profileId);
-        riseMembers.forEach(riseMember -> {
-            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getAddTime()));
-            riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
-        });
-        return riseMembers;
     }
 
     @Override
@@ -917,69 +872,6 @@ public class SignupServiceImpl implements SignupService {
                 .findAny().orElse(null);
     }
 
-    @Override
-    public BusinessSchool getSchoolInfoForPay(Integer profileId) {
-        BusinessSchool businessSchool = new BusinessSchool();
-        Double fee;
-        RiseMember riseMember = this.currentRiseMember(profileId);
-        MemberType memberType = this.getMemberType(RiseMember.ELITE);
-        businessSchool.setIsBusinessStudent(false);
-        if (riseMember != null) {
-            switch (riseMember.getMemberTypeId()) {
-                case RiseMember.ELITE:
-                    fee = memberType.getFee();
-                    businessSchool.setIsBusinessStudent(true);
-                    break;
-                case RiseMember.CAMP:
-                    fee = memberType.getFee();
-                    break;
-                default:
-                    fee = memberType.getFee();
-            }
-        } else {
-            fee = memberType.getFee();
-        }
-
-        businessSchool.setFee(fee);
-        return businessSchool;
-    }
-
-    @Override
-    public RiseMember getCurrentRiseMemberStatus(Integer profileId) {
-        Profile profile = accountService.getProfile(profileId);
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
-            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(DateUtils.afterMonths(riseMember.getExpireDate(), -12)));
-        } else {
-            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-        }
-        riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
-
-        if (profile != null) {
-            riseMember.setEntryCode(profile.getMemberId());
-        }
-        return riseMember;
-    }
-
-    @Override
-    public RiseMember getCurrentMonthlyCampStatus(Integer profileId) {
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-
-        Profile profile = accountService.getProfile(profileId);
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        riseMember.setStartTime(DateUtils.parseDateToStringByCommon(new Date()));
-        riseMember.setEndTime(DateUtils.parseDateToStringByCommon(monthlyCampConfig.getCloseDate()));
-
-        if (profile != null) {
-            riseMember.setEntryCode(profile.getMemberId());
-        }
-        return riseMember;
-    }
-
-    @Override
-    public List<RiseMember> loadPersonalAllRiseMembers(Integer profileId) {
-        return riseMemberDao.loadPersonalAll(profileId);
-    }
 
     @Override
     public void payApplicationSuccess(String orderId) {
@@ -1129,7 +1021,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public String getSubscribeQrCodeForApply(Integer memberTypeId) {
+    public String getSubscribeQrCodeForPay(Integer memberTypeId) {
         String qrCodeUrl = "";
         switch (memberTypeId) {
             case RiseMember.BS_APPLICATION:
@@ -1139,9 +1031,10 @@ public class SignupServiceImpl implements SignupService {
                 qrCodeUrl = ConfigUtils.getBusinessThoughtApplyQrCode();
                 break;
             default:
-                ;
+                break;
         }
         return qrCodeUrl;
     }
+
 
 }

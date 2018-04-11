@@ -106,4 +106,9 @@ public class RiseMemberManagerImpl implements RiseMemberManager{
 
         return riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, members);
     }
+
+    @Override
+    public List<RiseMember> loadPersonalAllRiseMembers(Integer profileId) {
+        return riseMemberDao.loadPersonalAll(profileId);
+    }
 }

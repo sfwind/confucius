@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
-import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
@@ -21,7 +20,7 @@ import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.course.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
@@ -213,7 +212,7 @@ public class SignupController {
         Account account = accountService.getAccountByUnionId(loginUser.getUnionId());
         Boolean subscribe = account != null && account.getSubscribe() == 1;
         if (!subscribe) {
-            String qrCodeUrl = signupService.getSubscribeQrCodeForApply(memberTypeId);
+            String qrCodeUrl = signupService.getSubscribeQrCodeForPay(memberTypeId);
             dto.setQrCode(qrCodeUrl);
         }
         dto.setSubscribe(subscribe);
@@ -254,10 +253,10 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> loadGoodsInfo(LoginUser loginUser, @RequestBody GoodsInfoDto goodsInfoDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(goodsInfoDto, "商品信息不能为空");
-        if (!GoodsInfoDto.GOODS_TYPES.contains(goodsInfoDto.getGoodsType())) {
-            logger.error("获取商品信息的商品类型异常,{}", goodsInfoDto);
-            return WebUtils.error("商品类型异常");
-        }
+//        if (!GoodsInfoDto.GOODS_TYPES.contains(goodsInfoDto.getGoodsType())) {
+//            logger.error("获取商品信息的商品类型异常,{}", goodsInfoDto);
+//            return WebUtils.error("商品类型异常");
+//        }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
@@ -268,9 +267,7 @@ public class SignupController {
         // 是否能使用多个优惠券
         goodsInfoDto.setMultiCoupons(this.checkMultiCoupons(goodsInfoDto.getGoodsType()));
         // 计算价格/等特殊
-        MemberType memberType = signupService.getMemberTypesPayInfo(loginUser.getId()).stream()
-                .filter(item -> item.getId().equals(goodsInfoDto.getGoodsId()))
-                .findFirst().orElse(null);
+        MemberType memberType = signupService.getMemberTypePayInfo(loginUser.getId(), goodsInfoDto.getGoodsId());
         if (memberType != null) {
             goodsInfoDto.setInitPrice(memberType.getInitPrice());
             goodsInfoDto.setFee(memberType.getFee());
@@ -280,11 +277,6 @@ public class SignupController {
                 goodsInfoDto.setEndTime(memberType.getEndTime());
             }
             goodsInfoDto.setName(memberType.getName());
-        }
-
-        BusinessSchool bs = signupService.getSchoolInfoForPay(loginUser.getId());
-        if (QuanwaiOrder.FRAG_MEMBER.equals(goodsInfoDto.getGoodsType())) {
-            goodsInfoDto.setFee(bs.getFee());
         }
 
         // 获取优惠券
@@ -325,10 +317,10 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> loadPayParam(LoginUser loginUser, HttpServletRequest request, @RequestBody PaymentDto paymentDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(paymentDto, "支付信息不能为空");
-        if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
-            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
-            return WebUtils.error("商品类型异常");
-        }
+//        if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
+//            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
+//            return WebUtils.error("商品类型异常");
+//        }
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
@@ -372,7 +364,7 @@ public class SignupController {
     }
 
     /**
-     * 计算优惠券
+     * 计算优惠券，返回优惠价格
      *
      * @param loginUser 用户信息
      */
@@ -380,10 +372,10 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> calculateCoupons(LoginUser loginUser, @RequestBody PaymentDto paymentDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(paymentDto, "支付信息不能为空");
-        if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
-            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
-            return WebUtils.error("商品类型异常");
-        }
+//        if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
+//            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
+//            return WebUtils.error("商品类型异常");
+//        }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
@@ -500,28 +492,15 @@ public class SignupController {
         operationLogService.log(operationLog);
 
         // pre1.获取基本信息（所有会员数据、要购买商品类型）
-        List<RiseMember> allUserMembers = signupService.loadPersonalAllRiseMembers(loginUser.getId());
-        List<MemberType> memberTypesPayInfo = signupService.getMemberTypesPayInfo();
-        MemberType memberType = memberTypesPayInfo.stream().filter(item -> item.getId().equals(memberTypeId)).findAny().orElse(null);
+        List<RiseMember> allUserMembers = riseMemberManager.loadPersonalAllRiseMembers(loginUser.getId());
+        MemberType memberType = signupService.getMemberTypePayInfo(loginUser.getId(), memberTypeId);
         if (memberType == null) {
             return WebUtils.error("商品类型错误");
         }
         // 1.检查是否有报名权限
         Pair<Boolean, String> pass = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
-//        switch (memberTypeId) {
-//            case RiseMember.ELITE: {
-//                privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId()).getLeft();
-//                break;
-//            }
-//            case RiseMember.BUSINESS_THOUGHT: {
-//                privilege = accountService.hasPrivilegeForMiniMBA(loginUser.getId()).getLeft();
-//                break;
-//            }
-//            default:
-//        }
         // 2.获取相关数据
         List<RiseMember> riseMembers = allUserMembers.stream().filter(item -> !item.getExpired()).collect(Collectors.toList());
-
         // 3.拼装dto
         RiseMemberDto dto = new RiseMemberDto();
         dto.setPrivilege(pass.getLeft());
@@ -562,14 +541,11 @@ public class SignupController {
                 dto.setAuditionStr(null);
             }
         } else if (memberType.getId() == RiseMember.BUSINESS_THOUGHT) {
-            dto.setButtonStr("立即入学");
+            // ignore
         } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
             // ignore
         }
-
-        /**
-         * 计算过期时间
-         */
+        // 计算过期时间
         Pair<Integer, Integer> hourMinutes = calcDealTime(memberTypeId, loginUser.getId());
         dto.setRemainHour(hourMinutes.getLeft());
         dto.setRemainMinute(hourMinutes.getRight());
