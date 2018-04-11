@@ -385,7 +385,7 @@ public class AccountServiceImpl implements AccountService {
     public Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId) {
         /*
         1.商业进阶课无需报名 x
-        2.申请核心能力通过 x
+        2.申请核心能力通过(未报名) x
         3.专业版无需申请 o
         4.申请通过 o
         5.是否有进行中的申请 x
@@ -397,7 +397,9 @@ public class AccountServiceImpl implements AccountService {
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
 
         if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
-            return Pair.of(false, "您已经申请核心能力项目，可联系圈外更改申请项目");
+            if (riseMemberManager.coreBusinessSchoolMember(profileId) == null) {
+                return Pair.of(false, "您已经申请核心能力项目，可联系圈外更改申请项目");
+            }
         }
         RiseMember proMember = riseMemberManager.proMember(profileId);
 
@@ -439,7 +441,12 @@ public class AccountServiceImpl implements AccountService {
                 return Pair.of(false, "您已经是商学院用户,无需重复申请");
             }
             if (this.hasAvailableApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-                return Pair.of(false, "您已有进阶课报名权限，可以联系圈外更改报名项目");
+                // 有能力报名进阶，查看是否已经报名
+                if (riseMemberManager.businessThought(profileId) == null) {
+                    return Pair.of(false, "您已有进阶课报名权限，可以联系圈外更改报名项目");
+                } else {
+                    // ignore
+                }
             }
         } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
             RiseMember riseMember = riseMemberManager.businessThought(profileId);
@@ -447,7 +454,9 @@ public class AccountServiceImpl implements AccountService {
                 return Pair.of(false, "您已经是商业进阶课用户，无需重复申请");
             }
             if (this.hasAvailableApply(profileId, Constants.Project.CORE_PROJECT)) {
-                return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
+                if (riseMemberManager.coreBusinessSchoolMember(profileId) == null) {
+                    return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
+                }
             }
         }
         if (applyList.stream().anyMatch(item -> !item.getDeal())) {
@@ -516,7 +525,9 @@ public class AccountServiceImpl implements AccountService {
 
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
         if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-            return Pair.of(false, "您已经申请商业进阶课，可联系圈外更改申请项目");
+            if (riseMemberManager.businessThought(profileId) == null) {
+                return Pair.of(false, "您已经申请商业进阶课，可联系圈外更改申请项目");
+            }
         }
 
         if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
