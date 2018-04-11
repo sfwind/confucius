@@ -521,7 +521,8 @@ public class SignupController {
                     dto.setButtonStr("续费商学院");
                 } else if (noMbaRiseMember.getMemberTypeId() == RiseMember.ELITE) {
                     //商学院用户不显示按钮
-                    return WebUtils.success();
+                    dto.setButtonStr("立即入学");
+//                    return WebUtils.result(dto);
                 } else {
                     dto.setButtonStr("立即入学");
                     dto.setAuditionStr("预约体验");
