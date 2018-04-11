@@ -427,12 +427,16 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project) {
         /*
-        1.已经是商学院用户-核心能力 x
-        2.已经申请进阶课的不能再申请-核心能力 x
-        3.已经有核心报名权限不能再申请-商业进阶 x
-        4.有审核中的申请则不能再申请-审核中 x
-//        5.优秀学员无需报名-优秀学员x
-        6.被拒绝后1个月后才能报名 x
+        1.1已经是商学院用户-核心能力项 x
+        1.2可以报名商业思维且为报名-核心能力项 x
+        1.3已经能报了-核心能力项 x
+
+        2.1已经是商业思维用户-商业性思维 x
+        2.2可以报名核心能力项目-商业思维 x
+        2.3已经可以报名商业思维-商业思维 x
+
+        3.有进行中的申请 x
+        4.最近一个月被拒绝过 x
          */
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
         if (Constants.Project.CORE_PROJECT == project) {
@@ -447,7 +451,7 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
             if (this.hasPrivilegeForBusinessSchool(profileId).getLeft()) {
-                return Pair.of(false, "您已经是商学院用户,无需重复申请");
+                return Pair.of(false, "您已有商学院报名权限,无需重复申请");
             }
         } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
             RiseMember riseMember = riseMemberManager.businessThought(profileId);
@@ -460,7 +464,7 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
             if (this.hasPrivilegeForMiniMBA(profileId).getLeft()) {
-                return Pair.of(false, "您已经是商业思维项目用户,无需重复申请");
+                return Pair.of(false, "您已有商业思维项目报名权限,无需重复申请");
             }
         }
         if (applyList.stream().anyMatch(item -> !item.getDeal())) {
@@ -497,7 +501,7 @@ public class AccountServiceImpl implements AccountService {
         1.查看是否开放报名 x
         2.专业版有效期内可直接报名  o
         3.精英版不能报名 x
-        4.已经能够报名商业进阶课时无法报名  x
+        4.商业思维申请通过  x
         5.申请通过可以报名 o
 //        6.有优秀证书可以报名 o
         7.剩下的都不可以报名，根据是否有申请中的记录进行提示
@@ -518,7 +522,7 @@ public class AccountServiceImpl implements AccountService {
 
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
-            //如果用户是专业版或者精英版,则无需申请
+            //如果用户是专业版,则无需申请
             if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId) {
                 return Pair.of(true, "ok");
             }
