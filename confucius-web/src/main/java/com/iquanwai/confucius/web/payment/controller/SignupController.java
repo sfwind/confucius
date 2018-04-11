@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
 import com.iquanwai.confucius.biz.domain.course.signup.BusinessSchool;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -17,6 +18,7 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
+import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
@@ -79,6 +81,8 @@ public class SignupController {
     private CacheService cacheService;
     @Autowired
     private BusinessSchoolService businessSchoolService;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
 
 
     /**
@@ -582,19 +586,10 @@ public class SignupController {
                 .memo(String.valueOf(memberTypeId));
         operationLogService.log(operationLog);
 
-        RiseMember riseMember = null;
-
-        switch (memberTypeId) {
-            case RiseMember.ELITE:
-                riseMember = signupService.getCurrentRiseMemberStatus(loginUser.getId());
-                break;
-            case RiseMember.CAMP:
-                riseMember = signupService.getCurrentMonthlyCampStatus(loginUser.getId());
-                break;
-            default:
-                break;
-        }
+        RiseMember riseMember = riseMemberManager.member(loginUser.getId()).stream().filter(item -> item.getMemberTypeId().equals(memberTypeId)).findFirst().orElse(null);
+        Profile profile = accountService.getProfile(loginUser.getId());
         if (riseMember != null) {
+            riseMember.setEntryCode(profile.getMemberId());
             return WebUtils.result(riseMember.simple());
         } else {
             return WebUtils.error("会员类型校验出错");
