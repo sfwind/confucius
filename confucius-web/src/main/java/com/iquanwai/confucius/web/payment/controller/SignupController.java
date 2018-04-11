@@ -212,7 +212,6 @@ public class SignupController {
         // 检查是否关注
         Account account = accountService.getAccountByUnionId(loginUser.getUnionId());
         Boolean subscribe = account != null && account.getSubscribe() == 1;
-        dto.setPrivilege(subscribe);
         if (!subscribe) {
             String qrCodeUrl = signupService.getSubscribeQrCodeForApply(memberTypeId);
             dto.setQrCode(qrCodeUrl);
