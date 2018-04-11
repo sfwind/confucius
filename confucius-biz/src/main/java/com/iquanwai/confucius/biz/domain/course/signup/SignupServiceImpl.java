@@ -986,7 +986,7 @@ public class SignupServiceImpl implements SignupService {
             case RiseMember.BS_APPLICATION:
                 qrCodeUrl = ConfigUtils.getCoreApplyQrCode();
                 break;
-            case RiseMember.BUSINESS_THOUGHT:
+            case RiseMember.BUSINESS_THOUGHT_APPLY:
                 qrCodeUrl = ConfigUtils.getBusinessThoughtApplyQrCode();
                 break;
             default:
