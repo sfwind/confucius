@@ -443,24 +443,25 @@ public class AccountServiceImpl implements AccountService {
             if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
                 // 有能力报名进阶，查看是否已经报名
                 if (riseMemberManager.businessThought(profileId) == null) {
-                    return Pair.of(false, "您已有进阶课报名权限，可以联系圈外更改报名项目");
-                } else {
-                    // ignore
+                    return Pair.of(false, "您已有商业思维项目报名权限，可以联系圈外更改报名项目");
                 }
+            }
+            if (this.hasPrivilegeForBusinessSchool(profileId).getLeft()) {
+                return Pair.of(false, "您已经是商学院用户,无需重复申请");
             }
         } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
             RiseMember riseMember = riseMemberManager.businessThought(profileId);
             if (riseMember != null) {
-                return Pair.of(false, "您已经是商业进阶课用户，无需重复申请");
+                return Pair.of(false, "您已经是商业思维项目用户，无需重复申请");
             }
             if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
                 if (riseMemberManager.coreBusinessSchoolMember(profileId) == null) {
                     return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
                 }
             }
-        }
-        if (this.hasAvailableApply(applyList, project)) {
-            return Pair.of(false, "您已有报名权限，无需重复申请");
+            if (this.hasPrivilegeForMiniMBA(profileId).getLeft()) {
+                return Pair.of(false, "您已经是商业思维项目用户,无需重复申请");
+            }
         }
         if (applyList.stream().anyMatch(item -> !item.getDeal())) {
             return Pair.of(false, "您的申请正在审核中");
