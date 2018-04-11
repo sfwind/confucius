@@ -12,9 +12,11 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
@@ -25,6 +27,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
+import com.iquanwai.confucius.web.payment.dto.ApplySubmitDto;
 import com.iquanwai.confucius.web.payment.dto.CampInfoDto;
 import com.iquanwai.confucius.web.payment.dto.GoodsInfoDto;
 import com.iquanwai.confucius.web.payment.dto.MonthlyCampProcessDto;
@@ -196,13 +199,21 @@ public class SignupController {
                 .action("点击RISE会员选择按钮")
                 .memo(memberTypeId + "");
         operationLogService.log(operationLog);
-
+        RiseMemberDto dto = new RiseMemberDto();
+        // 检查是否有报名权限
         Pair<Boolean, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
-        if (!result.getLeft()) {
-            return WebUtils.error(result.getRight());
-        } else {
-            return WebUtils.success();
+        dto.setPrivilege(result.getLeft());
+        dto.setErrorMsg(result.getRight());
+
+        // 检查是否关注
+        Account account = accountService.getAccountByUnionId(loginUser.getUnionId());
+        Boolean subscribe = account != null && account.getSubscribe() == 1;
+        dto.setPrivilege(subscribe);
+        if (!subscribe) {
+            String qrCodeUrl = signupService.getSubscribeQrCodeForApply(memberTypeId);
+            dto.setQrCode(qrCodeUrl);
         }
+        return WebUtils.result(dto);
     }
 
     @RequestMapping(value = "/mark/pay/{function}/{action}")
@@ -635,6 +646,39 @@ public class SignupController {
     }
 
 
+    /**
+     * 商学院申请信息提交
+     *
+     * @param loginUser      用户
+     * @param applySubmitDto 申请信息
+     */
+    @RequestMapping(value = "/submit/apply", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> submitApply(LoginUser loginUser, @RequestBody ApplySubmitDto applySubmitDto) {
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+                .module("商学院")
+                .function("申请")
+                .action("提交申请");
+        operationLogService.log(operationLog);
+
+        Pair<Boolean, String> pass = signupService.risePurchaseCheck(loginUser.getId(), applySubmitDto.getGoodsId());
+        if (!pass.getLeft()) {
+            return WebUtils.error(pass.getRight());
+        }
+
+        // 提交申请信息
+        List<BusinessApplySubmit> userApplySubmits = applySubmitDto.getUserSubmits().stream().map(applySubmitVO -> {
+            BusinessApplySubmit submit = new BusinessApplySubmit();
+            submit.setQuestionId(applySubmitVO.getQuestionId());
+            submit.setChoiceId(applySubmitVO.getChoiceId());
+            submit.setUserValue(applySubmitVO.getUserValue());
+            return submit;
+        }).collect(Collectors.toList());
+        // 如果不需要支付，则直接有效，否则先设置为无效
+        businessSchoolService.submitBusinessApply(loginUser.getId(), userApplySubmits, !ConfigUtils.getPayApplyFlag(), applySubmitDto.getGoodsId());
+        return WebUtils.success();
+    }
+
+
     private boolean canUseCoupon(GoodsInfoDto goodsInfoDto) {
         //申请商学院不能用优惠券
         if (goodsInfoDto.getGoodsType().equals(QuanwaiOrder.BS_APPLICATION)) {
@@ -643,5 +687,6 @@ public class SignupController {
 
         return true;
     }
+
 
 }

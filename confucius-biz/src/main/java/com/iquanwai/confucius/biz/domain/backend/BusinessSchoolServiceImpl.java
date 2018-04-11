@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.dao.apply.AuditionRewardDao;
+import com.iquanwai.confucius.biz.dao.apply.BusinessApplyChoiceDao;
 import com.iquanwai.confucius.biz.dao.apply.BusinessApplyQuestionDao;
 import com.iquanwai.confucius.biz.dao.apply.BusinessApplySubmitDao;
 import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
@@ -11,8 +12,11 @@ import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.common.permission.WhiteListDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.apply.AuditionReward;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyChoice;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
@@ -20,6 +24,7 @@ import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,6 +66,12 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     private AuditionRewardDao auditionRewardDao;
     @Autowired
     private WhiteListDao whiteListDao;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
+    @Autowired
+    private BusinessApplyChoiceDao businessApplyChoiceDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     @Override
     public List<BusinessSchoolApplication> loadBusinessSchoolList(Page page) {
@@ -142,7 +154,6 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     }
 
 
-
     @Override
     public List<BusinessApplyQuestion> loadUserQuestions(Integer applyId) {
         List<BusinessApplySubmit> submits = businessApplySubmitDao.loadByApplyId(applyId);
@@ -210,6 +221,49 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     @Override
     public List<BusinessApplySubmit> loadByApplyId(Integer applyId) {
         return businessApplySubmitDao.loadByApplyId(applyId);
+    }
+
+    @Override
+    public void submitBusinessApply(Integer profileId, List<BusinessApplySubmit> userApplySubmits, Boolean valid, Integer goodsId) {
+        //获取上次审核的结果
+        BusinessSchoolApplication lastBusinessApplication = businessSchoolApplicationDao.getLastVerifiedByProfileId(profileId);
+
+        BusinessSchoolApplication application = new BusinessSchoolApplication();
+        application.setProfileId(profileId);
+        application.setSubmitTime(new Date());
+        application.setStatus(BusinessSchoolApplication.APPLYING);
+
+        application.setIsDuplicate(false);
+        application.setValid(valid);
+        application.setDeal(false);
+        if (goodsId == RiseMember.BS_APPLICATION) {
+            application.setProject(Constants.Project.CORE_PROJECT);
+        } else if (goodsId == RiseMember.BUSINESS_THOUGHT_APPLY) {
+            application.setProject(Constants.Project.BUSINESS_THOUGHT_PROJECT);
+        }
+        if (lastBusinessApplication != null) {
+            application.setLastVerified(lastBusinessApplication.getStatus());
+        } else {
+            application.setLastVerified(0);
+        }
+
+        // TODO:待验证
+        Optional<RiseMember> optional = riseMemberManager.member(profileId).stream()
+                .sorted(((o1, o2) -> o2.getId() - o1.getId())).findFirst();
+        optional.ifPresent(riseMember -> application.setOriginMemberType(riseMember.getMemberTypeId()));
+
+        Integer applyId = businessSchoolApplicationDao.insert(application);
+
+        userApplySubmits.forEach(item -> {
+            item.setApplyId(applyId);
+            if (item.getChoiceId() != null) {
+                BusinessApplyChoice choice = businessApplyChoiceDao.load(BusinessApplyChoice.class, item.getChoiceId());
+                item.setChoiceText(choice.getSubject() == null ? "异常数据" : choice.getSubject());
+            }
+        });
+        businessApplySubmitDao.batchInsertApplySubmit(userApplySubmits);
+
+        operationLogService.trace(profileId, "submitApply");
     }
 
 }

@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
+import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
@@ -175,4 +176,6 @@ public interface AccountService {
     boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer project);
 
     Pair<Boolean, String> hasPrivilegeForCamp(Integer profileId);
+
+    Account getAccountByUnionId(String unionId);
 }

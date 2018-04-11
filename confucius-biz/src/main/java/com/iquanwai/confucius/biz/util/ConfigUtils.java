@@ -87,7 +87,7 @@ public class ConfigUtils {
         return getValue("incomplete.task.msg");
     }
 
-    public static String accountChangeMsgKey(){
+    public static String accountChangeMsgKey() {
         return getValue("account.change.message");
     }
 
@@ -111,7 +111,9 @@ public class ConfigUtils {
         return getValue("app.domainname");
     }
 
-    public static String getInterviewers(){return  getValue("interviewers");}
+    public static String getInterviewers() {
+        return getValue("interviewers");
+    }
 
     public static String staticResourceUrl(String domainName) {
         String url = getValue("static.resource.url");
@@ -409,5 +411,17 @@ public class ConfigUtils {
 
     public static String getSensorsProject() {
         return getValue("sensors.project");
+    }
+
+    public static Boolean getPayApplyFlag() {
+        return getBooleanValue("pay.apply.flag");
+    }
+
+    public static String getCoreApplyQrCode() {
+        return getValue("core.apply.qr.code");
+    }
+
+    public static String getBusinessThoughtApplyQrCode() {
+        return getValue("thought.apply.qr.code");
     }
 }

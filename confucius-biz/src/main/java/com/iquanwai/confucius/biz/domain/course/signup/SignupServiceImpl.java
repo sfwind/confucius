@@ -979,4 +979,20 @@ public class SignupServiceImpl implements SignupService {
         return list;
     }
 
+    @Override
+    public String getSubscribeQrCodeForApply(Integer memberTypeId) {
+        String qrCodeUrl = "";
+        switch (memberTypeId) {
+            case RiseMember.BS_APPLICATION:
+                qrCodeUrl = ConfigUtils.getCoreApplyQrCode();
+                break;
+            case RiseMember.BUSINESS_THOUGHT:
+                qrCodeUrl = ConfigUtils.getBusinessThoughtApplyQrCode();
+                break;
+            default:
+                ;
+        }
+        return qrCodeUrl;
+    }
+
 }

@@ -769,4 +769,9 @@ public class AccountServiceImpl implements AccountService {
         return Pair.of(true, "ok");
     }
 
+    @Override
+    public Account getAccountByUnionId(String unionId) {
+        return followUserDao.queryByUnionId(unionId);
+    }
+
 }

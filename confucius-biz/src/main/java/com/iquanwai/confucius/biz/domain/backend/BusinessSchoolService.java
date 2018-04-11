@@ -98,4 +98,7 @@ public interface BusinessSchoolService {
      * 加载商学院申请提交数据
      */
     List<BusinessApplySubmit> loadByApplyId(Integer applyId);
+
+
+    void submitBusinessApply(Integer profileId, List<BusinessApplySubmit> userApplySubmits, Boolean valid, Integer goodsId);
 }

@@ -167,4 +167,6 @@ public interface SignupService {
      * 根据商品类型和售价智能选择优惠券
      */
     List<Coupon> autoChooseCoupon(String goodsType, Double fee, List<Coupon> coupons);
+
+    String getSubscribeQrCodeForApply(Integer memberTypeId);
 }

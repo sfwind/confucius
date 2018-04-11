@@ -24,7 +24,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // TODO wait
-    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId,Integer project) {
+    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId, Integer project) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Project = ? AND Del = 0 AND Status = 1 AND Valid = 1 Order by Id desc";
         try {
@@ -49,6 +49,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     /**
      * 获得用户的有效申请
+     *
      * @param profileId 用户id
      * @return 有效申请列表
      */
@@ -121,11 +122,11 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     }
 
     // TODO wait
-    public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId,Integer project) {
+    public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId, Integer project) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from BusinessSchoolApplication where ProfileId = ? and Valid = 0 and Del = 0 and Project = ? order by Id desc limit 1";
         try {
-            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId,project);
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId, project);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -156,18 +157,19 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     /**
      * 根据教练加载正在审核中的商学院申请
+     *
      * @param interviewer
      * @return
      */
     // TODO wait
-    public List<BusinessSchoolApplication> loadByInterviewer(Integer interviewer,Page page){
+    public List<BusinessSchoolApplication> loadByInterviewer(Integer interviewer, Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from BusinessSchoolApplication where interviewer = ? and status = 0 and del = 0 LIMIT " + page.getOffset() + "," + page.getLimit();
         ResultSetHandler<List<BusinessSchoolApplication>> h = new BeanListHandler<>(BusinessSchoolApplication.class);
         try {
-            return runner.query(sql,h,interviewer);
+            return runner.query(sql, h, interviewer);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
@@ -177,10 +179,52 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT count(*) from BusinessSchoolApplication WHERE interviewer = ? and status = 0 AND Del =0";
         try {
-            return runner.query(sql, new ScalarHandler<Long>(),interviewer).intValue();
+            return runner.query(sql, new ScalarHandler<Long>(), interviewer).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    /**
+     * 获得最近一次被审批过的商学院申请
+     *
+     * @param profileId 用户id
+     * @return 获得最新一次被审核的记录
+     */
+    public BusinessSchoolApplication getLastVerifiedByProfileId(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = " select * from BusinessSchoolApplication where profileId = ? and status != 0 and del = 0 and Valid = 1  order by UpdateTime desc";
+
+        try {
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return null;
+    }
+
+    /**
+     * 插入申请信息
+     *
+     * @param businessSchoolApplication 申请记录
+     * @return 主键id
+     */
+    public Integer insert(BusinessSchoolApplication businessSchoolApplication) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO BusinessSchoolApplication(SubmitId, ProfileId, Status, CheckTime, IsDuplicate, Deal, " +
+                "OriginMemberType,SubmitTime,DealTime,Comment,LastVerified,Valid,Project) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        try {
+            return runner.insert(sql, new ScalarHandler<Long>(), businessSchoolApplication.getSubmitId(), businessSchoolApplication.getProfileId(),
+                    businessSchoolApplication.getStatus(), businessSchoolApplication.getCheckTime(), businessSchoolApplication.getIsDuplicate(),
+                    businessSchoolApplication.getDeal(), businessSchoolApplication.getOriginMemberType(),
+                    businessSchoolApplication.getSubmitTime(), businessSchoolApplication.getDealTime(),
+                    businessSchoolApplication.getComment(), businessSchoolApplication.getLastVerified(),
+                    businessSchoolApplication.getValid(), businessSchoolApplication.getProject()).intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 }
