@@ -215,7 +215,6 @@ public class PayServiceImpl implements PayService {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
-        // 商品是rise会员
         signupService.payRiseSuccess(quanwaiOrder.getOrderId());
         refreshStatus(quanwaiOrder, orderId);
     }

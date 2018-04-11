@@ -48,6 +48,8 @@ public interface SignupService {
      */
     void payMonthlyCampSuccess(String orderId);
 
+    void insertClassMemberMemberId(Integer profileId, Integer memberTypeId);
+
     /**
      * 获取专项课订单
      */

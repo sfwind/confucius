@@ -20,10 +20,17 @@ public class HelloServiceTest extends TestBase {
     @Autowired
     private AccountService accountService;
 
+
     @Test
     public void test() {
         customerMessageService.sendCustomerMessage(accountService.getProfile(30).getOpenid(), "LiCBL-QjQYIpExWSJt9gUxLGt3vNdf9bqYuxe-QDt5A", Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
         customerMessageService.sendCustomerMessage(accountService.getProfile(30).getOpenid(), "LiCBL-QjQYIpExWSJt9gUxLGt3vNdf9bqYuxe-QDt5A", Constants.WEIXIN_MESSAGE_TYPE.TEXT);
     }
+
+    @Test
+    public void soutTest(){
+        signupService.insertClassMemberMemberId(25556, 3);
+    }
+
 
 }
