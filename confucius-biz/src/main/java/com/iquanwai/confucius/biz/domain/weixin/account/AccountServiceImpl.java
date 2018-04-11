@@ -32,7 +32,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -45,6 +44,7 @@ import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -386,8 +386,9 @@ public class AccountServiceImpl implements AccountService {
         /*
         1.商业进阶课无需报名 x
         2.申请核心能力通过 x
-        3.申请通过 o
-        4.是否有进行中的申请 x
+        3.专业版无需申请 o
+        4.申请通过 o
+        5.是否有进行中的申请 x
          */
         RiseMember riseMember = riseMemberManager.businessThought(profileId);
         if (riseMember != null) {
@@ -397,6 +398,12 @@ public class AccountServiceImpl implements AccountService {
 
         if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
             return Pair.of(false, "您已经申请核心能力项目，可联系圈外更改申请项目");
+        }
+        RiseMember proMember = riseMemberManager.proMember(profileId);
+
+        if (proMember != null) {
+            //如果用户是专业版或者精英版,则无需申请
+            return Pair.of(true, "ok");
         }
         if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
             return Pair.of(true, "ok");
@@ -418,17 +425,27 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project) {
         /*
-        1.已经申请进阶课的不能再申请 x
-        2.已经有核心报名权限不能再申请 x
-        3.有审核中的申请则不能再申请 x
-        问题：直接进入做题页面，可以再提交一次
+        1.已经是商学院用户-核心能力 x
+        2.已经申请进阶课的不能再申请-核心能力 x
+        3.已经有核心报名权限不能再申请-商业进阶 x
+        4.有审核中的申请则不能再申请-审核中 x
+//        5.优秀学员无需报名-优秀学员x
+        6.被拒绝后1个月后才能报名 x
          */
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
         if (Constants.Project.CORE_PROJECT == project) {
+            RiseMember riseMember = riseMemberManager.coreBusinessSchoolMember(profileId);
+            if (riseMember != null) {
+                return Pair.of(false, "您已经是商学院用户,无需重复申请");
+            }
             if (this.hasAvailableApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
                 return Pair.of(false, "您已有进阶课报名权限，可以联系圈外更改报名项目");
             }
         } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
+            RiseMember riseMember = riseMemberManager.businessThought(profileId);
+            if (riseMember != null) {
+                return Pair.of(false, "您已经是商业进阶课用户，无需重复申请");
+            }
             if (this.hasAvailableApply(profileId, Constants.Project.CORE_PROJECT)) {
                 return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
             }
@@ -436,7 +453,28 @@ public class AccountServiceImpl implements AccountService {
         if (applyList.stream().anyMatch(item -> !item.getDeal())) {
             return Pair.of(false, "您的申请正在审核中");
         }
-        RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
+//        RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
+//        if (riseCertificate != null) {
+//            return Pair.of(false, "优秀学员有报名权限,无需重复申请");
+//        }
+
+
+        // 一个月之内被拒绝过
+        List<BusinessSchoolApplication> rejectLists = applyList
+                .stream()
+                .filter(item -> item.getProject().equals(project))
+                .filter(item -> item.getStatus() == BusinessSchoolApplication.REJECT)
+                .filter(item -> new DateTime(item.getDealTime()).withTimeAtStartOfDay().plusMonths(1).isAfter(new DateTime().withTimeAtStartOfDay()))
+                .collect(Collectors.toList());
+        if (rejectLists.size() > 0) {
+            Integer maxWaitDays = rejectLists
+                    .stream()
+                    .map(item -> DateUtils.interval(new DateTime(item.getDealTime()).withTimeAtStartOfDay().plusMonths(1).toDate(), new DateTime().withTimeAtStartOfDay().toDate()))
+                    .max((Comparator.comparingInt(o -> o)))
+                    .orElse(0);
+            return Pair.of(false, "还有 " + maxWaitDays + " 天才能再次申请哦");
+        }
+
         return Pair.of(true, "ok");
     }
 
@@ -448,7 +486,7 @@ public class AccountServiceImpl implements AccountService {
         3.精英版不能报名 x
         4.已经能够报名商业进阶课时无法报名  x
         5.申请通过可以报名 o
-        6.有优秀证书可以报名 o
+//        6.有优秀证书可以报名 o
         7.剩下的都不可以报名，根据是否有申请中的记录进行提示
          */
         // 购买会员
@@ -464,7 +502,6 @@ public class AccountServiceImpl implements AccountService {
 //        }
 
         RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
-        Boolean result = false;
 
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
@@ -487,11 +524,11 @@ public class AccountServiceImpl implements AccountService {
         }
 
 
-        //如果用户曾经获得证书,则无需申请
-        RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-        if (riseCertificate != null) {
-            return Pair.of(true, "ok");
-        }
+//        //如果用户曾经获得证书,则无需申请
+//        RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
+//        if (riseCertificate != null) {
+//            return Pair.of(true, "ok");
+//        }
 
         // 查看是否有进行中的申请
         List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> !item.getDeal()).collect(Collectors.toList());
