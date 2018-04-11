@@ -213,6 +213,7 @@ public class SignupController {
             String qrCodeUrl = signupService.getSubscribeQrCodeForApply(memberTypeId);
             dto.setQrCode(qrCodeUrl);
         }
+        dto.setSubscribe(subscribe);
         return WebUtils.result(dto);
     }
 
