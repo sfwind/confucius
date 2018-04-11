@@ -492,25 +492,25 @@ public class SignupController {
             return WebUtils.error("商品类型错误");
         }
         // 1.检查是否有报名权限
-        boolean privilege = false;
-        switch (memberTypeId) {
-            case RiseMember.ELITE: {
-                privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId()).getLeft();
-                break;
-            }
-            case RiseMember.BUSINESS_THOUGHT: {
-                privilege = accountService.hasPrivilegeForMiniMBA(loginUser.getId()).getLeft();
-                break;
-            }
-            default:
-        }
+        Pair<Boolean, String> pass = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
+//        switch (memberTypeId) {
+//            case RiseMember.ELITE: {
+//                privilege = accountService.hasPrivilegeForBusinessSchool(loginUser.getId()).getLeft();
+//                break;
+//            }
+//            case RiseMember.BUSINESS_THOUGHT: {
+//                privilege = accountService.hasPrivilegeForMiniMBA(loginUser.getId()).getLeft();
+//                break;
+//            }
+//            default:
+//        }
         // 2.获取相关数据
         List<RiseMember> riseMembers = allUserMembers.stream().filter(item -> !item.getExpired()).collect(Collectors.toList());
 
         // 3.拼装dto
         RiseMemberDto dto = new RiseMemberDto();
-        dto.setPrivilege(privilege);
-
+        dto.setPrivilege(pass.getLeft());
+        dto.setErrorMsg(pass.getRight());
         dto.setMemberType(memberType);
         // 不同商品的特殊逻辑
         if (memberType.getId() == RiseMember.ELITE) {
@@ -542,7 +542,7 @@ public class SignupController {
                 // 不显示宣讲会按钮
                 dto.setAuditionStr(null);
             }
-            if (privilege) {
+            if (pass.getLeft()) {
                 // 有付费权限不显示宣讲会按钮
                 dto.setAuditionStr(null);
             }

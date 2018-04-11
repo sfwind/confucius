@@ -86,10 +86,32 @@ public interface AccountService {
      */
     Profile loadProfileByMemberId(String memberId);
 
+    /**
+     * 是否有权限报名商业进阶课
+     *
+     * @param profileId 用户id
+     * @return left:权限<br/>
+     * right:报错信息
+     */
     Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId);
 
+    /**
+     * 是否有权限去申请商学院报名
+     *
+     * @param profileId 用户id
+     * @param project   项目
+     * @return left:权限<br/>
+     * right:报错信息
+     */
     Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project);
 
+    /**
+     * 是否有权限报名核心能力项目
+     *
+     * @param profileId 用户id
+     * @return left:权限<br/>
+     * right:报错信息
+     */
     Pair<Boolean, String> hasPrivilegeForBusinessSchool(Integer profileId);
 
     /**

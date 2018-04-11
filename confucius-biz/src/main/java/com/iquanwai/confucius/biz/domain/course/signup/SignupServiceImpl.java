@@ -129,6 +129,11 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
         Pair<Boolean, String> pass = Pair.of(false, "类型异常");
+        // common login
+        boolean exists = riseMemberManager.member(profileId).stream().anyMatch(item -> item.getMemberTypeId().equals(memberTypeId));
+        if (exists) {
+            return Pair.of(false, "您已经有该权限，无需重复报名");
+        }
 
         if (memberTypeId == RiseMember.ELITE) {
             pass = accountService.hasPrivilegeForBusinessSchool(profileId);

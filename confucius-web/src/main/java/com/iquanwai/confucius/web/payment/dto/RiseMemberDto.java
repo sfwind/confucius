@@ -18,6 +18,7 @@ public class RiseMemberDto {
     private String tip;
     /** 是否有报名权限 */
     private Boolean privilege;
+    private String errorMsg;
     /** 已经是商学院会员 */
     private Boolean elite;
     /**
