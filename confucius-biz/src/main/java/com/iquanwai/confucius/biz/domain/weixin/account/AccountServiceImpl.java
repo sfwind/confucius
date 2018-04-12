@@ -522,12 +522,12 @@ public class AccountServiceImpl implements AccountService {
 
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
+            if (RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
+                return Pair.of(false, "您已经是商学院用户，无需购买");
+            }
             //如果用户是专业版,则无需申请
             if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId) {
                 return Pair.of(true, "ok");
-            }
-            if (RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
-                return Pair.of(false, "您已经是商学院用户，无需购买");
             }
         }
 
