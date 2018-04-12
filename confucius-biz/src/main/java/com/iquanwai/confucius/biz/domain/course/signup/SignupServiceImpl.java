@@ -7,8 +7,8 @@ import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolApplicationOrderDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.OperateRotateDao;
@@ -119,7 +119,7 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private RiseMemberManager riseMemberManager;
     @Autowired
-    private ClassMemberDao classMemberDao;
+    private FragmentClassMemberDao fragmentClassMemberDao;
 
     private final static int PROBLEM_MAX_LENGTH = 30; //课程最长开放时间
 
@@ -375,7 +375,7 @@ public class SignupServiceImpl implements SignupService {
         classMember.setClassName(targetClassName.toString());
         classMember.setMemberTypeId(memberTypeId);
         classMember.setProfileId(profileId);
-        classMemberDao.insert(classMember);
+        fragmentClassMemberDao.insert(classMember);
     }
 
 

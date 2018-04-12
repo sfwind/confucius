@@ -18,7 +18,7 @@ import java.util.List;
  * Created by 三十文
  */
 @Repository
-public class ClassMemberDao extends PracticeDBUtil {
+public class FragmentClassMemberDao extends PracticeDBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
