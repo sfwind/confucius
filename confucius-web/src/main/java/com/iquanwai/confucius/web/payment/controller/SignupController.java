@@ -387,7 +387,6 @@ public class SignupController {
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
-        // TODO 将来删除
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER: {
                 return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup(), paymentDto.getPayType());
@@ -506,7 +505,6 @@ public class SignupController {
                 } else if (noMbaRiseMember.getMemberTypeId() == RiseMember.ELITE) {
                     //商学院用户不显示按钮
                     dto.setButtonStr("立即入学");
-//                    return WebUtils.result(dto);
                 } else {
                     dto.setButtonStr("立即入学");
                     dto.setAuditionStr("预约体验");
