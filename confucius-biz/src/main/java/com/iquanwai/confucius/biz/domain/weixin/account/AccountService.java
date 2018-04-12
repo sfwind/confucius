@@ -152,7 +152,7 @@ public interface AccountService {
     /**
      * 获取用户最后一次审批通过的商学院申请的通过时间
      */
-    BusinessSchoolApplication loadLastApply(Integer profileId, Integer project);
+    BusinessSchoolApplication loadLastApply(Integer profileId, Integer memberTypeId);
 
 
     boolean hasAvailableApply(Integer profileId, Integer project);

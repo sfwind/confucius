@@ -845,14 +845,8 @@ public class SignupServiceImpl implements SignupService {
         Assert.notNull(order, "商学院申请购买订单不能为空，orderId：" + orderId);
 
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-        BusinessSchoolApplication apply = null;
-
-        if (quanwaiOrder.getGoodsId().equals(Integer.valueOf(RiseMember.BS_APPLICATION).toString())) {
-            apply = businessSchoolApplicationDao.loadLatestInvalidApply(order.getProfileId(), Constants.Project.CORE_PROJECT);
-        } else if (quanwaiOrder.getGoodsId().equals(Integer.valueOf(RiseMember.BUSINESS_THOUGHT_APPLY).toString())) {
-            apply = businessSchoolApplicationDao.loadLatestInvalidApply(order.getProfileId(), Constants.Project.BUSINESS_THOUGHT_PROJECT);
-        }
-
+        Integer membetTypeId = riseMemberManager.loadApplyMemberMapping(Integer.valueOf(quanwaiOrder.getGoodsId()));
+        BusinessSchoolApplication apply = businessSchoolApplicationDao.loadLatestInvalidApply(order.getProfileId(), membetTypeId);
         if (apply == null) {
             // 更新订单状态
             businessSchoolApplicationOrderDao.paid(orderId);

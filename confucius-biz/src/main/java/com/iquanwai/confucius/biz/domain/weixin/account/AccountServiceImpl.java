@@ -661,8 +661,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public BusinessSchoolApplication loadLastApply(Integer profileId, Integer project) {
-        return businessSchoolApplicationDao.loadLastApproveApplication(profileId, project);
+    public BusinessSchoolApplication loadLastApply(Integer profileId, Integer memberTypeId) {
+        return businessSchoolApplicationDao.loadLastApproveApplication(profileId, memberTypeId);
     }
 
     @Override

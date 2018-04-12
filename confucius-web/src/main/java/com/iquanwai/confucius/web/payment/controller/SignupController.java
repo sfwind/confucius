@@ -26,7 +26,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
 import com.iquanwai.confucius.web.payment.dto.ApplySubmitDto;
@@ -178,19 +177,12 @@ public class SignupController {
     }
 
     private Pair<Integer, Integer> calcDealTime(Integer memberTypeId, Integer profileId) {
-        Date dealTime = null;
 
-        BusinessSchoolApplication businessSchoolApplication = null;
-        if (memberTypeId.equals(RiseMember.ELITE)) {
-            businessSchoolApplication = accountService.loadLastApply(profileId, Constants.Project.CORE_PROJECT);
-        } else if (memberTypeId.equals(RiseMember.BUSINESS_THOUGHT)) {
-            businessSchoolApplication = accountService.loadLastApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT);
-        }
+        BusinessSchoolApplication businessSchoolApplication = accountService.loadLastApply(profileId, memberTypeId);
         if (businessSchoolApplication == null) {
             return Pair.of(24, 0);
         } else {
-            dealTime = businessSchoolApplication.getDealTime();
-            int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
+            int time = DateUtils.intervalMinute(DateUtils.afterHours(businessSchoolApplication.getDealTime(), 24));
             if (time <= 0) {
                 businessSchoolService.expiredApply(businessSchoolApplication.getId());
                 return Pair.of(0, 0);
