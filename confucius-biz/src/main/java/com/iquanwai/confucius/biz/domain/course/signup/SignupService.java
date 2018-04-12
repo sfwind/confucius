@@ -151,6 +151,14 @@ public interface SignupService {
 
 
     /**
+     * 刷新用户信息
+     *
+     * @param quanwaiOrder 订单信息
+     * @param orderId      订单id
+     */
+    void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId);
+
+    /**
      * 根据商品类型和售价智能选择优惠券
      *
      * @param goodsType 商品类型

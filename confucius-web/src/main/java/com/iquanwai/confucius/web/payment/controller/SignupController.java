@@ -176,6 +176,7 @@ public class SignupController {
     }
 
     private Pair<Integer, Integer> calcDealTime(Integer memberTypeId, Integer profileId) {
+        // TODO update
         Date dealTime = null;
         if (memberTypeId.equals(RiseMember.ELITE)) {
             dealTime = accountService.loadLastApplicationDealTime(profileId, Constants.Project.CORE_PROJECT);
@@ -185,6 +186,7 @@ public class SignupController {
         if (dealTime == null) {
             return Pair.of(24, 0);
         } else {
+            businessSchoolService
             int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
             if (time <= 0) {
                 return Pair.of(0, 0);
@@ -204,6 +206,7 @@ public class SignupController {
         operationLogService.log(operationLog);
         RiseMemberDto dto = new RiseMemberDto();
         // 检查是否有报名权限
+        // TODO 子康
         Pair<Boolean, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
         dto.setPrivilege(result.getLeft());
         dto.setErrorMsg(result.getRight());
@@ -273,9 +276,11 @@ public class SignupController {
             goodsInfoDto.setFee(memberType.getFee());
             // 申请付费不填写时间
             if (!QuanwaiOrder.BS_APPLICATION.equals(goodsInfoDto.getGoodsType())) {
+                // TODO
                 goodsInfoDto.setStartTime(memberType.getStartTime());
                 goodsInfoDto.setEndTime(memberType.getEndTime());
             }
+            // TODO 交换description和name
             goodsInfoDto.setName(memberType.getName());
         }
 
@@ -405,6 +410,7 @@ public class SignupController {
      * @return 订单对象
      */
     private QuanwaiOrder createQuanwaiOrder(PaymentDto paymentDto, Integer profileId) {
+        // TODO 将来删除
         switch (paymentDto.getGoodsType()) {
             case QuanwaiOrder.FRAG_MEMBER: {
                 return signupService.signUpRiseMember(profileId, paymentDto.getGoodsId(), paymentDto.getCouponsIdGroup(), paymentDto.getPayType());
@@ -497,7 +503,7 @@ public class SignupController {
         if (memberType == null) {
             return WebUtils.error("商品类型错误");
         }
-        // 1.检查是否有报名权限
+        // 1.检查是否有权限
         Pair<Boolean, String> pass = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
         // 2.获取相关数据
         List<RiseMember> riseMembers = allUserMembers.stream().filter(item -> !item.getExpired()).collect(Collectors.toList());
@@ -506,8 +512,10 @@ public class SignupController {
         dto.setPrivilege(pass.getLeft());
         dto.setErrorMsg(pass.getRight());
         dto.setMemberType(memberType);
+
         // 不同商品的特殊逻辑
         if (memberType.getId() == RiseMember.ELITE) {
+            // TODO 页面按钮文字写死,tips 也删掉
             dto.setTip("开学后7天内可全额退款");
             RiseMember noMbaRiseMember = riseMembers.stream().filter(item -> !item.getMemberTypeId().equals(RiseMember.BUSINESS_THOUGHT)).findFirst().orElse(null);
             if (noMbaRiseMember != null && noMbaRiseMember.getMemberTypeId() != null) {
@@ -516,7 +524,6 @@ public class SignupController {
                     dto.setTip("优秀学员学费已减免，一键升级商学院");
                 } else if (noMbaRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
                     // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
-                    // TODO 精英版半年升级商学院
                     dto.setTip(null);
                     dto.setButtonStr("续费商学院");
                 } else if (noMbaRiseMember.getMemberTypeId() == RiseMember.ELITE) {
@@ -531,6 +538,7 @@ public class SignupController {
                 dto.setButtonStr("立即入学");
                 dto.setAuditionStr("预约体验");
             }
+
             // 用户层级是商学院用户或者曾经是商学院用户，则不显示试听课入口
             Long count = allUserMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
             if (count > 0) {

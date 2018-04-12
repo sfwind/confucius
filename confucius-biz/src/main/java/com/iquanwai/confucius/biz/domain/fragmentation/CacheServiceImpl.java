@@ -33,6 +33,7 @@ public class CacheServiceImpl implements CacheService {
     public void init() {
         monthlyCampConfig = monthlyCampConfigDao.loadActiveConfig();
         logger.info("monthly camp configuration init complete");
+        // TODO 两个配置表合一
         businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.ELITE);
         businessThoughtConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.BUSINESS_THOUGHT);
         logger.info("business college configuration init complete");

@@ -17,7 +17,6 @@ import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.RefundException;
-import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.util.CommonUtils;
@@ -26,15 +25,12 @@ import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.XMLHelper;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
-import java.net.ConnectException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +58,6 @@ public class PayServiceImpl implements PayService {
     @Autowired
     private OperationLogService operationLogService;
 
-    private RabbitMQPublisher paySuccessPublisher;
-
-    private RabbitMQPublisher freshLoginUserPublisher;
 
     private static final String WEIXIN = "NATIVE";
     private static final String JSAPI = "JSAPI";
@@ -79,12 +72,12 @@ public class PayServiceImpl implements PayService {
     private static final String ALIPAY_RETURN_PATH = "/pay/alipay/return";
 
 
-    @PostConstruct
-    public void init() {
-        // 初始化发送mq
-        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher(RISE_PAY_SUCCESS_TOPIC);
-        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(LOGIN_USER_RELOAD_TOPIC);
-    }
+//    @PostConstruct
+//    public void init() {
+//        // 初始化发送mq
+//        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher(RISE_PAY_SUCCESS_TOPIC);
+//        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(LOGIN_USER_RELOAD_TOPIC);
+//    }
 
     @Override
     public String unifiedOrder(String orderId) {
@@ -206,42 +199,19 @@ public class PayServiceImpl implements PayService {
             // 购买专项课
             signupService.payMonthlyCampSuccess(orderId);
         }
-        refreshStatus(quanwaiOrder, orderId);
+        signupService.refreshStatus(quanwaiOrder, orderId);
     }
 
-    // 购买会员
+
     @Override
     public void payMemberSuccess(String orderId) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         signupService.payRiseSuccess(quanwaiOrder.getOrderId());
-        refreshStatus(quanwaiOrder, orderId);
+        signupService.refreshStatus(quanwaiOrder, orderId);
     }
 
-    private void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
-        Profile profile = accountService.getProfile(quanwaiOrder.getProfileId());
-
-        // 刷新会员状态
-        try {
-            freshLoginUserPublisher.publish(profile.getUnionid());
-        } catch (ConnectException e) {
-            logger.error("发送会员信息更新mq失败", e);
-        }
-        // 更新优惠券使用状态
-        if (quanwaiOrder.getDiscount() != 0.0) {
-            logger.info("{}使用优惠券", profile.getOpenid());
-            costRepo.updateCoupon(Coupon.USED, orderId);
-        }
-        // 发送mq消息
-        try {
-            logger.info("发送支付成功message:{}", quanwaiOrder);
-            paySuccessPublisher.publish(quanwaiOrder);
-        } catch (ConnectException e) {
-            logger.error("发送支付成功mq失败", e);
-            messageService.sendAlarm("报名模块出错", "发送支付成功mq失败", "高", "订单id:" + orderId, e.getLocalizedMessage());
-        }
-    }
 
     @Override
     public Map<String, String> buildH5PayParam(String orderId, String ip, String openId) {

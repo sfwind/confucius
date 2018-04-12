@@ -17,6 +17,7 @@ public class LoginUser {
     private String weixinName;
     private String headimgUrl;
     private String realName;
+    // TODO delete
     private String unionId;
 
     public static LoginUser defaultUser(){

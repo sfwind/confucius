@@ -7,6 +7,7 @@ import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolApplicationOrderDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampOrderDao;
@@ -15,12 +16,14 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseOrderDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
+import com.iquanwai.confucius.biz.domain.fragmentation.ClassMember;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
@@ -116,6 +119,8 @@ public class SignupServiceImpl implements SignupService {
     private ShortMessageService shortMessageService;
     @Autowired
     private RiseMemberManager riseMemberManager;
+    @Autowired
+    private ClassMemberDao classMemberDao;
 
     private final static int PROBLEM_MAX_LENGTH = 30; //课程最长开放时间
 
@@ -152,8 +157,8 @@ public class SignupServiceImpl implements SignupService {
     public void init() {
         classMap.clear();
         courseMap.clear();
-        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher("rise_pay_success_topic");
-        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher("login_user_reload");
+        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher(PayService.RISE_PAY_SUCCESS_TOPIC);
+        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher("camp_order_topic");
 
     }
@@ -298,7 +303,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成memberId以及插入ClassMember
-     * 新学号格式：字母前缀 + 四位班级号（1701）+ 两位班级序号  + 三位递增唯一序列（1701011001）
+     * 新学号格式：字母前缀 + 四位年月（1701）+ 两位班级序号  + 三位递增唯一序列（1701011001）
      *
      * @param profileId    用户id
      * @param memberTypeId 会员id
@@ -356,7 +361,7 @@ public class SignupServiceImpl implements SignupService {
 
             if (memberId >= 200) {
                 // 满200人，人数重置1，班级+1
-                redisUtil.set(memberIdKey, "1", TimeUnit.DAYS.toSeconds(60));
+                redisUtil.set(memberIdKey, "001", TimeUnit.DAYS.toSeconds(60));
                 redisUtil.set(classNameKey, String.format("%02d", className + 1), TimeUnit.DAYS.toSeconds(60));
             } else {
                 // 不满200，人数更新
@@ -372,16 +377,15 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(profileId);
         boolean hasMemberId = profile.getMemberId() != null;
         String memberId;
-        if (hasMemberId) {
-            memberId = profile.getMemberId();
-        } else {
+        if (!hasMemberId) {
             memberId = targetMemberId.toString();
             accountService.updateMemberId(profileId, memberId);
         }
-        //TODO 插入ClassMember
-        System.out.println(targetClassName.toString());
-        System.out.println(targetMemberId.toString());
-        System.out.println(memberId);
+        ClassMember classMember = new ClassMember();
+        classMember.setClassName(targetClassName.toString());
+        classMember.setMemberTypeId(memberTypeId);
+        classMember.setProfileId(profileId);
+        classMemberDao.insert(classMember);
     }
 
 
@@ -560,6 +564,15 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public void payRiseSuccess(String orderId) {
+        /**
+         * 1.查看是否已经处理过
+         * 2.memberTypeId是否属于该GoodsType
+         * 3.进行中的plan加点评
+         * 4.1如果不存在老的，则正常时间
+         * 4.2如果存在老的，则升级延期，过期老的
+         * 5.插入班级学号
+         * 6.生成课表在platon
+         */
         RiseOrder riseOrder = riseOrderDao.loadOrder(orderId);
 
         try {
@@ -580,6 +593,7 @@ public class SignupServiceImpl implements SignupService {
         // 开课时间
         BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(memberType.getId());
         // 查看是否存在现成会员数据
+        // TODO 专业版测试
         RiseMember existRiseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(riseOrder.getProfileId(), Lists.newArrayList(riseOrder.getMemberType())).stream().findFirst().orElse(null);
         // 添加会员表
         RiseMember riseMember = new RiseMember();
@@ -590,10 +604,8 @@ public class SignupServiceImpl implements SignupService {
         riseMember.setVip(false);
         // 学习时间
         Integer learningMonthDate = 12;
-        if (RiseMember.ELITE == memberType.getId()) {
-            learningMonthDate = BUSINESS_SCHOOL_LEARNING_MONTHS;
-        } else if (RiseMember.BUSINESS_THOUGHT == memberType.getId()) {
-            learningMonthDate = BUSINESS_THOUGHT_LEARNING_MONTHS;
+        if (memberType.getOpenMonth() != null) {
+            learningMonthDate = memberType.getOpenMonth();
         } else {
             logger.error("该会员ID异常{}", memberType);
             messageService.sendAlarm("报名模块出错", "会员id异常", "高", "订单id:" + orderId, "会员类型异常");
@@ -618,15 +630,16 @@ public class SignupServiceImpl implements SignupService {
             riseMember.setOpenDate(businessSchoolConfig.getOpenDate());
             riseMember.setExpireDate(DateUtils.afterMonths(businessSchoolConfig.getOpenDate(), learningMonthDate));
 //            insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
-            insertClassMemberMemberId(riseOrder.getProfileId(), riseOrder.getMemberType());
             profileDao.initOnceRequestCommentCount(riseOrder.getProfileId());
         } else {
             // 如果存在，则将已经存在的 riseMember 数据置为已过期
-            riseMemberDao.expired(existRiseMember.getId());
-            riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), learningMonthDate));
-            // 续费，继承OpenDate
-            riseMember.setOpenDate(existRiseMember.getOpenDate());
+//            riseMemberDao.expired(existRiseMember.getId());
+//            riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), learningMonthDate));
+//            // 续费，继承OpenDate
+//            riseMember.setOpenDate(existRiseMember.getOpenDate());
         }
+        // 插入班级学号（学号幂等）
+        insertClassMemberMemberId(riseOrder.getProfileId(), riseOrder.getMemberType());
         riseMemberDao.insert(riseMember);
 
         Profile profile = accountService.getProfile(riseOrder.getProfileId());
@@ -817,6 +830,7 @@ public class SignupServiceImpl implements SignupService {
                     memberType.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getExpireDate()));
                     memberType.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(
                             DateUtils.afterMonths(riseMember.getExpireDate(), memberType.getOpenMonth()), 1)));
+                    // TODO 现在没有续费，这里干掉
                 } else {
                     // 报名
                     if (courseConfig != null) {
@@ -903,6 +917,12 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId) {
         return businessSchoolApplicationOrderDao.loadBusinessSchoolApplicationOrder(orderId);
+    }
+
+    @Override
+    public void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
+        Profile profile = accountService.getProfile(quanwaiOrder.getProfileId());
+        this.refreshStatus(quanwaiOrder, profile, orderId);
     }
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, Profile profile, String orderId) {

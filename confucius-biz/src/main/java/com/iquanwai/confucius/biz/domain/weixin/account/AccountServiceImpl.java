@@ -437,7 +437,12 @@ public class AccountServiceImpl implements AccountService {
 
         3.有进行中的申请 x
         4.最近一个月被拒绝过 x
+
+        // TODO 过期状态、付费状态回写，如果已经付费，则相当于已经付费
+
+        // TODO 核心能力项目不能申请分拆项目(两个六个月)
          */
+        // TODO project改为membertypeid 8/3 ,缺一个申请和会员的映射,不能同时申请
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
         if (Constants.Project.CORE_PROJECT == project) {
             RiseMember riseMember = riseMemberManager.coreBusinessSchoolMember(profileId);
@@ -499,8 +504,8 @@ public class AccountServiceImpl implements AccountService {
     public Pair<Boolean, String> hasPrivilegeForBusinessSchool(Integer profileId) {
         /*
         1.查看是否开放报名 x
-        2.专业版有效期内可直接报名  o
         3.精英版不能报名 x
+        2.专业版有效期内可直接报名  o
         4.商业思维申请通过  x
         5.申请通过可以报名 o
 //        6.有优秀证书可以报名 o
@@ -517,8 +522,9 @@ public class AccountServiceImpl implements AccountService {
 //                return Pair.of(false, "谢谢您关注圈外商学院!\n本次报名已达到限额\n记得及时关注下期开放通知哦");
 //            }
 //        }
-
-        RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
+        // TODO 查1234
+        // TODO 身份共存,1234 不能共存，5、8
+        RiseMember riseMember = riseMemberManager.oldMember(profileId);
 
         if (riseMember != null) {
             Integer memberTypeId = riseMember.getMemberTypeId();
@@ -530,7 +536,7 @@ public class AccountServiceImpl implements AccountService {
                 return Pair.of(true, "ok");
             }
         }
-
+        // TODO project改成memberTypeId
         List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
         if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
             if (riseMemberManager.businessThought(profileId) == null) {
@@ -549,14 +555,10 @@ public class AccountServiceImpl implements AccountService {
 //            return Pair.of(true, "ok");
 //        }
 
-        // 查看是否有进行中的申请
+        //TODO 查看是否有进行中的申请，文案改为通用逻辑
         List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> !item.getDeal()).collect(Collectors.toList());
         if (!checking.isEmpty()) {
-            if (checking.stream().anyMatch(item -> item.getProject() == Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-                return Pair.of(false, "你已申请商业进阶课，可申请调换");
-            } else {
-                return Pair.of(false, "您的申请正在审核中");
-            }
+            return Pair.of(false, "您的申请正在审核中");
         } else {
             return Pair.of(false, "请先提交申请");
         }
