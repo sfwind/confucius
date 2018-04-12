@@ -125,4 +125,10 @@ public interface Constants {
         String BUSINESS_THOUGHT_PROJECT = "S";
         String CAMP = "M";
     }
+
+    interface MemberType{
+        int ELITE = 3;
+        int THOUGHT = 8;
+    }
+
 }

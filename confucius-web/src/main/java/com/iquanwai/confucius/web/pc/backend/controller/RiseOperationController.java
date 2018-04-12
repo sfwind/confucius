@@ -39,6 +39,7 @@ import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
+import com.iquanwai.confucius.web.enums.MemberTypeEnums;
 import com.iquanwai.confucius.web.enums.ProjectEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
@@ -727,9 +728,9 @@ public class RiseOperationController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
-            ProjectEnums projectEnums = ProjectEnums.getById(application.getProject());
-            if (projectEnums != null) {
-                dto.setProject(projectEnums.getProjectName());
+            MemberTypeEnums memberTypeEnums = MemberTypeEnums.getById(application.getMemberTypeId());
+            if (memberTypeEnums != null) {
+                dto.setProject(memberTypeEnums.getMemberTypeName());
             }
             dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId()) == null ? "否" : "是");
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
