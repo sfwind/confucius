@@ -24,11 +24,11 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // TODO wait
-    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId, Integer project) {
+    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId,Integer memberTypeId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Project = ? AND Del = 0 AND Status = 1 AND Valid = 1 Order by Id desc";
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND MemberTypeId = ? AND Del = 0 AND Status = 1 AND Valid = 1 Order by Id desc";
         try {
-            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId, project);
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId, memberTypeId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -122,11 +122,11 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     }
 
     // TODO wait
-    public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId, Integer project) {
+    public BusinessSchoolApplication loadLatestInvalidApply(Integer profileId, Integer memberTypeId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from BusinessSchoolApplication where ProfileId = ? and Valid = 0 and Del = 0 and Project = ? order by Id desc limit 1";
+        String sql = "select * from BusinessSchoolApplication where ProfileId = ? and Valid = 0 and Del = 0 and MemberTypeId = ? order by Id desc limit 1";
         try {
-            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId, project);
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId, memberTypeId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -214,14 +214,14 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     public Integer insert(BusinessSchoolApplication businessSchoolApplication) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO BusinessSchoolApplication(SubmitId, ProfileId, Status, CheckTime, IsDuplicate, Deal, " +
-                "OriginMemberType,SubmitTime,DealTime,Comment,LastVerified,Valid,Project) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "OriginMemberType,SubmitTime,DealTime,Comment,LastVerified,Valid,MemberTypeId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
         try {
             return runner.insert(sql, new ScalarHandler<Long>(), businessSchoolApplication.getSubmitId(), businessSchoolApplication.getProfileId(),
                     businessSchoolApplication.getStatus(), businessSchoolApplication.getCheckTime(), businessSchoolApplication.getIsDuplicate(),
                     businessSchoolApplication.getDeal(), businessSchoolApplication.getOriginMemberType(),
                     businessSchoolApplication.getSubmitTime(), businessSchoolApplication.getDealTime(),
                     businessSchoolApplication.getComment(), businessSchoolApplication.getLastVerified(),
-                    businessSchoolApplication.getValid(), businessSchoolApplication.getProject()).intValue();
+                    businessSchoolApplication.getValid(), businessSchoolApplication.getMemberTypeId()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -23,6 +23,7 @@ import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.enums.MemberTypeEnums;
 import com.iquanwai.confucius.web.enums.ProjectEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.BusinessApplicationDto;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
@@ -390,9 +391,9 @@ public class AssistantCoachController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
-            ProjectEnums projectEnums = ProjectEnums.getById(application.getProject());
+            MemberTypeEnums projectEnums = MemberTypeEnums.getById(application.getMemberTypeId());
             if (projectEnums != null) {
-                dto.setProject(projectEnums.getProjectName());
+                dto.setProject(projectEnums.getMemberTypeName());
             }
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId())==null?"否":"是");

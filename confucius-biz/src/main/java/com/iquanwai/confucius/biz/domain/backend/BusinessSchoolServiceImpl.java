@@ -237,9 +237,9 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         application.setValid(valid);
         application.setDeal(false);
         if (goodsId == RiseMember.BS_APPLICATION) {
-            application.setProject(Constants.Project.CORE_PROJECT);
+            application.setMemberTypeId(Constants.MemberType.ELITE);
         } else if (goodsId == RiseMember.BUSINESS_THOUGHT_APPLY) {
-            application.setProject(Constants.Project.BUSINESS_THOUGHT_PROJECT);
+            application.setMemberTypeId(Constants.MemberType.THOUGHT);
         }
         if (lastBusinessApplication != null) {
             application.setLastVerified(lastBusinessApplication.getStatus());

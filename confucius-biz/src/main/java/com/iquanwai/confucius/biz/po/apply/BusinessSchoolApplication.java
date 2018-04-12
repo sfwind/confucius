@@ -30,7 +30,13 @@ public class BusinessSchoolApplication {
     /**
      * 课程类型
      */
+    @Deprecated
     private Integer project;
+
+    /**
+     * 项目类型
+     */
+    private Integer memberTypeId;
 
     private String originMemberTypeName;
 
