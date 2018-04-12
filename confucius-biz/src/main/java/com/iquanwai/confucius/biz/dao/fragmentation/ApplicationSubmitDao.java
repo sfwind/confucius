@@ -109,7 +109,7 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
     public List<ApplicationSubmit> getPracticeSubmit(Integer practiceId, Page page) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from ApplicationSubmit where ApplicationId=? and Content is not null and Del=0 " +
-                "order by Priority desc, PublishTime desc limit "
+                "order by Priority desc, LastModifiedTime desc limit "
                 + page.getOffset() + "," + page.getLimit();
         ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
         try {
