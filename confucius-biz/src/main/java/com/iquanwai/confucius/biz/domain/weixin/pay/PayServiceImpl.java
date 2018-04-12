@@ -199,7 +199,6 @@ public class PayServiceImpl implements PayService {
             // 购买专项课
             signupService.payMonthlyCampSuccess(orderId);
         }
-        signupService.refreshStatus(quanwaiOrder, orderId);
     }
 
 
@@ -209,7 +208,6 @@ public class PayServiceImpl implements PayService {
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
         signupService.payRiseSuccess(quanwaiOrder.getOrderId());
-        signupService.refreshStatus(quanwaiOrder, orderId);
     }
 
 

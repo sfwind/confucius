@@ -141,13 +141,8 @@ public interface SignupService {
     BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
 
 
-    /**
-     * 刷新用户信息
-     *
-     * @param quanwaiOrder 订单信息
-     * @param orderId      订单id
-     */
-    void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId);
+    void refreshStatus(String orderId);
+
 
     /**
      * 根据商品类型和售价智能选择优惠券

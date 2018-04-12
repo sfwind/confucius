@@ -288,7 +288,7 @@ public class SignupServiceImpl implements SignupService {
 
         sendPurchaseMessage(profile, RiseMember.CAMP, orderId, year, month);
         // 刷新相关状态
-        refreshStatus(quanwaiOrderDao.loadOrder(orderId), profile, orderId);
+        refreshStatus(orderId);
     }
 
     /**
@@ -603,7 +603,10 @@ public class SignupServiceImpl implements SignupService {
         Profile profile = accountService.getProfile(riseOrder.getProfileId());
         // 发送模板消息
         sendPurchaseMessage(profile, memberType.getId(), orderId, businessSchoolConfig.getSellingYear(), businessSchoolConfig.getSellingMonth());
+
+        this.refreshStatus(orderId);
     }
+
 
     private void sendPurchaseMessage(Profile profile, Integer memberTypeId, String orderId, Integer year, Integer month) {
         Assert.notNull(profile, "openid不能为空");
@@ -854,6 +857,7 @@ public class SignupServiceImpl implements SignupService {
             // 提交有效申请
             operationLogService.trace(order.getProfileId(), "submitValidApply");
         }
+        this.refreshStatus(orderId);
     }
 
     @Override
@@ -862,10 +866,12 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public void refreshStatus(QuanwaiOrder quanwaiOrder, String orderId) {
+    public void refreshStatus(String orderId) {
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Profile profile = accountService.getProfile(quanwaiOrder.getProfileId());
         this.refreshStatus(quanwaiOrder, profile, orderId);
     }
+
 
     private void refreshStatus(QuanwaiOrder quanwaiOrder, Profile profile, String orderId) {
         // 刷新会员状态
