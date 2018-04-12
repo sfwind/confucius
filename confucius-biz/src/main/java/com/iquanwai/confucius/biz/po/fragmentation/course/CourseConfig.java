@@ -26,4 +26,8 @@ public class CourseConfig {
      * 该条数据记录是否生效
      */
     private Boolean active;
+    /**
+     * 售卖中专项课结营日期
+     */
+    private Date closeDate;
 }

@@ -7,7 +7,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.course.MonthlyCampConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -115,14 +114,6 @@ public interface SignupService {
      */
     RiseMember currentRiseMember(Integer profileId);
 
-
-    /**
-     * 当月专项课
-     *
-     * @param monthlyCampConfig 专项课配置信息
-     * @return 售卖月份
-     */
-    Integer loadCurrentCampMonth(MonthlyCampConfig monthlyCampConfig);
 
     /**
      * 获得该会员对应月份主修课id

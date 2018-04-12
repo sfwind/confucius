@@ -1,7 +1,5 @@
 package com.iquanwai.confucius.biz.domain.fragmentation;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolConfigDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampConfigDao;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
@@ -41,15 +39,15 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public MonthlyCampConfig loadMonthlyCampConfig() {
-        return JSONObject.parseObject(JSON.toJSONString(monthlyCampConfig), MonthlyCampConfig.class);
+        return monthlyCampConfig.copy();
     }
 
     @Override
     public BusinessSchoolConfig loadBusinessCollegeConfig(Integer memberTypeId) {
         if (memberTypeId == RiseMember.ELITE) {
-            return JSONObject.parseObject(JSON.toJSONString(businessSchoolConfig), BusinessSchoolConfig.class);
+            return businessSchoolConfig.copy();
         } else if (memberTypeId == RiseMember.BUSINESS_THOUGHT) {
-            return JSONObject.parseObject(JSON.toJSONString(businessThoughtConfig), BusinessSchoolConfig.class);
+            return businessThoughtConfig.copy();
         }
         return null;
     }

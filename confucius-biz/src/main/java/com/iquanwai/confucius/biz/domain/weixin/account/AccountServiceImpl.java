@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
@@ -15,6 +16,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
@@ -28,14 +30,13 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.course.BusinessSchoolConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.course.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
 import com.iquanwai.confucius.biz.util.ThreadPool;
@@ -102,6 +103,8 @@ public class AccountServiceImpl implements AccountService {
     private RiseMemberManager riseMemberManager;
     @Autowired
     private CacheService cacheService;
+    @Autowired
+    private RiseMemberTypeRepo riseMemberTypeRepo;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -381,51 +384,9 @@ public class AccountServiceImpl implements AccountService {
         return profile;
     }
 
-    @Override
-    public Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId) {
-        /*
-        1.商业进阶课无需报名 x
-        2.申请核心能力通过(未报名) x
-        3.专业版无需申请 o
-        4.申请通过 o
-        5.是否有进行中的申请 x
-         */
-        RiseMember riseMember = riseMemberManager.businessThought(profileId);
-        if (riseMember != null) {
-            return Pair.of(false, "您已经是商业进阶课用户");
-        }
-        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
-
-        if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
-            if (riseMemberManager.coreBusinessSchoolMember(profileId) == null) {
-                return Pair.of(false, "您已经申请核心能力项目，可联系圈外更改申请项目");
-            }
-        }
-        RiseMember proMember = riseMemberManager.proMember(profileId);
-
-        if (proMember != null) {
-            //如果用户是专业版或者精英版,则无需申请
-            return Pair.of(true, "ok");
-        }
-        if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-            return Pair.of(true, "ok");
-        } else {
-            // 查看是否有进行中的申请
-            List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> !item.getDeal()).collect(Collectors.toList());
-            if (!checking.isEmpty()) {
-                if (checking.stream().anyMatch(item -> item.getProject() == Constants.Project.CORE_PROJECT)) {
-                    return Pair.of(false, "你已申请核心能力课，可申请调换");
-                } else {
-                    return Pair.of(false, "您的申请正在审核中");
-                }
-            } else {
-                return Pair.of(false, "请先提交申请");
-            }
-        }
-    }
 
     @Override
-    public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project) {
+    public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer memberTypeId) {
         /*
         1.1已经是商学院用户-核心能力项 x
         1.2可以报名商业思维且为报名-核心能力项 x
@@ -437,54 +398,35 @@ public class AccountServiceImpl implements AccountService {
 
         3.有进行中的申请 x
         4.最近一个月被拒绝过 x
+         */
 
         // TODO 过期状态、付费状态回写，如果已经付费，则相当于已经付费
-
         // TODO 核心能力项目不能申请分拆项目(两个六个月)
-         */
-        // TODO project改为membertypeid 8/3 ,缺一个申请和会员的映射,不能同时申请
-        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
-        if (Constants.Project.CORE_PROJECT == project) {
-            RiseMember riseMember = riseMemberManager.coreBusinessSchoolMember(profileId);
-            if (riseMember != null) {
-                return Pair.of(false, "您已经是商学院用户,无需重复申请");
-            }
-            if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-                // 有能力报名进阶，查看是否已经报名
-                if (riseMemberManager.businessThought(profileId) == null) {
-                    return Pair.of(false, "您已有商业思维项目报名权限，可以联系圈外更改报名项目");
-                }
-            }
-            if (this.hasPrivilegeForBusinessSchool(profileId).getLeft()) {
-                return Pair.of(false, "您已有商学院报名权限,无需重复申请");
-            }
-        } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == project) {
-            RiseMember riseMember = riseMemberManager.businessThought(profileId);
-            if (riseMember != null) {
-                return Pair.of(false, "您已经是商业思维项目用户，无需重复申请");
-            }
-            if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
-                if (riseMemberManager.coreBusinessSchoolMember(profileId) == null) {
-                    return Pair.of(false, "您已有核心课报名权限，可以联系圈外更改报名项目");
-                }
-            }
-            if (this.hasPrivilegeForMiniMBA(profileId).getLeft()) {
-                return Pair.of(false, "您已有商业思维项目报名权限,无需重复申请");
-            }
+        // 是否已经报名本状态
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        boolean entryThis = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, Lists.newArrayList(memberTypeId)).stream().findAny().isPresent();
+        if (entryThis) {
+            return Pair.of(false, "您已经报名" + memberType.getDescription() + ",无需重复申请");
         }
+
+        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
+        // 是否有权限报名
+        if (this.hasAvailableApply(applyList, memberTypeId)) {
+            return Pair.of(false, "您已经有" + memberType.getDescription() + "报名权限，无需重复申请");
+        }
+        // 可以报名其他项目
+        if (this.hasAvailableOtherApply(applyList, memberTypeId)) {
+            return Pair.of(false, "您有其他项目报名权限，需申请更换报名项目");
+        }
+        // 检查有没有进行中
         if (applyList.stream().anyMatch(item -> !item.getDeal())) {
             return Pair.of(false, "您的申请正在审核中");
         }
-//        RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-//        if (riseCertificate != null) {
-//            return Pair.of(false, "优秀学员有报名权限,无需重复申请");
-//        }
-
 
         // 一个月之内被拒绝过
         List<BusinessSchoolApplication> rejectLists = applyList
                 .stream()
-                .filter(item -> item.getProject().equals(project))
+                .filter(item -> item.getMemberTypeId().equals(memberTypeId))
                 .filter(item -> item.getStatus() == BusinessSchoolApplication.REJECT)
                 .filter(item -> new DateTime(item.getDealTime()).withTimeAtStartOfDay().plusMonths(1).isAfter(new DateTime().withTimeAtStartOfDay()))
                 .collect(Collectors.toList());
@@ -500,64 +442,43 @@ public class AccountServiceImpl implements AccountService {
         return Pair.of(true, "ok");
     }
 
+
     @Override
-    public Pair<Boolean, String> hasPrivilegeForBusinessSchool(Integer profileId) {
+    public Pair<Boolean, String> hasPrivilegeForMember(Integer profileId, Integer memberTypeId) {
         /*
-        1.查看是否开放报名 x
-        3.精英版不能报名 x
-        2.专业版有效期内可直接报名  o
-        4.商业思维申请通过  x
-        5.申请通过可以报名 o
-//        6.有优秀证书可以报名 o
-        7.剩下的都不可以报名，根据是否有申请中的记录进行提示
+        1.查看是否开放报名
+        2.已经报过的不能报名
+        3.专业版直接付费
+        4.需要申请
          */
-        // 购买会员
-        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(RiseMember.ELITE);
-        if (!businessSchoolConfig.getPurchaseSwitch()) {
-            return Pair.of(false, "商学院报名临时关闭\n记得及时关注开放时间哦");
+        // 查看是否开放报名 x
+        CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        if (!courseConfig.getPurchaseSwitch()) {
+            return Pair.of(false, memberType.getDescription() + "报名临时关闭\n记得及时关注开放时间哦");
         }
-//        else {
-//            // 查看是否开放报名
-//            if (ConfigUtils.getRisePayStopTime().before(new Date())) {
-//                return Pair.of(false, "谢谢您关注圈外商学院!\n本次报名已达到限额\n记得及时关注下期开放通知哦");
-//            }
-//        }
-        // TODO 查1234
-        // TODO 身份共存,1234 不能共存，5、8
-        RiseMember riseMember = riseMemberManager.oldMember(profileId);
-
+        // 已经报过的不能报名
+        RiseMember riseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, memberTypeId);
         if (riseMember != null) {
-            Integer memberTypeId = riseMember.getMemberTypeId();
-            if (RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
-                return Pair.of(false, "您已经是商学院用户，无需购买");
-            }
-            //如果用户是专业版,则无需申请
-            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId) {
-                return Pair.of(true, "ok");
-            }
-        }
-        // TODO project改成memberTypeId
-        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
-        if (this.hasAvailableApply(applyList, Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-            if (riseMemberManager.businessThought(profileId) == null) {
-                return Pair.of(false, "您已经申请商业进阶课，可联系圈外更改申请项目");
-            }
+            return Pair.of(false, "您已经是" + memberType.getDescription() + "用户，无需购买");
         }
 
-        if (this.hasAvailableApply(applyList, Constants.Project.CORE_PROJECT)) {
+        if (riseMemberManager.proMember(profileId) != null) {
+            // 专业版直接付费 to Del
+            return Pair.of(true, "ok");
+        }
+        // 有其他申请通过
+        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
+        if (this.hasAvailableOtherApply(applyList, memberTypeId)) {
+            return Pair.of(false, "您有其他项目报名权限，需申请更换报名项目");
+        }
+        // 申请通过
+        if (this.hasAvailableApply(applyList, memberTypeId)) {
             return Pair.of(true, "ok");
         }
 
-
-//        //如果用户曾经获得证书,则无需申请
-//        RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-//        if (riseCertificate != null) {
-//            return Pair.of(true, "ok");
-//        }
-
-        //TODO 查看是否有进行中的申请，文案改为通用逻辑
-        List<BusinessSchoolApplication> checking = applyList.stream().filter(item -> !item.getDeal()).collect(Collectors.toList());
-        if (!checking.isEmpty()) {
+        boolean hasApplying = applyList.stream().anyMatch(item -> !item.getDeal());
+        if (hasApplying) {
             return Pair.of(false, "您的申请正在审核中");
         } else {
             return Pair.of(false, "请先提交申请");
@@ -740,13 +661,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Date loadLastApplicationDealTime(Integer profileId, Integer project) {
-        BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao.loadLastApproveApplication(profileId, project);
-        if (businessSchoolApplication != null) {
-            return businessSchoolApplication.getDealTime();
-        } else {
-            return null;
-        }
+    public BusinessSchoolApplication loadLastApply(Integer profileId, Integer project) {
+        return businessSchoolApplicationDao.loadLastApproveApplication(profileId, project);
     }
 
     @Override
@@ -755,13 +671,40 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer project) {
+    public boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId) {
         return applyList
                 .stream()
-                .filter(item -> Objects.equals(item.getProject(), project))
+                .filter(item -> Objects.equals(item.getMemberTypeId(), memberTypeId))
                 .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
                 .filter(BusinessSchoolApplication::getDeal)
-                .anyMatch(item -> DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) > 0);
+                .filter(item -> !item.getExpired())
+                .peek(item -> {
+                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
+                        // 已经过期
+                        item.setExpired(true);
+                        businessSchoolApplicationDao.expiredApply(item.getId());
+                    }
+                })
+                .filter(item -> !item.getEntry())
+                .anyMatch(item -> !item.getExpired());
+    }
+
+    @Override
+    public boolean hasAvailableOtherApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId) {
+        return applyList
+                .stream()
+                .filter(item -> !Objects.equals(item.getMemberTypeId(), memberTypeId))
+                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
+                .filter(BusinessSchoolApplication::getDeal)
+                .filter(item -> !item.getExpired())
+                .peek(item -> {
+                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
+                        // 已经过期
+                        item.setExpired(true);
+                        businessSchoolApplicationDao.expiredApply(item.getId());
+                    }
+                })
+                .anyMatch(item -> !item.getExpired());
     }
 
     @Override
@@ -771,16 +714,14 @@ public class AccountServiceImpl implements AccountService {
         2.已经报过这个月的 x
         3.本月报名已经关闭 x
          */
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+        CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
         RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
         // 购买专项课
-        if (riseMember != null && (RiseMember.HALF_ELITE == riseMember.getMemberTypeId() ||
-                RiseMember.ELITE == riseMember.getMemberTypeId())) {
+        if (riseMember != null && RiseMember.isMember(riseMember.getMemberTypeId())) {
             return Pair.of(false, "您已经是圈外商学院学员，拥有主题专项课，无需重复报名\n如有疑问请在学习群咨询班长");
         } else {
-            List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
-            List<Integer> months = classMembers.stream().map(RiseClassMember::getMonth).collect(Collectors.toList());
-            if (months.contains(monthlyCampConfig.getSellingMonth())) {
+            RiseMember campRiseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, RiseMember.CAMP);
+            if (campRiseMember != null) {
                 return Pair.of(false, "您已经是" + monthlyCampConfig.getSellingMonth() + "月专项课用户");
             }
             if (!monthlyCampConfig.getPurchaseSwitch()) {

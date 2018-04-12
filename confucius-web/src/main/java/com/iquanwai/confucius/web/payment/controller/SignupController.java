@@ -17,13 +17,14 @@ import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.course.MonthlyCampConfig;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -35,6 +36,7 @@ import com.iquanwai.confucius.web.payment.dto.MonthlyCampProcessDto;
 import com.iquanwai.confucius.web.payment.dto.PaymentDto;
 import com.iquanwai.confucius.web.payment.dto.RiseMemberDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
+import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -176,19 +178,21 @@ public class SignupController {
     }
 
     private Pair<Integer, Integer> calcDealTime(Integer memberTypeId, Integer profileId) {
-        // TODO update
         Date dealTime = null;
+
+        BusinessSchoolApplication businessSchoolApplication = null;
         if (memberTypeId.equals(RiseMember.ELITE)) {
-            dealTime = accountService.loadLastApplicationDealTime(profileId, Constants.Project.CORE_PROJECT);
+            businessSchoolApplication = accountService.loadLastApply(profileId, Constants.Project.CORE_PROJECT);
         } else if (memberTypeId.equals(RiseMember.BUSINESS_THOUGHT)) {
-            dealTime = accountService.loadLastApplicationDealTime(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT);
+            businessSchoolApplication = accountService.loadLastApply(profileId, Constants.Project.BUSINESS_THOUGHT_PROJECT);
         }
-        if (dealTime == null) {
+        if (businessSchoolApplication == null) {
             return Pair.of(24, 0);
         } else {
-            businessSchoolService
+            dealTime = businessSchoolApplication.getDealTime();
             int time = DateUtils.intervalMinute(DateUtils.afterHours(dealTime, 24));
             if (time <= 0) {
+                businessSchoolService.expiredApply(businessSchoolApplication.getId());
                 return Pair.of(0, 0);
             } else {
                 return Pair.of(time / 60, time % 60);
@@ -197,7 +201,7 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/rise/member/check/{memberTypeId}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(LoginUser loginUser, @PathVariable Integer memberTypeId) {
+    public ResponseEntity<Map<String, Object>> checkRiseMemberDate(UnionUser loginUser, @PathVariable Integer memberTypeId) {
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
@@ -206,7 +210,6 @@ public class SignupController {
         operationLogService.log(operationLog);
         RiseMemberDto dto = new RiseMemberDto();
         // 检查是否有报名权限
-        // TODO 子康
         Pair<Boolean, String> result = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
         dto.setPrivilege(result.getLeft());
         dto.setErrorMsg(result.getRight());
@@ -256,10 +259,6 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> loadGoodsInfo(LoginUser loginUser, @RequestBody GoodsInfoDto goodsInfoDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(goodsInfoDto, "商品信息不能为空");
-//        if (!GoodsInfoDto.GOODS_TYPES.contains(goodsInfoDto.getGoodsType())) {
-//            logger.error("获取商品信息的商品类型异常,{}", goodsInfoDto);
-//            return WebUtils.error("商品类型异常");
-//        }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
@@ -274,12 +273,6 @@ public class SignupController {
         if (memberType != null) {
             goodsInfoDto.setInitPrice(memberType.getInitPrice());
             goodsInfoDto.setFee(memberType.getFee());
-            // 申请付费不填写时间
-            if (!QuanwaiOrder.BS_APPLICATION.equals(goodsInfoDto.getGoodsType())) {
-                // TODO
-                goodsInfoDto.setStartTime(memberType.getStartTime());
-                goodsInfoDto.setEndTime(memberType.getEndTime());
-            }
             // TODO 交换description和name
             goodsInfoDto.setName(memberType.getName());
         }
@@ -322,10 +315,6 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> loadPayParam(LoginUser loginUser, HttpServletRequest request, @RequestBody PaymentDto paymentDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(paymentDto, "支付信息不能为空");
-//        if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
-//            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
-//            return WebUtils.error("商品类型异常");
-//        }
 
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
@@ -377,10 +366,6 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> calculateCoupons(LoginUser loginUser, @RequestBody PaymentDto paymentDto) {
         Assert.notNull(loginUser, "用户不能为空");
         Assert.notNull(paymentDto, "支付信息不能为空");
-//        if (!GoodsInfoDto.GOODS_TYPES.contains(paymentDto.getGoodsType())) {
-//            logger.error("获取商品信息的商品类型异常,{}", paymentDto);
-//            return WebUtils.error("商品类型异常");
-//        }
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("报名")
                 .function("报名页面")
@@ -394,8 +379,8 @@ public class SignupController {
     public ResponseEntity<Map<String, Object>> validateCampUrl(LoginUser loginUser) {
         Assert.notNull(loginUser, "登录用户不能为空");
         MonthlyCampProcessDto dto = new MonthlyCampProcessDto();
-        MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
-        Integer currentSellingMonth = signupService.loadCurrentCampMonth(monthlyCampConfig);
+        CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
+        Integer currentSellingMonth = monthlyCampConfig.getSellingMonth();
         dto.setMarkSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
         dto.setCurrentCampMonth(currentSellingMonth);
         dto.setCampMonthProblemId(signupService.loadHrefProblemId(loginUser.getId(), currentSellingMonth));
@@ -598,10 +583,10 @@ public class SignupController {
         if (json == null) {
             return WebUtils.error("配置异常");
         } else {
-            MonthlyCampConfig monthlyCampConfig = cacheService.loadMonthlyCampConfig();
+            CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
             CampInfoDto dto = JSONObject.parseObject(json, CampInfoDto.class);
             dto.setMarkSellingMemo(monthlyCampConfig.getSellingYear() + "-" + monthlyCampConfig.getSellingMonth());
-            dto.setCurrentCampMonth(signupService.loadCurrentCampMonth(monthlyCampConfig));
+            dto.setCurrentCampMonth(monthlyCampConfig.getSellingMonth());
             return WebUtils.result(dto);
         }
     }

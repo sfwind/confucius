@@ -42,6 +42,19 @@ public class RiseMemberDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+
+    public RiseMember loadValidRiseMemberByMemberTypeId(Integer profileId, Integer memberType) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND memberTypeId = ? AND Expired=0 AND Del = 0";
+        BeanHandler<RiseMember> h = new BeanHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, profileId, memberType);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public void updateExpiredAhead(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE RiseMember SET Expired = 1, Memo = '商学院提前过期' WHERE ProfileId = ? AND Expired = 0 AND Del = 0";

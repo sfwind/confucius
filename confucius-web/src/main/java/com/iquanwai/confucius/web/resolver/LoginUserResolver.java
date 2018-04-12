@@ -48,7 +48,6 @@ public class LoginUserResolver implements HandlerMethodArgumentResolver {
         loginUser.setWeixinName(unionUser.getNickName());
         loginUser.setHeadimgUrl(unionUser.getHeadImgUrl());
         loginUser.setRealName("");
-        loginUser.setUnionId(unionUser.getUnionId());
         return loginUser;
     }
 

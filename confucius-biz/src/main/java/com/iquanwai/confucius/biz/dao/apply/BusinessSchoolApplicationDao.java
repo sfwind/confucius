@@ -24,7 +24,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // TODO wait
-    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId,Integer memberTypeId) {
+    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId, Integer memberTypeId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND MemberTypeId = ? AND Del = 0 AND Status = 1 AND Valid = 1 Order by Id desc";
         try {
@@ -226,5 +226,16 @@ public class BusinessSchoolApplicationDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
+    }
+
+    public Integer expiredApply(Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE BusinessSchoolApplication SET Expired = 1 WHERE Id = ?";
+        try {
+            return runner.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
     }
 }

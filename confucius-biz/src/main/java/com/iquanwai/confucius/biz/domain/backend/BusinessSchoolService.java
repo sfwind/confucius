@@ -101,4 +101,6 @@ public interface BusinessSchoolService {
 
 
     void submitBusinessApply(Integer profileId, List<BusinessApplySubmit> userApplySubmits, Boolean valid, Integer goodsId);
+
+    void expiredApply(Integer id);
 }

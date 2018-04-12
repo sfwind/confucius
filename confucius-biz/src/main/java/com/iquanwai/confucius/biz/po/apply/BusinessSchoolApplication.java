@@ -27,6 +27,8 @@ public class BusinessSchoolApplication {
     private Integer lastVerified;
     private Integer interviewer;
     private Boolean valid;
+    private Boolean expired;
+    private Boolean entry;
     /**
      * 课程类型
      */

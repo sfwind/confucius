@@ -11,7 +11,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -87,14 +86,6 @@ public interface AccountService {
      */
     Profile loadProfileByMemberId(String memberId);
 
-    /**
-     * 是否有权限报名商业进阶课
-     *
-     * @param profileId 用户id
-     * @return left:权限<br/>
-     * right:报错信息
-     */
-    Pair<Boolean, String> hasPrivilegeForMiniMBA(Integer profileId);
 
     /**
      * 是否有权限去申请商学院报名
@@ -106,14 +97,8 @@ public interface AccountService {
      */
     Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer project);
 
-    /**
-     * 是否有权限报名核心能力项目
-     *
-     * @param profileId 用户id
-     * @return left:权限<br/>
-     * right:报错信息
-     */
-    Pair<Boolean, String> hasPrivilegeForBusinessSchool(Integer profileId);
+
+    Pair<Boolean, String> hasPrivilegeForMember(Integer profileId, Integer memberTypeId);
 
     /**
      * 获取黑名单列表
@@ -167,13 +152,15 @@ public interface AccountService {
     /**
      * 获取用户最后一次审批通过的商学院申请的通过时间
      */
-    Date loadLastApplicationDealTime(Integer profileId, Integer project);
+    BusinessSchoolApplication loadLastApply(Integer profileId, Integer project);
 
 
     boolean hasAvailableApply(Integer profileId, Integer project);
 
 
     boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer project);
+
+    boolean hasAvailableOtherApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId);
 
     Pair<Boolean, String> hasPrivilegeForCamp(Integer profileId);
 

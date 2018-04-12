@@ -266,4 +266,8 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         operationLogService.trace(profileId, "submitApply");
     }
 
+    @Override
+    public void expiredApply(Integer id) {
+        businessSchoolApplicationDao.expiredApply(id);
+    }
 }

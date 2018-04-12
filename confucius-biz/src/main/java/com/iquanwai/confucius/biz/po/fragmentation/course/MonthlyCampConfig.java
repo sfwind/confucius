@@ -2,13 +2,17 @@ package com.iquanwai.confucius.biz.po.fragmentation.course;
 
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
 public class MonthlyCampConfig extends CourseConfig {
-    /**
-     * 售卖中专项课结营日期
-     */
-    private Date closeDate;
 
+    public MonthlyCampConfig copy() {
+        MonthlyCampConfig config = new MonthlyCampConfig();
+        config.setActive(this.getActive());
+        config.setCloseDate(this.getCloseDate());
+        config.setOpenDate(this.getOpenDate());
+        config.setPurchaseSwitch(this.getPurchaseSwitch());
+        config.setSellingMonth(this.getSellingMonth());
+        config.setSellingYear(this.getSellingYear());
+        return config;
+    }
 }

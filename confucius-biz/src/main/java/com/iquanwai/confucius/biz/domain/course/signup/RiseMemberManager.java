@@ -56,4 +56,5 @@ public interface RiseMemberManager {
      */
     List<RiseMember> loadPersonalAllRiseMembers(Integer profileId);
 
+    Integer loadApplyMemberMapping(Integer applyMemberId);
 }
