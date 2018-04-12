@@ -601,8 +601,15 @@ public class SignupServiceImpl implements SignupService {
         riseMemberDao.insert(riseMember);
 
         Profile profile = accountService.getProfile(riseOrder.getProfileId());
+        // 回写支付状态
+        BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao.loadLastApproveApplication(riseOrder.getProfileId(), riseOrder.getMemberType());
+        if (businessSchoolApplication != null) {
+            businessSchoolApplicationDao.entryApply(businessSchoolApplication.getId());
+        }
+
         // 发送模板消息
         sendPurchaseMessage(profile, memberType.getId(), orderId, businessSchoolConfig.getSellingYear(), businessSchoolConfig.getSellingMonth());
+
 
         this.refreshStatus(orderId);
     }
