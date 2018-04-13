@@ -26,11 +26,11 @@ public class FragmentClassMemberDao extends PracticeDBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO ClassMember (ProfileId, ClassName, GroupId, MemberTypeId) VALUES (?, ?, ?, ?)";
         try {
-            return runner.insert(sql, new ScalarHandler<>(),
+            return runner.insert(sql, new ScalarHandler<Long>(),
                     classMember.getProfileId(),
                     classMember.getClassName(),
                     classMember.getGroupId(),
-                    classMember.getMemberTypeId());
+                    classMember.getMemberTypeId()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
