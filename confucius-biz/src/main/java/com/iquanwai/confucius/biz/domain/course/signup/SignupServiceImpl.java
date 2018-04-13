@@ -376,6 +376,7 @@ public class SignupServiceImpl implements SignupService {
         classMember.setMemberTypeId(memberTypeId);
         classMember.setProfileId(profileId);
         fragmentClassMemberDao.insert(classMember);
+        System.out.println(targetClassName.toString() + ":" + targetMemberId.toString() + ":" + profile.getMemberId());
     }
 
 

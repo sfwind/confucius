@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.domain.fragmentation.ClassMember;
+import com.iquanwai.confucius.biz.po.fragmentation.course.ClassMemberTest;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -31,6 +32,17 @@ public class FragmentClassMemberDao extends PracticeDBUtil {
                     classMember.getClassName(),
                     classMember.getGroupId(),
                     classMember.getMemberTypeId()).intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
+    public Integer insert(ClassMemberTest classMember) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO ClassMemberTest (ProfileId, MemberTypeId, ClassName, MemberId) VALUES (?, ?, ?, ?)";
+        try {
+            return runner.insert(sql, new ScalarHandler<Long>(), classMember.getProfileId(), classMember.getMemberId(), classMember.getClassName(), classMember.getMemberId()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

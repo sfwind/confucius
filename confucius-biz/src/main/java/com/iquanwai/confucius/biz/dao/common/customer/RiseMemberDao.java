@@ -186,4 +186,14 @@ public class RiseMemberDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+//    public void update(Integer id, Integer memberTypeId) {
+//        QueryRunner runner = new QueryRunner(getDataSource());
+//        String sql = "UPDATE RiseMember SET MemberTypeId = ?  WHERE Id = ?";
+//        try {
+//            runner.update(sql, memberTypeId, id);
+//        } catch (SQLException e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
+//    }
 }
