@@ -704,6 +704,7 @@ public class AccountServiceImpl implements AccountService {
                         businessSchoolApplicationDao.expiredApply(item.getId());
                     }
                 })
+                .filter(item -> !item.getEntry())
                 .anyMatch(item -> !item.getExpired());
     }
 
