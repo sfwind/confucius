@@ -22,9 +22,9 @@ public class FragmentClassMemberDao extends PracticeDBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public int insert(ClassMember classMember) {
+    public Integer insert(ClassMember classMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO fragmentCourse.ClassMember (ProfileId, ClassName, GroupId, MemberTypeId) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ClassMember (ProfileId, ClassName, GroupId, MemberTypeId) VALUES (?, ?, ?, ?)";
         try {
             return runner.insert(sql, new ScalarHandler<>(),
                     classMember.getProfileId(),
