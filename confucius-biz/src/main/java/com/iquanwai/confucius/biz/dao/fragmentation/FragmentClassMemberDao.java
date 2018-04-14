@@ -3,9 +3,9 @@ package com.iquanwai.confucius.biz.dao.fragmentation;
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.domain.fragmentation.ClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.course.ClassMemberTest;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -38,17 +38,6 @@ public class FragmentClassMemberDao extends PracticeDBUtil {
         return -1;
     }
 
-    public Integer insert(ClassMemberTest classMember) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO ClassMemberTest (ProfileId, MemberTypeId, ClassName, MemberId) VALUES (?, ?, ?, ?)";
-        try {
-            return runner.insert(sql, new ScalarHandler<Long>(), classMember.getProfileId(), classMember.getMemberId(), classMember.getClassName(), classMember.getMemberId()).intValue();
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return -1;
-    }
-
     public List<ClassMember> loadByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ClassMember WHERE ProfileId = ? AND Del = 0";
@@ -61,28 +50,16 @@ public class FragmentClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public List<ClassMember> loadByProfileIdAndMemberTypeId(Integer profileId, Integer memberTypeId) {
+    public ClassMember loadByProfileIdAndMemberTypeId(Integer profileId, Integer memberTypeId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ClassMember WHERE ProfileId = ? AND MemberTypeId = ? AND Del = 0";
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
+        BeanHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
         try {
             return runner.query(sql, h, profileId, memberTypeId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        return Lists.newArrayList();
-    }
-
-    public List<ClassMember> loadByMemberTypeId(Integer memberTypeId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ClassMember WHERE MemberTypeId = ? AND Del = 0";
-        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
-        try {
-            return runner.query(sql, h, memberTypeId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
+        return null;
     }
 
     public List<ClassMember> loadByProfileIds(List<Integer> profileIds) {

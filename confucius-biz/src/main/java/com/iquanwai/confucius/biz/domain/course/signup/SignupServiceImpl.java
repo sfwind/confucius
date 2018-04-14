@@ -34,7 +34,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.course.BusinessSchoolConfig;
@@ -311,7 +310,8 @@ public class SignupServiceImpl implements SignupService {
             sellingYear = yearMonth.getLeft();
             sellingMonth = yearMonth.getRight();
             // 获取prefix
-            prefix = classMemberPrefixes.get(memberTypeId);
+            String classPrefix = String.format("%02d", sellingYear % 2000) + String.format("%02d", sellingMonth);
+            prefix = classMemberPrefixes.get(memberTypeId) + classPrefix;
             Assert.notNull(prefix, "获取班级前缀失败");
         } catch (Exception e) {
             // 数据异常
@@ -323,11 +323,17 @@ public class SignupServiceImpl implements SignupService {
         // 班序号key、班内序号key、班级前缀
         String classNameKey = StringUtils.replace(CLASS_NAME_KEY, PLACEHOLDER, prefix);
         String memberIdKey = StringUtils.replace(CLASS_MEMBER_ID_KEY, PLACEHOLDER, prefix);
-        String classPrefix = String.format("%02d", sellingYear % 2000) + String.format("%02d", sellingMonth);
         StringBuilder targetMemberId = new StringBuilder();
         targetMemberId.append(prefix);
-        targetMemberId.append(classPrefix);
         StringBuilder targetClassName = new StringBuilder();
+        RiseMember riseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, memberTypeId);
+        ClassMember exists = fragmentClassMemberDao.loadByProfileIdAndMemberTypeId(profileId, memberTypeId);
+        String existsClassName;
+        if (exists != null && Objects.equals(exists.getMemberTypeId(), memberTypeId)) {
+            existsClassName = exists.getClassName();
+        } else {
+            existsClassName = null;
+        }
         redisUtil.lock(StringUtils.replace(CLASS_MEMBER_ID_LOCK, PLACEHOLDER, prefix), (lock) -> {
             // 1.班级序号
             String classNameSequence = redisUtil.get(classNameKey);
@@ -349,6 +355,16 @@ public class SignupServiceImpl implements SignupService {
                 memberIdSequence = String.format("%03d", memberId);
             }
 
+            // 设置班级和序号
+            targetMemberId.append(classNameSequence);
+            targetMemberId.append(memberIdSequence);
+            targetClassName.append(prefix);
+            targetClassName.append(classNameSequence);
+            if (Objects.equals(targetClassName.toString(), existsClassName)) {
+                //
+                return;
+            }
+
             if (memberId >= 200) {
                 // 满200人，人数重置1，班级+1
                 redisUtil.set(memberIdKey, "001", TimeUnit.DAYS.toSeconds(60));
@@ -357,11 +373,7 @@ public class SignupServiceImpl implements SignupService {
                 // 不满200，人数更新
                 redisUtil.set(memberIdKey, memberIdSequence, TimeUnit.DAYS.toSeconds(60));
             }
-            // 设置班级和序号
-            targetMemberId.append(classNameSequence);
-            targetMemberId.append(memberIdSequence);
-            targetClassName.append(prefix);
-            targetClassName.append(classNameSequence);
+
         });
         String className = targetClassName.toString();
         Profile profile = accountService.getProfile(profileId);
@@ -396,35 +408,6 @@ public class SignupServiceImpl implements SignupService {
         }
     }
 
-
-    /**
-     * 新增商学院用户 RiseClassMember 记录
-     */
-    private void insertBusinessCollegeRiseClassMember(Integer profileId) {
-        BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(RiseMember.ELITE);
-
-        // 查看当月是否有专项课的其他记录，如果有则删除
-        Integer sellingYear = businessSchoolConfig.getSellingYear();
-        Integer sellingMonth = businessSchoolConfig.getSellingMonth();
-        RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, sellingYear, sellingMonth);
-        if (riseClassMember != null) {
-            riseClassMemberDao.del(riseClassMember.getId());
-        }
-
-        // RiseClassMember 新增记录
-        String memberId = generateMemberId(sellingYear, sellingMonth, RiseClassMember.BUSINESS_MEMBERSHIP);
-
-        RiseClassMember classMember = new RiseClassMember();
-        classMember.setClassName(generateClassName(memberId));
-//        classMember.setMemberId(memberId);
-        classMember.setProfileId(profileId);
-        classMember.setYear(businessSchoolConfig.getSellingYear());
-        classMember.setMonth(businessSchoolConfig.getSellingMonth());
-        classMember.setActive(0);
-        riseClassMemberDao.insert(classMember);
-        Profile profile = accountService.getProfile(profileId);
-        accountService.updateMemberId(profileId, memberId);
-    }
 
     /**
      * 购买完专项课之后，更新 RiseMember 表中的数据
@@ -482,40 +465,6 @@ public class SignupServiceImpl implements SignupService {
         return monthlyCampOrderDao.loadCampOrder(orderId);
     }
 
-
-    /**
-     * 新学号格式：四位班级号（1701）+ 两位随着人数自增的值 + 一位身份信息（会员、课程、公益课、试听课） + 三位递增唯一序列（1701011001）
-     */
-    @Override
-    public String generateMemberId(Integer year, Integer month, Integer identityType) {
-        StringBuilder targetMemberId = new StringBuilder();
-
-        String classPrefix = String.format("%02d", year % 2000) + String.format("%02d", month);
-
-        String prefix = classPrefix + identityType;
-        String key = "customer:memberId:" + prefix;
-
-        redisUtil.lock("lock:memberId", (lock) -> {
-            String sequence = redisUtil.get(key);
-            if (sequence == null) {
-                sequence = "001";
-            } else {
-                sequence = String.format("%03d", Integer.parseInt(sequence) + 1);
-            }
-            redisUtil.set(key, sequence, TimeUnit.DAYS.toSeconds(60));
-            int sequenceInt = Integer.parseInt(sequence);
-            targetMemberId.append(classPrefix);
-            if (RiseClassMember.BUSINESS_MEMBERSHIP == identityType) {
-                targetMemberId.append(String.format("%02d", (sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1) * 2 - 1));
-            } else if (RiseClassMember.MONTHLY_CAMP == identityType) {
-                targetMemberId.append(String.format("%02d", (sequenceInt % 200 == 0 ? sequenceInt / 200 : sequenceInt / 200 + 1) * 2));
-            }
-            targetMemberId.append(identityType);
-            targetMemberId.append(String.format("%03d", sequenceInt % 200 == 0 ? 1 : sequenceInt % 200));
-        });
-
-        return targetMemberId.toString();
-    }
 
     private String generateClassName(String memberId) {
         return memberId.substring(0, 6);

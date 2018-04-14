@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.service;
 
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.TestBase;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by justin on 7/15/15.
@@ -35,24 +37,31 @@ public class HelloServiceTest extends TestBase {
     @Test
     public void test() {
         List<RiseMember> riseMembers = riseMemberDao.loadAll(RiseMember.class);
-//        Collections.shuffle(riseMembers);
-//        for (int i = 0; i < riseMembers.size(); i++) {
-//            RiseMember item = riseMembers.get(i);
-//            if (i < (riseMembers.size() / 3)) {
-//                riseMemberDao.update(item.getId(), 3);
-//            } else if (i > ((riseMembers.size() / 3) * 2)) {
-//                riseMemberDao.update(item.getId(), 5);
-//            } else {
-//                riseMemberDao.update(item.getId(), 8);
-//            }
-//        }
-    }
+        Map<Integer, Boolean> start = Maps.newHashMap();
+        start.put(1, true);
+        for (int i = 0; i < riseMembers.size(); i++) {
+            RiseMember riseMember = riseMembers.get(i);
+            new Thread(() -> {
+                while (start.get(1)) {
+                    //ignore
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                signupService.insertClassMemberMemberId(riseMember.getProfileId(), riseMember.getMemberTypeId());
+                System.out.println("complete");
+            }).start();
+        }
+        start.put(1, false);
+        try {
+            Thread.sleep(1000 * 100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-    @Test
-    public void soutTest() {
-        signupService.insertClassMemberMemberId(25556, 3);
 
-//        redisUtil.deleteByPattern("member:id:num*");
     }
 
 

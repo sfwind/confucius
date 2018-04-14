@@ -60,10 +60,6 @@ public interface SignupService {
      */
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-    /**
-     * 生成学号
-     */
-    String generateMemberId(Integer year, Integer month, Integer identityType);
 
     /**
      * 商学院购买成功处理
