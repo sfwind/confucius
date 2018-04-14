@@ -633,6 +633,13 @@ public class SignupController {
         return WebUtils.success();
     }
 
+    @RequestMapping(value = "/apply/project/mapping", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> applyProjectMapping(UnionUser unionUser, @RequestParam(value = "applyId") Integer applyId) {
+        Integer memberType = riseMemberManager.loadApplyMemberMapping(applyId);
+        MemberType memberTypeInfo = signupService.getMemberTypePayInfo(unionUser.getId(), memberType);
+        return WebUtils.result(memberTypeInfo);
+    }
+
 
     private boolean canUseCoupon(GoodsInfoDto goodsInfoDto) {
         //申请商学院不能用优惠券
