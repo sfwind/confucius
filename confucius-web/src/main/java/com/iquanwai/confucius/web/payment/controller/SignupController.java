@@ -28,6 +28,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ErrorMessageUtils;
+import com.iquanwai.confucius.web.payment.dto.ApplyMappingDto;
 import com.iquanwai.confucius.web.payment.dto.ApplySubmitDto;
 import com.iquanwai.confucius.web.payment.dto.CampInfoDto;
 import com.iquanwai.confucius.web.payment.dto.GoodsInfoDto;
@@ -180,7 +181,7 @@ public class SignupController {
 
         BusinessSchoolApplication businessSchoolApplication = accountService.loadLastApply(profileId, memberTypeId);
         if (businessSchoolApplication == null) {
-            return Pair.of(24, 0);
+            return Pair.of(23, 59);
         } else {
             int time = DateUtils.intervalMinute(DateUtils.afterHours(businessSchoolApplication.getDealTime(), 24));
             if (time <= 0) {
@@ -634,10 +635,21 @@ public class SignupController {
     }
 
     @RequestMapping(value = "/apply/project/mapping", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> applyProjectMapping(UnionUser unionUser, @RequestParam(value = "applyId") Integer applyId) {
-        Integer memberType = riseMemberManager.loadApplyMemberMapping(applyId);
-        MemberType memberTypeInfo = signupService.getMemberTypePayInfo(unionUser.getId(), memberType);
-        return WebUtils.result(memberTypeInfo);
+    public ResponseEntity<Map<String, Object>> applyProjectMapping(UnionUser unionUser, @RequestParam(value = "applyId", required = false) Integer applyId,
+                                                                   @RequestParam(value = "wannaGoodsId", required = false) Integer wannaGoodsId) {
+        Pair<Integer, Integer> applyWanna;
+        if (applyId != null) {
+            applyWanna = riseMemberManager.loadWannaGoodsIdByApplyId(applyId);
+        } else {
+            applyWanna = riseMemberManager.loadWannaGoodsIdByApplyId(applyId);
+        }
+        ApplyMappingDto dto = new ApplyMappingDto();
+        if (applyWanna != null) {
+            dto.setApplyId(applyWanna.getLeft());
+            dto.setWannaGoodsId(applyWanna.getRight());
+        }
+        return WebUtils.result(dto);
+
     }
 
 

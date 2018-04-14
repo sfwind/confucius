@@ -4,9 +4,11 @@ import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -16,6 +18,15 @@ import java.util.List;
 public class RiseMemberManagerImpl implements RiseMemberManager {
     @Autowired
     private RiseMemberDao riseMemberDao;
+
+    private List<Pair<Integer, Integer>> applyMapping;
+
+    @PostConstruct
+    public void init() {
+        applyMapping.clear();
+        applyMapping.add(Pair.of(RiseMember.BS_APPLICATION, RiseMember.ELITE));
+        applyMapping.add(Pair.of(RiseMember.BUSINESS_THOUGHT_APPLY, RiseMember.BUSINESS_THOUGHT));
+    }
 
     @Override
     public RiseMember coreBusinessSchoolMember(Integer profileId) {
@@ -113,12 +124,12 @@ public class RiseMemberManagerImpl implements RiseMemberManager {
     }
 
     @Override
-    public Integer loadApplyMemberMapping(Integer applyMemberId) {
-        if (RiseMember.BS_APPLICATION == applyMemberId) {
-            return RiseMember.ELITE;
-        } else if (RiseMember.BUSINESS_THOUGHT_APPLY == applyMemberId) {
-            return RiseMember.BUSINESS_THOUGHT;
-        }
-        return null;
+    public Pair<Integer, Integer> loadWannaGoodsIdByApplyId(Integer applyMemberId) {
+        return this.applyMapping.stream().filter(item -> item.getLeft().equals(applyMemberId)).findAny().orElse(null);
+    }
+
+    @Override
+    public Pair<Integer, Integer> loadApplyIdByGoodsId(Integer wannaGoodsId) {
+        return this.applyMapping.stream().filter(item -> item.getRight().equals(wannaGoodsId)).findAny().orElse(null);
     }
 }

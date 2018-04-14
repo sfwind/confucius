@@ -2,6 +2,7 @@ package com.iquanwai.confucius.biz.domain.course.signup;
 
 
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
@@ -56,5 +57,7 @@ public interface RiseMemberManager {
      */
     List<RiseMember> loadPersonalAllRiseMembers(Integer profileId);
 
-    Integer loadApplyMemberMapping(Integer applyMemberId);
+    Pair<Integer,Integer> loadWannaGoodsIdByApplyId(Integer applyMemberId);
+
+    Pair<Integer,Integer> loadApplyIdByGoodsId(Integer wannaGoodsId);
 }
