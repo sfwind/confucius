@@ -641,12 +641,12 @@ public class SignupController {
         if (applyId != null) {
             applyWanna = riseMemberManager.loadWannaGoodsIdByApplyId(applyId);
         } else {
-            applyWanna = riseMemberManager.loadWannaGoodsIdByApplyId(applyId);
+            applyWanna = riseMemberManager.loadWannaGoodsIdByApplyId(wannaGoodsId);
         }
         ApplyMappingDto dto = new ApplyMappingDto();
         if (applyWanna != null) {
-            dto.setApplyId(applyWanna.getLeft());
-            dto.setWannaGoodsId(applyWanna.getRight());
+            dto.setApply(signupService.getMemberTypePayInfo(unionUser.getId(), applyWanna.getLeft()));
+            dto.setWannaGoods(signupService.getMemberTypePayInfo(unionUser.getId(), applyWanna.getRight()));
         }
         return WebUtils.result(dto);
 
