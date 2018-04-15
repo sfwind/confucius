@@ -165,7 +165,7 @@ public class SignupServiceImpl implements SignupService {
     public Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
         Pair<Boolean, String> pass = Pair.of(false, "类型异常");
         if (RiseMember.isApply(memberTypeId)) {
-            Integer wannaMemberTypeId = riseMemberManager.loadApplyMemberMapping(memberTypeId);
+            Integer wannaMemberTypeId = riseMemberManager.loadWannaGoodsIdByApplyId(memberTypeId).getRight();
             pass = accountService.hasPrivilegeForApply(profileId, wannaMemberTypeId);
         } else if (RiseMember.isMember(memberTypeId)) {
             pass = accountService.hasPrivilegeForMember(profileId, memberTypeId);
@@ -795,7 +795,7 @@ public class SignupServiceImpl implements SignupService {
         Assert.notNull(order, "商学院申请购买订单不能为空，orderId：" + orderId);
 
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-        Integer membetTypeId = riseMemberManager.loadApplyMemberMapping(Integer.valueOf(quanwaiOrder.getGoodsId()));
+        Integer membetTypeId = riseMemberManager.loadWannaGoodsIdByApplyId(Integer.valueOf(quanwaiOrder.getGoodsId())).getRight();
         BusinessSchoolApplication apply = businessSchoolApplicationDao.loadLatestInvalidApply(order.getProfileId(), membetTypeId);
         if (apply == null) {
             // 更新订单状态

@@ -19,7 +19,7 @@ public class RiseMemberManagerImpl implements RiseMemberManager {
     @Autowired
     private RiseMemberDao riseMemberDao;
 
-    private List<Pair<Integer, Integer>> applyMapping;
+    private List<Pair<Integer, Integer>> applyMapping = Lists.newArrayList();
 
     @PostConstruct
     public void init() {

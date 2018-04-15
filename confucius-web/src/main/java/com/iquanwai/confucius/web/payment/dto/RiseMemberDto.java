@@ -35,4 +35,5 @@ public class RiseMemberDto {
     private int remainHour;
     /** 订单关闭剩余分钟 */
     private int remainMinute;
+    private int remainSeconds;
 }

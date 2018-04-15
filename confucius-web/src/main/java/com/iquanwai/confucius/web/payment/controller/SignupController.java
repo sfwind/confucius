@@ -177,19 +177,17 @@ public class SignupController {
         return WebUtils.result(coupons);
     }
 
-    private Pair<Integer, Integer> calcDealTime(Integer memberTypeId, Integer profileId) {
+    private Integer calcDealTime(Integer memberTypeId, Integer profileId) {
 
         BusinessSchoolApplication businessSchoolApplication = accountService.loadLastApply(profileId, memberTypeId);
         if (businessSchoolApplication == null) {
-            return Pair.of(23, 59);
+            return 24 * 60 * 60;
         } else {
-            int time = DateUtils.intervalMinute(DateUtils.afterHours(businessSchoolApplication.getDealTime(), 24));
+            int time = DateUtils.intervalSecond(DateUtils.afterHours(businessSchoolApplication.getDealTime(), 24));
             if (time <= 0) {
                 businessSchoolService.expiredApply(businessSchoolApplication.getId());
-                return Pair.of(0, 0);
-            } else {
-                return Pair.of(time / 60, time % 60);
             }
+            return time;
         }
     }
 
@@ -531,9 +529,8 @@ public class SignupController {
             // ignore
         }
         // 计算过期时间
-        Pair<Integer, Integer> hourMinutes = calcDealTime(memberTypeId, loginUser.getId());
-        dto.setRemainHour(hourMinutes.getLeft());
-        dto.setRemainMinute(hourMinutes.getRight());
+        Integer seconds = calcDealTime(memberTypeId, loginUser.getId());
+        dto.setRemainSeconds(seconds);
         return WebUtils.result(dto);
     }
 
