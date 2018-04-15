@@ -63,7 +63,7 @@ public class IndexController {
 
         //设置渠道漏洞监控参数,浏览器关闭后cookie自动失效
         if(channel != null){
-            CookieUtils.addCookie("_tm", channel, response);
+            CookieUtils.removeCookie("_tm", channel, response);
         }
 
         if (request.getParameter("debug") != null) {
