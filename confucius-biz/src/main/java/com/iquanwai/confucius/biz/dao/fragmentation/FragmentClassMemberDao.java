@@ -5,7 +5,6 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.domain.fragmentation.ClassMember;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -50,16 +49,16 @@ public class FragmentClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
-    public ClassMember loadByProfileIdAndMemberTypeId(Integer profileId, Integer memberTypeId) {
+    public List<ClassMember> loadByProfileIdAndMemberTypeId(Integer profileId, Integer memberTypeId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ClassMember WHERE ProfileId = ? AND MemberTypeId = ? AND Del = 0";
-        BeanHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
         try {
             return runner.query(sql, h, profileId, memberTypeId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        return null;
+        return Lists.newArrayList();
     }
 
     public List<ClassMember> loadByProfileIds(List<Integer> profileIds) {

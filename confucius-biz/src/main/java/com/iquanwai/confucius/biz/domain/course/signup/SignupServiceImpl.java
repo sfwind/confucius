@@ -326,14 +326,7 @@ public class SignupServiceImpl implements SignupService {
         StringBuilder targetMemberId = new StringBuilder();
         targetMemberId.append(prefix);
         StringBuilder targetClassName = new StringBuilder();
-        RiseMember riseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, memberTypeId);
-        ClassMember exists = fragmentClassMemberDao.loadByProfileIdAndMemberTypeId(profileId, memberTypeId);
-        String existsClassName;
-        if (exists != null && Objects.equals(exists.getMemberTypeId(), memberTypeId)) {
-            existsClassName = exists.getClassName();
-        } else {
-            existsClassName = null;
-        }
+        List<ClassMember> existsClasses = fragmentClassMemberDao.loadByProfileIdAndMemberTypeId(profileId, memberTypeId);
         redisUtil.lock(StringUtils.replace(CLASS_MEMBER_ID_LOCK, PLACEHOLDER, prefix), (lock) -> {
             // 1.班级序号
             String classNameSequence = redisUtil.get(classNameKey);
@@ -360,11 +353,6 @@ public class SignupServiceImpl implements SignupService {
             targetMemberId.append(memberIdSequence);
             targetClassName.append(prefix);
             targetClassName.append(classNameSequence);
-            if (Objects.equals(targetClassName.toString(), existsClassName)) {
-                //
-                return;
-            }
-
             if (memberId >= 200) {
                 // 满200人，人数重置1，班级+1
                 redisUtil.set(memberIdKey, "001", TimeUnit.DAYS.toSeconds(60));
@@ -375,7 +363,9 @@ public class SignupServiceImpl implements SignupService {
             }
 
         });
-        String className = targetClassName.toString();
+
+        boolean existsClassName = existsClasses.stream().anyMatch(item -> Objects.equals(targetClassName.toString(), item.getClassName()));
+
         Profile profile = accountService.getProfile(profileId);
         boolean hasMemberId = profile.getMemberId() != null;
         String memberId;
@@ -383,12 +373,14 @@ public class SignupServiceImpl implements SignupService {
             memberId = targetMemberId.toString();
             accountService.updateMemberId(profileId, memberId);
         }
-        ClassMember classMember = new ClassMember();
-        classMember.setClassName(targetClassName.toString());
-        classMember.setMemberTypeId(memberTypeId);
-        classMember.setProfileId(profileId);
-        fragmentClassMemberDao.insert(classMember);
-        System.out.println(targetClassName.toString() + ":" + targetMemberId.toString() + ":" + profile.getMemberId());
+        if (!existsClassName) {
+            ClassMember classMember = new ClassMember();
+            classMember.setClassName(targetClassName.toString());
+            classMember.setMemberTypeId(memberTypeId);
+            classMember.setProfileId(profileId);
+            fragmentClassMemberDao.insert(classMember);
+        }
+        logger.info(targetClassName.toString() + ":" + targetMemberId.toString() + ":" + profile.getMemberId());
     }
 
 
