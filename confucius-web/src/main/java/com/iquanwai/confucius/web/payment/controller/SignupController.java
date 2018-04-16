@@ -638,7 +638,7 @@ public class SignupController {
         if (applyId != null) {
             applyWanna = riseMemberManager.loadWannaGoodsIdByApplyId(applyId);
         } else {
-            applyWanna = riseMemberManager.loadWannaGoodsIdByApplyId(wannaGoodsId);
+            applyWanna = riseMemberManager.loadApplyIdByGoodsId(wannaGoodsId);
         }
         ApplyMappingDto dto = new ApplyMappingDto();
         if (applyWanna != null) {
