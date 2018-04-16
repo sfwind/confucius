@@ -254,8 +254,7 @@ public class SignupServiceImpl implements SignupService {
         // 更新 profile 表中状态
         Profile profile = accountService.getProfile(profileId);
 
-        // RiseClassMember 新增记录
-//        insertMonthlyCampRiseClassMember(profileId);
+        // ClassMember 新增记录
         insertClassMemberMemberId(profileId, RiseMember.CAMP);
 
         // 更新 RiseMember 表中信息
@@ -287,7 +286,7 @@ public class SignupServiceImpl implements SignupService {
 
         sendPurchaseMessage(profile, RiseMember.CAMP, orderId, year, month);
         // 刷新相关状态
-        refreshStatus(orderId);
+//        refreshStatus(orderId);
     }
 
     /**
@@ -493,8 +492,6 @@ public class SignupServiceImpl implements SignupService {
         // 开课时间
         BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(memberType.getId());
         // 查看是否存在现成会员数据
-        // TODO 专业版测试
-        RiseMember existRiseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(riseOrder.getProfileId(), Lists.newArrayList(riseOrder.getMemberType())).stream().findFirst().orElse(null);
         // 添加会员表
         RiseMember riseMember = new RiseMember();
         riseMember.setOrderId(riseOrder.getOrderId());
@@ -525,20 +522,21 @@ public class SignupServiceImpl implements SignupService {
             }
         });
 
+        // TODO 专业版测试,以后删除
+        RiseMember existRiseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(riseOrder.getProfileId(), Lists.newArrayList(RiseMember.HALF, RiseMember.ANNUAL)).stream().findFirst().orElse(null);
         if (existRiseMember == null) {
             // 非续费，查询本次开营时间
             riseMember.setOpenDate(businessSchoolConfig.getOpenDate());
             riseMember.setExpireDate(DateUtils.afterMonths(businessSchoolConfig.getOpenDate(), learningMonthDate));
-//            insertBusinessCollegeRiseClassMember(riseOrder.getProfileId());
             profileDao.initOnceRequestCommentCount(riseOrder.getProfileId());
         } else {
             // 如果存在，则将已经存在的 riseMember 数据置为已过期
-//            riseMemberDao.expired(existRiseMember.getId());
-//            riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), learningMonthDate));
+            riseMemberDao.expired(existRiseMember.getId());
+            riseMember.setExpireDate(DateUtils.afterMonths(existRiseMember.getExpireDate(), learningMonthDate));
 //            // 续费，继承OpenDate
-//            riseMember.setOpenDate(existRiseMember.getOpenDate());
+            riseMember.setOpenDate(existRiseMember.getOpenDate());
         }
-        // 插入班级学号（学号幂等）
+        // 插入班级、学号（学号幂等）
         insertClassMemberMemberId(riseOrder.getProfileId(), riseOrder.getMemberType());
         riseMemberDao.insert(riseMember);
 
@@ -800,7 +798,6 @@ public class SignupServiceImpl implements SignupService {
             // 提交有效申请
             operationLogService.trace(order.getProfileId(), "submitValidApply");
         }
-        this.refreshStatus(orderId);
     }
 
     @Override
