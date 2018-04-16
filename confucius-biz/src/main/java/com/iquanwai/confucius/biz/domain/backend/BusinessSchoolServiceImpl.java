@@ -26,6 +26,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,10 +116,11 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 
     @Override
     public String queryFinalPayStatus(Integer profileId) {
-        // TODO: 杨仁
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        List<RiseMember> riseMembers = riseMemberManager.loadValidRiseMembers(profileId);
+
+
         QuanwaiOrder order = quanwaiOrderDao.loadCampOrBusinessOrder(profileId);
-        if (riseMember == null) {
+        if (CollectionUtils.isEmpty(riseMembers)) {
             // 查看是否点过付费按钮
             if (order != null) {
                 return "点击付费按钮未付费";
@@ -126,11 +128,13 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
                 return "未点击付费按钮";
             }
         } else {
-            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
+            if(riseMembers.contains(RiseMember.ELITE)){
                 return "已付费商学院";
-            } else if (riseMember.getMemberTypeId().equals(RiseMember.CAMP)) {
+            }else if(riseMembers.contains(RiseMember.CAMP)){
                 return "已付费专项课";
-            } else {
+            }else if(riseMembers.contains(RiseMember.BUSINESS_THOUGHT)){
+                return "已付费商业进阶课程";
+            } else{
                 if (order != null) {
                     return "点击付费按钮未付费";
                 } else {
@@ -141,16 +145,19 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     }
 
     @Override
-    public RiseMember getUserRiseMember(Integer profileId) {
-        // TODO: 杨仁
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember != null) {
-            MemberType memberType = memberTypeDao.load(MemberType.class, riseMember.getMemberTypeId());
-            if (memberType != null) {
-                riseMember.setName(memberType.getName());
-            }
+    public String getUserRiseMemberNames(Integer profileId) {
+        List<RiseMember> riseMembers = riseMemberManager.loadValidRiseMembers(profileId);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if(CollectionUtils.isNotEmpty(riseMembers)){
+           riseMembers.forEach(riseMember -> {
+               MemberType memberType = memberTypeDao.load(MemberType.class,riseMember.getMemberTypeId());
+               if(memberType!=null){
+                   stringBuilder.append(memberType.getName()+" ");
+               }
+           });
         }
-        return riseMember;
+        return stringBuilder.toString();
     }
 
 

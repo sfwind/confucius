@@ -60,4 +60,6 @@ public interface RiseMemberManager {
     Pair<Integer,Integer> loadWannaGoodsIdByApplyId(Integer applyMemberId);
 
     Pair<Integer,Integer> loadApplyIdByGoodsId(Integer wannaGoodsId);
+
+    List<RiseMember> loadValidRiseMembers(Integer profileId);
 }

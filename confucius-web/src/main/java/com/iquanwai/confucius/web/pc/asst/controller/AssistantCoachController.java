@@ -379,11 +379,13 @@ public class AssistantCoachController {
             List<BusinessApplyQuestion> questions = businessSchoolService.loadUserQuestions(application.getId()).stream().sorted((Comparator.comparing(BusinessApplyQuestion::getSequence))).collect(Collectors.toList());
             dto.setQuestionList(questions);
             // 查询是否会员
-            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
-            if (riseMember != null) {
-                dto.setMemberTypeId(riseMember.getMemberTypeId());
-                dto.setMemberType(riseMember.getName());
-            }
+//            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
+//            if (riseMember != null) {
+//                dto.setMemberTypeId(riseMember.getMemberTypeId());
+//                dto.setMemberType(riseMember.getName());
+//            }
+            String riseMemberNames = businessSchoolService.getUserRiseMemberNames(application.getProfileId());
+            dto.setMemberType(riseMemberNames);
             dto.setApplyId(application.getId());
             dto.setInterviewRecord(assistantCoachService.loadInterviewRecord(application.getId()));
             dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
