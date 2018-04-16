@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.util;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Minutes;
+import org.joda.time.Seconds;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -63,8 +64,16 @@ public class DateUtils {
         return Math.abs(Days.daysBetween(new DateTime(date), new DateTime().withTimeAtStartOfDay()).getDays());
     }
 
+    public static int interval(Date date1, Date date2) {
+        return Math.abs(Days.daysBetween(new DateTime(date1), new DateTime(date2)).getDays());
+    }
+
     public static int intervalMinute(Date date) {
         return Minutes.minutesBetween(new DateTime(), new DateTime(date)).getMinutes();
+    }
+
+    public static int intervalSecond(Date date) {
+        return Seconds.secondsBetween(new DateTime(), new DateTime(date)).getSeconds();
     }
 
     public static long nextDayRemainSeconds(Date today) {

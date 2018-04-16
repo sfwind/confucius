@@ -7,11 +7,9 @@ import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDefaultDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ProblemDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.*;
-import com.iquanwai.confucius.biz.util.page.Page;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +29,6 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private SignupService signupService;
-    @Autowired
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private RiseCertificateDao riseCertificateDao;
@@ -48,44 +44,6 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
     @Override
     public List<RiseClassMember> loadRiseClassMemberByClassName(String className) {
         return riseClassMemberDao.loadByClassName(className);
-    }
-
-    @Override
-    public List<RiseClassMember> loadUnGroupRiseClassMember(Page page) {
-        List<RiseClassMember> unGroupRiseClassMembers = riseClassMemberDao.loadUnGroupMember();
-        page.setTotal(unGroupRiseClassMembers.size());
-        return riseClassMemberDao.loadUnGroupMemberPage(page);
-    }
-
-    @Override
-    public int initRiseClassMember(RiseClassMember riseClassMember) {
-        Integer profileId = riseClassMember.getProfileId();
-        List<RiseClassMember> classMembers = riseClassMemberDao.queryByProfileId(profileId);
-        if (classMembers.size() == 0) {
-            return riseClassMemberDao.insert(riseClassMember);
-        } else {
-            return -1;
-        }
-    }
-
-    @Override
-    public RiseClassMember loadRiseClassMemberById(Integer riseClassMemberId) {
-        return riseClassMemberDao.load(RiseClassMember.class, riseClassMemberId);
-    }
-
-    @Override
-    public RiseClassMember updateRiseClassMemberById(RiseClassMember riseClassMember) {
-        int result = riseClassMemberDao.update(riseClassMember);
-        if (result > 0) {
-            return riseClassMemberDao.load(RiseClassMember.class, riseClassMember.getId());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public int batchUpdateRiseClassMemberByIds(List<Integer> riseMemberIds, String groupId) {
-        return riseClassMemberDao.batchUpdateGroupId(riseMemberIds, groupId);
     }
 
     @Override
@@ -128,24 +86,18 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
         logger.info("专项课数据切换完毕");
     }
 
-    @Override
-    public void unlockMonthlyCampAuthority(String riseId) {
-        Profile profile = accountService.getProfileByRiseId(riseId);
-        signupService.unlockMonthlyCamp(profile.getId());
-    }
-
     /**
      * 在 RiseCertificate 表中，初始化需要发送的人员数据
      */
     @Override
     public void insertRiseCertificate(Integer year, Integer month, Integer type, List<String> memberIds) {
-        List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryForCertificateMemberIds(memberIds);
+        List<Profile> profiles = accountService.getProfilesByMemberIds(memberIds);
         List<Integer> certificateNoSequence = Lists.newArrayList();
         certificateNoSequence.add(1);
 
-        riseClassMembers.forEach(riseClassMember -> {
-            logger.info("正在添加：" + riseClassMember.getMemberId());
-            Integer profileId = riseClassMember.getProfileId();
+        profiles.forEach(profile -> {
+            logger.info("正在添加：" + profile.getMemberId());
+            Integer profileId = profile.getId();
 
             List<RiseCertificate> riseCertificates = riseCertificateDao.loadRiseCertificatesByProfileId(profileId);
             RiseCertificate existRiseCertificate = riseCertificates.stream()
@@ -156,7 +108,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
 
             // 如果该类型的证书已经添加过，则不再添加
             if (existRiseCertificate == null) {
-                String groupNo = riseClassMember.getGroupId();
+                RiseClassMember riseClassMember = riseClassMemberDao.queryByProfileIdAndTime(profileId, year, month);
 
                 Integer category = accountService.loadUserScheduleCategory(profileId);
                 List<CourseScheduleDefault> courseScheduleDefaults = courseScheduleDefaultDao
@@ -176,7 +128,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
 
                 StringBuilder certificateNoBuilder = new StringBuilder("IQW");
                 certificateNoBuilder.append(String.format("%02d", type));
-                certificateNoBuilder.append(riseClassMember.getMemberId());
+                certificateNoBuilder.append(profile.getMemberId());
                 certificateNoBuilder.append(String.format("%02d", month));
                 Integer noSequence = certificateNoSequence.get(0);
                 certificateNoSequence.clear();
@@ -191,7 +143,7 @@ public class MonthlyCampServiceImpl implements MonthlyCampService {
                 riseCertificate.setYear(year);
                 riseCertificate.setMonth(month);
                 try {
-                    riseCertificate.setGroupNo(Integer.parseInt(groupNo));
+                    riseCertificate.setGroupNo(Integer.parseInt(riseClassMember.getGroupId()));
                 } catch (Exception e) {
                     logger.error(e.getLocalizedMessage(), e);
                 }

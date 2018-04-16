@@ -1,6 +1,7 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
 import com.iquanwai.confucius.biz.dao.apply.AuditionRewardDao;
+import com.iquanwai.confucius.biz.dao.apply.BusinessApplyChoiceDao;
 import com.iquanwai.confucius.biz.dao.apply.BusinessApplyQuestionDao;
 import com.iquanwai.confucius.biz.dao.apply.BusinessApplySubmitDao;
 import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
@@ -11,17 +12,21 @@ import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.common.permission.WhiteListDao;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.apply.AuditionReward;
+import com.iquanwai.confucius.biz.po.apply.BusinessApplyChoice;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplyQuestion;
 import com.iquanwai.confucius.biz.po.apply.BusinessApplySubmit;
 import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
-import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.page.Page;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +67,12 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     private AuditionRewardDao auditionRewardDao;
     @Autowired
     private WhiteListDao whiteListDao;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
+    @Autowired
+    private BusinessApplyChoiceDao businessApplyChoiceDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     @Override
     public List<BusinessSchoolApplication> loadBusinessSchoolList(Page page) {
@@ -105,9 +116,11 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
 
     @Override
     public String queryFinalPayStatus(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        List<RiseMember> riseMembers = riseMemberManager.loadValidRiseMembers(profileId);
+
+
         QuanwaiOrder order = quanwaiOrderDao.loadCampOrBusinessOrder(profileId);
-        if (riseMember == null) {
+        if (CollectionUtils.isEmpty(riseMembers)) {
             // 查看是否点过付费按钮
             if (order != null) {
                 return "点击付费按钮未付费";
@@ -115,11 +128,13 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
                 return "未点击付费按钮";
             }
         } else {
-            if (riseMember.getMemberTypeId().equals(RiseMember.ELITE)) {
+            if(riseMembers.contains(RiseMember.ELITE)){
                 return "已付费商学院";
-            } else if (riseMember.getMemberTypeId().equals(RiseMember.CAMP)) {
+            }else if(riseMembers.contains(RiseMember.CAMP)){
                 return "已付费专项课";
-            } else {
+            }else if(riseMembers.contains(RiseMember.BUSINESS_THOUGHT)){
+                return "已付费商业进阶课程";
+            } else{
                 if (order != null) {
                     return "点击付费按钮未付费";
                 } else {
@@ -130,32 +145,21 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
     }
 
     @Override
-    public RiseMember getUserRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember != null) {
-            MemberType memberType = memberTypeDao.load(MemberType.class, riseMember.getMemberTypeId());
-            if (memberType != null) {
-                riseMember.setName(memberType.getName());
-            }
+    public String getUserRiseMemberNames(Integer profileId) {
+        List<RiseMember> riseMembers = riseMemberManager.loadValidRiseMembers(profileId);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if(CollectionUtils.isNotEmpty(riseMembers)){
+           riseMembers.forEach(riseMember -> {
+               MemberType memberType = memberTypeDao.load(MemberType.class,riseMember.getMemberTypeId());
+               if(memberType!=null){
+                   stringBuilder.append(memberType.getName()+" ");
+               }
+           });
         }
-        return riseMember;
+        return stringBuilder.toString();
     }
 
-    @Override
-    public Date loadLastApplicationDealTime(Integer profileId) {
-        BusinessSchoolApplication businessSchoolApplication = businessSchoolApplicationDao
-                .loadLastApproveApplication(profileId);
-        if (businessSchoolApplication != null) {
-            return businessSchoolApplication.getDealTime();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void expireApplication(Integer profileId) {
-        customerStatusDao.delStatus(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
-    }
 
     @Override
     public List<BusinessApplyQuestion> loadUserQuestions(Integer applyId) {
@@ -226,4 +230,51 @@ public class BusinessSchoolServiceImpl implements BusinessSchoolService {
         return businessApplySubmitDao.loadByApplyId(applyId);
     }
 
+    @Override
+    public void submitBusinessApply(Integer profileId, List<BusinessApplySubmit> userApplySubmits, Boolean valid, Integer goodsId) {
+        //获取上次审核的结果
+        BusinessSchoolApplication lastBusinessApplication = businessSchoolApplicationDao.getLastVerifiedByProfileId(profileId);
+
+        BusinessSchoolApplication application = new BusinessSchoolApplication();
+        application.setProfileId(profileId);
+        application.setSubmitTime(new Date());
+        application.setStatus(BusinessSchoolApplication.APPLYING);
+
+        application.setIsDuplicate(false);
+        application.setValid(valid);
+        application.setDeal(false);
+        if (goodsId == RiseMember.BS_APPLICATION) {
+            application.setMemberTypeId(Constants.MemberType.ELITE);
+        } else if (goodsId == RiseMember.BUSINESS_THOUGHT_APPLY) {
+            application.setMemberTypeId(Constants.MemberType.THOUGHT);
+        }
+        if (lastBusinessApplication != null) {
+            application.setLastVerified(lastBusinessApplication.getStatus());
+        } else {
+            application.setLastVerified(0);
+        }
+
+        // TODO:待验证
+        Optional<RiseMember> optional = riseMemberManager.member(profileId).stream()
+                .sorted(((o1, o2) -> o2.getId() - o1.getId())).findFirst();
+        optional.ifPresent(riseMember -> application.setOriginMemberType(riseMember.getMemberTypeId()));
+
+        Integer applyId = businessSchoolApplicationDao.insert(application);
+
+        userApplySubmits.forEach(item -> {
+            item.setApplyId(applyId);
+            if (item.getChoiceId() != null) {
+                BusinessApplyChoice choice = businessApplyChoiceDao.load(BusinessApplyChoice.class, item.getChoiceId());
+                item.setChoiceText(choice.getSubject() == null ? "异常数据" : choice.getSubject());
+            }
+        });
+        businessApplySubmitDao.batchInsertApplySubmit(userApplySubmits);
+
+        operationLogService.trace(profileId, "submitApply");
+    }
+
+    @Override
+    public void expiredApply(Integer id) {
+        businessSchoolApplicationDao.expiredApply(id);
+    }
 }

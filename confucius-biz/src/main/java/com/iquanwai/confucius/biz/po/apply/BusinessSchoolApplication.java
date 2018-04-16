@@ -27,6 +27,18 @@ public class BusinessSchoolApplication {
     private Integer lastVerified;
     private Integer interviewer;
     private Boolean valid;
+    private Boolean expired;
+    private Boolean entry;
+    /**
+     * 课程类型
+     */
+    @Deprecated
+    private Integer project;
+
+    /**
+     * 项目类型
+     */
+    private Integer memberTypeId;
 
     private String originMemberTypeName;
 

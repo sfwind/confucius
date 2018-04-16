@@ -7,7 +7,6 @@ import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.page.Page;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,17 +51,8 @@ public interface BusinessSchoolService {
     /**
      * 查询会员状态
      */
-    RiseMember getUserRiseMember(Integer profileId);
+   String getUserRiseMemberNames(Integer profileId);
 
-    /**
-     * 获取用户最后一次审批通过的商学院申请的通过时间
-     */
-    Date loadLastApplicationDealTime(Integer profileId);
-
-    /**
-     * 申请作废
-     */
-    void expireApplication(Integer profileId);
 
     /**
      * 获取用户申请信息
@@ -107,5 +97,10 @@ public interface BusinessSchoolService {
     /**
      * 加载商学院申请提交数据
      */
-   List<BusinessApplySubmit> loadByApplyId(Integer applyId);
+    List<BusinessApplySubmit> loadByApplyId(Integer applyId);
+
+
+    void submitBusinessApply(Integer profileId, List<BusinessApplySubmit> userApplySubmits, Boolean valid, Integer goodsId);
+
+    void expiredApply(Integer id);
 }

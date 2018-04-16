@@ -25,11 +25,51 @@ public class RiseMemberDao extends DBUtil {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    public List<RiseMember> loadValidRiseMemberByMemberTypeId(Integer profileId, List<Integer> memberTypes) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String mask = produceQuestionMark(memberTypes.size());
+        List<Object> params = Lists.newArrayList();
+        params.add(profileId);
+        params.addAll(memberTypes);
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND memberTypeId in ("
+                + mask + ") AND Expired=0 AND Del = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, params.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+    public RiseMember loadValidRiseMemberByMemberTypeId(Integer profileId, Integer memberType) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND memberTypeId = ? AND Expired=0 AND Del = 0";
+        BeanHandler<RiseMember> h = new BeanHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, profileId, memberType);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public void updateExpiredAhead(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE RiseMember SET Expired = 1, Memo = '商学院提前过期' WHERE ProfileId = ? AND Expired = 0 AND Del = 0";
         try {
             runner.update(sql, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void expired(Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE RiseMember SET Expired = 1, Memo = '商学院提前过期' WHERE Id = ?";
+        try {
+            runner.update(sql, id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -71,6 +111,19 @@ public class RiseMemberDao extends DBUtil {
         return null;
     }
 
+    public List<RiseMember> loadValidRiseMembers(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from RiseMember where ProfileId = ? and Expired = 0 AND Del = 0";
+
+        try {
+            BeanListHandler<RiseMember> handler = new BeanListHandler<>(RiseMember.class);
+            return runner.query(sql, handler, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public RiseMember loadByOrderId(String orderId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where OrderId = ? AND Del = 0";
@@ -82,19 +135,6 @@ public class RiseMemberDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
-    }
-
-    public List<RiseMember> eliteMembers() {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where MemberTypeId in (3,4) and Expired = 0 And Del = 0";
-
-        try {
-            ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
-            return runner.query(sql, handler);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
     }
 
     public List<Integer> loadEliteMembersId() {
@@ -146,4 +186,14 @@ public class RiseMemberDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+//    public void update(Integer id, Integer memberTypeId) {
+//        QueryRunner runner = new QueryRunner(getDataSource());
+//        String sql = "UPDATE RiseMember SET MemberTypeId = ?  WHERE Id = ?";
+//        try {
+//            runner.update(sql, memberTypeId, id);
+//        } catch (SQLException e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
+//    }
 }

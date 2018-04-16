@@ -55,8 +55,6 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
     @Autowired
     private InterviewRecordDao interviewRecordDao;
-    @Autowired
-    private AsstUpExecutionDao asstUpExecutionDao;
 
     private static final int SIZE = 100;
 
@@ -229,27 +227,26 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
     @Override
     public List<RiseWorkInfoDto> getUnderCommentApplicationsByMemberId(Integer problemId, String memberId) {
         List<RiseWorkInfoDto> workInfoDtos = Lists.newArrayList();
-        RiseClassMember riseClassMember = riseClassMemberDao.queryByMemberId(memberId);
-        if (riseClassMember != null && riseClassMember.getProfileId() != null) {
-            Profile profile = accountService.getProfile(riseClassMember.getProfileId());
-            if (profile != null) {
-                List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByProfileId(problemId, profile.getId());
-                submits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
+        Profile profile = accountService.loadProfileByMemberId(memberId);
 
-                List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
-                for (ApplicationSubmit submit : submits) {
-                    RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
-                    applicationPractices.forEach(applicationPractice -> {
-                        if (submit.getApplicationId().equals(applicationPractice.getId())) {
-                            riseWorkInfoDto.setTitle(applicationPractice.getTopic());
-                        }
-                    });
-                    workInfoDtos.add(riseWorkInfoDto);
-                }
+        if (profile != null) {
+            List<ApplicationSubmit> submits = applicationSubmitDao.loadSubmitsByProfileId(problemId, profile.getId());
+            submits.sort(Comparator.comparing(ApplicationSubmit::getPublishTime).reversed());
+
+            List<ApplicationPractice> applicationPractices = applicationPracticeDao.getAllPracticeByProblemId(problemId);
+            for (ApplicationSubmit submit : submits) {
+                RiseWorkInfoDto riseWorkInfoDto = buildApplicationSubmit(submit);
+                applicationPractices.forEach(applicationPractice -> {
+                    if (submit.getApplicationId().equals(applicationPractice.getId())) {
+                        riseWorkInfoDto.setTitle(applicationPractice.getTopic());
+                    }
+                });
+                workInfoDtos.add(riseWorkInfoDto);
             }
         }
         return workInfoDtos;
     }
+
 
     /**
      * 根据班级和小组查询所有待点评的应用题
@@ -259,7 +256,8 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
      * @return
      */
     @Override
-    public List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId, String className, String groupId) {
+    public List<RiseWorkInfoDto> getUnderCommentApplicationsByClassNameAndGroup(Integer problemId, String
+            className, String groupId) {
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.getRiseClassMemberByClassNameGroupId(className, groupId);
         List<Integer> profiles = riseClassMembers.stream().map(RiseClassMember::getProfileId).collect(Collectors.toList());
 
@@ -483,14 +481,14 @@ public class AssistantCoachServiceImpl implements AssistantCoachService {
         InterviewRecord existInterviewRecord = interviewRecordDao.queryByApplyId(applyId);
         if (existInterviewRecord == null) {
             //判断是否是后台直接录入面试数据
-            if(interviewRecord.getApprovalId()!=null){
+            if (interviewRecord.getApprovalId() != null) {
                 interviewRecord.setInterviewerId(interviewRecord.getApprovalId());
             }
             return interviewRecordDao.insert(interviewRecord);
         } else {
             interviewRecord.setId(existInterviewRecord.getId());
             //判断是管理员还是助教
-            if(interviewRecord.getApprovalId()!=null){
+            if (interviewRecord.getApprovalId() != null) {
                 return interviewRecordDao.updateByAdmin(interviewRecord);
             }
             return interviewRecordDao.updateByAssist(interviewRecord);

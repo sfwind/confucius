@@ -11,16 +11,6 @@ import java.util.List;
 public interface MonthlyCampService {
     List<RiseClassMember> loadRiseClassMemberByClassName(String className);
 
-    List<RiseClassMember> loadUnGroupRiseClassMember(Page page);
-
-    RiseClassMember updateRiseClassMemberById(RiseClassMember riseClassMember);
-
-    int initRiseClassMember(RiseClassMember riseClassMember);
-
-    RiseClassMember loadRiseClassMemberById(Integer riseClassMemberId);
-
-    int batchUpdateRiseClassMemberByIds(List<Integer> riseMemberIds, String groupId);
-
     List<RiseClassMember> batchQueryRiseClassMemberByProfileIds(List<Integer> profileIds);
 
     /**
@@ -35,8 +25,6 @@ public interface MonthlyCampService {
      * @param targetMonth 切换后月份
      */
     void switchCampDataProcess(Integer sourceYear, Integer sourceMonth, Integer targetYear, Integer targetMonth);
-
-    void unlockMonthlyCampAuthority(String riseId);
 
     void insertRiseCertificate(Integer year, Integer month, Integer type, List<String> memberIds);
 }

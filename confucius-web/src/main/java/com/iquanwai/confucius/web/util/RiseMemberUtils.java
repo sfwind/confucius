@@ -26,6 +26,8 @@ public class RiseMemberUtils {
                 return "单买课程";
             case RiseMember.BS_APPLICATION:
                 return "商学院申请";
+            case RiseMember.BUSINESS_THOUGHT:
+                return "商业思维会员";
 
         }
         return "未知";

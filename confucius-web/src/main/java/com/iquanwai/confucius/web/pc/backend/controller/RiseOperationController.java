@@ -39,6 +39,8 @@ import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import com.iquanwai.confucius.web.enums.AssistCatalogEnums;
 import com.iquanwai.confucius.web.enums.LastVerifiedEnums;
+import com.iquanwai.confucius.web.enums.MemberTypeEnums;
+import com.iquanwai.confucius.web.enums.ProjectEnums;
 import com.iquanwai.confucius.web.pc.asst.dto.InterviewDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ApproveDto;
 import com.iquanwai.confucius.web.pc.backend.dto.AssignDto;
@@ -304,7 +306,7 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/bs/application/list", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page, UnionUser loginUser) {
-        OperationLog operationLog = OperationLog.create()
+        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
                 .module("后台功能")
                 .function("商学院申请")
                 .action("加载申请列表");
@@ -339,6 +341,7 @@ public class RiseOperationController {
                 return WebUtils.error("更新失败");
             }
             interviewRecord.setApprovalId(loginUser.getProfileId());
+            interviewRecord.setAdmit(1);
             if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
@@ -376,7 +379,6 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/bs/application/approve", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> approveApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
-        System.out.println(loginUser);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId() + "");
         operationLogService.log(operationLog);
 
@@ -398,6 +400,20 @@ public class RiseOperationController {
             }
             boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(), "");
             if (approve) {
+                String orderId = application.getOrderId();
+                if (orderId != null) {
+                    QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+                    if (quanwaiOrder != null) {
+                        if (quanwaiOrder.getStatus().equals(QuanwaiOrder.PAID) || quanwaiOrder.getStatus().equals(QuanwaiOrder.REFUND_FAILED)) {
+                            // 开始退款
+                            try {
+                                payService.refund(orderId, quanwaiOrder.getPrice());
+                            } catch (RefundException e) {
+                                LOGGER.error("退款失败:{}", orderId);
+                            }
+                        }
+                    }
+                }
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
                         () -> {
                             OperationLogService.Prop prop = OperationLogService.props()
@@ -600,7 +616,7 @@ public class RiseOperationController {
             openIds = new ArrayList<>(tempList);
             List excludeList = Arrays.asList(templateDto.getExcludeOpenIds().split("\n"));
             //排除人数
-            openIds = openIds.stream().filter(openId->!excludeList.contains(openId)).collect(Collectors.toList());
+            openIds = openIds.stream().filter(openId -> !excludeList.contains(openId)).collect(Collectors.toList());
         }
         Integer templateId = templateDto.getTemplateId();
         String templateMsgId = templateMessageService.getTemplateIdByDB(templateId);
@@ -664,8 +680,8 @@ public class RiseOperationController {
                         templateMessageService.sendMessage(templateMessage, forcePush == null || !forcePush, source);
                     }
                 });
-                if(!templateDto.getIsMime()){
-                    templateMessageService.sendSelfCompleteMessage(templateDto.getKeyword1(),unionUser.getOpenId());
+                if (!templateDto.getIsMime()) {
+                    templateMessageService.sendSelfCompleteMessage(templateDto.getKeyword1(), unionUser.getOpenId());
                 }
             } catch (Exception e) {
                 LOGGER.error("发送通知失败", e);
@@ -713,11 +729,8 @@ public class RiseOperationController {
             }
             dto.setQuestionList(questions);
             // 查询是否会员
-            RiseMember riseMember = businessSchoolService.getUserRiseMember(application.getProfileId());
-            if (riseMember != null) {
-                dto.setMemberTypeId(riseMember.getMemberTypeId());
-                dto.setMemberType(riseMember.getName());
-            }
+            String riseMemberNames = businessSchoolService.getUserRiseMemberNames(application.getProfileId());
+            dto.setMemberType(riseMemberNames);
             dto.setApplyId(application.getId());
             dto.setInterviewRecord(assistantCoachService.loadInterviewRecord(application.getId()));
             dto.setIsAsst(businessSchoolService.checkIsAsst(application.getProfileId()) ? "是" : "否");
@@ -725,6 +738,10 @@ public class RiseOperationController {
             dto.setNickname(profile.getNickname());
             dto.setOriginMemberTypeName(this.getMemberName(application.getOriginMemberType()));
             dto.setIsBlack("否");
+            MemberTypeEnums memberTypeEnums = MemberTypeEnums.getById(application.getMemberTypeId());
+            if (memberTypeEnums != null) {
+                dto.setProject(memberTypeEnums.getMemberTypeName());
+            }
             dto.setIsInterviewed(assistantCoachService.loadInterviewRecord(application.getId()) == null ? "否" : "是");
             List<BusinessApplySubmit> businessApplySubmits = businessSchoolService.loadByApplyId(application.getId());
             businessApplySubmits.stream().forEach(businessApplySubmit -> {

@@ -13,6 +13,7 @@ public class RiseClassMember {
     private String classId; // classId 2017 年份
     private String className; // 班级名称
     private String groupId; // 班级 01
+    @Deprecated
     private String memberId;
     private Integer profileId; // 用户 id
     private Integer year;
