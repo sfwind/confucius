@@ -3,7 +3,6 @@ package com.iquanwai.confucius.web;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
-import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,11 +60,11 @@ public class RedirectController {
      * 模板消息打开率监控
      */
     @RequestMapping(value = "/template/message")
-    public void redirectKitPackage(LoginUser loginUser, @RequestParam(value = "url") String url,
+    public void redirectKitPackage(UnionUser unionUser, @RequestParam(value = "url") String url,
                                    @RequestParam(value = "key") String key,
                                    HttpServletResponse response) {
         OperationLog operationLog = new OperationLog()
-                .openid(loginUser.getOpenId())
+                .openid(unionUser.getOpenId())
                 .module("链接重定向")
                 .function("模板消息")
                 .action("打开率监控")
@@ -75,7 +74,7 @@ public class RedirectController {
         try {
             response.sendRedirect(url);
         } catch (IOException e) {
-            logger.error("重定向失败,{}", loginUser.getOpenId());
+            logger.error("重定向失败,{}", unionUser.getOpenId());
         }
     }
 }
