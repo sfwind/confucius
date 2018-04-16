@@ -132,4 +132,11 @@ public class RiseMemberManagerImpl implements RiseMemberManager {
     public Pair<Integer, Integer> loadApplyIdByGoodsId(Integer wannaGoodsId) {
         return this.applyMapping.stream().filter(item -> item.getRight().equals(wannaGoodsId)).findAny().orElse(null);
     }
+
+    @Override
+    public List<RiseMember> loadValidRiseMembers(Integer profileId) {
+        return riseMemberDao.loadValidRiseMembers(profileId);
+    }
+
+
 }

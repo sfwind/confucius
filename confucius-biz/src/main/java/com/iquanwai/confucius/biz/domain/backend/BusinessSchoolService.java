@@ -51,7 +51,7 @@ public interface BusinessSchoolService {
     /**
      * 查询会员状态
      */
-    RiseMember getUserRiseMember(Integer profileId);
+   String getUserRiseMemberNames(Integer profileId);
 
 
     /**
