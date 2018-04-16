@@ -34,6 +34,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.course.BusinessSchoolConfig;
@@ -172,6 +173,13 @@ public class SignupServiceImpl implements SignupService {
         } else if (RiseMember.CAMP == memberTypeId) {
             pass = accountService.hasPrivilegeForCamp(profileId);
         }
+
+        RiseClassMember riseClassMember = riseClassMemberDao.whiteList(profileId);
+        if (riseClassMember == null) {
+            // 不能报名
+            return Pair.of(false, "暂时只对部分用户预售");
+        }
+
         return pass;
     }
 
@@ -292,7 +300,8 @@ public class SignupServiceImpl implements SignupService {
     /**
      * 生成memberId以及插入ClassMember
      * 新学号格式：字母前缀 + 四位年月（1701）+ 两位班级序号  + 三位递增唯一序列（1701011001）
-     * @param profileId 用户id
+     *
+     * @param profileId    用户id
      * @param memberTypeId 会员id
      * @return ClassName:MemberID
      */
@@ -384,6 +393,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成会员售卖年月信息
+     *
      * @param memberTypeId 会员id
      * @return left：year <br/>
      * right:month
@@ -400,6 +410,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 购买完专项课之后，更新 RiseMember 表中的数据
+     *
      * @param profile 用户 Profile
      */
     private void updateMonthlyCampRiseMemberStatus(Profile profile, String orderId) {
@@ -834,7 +845,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee      总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -852,7 +864,8 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     * @param fee 总价格
+     *
+     * @param fee           总价格
      * @param couponIdGroup 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {

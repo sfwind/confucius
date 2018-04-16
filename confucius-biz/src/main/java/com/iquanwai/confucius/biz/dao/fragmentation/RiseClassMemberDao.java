@@ -235,10 +235,22 @@ public class RiseClassMemberDao extends PracticeDBUtil {
         String sql = "SELECT COUNT(*) FROM RiseClassMember WHERE CLASSNAME=? AND DEL = 0";
 
         try {
-           return runner.query(sql, new ScalarHandler<Long>(), className).intValue();
+            return runner.query(sql, new ScalarHandler<Long>(), className).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    public RiseClassMember whiteList(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseClassMember WHERE ClassName IN ('170701','170702','170801','170803') and Active = 1 and Del = 0 and ProfileId = ?";
+        BeanHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 }
