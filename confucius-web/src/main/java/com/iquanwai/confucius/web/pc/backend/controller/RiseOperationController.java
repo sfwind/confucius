@@ -379,7 +379,6 @@ public class RiseOperationController {
 
     @RequestMapping(value = "/bs/application/approve", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> approveApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
-        System.out.println(loginUser);
         OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId() + "");
         operationLogService.log(operationLog);
 
@@ -401,6 +400,20 @@ public class RiseOperationController {
             }
             boolean approve = businessSchoolService.approveApplication(approveDto.getId(), approveDto.getCoupon(), "");
             if (approve) {
+                String orderId = application.getOrderId();
+                if (orderId != null) {
+                    QuanwaiOrder quanwaiOrder = signupService.getQuanwaiOrder(orderId);
+                    if (quanwaiOrder != null) {
+                        if (quanwaiOrder.getStatus().equals(QuanwaiOrder.PAID) || quanwaiOrder.getStatus().equals(QuanwaiOrder.REFUND_FAILED)) {
+                            // 开始退款
+                            try {
+                                payService.refund(orderId, quanwaiOrder.getPrice());
+                            } catch (RefundException e) {
+                                LOGGER.error("退款失败:{}", orderId);
+                            }
+                        }
+                    }
+                }
                 operationLogService.trace(application.getProfileId(), "phoneCheck",
                         () -> {
                             OperationLogService.Prop prop = OperationLogService.props()
