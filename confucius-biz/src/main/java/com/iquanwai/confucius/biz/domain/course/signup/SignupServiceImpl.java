@@ -292,8 +292,7 @@ public class SignupServiceImpl implements SignupService {
     /**
      * 生成memberId以及插入ClassMember
      * 新学号格式：字母前缀 + 四位年月（1701）+ 两位班级序号  + 三位递增唯一序列（1701011001）
-     *
-     * @param profileId    用户id
+     * @param profileId 用户id
      * @param memberTypeId 会员id
      * @return ClassName:MemberID
      */
@@ -385,7 +384,6 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成会员售卖年月信息
-     *
      * @param memberTypeId 会员id
      * @return left：year <br/>
      * right:month
@@ -402,7 +400,6 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 购买完专项课之后，更新 RiseMember 表中的数据
-     *
      * @param profile 用户 Profile
      */
     private void updateMonthlyCampRiseMemberStatus(Profile profile, String orderId) {
@@ -645,48 +642,48 @@ public class SignupServiceImpl implements SignupService {
                 break;
             }
             case RiseMember.BUSINESS_THOUGHT: {
-                List<OperateRotate> riseMemberOperateRotates = operateRotates.stream()
-                        .filter(operateRotate -> RISEMEMBER_OPERATEROTATE_SCENE_CODE.equals(operateRotate.getSceneCode()))
-                        .sorted(Comparator.comparingInt(OperateRotate::getSequence))
-                        .collect(Collectors.toList());
+                // List<OperateRotate> riseMemberOperateRotates = operateRotates.stream()
+                //         .filter(operateRotate -> RISEMEMBER_OPERATEROTATE_SCENE_CODE.equals(operateRotate.getSceneCode()))
+                //         .sorted(Comparator.comparingInt(OperateRotate::getSequence))
+                //         .collect(Collectors.toList());
 
-                redisUtil.lock("operateRotate:riseMember:paySuccess", lock -> {
-                    String riseMemberKey = "operateRotate:" + RISEMEMBER_OPERATEROTATE_SCENE_CODE + ":index";
-                    String riseMemberIndexStr = redisUtil.get(riseMemberKey);
-                    int riseMemberIndex = riseMemberIndexStr == null ? 1 : Integer.parseInt(riseMemberIndexStr);
-                    redisUtil.set(riseMemberKey, riseMemberIndex + 1);
-                    logger.info("riseMemberIndex: {}", riseMemberIndex);
-                    int sequence = riseMemberIndex % OPERATEROTATE_SWITCH_SIZE == 0 ? riseMemberIndex / OPERATEROTATE_SWITCH_SIZE : riseMemberIndex / OPERATEROTATE_SWITCH_SIZE + 1;
-                    logger.info("sequence: {}", sequence);
-                    OperateRotate operateRotate = riseMemberOperateRotates.get(sequence % riseMemberOperateRotates.size() == 0 ? riseMemberOperateRotates.size() - 1 : sequence % riseMemberOperateRotates.size() - 1);
-                    Assert.notNull(operateRotate);
-                    logger.info("operateRotate mediaId: {}", operateRotate.getMediaId());
+                // redisUtil.lock("operateRotate:riseMember:paySuccess", lock -> {
+                // String riseMemberKey = "operateRotate:" + RISEMEMBER_OPERATEROTATE_SCENE_CODE + ":index";
+                // String riseMemberIndexStr = redisUtil.get(riseMemberKey);
+                // int riseMemberIndex = riseMemberIndexStr == null ? 1 : Integer.parseInt(riseMemberIndexStr);
+                // redisUtil.set(riseMemberKey, riseMemberIndex + 1);
+                // logger.info("riseMemberIndex: {}", riseMemberIndex);
+                // int sequence = riseMemberIndex % OPERATEROTATE_SWITCH_SIZE == 0 ? riseMemberIndex / OPERATEROTATE_SWITCH_SIZE : riseMemberIndex / OPERATEROTATE_SWITCH_SIZE + 1;
+                // logger.info("sequence: {}", sequence);
+                // OperateRotate operateRotate = riseMemberOperateRotates.get(sequence % riseMemberOperateRotates.size() == 0 ? riseMemberOperateRotates.size() - 1 : sequence % riseMemberOperateRotates.size() - 1);
+                // Assert.notNull(operateRotate);
+                // logger.info("operateRotate mediaId: {}", operateRotate.getMediaId());
 
-                    String entryCode = profile.getMemberId();
-                    logger.info("发送会员数据");
-                    // 发送消息给一年精英版的用户
-                    customerMessageService.sendCustomerMessage(profile.getOpenid(), operateRotate.getMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
-                    try {
-                        TimeUnit.SECONDS.sleep(2);
-                    } catch (InterruptedException e) {
-                        logger.error(e.getLocalizedMessage(), e);
-                    }
-                    customerMessageService.sendCustomerMessage(profile.getOpenid(), entryCode, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
-                    if (sendUrl != null) {
-                        messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
-                    }
-                    // 发短信提醒
-                    if (profile.getMobileNo() != null) {
-                        ShortMessage shortMessage = new ShortMessage();
-                        shortMessage.setProfileId(profile.getId());
-                        shortMessage.setContent(profile.getNickname() + " 你好，欢迎加入商业进阶课。请添加你的班主任微信：MBAsalmon，接下来班主任将帮助你更好地学习。" +
-                                "快回复你的学号（学号：" + entryCode + "）向班主任报道吧！");
-                        shortMessage.setNickname(shortMessage.getNickname());
-                        shortMessage.setType(ShortMessage.BUSINESS);
-                        shortMessage.setPhone(profile.getMobileNo());
-                        shortMessageService.sendMessage(shortMessage);
-                    }
-                });
+                String entryCode = profile.getMemberId();
+                logger.info("发送会员数据");
+                // 发送消息给一年精英版的用户
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), ConfigUtils.getHeadTeacherWeiWeiMediaId(), Constants.WEIXIN_MESSAGE_TYPE.IMAGE);
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+                customerMessageService.sendCustomerMessage(profile.getOpenid(), entryCode, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
+                if (sendUrl != null) {
+                    messageService.sendMessage("点此完善个人信息，才能参加校友会，获取更多人脉资源喔！", Objects.toString(profile.getId()), MessageService.SYSTEM_MESSAGE, sendUrl);
+                }
+                // 发短信提醒
+                if (profile.getMobileNo() != null) {
+                    ShortMessage shortMessage = new ShortMessage();
+                    shortMessage.setProfileId(profile.getId());
+                    shortMessage.setContent(profile.getNickname() + " 你好，欢迎加入商业进阶课。请添加你的班主任微信：MBAELLA，接下来班主任将帮助你更好地学习。" +
+                            "快回复你的学号（学号：" + entryCode + "）向班主任报道吧！");
+                    shortMessage.setNickname(shortMessage.getNickname());
+                    shortMessage.setType(ShortMessage.BUSINESS);
+                    shortMessage.setPhone(profile.getMobileNo());
+                    shortMessageService.sendMessage(shortMessage);
+                }
+                // });
                 break;
             }
             default: {
@@ -837,8 +834,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     *
-     * @param fee      总价格
+     * @param fee 总价格
      * @param couponId 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, Integer couponId) {
@@ -856,8 +852,7 @@ public class SignupServiceImpl implements SignupService {
 
     /**
      * 生成orderId以及计算优惠价格
-     *
-     * @param fee           总价格
+     * @param fee 总价格
      * @param couponIdGroup 优惠券id 如果
      */
     private Pair<String, Double> generateOrderId(Double fee, List<Integer> couponIdGroup) {

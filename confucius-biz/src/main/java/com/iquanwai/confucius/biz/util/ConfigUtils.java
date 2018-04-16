@@ -424,4 +424,8 @@ public class ConfigUtils {
     public static String getBusinessThoughtApplyQrCode() {
         return getValue("thought.apply.qr.code");
     }
+
+    public static String getHeadTeacherWeiWeiMediaId() {
+        return getValue("pay.success.thought.reply.image");
+    }
 }
