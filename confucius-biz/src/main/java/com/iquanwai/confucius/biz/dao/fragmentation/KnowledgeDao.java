@@ -25,7 +25,7 @@ public class KnowledgeDao extends PracticeDBUtil {
                 "Description,Knowledge, Step, Analysis, Means, Keynote, " +
                 "AnalysisPic, MeansPic, KeynotePic, Pic, " +
                 "AnalysisAudioId, MeansAudioId, KeynoteAudioId, AudioId,Updated " +
-                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,2)";
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,2)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     knowledge.getKnowledge(), knowledge.getStep(),knowledge.getDescription(),
