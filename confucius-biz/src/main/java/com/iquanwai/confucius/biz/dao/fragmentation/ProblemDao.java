@@ -36,15 +36,12 @@ public class ProblemDao extends PracticeDBUtil {
 
     public void updateProblem(Problem problem) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Problem set Problem =?, Length=?, CatalogId=?, SubCatalogId=?, " +
-                "Author=?, AuthorPic=?, DifficultyScore=?, UsefulScore=?, DescPic=?, " +
-                "AudioId=?, Who=?, How=?, Why=?, Trial=?, Abbreviation=?,Updated = ? where id=?";
+        String sql = "Update Problem set Problem =?, Length=?, CatalogId=?, SubCatalogId=?, AudioId=?, Who=?, How=?, Why=?,Abbreviation=?,Updated = ? where id=?";
         try {
             runner.update(sql, problem.getProblem(), problem.getLength(),
-                    problem.getCatalogId(), problem.getSubCatalogId(), problem.getAuthor(),
-                    problem.getAuthorPic(), problem.getDifficultyScore(), problem.getUsefulScore(),
-                    problem.getDescPic(), problem.getAudioId(), problem.getWho(), problem.getHow(),
-                    problem.getWhy(), problem.getTrial(), problem.getAbbreviation(),problem.getUpdated(), problem.getId());
+                    problem.getCatalogId(), problem.getSubCatalogId(),
+                    problem.getAudioId(), problem.getWho(), problem.getHow(),
+                    problem.getWhy(),problem.getAbbreviation(),problem.getUpdated(), problem.getId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
