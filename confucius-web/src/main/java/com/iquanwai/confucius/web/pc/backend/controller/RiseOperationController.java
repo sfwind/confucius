@@ -32,6 +32,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
@@ -71,6 +72,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.net.ConnectException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -128,7 +130,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/search/bs/application/{date}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> searchApplication(UnionUser loginUser, @PathVariable String date) {
+    public ResponseEntity<Map<String, Object>> searchApplication(@PathVariable String date) {
         LOGGER.info("搜索{} 申请", date);
         try {
             searchPublisher.publish(date);
@@ -140,7 +142,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/notice/bs/application/{date}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> noticeApplication(UnionUser loginUser, @PathVariable String date) {
+    public ResponseEntity<Map<String, Object>> noticeApplication(@PathVariable String date) {
         LOGGER.info("发送{} 提醒", date);
         try {
             noticePublisher.publish(date);
@@ -153,18 +155,18 @@ public class RiseOperationController {
 
 
     @RequestMapping("/application/submit/{applicationId}")
-    public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser unionUser,
                                                                      @PathVariable Integer applicationId,
                                                                      @ModelAttribute Page page) {
         page.setPageSize(APPLICATION_SUBMIT_SIZE);
         List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page);
 
         applicationSubmitList.stream().forEach(applicationSubmit -> {
-            Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), loginUser.getProfileId());
+            Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), unionUser.getProfileId());
             applicationSubmit.setComment(isComment ? 1 : 0);
         });
 
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习提交")
                 .action("加载应用练习提交")
@@ -175,11 +177,11 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/discuss/{discussId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> highlightDiscuss(UnionUser loginUser,
+    public ResponseEntity<Map<String, Object>> highlightDiscuss(UnionUser unionUser,
                                                                 @PathVariable Integer discussId) {
 
         operationManagementService.highlightDiscuss(discussId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习")
                 .action("加精讨论")
@@ -189,11 +191,11 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/cancel/discuss/{discussId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> unhighlightDiscuss(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> unhighlightDiscuss(PCLoginUser unionUser,
                                                                   @PathVariable Integer discussId) {
 
         operationManagementService.unhighlightDiscuss(discussId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习")
                 .action("取消加精")
@@ -203,11 +205,11 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/applicationSubmit/{submitId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> highlightApplicationSubmit(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> highlightApplicationSubmit(PCLoginUser unionUser,
                                                                           @PathVariable Integer submitId) {
 
         operationManagementService.highlightApplicationSubmit(submitId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习")
                 .action("加精优秀的作业")
@@ -217,11 +219,11 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/highlight/cancel/applicationSubmit/{submitId}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> unhighlightApplicationSubmit(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> unhighlightApplicationSubmit(PCLoginUser unionUser,
                                                                             @PathVariable Integer submitId) {
 
         operationManagementService.unhighlightApplicationSubmit(submitId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("内容运营")
                 .function("应用练习")
                 .action("加精优秀的作业")
@@ -267,9 +269,9 @@ public class RiseOperationController {
      * 删除助教的巩固练习评论
      */
     @RequestMapping("/warmup/discuss/del/{discussId}")
-    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(UnionUser loginUser, @PathVariable Integer discussId) {
+    public ResponseEntity<Map<String, Object>> deleteWarmupDiscuss(UnionUser unionUser, @PathVariable Integer discussId) {
         Integer result = operationManagementService.deleteAsstWarmupDiscuss(discussId);
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("内容运营")
                 .function("巩固练习练习区")
                 .action("删除巩固练习评论")
@@ -305,8 +307,8 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/list", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page, UnionUser loginUser) {
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+    public ResponseEntity<Map<String, Object>> loadApplicationList(@ModelAttribute Page page) {
+        OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
                 .action("加载申请列表");
@@ -325,7 +327,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/reject", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> rejectApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
+    public ResponseEntity<Map<String, Object>> rejectApplication(PCLoginUser unionUser, @RequestBody ApproveDto approveDto) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -340,7 +342,7 @@ public class RiseOperationController {
             if (interviewRecord == null) {
                 return WebUtils.error("更新失败");
             }
-            interviewRecord.setApprovalId(loginUser.getProfileId());
+            interviewRecord.setApprovalId(unionUser.getProfileId());
             interviewRecord.setAdmit(1);
             if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
@@ -378,8 +380,9 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/approve", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> approveApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId()).module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId() + "");
+    public ResponseEntity<Map<String, Object>> approveApplication(PCLoginUser unionUser, @RequestBody ApproveDto approveDto) {
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
+                .module("后台功能").function("商学院申请").action("通过").memo(approveDto.getId() + "");
         operationLogService.log(operationLog);
 
         BusinessSchoolApplication application = businessSchoolService.loadBusinessSchoolApplication(approveDto.getId());
@@ -394,7 +397,7 @@ public class RiseOperationController {
             if (interviewRecord == null) {
                 return WebUtils.error("更新失败");
             }
-            interviewRecord.setApprovalId(loginUser.getProfileId());
+            interviewRecord.setApprovalId(unionUser.getProfileId());
             if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
@@ -433,7 +436,7 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/bs/application/ignore", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> ignoreApplication(PCLoginUser loginUser, @RequestBody ApproveDto approveDto) {
+    public ResponseEntity<Map<String, Object>> ignoreApplication(PCLoginUser unionUser, @RequestBody ApproveDto approveDto) {
         OperationLog operationLog = OperationLog.create()
                 .module("后台功能")
                 .function("商学院申请")
@@ -448,7 +451,7 @@ public class RiseOperationController {
             if (interviewRecord == null) {
                 return WebUtils.error("更新失败");
             }
-            interviewRecord.setApprovalId(loginUser.getProfileId());
+            interviewRecord.setApprovalId(unionUser.getProfileId());
             if (assistantCoachService.addInterviewRecord(interviewRecord) == -1) {
                 return WebUtils.error("更新失败");
             }
@@ -510,9 +513,9 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/survey/config/list", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadConfigList(PCLoginUser loginUser) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+    public ResponseEntity<Map<String, Object>> loadConfigList(PCLoginUser unionUser) {
+        Assert.notNull(unionUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("后台管理")
                 .function("问卷星")
                 .action("查看问卷配置");
@@ -522,11 +525,11 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/survey/config", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> updateSurveyConfig(PCLoginUser loginUser,
+    public ResponseEntity<Map<String, Object>> updateSurveyConfig(PCLoginUser unionUser,
                                                                   @RequestBody SurveyHref surveyHref) {
-        Assert.notNull(loginUser, "用户不能为空");
+        Assert.notNull(unionUser, "用户不能为空");
         Assert.notNull(surveyHref, "问卷不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("后台管理")
                 .function("问卷星")
                 .action("更新问卷配置");
@@ -536,10 +539,10 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/delete/survey/config/{id}", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> deleteSurveyConfig(PCLoginUser loginUser, @PathVariable Integer id) {
-        Assert.notNull(loginUser, "用户不能为空");
+    public ResponseEntity<Map<String, Object>> deleteSurveyConfig(PCLoginUser unionUser, @PathVariable Integer id) {
+        Assert.notNull(unionUser, "用户不能为空");
         Assert.notNull(id, "问卷id不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("后台管理")
                 .function("问卷星")
                 .action("删除问卷配置");
@@ -549,9 +552,9 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/interviewer/list", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadInterviewerList(PCLoginUser loginUser) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+    public ResponseEntity<Map<String, Object>> loadInterviewerList(PCLoginUser unionUser) {
+        Assert.notNull(unionUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("后台管理")
                 .function("审批")
                 .action("获取审批者列表");
@@ -570,9 +573,9 @@ public class RiseOperationController {
     }
 
     @RequestMapping(value = "/assign/interviewer", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> assignInterviewer(UnionUser loginUser, @RequestBody AssignDto assignDto) {
-        Assert.notNull(loginUser, "用户不能为空");
-        OperationLog operationLog = OperationLog.create().openid(loginUser.getOpenId())
+    public ResponseEntity<Map<String, Object>> assignInterviewer(UnionUser unionUser, @RequestBody AssignDto assignDto) {
+        Assert.notNull(unionUser, "用户不能为空");
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
                 .module("后台管理")
                 .function("审批")
                 .action("分配审批者");
@@ -587,7 +590,7 @@ public class RiseOperationController {
 
 
     @RequestMapping(value = "/load/templates", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Object>> loadTemplates(UnionUser unionUser) {
+    public ResponseEntity<Map<String, Object>> loadTemplates() {
         List<TemplateMsg> templateMsgList = templateMessageService.loadTemplateMsgs();
 
         return WebUtils.result(templateMsgList);
@@ -612,9 +615,9 @@ public class RiseOperationController {
             templateDto.setForcePush(true);
             openIds.add(unionUser.getOpenId());
         } else {
-            List tempList = Arrays.asList(templateDto.getOpenIds().split("\n"));
+            List<String> tempList = Arrays.asList(templateDto.getOpenIds().split("\n"));
             openIds = new ArrayList<>(tempList);
-            List excludeList = Arrays.asList(templateDto.getExcludeOpenIds().split("\n"));
+            List<String> excludeList = Arrays.asList(templateDto.getExcludeOpenIds().split("\n"));
             //排除人数
             openIds = openIds.stream().filter(openId -> !excludeList.contains(openId)).collect(Collectors.toList());
         }
@@ -671,7 +674,9 @@ public class RiseOperationController {
                     }
                     String url = templateDto.getUrl();
                     if (url != null && url.length() > 0) {
-                        templateMessage.setUrl(templateDto.getUrl());
+                        String redirectUrl = URLEncoder.encode(url);
+                        url = ConfigUtils.domainName() + "/redirect/template/message?key=" + source + "&url=" + redirectUrl;
+                        templateMessage.setUrl(url);
                     }
                     templateMessage.setComment(templateDto.getComment());
                     if (openid.equals(unionUser.getOpenId())) {
