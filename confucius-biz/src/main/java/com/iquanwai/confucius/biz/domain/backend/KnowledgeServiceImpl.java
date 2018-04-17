@@ -89,6 +89,9 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             }
 
             int knowledgeId = knowledgeDao.insertKnowledge(knowledge);
+            if(knowledgeId==-1){
+                return -1;
+            }
             knowledge.setId(knowledgeId);
             //插入目标知识点对应的Schedule
             insertProblemSchedule(knowledge, problemId);
