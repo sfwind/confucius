@@ -42,10 +42,10 @@ public class KnowledgeDao extends PracticeDBUtil {
 
     public Integer updateKnowledge(Knowledge knowledge) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?, Analysis = ?, Means = ?, Keynote = ?," +
+        String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?,Description = ?,Analysis = ?, Means = ?, Keynote = ?," +
                 "AnalysisAudioId=?, MeansAudioId=?, KeynoteAudioId=?, AudioId=?,Updated = ? WHERE Id = ?";
         try {
-            return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),
+            return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),knowledge.getDescription(),
                     knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
                     knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
                     knowledge.getKeynoteAudioId(), knowledge.getAudioId(), knowledge.getUpdated(), knowledge.getId());

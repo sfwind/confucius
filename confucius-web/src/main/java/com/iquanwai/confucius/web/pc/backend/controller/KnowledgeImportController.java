@@ -83,7 +83,10 @@ public class KnowledgeImportController {
             return WebUtils.result(result);
         } else if (result == KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getCode()) {
             return WebUtils.error(KnowledgeEnums.KNOWLEDG_Duplicate_ERROR.getMsg());
-        } else {
+        }else if(result == -1){
+            return WebUtils.error("操作失败");
+        }
+        else {
             return WebUtils.error(KnowledgeEnums.UNKNOWN_ERROR.getMsg());
         }
     }

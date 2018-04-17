@@ -84,7 +84,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             if (problemSchedule != null) {
                 //如果正好不是复习，则认为章节重复
                 if (problemSchedule.getChapter().intValue() != reviewSchedules.get(0).getChapter().intValue()) {
-                    return -1;
+                    return -2;
                 }
             }
 
