@@ -1,9 +1,11 @@
 package com.iquanwai.confucius.web.enums;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum LastVerifiedEnums {
 
     LAST_VERIFIED_ZERO(0,"无"),
@@ -15,9 +17,4 @@ public enum LastVerifiedEnums {
     private Integer lastVerifiedCode;
 
     private String lastVerifiedMsg;
-
-    LastVerifiedEnums(Integer lastVerifiedCode, String lastVerifiedMsg) {
-        this.lastVerifiedCode = lastVerifiedCode;
-        this.lastVerifiedMsg = lastVerifiedMsg;
-    }
 }

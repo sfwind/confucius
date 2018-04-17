@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.dao.fragmentation;
 
 import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.course.MonthlyCampConfig;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;

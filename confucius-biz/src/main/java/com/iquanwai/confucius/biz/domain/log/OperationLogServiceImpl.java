@@ -1,11 +1,13 @@
 package com.iquanwai.confucius.biz.domain.log;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.log.ActionLogDao;
 import com.iquanwai.confucius.biz.dao.common.log.OperationLogDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.po.ActionLog;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -22,8 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.support.Assert;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 public class OperationLogServiceImpl implements OperationLogService {
@@ -43,6 +47,8 @@ public class OperationLogServiceImpl implements OperationLogService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private UserRoleDao userRoleDao;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
 
     @Override
     public void log(OperationLog operationLog) {
@@ -76,21 +82,37 @@ public class OperationLogServiceImpl implements OperationLogService {
                 UserRole role = userRoleDao.loadAssist(profileId);
 
                 Integer roleName = 0;
-                RiseMember validRiseMember = riseMemberDao.loadValidRiseMember(profileId);
+
+//                RiseMember validRiseMember = riseMemberDao.loadValidRiseMember(profileId);
+                List<RiseMember> riseMemberList = riseMemberManager.member(profileId);
 
                 RiseClassMember riseClassMember = riseClassMemberDao.loadActiveRiseClassMember(profileId);
                 if (riseClassMember == null) {
                     riseClassMember = riseClassMemberDao.loadLatestRiseClassMember(profileId);
                 }
+                if (!riseMemberList.isEmpty()) {
+                    properties.put("roleNames", riseMemberList
+                            .stream()
+                            .map(RiseMember::getMemberTypeId)
+                            .map(Object::toString)
+                            .distinct()
+                            .collect(Collectors.toList()));
+                } else {
+                    properties.put("roleNames", Lists.newArrayList("0"));
+                }
 
                 if (riseClassMember != null) {
-                    properties.put("className", riseClassMember.getClassName());
-                    properties.put("groupId", riseClassMember.getGroupId());
+                    if (riseClassMember.getClassName() != null) {
+                        properties.put("className", riseClassMember.getClassName());
+                    }
+                    if (riseClassMember.getGroupId() != null) {
+                        properties.put("groupId", riseClassMember.getGroupId());
+                    }
                 }
-                if (validRiseMember != null) {
-                    roleName = validRiseMember.getMemberTypeId();
-                }
-                properties.put("roleName", roleName);
+//                if (validRiseMember != null) {
+//                    roleName = validRiseMember.getMemberTypeId();
+//                }
+//                properties.put("roleName", roleName);
                 properties.put("isAsst", role != null);
                 properties.put("riseId", profile.getRiseId());
                 logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, eventName, properties);

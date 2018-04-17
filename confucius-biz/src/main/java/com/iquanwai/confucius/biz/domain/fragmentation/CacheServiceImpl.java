@@ -1,11 +1,11 @@
 package com.iquanwai.confucius.biz.domain.fragmentation;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.iquanwai.confucius.biz.dao.fragmentation.BusinessSchoolConfigDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.MonthlyCampConfigDao;
-import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolConfig;
-import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.course.BusinessSchoolConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
+import com.iquanwai.confucius.biz.po.fragmentation.course.MonthlyCampConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,24 +25,33 @@ public class CacheServiceImpl implements CacheService {
 
     private MonthlyCampConfig monthlyCampConfig;
     private BusinessSchoolConfig businessSchoolConfig;
+    private BusinessSchoolConfig businessThoughtConfig;
 
     @PostConstruct
     public void init() {
         monthlyCampConfig = monthlyCampConfigDao.loadActiveConfig();
         logger.info("monthly camp configuration init complete");
-        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig();
+        // TODO 两个配置表合一
+        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.ELITE);
+        businessThoughtConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.BUSINESS_THOUGHT);
         logger.info("business college configuration init complete");
     }
 
     @Override
     public MonthlyCampConfig loadMonthlyCampConfig() {
-        return JSONObject.parseObject(JSON.toJSONString(monthlyCampConfig), MonthlyCampConfig.class);
+        return monthlyCampConfig.copy();
     }
 
     @Override
-    public BusinessSchoolConfig loadBusinessCollegeConfig() {
-        return JSONObject.parseObject(JSON.toJSONString(businessSchoolConfig), BusinessSchoolConfig.class);
+    public BusinessSchoolConfig loadBusinessCollegeConfig(Integer memberTypeId) {
+        if (memberTypeId == RiseMember.ELITE) {
+            return businessSchoolConfig.copy();
+        } else if (memberTypeId == RiseMember.BUSINESS_THOUGHT) {
+            return businessThoughtConfig.copy();
+        }
+        return null;
     }
+
 
     @Override
     public void reload() {
@@ -56,7 +65,17 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public void reloadBusinessCollegeConfig() {
-        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig();
+        businessSchoolConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.ELITE);
+        businessThoughtConfig = businessSchoolConfigDao.loadActiveConfig(RiseMember.BUSINESS_THOUGHT);
+    }
+
+    @Override
+    public CourseConfig loadCourseConfig(Integer memberTypeId) {
+        if (memberTypeId == RiseMember.CAMP) {
+            return loadMonthlyCampConfig();
+        } else {
+            return loadBusinessCollegeConfig(memberTypeId);
+        }
     }
 
 }

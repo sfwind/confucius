@@ -77,21 +77,33 @@ public class ProfileDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public List<Profile> queryAccountsByOpenids(List<String> openids) {
-        if (CollectionUtils.isEmpty(openids)) {
+    public List<Profile> queryByMemberIds(List<String> memberIds) {
+        if (CollectionUtils.isEmpty(memberIds)) {
             return Lists.newArrayList();
         }
-        String questionMarks = produceQuestionMark(openids.size());
+        String questionMarks = produceQuestionMark(memberIds.size());
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
-        String sql = "SELECT * FROM Profile where Openid in (" + questionMarks + ") AND Del = 0";
+        String sql = "SELECT * FROM Profile where MemberId in (" + questionMarks + ") AND Del = 0";
         try {
-            return run.query(sql, h, openids.toArray());
+            return run.query(sql, h, memberIds.toArray());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
 
         return Lists.newArrayList();
+    }
+
+    public Profile queryByMemberId(String memberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Profile WHERE MemberId = ? AND Del = 0";
+        ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
+        try {
+            return runner.query(sql, h, memberId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     public int insertProfile(Profile profile) throws SQLException {
@@ -141,6 +153,16 @@ public class ProfileDao extends DBUtil {
         String sql = "UPDATE Profile SET Point = ? where Id = ?";
         try {
             runner.update(sql, point, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void updateMemberId(Integer profileId, String memberId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE Profile SET MemberId = ? where Id = ?";
+        try {
+            runner.update(sql, memberId, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

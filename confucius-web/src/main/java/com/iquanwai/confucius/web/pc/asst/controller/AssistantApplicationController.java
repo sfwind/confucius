@@ -1,6 +1,8 @@
 package com.iquanwai.confucius.web.pc.asst.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.fragmentation.CommentDao;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -59,6 +61,8 @@ public class AssistantApplicationController {
     private CommentDao commentDao;
     @Autowired
     private ApplicationService applicationService;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
 
     /**
      * 点赞或者取消点赞
@@ -71,7 +75,6 @@ public class AssistantApplicationController {
         Assert.isTrue(vote.getStatus() == 1 || vote.getStatus() == 2, "点赞状态异常");
         Integer refer = vote.getReferencedId();
         Integer status = vote.getStatus();
-        String openId = loginUser.getOpenId();
 
         if (status == 1) {
             practiceService.vote(vote.getType(), refer, loginUser.getProfileId());
@@ -182,9 +185,16 @@ public class AssistantApplicationController {
 
             operationLogService.trace(loginUser.getProfileId(), "commentApplication", () -> {
                 OperationLogService.Prop prop = OperationLogService.props();
-                RiseMember riseMember = accountService.getCurrentRiseMember(applicationSubmit.getProfileId());
-                if (riseMember != null) {
-                    prop.add("discussedRolename", riseMember.getMemberTypeId());
+                List<RiseMember> riseMemberList = riseMemberManager.member(applicationSubmit.getProfileId());
+                if (riseMemberList.isEmpty()) {
+                    prop.add("discussedRolenames", Lists.newArrayList("0"));
+                } else {
+                    prop.add("discussedRolenames", riseMemberList
+                            .stream()
+                            .map(RiseMember::getMemberTypeId)
+                            .map(Object::toString)
+                            .distinct()
+                            .collect(Collectors.toList()));
                 }
                 prop.add("applicationId", applicationSubmit.getApplicationId());
                 Profile profile = accountService.getProfile(applicationSubmit.getProfileId());

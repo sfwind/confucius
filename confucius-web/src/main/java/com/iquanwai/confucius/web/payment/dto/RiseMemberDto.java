@@ -1,6 +1,5 @@
 package com.iquanwai.confucius.web.payment.dto;
 
-import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import lombok.Data;
 
@@ -19,6 +18,7 @@ public class RiseMemberDto {
     private String tip;
     /** 是否有报名权限 */
     private Boolean privilege;
+    private String errorMsg;
     /** 已经是商学院会员 */
     private Boolean elite;
     /**
@@ -29,10 +29,11 @@ public class RiseMemberDto {
      * 试听课按钮显示
      */
     private String auditionStr;
+    private String qrCode;
+    private Boolean subscribe;
     /** 订单关闭剩余小时 */
     private int remainHour;
     /** 订单关闭剩余分钟 */
     private int remainMinute;
-    /** 是否已经报名 */
-    private boolean entry;
+    private int remainSeconds;
 }

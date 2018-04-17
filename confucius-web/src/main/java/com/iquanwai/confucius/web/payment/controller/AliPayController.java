@@ -9,6 +9,7 @@ import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
@@ -64,6 +65,8 @@ public class AliPayController {
     private RestfulHelper restfulHelper;
     @Autowired
     private SignupService signupService;
+    @Autowired
+    private MessageService messageService;
 
 
     @RequestMapping(value = "order/query", method = RequestMethod.GET)
@@ -176,7 +179,10 @@ public class AliPayController {
                     }
                 }
             } catch (Exception e) {
+                messageService.sendAlarm("报名模块出错", "阿里回调处理失败",
+                        "高", "orderId:" + payCallback.getOut_trade_no(), e.getLocalizedMessage());
                 logger.error("rise会员支付结果回调处理失败", e);
+
             }
         });
     }

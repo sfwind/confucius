@@ -2,8 +2,10 @@ package com.iquanwai.confucius.biz.domain.weixin.account;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.RedisUtil;
+import com.iquanwai.confucius.biz.dao.apply.BusinessSchoolApplicationDao;
 import com.iquanwai.confucius.biz.dao.common.customer.CustomerStatusDao;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
@@ -13,24 +15,27 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
+import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
-import com.iquanwai.confucius.biz.domain.weixin.accesstoken.AccessTokenService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
-import com.iquanwai.confucius.biz.exception.NotFollowingException;
 import com.iquanwai.confucius.biz.po.Account;
 import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.po.CourseSchedule;
+import com.iquanwai.confucius.biz.po.apply.BusinessSchoolApplication;
 import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
 import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseCertificate;
+import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
@@ -38,9 +43,6 @@ import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.ConversionException;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
@@ -57,6 +59,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/8/10.
@@ -92,9 +96,15 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private CourseScheduleDao courseScheduleDao;
     @Autowired
-    private AccessTokenService accessTokenService;
-    @Autowired
     private SensorsAnalytics sa;
+    @Autowired
+    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
+    @Autowired
+    private CacheService cacheService;
+    @Autowired
+    private RiseMemberTypeRepo riseMemberTypeRepo;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -277,8 +287,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account getAccountByUnionId(String unionId) {
-        return followUserDao.queryByUnionId(unionId);
+    public void updateMemberId(Integer profileId, String memberId) {
+        profileDao.updateMemberId(profileId, memberId);
     }
 
     @Override
@@ -295,7 +305,6 @@ public class AccountServiceImpl implements AccountService {
     public Profile getProfile(Integer profileId) {
         Profile profile = profileDao.load(Profile.class, profileId);
         if (profile != null) {
-            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -311,19 +320,19 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Profile> getProfilesByMemberIds(List<String> memberIds) {
+        return profileDao.queryByMemberIds(memberIds);
+    }
+
+    @Override
     public Profile getProfileByRiseId(String riseId) {
-        Profile profile = profileDao.queryByRiseId(riseId);
-        if (profile != null) {
-            profile.setRiseMember(getRiseMember(profile.getId()));
-        }
-        return profile;
+        return profileDao.queryByRiseId(riseId);
     }
 
     @Override
     public List<Profile> getProfiles(List<Integer> profileIds) {
         List<Profile> profiles = profileDao.queryAccounts(profileIds);
         profiles.forEach(profile -> {
-            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -336,138 +345,6 @@ public class AccountServiceImpl implements AccountService {
             // TODO 处理头像问题
         });
         return profiles;
-    }
-
-    @Override
-    public Integer getRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember == null) {
-            return 0;
-        }
-        Integer memberTypeId = riseMember.getMemberTypeId();
-        if (memberTypeId == null) {
-            return 0;
-        }
-        // 精英或者专业版用户
-        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
-            return 1;
-        } else if (memberTypeId == RiseMember.CAMP) {
-            return 3;
-        } else if (memberTypeId == RiseMember.COURSE) {
-            return 2;
-        } else {
-            return 0;
-        }
-    }
-
-    // private Account getAccountFromWeixin(String openid) throws NotFollowingException {
-    //     // 调用api查询用户详情
-    //     String url = USER_INFO_URL;
-    //     Map<String, String> map = Maps.newHashMap();
-    //     map.put("openid", openid);
-    //     logger.info("请求用户信息:{}", openid);
-    //     url = CommonUtils.placeholderReplace(url, map);
-    //     String body = restfulHelper.get(url);
-    //     logger.info("请求用户信息结果:{}", body);
-    //     Map<String, Object> result = CommonUtils.jsonToMap(body);
-    //
-    //     Account account = new Account();
-    //     try {
-    //         ConvertUtils.register((aClass, value) -> {
-    //             if (value == null) {
-    //                 return null;
-    //             }
-    //             if (!(value instanceof Double)) {
-    //                 logger.error("不是日期类型");
-    //                 throw new ConversionException("不是日期类型");
-    //             }
-    //             Double time = (Double) value * 1000;
-    //             return new DateTime(time.longValue()).toDate();
-    //         }, Date.class);
-    //         BeanUtils.populate(account, result);
-    //         if (account.getSubscribe() != null && account.getSubscribe() == 0) {
-    //             //未关注直接抛异常
-    //             throw new NotFollowingException();
-    //         }
-    //
-    //         redisUtil.lock("lock:wx:user:insert:profile", (lock) -> {
-    //             Account existAccount = followUserDao.queryByOpenid(openid);
-    //             logger.info("existAccount: {}", existAccount);
-    //             if (existAccount == null) {
-    //                 logger.info("插入用户信息:{}", account);
-    //                 followUserDao.insert(account);
-    //                 // 插入profile表
-    //                 Profile profile = getProfileFromDB(account.getOpenid());
-    //                 if (profile == null) {
-    //                     ModelMapper modelMapper = new ModelMapper();
-    //                     profile = modelMapper.map(account, Profile.class);
-    //                     try {
-    //                         logger.info("插入Profile表信息:{}", profile);
-    //                         profile.setRiseId(CommonUtils.randomString(7));
-    //                         profileDao.insertProfile(profile);
-    //                     } catch (SQLException err) {
-    //                         profile.setRiseId(CommonUtils.randomString(7));
-    //                         try {
-    //                             profileDao.insertProfile(profile);
-    //                         } catch (SQLException subErr) {
-    //                             logger.error("插入Profile失败，openId:{},riseId:{}", profile.getOpenid(), profile.getRiseId());
-    //                         }
-    //                     }
-    //                 } else {
-    //                     ModelMapper modelMapper = new ModelMapper();
-    //                     profile = modelMapper.map(account, Profile.class);
-    //                     profileDao.updateOAuthFields(profile);
-    //                 }
-    //             } else {
-    //                 followUserDao.updateOAuthFields(account);
-    //             }
-    //         });
-    //     } catch (NotFollowingException e1) {
-    //         throw new NotFollowingException();
-    //     } catch (Exception e) {
-    //         logger.error(e.getMessage(), e);
-    //     }
-    //     return account;
-    // }
-
-    @Override
-    public String getRealHeadImgUrlFromWeixin(String openId) throws NotFollowingException {
-        // 调用api查询account对象
-        String url = USER_INFO_URL;
-        Map<String, String> map = Maps.newHashMap();
-        map.put("openid", openId);
-        logger.info("请求用户信息:{}", openId);
-        url = CommonUtils.placeholderReplace(url, map);
-        String body = restfulHelper.get(url);
-        logger.info("请求用户信息结果:{}", body);
-        Map<String, Object> result = CommonUtils.jsonToMap(body);
-        Account accountNew = new Account();
-        try {
-            ConvertUtils.register((aClass, value) -> {
-                if (value == null) {
-                    return null;
-                }
-                if (!(value instanceof Double)) {
-                    logger.error("不是日期类型");
-                    throw new ConversionException("不是日期类型");
-                }
-                Double time = (Double) value * 1000;
-                return new DateTime(time.longValue()).toDate();
-            }, Date.class);
-
-            BeanUtils.populate(accountNew, result);
-            if (accountNew.getSubscribe() != null && accountNew.getSubscribe() == 0) {
-                //未关注直接抛异常
-                throw new NotFollowingException();
-            } else {
-                return accountNew.getHeadimgurl();
-            }
-        } catch (NotFollowingException e1) {
-            throw new NotFollowingException();
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
     }
 
     @Override
@@ -487,18 +364,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Profile loadProfileByMemberId(String memberId) {
-        RiseClassMember riseClassMember = riseClassMemberDao.queryValidClassMemberByMemberId(memberId);
-        if (riseClassMember != null && riseClassMember.getProfileId() != null) {
-            return getProfile(riseClassMember.getProfileId());
-        } else {
-            return null;
-        }
+        return profileDao.queryByMemberId(memberId);
     }
 
     private Profile getProfileFromDB(String openid) {
         Profile profile = profileDao.queryByOpenId(openid);
         if (profile != null) {
-            profile.setRiseMember(getRiseMember(profile.getId()));
             if (profile.getHeadimgurl() != null) {
                 profile.setHeadimgurl(profile.getHeadimgurl().replace("http:", "https:"));
             }
@@ -513,31 +384,105 @@ public class AccountServiceImpl implements AccountService {
         return profile;
     }
 
+
     @Override
-    public Boolean hasPrivilegeForBusinessSchool(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        Boolean result = false;
+    public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer memberTypeId) {
+        /*
+        1.1已经是商学院用户-核心能力项 x
+        1.2可以报名商业思维且为报名-核心能力项 x
+        1.3已经能报了-核心能力项 x
 
+        2.1已经是商业思维用户-商业性思维 x
+        2.2可以报名核心能力项目-商业思维 x
+        2.3已经可以报名商业思维-商业思维 x
+
+        3.有进行中的申请 x
+        4.最近一个月被拒绝过 x
+         */
+
+        // TODO 过期状态、付费状态回写，如果已经付费，则相当于已经付费
+        // TODO 核心能力项目不能申请分拆项目(两个六个月)
+        // 是否已经报名本状态
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        boolean entryThis = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, Lists.newArrayList(memberTypeId)).stream().findAny().isPresent();
+        if (entryThis) {
+            return Pair.of(false, "您已经报名" + memberType.getDescription() + ",无需重复申请");
+        }
+
+        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
+        // 是否有权限报名
+        if (this.hasAvailableApply(applyList, memberTypeId)) {
+            return Pair.of(false, "您已经有" + memberType.getDescription() + "报名权限，无需重复申请");
+        }
+        // 可以报名其他项目
+        if (this.hasAvailableOtherApply(applyList, memberTypeId)) {
+            return Pair.of(false, "您有其他项目报名权限，需申请更换报名项目");
+        }
+        // 检查有没有进行中
+        if (applyList.stream().anyMatch(item -> !item.getDeal())) {
+            return Pair.of(false, "您的申请正在审核中");
+        }
+
+        // 一个月之内被拒绝过
+        List<BusinessSchoolApplication> rejectLists = applyList
+                .stream()
+                .filter(item -> item.getMemberTypeId().equals(memberTypeId))
+                .filter(item -> item.getStatus() == BusinessSchoolApplication.REJECT)
+                .filter(item -> new DateTime(item.getDealTime()).withTimeAtStartOfDay().plusMonths(1).isAfter(new DateTime().withTimeAtStartOfDay()))
+                .collect(Collectors.toList());
+        if (rejectLists.size() > 0) {
+            Integer maxWaitDays = rejectLists
+                    .stream()
+                    .map(item -> DateUtils.interval(new DateTime(item.getDealTime()).withTimeAtStartOfDay().plusMonths(1).toDate(), new DateTime().withTimeAtStartOfDay().toDate()))
+                    .max((Comparator.comparingInt(o -> o)))
+                    .orElse(0);
+            return Pair.of(false, "还有 " + maxWaitDays + " 天才能再次申请哦");
+        }
+
+        return Pair.of(true, "ok");
+    }
+
+
+    @Override
+    public Pair<Boolean, String> hasPrivilegeForMember(Integer profileId, Integer memberTypeId) {
+        /*
+        1.查看是否开放报名
+        2.已经报过的不能报名
+        3.专业版直接付费
+        4.需要申请
+         */
+        // 查看是否开放报名 x
+        CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
+        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        if (!courseConfig.getPurchaseSwitch()) {
+            return Pair.of(false, memberType.getDescription() + "报名临时关闭\n记得及时关注开放时间哦");
+        }
+        // 已经报过的不能报名
+        RiseMember riseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, memberTypeId);
         if (riseMember != null) {
-            Integer memberTypeId = riseMember.getMemberTypeId();
-            //如果用户是专业版或者精英版,则无需申请
-            if (RiseMember.HALF == memberTypeId || RiseMember.ANNUAL == memberTypeId || RiseMember.ELITE == memberTypeId || RiseMember.HALF_ELITE == memberTypeId) {
-                result = true;
-            }
+            return Pair.of(false, "您已经是" + memberType.getDescription() + "用户，无需购买");
         }
 
-        //如果用户曾经获得证书,则无需申请
-        if (!result) {
-            RiseCertificate riseCertificate = riseCertificateDao.loadGraduateByProfileId(profileId);
-            result = riseCertificate != null;
+        if (riseMemberManager.proMember(profileId) != null) {
+            // 专业版直接付费 to Del
+            return Pair.of(true, "ok");
+        }
+        // 有其他申请通过
+        List<BusinessSchoolApplication> applyList = businessSchoolApplicationDao.loadApplyList(profileId);
+        if (this.hasAvailableOtherApply(applyList, memberTypeId)) {
+            return Pair.of(false, "您有其他项目报名权限，需申请更换报名项目");
+        }
+        // 申请通过
+        if (this.hasAvailableApply(applyList, memberTypeId)) {
+            return Pair.of(true, "ok");
         }
 
-        //如果用户已经通过申请,则无需再次申请
-        if (!result) {
-            result = customerStatusDao.load(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS) != null;
+        boolean hasApplying = applyList.stream().anyMatch(item -> !item.getDeal());
+        if (hasApplying) {
+            return Pair.of(false, "您的申请正在审核中");
+        } else {
+            return Pair.of(false, "请先提交申请");
         }
-
-        return result;
     }
 
     /**
@@ -665,11 +610,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int updateHeadImageUrl(Integer profileId, String headImgUrl) {
-        return profileDao.updateHeadImgUrl(profileId, headImgUrl);
-    }
-
-    @Override
     public RiseClassMember getLatestMemberId(Integer profileId) {
         List<RiseClassMember> riseClassMembers = riseClassMemberDao.queryByProfileId(profileId);
         RiseClassMember riseClassMember = riseClassMembers.stream().max(Comparator.comparing(RiseClassMember::getId)).orElse(null);
@@ -702,6 +642,7 @@ public class AccountServiceImpl implements AccountService {
         Profile profile = getProfileByRiseId(riseId);
         int profileId = profile.getId();
 
+        // TODO: 杨仁 增加project项目
         RiseMember currentRiseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (currentRiseMember != null) {
             return new MutablePair<>(-1, "该用户已经是会员");
@@ -717,6 +658,83 @@ public class AccountServiceImpl implements AccountService {
         riseMember.setVip(true);
         int result = riseMemberDao.insert(riseMember);
         return new MutablePair<>(result, null);
+    }
+
+    @Override
+    public BusinessSchoolApplication loadLastApply(Integer profileId, Integer memberTypeId) {
+        return businessSchoolApplicationDao.loadLastApproveApplication(profileId, memberTypeId);
+    }
+
+    @Override
+    public boolean hasAvailableApply(Integer profileId, Integer project) {
+        return this.hasAvailableApply(businessSchoolApplicationDao.loadApplyList(profileId), project);
+    }
+
+    @Override
+    public boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId) {
+        return applyList
+                .stream()
+                .filter(item -> Objects.equals(item.getMemberTypeId(), memberTypeId))
+                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
+                .filter(BusinessSchoolApplication::getDeal)
+                .filter(item -> !item.getExpired())
+                .peek(item -> {
+                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
+                        // 已经过期
+                        item.setExpired(true);
+                        businessSchoolApplicationDao.expiredApply(item.getId());
+                    }
+                })
+                .filter(item -> !item.getEntry())
+                .anyMatch(item -> !item.getExpired());
+    }
+
+    @Override
+    public boolean hasAvailableOtherApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId) {
+        return applyList
+                .stream()
+                .filter(item -> !Objects.equals(item.getMemberTypeId(), memberTypeId))
+                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
+                .filter(BusinessSchoolApplication::getDeal)
+                .filter(item -> !item.getExpired())
+                .peek(item -> {
+                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
+                        // 已经过期
+                        item.setExpired(true);
+                        businessSchoolApplicationDao.expiredApply(item.getId());
+                    }
+                })
+                .filter(item -> !item.getEntry())
+                .anyMatch(item -> !item.getExpired());
+    }
+
+    @Override
+    public Pair<Boolean, String> hasPrivilegeForCamp(Integer profileId) {
+        /*
+        1.已经是商学院用户 x
+        2.已经报过这个月的 x
+        3.本月报名已经关闭 x
+         */
+        CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
+        RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
+        // 购买专项课
+        if (riseMember != null && RiseMember.isMember(riseMember.getMemberTypeId())) {
+            return Pair.of(false, "您已经是圈外商学院学员，拥有主题专项课，无需重复报名\n如有疑问请在学习群咨询班长");
+        } else {
+            RiseMember campRiseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, RiseMember.CAMP);
+            if (campRiseMember != null) {
+                return Pair.of(false, "您已经是" + monthlyCampConfig.getSellingMonth() + "月专项课用户");
+            }
+            if (!monthlyCampConfig.getPurchaseSwitch()) {
+                return Pair.of(false, "当月专项课已关闭报名");
+            }
+        }
+        return Pair.of(true, "ok");
+    }
+
+    @Override
+    public Account getAccountByUnionId(String unionId) {
+        return followUserDao.queryByUnionId(unionId);
     }
 
 }

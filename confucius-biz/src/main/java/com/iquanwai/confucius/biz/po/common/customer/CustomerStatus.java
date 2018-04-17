@@ -14,8 +14,10 @@ public class CustomerStatus {
     public static final Integer OPEN_BIBLE = 1; //开bible
     public static final Integer EDIT_TAG = 2; //选择tag
     public static final Integer APPLY_BUSINESS_SCHOOL_SUCCESS = 3; // 申请通过
+    public static final Integer APPLY_MINI_MBA_SUCCESS = 6;
     /**
      * 学过试听课
+     *
      * @deprecated
      */
     public static final Integer LEARNED_AUDITION = 4;
