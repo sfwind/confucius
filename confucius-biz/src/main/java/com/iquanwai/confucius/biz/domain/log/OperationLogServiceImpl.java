@@ -66,8 +66,8 @@ public class OperationLogServiceImpl implements OperationLogService {
     @PostConstruct
     public void init() {
         riseMemberTypeRepo.memberTypes().forEach(item -> {
-            classNameMap.put(item.getId(), "className:" + item.getId());
-            groupIdMap.put(item.getId(), "groupId:" + item.getId());
+            classNameMap.put(item.getId(), "className_" + item.getId());
+            groupIdMap.put(item.getId(), "groupId_" + item.getId());
         });
     }
 
