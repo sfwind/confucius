@@ -742,4 +742,10 @@ public class AccountServiceImpl implements AccountService {
         return followUserDao.queryByUnionId(unionId);
     }
 
+    @Override
+    public Boolean isWhiteList(Integer profileId) {
+        RiseClassMember riseClassMember = riseClassMemberDao.whiteList(profileId);
+        return riseClassMember != null;
+    }
+
 }

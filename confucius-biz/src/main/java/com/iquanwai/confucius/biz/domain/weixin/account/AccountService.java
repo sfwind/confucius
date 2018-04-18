@@ -165,4 +165,6 @@ public interface AccountService {
     Pair<Boolean, String> hasPrivilegeForCamp(Integer profileId);
 
     Account getAccountByUnionId(String unionId);
+
+    Boolean isWhiteList(Integer profileId);
 }

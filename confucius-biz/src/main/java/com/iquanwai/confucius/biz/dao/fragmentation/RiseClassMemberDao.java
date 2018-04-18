@@ -244,7 +244,7 @@ public class RiseClassMemberDao extends PracticeDBUtil {
 
     public RiseClassMember whiteList(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM RiseClassMember WHERE ClassName IN ('170701','170702','170801','170803') and Active = 1 and Del = 0 and ProfileId = ?";
+        String sql = "SELECT * FROM RiseClassMember WHERE ClassName IN ('170801') and Active = 1 and Del = 0 and ProfileId = ?";
         BeanHandler<RiseClassMember> h = new BeanHandler<>(RiseClassMember.class);
         try {
             return runner.query(sql, h, profileId);

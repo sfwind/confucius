@@ -1,8 +1,10 @@
 package com.iquanwai.confucius.web;
 
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
+import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
+import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -24,29 +26,50 @@ public class IndexController {
 
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private AccountService accountService;
 
     private static final String PAY_VIEW = "pay";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+
     @RequestMapping(value = "/pay/alipay/**", method = RequestMethod.GET)
     public ModelAndView getAlipayIndex(HttpServletRequest request, HttpServletResponse response,
-                                       @RequestParam(value="_tm", required = false) String channel) throws Exception {
+                                       @RequestParam(value = "_tm", required = false) String channel) throws Exception {
         OperationLog operationLog = new OperationLog().function("打点").module("访问页面").action("阿里支付")
                 .memo(request.getRequestURI());
         operationLogService.log(operationLog);
         return payView(request, response, channel, PAY_VIEW);
     }
 
+
+    @RequestMapping(value = "/pay/thought", method = RequestMethod.GET)
+    public ModelAndView getPayThoughtIndex(UnionUser unionUser, HttpServletRequest request, HttpServletResponse response,
+                                           @RequestParam(value = "_tm", required = false) String channel) throws Exception {
+        if (unionUser == null) {
+            logger.error("无User，跳转到首页");
+            response.sendRedirect("/rise/static/rise");
+            return null;
+        } else {
+            Boolean isWhite = accountService.isWhiteList(unionUser.getId());
+            if (!isWhite) {
+                logger.error("无权限，跳转到首页");
+                response.sendRedirect("/rise/static/rise");
+            }
+        }
+        return payView(request, response, channel, PAY_VIEW);
+    }
+
     @RequestMapping(value = "/pay/**", method = RequestMethod.GET)
     public ModelAndView getPayIndex(HttpServletRequest request, HttpServletResponse response,
-                                    @RequestParam(value="_tm", required = false) String channel) throws Exception {
+                                    @RequestParam(value = "_tm", required = false) String channel) throws Exception {
         return payView(request, response, channel, PAY_VIEW);
     }
 
     @RequestMapping(value = "/subscribe")
     public ModelAndView goSubscribe(HttpServletRequest request, HttpServletResponse response,
-                                    @RequestParam(value="_tm", required = false) String channel) throws Exception {
+                                    @RequestParam(value = "_tm", required = false) String channel) throws Exception {
         logger.info("用户未关注，跳转关注页面：{}", request.getRequestURI());
         return payView(request, response, channel, PAY_VIEW);
     }
@@ -62,7 +85,7 @@ public class IndexController {
         String resource = ConfigUtils.staticPayUrl(domainName);
 
         //FIX BUG
-        if(channel != null){
+        if (channel != null) {
             CookieUtils.removeCookie("_tm", channel, response);
         }
 
