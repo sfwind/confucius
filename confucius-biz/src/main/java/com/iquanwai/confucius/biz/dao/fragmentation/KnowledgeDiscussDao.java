@@ -44,4 +44,16 @@ public class KnowledgeDiscussDao extends PracticeDBUtil {
         return -1;
     }
 
+    public List<KnowledgeDiscuss> loadByRepliedId(Integer discussId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM KnowledgeDiscuss WHERE RepliedId = ? AND Del = 0";
+        ResultSetHandler<List<KnowledgeDiscuss>> h = new BeanListHandler<KnowledgeDiscuss>(KnowledgeDiscuss.class);
+        try {
+            return runner.query(sql, h, discussId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }

@@ -202,6 +202,16 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    public KnowledgeDiscuss loadKnowledgeDiscussById(Integer discussId) {
+        return knowledgeDiscussDao.load(KnowledgeDiscuss.class, discussId);
+    }
+
+    @Override
+    public List<KnowledgeDiscuss> loadReplyDiscusses(Integer discussId) {
+        return knowledgeDiscussDao.loadByRepliedId(discussId);
+    }
+
+    @Override
     public int updatePriority(Integer discussId, Boolean priority) {
         return knowledgeDiscussDao.voteKnowledgeDiscuss(discussId, priority);
     }

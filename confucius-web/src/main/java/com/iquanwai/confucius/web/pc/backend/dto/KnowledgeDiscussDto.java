@@ -14,4 +14,7 @@ public class KnowledgeDiscussDto extends KnowledgeDiscuss {
 
     private String publishTime;
 
+    // 是否是自己作业
+    private Boolean isSelf;
+
 }

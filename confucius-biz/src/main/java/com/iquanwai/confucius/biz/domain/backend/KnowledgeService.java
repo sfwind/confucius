@@ -32,5 +32,13 @@ public interface KnowledgeService {
 
     List<KnowledgeDiscuss> loadKnowledgeDiscussByKnowledgeId(Integer knowledgeId);
 
+    /**
+     * 根据讨论 id 获取知识点评论
+     * @param discussId 讨论 id
+     */
+    KnowledgeDiscuss loadKnowledgeDiscussById(Integer discussId);
+
+    List<KnowledgeDiscuss> loadReplyDiscusses(Integer discussId);
+
     int updatePriority(Integer discussId, Boolean priority);
 }

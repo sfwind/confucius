@@ -13,6 +13,7 @@ import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.enums.KnowledgeEnums;
+import com.iquanwai.confucius.web.pc.backend.dto.KnowledgeDiscussCommentDto;
 import com.iquanwai.confucius.web.pc.backend.dto.KnowledgeDiscussDto;
 import com.iquanwai.confucius.web.pc.backend.dto.ProblemKnowledgesDto;
 import com.iquanwai.confucius.web.pc.backend.dto.SimpleKnowledge;
@@ -124,7 +125,7 @@ public class KnowledgeImportController {
     }
 
     @RequestMapping(value = "/load/discuss")
-    public ResponseEntity<Map<String, Object>> loadKnowledgeDiscuss(UnionUser unionUser, @RequestParam("knowledgeId") Integer knowledgeId) {
+    public ResponseEntity<Map<String, Object>> loadKnowledgeDiscusses(UnionUser unionUser, @RequestParam("knowledgeId") Integer knowledgeId) {
         List<KnowledgeDiscuss> knowledgeDiscusses = knowledgeService.loadKnowledgeDiscussByKnowledgeId(knowledgeId);
         List<Integer> profileIds = knowledgeDiscusses.stream().map(KnowledgeDiscuss::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = accountService.getProfiles(profileIds);
@@ -139,12 +140,63 @@ public class KnowledgeImportController {
                 dto.setHeadImgUrl(profile.getHeadimgurl());
                 dto.setNickName(profile.getRealName());
                 dto.setPublishTime(DateUtils.parseDateToString(knowledgeDiscuss.getAddTime()));
+                dto.setKnowledgeId(knowledgeId);
                 dto.setComment(knowledgeDiscuss.getComment());
                 dto.setPriority(knowledgeDiscuss.getPriority());
+                dto.setIsSelf(knowledgeDiscuss.getProfileId().equals(unionUser.getId()));
                 knowledgeDiscussDtos.add(dto);
             }
         });
         return WebUtils.result(knowledgeDiscussDtos);
+    }
+
+    @RequestMapping(value = "/load/discuss/{discussId}")
+    public ResponseEntity<Map<String, Object>> loadKnowledgeDiscuss(UnionUser unionUser, @PathVariable("discussId") Integer discussId) {
+        KnowledgeDiscuss knowledgeDiscuss = knowledgeService.loadKnowledgeDiscussById(discussId);
+        Integer discussProfileId = knowledgeDiscuss.getProfileId();
+
+        List<KnowledgeDiscuss> replyDiscusses = knowledgeService.loadReplyDiscusses(discussId);
+        List<Integer> profileIds = Lists.newArrayList();
+        profileIds.add(discussProfileId);
+        profileIds.addAll(replyDiscusses.stream().map(KnowledgeDiscuss::getProfileId).collect(Collectors.toList()));
+        List<Profile> profiles = accountService.getProfiles(profileIds);
+        Map<Integer, Profile> profileMap = profiles.stream().collect(Collectors.toMap(Profile::getId, profile -> profile, (key1, key2) -> key1));
+
+        KnowledgeDiscussCommentDto discussCommentDto = new KnowledgeDiscussCommentDto();
+
+        Profile discussProfile = profileMap.getOrDefault(discussProfileId, null);
+        if (discussProfile != null) {
+            KnowledgeDiscussDto discussDto = new KnowledgeDiscussDto();
+            discussDto.setId(knowledgeDiscuss.getId());
+            discussDto.setHeadImgUrl(discussProfile.getHeadimgurl());
+            discussDto.setNickName(discussProfile.getNickname());
+            discussDto.setPublishTime(DateUtils.parseDateToString(knowledgeDiscuss.getAddTime()));
+            discussDto.setComment(knowledgeDiscuss.getComment());
+            discussDto.setPriority(knowledgeDiscuss.getPriority());
+            discussDto.setKnowledgeId(knowledgeDiscuss.getKnowledgeId());
+            discussDto.setIsSelf(knowledgeDiscuss.getProfileId().equals(unionUser.getId()));
+            discussCommentDto.setDiscuss(discussDto);
+        }
+
+        List<KnowledgeDiscussDto> knowledgeDiscusses = Lists.newArrayList();
+        replyDiscusses.forEach(discuss -> {
+            Profile profile = profileMap.getOrDefault(discuss.getProfileId(), null);
+            if (profile != null) {
+                KnowledgeDiscussDto discussDto = new KnowledgeDiscussDto();
+                discussDto.setId(discuss.getId());
+                discussDto.setHeadImgUrl(profile.getHeadimgurl());
+                discussDto.setNickName(profile.getNickname());
+                discussDto.setPublishTime(DateUtils.parseDateToString(discuss.getAddTime()));
+                discussDto.setComment(discuss.getComment());
+                discussDto.setKnowledgeId(discuss.getKnowledgeId());
+                discussDto.setPriority(discuss.getPriority());
+                discussDto.setIsSelf(discuss.getProfileId().equals(unionUser.getId()));
+                knowledgeDiscusses.add(discussDto);
+            }
+        });
+        discussCommentDto.setDiscussReplies(knowledgeDiscusses);
+
+        return WebUtils.result(discussCommentDto);
     }
 
     @RequestMapping(value = "/vote/discuss", method = RequestMethod.POST)
