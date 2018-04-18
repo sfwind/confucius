@@ -174,11 +174,14 @@ public class SignupServiceImpl implements SignupService {
             pass = accountService.hasPrivilegeForCamp(profileId);
         }
 
+        // TODO DELETE 预售阶段只有这几个班可以买
         RiseClassMember riseClassMember = riseClassMemberDao.whiteList(profileId);
         if (riseClassMember == null) {
             // 不能报名
             return Pair.of(false, "暂时只对部分用户预售");
         }
+
+
 
         return pass;
     }
