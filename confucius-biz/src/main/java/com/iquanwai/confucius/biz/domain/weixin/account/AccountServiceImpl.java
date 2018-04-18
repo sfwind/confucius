@@ -388,6 +388,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Pair<Boolean, String> hasPrivilegeForApply(Integer profileId, Integer memberTypeId) {
         /*
+        pre.是否需要申请
         1.1已经是商学院用户-核心能力项 x
         1.2可以报名商业思维且为报名-核心能力项 x
         1.3已经能报了-核心能力项 x
@@ -672,21 +673,23 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId) {
-        return applyList
-                .stream()
-                .filter(item -> Objects.equals(item.getMemberTypeId(), memberTypeId))
-                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
-                .filter(BusinessSchoolApplication::getDeal)
-                .filter(item -> !item.getExpired())
-                .peek(item -> {
-                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
-                        // 已经过期
-                        item.setExpired(true);
-                        businessSchoolApplicationDao.expiredApply(item.getId());
-                    }
-                })
-                .filter(item -> !item.getEntry())
-                .anyMatch(item -> !item.getExpired());
+//        return applyList
+//                .stream()
+//                .filter(item -> Objects.equals(item.getMemberTypeId(), memberTypeId))
+//                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
+//                .filter(BusinessSchoolApplication::getDeal)
+//                .filter(item -> !item.getExpired())
+//                .peek(item -> {
+//                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
+//                        // 已经过期
+//                        item.setExpired(true);
+//                        businessSchoolApplicationDao.expiredApply(item.getId());
+//                    }
+//                })
+//                .filter(item -> !item.getEntry())
+//                .anyMatch(item -> !item.getExpired());
+        // TODO 目前不需要申请，大家都有付费权限
+        return true;
     }
 
     @Override
