@@ -673,23 +673,25 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId) {
-//        return applyList
-//                .stream()
-//                .filter(item -> Objects.equals(item.getMemberTypeId(), memberTypeId))
-//                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
-//                .filter(BusinessSchoolApplication::getDeal)
-//                .filter(item -> !item.getExpired())
-//                .peek(item -> {
-//                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
-//                        // 已经过期
-//                        item.setExpired(true);
-//                        businessSchoolApplicationDao.expiredApply(item.getId());
-//                    }
-//                })
-//                .filter(item -> !item.getEntry())
-//                .anyMatch(item -> !item.getExpired());
-        // TODO 目前不需要申请，大家都有付费权限
-        return true;
+        if (memberTypeId == RiseMember.BUSINESS_THOUGHT) {
+            // TODO 目前不需要申请，大家都有付费权限
+            return true;
+        }
+        return applyList
+                .stream()
+                .filter(item -> Objects.equals(item.getMemberTypeId(), memberTypeId))
+                .filter(item -> item.getStatus() == BusinessSchoolApplication.APPROVE)
+                .filter(BusinessSchoolApplication::getDeal)
+                .filter(item -> !item.getExpired())
+                .peek(item -> {
+                    if (DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0) {
+                        // 已经过期
+                        item.setExpired(true);
+                        businessSchoolApplicationDao.expiredApply(item.getId());
+                    }
+                })
+                .filter(item -> !item.getEntry())
+                .anyMatch(item -> !item.getExpired());
     }
 
     @Override
