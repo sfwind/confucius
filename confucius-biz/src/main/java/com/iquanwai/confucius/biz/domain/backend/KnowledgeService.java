@@ -30,6 +30,9 @@ public interface KnowledgeService {
      */
     List<Knowledge> loadKnowledgesByProblemId(Integer problemId);
 
+    /**
+     * 根据知识点 id 获取知识点评论
+     */
     List<KnowledgeDiscuss> loadKnowledgeDiscussByKnowledgeId(Integer knowledgeId);
 
     /**
