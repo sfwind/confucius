@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.dao.PracticeDBUtil;
 import com.iquanwai.confucius.biz.domain.fragmentation.ClassMember;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -74,6 +75,30 @@ public class FragmentClassMemberDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage());
         }
         return Lists.newArrayList();
+    }
+
+    public List<ClassMember> loadActiveByProfileId(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ClassMember WHERE ProfileId = ? AND Active = 1 AND Del = 0";
+        ResultSetHandler<List<ClassMember>> h = new BeanListHandler<>(ClassMember.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public ClassMember loadLatestByProfileId(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ClassMember WHERE ProfileId = ? AND Del = 0 ORDER BY AddTime DESC";
+        ResultSetHandler<ClassMember> h = new BeanHandler<>(ClassMember.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
 }

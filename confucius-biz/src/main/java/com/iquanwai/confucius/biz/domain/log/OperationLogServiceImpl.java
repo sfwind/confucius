@@ -1,18 +1,21 @@
 package com.iquanwai.confucius.biz.domain.log;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.log.ActionLogDao;
 import com.iquanwai.confucius.biz.dao.common.log.OperationLogDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.FragmentClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
+import com.iquanwai.confucius.biz.domain.fragmentation.ClassMember;
 import com.iquanwai.confucius.biz.po.ActionLog;
 import com.iquanwai.confucius.biz.po.OperationLog;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.ThreadPool;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.support.Assert;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -49,6 +53,24 @@ public class OperationLogServiceImpl implements OperationLogService {
     private UserRoleDao userRoleDao;
     @Autowired
     private RiseMemberManager riseMemberManager;
+    @Autowired
+    private FragmentClassMemberDao fragmentClassMemberDao;
+    @Autowired
+    private RiseMemberTypeRepo riseMemberTypeRepo;
+
+
+    private Map<Integer, String> classNameMap = Maps.newHashMap();
+    private Map<Integer, String> groupIdMap = Maps.newHashMap();
+
+
+    @PostConstruct
+    public void init() {
+        riseMemberTypeRepo.memberTypes().forEach(item -> {
+            classNameMap.put(item.getId(), "className:" + item.getId());
+            groupIdMap.put(item.getId(), "groupId:" + item.getId());
+        });
+    }
+
 
     @Override
     public void log(OperationLog operationLog) {
@@ -80,16 +102,8 @@ public class OperationLogServiceImpl implements OperationLogService {
                 Assert.notNull(profileId, "用户id不能为null");
                 Profile profile = profileDao.load(Profile.class, profileId);
                 UserRole role = userRoleDao.loadAssist(profileId);
-
-                Integer roleName = 0;
-
-//                RiseMember validRiseMember = riseMemberDao.loadValidRiseMember(profileId);
                 List<RiseMember> riseMemberList = riseMemberManager.member(profileId);
 
-                RiseClassMember riseClassMember = riseClassMemberDao.loadActiveRiseClassMember(profileId);
-                if (riseClassMember == null) {
-                    riseClassMember = riseClassMemberDao.loadLatestRiseClassMember(profileId);
-                }
                 if (!riseMemberList.isEmpty()) {
                     properties.put("roleNames", riseMemberList
                             .stream()
@@ -101,18 +115,20 @@ public class OperationLogServiceImpl implements OperationLogService {
                     properties.put("roleNames", Lists.newArrayList("0"));
                 }
 
-                if (riseClassMember != null) {
-                    if (riseClassMember.getClassName() != null) {
-                        properties.put("className", riseClassMember.getClassName());
-                    }
-                    if (riseClassMember.getGroupId() != null) {
-                        properties.put("groupId", riseClassMember.getGroupId());
-                    }
+                List<ClassMember> classMembers = fragmentClassMemberDao.loadActiveByProfileId(profileId);
+                if (classMembers == null) {
+                    classMembers = Lists.newArrayList(fragmentClassMemberDao.loadLatestByProfileId(profileId));
                 }
-//                if (validRiseMember != null) {
-//                    roleName = validRiseMember.getMemberTypeId();
-//                }
-//                properties.put("roleName", roleName);
+                if (!classMembers.isEmpty()) {
+                    classMembers.forEach(item -> {
+                        if (item.getClassName() != null) {
+                            properties.put(classNameMap.get(item.getMemberTypeId()), item.getClassName());
+                        }
+                        if (item.getGroupId() != null) {
+                            properties.put(groupIdMap.get(item.getMemberTypeId()), item.getGroupId());
+                        }
+                    });
+                }
                 properties.put("isAsst", role != null);
                 properties.put("riseId", profile.getRiseId());
                 logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, eventName, properties);
