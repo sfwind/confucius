@@ -132,9 +132,7 @@ public class UnionUserService {
     }
 
     public boolean isInterceptorRequestURI(HttpServletRequest request) {
-        List<String> regexs = Lists.newArrayList();
-        regexs.add("/survey/wjx");
-        regexs.add("/redirect/template/message");
+        List<String> regexs = InterceptorURIUtil.getInterceptorUriRegexs();
 
         String requestURI = request.getRequestURI();
         for (String regex : regexs) {
