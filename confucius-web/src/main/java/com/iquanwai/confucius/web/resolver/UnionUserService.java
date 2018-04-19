@@ -143,10 +143,11 @@ public class UnionUserService {
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(requestURI);
             if (matcher.find()) {
+                logger.info("需要拦截");
                 return true;
             }
         }
-
+        logger.info("无需拦截");
         return false;
     }
 
