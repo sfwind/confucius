@@ -5,6 +5,7 @@ import com.iquanwai.confucius.biz.po.Callback;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.resolver.UnionUserService;
+import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
-        if (platform == null || unionUserService.isDocumentRequest(request)) {
+        if ((platform == null || unionUserService.isDocumentRequest(request)) && !unionUserService.isInterceptorRequestURI(request)) {
             return true;
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
@@ -57,6 +58,9 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
             } else {
                 if (ConfigUtils.isDebug()) {
                     return true;
+                }
+                if (unionUserService.isInterceptorRequestURI(request)) {
+                    WebUtils.auth(request, response);
                 }
                 writeUnLoginStatus(response);
                 return false;

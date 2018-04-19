@@ -21,6 +21,8 @@ import java.lang.ref.SoftReference;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by 三十文
@@ -127,6 +129,20 @@ public class UnionUserService {
 
     public boolean isDocumentRequest(HttpServletRequest request) {
         return request.getHeader(PLATFORM_HEADER_NAME) == null;
+    }
+
+    public boolean isInterceptorRequestURI(HttpServletRequest request) {
+        List<String> regexs = InterceptorURIUtil.getInterceptorUriRegexs();
+
+        String requestURI = request.getRequestURI();
+        for (String regex : regexs) {
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(requestURI);
+            if (matcher.find()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addCookie(UnionUser.Platform platform, String state, HttpServletResponse response) {
