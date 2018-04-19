@@ -35,7 +35,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         UnionUser.Platform platform = unionUserService.getPlatformType(request);
-        if (platform == null || unionUserService.isDocumentRequest(request)) {
+        if ((platform == null || unionUserService.isDocumentRequest(request)) && !unionUserService.isInterceptorRequestURI(request)) {
             return true;
         } else {
             Callback callback = unionUserService.getCallbackByRequest(request);
