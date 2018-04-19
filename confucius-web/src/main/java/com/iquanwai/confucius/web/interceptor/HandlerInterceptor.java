@@ -39,7 +39,6 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
         if ((platform == null || unionUserService.isDocumentRequest(request)) && !unionUserService.isInterceptorRequestURI(request)) {
             return true;
         } else {
-            logger.info("进入 check 逻辑");
             Callback callback = unionUserService.getCallbackByRequest(request);
             if (callback != null && callback.getUnionId() != null) {
                 // 校验是否有权限访问页面
@@ -57,9 +56,7 @@ public class HandlerInterceptor extends HandlerInterceptorAdapter {
                 }
                 return true;
             } else {
-                logger.info("不存在 callback");
                 if (ConfigUtils.isDebug()) {
-                    logger.info("进入 debug 模式");
                     return true;
                 }
                 if (unionUserService.isInterceptorRequestURI(request)) {
