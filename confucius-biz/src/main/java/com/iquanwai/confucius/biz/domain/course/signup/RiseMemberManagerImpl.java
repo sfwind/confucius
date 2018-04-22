@@ -47,19 +47,6 @@ public class RiseMemberManagerImpl implements RiseMemberManager {
     }
 
     @Override
-    public RiseMember coreBusinessSchoolUser(Integer profileId) {
-        //TODO: 可能有多个身份
-        List<Integer> members = Lists.newArrayList();
-        members.add(RiseMember.HALF);
-        members.add(RiseMember.ANNUAL);
-        members.add(RiseMember.HALF_ELITE);
-        members.add(RiseMember.ELITE);
-        members.add(RiseMember.CAMP);
-
-        return getRiseMember(profileId, members);
-    }
-
-    @Override
     public RiseMember campMember(Integer profileId) {
         List<Integer> members = Lists.newArrayList();
         members.add(RiseMember.CAMP);
