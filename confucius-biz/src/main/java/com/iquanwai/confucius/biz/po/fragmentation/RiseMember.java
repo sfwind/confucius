@@ -63,4 +63,13 @@ public class RiseMember {
         return memberTypeId == ELITE || memberTypeId == BUSINESS_THOUGHT;
     }
 
+    public static boolean isProfileSet(Integer memberTypeId) {
+        return memberTypeId == ELITE || memberTypeId == BUSINESS_THOUGHT || memberTypeId == CAMP;
+    }
+
+
+    public static boolean isProfileSet(String memberTypeId) {
+        return isProfileSet(Integer.valueOf(memberTypeId));
+    }
+
 }

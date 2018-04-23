@@ -12,6 +12,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
 import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
@@ -19,6 +20,7 @@ import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
+import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -34,6 +36,7 @@ import org.springframework.util.Assert;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by justin on 16/9/14.
@@ -57,6 +60,8 @@ public class PayServiceImpl implements PayService {
     private AccountService accountService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private RiseMemberManager riseMemberManager;
 
 
     private static final String WEIXIN = "NATIVE";
@@ -168,6 +173,13 @@ public class PayServiceImpl implements PayService {
             paidTime = DateUtils.parseStringToDate3(paidTimeStr);
         }
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
+        if (RiseMember.isProfileSet(order.getGoodsId())) {
+            // 更新profile
+            List<RiseMember> riseMembers = riseMemberManager.loadValidRiseMembers(order.getProfileId());
+            List<String> members = riseMembers.stream().map(RiseMember::getMemberTypeId).map(String::valueOf).collect(Collectors.toList());
+            members.add(order.getGoodsId());
+            operationLogService.profileSet(order.getProfileId(), "roleNames", members.stream().distinct().collect(Collectors.toList()));
+        }
 
         operationLogService.trace(order.getProfileId(), "payMember",
                 () -> OperationLogService
