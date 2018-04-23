@@ -10,6 +10,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 </head>
 <body>
+<!-- 腾讯点播器 -->
+<link href="//imgcache.qq.com/open/qcloud/video/tcplayer/tcplayer.css" rel="stylesheet">
+<script src="//imgcache.qq.com/open/qcloud/video/tcplayer/tcplayer.min.js"></script>
 <script>
     window.ENV = {
         reactMountPoint: "react-app",
@@ -17,15 +20,6 @@
         sensorsProject:"${sensorsProject}",
     }
 </script>
-<%--userName: "${userName}",--%>
-<%--headImage:"${headImage}",--%>
-<%--loginSocketUrl:"${loginSocketUrl}",--%>
-
-<%--feedBack:${feedBack},--%>
-<%--backend:false,--%>
-<%--roleId:${roleId},--%>
-<%--signature:"${signature}",--%>
-<%--configUrl:window.location.href,--%>
 
 <div id="react-app"></div>
 <script src="//res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js"></script>

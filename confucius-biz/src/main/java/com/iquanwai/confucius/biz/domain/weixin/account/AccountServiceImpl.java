@@ -721,7 +721,7 @@ public class AccountServiceImpl implements AccountService {
         3.本月报名已经关闭 x
          */
         CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
-        RiseMember riseMember = riseMemberManager.coreBusinessSchoolUser(profileId);
+        RiseMember riseMember = riseMemberManager.oldMember(profileId);
         // 购买专项课
         if (riseMember != null && RiseMember.isMember(riseMember.getMemberTypeId())) {
             return Pair.of(false, "您已经是圈外商学院学员，拥有主题专项课，无需重复报名\n如有疑问请在学习群咨询班长");

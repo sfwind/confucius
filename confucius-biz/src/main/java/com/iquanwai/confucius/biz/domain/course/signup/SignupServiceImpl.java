@@ -419,7 +419,7 @@ public class SignupServiceImpl implements SignupService {
     private void updateMonthlyCampRiseMemberStatus(Profile profile, String orderId) {
         CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
         // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
-        RiseMember existRiseMember = this.currentRiseMember(profile.getId());
+        RiseMember existRiseMember = riseMemberManager.oldMember(profile.getId());
         if (existRiseMember == null) {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
@@ -731,7 +731,6 @@ public class SignupServiceImpl implements SignupService {
     public MemberType getMemberTypePayInfo(Integer profileId, Integer memberTypeId) {
         // TODO 获得针对这个人的真实的价格，可针对不同人实现不同价格
         CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
 
         MemberType memberType = riseMemberTypeRepo.memberTypes().stream().filter(item -> item.getId().equals(memberTypeId)).findFirst().orElse(null);
         if (memberType != null) {

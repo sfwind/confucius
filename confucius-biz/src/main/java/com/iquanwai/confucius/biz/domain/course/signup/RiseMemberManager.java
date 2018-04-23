@@ -17,11 +17,6 @@ public interface RiseMemberManager {
     RiseMember coreBusinessSchoolMember(Integer profileId);
 
     /**
-     * 核心能力项目用户（商学院+专业版+专项课）
-     */
-    RiseMember coreBusinessSchoolUser(Integer profileId);
-
-    /**
      * 专项课用户
      */
     RiseMember campMember(Integer profileId);
