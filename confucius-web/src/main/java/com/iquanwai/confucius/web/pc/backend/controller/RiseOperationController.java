@@ -157,9 +157,9 @@ public class RiseOperationController {
     @RequestMapping("/application/submit/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser unionUser,
                                                                      @PathVariable Integer applicationId,
-                                                                     @ModelAttribute Page page) {
+                                                                     @ModelAttribute Page page,@ModelAttribute Boolean show) {
         page.setPageSize(APPLICATION_SUBMIT_SIZE);
-        List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page);
+        List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page,show);
 
         applicationSubmitList.stream().forEach(applicationSubmit -> {
             Boolean isComment = operationManagementService.isComment(applicationSubmit.getId(), unionUser.getProfileId());

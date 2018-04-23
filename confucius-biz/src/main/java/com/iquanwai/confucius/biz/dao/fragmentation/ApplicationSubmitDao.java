@@ -120,6 +120,20 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<ApplicationSubmit> getWithoutHighLight(Integer practiceId, Page page) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from ApplicationSubmit where ApplicationId=? and Priority=0  and Content is not null and Del=0 " +
+                "order by LastModifiedTime desc limit "
+                + page.getOffset() + "," + page.getLimit();
+        ResultSetHandler<List<ApplicationSubmit>> h = new BeanListHandler<>(ApplicationSubmit.class);
+        try {
+            return runner.query(sql, h, practiceId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<ApplicationSubmit> loadRequestCommentApplications(Integer problemId, int size) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from ApplicationSubmit where ProblemId =? and Content is not null " +
@@ -187,7 +201,6 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-
 
 
     public List<ApplicationSubmit> loadUnderCommentApplicationsIncludeSomeone(Integer problemId, int size, Date date,
@@ -406,7 +419,8 @@ public class ApplicationSubmitDao extends PracticeDBUtil {
 
     /**
      * 加载这些人非求点评的
-     * @param problemId 小课id
+     *
+     * @param problemId  小课id
      * @param profileIds 人员id
      * @return 应用题提交列表
      */
