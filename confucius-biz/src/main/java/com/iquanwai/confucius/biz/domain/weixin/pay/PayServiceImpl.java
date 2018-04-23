@@ -175,10 +175,13 @@ public class PayServiceImpl implements PayService {
         quanwaiOrderDao.paySuccess(paidTime, transactionId, orderId);
         if (RiseMember.isProfileSet(order.getGoodsId())) {
             // 更新profile
-            List<RiseMember> riseMembers = riseMemberManager.loadValidRiseMembers(order.getProfileId());
-            List<String> members = riseMembers.stream().map(RiseMember::getMemberTypeId).map(String::valueOf).collect(Collectors.toList());
-            members.add(order.getGoodsId());
-            operationLogService.profileSet(order.getProfileId(), "roleNames", members.stream().distinct().collect(Collectors.toList()));
+            operationLogService.profileSet(order::getProfileId, () -> {
+                List<RiseMember> riseMembers = riseMemberManager.loadValidRiseMembers(order.getProfileId());
+                List<String> members = riseMembers.stream().map(RiseMember::getMemberTypeId).map(String::valueOf).collect(Collectors.toList());
+                members.add(order.getGoodsId());
+                return OperationLogService.props().add("roleNames", members.stream().distinct().collect(Collectors.toList()));
+            });
+
         }
 
         operationLogService.trace(order.getProfileId(), "payMember",

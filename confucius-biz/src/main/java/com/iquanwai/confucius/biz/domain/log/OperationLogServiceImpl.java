@@ -158,20 +158,24 @@ public class OperationLogServiceImpl implements OperationLogService {
 
     @Override
     public void profileSet(Integer profileId, String key, Object value) {
-        profileSet(() -> profileId, key, value);
+        profileSet(() -> profileId, () -> OperationLogService.props().add(key, value));
     }
 
     @Override
     public void profileSet(Supplier<Integer> supplier, String key, Object value) {
+        this.profileSet(supplier, () -> OperationLogService.props().add(key, value));
+    }
+
+    @Override
+    public void profileSet(Supplier<Integer> supplier, Supplier<Prop> propSupplier) {
         ThreadPool.execute(() -> {
             Integer profileId = supplier.get();
             Profile profile = profileDao.load(Profile.class, profileId);
             try {
-                sa.profileSet(profile.getRiseId(), true, key, value);
+                sa.profileSet(profile.getRiseId(), true, propSupplier.get().build());
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
         });
     }
-
 }
