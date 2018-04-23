@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.biz.domain.backend;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
@@ -59,8 +60,14 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page) {
-        List<ApplicationSubmit> applicationSubmitList = applicationSubmitDao.getPracticeSubmit(practiceId, page);
+    public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page,Boolean show) {
+        List<ApplicationSubmit> applicationSubmitList;
+       if(show) {
+           applicationSubmitList = applicationSubmitDao.getPracticeSubmit(practiceId, page);
+       }
+       else{
+           applicationSubmitList = applicationSubmitDao.getWithoutHighLight(practiceId,page);
+       }
         applicationSubmitList.stream().forEach(applicationSubmit -> {
             Integer profileId = applicationSubmit.getProfileId();
             Profile profile = accountService.getProfile(profileId);
