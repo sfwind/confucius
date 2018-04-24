@@ -30,6 +30,7 @@ public class RedirectController {
 
     /**
      * 小课洞见文章跳转区分
+     *
      * @param problemId 小课id
      */
     @RequestMapping(value = "/kit_package/{id}")
@@ -74,8 +75,11 @@ public class RedirectController {
                 .action("打开率监控")
                 .memo(key);
         operationLogService.log(operationLog);
-
         try {
+            operationLogService.trace(unionUser.getId(),
+                    "openWechatMessage",
+                    () -> OperationLogService.props().add("source", key)
+            );
             response.sendRedirect(url);
         } catch (IOException e) {
             logger.error("重定向失败,{}", unionUser.getOpenId());
