@@ -60,9 +60,9 @@ public class OperationManagementServiceImpl implements OperationManagementServic
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page,Boolean show) {
+    public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page,String show) {
         List<ApplicationSubmit> applicationSubmitList;
-       if(show) {
+       if(show.equals("true")) {
            applicationSubmitList = applicationSubmitDao.getPracticeSubmit(practiceId, page);
        }
        else{
