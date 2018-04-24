@@ -74,11 +74,11 @@ public class ApplicationPracticeDao extends PracticeDBUtil {
     public int insertApplicationPractice(ApplicationPractice applicationPractice) {
 
         QueryRunner runner = new QueryRunner(getDataSource());
-            String sql = "insert into ApplicationPractice(topic,description,difficulty,knowledgeId,sceneId,sequence,problemId,pic,practiceUid,updated) values(?,?,?,?,?,?,?,?,?,?)";
+            String sql = "insert into ApplicationPractice(topic,description,difficulty,knowledgeId,sceneId,sequence,problemId,pic,type,updated) values(?,?,?,?,?,?,?,?,?,?)";
 
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(), applicationPractice.getTopic(), applicationPractice.getDescription(), applicationPractice.getDifficulty(), applicationPractice.getKnowledgeId()
-                    , applicationPractice.getSceneId(), applicationPractice.getSequence(), applicationPractice.getProblemId(), applicationPractice.getPic(), applicationPractice.getPracticeUid(), applicationPractice.getUpdated());
+                    , applicationPractice.getSceneId(), applicationPractice.getSequence(), applicationPractice.getProblemId(), applicationPractice.getPic(), applicationPractice.getType(), applicationPractice.getUpdated());
             return result.intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

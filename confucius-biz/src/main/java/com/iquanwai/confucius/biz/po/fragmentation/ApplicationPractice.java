@@ -20,4 +20,9 @@ public class ApplicationPractice {
     private String pic;//图片链接
     private String practiceUid;//任务编号
     private int updated;//是否修改
+
+    /**
+     * 应用题类型
+     */
+    private Integer type;
 }
