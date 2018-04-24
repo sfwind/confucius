@@ -3,6 +3,7 @@ package com.iquanwai.confucius.biz.domain.fragmentation.point;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.ImprovementPlanDao;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -25,6 +26,8 @@ public class PointRepoImpl implements PointRepo {
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     public static Map<Integer, Integer> score = Maps.newHashMap();
 
@@ -53,6 +56,7 @@ public class PointRepoImpl implements PointRepo {
         Profile profile = profileDao.load(Profile.class, profileId);
         if (profile != null) {
             profileDao.updatePoint(profileId, profile.getPoint() + increment);
+            operationLogService.profileSet(profileId, "point", profile.getPoint() + increment);
         }
     }
 
