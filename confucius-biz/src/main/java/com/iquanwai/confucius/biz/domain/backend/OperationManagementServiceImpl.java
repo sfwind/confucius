@@ -61,6 +61,7 @@ public class OperationManagementServiceImpl implements OperationManagementServic
 
     @Override
     public List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page,String show) {
+        logger.info("show:"+show);
         List<ApplicationSubmit> applicationSubmitList;
        if(show.equals("true")) {
            applicationSubmitList = applicationSubmitDao.getPracticeSubmit(practiceId, page);
