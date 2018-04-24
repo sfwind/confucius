@@ -25,4 +25,5 @@ public class ApplicationPractice {
      * 应用题类型
      */
     private Integer type;
+
 }

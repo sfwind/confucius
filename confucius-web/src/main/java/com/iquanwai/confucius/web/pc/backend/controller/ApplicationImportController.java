@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.pc.backend.controller;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.ApplicationService;
 import com.iquanwai.confucius.biz.domain.fragmentation.practice.PracticeService;
@@ -16,10 +17,13 @@ import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.HtmlRegexpUtil;
 import com.iquanwai.confucius.biz.util.page.Page;
+import com.iquanwai.confucius.web.enums.ApplicationTypeEnums;
 import com.iquanwai.confucius.web.pc.backend.dto.ApplicationDto;
+import com.iquanwai.confucius.web.pc.backend.dto.ApplicationTypeDto;
 import com.iquanwai.confucius.web.pc.backend.dto.RefreshListDto;
 import com.iquanwai.confucius.web.pc.backend.dto.RiseWorkEditDto;
 import com.iquanwai.confucius.web.resolver.PCLoginUser;
+import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,4 +279,22 @@ public class ApplicationImportController {
         }
         return WebUtils.success();
     }
+
+    @RequestMapping(value = "/load/type",method=RequestMethod.GET)
+    public ResponseEntity<Map<String,Object>> loadTypes(UnionUser unionUser){
+        OperationLog operationLog = OperationLog.create().openid(unionUser.getOpenId())
+                                    .module("后台管理").function("加载应用题种类").action("加载应用题种类");
+        operationLogService.log(operationLog);
+        List<ApplicationTypeDto> applicationTypeDtos = Lists.newArrayList();
+
+        for(ApplicationTypeEnums applicationTypeEnums:ApplicationTypeEnums.values()){
+            ApplicationTypeDto applicationTypeDto = new ApplicationTypeDto();
+            applicationTypeDto.setTypeId(applicationTypeEnums.getCode());
+            applicationTypeDto.setTypeName(applicationTypeEnums.getMsg());
+            applicationTypeDtos.add(applicationTypeDto);
+        }
+        return WebUtils.result(applicationTypeDtos);
+    }
+
 }
+
