@@ -171,8 +171,10 @@ public class OperationLogServiceImpl implements OperationLogService {
         ThreadPool.execute(() -> {
             Integer profileId = supplier.get();
             Profile profile = profileDao.load(Profile.class, profileId);
+            Map<String, Object> properties = propSupplier.get().build();
+            logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, "profileSet", properties);
             try {
-                sa.profileSet(profile.getRiseId(), true, propSupplier.get().build());
+                sa.profileSet(profile.getRiseId(), true, properties);
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
