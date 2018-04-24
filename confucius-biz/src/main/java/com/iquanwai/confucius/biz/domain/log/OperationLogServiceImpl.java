@@ -134,7 +134,9 @@ public class OperationLogServiceImpl implements OperationLogService {
                 logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, eventName, properties);
                 sa.track(profile.getRiseId(), true, eventName, properties);
                 //  上线前删掉
-//                sa.flush();
+                if (ConfigUtils.isDevelopment()) {
+                    sa.flush();
+                }
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
@@ -175,6 +177,9 @@ public class OperationLogServiceImpl implements OperationLogService {
             logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, "profileSet", properties);
             try {
                 sa.profileSet(profile.getRiseId(), true, properties);
+                if (ConfigUtils.isDevelopment()) {
+                    sa.flush();
+                }
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
