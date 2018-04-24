@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 @Service
 public class CacheReloadReceiver {
     public final static String TOPIC = "confucius_resource_reload";
+    public final static String RISE_TOPIC = "rise_resource_reload";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
