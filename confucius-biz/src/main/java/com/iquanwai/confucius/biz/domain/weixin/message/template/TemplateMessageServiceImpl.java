@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.common.message.CustomerMessageLogDao;
 import com.iquanwai.confucius.biz.dao.common.message.TemplateMessageDao;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.TemplateMsg;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -37,6 +38,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private AccountService accountService;
     @Autowired
     private TemplateMessageDao templateMessageDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -80,7 +83,24 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             String json = new Gson().toJson(templateMessage);
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
         }
-        return StringUtils.isNoneEmpty(body);
+        boolean success = StringUtils.isNoneEmpty(body);
+
+        // 只记录带source的
+        if (source != null) {
+            // 模板消息发送打点
+            operationLogService.trace(() -> {
+                        Profile profile = accountService.getProfile(templateMessage.getTouser());
+                        return profile.getId();
+                    },
+                    "sendWechatMessage",
+                    () -> OperationLogService
+                            .props()
+                            .add("success", success)
+                            .add("server_project", "confucius")
+                            .add("source", source));
+        }
+
+        return success;
     }
 
     @Override
@@ -114,6 +134,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
      * 5. 用户每天最多收到2条消息
      * 6. 用户三小时内最多收到1条消息
      * 7. 活动提醒通知，文字尽量简洁，不要用推销的口吻
+     *
      * @return 是否允许发送模板消息
      */
     private boolean checkTemplateMessageAuthority(TemplateMessage templateMessage, boolean forwardlyPush) {

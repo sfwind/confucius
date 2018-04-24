@@ -15,7 +15,13 @@ import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
-import com.iquanwai.confucius.web.backend.dto.*;
+import com.iquanwai.confucius.web.backend.dto.CustomerMsgDto;
+import com.iquanwai.confucius.web.backend.dto.ErrorLogDto;
+import com.iquanwai.confucius.web.backend.dto.MarkDto;
+import com.iquanwai.confucius.web.backend.dto.NoticeMsgDto;
+import com.iquanwai.confucius.web.backend.dto.ProfileSetDto;
+import com.iquanwai.confucius.web.backend.dto.RefreshLoginUserDto;
+import com.iquanwai.confucius.web.backend.dto.SystemMsgDto;
 import com.iquanwai.confucius.web.resolver.LoginUser;
 import com.iquanwai.confucius.web.util.HandleStringUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
@@ -24,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -261,6 +268,21 @@ public class BackendController {
             }
         });
         return WebUtils.result("正在运行中");
+    }
+
+    @RequestMapping(value = "/sa/profile/batch", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> batchProfileSet(@RequestBody ProfileSetDto profileSetDto) {
+        if (CollectionUtils.isEmpty(profileSetDto.getProfiles())) {
+            return WebUtils.error("必须输入用户列表 profiles");
+        }
+        if (profileSetDto.getKey() == null) {
+            return WebUtils.error("必须输入key");
+        }
+        if (profileSetDto.getValue() == null) {
+            return WebUtils.error("必须输入value");
+        }
+        profileSetDto.getProfiles().forEach(profileId -> operationLogService.profileSet(profileId, profileSetDto.getKey(), profileSetDto.getValue()));
+        return WebUtils.success();
     }
 
 }

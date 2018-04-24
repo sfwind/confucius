@@ -19,6 +19,7 @@ import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
+import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinApiService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
@@ -105,6 +106,8 @@ public class AccountServiceImpl implements AccountService {
     private CacheService cacheService;
     @Autowired
     private RiseMemberTypeRepo riseMemberTypeRepo;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private Map<Integer, Integer> userRoleMap = Maps.newHashMap();
 
@@ -236,15 +239,19 @@ public class AccountServiceImpl implements AccountService {
                 profile.setNickname(nickName);
                 profile.setHeadimgurl(headImgUrl);
                 profile.setRiseId(CommonUtils.randomString(7));
+                Integer profileId = null;
                 try {
-                    profileDao.insertProfile(profile);
+                    profileId = profileDao.insertProfile(profile);
                 } catch (SQLException e) {
                     profile.setRiseId(CommonUtils.randomString(7));
                     try {
-                        profileDao.insertProfile(profile);
+                        profileId = profileDao.insertProfile(profile);
                     } catch (SQLException e1) {
                         logger.error(e1.getLocalizedMessage(), e);
                     }
+                }
+                if (profileId != null) {
+                    operationLogService.profileSet(profileId, "openId", profile.getOpenid());
                 }
             } else {
                 switch (profileType) {
@@ -258,6 +265,7 @@ public class AccountServiceImpl implements AccountService {
                     default:
                         break;
                 }
+                operationLogService.profileSet(profile.getId(), "openId", profile.getOpenid());
                 profileDao.updateOAuthFields(profile);
             }
         });

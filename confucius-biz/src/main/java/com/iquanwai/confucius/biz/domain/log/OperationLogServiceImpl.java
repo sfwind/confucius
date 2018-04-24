@@ -134,7 +134,9 @@ public class OperationLogServiceImpl implements OperationLogService {
                 logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, eventName, properties);
                 sa.track(profile.getRiseId(), true, eventName, properties);
                 //  上线前删掉
-//                sa.flush();
+                if (ConfigUtils.isDevelopment()) {
+                    sa.flush();
+                }
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
@@ -154,5 +156,33 @@ public class OperationLogServiceImpl implements OperationLogService {
     @Override
     public void trace(Integer profileId, String eventName, Supplier<Prop> supplier) {
         this.trace(() -> profileId, eventName, supplier);
+    }
+
+    @Override
+    public void profileSet(Integer profileId, String key, Object value) {
+        profileSet(() -> profileId, () -> OperationLogService.props().add(key, value));
+    }
+
+    @Override
+    public void profileSet(Supplier<Integer> supplier, String key, Object value) {
+        this.profileSet(supplier, () -> OperationLogService.props().add(key, value));
+    }
+
+    @Override
+    public void profileSet(Supplier<Integer> supplier, Supplier<Prop> propSupplier) {
+        ThreadPool.execute(() -> {
+            Integer profileId = supplier.get();
+            Profile profile = profileDao.load(Profile.class, profileId);
+            Map<String, Object> properties = propSupplier.get().build();
+            logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, "profileSet", properties);
+            try {
+                sa.profileSet(profile.getRiseId(), true, properties);
+                if (ConfigUtils.isDevelopment()) {
+                    sa.flush();
+                }
+            } catch (InvalidArgumentException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        });
     }
 }
