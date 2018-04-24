@@ -157,7 +157,7 @@ public class RiseOperationController {
     @RequestMapping("/application/submit/{applicationId}")
     public ResponseEntity<Map<String, Object>> loadApplicationSubmit(PCLoginUser unionUser,
                                                                      @PathVariable Integer applicationId,
-                                                                     @ModelAttribute Page page,@ModelAttribute Boolean show) {
+                                                                     @ModelAttribute Page page,@ModelAttribute String show) {
         page.setPageSize(APPLICATION_SUBMIT_SIZE);
         List<ApplicationSubmit> applicationSubmitList = operationManagementService.loadApplicationSubmit(applicationId, page,show);
 

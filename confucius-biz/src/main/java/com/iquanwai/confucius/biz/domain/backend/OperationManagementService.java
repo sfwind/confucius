@@ -16,7 +16,7 @@ public interface OperationManagementService {
      * @param practiceId 练习id
      * @param page 分页对象
      */
-    List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page,Boolean show);
+    List<ApplicationSubmit> loadApplicationSubmit(Integer practiceId, Page page,String show);
 
     /**
      * 获取60天内讨论区活跃的问题
