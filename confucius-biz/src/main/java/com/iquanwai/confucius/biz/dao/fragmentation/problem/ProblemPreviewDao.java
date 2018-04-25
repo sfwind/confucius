@@ -18,15 +18,15 @@ public class ProblemPreviewDao extends PracticeDBUtil {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
 
-    public ProblemPreview loadByScheduleId(Integer problemScheduleId){
+    public ProblemPreview loadByScheduleId(Integer problemScheduleId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM ProblemPreview WHERE ProblemScheduleId = ? AND DEL = 0";
         ResultSetHandler<ProblemPreview> h = new BeanHandler<ProblemPreview>(ProblemPreview.class);
 
         try {
-           return runner.query(sql,h,problemScheduleId);
+            return runner.query(sql, h, problemScheduleId);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return null;
     }
@@ -48,11 +48,11 @@ public class ProblemPreviewDao extends PracticeDBUtil {
 
     public Integer update(ProblemPreview problemPreview) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = " Update ProblemPreview SET Description = ?,AudioId=?,VideoId=?,ProblemScheduleId=?,Updated=? WHERE ID = ?";
+        String sql = " Update ProblemPreview SET Description = ?,AudioId=?,VideoId=?,Updated=? WHERE ProblemScheduleId = ?";
         try {
             return runner.update(sql, problemPreview.getDescription(), problemPreview.getAudioId(),
-                    problemPreview.getVideoId(), problemPreview.getProblemScheduleId(),
-                    problemPreview.getUpdated(), problemPreview.getId());
+                    problemPreview.getVideoId(), problemPreview.getUpdated(),
+                    problemPreview.getProblemScheduleId());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
