@@ -27,13 +27,13 @@ public class PreviewController {
     public ResponseEntity<Map<String,Object>> loadDescription(@PathVariable Integer problemId,@RequestParam("chapter")Integer chapter,@RequestParam("section")Integer section){
         ProblemSchedule problemSchedule = scheduleService.loadProblemSchedule(problemId, chapter, section);
         if(problemSchedule==null){
-            return WebUtils.error("没有该章节");
+            return WebUtils.result("");
         }else{
             ProblemPreview problemPreview = previewService.loadByProblemScheduleId(problemSchedule.getId());
             if(problemPreview!=null){
                 return WebUtils.result(problemPreview.getDescription());
             }else{
-                return WebUtils.success();
+                return WebUtils.result("");
             }
         }
     }
