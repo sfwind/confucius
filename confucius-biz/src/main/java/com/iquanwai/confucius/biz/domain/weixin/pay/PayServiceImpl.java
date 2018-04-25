@@ -11,9 +11,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
-import com.iquanwai.confucius.biz.domain.course.signup.CostManger;
+import com.iquanwai.confucius.biz.domain.course.signup.EntryManager;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -21,12 +20,7 @@ import com.iquanwai.confucius.biz.exception.RefundException;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
-import com.iquanwai.confucius.biz.util.CommonUtils;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
-import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.biz.util.RestfulHelper;
-import com.iquanwai.confucius.biz.util.XMLHelper;
-import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
+import com.iquanwai.confucius.biz.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,15 +41,11 @@ public class PayServiceImpl implements PayService {
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
-    private CostManger costManger;
-    @Autowired
-    private SignupService signupService;
+    private EntryManager entryManager;
     @Autowired
     private RestfulHelper restfulHelper;
     @Autowired
     private MessageService messageService;
-    @Autowired
-    private RabbitMQFactory rabbitMQFactory;
     @Autowired
     private AccountService accountService;
     @Autowired
@@ -206,13 +196,13 @@ public class PayServiceImpl implements PayService {
 
         if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
             // 商品是rise会员
-            signupService.payRiseSuccess(quanwaiOrder.getOrderId());
+            entryManager.payRiseSuccess(quanwaiOrder.getOrderId());
         } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
             // 购买商学院申请
-            signupService.payApplicationSuccess(orderId);
+            entryManager.payApplicationSuccess(orderId);
         } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
             // 购买专项课
-            signupService.payMonthlyCampSuccess(orderId);
+            entryManager.payMonthlyCampSuccess(orderId);
         }
     }
 
@@ -222,7 +212,7 @@ public class PayServiceImpl implements PayService {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Assert.notNull(quanwaiOrder, "订单不存在，OrderId:" + orderId);
         Assert.isTrue(QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType()));
-        signupService.payRiseSuccess(quanwaiOrder.getOrderId());
+        entryManager.payRiseSuccess(quanwaiOrder.getOrderId());
     }
 
 

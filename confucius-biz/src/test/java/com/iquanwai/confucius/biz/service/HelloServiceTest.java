@@ -34,35 +34,4 @@ public class HelloServiceTest extends TestBase {
     private FragmentClassMemberDao fragmentClassMemberDao;
 
 
-    @Test
-    public void test() {
-        List<RiseMember> riseMembers = riseMemberDao.loadAll(RiseMember.class);
-        Map<Integer, Boolean> start = Maps.newHashMap();
-        start.put(1, true);
-        for (int i = 0; i < riseMembers.size(); i++) {
-            RiseMember riseMember = riseMembers.get(i);
-            new Thread(() -> {
-                while (start.get(1)) {
-                    //ignore
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                signupService.insertClassMemberMemberId(riseMember.getProfileId(), riseMember.getMemberTypeId());
-                System.out.println("complete");
-            }).start();
-        }
-        start.put(1, false);
-        try {
-            Thread.sleep(1000 * 100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-
 }

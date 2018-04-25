@@ -8,14 +8,14 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Created by justin on 16/10/13.
  */
-@Repository
+@Service
 public class CostMangerImpl implements CostManger {
     @Autowired
     private CouponDao couponDao;
