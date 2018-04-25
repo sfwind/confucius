@@ -15,8 +15,8 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
-import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.course.signup.MemberTypeManager;
+import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -31,11 +31,7 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -44,7 +40,6 @@ import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -54,13 +49,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -654,7 +643,7 @@ public class AccountServiceImpl implements AccountService {
         // TODO: 杨仁 增加project项目
         RiseMember currentRiseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (currentRiseMember != null) {
-            return new MutablePair<>(-1, "该用户已经是会员");
+            return Pair.of(-1, "该用户已经是会员");
         }
         RiseMember riseMember = new RiseMember();
         riseMember.setProfileId(profileId);
@@ -666,7 +655,7 @@ public class AccountServiceImpl implements AccountService {
         riseMember.setMemo(memo);
         riseMember.setVip(true);
         int result = riseMemberDao.insert(riseMember);
-        return new MutablePair<>(result, null);
+        return Pair.of(result, null);
     }
 
     @Override

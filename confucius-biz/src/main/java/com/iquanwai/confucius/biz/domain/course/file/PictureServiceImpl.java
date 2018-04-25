@@ -9,7 +9,6 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.QiNiuUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,23 +61,23 @@ public class PictureServiceImpl implements PictureService {
     @Override
     public Pair<Integer, String> checkAvaliable(PictureModule pictureModule, Picture picture) {
         if (picture.getLength() == null) {
-            return new ImmutablePair<>(0, "该图片大小未知，无法上传");
+            return Pair.of(0, "该图片大小未知，无法上传");
         }
         if (picture.getType() == null) {
-            return new ImmutablePair<>(0, "该图片类型未知，无法上传");
+            return Pair.of(0, "该图片类型未知，无法上传");
         }
 
         if (picture.getLength() > MAX_PIC_SIZE) {
-            return new ImmutablePair<>(0, "该图片过大，请压缩后上传");
+            return Pair.of(0, "该图片过大，请压缩后上传");
         }
         List<String> typeList = pictureModule.getTypeLimit() == null ?
                 Lists.newArrayList() : Lists.newArrayList(pictureModule.getTypeLimit().split(","));
         long matchTypeCount = typeList.stream().filter(contentType -> contentType.equals(picture.getType())).count();
         if (matchTypeCount == 0) {
-            return new ImmutablePair<>(0, pictureModule.getModuleName() + "模块不支持该图片类型");
+            return Pair.of(0, pictureModule.getModuleName() + "模块不支持该图片类型");
         }
         // 通过校验开始上传
-        return new ImmutablePair<>(1, null);
+        return Pair.of(1, null);
     }
 
 
