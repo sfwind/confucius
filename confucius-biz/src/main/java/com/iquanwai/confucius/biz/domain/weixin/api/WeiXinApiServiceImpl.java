@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by 三十文
@@ -224,8 +225,8 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
                 return null;
             }
             Map<String, Object> result = CommonUtils.jsonToMap(body);
-            String newOpenId = result.get("openid").toString();
-            String nickName = result.get("nickname").toString();
+            String newOpenId = Objects.toString(result.get("openid"), null);
+            String nickName = Objects.toString(result.get("nickname"), null);
             Integer sex = null;
             try {
                 Double tempSex = (Double) result.get("sex");
@@ -235,11 +236,12 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             } catch (Exception e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
             }
-            String headImgUrl = result.get("headimgurl").toString();
-            String country = result.get("country").toString();
-            String province = result.get("province").toString();
-            String city = result.get("city").toString();
-            String unionId = result.get("unionid").toString();
+            String headImgUrl = Objects.toString(result.get("headimgurl"), null);
+            String country = Objects.toString(result.get("country"), null);
+            String province = Objects.toString(result.get("province"), null);
+            String city = Objects.toString(result.get("city"), null);
+            String unionId = Objects.toString(result.get("unionid"), null);
+
             Integer subscribe = null;
             try {
                 Double tempSubscribe = (Double) result.get("subscribe");
@@ -284,8 +286,8 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
                 return null;
             }
             Map<String, Object> result = CommonUtils.jsonToMap(body);
-            String newOpenId = result.get("openid").toString();
-            String nickName = result.get("nickname").toString();
+            String newOpenId = Objects.toString(result.get("openid"), null);
+            String nickName = Objects.toString(result.get("nickname"), null);
             Integer sex = null;
             try {
                 Double tempSex = (Double) result.get("sex");
@@ -295,11 +297,12 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
             } catch (Exception e1) {
                 logger.error(e1.getLocalizedMessage(), e1);
             }
-            String headImgUrl = result.get("headimgurl").toString();
-            String country = result.get("country").toString();
-            String province = result.get("province").toString();
-            String city = result.get("city").toString();
-            String unionId = result.get("unionid").toString();
+            String headImgUrl = Objects.toString(result.get("headimgurl"), null);
+            String country = Objects.toString(result.get("country"), null);
+            String province = Objects.toString(result.get("province"), null);
+            String city = Objects.toString(result.get("city"), null);
+            String unionId = Objects.toString(result.get("unionid"), null);
+
             Integer subscribe = 1;
             try {
                 Double tempSubscribe = (Double) result.get("subscribe");
