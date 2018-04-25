@@ -36,26 +36,11 @@ public interface ApplicationService {
     List<ApplicationSubmit> loadApplicationSubmitList(Integer applicationId);
 
     /**
-     * 提交
-     *
-     * @param applicationId 应用练习id
-     * @param content       内容
-     */
-    Boolean submit(Integer applicationId, String content);
-
-    /**
      * 获取提交记录
      *
      * @param id 提交id
      */
     ApplicationSubmit loadSubmit(Integer id);
-
-    /**
-     * 获取知识点
-     *
-     * @param knowledgeId 知识点id
-     */
-    Knowledge getKnowledge(Integer knowledgeId);
 
     /**
      * 更新应用练习题干

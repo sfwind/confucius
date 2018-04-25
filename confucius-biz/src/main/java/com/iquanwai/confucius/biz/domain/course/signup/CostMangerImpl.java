@@ -16,7 +16,7 @@ import java.util.List;
  * Created by justin on 16/10/13.
  */
 @Repository
-public class CostRepoImpl implements CostRepo {
+public class CostMangerImpl implements CostManger {
     @Autowired
     private CouponDao couponDao;
 

@@ -5,7 +5,6 @@ import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -103,15 +102,6 @@ public interface SignupService {
 
 
     /**
-     * 用户当前的会员
-     *
-     * @param profileId 用户id
-     * @return 会员数据
-     */
-    RiseMember currentRiseMember(Integer profileId);
-
-
-    /**
      * 获得该会员对应月份主修课id
      *
      * @param profileId 用户id
@@ -157,5 +147,13 @@ public interface SignupService {
      * @return qrcode链接
      */
     String getSubscribeQrCodeForPay(Integer memberTypeId);
+
+    /**
+     * 设置项目的剩余名额
+     *
+     * @param remainNumber 剩余人数
+     * @param memberTypeId 身份id
+     */
+    void changeRemainNumber(Integer remainNumber, Integer memberTypeId);
 
 }

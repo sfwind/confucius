@@ -1,9 +1,9 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
-import com.iquanwai.confucius.biz.dao.fragmentation.*;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepoImpl;
-import com.iquanwai.confucius.biz.po.fragmentation.*;
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationPracticeDao;
+import com.iquanwai.confucius.biz.dao.fragmentation.ApplicationSubmitDao;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationPractice;
+import com.iquanwai.confucius.biz.po.fragmentation.ApplicationSubmit;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +22,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     private ApplicationPracticeDao applicationPracticeDao;
     @Autowired
     private ApplicationSubmitDao applicationSubmitDao;
-    @Autowired
-    private PracticePlanDao practicePlanDao;
-    @Autowired
-    private ImprovementPlanDao improvementPlanDao;
-    @Autowired
-    private KnowledgeDao knowledgeDao;
-    @Autowired
-    private PointRepo pointRepo;
 
     @Override
     public ApplicationPractice loadApplicationPractice(Integer id) {
@@ -78,62 +70,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Boolean submit(Integer id, String content) {
-        ApplicationSubmit submit = applicationSubmitDao.load(ApplicationSubmit.class, id);
-        if (submit == null) {
-            logger.error("submitId {} is not existed", id);
-            return false;
-        }
-        boolean result;
-        int length = CommonUtils.removeHTMLTag(content).length();
-        if (submit.getContent() == null) {
-            result = applicationSubmitDao.firstAnswer(id, content, length);
-        } else {
-            result = applicationSubmitDao.answer(id, content, length);
-        }
-
-        if (result && submit.getPointStatus() == 0) {
-            // 修改应用任务记录
-            ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, submit.getPlanId());
-            if (plan != null) {
-                improvementPlanDao.updateApplicationComplete(plan.getId());
-            } else {
-                logger.error("ImprovementPlan is not existed,planId:{}", submit.getPlanId());
-            }
-            logger.info("应用练习加分:{}", id);
-            int applicationId = submit.getApplicationId();
-            ApplicationPractice applicationPractice = applicationPracticeDao.load(ApplicationPractice.class, applicationId);
-
-            Integer type;
-            if (Knowledge.isReview(applicationPractice.getKnowledgeId())) {
-                type = PracticePlan.APPLICATION_REVIEW;
-            } else {
-                type = PracticePlan.APPLICATION;
-            }
-
-            PracticePlan practicePlan = practicePlanDao.loadPracticePlan(submit.getPlanId(),
-                    submit.getApplicationId(), type);
-            if (practicePlan != null) {
-                practicePlanDao.complete(practicePlan.getId());
-                Integer point = PointRepoImpl.score.get(applicationPracticeDao.load(ApplicationPractice.class, submit.getApplicationId()).getDifficulty());
-                // 查看难度，加分
-                pointRepo.risePoint(submit.getPlanId(), point);
-                // 修改status
-                applicationSubmitDao.updatePointStatus(id);
-                pointRepo.riseCustomerPoint(submit.getProfileId(), point);
-            }
-        }
-        return result;
-    }
-
-    @Override
     public ApplicationSubmit loadSubmit(Integer id) {
         return applicationSubmitDao.load(ApplicationSubmit.class, id);
-    }
-
-    @Override
-    public Knowledge getKnowledge(Integer knowledgeId) {
-        return knowledgeDao.load(Knowledge.class, knowledgeId);
     }
 
     @Override

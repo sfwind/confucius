@@ -16,7 +16,7 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
-import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
+import com.iquanwai.confucius.biz.domain.course.signup.MemberTypeManager;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -105,7 +105,7 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private CacheService cacheService;
     @Autowired
-    private RiseMemberTypeRepo riseMemberTypeRepo;
+    private MemberTypeManager memberTypeManger;
     @Autowired
     private OperationLogService operationLogService;
 
@@ -412,7 +412,7 @@ public class AccountServiceImpl implements AccountService {
         // TODO 过期状态、付费状态回写，如果已经付费，则相当于已经付费
         // TODO 核心能力项目不能申请分拆项目(两个六个月)
         // 是否已经报名本状态
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        MemberType memberType = memberTypeManger.memberType(memberTypeId);
         boolean entryThis = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, Lists.newArrayList(memberTypeId)).stream().findAny().isPresent();
         if (entryThis) {
             return Pair.of(false, "您已经报名" + memberType.getDescription() + ",无需重复申请");
@@ -462,7 +462,7 @@ public class AccountServiceImpl implements AccountService {
          */
         // 查看是否开放报名 x
         CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        MemberType memberType = memberTypeManger.memberType(memberTypeId);
         if (!courseConfig.getPurchaseSwitch()) {
             return Pair.of(false, memberType.getDescription() + "报名临时关闭\n记得及时关注开放时间哦");
         }

@@ -1,8 +1,6 @@
 package com.iquanwai.confucius.mq;
 
-import com.iquanwai.confucius.biz.domain.course.progress.CourseStudyService;
-import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
-import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
+import com.iquanwai.confucius.biz.domain.course.signup.MemberTypeManager;
 import com.iquanwai.confucius.biz.domain.permission.PermissionService;
 import com.iquanwai.confucius.biz.domain.weixin.message.callback.CallbackMessageService;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQDto;
@@ -28,7 +26,7 @@ public class CacheReloadReceiver {
     @Autowired
     private CallbackMessageService callbackMessageService;
     @Autowired
-    private RiseMemberTypeRepo riseMemberTypeRepo;
+    private MemberTypeManager memberTypeManager;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
 
@@ -49,7 +47,7 @@ public class CacheReloadReceiver {
                     callbackMessageService.reload();
                     break;
                 case "rise_member":
-                    riseMemberTypeRepo.reload();
+                    memberTypeManager.reload();
                     break;
                 default:
                     logger.error("异常，获取cacheReloadMq数据异常:{}", message);

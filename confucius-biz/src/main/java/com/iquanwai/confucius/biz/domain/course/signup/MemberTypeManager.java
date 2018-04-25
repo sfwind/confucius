@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by nethunder on 2017/4/6.
  */
-public interface RiseMemberTypeRepo {
+public interface MemberTypeManager {
 
     /**
      * 根据id获得memberType

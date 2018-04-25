@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointManger;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -45,7 +45,7 @@ public class PracticeServiceImpl implements PracticeService {
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
-    private PointRepo pointRepo;
+    private PointManger pointManger;
     @Autowired
     private WarmupPracticeDao warmupPracticeDao;
     @Autowired
@@ -83,8 +83,8 @@ public class PracticeServiceImpl implements PracticeService {
             homeworkVote.setVotedProfileId(submitProfileId);
             homeworkVote.setDevice(Constants.Device.PC);
             homeworkVoteDao.vote(homeworkVote);
-            pointRepo.risePoint(planId, ConfigUtils.getVoteScore());
-            pointRepo.riseCustomerPoint(submitProfileId, ConfigUtils.getVoteScore());
+            pointManger.risePoint(planId, ConfigUtils.getVoteScore());
+            pointManger.riseCustomerPoint(submitProfileId, ConfigUtils.getVoteScore());
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }

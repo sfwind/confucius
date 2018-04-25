@@ -2,7 +2,6 @@ package com.iquanwai.confucius.biz.service;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.TestBase;
-import com.iquanwai.confucius.biz.domain.course.progress.CourseProgressService;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessage;
 import com.iquanwai.confucius.biz.domain.weixin.message.template.TemplateMessageService;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
@@ -17,8 +16,6 @@ import java.util.Map;
 public class TemplateMessageServiceTest extends TestBase {
     @Autowired
     private TemplateMessageService templateMessageService;
-    @Autowired
-    private CourseProgressService progressService;
 
     @Test
     public void testSend(){
@@ -36,10 +33,5 @@ public class TemplateMessageServiceTest extends TestBase {
         data.put("keyword2", new TemplateMessage.Keyword("明天凌晨"));
         data.put("remark", new TemplateMessage.Keyword(remark));
         templateMessageService.sendMessage(templateMessage);
-    }
-
-    @Test
-    public void closeTest(){
-        progressService.noticeWillCloseMember();
     }
 }

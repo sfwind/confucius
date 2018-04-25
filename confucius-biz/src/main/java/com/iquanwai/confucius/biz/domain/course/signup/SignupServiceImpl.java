@@ -49,7 +49,6 @@ import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQPublisher;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,9 +78,9 @@ public class SignupServiceImpl implements SignupService {
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
-    private CostRepo costRepo;
+    private CostManger costManger;
     @Autowired
-    private RiseMemberTypeRepo riseMemberTypeRepo;
+    private MemberTypeManager memberTypeManager;
     @Autowired
     private RiseOrderDao riseOrderDao;
     @Autowired
@@ -212,7 +211,7 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public QuanwaiOrder signUpMonthlyCamp(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType) {
         // 如果是购买专项课，配置 zk，查看当前月份
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        MemberType memberType = memberTypeManager.memberType(memberTypeId);
         Assert.notNull(memberType, "会员类型错误");
 
         CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
@@ -296,6 +295,12 @@ public class SignupServiceImpl implements SignupService {
         Integer month = courseConfig.getSellingMonth();
 
         sendPurchaseMessage(profile, RiseMember.CAMP, orderId, year, month);
+        // 更新优惠券使用状态
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        if (quanwaiOrder.getDiscount() != 0.0) {
+            logger.info("{}使用优惠券", profile.getOpenid());
+            costManger.updateCoupon(Coupon.USED, orderId);
+        }
         // 刷新相关状态
 //        refreshStatus(orderId);
     }
@@ -306,7 +311,6 @@ public class SignupServiceImpl implements SignupService {
      *
      * @param profileId    用户id
      * @param memberTypeId 会员id
-     * @return ClassName:MemberID
      */
     @Override
     public void insertClassMemberMemberId(Integer profileId, Integer memberTypeId) {
@@ -467,11 +471,6 @@ public class SignupServiceImpl implements SignupService {
         return monthlyCampOrderDao.loadCampOrder(orderId);
     }
 
-
-    private String generateClassName(String memberId) {
-        return memberId.substring(0, 6);
-    }
-
     @Override
     public void payRiseSuccess(String orderId) {
         /**
@@ -499,7 +498,7 @@ public class SignupServiceImpl implements SignupService {
         // 支付成功
         riseOrderDao.entry(orderId);
         // 会员项目信息
-        MemberType memberType = riseMemberTypeRepo.memberType(riseOrder.getMemberType());
+        MemberType memberType = memberTypeManager.memberType(riseOrder.getMemberType());
         // 开课时间
         BusinessSchoolConfig businessSchoolConfig = cacheService.loadBusinessCollegeConfig(memberType.getId());
         // 查看是否存在现成会员数据
@@ -534,7 +533,8 @@ public class SignupServiceImpl implements SignupService {
         });
 
         // TODO 专业版测试,以后删除
-        RiseMember existRiseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(riseOrder.getProfileId(), Lists.newArrayList(RiseMember.HALF, RiseMember.ANNUAL)).stream().findFirst().orElse(null);
+        RiseMember existRiseMember = riseMemberDao.loadValidRiseMemberByMemberTypeId(riseOrder.getProfileId(),
+                Lists.newArrayList(RiseMember.HALF, RiseMember.ANNUAL)).stream().findFirst().orElse(null);
         if (existRiseMember == null) {
             // 非续费，查询本次开营时间
             riseMember.setOpenDate(businessSchoolConfig.getOpenDate());
@@ -560,8 +560,11 @@ public class SignupServiceImpl implements SignupService {
 
         // 发送模板消息
         sendPurchaseMessage(profile, memberType.getId(), orderId, businessSchoolConfig.getSellingYear(), businessSchoolConfig.getSellingMonth());
-
-
+        QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+        if (quanwaiOrder.getDiscount() != 0.0) {
+            logger.info("{}使用优惠券", profile.getOpenid());
+            costManger.updateCoupon(Coupon.USED, orderId);
+        }
         this.refreshStatus(orderId);
     }
 
@@ -719,8 +722,8 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public List<Coupon> getCoupons(Integer profileId) {
-        if (costRepo.hasCoupon(profileId)) {
-            List<Coupon> coupons = costRepo.getCoupons(profileId);
+        if (costManger.hasCoupon(profileId)) {
+            List<Coupon> coupons = costManger.getCoupons(profileId);
             coupons.forEach(item -> item.setExpired(DateUtils.parseDateToStringByCommon(item.getExpiredDate())));
             return coupons;
         }
@@ -732,7 +735,7 @@ public class SignupServiceImpl implements SignupService {
         // TODO 获得针对这个人的真实的价格，可针对不同人实现不同价格
         CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
 
-        MemberType memberType = riseMemberTypeRepo.memberTypes().stream().filter(item -> item.getId().equals(memberTypeId)).findFirst().orElse(null);
+        MemberType memberType = memberTypeManager.memberTypes().stream().filter(item -> item.getId().equals(memberTypeId)).findFirst().orElse(null);
         if (memberType != null) {
             // 写入会员开始和结束时间
             if (courseConfig != null) {
@@ -752,7 +755,7 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public Double calculateMemberCoupon(Integer profileId, Integer memberTypeId, List<Integer> couponIdGroup) {
-        Double amount = couponIdGroup.stream().map(costRepo::getCoupon).filter(Objects::nonNull).mapToDouble(Coupon::getAmount).sum();
+        Double amount = couponIdGroup.stream().map(costManger::getCoupon).filter(Objects::nonNull).mapToDouble(Coupon::getAmount).sum();
         MemberType memberType = this.getMemberTypePayInfo(profileId, memberTypeId);
         Double fee = memberType.getFee();
         if (fee >= amount) {
@@ -761,18 +764,6 @@ public class SignupServiceImpl implements SignupService {
             return 0D;
         }
     }
-
-
-    @Override
-    public RiseMember currentRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember != null) {
-            riseMember.setStartTime(DateUtils.parseDateToStringByCommon(riseMember.getAddTime()));
-            riseMember.setEndTime(DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(riseMember.getExpireDate(), 1)));
-        }
-        return riseMember;
-    }
-
 
     /**
      * 课程售卖页面，跳转课程介绍页面 problemId
@@ -819,21 +810,16 @@ public class SignupServiceImpl implements SignupService {
     public void refreshStatus(String orderId) {
         QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
         Profile profile = accountService.getProfile(quanwaiOrder.getProfileId());
-        this.refreshStatus(quanwaiOrder, profile, orderId);
+        this.refreshStatus(quanwaiOrder, profile);
     }
 
 
-    private void refreshStatus(QuanwaiOrder quanwaiOrder, Profile profile, String orderId) {
+    private void refreshStatus(QuanwaiOrder quanwaiOrder, Profile profile) {
         // 刷新会员状态
         try {
             freshLoginUserPublisher.publish(profile.getUnionid());
         } catch (ConnectException e) {
             logger.error("发送会员信息更新mq失败", e);
-        }
-        // 更新优惠券使用状态
-        if (quanwaiOrder.getDiscount() != 0.0) {
-            logger.info("{}使用优惠券", profile.getOpenid());
-            costRepo.updateCoupon(Coupon.USED, orderId);
         }
         // 发送支付成功 mq 消息
         try {
@@ -841,7 +827,8 @@ public class SignupServiceImpl implements SignupService {
             paySuccessPublisher.publish(quanwaiOrder);
         } catch (ConnectException e) {
             logger.error("发送支付成功mq失败", e);
-            messageService.sendAlarm("报名模块出错", "发送支付成功mq失败", "高", "订单id:" + orderId, e.getLocalizedMessage());
+            messageService.sendAlarm("报名模块出错", "发送支付成功mq失败", "高", "订单id:" + quanwaiOrder.getOrderId(),
+                    e.getLocalizedMessage());
         }
     }
 
@@ -857,11 +844,11 @@ public class SignupServiceImpl implements SignupService {
         Double discount = 0d;
         if (couponId != null) {
             // 计算优惠
-            Coupon coupon = costRepo.getCoupon(couponId);
+            Coupon coupon = costManger.getCoupon(couponId);
             Assert.notNull(coupon, "优惠券无效");
-            discount = costRepo.discount(fee, orderId, coupon);
+            discount = costManger.discount(fee, orderId, coupon);
         }
-        return new MutablePair<>(orderId, discount);
+        return Pair.of(orderId, discount);
     }
 
     /**
@@ -876,11 +863,11 @@ public class SignupServiceImpl implements SignupService {
         Double discount = 0d;
         if (CollectionUtils.isNotEmpty(couponIdGroup)) {
             // 计算优惠
-            List<Coupon> coupons = couponIdGroup.stream().map(costRepo::getCoupon).collect(Collectors.toList());
+            List<Coupon> coupons = couponIdGroup.stream().map(costManger::getCoupon).collect(Collectors.toList());
             Assert.notEmpty(coupons, "优惠券无效");
-            discount = costRepo.discount(fee, orderId, coupons);
+            discount = costManger.discount(fee, orderId, coupons);
         }
-        return new MutablePair<>(orderId, discount);
+        return Pair.of(orderId, discount);
     }
 
     private QuanwaiOrder createQuanwaiOrder(Integer profileId, String orderId, Double fee, Double discount, String goodsId,
@@ -952,6 +939,11 @@ public class SignupServiceImpl implements SignupService {
                 break;
         }
         return qrCodeUrl;
+    }
+
+    @Override
+    public void changeRemainNumber(Integer remainNumber, Integer memberTypeId) {
+        redisUtil.set("memberType:remain:"+memberTypeId, remainNumber, 7*24*60*60L);
     }
 
 

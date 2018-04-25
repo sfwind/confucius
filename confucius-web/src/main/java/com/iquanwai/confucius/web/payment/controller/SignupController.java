@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.domain.backend.BusinessSchoolService;
-import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
+import com.iquanwai.confucius.biz.domain.course.signup.CostManger;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
@@ -75,7 +75,7 @@ public class SignupController {
     @Autowired
     private PayService payService;
     @Autowired
-    private CostRepo costRepo;
+    private CostManger costManger;
     @Autowired
     private MessageService messageService;
     @Autowired
@@ -328,7 +328,7 @@ public class SignupController {
 
         if (CollectionUtils.isNotEmpty(paymentDto.getCouponsIdGroup())) {
             for (Integer coupon : paymentDto.getCouponsIdGroup()) {
-                if (!costRepo.checkCouponValidation(loginUser.getId(), coupon)) {
+                if (!costManger.checkCouponValidation(loginUser.getId(), coupon)) {
                     return WebUtils.error("该优惠券无效");
                 }
             }

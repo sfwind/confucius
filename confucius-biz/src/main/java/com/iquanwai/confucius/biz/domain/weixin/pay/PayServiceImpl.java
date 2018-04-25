@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.confucius.biz.dao.wx.QuanwaiOrderDao;
-import com.iquanwai.confucius.biz.domain.course.signup.CostRepo;
+import com.iquanwai.confucius.biz.domain.course.signup.CostManger;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -47,7 +47,7 @@ public class PayServiceImpl implements PayService {
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
-    private CostRepo costRepo;
+    private CostManger costManger;
     @Autowired
     private SignupService signupService;
     @Autowired
