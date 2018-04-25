@@ -39,8 +39,8 @@ public class PreviewController {
     }
 
 
-    @RequestMapping(value = "/update/{problemId}",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> updatePreviews(@PathVariable Integer problemId, @RequestParam ("param")PreviewDto previewDto){
+    @RequestMapping(value = "/update/{problemId}",method = RequestMethod.POST)
+    public ResponseEntity<Map<String,Object>> updatePreviews(@PathVariable Integer problemId, @RequestBody PreviewDto previewDto){
         Integer chapter = previewDto.getChapter();
         Integer section = previewDto.getSection();
 
