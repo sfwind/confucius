@@ -15,6 +15,11 @@ public class PreviewServiceImpl implements PreviewService {
 
 
     @Override
+    public ProblemPreview loadByProblemScheduleId(Integer problemScheduleId) {
+        return problemPreviewDao.loadByScheduleId(problemScheduleId);
+    }
+
+    @Override
     public Integer updatePreview(ProblemPreview problemPreview) {
         ProblemPreview existPreview = problemPreviewDao.loadByScheduleId(problemPreview.getProblemScheduleId());
         if (existPreview == null) {
