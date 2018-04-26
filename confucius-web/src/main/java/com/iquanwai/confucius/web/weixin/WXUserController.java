@@ -41,10 +41,10 @@ public class WXUserController {
 
 
     @RequestMapping(value = "/update/image",method = RequestMethod.GET)
-    public ResponseEntity<Map<String,Object>> updateWXImg(@RequestParam("memberId")String memberId){
-        logger.info("更新{}头像",memberId);
+    public ResponseEntity<Map<String,Object>> updateWXImg(@RequestParam("riseId")String riseId){
+        logger.info("更新{}头像",riseId);
         ThreadPool.execute(()->{
-            Profile profile = accountService.loadProfileByMemberId(memberId);
+            Profile profile = accountService.getProfileByRiseId(riseId);
             if(profile!=null){
                 //更新用户头像
                 accountService.updateProfileByWeiXin(profile);
