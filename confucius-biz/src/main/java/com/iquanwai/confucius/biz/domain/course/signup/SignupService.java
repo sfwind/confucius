@@ -122,4 +122,7 @@ public interface SignupService {
      */
     void changeRemainNumber(Integer remainNumber, Integer memberTypeId);
 
+    /** 项目报名的剩余名额*/
+    String SIGNUP_REMAIN_NUMBER_PREFIX = "memberType:remain:";
+
 }

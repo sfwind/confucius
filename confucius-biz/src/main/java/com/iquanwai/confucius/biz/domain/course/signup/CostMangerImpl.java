@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.course.signup;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.confucius.biz.dao.course.CouponDao;
+import com.iquanwai.confucius.biz.dao.common.coupon.CouponDao;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import org.apache.commons.collections.CollectionUtils;

@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -57,6 +58,12 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public Pair<Boolean, String> risePurchaseCheck(Integer profileId, Integer memberTypeId) {
+        Integer number = redisUtil.getInt(SIGNUP_REMAIN_NUMBER_PREFIX + memberTypeId);
+        if (number != null && number <= 0) {
+            // 不能报名
+            return Pair.of(false, "名额已满,请关注下期报名");
+        }
+
         Pair<Boolean, String> pass = Pair.of(false, "类型异常");
         if (RiseMember.isApply(memberTypeId)) {
             Integer wannaMemberTypeId = riseMemberManager.loadWannaGoodsIdByApplyId(memberTypeId).getRight();
@@ -338,7 +345,11 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public void changeRemainNumber(Integer remainNumber, Integer memberTypeId) {
-        redisUtil.set("memberType:remain:"+memberTypeId, remainNumber, 7*24*60*60L);
+        if (remainNumber == null) {
+            redisUtil.deleteByPattern(SIGNUP_REMAIN_NUMBER_PREFIX + memberTypeId);
+        } else {
+            redisUtil.set(SIGNUP_REMAIN_NUMBER_PREFIX + memberTypeId, remainNumber, TimeUnit.DAYS.toSeconds(7));
+        }
     }
 
 

@@ -16,6 +16,7 @@ import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.message.customer.CustomerMessageService;
+import com.iquanwai.confucius.biz.domain.weixin.pay.PayService;
 import com.iquanwai.confucius.biz.po.Coupon;
 import com.iquanwai.confucius.biz.po.OperateRotate;
 import com.iquanwai.confucius.biz.po.QuanwaiOrder;
@@ -91,6 +92,8 @@ public class EntryManagerImpl implements EntryManager {
     private CostManger costManger;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private BusinessSchoolConfigDao businessSchoolConfigDao;
 
     private static final String RISEMEMBER_OPERATEROTATE_SCENE_CODE = "rise_member_pay_success";
     private static final String MONTHLYCAMP_OPERATEROTATE_SCENE_CODE = "monthly_camp_pay_success";
@@ -110,8 +113,10 @@ public class EntryManagerImpl implements EntryManager {
     private RabbitMQPublisher rabbitMQPublisher;
     private RabbitMQPublisher paySuccessPublisher;
     private RabbitMQPublisher freshLoginUserPublisher;
+    private RabbitMQPublisher purcharseConfigPublisher;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
+
     /**
      * 初始化缓存
      */
@@ -119,9 +124,10 @@ public class EntryManagerImpl implements EntryManager {
     public void init() {
         classMap.clear();
         courseMap.clear();
-        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher(com.iquanwai.confucius.biz.domain.weixin.pay.PayService.RISE_PAY_SUCCESS_TOPIC);
-        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(com.iquanwai.confucius.biz.domain.weixin.pay.PayService.LOGIN_USER_RELOAD_TOPIC);
+        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher(PayService.RISE_PAY_SUCCESS_TOPIC);
+        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(PayService.LOGIN_USER_RELOAD_TOPIC);
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher("camp_order_topic");
+        purcharseConfigPublisher = rabbitMQFactory.initFanoutPublisher("purchase_configuration_reload");
 
     }
 
@@ -170,9 +176,6 @@ public class EntryManagerImpl implements EntryManager {
         // 更新 RiseMember 表中信息
         updateMonthlyCampRiseMemberStatus(profile, orderId);
 
-        // 送优惠券
-//        insertCampCoupon(profile);
-
         // 更新订单状态
         monthlyCampOrderDao.entry(orderId);
 
@@ -201,8 +204,6 @@ public class EntryManagerImpl implements EntryManager {
             logger.info("{}使用优惠券", profile.getOpenid());
             costManger.updateCoupon(Coupon.USED, orderId);
         }
-        // 刷新相关状态
-//        refreshStatus(orderId);
     }
 
     @Override
@@ -251,7 +252,8 @@ public class EntryManagerImpl implements EntryManager {
             logger.error("该会员ID异常{}", memberType);
             messageService.sendAlarm("报名模块出错", "会员id异常", "高", "订单id:" + orderId, "会员类型异常");
         }
-
+        // 剩余名额校验
+        remainNumberCheck(memberType, businessSchoolConfig);
         // 所有计划设置为会员
         List<ImprovementPlan> plans = improvementPlanDao.loadAllPlans(riseOrder.getProfileId());
         plans.stream().filter(plan -> !plan.getRiseMember()).forEach(plan -> {
@@ -300,6 +302,44 @@ public class EntryManagerImpl implements EntryManager {
             costManger.updateCoupon(Coupon.USED, orderId);
         }
         this.refreshStatus(orderId);
+    }
+
+    private void remainNumberCheck(MemberType memberType, BusinessSchoolConfig businessSchoolConfig) {
+        Integer number = redisUtil.getInt(SignupService.SIGNUP_REMAIN_NUMBER_PREFIX + memberType.getId());
+        if (number != null) {
+            // 已配置剩余名额时,在支付成功后扣除一个名额
+            if (number > 0) {
+                redisUtil.set(SignupService.SIGNUP_REMAIN_NUMBER_PREFIX + memberType.getId(), --number,
+                        TimeUnit.DAYS.toSeconds(7));
+            }
+            // 如果名额已用完,自动更新配置
+            if (number <= 0) {
+                int year = businessSchoolConfig.getSellingYear();
+                int month = businessSchoolConfig.getSellingMonth();
+                businessSchoolConfigDao.inactiveConfig(memberType.getId(), year, month);
+                if (month == 12) {
+                    month = 1;
+                    year++;
+                } else {
+                    month++;
+                }
+                int result = businessSchoolConfigDao.activeConfig(memberType.getId(), year, month);
+                // 更新成功
+                if (result > 0) {
+                    redisUtil.deleteByPattern(SignupService.SIGNUP_REMAIN_NUMBER_PREFIX + memberType.getId());
+                    messageService.sendAlarm(memberType.getDescription() + "售卖自动切换", "切换成功", "高", null, null);
+                } else {
+                    messageService.sendAlarm(memberType.getDescription() + "售卖自动切换", "切换失败", "高", null, "没有配置数据");
+                }
+                // 刷新售卖配置表
+                try {
+                    purcharseConfigPublisher.publish("PurchaseConfigReload");
+                } catch (ConnectException e) {
+                    logger.error("publish purchase cache reload failed", e);
+                }
+            }
+        }
+
     }
 
     /**
@@ -417,7 +457,7 @@ public class EntryManagerImpl implements EntryManager {
     private void updateMonthlyCampRiseMemberStatus(Profile profile, String orderId) {
         CourseConfig monthlyCampConfig = cacheService.loadCourseConfig(RiseMember.CAMP);
         // 每当在 RiseMember 表新增一种状态时候，预先在 RiseMember 表中其他数据置为过期
-        RiseMember existRiseMember = riseMemberManager.oldMember(profile.getId());
+        RiseMember existRiseMember = riseMemberManager.proMember(profile.getId());
         if (existRiseMember == null) {
             // 添加会员表
             RiseMember riseMember = new RiseMember();
@@ -443,18 +483,9 @@ public class EntryManagerImpl implements EntryManager {
             riseMember.setExpireDate(monthlyCampConfig.getCloseDate());
             riseMember.setVip(false);
 
-            if (existRiseMember.getMemberTypeId() == RiseMember.ANNUAL
-                    || existRiseMember.getMemberTypeId() == RiseMember.HALF
-                    || existRiseMember.getMemberTypeId() == RiseMember.HALF_ELITE
-                    || existRiseMember.getMemberTypeId() == RiseMember.ELITE) {
-                // 如果当前购买的人的身份是商学院会员或者专业版会员，则直接将新增的数据记录置为过期
-                riseMember.setExpired(true);
-                riseMember.setMemo("专业版购买专项课");
-            } else {
-                riseMemberDao.updateExpiredAhead(profile.getId());
-
-                riseMember.setExpired(false);
-            }
+            // 如果当前购买的人的身份是专业版会员，则直接将新增的数据记录置为过期
+            riseMember.setExpired(true);
+            riseMember.setMemo("专业版购买专项课");
             riseMemberDao.insert(riseMember);
         }
     }
@@ -609,7 +640,7 @@ public class EntryManagerImpl implements EntryManager {
         } catch (ConnectException e) {
             logger.error("发送会员信息更新mq失败", e);
         }
-        // 发送支付成功 mq 消息
+        // 发送支付成功 mq 消息 platon处理
         try {
             logger.info("发送支付成功message:{}", quanwaiOrder);
             paySuccessPublisher.publish(quanwaiOrder);

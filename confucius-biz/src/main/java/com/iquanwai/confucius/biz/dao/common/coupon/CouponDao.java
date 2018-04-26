@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.biz.dao.course;
+package com.iquanwai.confucius.biz.dao.common.coupon;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.confucius.biz.dao.DBUtil;

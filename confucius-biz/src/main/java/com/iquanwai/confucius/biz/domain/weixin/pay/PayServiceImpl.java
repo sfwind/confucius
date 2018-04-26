@@ -66,14 +66,6 @@ public class PayServiceImpl implements PayService {
     private static final String ALIPAY_CALLBACK_PATH = "/ali/pay/callback/notify";
     private static final String ALIPAY_RETURN_PATH = "/pay/alipay/return";
 
-
-//    @PostConstruct
-//    public void init() {
-//        // 初始化发送mq
-//        paySuccessPublisher = rabbitMQFactory.initFanoutPublisher(RISE_PAY_SUCCESS_TOPIC);
-//        freshLoginUserPublisher = rabbitMQFactory.initFanoutPublisher(LOGIN_USER_RELOAD_TOPIC);
-//    }
-
     @Override
     public String unifiedOrder(String orderId) {
         Assert.notNull(orderId, "订单号不能为空");
