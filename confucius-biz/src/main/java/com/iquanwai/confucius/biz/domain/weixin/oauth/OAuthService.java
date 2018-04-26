@@ -16,7 +16,9 @@ public interface OAuthService {
     /**
      * 在访问用户授权页面之前，预生成 Callback 对象，存储 state 已经对应的回调 url
      */
-    Callback initCallback(String callbackUrl, String state);
+    Callback initCallback(String callbackUrl, String state, String checkParam);
+
+    boolean checkCallbackAuthority(String state, String checkParam);
 
     Callback supplementMobileCallback(String state, WeiXinResult.UserAccessTokenObject userAccessTokenObject);
 

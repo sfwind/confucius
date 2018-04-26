@@ -21,12 +21,13 @@ public class CallbackDao extends DBUtil {
 
     public int insert(Callback callback) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Callback(State, CallbackUrl, AccessToken, PcAccessToken, WeMiniAccessToken, " +
+        String sql = "INSERT INTO Callback(State, CheckParam, CallbackUrl, AccessToken, PcAccessToken, WeMiniAccessToken, " +
                 "RefreshToken, UnionId, Openid, PcOpenid, WeMiniOpenid) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Long result = run.insert(sql, new ScalarHandler<>(),
                     callback.getState(),
+                    callback.getCheckParam(),
                     callback.getCallbackUrl(),
                     callback.getAccessToken(),
                     callback.getPcAccessToken(),

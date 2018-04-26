@@ -42,7 +42,7 @@ public class OAuthServiceImpl implements OAuthService {
     /**
      * 在访问用户授权页面之前，预生成 Callback 对象，存储 state 已经对应的回调 url
      */
-    public Callback initCallback(String callbackUrl, String state) {
+    public Callback initCallback(String callbackUrl, String state, String checkParam) {
         String ip = getIpFromUrl(callbackUrl);
         if (ip != null) {
             callbackUrl = callbackUrl.replace("http://" + ip, ConfigUtils.domainName());
@@ -51,9 +51,21 @@ public class OAuthServiceImpl implements OAuthService {
         // 为了存储 state 值，不得不在此声明 callback
         Callback callback = new Callback();
         callback.setState(state);
+        callback.setCheckParam(checkParam);
         callback.setCallbackUrl(callbackUrl);
         callbackDao.insert(callback);
         return callback;
+    }
+
+    @Override
+    public boolean checkCallbackAuthority(String state, String checkParam) {
+        logger.info("获取 state：{}", state);
+        logger.info("获取 checkParam: {}", checkParam);
+        Callback callback = callbackDao.queryByState(state);
+        if (callback != null) {
+            return checkParam.equals(callback.getCheckParam());
+        }
+        return false;
     }
 
     /**

@@ -11,6 +11,7 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.web.resolver.UnionUser;
 import com.iquanwai.confucius.web.resolver.UnionUserService;
+import com.iquanwai.confucius.web.util.CookieUtils;
 import com.iquanwai.confucius.web.util.WebUtils;
 import com.iquanwai.confucius.web.weixin.dto.WeMiniCallback;
 import org.slf4j.Logger;
@@ -45,6 +46,8 @@ public class OAuthController {
     public static final String ERROR_STATE_SUFFIX = "#wechat_redirect";
     public static final String PAGE_NOT_FOUND = "/403.jsp";
 
+    private static final String CHECK_PARAM_COOKIE = "checkParam";
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
@@ -55,8 +58,10 @@ public class OAuthController {
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
             String state = CommonUtils.randomString(32);
+            String checkParam = CommonUtils.randomString(8);
+            CookieUtils.addCookie(CHECK_PARAM_COOKIE, checkParam, response);
             // 数据库预存储 callback 对象
-            oAuthService.initCallback(callbackUrl, state);
+            oAuthService.initCallback(callbackUrl, state, checkParam);
             String redirectOAuthUrl = weiXinApiService.generateRedirectOAuthUrl(state, "/wx/oauth/code");
             if (ConfigUtils.logDetail()) {
                 logger.info("ip is {}, callbackUrl is {}, requestUrl is {}", remoteIp, callbackUrl, redirectOAuthUrl);
@@ -91,6 +96,16 @@ public class OAuthController {
             if (state != null && state.endsWith(ERROR_STATE_SUFFIX)) {
                 state = state.replace(ERROR_STATE_SUFFIX, "");
             }
+
+            String checkParam = CookieUtils.getCookie(request, CHECK_PARAM_COOKIE);
+
+            // 校验 cookie 中的校验参数是否合法
+            boolean authority = oAuthService.checkCallbackAuthority(state, checkParam);
+            if (!authority) {
+                response.sendRedirect(PAGE_NOT_FOUND);
+                return;
+            }
+
             Callback callback = oAuthService.supplementMobileCallback(state, userAccessTokenObject);
             if (callback == null) {
                 response.sendRedirect(PAGE_NOT_FOUND);
@@ -127,8 +142,10 @@ public class OAuthController {
         try {
             String remoteIp = request.getHeader("X-Forwarded-For");
             String state = CommonUtils.randomString(32);
+            String checkParam = CommonUtils.randomString(8);
+            CookieUtils.addCookie(CHECK_PARAM_COOKIE, checkParam, response);
             // 数据库预存储 callback 对象
-            oAuthService.initCallback(callbackUrl, state);
+            oAuthService.initCallback(callbackUrl, state, checkParam);
             Map<String, String> authParam = weiXinApiService.generateJsOAuthParam(state, "/wx/oauth/pc/code");
             if (ConfigUtils.logDetail()) {
                 logger.info("ip is {}, callbackUrl is {}, param is {}", remoteIp, callbackUrl, authParam);
@@ -160,6 +177,16 @@ public class OAuthController {
             if (state != null && state.endsWith(ERROR_STATE_SUFFIX)) {
                 state = state.replace(ERROR_STATE_SUFFIX, "");
             }
+
+            String checkParam = CookieUtils.getCookie(request, CHECK_PARAM_COOKIE);
+
+            // 校验 cookie 中的校验参数是否合法
+            boolean authority = oAuthService.checkCallbackAuthority(state, checkParam);
+            if (!authority) {
+                response.sendRedirect(PAGE_NOT_FOUND);
+                return;
+            }
+
             Callback callback = oAuthService.supplementPcCallback(state, userAccessTokenObject);
             if (callback == null) {
                 response.sendRedirect(PAGE_NOT_FOUND);

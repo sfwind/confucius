@@ -12,6 +12,7 @@ public class Callback {
 
     private Integer id;
     private String state; // 随机值，供客户端调用
+    private String checkParam; // 回调校验值
     private String callbackUrl; // 回调地址
     private String accessToken; // 服务号 accessToken
     private String pcAccessToken; // PC accessToken
