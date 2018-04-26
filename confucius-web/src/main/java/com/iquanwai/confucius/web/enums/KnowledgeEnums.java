@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum KnowledgeEnums {
 
-    KNOWLEDG_Duplicate_ERROR(-1,"设置的章节与现有章节重复"),
+    KNOWLEDG_Duplicate_ERROR(-2,"设置的章节与现有章节重复"),
     UNKNOWN_ERROR(-100,"未知错误");
 
     private Integer code;
