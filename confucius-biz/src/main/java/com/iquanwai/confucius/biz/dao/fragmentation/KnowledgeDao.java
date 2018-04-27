@@ -22,16 +22,16 @@ public class KnowledgeDao extends PracticeDBUtil {
     public Integer insertKnowledge(Knowledge knowledge) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Knowledge (" +
-                "Knowledge, Step, Analysis, Means, Keynote, " +
+                "Description,Knowledge, Step, Analysis, Means, Keynote, " +
                 "AnalysisPic, MeansPic, KeynotePic, Pic, " +
                 "AnalysisAudioId, MeansAudioId, KeynoteAudioId, AudioId,Updated " +
-                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,2)";
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,2)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
-                    knowledge.getKnowledge(), knowledge.getStep(), knowledge.getAnalysis(),
-                    knowledge.getMeans(), knowledge.getKeynote(), knowledge.getAnalysisPic(),
-                    knowledge.getMeansPic(), knowledge.getKeynotePic(), knowledge.getPic(),
-                    knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
+                    knowledge.getDescription(), knowledge.getKnowledge(),knowledge.getStep(),
+                    knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
+                    knowledge.getAnalysisPic(), knowledge.getMeansPic(), knowledge.getKeynotePic(),
+                    knowledge.getPic(), knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
                     knowledge.getKeynoteAudioId(), knowledge.getAudioId());
             return result.intValue();
         } catch (SQLException e) {
@@ -42,10 +42,10 @@ public class KnowledgeDao extends PracticeDBUtil {
 
     public Integer updateKnowledge(Knowledge knowledge) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?, Analysis = ?, Means = ?, Keynote = ?," +
+        String sql = "UPDATE Knowledge SET Knowledge = ?, Step = ?,Description = ?,Analysis = ?, Means = ?, Keynote = ?," +
                 "AnalysisAudioId=?, MeansAudioId=?, KeynoteAudioId=?, AudioId=?,Updated = ? WHERE Id = ?";
         try {
-            return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),
+            return runner.update(sql, knowledge.getKnowledge(), knowledge.getStep(),knowledge.getDescription(),
                     knowledge.getAnalysis(), knowledge.getMeans(), knowledge.getKeynote(),
                     knowledge.getAnalysisAudioId(), knowledge.getMeansAudioId(),
                     knowledge.getKeynoteAudioId(), knowledge.getAudioId(), knowledge.getUpdated(), knowledge.getId());

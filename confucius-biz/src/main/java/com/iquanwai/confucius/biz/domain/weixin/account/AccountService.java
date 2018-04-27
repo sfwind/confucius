@@ -31,6 +31,12 @@ public interface AccountService {
 
     WeiXinResult.UserInfoObject storeWeiXinUserInfoByMobileApp(String openId);
 
+    /**
+     * 更新用户头像
+     * @param profile
+     */
+    void updateProfileByWeiXin(Profile profile);
+
     Role getUserRole(Integer profileId);
 
     void updateMemberId(Integer profileId, String memberId);

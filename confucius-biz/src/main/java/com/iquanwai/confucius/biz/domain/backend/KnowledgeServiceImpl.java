@@ -84,11 +84,14 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             if (problemSchedule != null) {
                 //如果正好不是复习，则认为章节重复
                 if (problemSchedule.getChapter().intValue() != reviewSchedules.get(0).getChapter().intValue()) {
-                    return -1;
+                    return -2;
                 }
             }
 
             int knowledgeId = knowledgeDao.insertKnowledge(knowledge);
+            if(knowledgeId==-1){
+                return -1;
+            }
             knowledge.setId(knowledgeId);
             //插入目标知识点对应的Schedule
             insertProblemSchedule(knowledge, problemId);

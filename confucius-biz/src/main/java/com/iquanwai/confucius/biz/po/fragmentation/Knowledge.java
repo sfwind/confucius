@@ -11,6 +11,10 @@ public class Knowledge {
     private int id;
     private String knowledge; //知识点
     private String step; //步骤
+    /**
+     * 知识点内容
+     */
+    private String description;
     private String analysis; //作用
     private String means; //方法
     private String keynote; //要点
