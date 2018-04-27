@@ -197,11 +197,11 @@ public class OperationLogServiceImpl implements OperationLogService {
     @Override
     public void refreshProfiles(List<Integer> profileIds) {
         // 员工
-        Map<Integer, List<QuanwaiEmployee>> employeeRepo = employeeDao.loadAll(QuanwaiEmployee.class).stream().collect(Collectors.groupingBy(QuanwaiEmployee::getProfileId));
+        Map<Integer, List<QuanwaiEmployee>> employeeRepo = employeeDao.loadAll(QuanwaiEmployee.class).stream().filter(item -> item.getProfileId() != null).collect(Collectors.groupingBy(QuanwaiEmployee::getProfileId));
         // vip
-        Map<Integer, List<UserRole>> roleRepo = userRoleDao.loadAll(UserRole.class).stream().filter(item -> !item.getDel()).collect(Collectors.groupingBy(UserRole::getProfileId));
+        Map<Integer, List<UserRole>> roleRepo = userRoleDao.loadAll(UserRole.class).stream().filter(item -> item.getProfileId() != null).filter(item -> !item.getDel()).collect(Collectors.groupingBy(UserRole::getProfileId));
         // 会员
-        Map<Integer, List<RiseMember>> riseMemberRepo = riseMemberDao.loadByProfileIds(profileIds).stream().filter(item -> !item.getMemberTypeId().equals(RiseMember.COURSE)).collect(Collectors.groupingBy(RiseMember::getProfileId));
+        Map<Integer, List<RiseMember>> riseMemberRepo = riseMemberDao.loadByProfileIds(profileIds).stream().filter(item -> item.getProfileId() != null).filter(item -> !item.getMemberTypeId().equals(RiseMember.COURSE)).collect(Collectors.groupingBy(RiseMember::getProfileId));
         // 身份信息
         Map<Integer, List<Profile>> profileRepo = profileDao.loadByProfileIds(profileIds).stream().collect(Collectors.groupingBy(Profile::getId));
 
