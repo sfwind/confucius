@@ -152,6 +152,15 @@ public class AccountServiceImpl implements AccountService {
         return userInfoObject;
     }
 
+    @Override
+    public void updateProfileByWeiXin(Profile profile) {
+        WeiXinResult.UserInfoObject userInfoObject = weiXinApiService.getWeiXinUserInfoByMobileApp(profile.getOpenid());
+        if(userInfoObject!=null){
+            String headImgUrl = userInfoObject.getHeadImgUrl();
+            profileDao.updateHeadImgUrl(profile.getId(),headImgUrl);
+        }
+    }
+
     private void store(String openId, WeiXinResult.UserInfoObject userInfoObject, Profile.ProfileType profileType) {
         String unionId = userInfoObject.getUnionId();
         String nickName = userInfoObject.getNickName();
