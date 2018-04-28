@@ -290,7 +290,7 @@ public class BackendController {
                                                                @RequestParam(value = "close", required = false) Boolean close,
                                                                @RequestParam(value = "number", required = false) Integer number) {
 
-        if(close){
+        if(close!=null && close){
             signupService.changeRemainNumber(null, memberTypeId);
         }else{
             signupService.changeRemainNumber(number, memberTypeId);
