@@ -1,4 +1,4 @@
-package com.iquanwai.confucius.web.course.controller;
+package com.iquanwai.confucius.web.file.controller;
 
 import com.iquanwai.confucius.biz.domain.course.file.PictureService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;

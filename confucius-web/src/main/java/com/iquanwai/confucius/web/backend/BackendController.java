@@ -2,6 +2,7 @@ package com.iquanwai.confucius.web.backend;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
@@ -32,10 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -64,6 +62,8 @@ public class BackendController {
     private MessageService messageService;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
+    @Autowired
+    private SignupService signupService;
 
     private RabbitMQPublisher userReloadPublisher;
 
@@ -285,6 +285,18 @@ public class BackendController {
         return WebUtils.success();
     }
 
+    @RequestMapping(value = "/remain/number", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> setRemainPerson(@RequestParam(value = "memberTypeId") Integer memberTypeId,
+                                                               @RequestParam(value = "close", required = false) Boolean close,
+                                                               @RequestParam(value = "number", required = false) Integer number) {
+        if (close != null && close) {
+            signupService.changeRemainNumber(null, memberTypeId);
+        } else {
+            signupService.changeRemainNumber(number, memberTypeId);
+        }
+        return WebUtils.success();
+    }
+
     @RequestMapping(value = "/sa/profile/update", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> bachUpdateProfile(@RequestBody ProfileSetDto profileSetDto) {
         if (CollectionUtils.isEmpty(profileSetDto.getProfiles())) {
@@ -292,7 +304,6 @@ public class BackendController {
         }
 
         operationLogService.refreshProfiles(profileSetDto.getProfiles());
-
         return WebUtils.success();
     }
 

@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
  * Created by nethunder on 2017/4/6.
  */
 @Service
-public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
+public class MemberTypeManagerImpl implements MemberTypeManager {
     @Autowired
     private MemberTypeDao memberTypeDao;
 
     private static Map<Integer, MemberType> memberTypes = Maps.newHashMap();
-    private static Logger logger = LoggerFactory.getLogger(RiseMemberTypeRepoImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(MemberTypeManagerImpl.class);
 
     @PostConstruct
     public void init(){
@@ -30,7 +30,7 @@ public class RiseMemberTypeRepoImpl implements RiseMemberTypeRepo {
                 .collect(Collectors.toList());
 
         types.forEach(item -> memberTypes.put(item.getId(), item));
-        logger.info("圈外会员价格:{}", RiseMemberTypeRepoImpl.memberTypes);
+        logger.info("圈外会员价格:{}", MemberTypeManagerImpl.memberTypes);
     }
 
     @Override

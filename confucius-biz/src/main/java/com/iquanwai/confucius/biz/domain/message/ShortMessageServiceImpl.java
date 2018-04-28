@@ -13,7 +13,6 @@ import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.RestfulHelper;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,32 +51,32 @@ public class ShortMessageServiceImpl implements ShortMessageService {
         Profile profile = accountService.getProfile(shortMessage.getProfileId());
         if (profile == null) {
             // profileId异常
-            return new MutablePair<>(-201, "发送失败，请联系管理员");
+            return Pair.of(-201, "发送失败，请联系管理员");
         }
 
         // 2.发送条数限制
         SendLimit limit = getUserSendLimit(shortMessage.getProfileId());
         if (limit.getMinSend() >= ConfigUtils.getMinSendLimit()) {
-            return new MutablePair<>(-1, "操作过于频繁，请稍后再试");
+            return Pair.of(-1, "操作过于频繁，请稍后再试");
         }
         if (limit.getHourSend() >= ConfigUtils.getHourSendLimit()) {
-            return new MutablePair<>(-2, "操作过于频繁，请稍后再试");
+            return Pair.of(-2, "操作过于频繁，请稍后再试");
         }
         if (limit.getDaySend() >= ConfigUtils.getDaySendLimit()) {
-            return new MutablePair<>(-3, "操作过于频繁，请稍后再试");
+            return Pair.of(-3, "操作过于频繁，请稍后再试");
         }
 
 //        // 3.电话号码数量检查
 //        if (shortMessage.getPhones() == null || shortMessage.getPhones().size() > MAX_PHONE_COUNT) {
-//            return new MutablePair<>(-202, MAX_PHONE_COUNT);
+//            return Pair.of(-202, MAX_PHONE_COUNT);
 //        }
         // 4.文字内容检查
         String content = shortMessage.getContent();
         if (content.length() > MAX_CONTENT_SIZE) {
-            return new MutablePair<>(-203, "短信内容过长，请进行精简");
+            return Pair.of(-203, "短信内容过长，请进行精简");
         }
         // 通过检查
-        return new MutablePair<>(1, "ok");
+        return Pair.of(1, "ok");
     }
 
     @Override

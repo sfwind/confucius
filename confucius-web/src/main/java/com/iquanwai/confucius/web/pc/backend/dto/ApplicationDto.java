@@ -1,10 +1,8 @@
 package com.iquanwai.confucius.web.pc.backend.dto;
 
-import com.iquanwai.confucius.biz.util.DateUtils;
-import com.iquanwai.confucius.web.course.dto.PictureDto;
+import com.iquanwai.confucius.web.file.dto.PictureDto;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 

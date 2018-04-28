@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.mq;
 
+import com.iquanwai.confucius.biz.domain.course.signup.MemberTypeManager;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.util.rabbitmq.RabbitMQFactory;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ public class PurchaseConfigReloadReceiver {
     private RabbitMQFactory rabbitMQFactory;
     @Autowired
     private CacheService cacheService;
+    @Autowired
+    private MemberTypeManager memberTypeManager;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -28,6 +31,7 @@ public class PurchaseConfigReloadReceiver {
             if ("PurchaseConfigReload".equals(message)) {
                 cacheService.reloadBusinessCollegeConfig();
                 cacheService.reloadMonthlyCampConfig();
+                memberTypeManager.reload();
                 logger.info("支付配置刷新成功");
             }
         });

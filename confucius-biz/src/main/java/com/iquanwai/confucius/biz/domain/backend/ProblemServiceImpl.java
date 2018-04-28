@@ -9,7 +9,6 @@ import com.iquanwai.confucius.biz.po.fragmentation.Problem;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemCatalog;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemSchedule;
 import com.iquanwai.confucius.biz.po.fragmentation.ProblemSubCatalog;
-import com.iquanwai.confucius.biz.util.ConfigUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class ProblemServiceImpl implements ProblemService {
     //缓存问题
     private List<Problem> problems = Lists.newArrayList();
 
-    private int review_knowledgeId = 59;
+    private static final int REVIEW_KNOWLEDGE_ID = 59;
 
     @Override
     public List<Problem> loadProblems() {
@@ -96,7 +95,7 @@ public class ProblemServiceImpl implements ProblemService {
     public int insertProblemScehdule(Integer problemId) {
         ProblemSchedule problemSchedule = new ProblemSchedule();
         problemSchedule.setProblemId(problemId);
-        problemSchedule.setKnowledgeId(review_knowledgeId);
+        problemSchedule.setKnowledgeId(REVIEW_KNOWLEDGE_ID);
         problemSchedule.setChapter(1);
         problemSchedule.setSection(1);
         problemSchedule.setSeries(1);

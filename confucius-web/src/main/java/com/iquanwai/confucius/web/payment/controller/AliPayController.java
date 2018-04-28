@@ -8,6 +8,7 @@ import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.google.common.collect.Maps;
+import com.iquanwai.confucius.biz.domain.course.signup.EntryManager;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.PayCallback;
@@ -64,6 +65,8 @@ public class AliPayController {
     @Autowired
     private RestfulHelper restfulHelper;
     @Autowired
+    private EntryManager entryManager;
+    @Autowired
     private SignupService signupService;
     @Autowired
     private MessageService messageService;
@@ -92,8 +95,8 @@ public class AliPayController {
             PrintWriter out = response.getWriter();
             Map<String, String> params = Maps.newHashMap();
             Map requestParams = request.getParameterMap();
-            for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
-                String name = (String) iter.next();
+            for (Object o : requestParams.keySet()) {
+                String name = (String) o;
                 String[] values = (String[]) requestParams.get(name);
                 String valueStr = "";
                 for (int i = 0; i < values.length; i++) {
@@ -173,9 +176,9 @@ public class AliPayController {
                     if (QuanwaiOrder.FRAG_MEMBER.equals(quanwaiOrder.getGoodsType())) {
                         payService.payMemberSuccess(quanwaiOrder.getOrderId());
                     } else if (QuanwaiOrder.FRAG_CAMP.equals(quanwaiOrder.getGoodsType())) {
-                        signupService.payMonthlyCampSuccess(quanwaiOrder.getOrderId());
+                        entryManager.payMonthlyCampSuccess(quanwaiOrder.getOrderId());
                     } else if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
-                        signupService.payApplicationSuccess(quanwaiOrder.getOrderId());
+                        entryManager.payApplicationSuccess(quanwaiOrder.getOrderId());
                     }
                 }
             } catch (Exception e) {

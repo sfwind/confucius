@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by justin on 16/10/13.
  */
-public interface CostRepo {
+public interface CostManger {
     /** 计算折扣价 */
     double discount(Double price, String orderId, Coupon coupon);
 

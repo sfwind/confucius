@@ -1,5 +1,6 @@
 package com.iquanwai.confucius.web.weixin;
 
+import com.iquanwai.confucius.biz.domain.course.signup.EntryManager;
 import com.iquanwai.confucius.biz.domain.course.signup.SignupService;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallback;
 import com.iquanwai.confucius.biz.domain.weixin.pay.OrderCallbackReply;
@@ -28,7 +29,7 @@ public class PayController {
     @Autowired
     private PayService payService;
     @Autowired
-    private SignupService signupService;
+    private EntryManager entryManager;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -92,7 +93,7 @@ public class PayController {
             try {
                 payService.handlePayResult(payCallback);
                 if ("SUCCESS".equals(payCallback.getResult_code())) {
-                    signupService.payMonthlyCampSuccess(payCallback.getOut_trade_no());
+                    entryManager.payMonthlyCampSuccess(payCallback.getOut_trade_no());
                 } else {
                     logger.error("{}付费失败", payCallback.getOut_trade_no());
                 }
@@ -114,7 +115,7 @@ public class PayController {
             try {
                 payService.handlePayResult(payCallback);
                 if ("SUCCESS".equals(payCallback.getResult_code())) {
-                    signupService.payApplicationSuccess(payCallback.getOut_trade_no());
+                    entryManager.payApplicationSuccess(payCallback.getOut_trade_no());
                 } else {
                     logger.error("{}付费失败", payCallback.getOut_trade_no());
                 }

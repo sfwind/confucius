@@ -15,8 +15,8 @@ import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
+import com.iquanwai.confucius.biz.domain.course.signup.MemberTypeManager;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
-import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.fragmentation.plan.PlanService;
 import com.iquanwai.confucius.biz.domain.log.OperationLogService;
@@ -31,11 +31,7 @@ import com.iquanwai.confucius.biz.po.common.customer.CustomerStatus;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
 import com.iquanwai.confucius.biz.po.common.permisson.Role;
 import com.iquanwai.confucius.biz.po.common.permisson.UserRole;
-import com.iquanwai.confucius.biz.po.fragmentation.CourseScheduleDefault;
-import com.iquanwai.confucius.biz.po.fragmentation.ImprovementPlan;
-import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseClassMember;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
+import com.iquanwai.confucius.biz.po.fragmentation.*;
 import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.biz.util.CommonUtils;
 import com.iquanwai.confucius.biz.util.DateUtils;
@@ -44,7 +40,6 @@ import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -54,13 +49,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -105,7 +94,7 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private CacheService cacheService;
     @Autowired
-    private RiseMemberTypeRepo riseMemberTypeRepo;
+    private MemberTypeManager memberTypeManger;
     @Autowired
     private OperationLogService operationLogService;
 
@@ -421,7 +410,7 @@ public class AccountServiceImpl implements AccountService {
         // TODO 过期状态、付费状态回写，如果已经付费，则相当于已经付费
         // TODO 核心能力项目不能申请分拆项目(两个六个月)
         // 是否已经报名本状态
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        MemberType memberType = memberTypeManger.memberType(memberTypeId);
         boolean entryThis = riseMemberDao.loadValidRiseMemberByMemberTypeId(profileId, Lists.newArrayList(memberTypeId)).stream().findAny().isPresent();
         if (entryThis) {
             return Pair.of(false, "您已经报名" + memberType.getDescription() + ",无需重复申请");
@@ -471,7 +460,7 @@ public class AccountServiceImpl implements AccountService {
          */
         // 查看是否开放报名 x
         CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
-        MemberType memberType = riseMemberTypeRepo.memberType(memberTypeId);
+        MemberType memberType = memberTypeManger.memberType(memberTypeId);
         if (!courseConfig.getPurchaseSwitch()) {
             return Pair.of(false, memberType.getDescription() + "报名临时关闭\n记得及时关注开放时间哦");
         }
@@ -663,7 +652,7 @@ public class AccountServiceImpl implements AccountService {
         // TODO: 杨仁 增加project项目
         RiseMember currentRiseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (currentRiseMember != null) {
-            return new MutablePair<>(-1, "该用户已经是会员");
+            return Pair.of(-1, "该用户已经是会员");
         }
         RiseMember riseMember = new RiseMember();
         riseMember.setProfileId(profileId);
@@ -675,7 +664,7 @@ public class AccountServiceImpl implements AccountService {
         riseMember.setMemo(memo);
         riseMember.setVip(true);
         int result = riseMemberDao.insert(riseMember);
-        return new MutablePair<>(result, null);
+        return Pair.of(result, null);
     }
 
     @Override

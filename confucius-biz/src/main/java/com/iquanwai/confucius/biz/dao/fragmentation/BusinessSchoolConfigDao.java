@@ -28,4 +28,25 @@ public class BusinessSchoolConfigDao extends PracticeDBUtil {
         return null;
     }
 
+    public void inactiveConfig(Integer memberTypeId, int year, int month) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE BusinessSchoolConfig SET Active = 0 WHERE MemberTypeId = ? and Year = ? and Month = ?";
+        try {
+            runner.update(sql, memberTypeId, year, month);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public int activeConfig(Integer memberTypeId, int year, int month) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE BusinessSchoolConfig SET Active = 1 WHERE MemberTypeId = ? and Year = ? and Month = ?";
+        try {
+            return runner.update(sql, memberTypeId, year, month);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
 }

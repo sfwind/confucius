@@ -10,8 +10,8 @@ import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.FragmentClassMemberDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.quanwai.EmployeeDao;
+import com.iquanwai.confucius.biz.domain.course.signup.MemberTypeManager;
 import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberManager;
-import com.iquanwai.confucius.biz.domain.course.signup.RiseMemberTypeRepo;
 import com.iquanwai.confucius.biz.domain.fragmentation.ClassMember;
 import com.iquanwai.confucius.biz.po.ActionLog;
 import com.iquanwai.confucius.biz.po.OperationLog;
@@ -51,19 +51,19 @@ public class OperationLogServiceImpl implements OperationLogService {
     @Autowired
     private ProfileDao profileDao;
     @Autowired
-    private RiseClassMemberDao riseClassMemberDao;
-    @Autowired
-    private RiseMemberDao riseMemberDao;
-    @Autowired
     private UserRoleDao userRoleDao;
     @Autowired
     private RiseMemberManager riseMemberManager;
     @Autowired
     private FragmentClassMemberDao fragmentClassMemberDao;
     @Autowired
-    private RiseMemberTypeRepo riseMemberTypeRepo;
+    private MemberTypeManager memberTypeManager;
     @Autowired
     private EmployeeDao employeeDao;
+    @Autowired
+    private RiseMemberDao riseMemberDao;
+    @Autowired
+    private RiseClassMemberDao riseClassMemberDao;
 
 
     private Map<Integer, String> classNameMap = Maps.newHashMap();
@@ -72,7 +72,7 @@ public class OperationLogServiceImpl implements OperationLogService {
 
     @PostConstruct
     public void init() {
-        riseMemberTypeRepo.memberTypes().forEach(item -> {
+        memberTypeManager.memberTypes().forEach(item -> {
             classNameMap.put(item.getId(), "className_" + item.getId());
             groupIdMap.put(item.getId(), "groupId_" + item.getId());
         });

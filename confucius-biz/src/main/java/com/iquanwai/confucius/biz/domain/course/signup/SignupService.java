@@ -5,7 +5,6 @@ import com.iquanwai.confucius.biz.po.QuanwaiOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.BusinessSchoolApplicationOrder;
 import com.iquanwai.confucius.biz.po.fragmentation.MemberType;
 import com.iquanwai.confucius.biz.po.fragmentation.MonthlyCampOrder;
-import com.iquanwai.confucius.biz.po.fragmentation.RiseMember;
 import com.iquanwai.confucius.biz.po.fragmentation.RiseOrder;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -37,34 +36,10 @@ public interface SignupService {
     QuanwaiOrder signupBusinessSchoolApplication(Integer profileId, Integer memberTypeId, Integer couponId, Integer payType);
 
     /**
-     * 购买完专项课后续操作
-     * 1、更新 Profile RiseMember 值
-     * 2、RiseMemberClass 新增数据记录
-     * 3、更新 RiseMember 表旧数据为过期状态，并新增一条当前购买类型数据记录
-     * 4、送优惠券
-     * 5、发送 mq 通知 platon 强制开启课程
-     * 6、发送购买成功信息，开课信息（可以合并）
-     */
-    void payMonthlyCampSuccess(String orderId);
-
-    /**
-     * 插入班级、学号
-     *
-     * @param profileId    用户id
-     * @param memberTypeId 会员类型
-     */
-    void insertClassMemberMemberId(Integer profileId, Integer memberTypeId);
-
-    /**
      * 获取专项课订单
      */
     MonthlyCampOrder getMonthlyCampOrder(String orderId);
 
-
-    /**
-     * 商学院购买成功处理
-     */
-    void payRiseSuccess(String orderId);
 
     /**
      * 获得圈外订单
@@ -103,15 +78,6 @@ public interface SignupService {
 
 
     /**
-     * 用户当前的会员
-     *
-     * @param profileId 用户id
-     * @return 会员数据
-     */
-    RiseMember currentRiseMember(Integer profileId);
-
-
-    /**
      * 获得该会员对应月份主修课id
      *
      * @param profileId 用户id
@@ -122,22 +88,12 @@ public interface SignupService {
 
 
     /**
-     * 申请商学院付费后
-     *
-     * @param orderId 订单号
-     */
-    void payApplicationSuccess(String orderId);
-
-    /**
      * 获取商学院申请订单
      *
      * @param orderId 订单号
      * @return 商学院申请订单
      */
     BusinessSchoolApplicationOrder getBusinessSchoolOrder(String orderId);
-
-
-    void refreshStatus(String orderId);
 
 
     /**
@@ -157,5 +113,16 @@ public interface SignupService {
      * @return qrcode链接
      */
     String getSubscribeQrCodeForPay(Integer memberTypeId);
+
+    /**
+     * 设置项目的剩余名额
+     *
+     * @param remainNumber 剩余人数
+     * @param memberTypeId 身份id
+     */
+    void changeRemainNumber(Integer remainNumber, Integer memberTypeId);
+
+    /** 项目报名的剩余名额*/
+    String SIGNUP_REMAIN_NUMBER_PREFIX = "memberType:remain:";
 
 }

@@ -1,10 +1,12 @@
 package com.iquanwai.confucius.web.internal.controller;
 
+import com.iquanwai.confucius.biz.domain.fragmentation.CacheService;
 import com.iquanwai.confucius.biz.domain.message.SMSSendResult;
 import com.iquanwai.confucius.biz.domain.message.ShortMessage;
 import com.iquanwai.confucius.biz.domain.message.ShortMessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.domain.weixin.api.WeiXinResult;
+import com.iquanwai.confucius.biz.po.fragmentation.course.CourseConfig;
 import com.iquanwai.confucius.web.internal.dto.SMSDto;
 import com.iquanwai.confucius.web.util.WebUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,8 @@ public class InternalController {
     private ShortMessageService shortMessageService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private CacheService cacheService;
 
     /**
      * 短信发送
@@ -93,6 +97,12 @@ public class InternalController {
         } else {
             return WebUtils.result(1);
         }
+    }
+
+    @RequestMapping(value = "/course/config/{memberTypeId}")
+    public ResponseEntity<Map<String, Object>> courseConfig(@PathVariable("memberTypeId") Integer memberTypeId) {
+        CourseConfig courseConfig = cacheService.loadCourseConfig(memberTypeId);
+        return WebUtils.result(courseConfig);
     }
 
 }

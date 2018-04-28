@@ -1,7 +1,7 @@
 package com.iquanwai.confucius.biz.domain.fragmentation.practice;
 
 import com.iquanwai.confucius.biz.dao.fragmentation.*;
-import com.iquanwai.confucius.biz.domain.fragmentation.point.PointRepo;
+import com.iquanwai.confucius.biz.domain.fragmentation.point.PointManger;
 import com.iquanwai.confucius.biz.domain.message.MessageService;
 import com.iquanwai.confucius.biz.domain.weixin.account.AccountService;
 import com.iquanwai.confucius.biz.po.common.customer.Profile;
@@ -12,7 +12,6 @@ import com.iquanwai.confucius.biz.util.ConfigUtils;
 import com.iquanwai.confucius.biz.util.Constants;
 import com.iquanwai.confucius.biz.util.DateUtils;
 import com.iquanwai.confucius.biz.util.page.Page;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class PracticeServiceImpl implements PracticeService {
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
-    private PointRepo pointRepo;
+    private PointManger pointManger;
     @Autowired
     private WarmupPracticeDao warmupPracticeDao;
     @Autowired
@@ -83,8 +82,8 @@ public class PracticeServiceImpl implements PracticeService {
             homeworkVote.setVotedProfileId(submitProfileId);
             homeworkVote.setDevice(Constants.Device.PC);
             homeworkVoteDao.vote(homeworkVote);
-            pointRepo.risePoint(planId, ConfigUtils.getVoteScore());
-            pointRepo.riseCustomerPoint(submitProfileId, ConfigUtils.getVoteScore());
+            pointManger.risePoint(planId, ConfigUtils.getVoteScore());
+            pointManger.riseCustomerPoint(submitProfileId, ConfigUtils.getVoteScore());
         } else {
             homeworkVoteDao.reVote(vote.getId());
         }
@@ -129,7 +128,7 @@ public class PracticeServiceImpl implements PracticeService {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
-                return new MutablePair<>(-1, "没有该文章");
+                return Pair.of(-1, "没有该文章");
             }
             //更新助教评论状态
             if (isAsst) {
@@ -146,7 +145,7 @@ public class PracticeServiceImpl implements PracticeService {
                 messageService.sendMessage("评论了我的应用题", load.getProfileId().toString(), profileId.toString(), url);
             }
         }
-        return new MutablePair<>(id, "评论成功");
+        return Pair.of(id, "评论成功");
     }
 
     @Override
@@ -163,7 +162,7 @@ public class PracticeServiceImpl implements PracticeService {
             ApplicationSubmit load = applicationSubmitDao.load(ApplicationSubmit.class, referId);
             if (load == null) {
                 logger.error("评论模块:{} 失败，没有文章id:{}，评论内容:{}", moduleId, referId, content);
-                return new MutablePair<>(-1, "没有该文章");
+                return Pair.of(-1, "没有该文章");
             }
             // 是助教评论
             if (isAsst) {
@@ -176,7 +175,7 @@ public class PracticeServiceImpl implements PracticeService {
         //被回复的评论
         Comment repliedComment = commentDao.load(Comment.class, repliedId);
         if (repliedComment == null) {
-            return new MutablePair<>(-1, "评论失败");
+            return Pair.of(-1, "评论失败");
         }
 
         Comment comment = new Comment();
@@ -204,7 +203,7 @@ public class PracticeServiceImpl implements PracticeService {
             url = url.append("?moduleId=").append(moduleId).append("&submitId=").append(referId).append("&commentId=").append(id);
             messageService.sendMessage(msg, repliedComment.getCommentProfileId().toString(), profileId.toString(), url.toString());
         }
-        return new MutablePair<>(id, "评论成功");
+        return Pair.of(id, "评论成功");
     }
 
     private void asstCoachComment(Integer profileId, Integer problemId) {
