@@ -289,12 +289,21 @@ public class BackendController {
     public ResponseEntity<Map<String, Object>> setRemainPerson(@RequestParam(value = "memberTypeId") Integer memberTypeId,
                                                                @RequestParam(value = "close", required = false) Boolean close,
                                                                @RequestParam(value = "number", required = false) Integer number) {
-
-        if(close!=null && close){
+        if (close != null && close) {
             signupService.changeRemainNumber(null, memberTypeId);
-        }else{
+        } else {
             signupService.changeRemainNumber(number, memberTypeId);
         }
+        return WebUtils.success();
+    }
+
+    @RequestMapping(value = "/sa/profile/update", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> bachUpdateProfile(@RequestBody ProfileSetDto profileSetDto) {
+        if (CollectionUtils.isEmpty(profileSetDto.getProfiles())) {
+            return WebUtils.error("必须输入用户列表 profiles");
+        }
+
+        operationLogService.refreshProfiles(profileSetDto.getProfiles());
         return WebUtils.success();
     }
 

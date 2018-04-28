@@ -218,4 +218,19 @@ public class ProfileDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public List<Profile> loadByProfileIds(List<Integer> profiles) {
+        if (CollectionUtils.isEmpty(profiles)) {
+            return Lists.newArrayList();
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
+        String sql = "select * from Profile where Id in (" + this.produceQuestionMark(profiles.size()) + ")";
+        try {
+            return runner.query(sql, h, profiles.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }
