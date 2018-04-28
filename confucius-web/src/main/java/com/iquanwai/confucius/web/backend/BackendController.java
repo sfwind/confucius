@@ -285,5 +285,16 @@ public class BackendController {
         return WebUtils.success();
     }
 
+    @RequestMapping(value = "/sa/profile/update", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> bachUpdateProfile(@RequestBody ProfileSetDto profileSetDto) {
+        if (CollectionUtils.isEmpty(profileSetDto.getProfiles())) {
+            return WebUtils.error("必须输入用户列表 profiles");
+        }
+
+        operationLogService.refreshProfiles(profileSetDto.getProfiles());
+
+        return WebUtils.success();
+    }
+
 }
 

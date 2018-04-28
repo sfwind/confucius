@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.iquanwai.confucius.biz.po.ActionLog;
 import com.iquanwai.confucius.biz.po.OperationLog;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -33,6 +34,8 @@ public interface OperationLogService {
     void profileSet(Supplier<Integer> supplier, String key, Object value);
 
     void profileSet(Supplier<Integer> supplier, Supplier<Prop> propSupplier);
+
+    void refreshProfiles(List<Integer> profileIds);
 
     class Prop {
         private Map<String, Object> map = Maps.newHashMap();
