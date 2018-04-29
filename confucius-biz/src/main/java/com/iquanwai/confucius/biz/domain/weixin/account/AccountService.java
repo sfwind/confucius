@@ -112,20 +112,6 @@ public interface AccountService {
      */
     List<String> loadBlackListOpenIds();
 
-    /**
-     * 批量拉黑用户
-     *
-     * @param openidList 拉黑用户列表
-     */
-    boolean batchBlackList(List<String> openidList);
-
-    /**
-     * 取消拉黑用户
-     *
-     * @param openidList 取消拉黑用户列表
-     */
-    boolean batchUnBlackList(List<String> openidList);
-
     Integer loadUserScheduleCategory(Integer profileId);
 
     Profile getProfileByUnionId(String unionId);
@@ -135,6 +121,7 @@ public interface AccountService {
     /**
      * 获得最新的学号
      */
+    @Deprecated
     RiseClassMember getLatestMemberId(Integer profileId);
 
     /**
@@ -160,10 +147,6 @@ public interface AccountService {
      */
     BusinessSchoolApplication loadLastApply(Integer profileId, Integer memberTypeId);
 
-
-    boolean hasAvailableApply(Integer profileId, Integer project);
-
-
     boolean hasAvailableApply(List<BusinessSchoolApplication> applyList, Integer project);
 
     boolean hasAvailableOtherApply(List<BusinessSchoolApplication> applyList, Integer memberTypeId);
@@ -171,6 +154,4 @@ public interface AccountService {
     Pair<Boolean, String> hasPrivilegeForCamp(Integer profileId);
 
     Account getAccountByUnionId(String unionId);
-
-    Boolean isWhiteList(Integer profileId);
 }

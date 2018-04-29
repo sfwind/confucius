@@ -55,16 +55,6 @@ public class RiseMemberDao extends DBUtil {
         return null;
     }
 
-    public void updateExpiredAhead(Integer profileId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE RiseMember SET Expired = 1, Memo = '商学院提前过期' WHERE ProfileId = ? AND Expired = 0 AND Del = 0";
-        try {
-            runner.update(sql, profileId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
     public void expired(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE RiseMember SET Expired = 1, Memo = '商学院提前过期' WHERE Id = ?";

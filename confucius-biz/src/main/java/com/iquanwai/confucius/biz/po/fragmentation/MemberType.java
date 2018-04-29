@@ -20,6 +20,7 @@ public class MemberType {
     private String startTime; // 开启时间 非DB字段
     private String endTime; // 结束时间 非DB字段
     private Boolean del; // 是否删除
+    private Boolean purchaseSwitch; //购买开关
 
     public MemberType copy(){
         MemberType temp = new MemberType();
@@ -32,6 +33,7 @@ public class MemberType {
         temp.setEndTime(this.endTime);
         temp.setDel(this.del);
         temp.setInitPrice(this.initPrice);
+        temp.setPurchaseSwitch(this.purchaseSwitch);
         return temp;
     }
 }

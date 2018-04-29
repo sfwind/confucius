@@ -11,7 +11,6 @@ import com.iquanwai.confucius.biz.dao.common.customer.ProfileDao;
 import com.iquanwai.confucius.biz.dao.common.customer.RiseMemberDao;
 import com.iquanwai.confucius.biz.dao.common.permission.UserRoleDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.CourseScheduleDao;
-import com.iquanwai.confucius.biz.dao.fragmentation.RiseCertificateDao;
 import com.iquanwai.confucius.biz.dao.fragmentation.RiseClassMemberDao;
 import com.iquanwai.confucius.biz.dao.wx.CallbackDao;
 import com.iquanwai.confucius.biz.dao.wx.FollowUserDao;
@@ -40,6 +39,7 @@ import com.iquanwai.confucius.biz.util.ThreadPool;
 import com.iquanwai.confucius.biz.util.page.Page;
 import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -71,8 +71,6 @@ public class AccountServiceImpl implements AccountService {
     private CustomerStatusDao customerStatusDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
-    @Autowired
-    private RiseCertificateDao riseCertificateDao;
     @Autowired
     private RiseClassMemberDao riseClassMemberDao;
     @Autowired
@@ -531,46 +529,6 @@ public class AccountServiceImpl implements AccountService {
         return blackList;
     }
 
-    /**
-     * 批量拉黑用户
-     */
-    @Override
-    public boolean batchBlackList(List<String> openidList) {
-        String url = BATCH_BALCKLIST_URL;
-
-        String body = queryWXBlackListInterface(url, openidList);
-        return checkIsSuccess(body);
-    }
-
-    /**
-     * 批量取消拉黑用户
-     */
-    @Override
-    public boolean batchUnBlackList(List<String> openidList) {
-        String url = UNBATCH_BACKLIST_URL;
-
-        String body = queryWXBlackListInterface(url, openidList);
-        return checkIsSuccess(body);
-    }
-
-    private boolean checkIsSuccess(String body) {
-        JSONObject resultJSON = JSON.parseObject(body);
-        if ((Integer) resultJSON.get("errcode") == 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private String queryWXBlackListInterface(String url, List<String> openidList) {
-        //拼装JSON数据
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("openid_list", openidList);
-        String body = restfulHelper.post(url, jsonObject.toJSONString());
-        logger.info(body);
-        return body;
-    }
-
     @Override
     public Integer loadUserScheduleCategory(Integer profileId) {
         CourseSchedule courseSchedule = courseScheduleDao.loadOldestCourseSchedule(profileId);
@@ -649,9 +607,8 @@ public class AccountServiceImpl implements AccountService {
         Profile profile = getProfileByRiseId(riseId);
         int profileId = profile.getId();
 
-        // TODO: 杨仁 增加project项目
-        RiseMember currentRiseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (currentRiseMember != null) {
+        List<RiseMember> currentRiseMembers = riseMemberManager.member(profileId);
+        if (CollectionUtils.isNotEmpty(currentRiseMembers)) {
             return Pair.of(-1, "该用户已经是会员");
         }
         RiseMember riseMember = new RiseMember();
@@ -670,11 +627,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public BusinessSchoolApplication loadLastApply(Integer profileId, Integer memberTypeId) {
         return businessSchoolApplicationDao.loadLastApproveApplication(profileId, memberTypeId);
-    }
-
-    @Override
-    public boolean hasAvailableApply(Integer profileId, Integer project) {
-        return this.hasAvailableApply(businessSchoolApplicationDao.loadApplyList(profileId), project);
     }
 
     @Override
@@ -746,12 +698,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account getAccountByUnionId(String unionId) {
         return followUserDao.queryByUnionId(unionId);
-    }
-
-    @Override
-    public Boolean isWhiteList(Integer profileId) {
-        RiseClassMember riseClassMember = riseClassMemberDao.whiteList(profileId);
-        return riseClassMember != null;
     }
 
 }
