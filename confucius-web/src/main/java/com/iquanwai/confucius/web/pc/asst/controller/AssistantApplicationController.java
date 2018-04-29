@@ -142,7 +142,6 @@ public class AssistantApplicationController {
 
     /**
      * 评论
-     * TODO 根据角色设置评论类型
      *
      * @param loginUser 登陆人
      * @param moduleId  评论模块

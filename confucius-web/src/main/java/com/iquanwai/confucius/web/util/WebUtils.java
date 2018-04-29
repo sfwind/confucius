@@ -91,14 +91,14 @@ public class WebUtils {
     }
 
     /**
-     * TODO 跳转至拒绝页面
+     * 跳转至拒绝页面
      */
     public static void reject(HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.sendRedirect(ConfigUtils.adapterDomainName() + "/pc/static/reject");
     }
 
     /**
-     * TODO 跳转至异常页面
+     * 跳转至异常页面
      */
     public static void redirectError(HttpServletRequest request, HttpServletResponse response, String err) throws Exception {
         err = URLEncoder.encode(err, "UTF-8");

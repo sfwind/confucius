@@ -488,46 +488,6 @@ public class SignupController {
         dto.setErrorMsg(pass.getRight());
         dto.setMemberType(memberType);
 
-        // 不同商品的特殊逻辑
-        if (memberType.getId() == RiseMember.ELITE) {
-            // TODO 页面按钮文字写死,tips 也删掉
-            dto.setTip("开学后7天内可全额退款");
-            RiseMember noMbaRiseMember = riseMembers.stream().filter(item -> !item.getMemberTypeId().equals(RiseMember.BUSINESS_THOUGHT)).findFirst().orElse(null);
-            if (noMbaRiseMember != null && noMbaRiseMember.getMemberTypeId() != null) {
-                if (noMbaRiseMember.getMemberTypeId().equals(RiseMember.HALF) || noMbaRiseMember.getMemberTypeId().equals(RiseMember.ANNUAL)) {
-                    dto.setButtonStr("升级商学院");
-                    dto.setTip("优秀学员学费已减免，一键升级商学院");
-                } else if (noMbaRiseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                    // 如果是精英版半年用户，提供续费通道，转成商学院 1 年
-                    dto.setTip(null);
-                    dto.setButtonStr("续费商学院");
-                } else if (noMbaRiseMember.getMemberTypeId() == RiseMember.ELITE) {
-                    //商学院用户不显示按钮
-                    dto.setButtonStr("立即入学");
-                } else {
-                    dto.setButtonStr("立即入学");
-                    dto.setAuditionStr("预约体验");
-                }
-            } else {
-                dto.setButtonStr("立即入学");
-                dto.setAuditionStr("预约体验");
-            }
-
-            // 用户层级是商学院用户或者曾经是商学院用户，则不显示试听课入口
-            Long count = allUserMembers.stream().filter(member -> member.getMemberTypeId() == RiseMember.ELITE).count();
-            if (count > 0) {
-                // 不显示宣讲会按钮
-                dto.setAuditionStr(null);
-            }
-            if (pass.getLeft()) {
-                // 有付费权限不显示宣讲会按钮
-                dto.setAuditionStr(null);
-            }
-        } else if (memberType.getId() == RiseMember.BUSINESS_THOUGHT) {
-            // ignore
-        } else if (memberType.getId() == RiseMember.BS_APPLICATION) {
-            // ignore
-        }
         // 计算过期时间
         Integer seconds = calcDealTime(memberTypeId, loginUser.getId());
         dto.setRemainSeconds(seconds);

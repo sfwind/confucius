@@ -30,7 +30,6 @@ public class HtmlRegexpUtil {
      *
      */
     public HtmlRegexpUtil() {
-        // TODO Auto-generated constructor stub
     }
 
     /**

@@ -16,12 +16,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
-import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
@@ -391,13 +388,4 @@ public class QRCodeUtils {
         }
     }
 
-    public static void image2FS(Image image, String path){
-        try {
-            // TODO:改成ftp
-            ImageIO.write((RenderedImage) image, "jpg", new File(path));
-        } catch (IOException e) {
-//            e.printStackTrace();
-            logger.error(e.getMessage(), e);
-        }
-    }
 }
