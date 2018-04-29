@@ -472,17 +472,13 @@ public class SignupController {
                 .memo(memberTypeId.toString());
         operationLogService.log(operationLog);
 
-        // pre1.获取基本信息（所有会员数据、要购买商品类型）
-        List<RiseMember> allUserMembers = riseMemberManager.loadPersonalAllRiseMembers(loginUser.getId());
         MemberType memberType = signupService.getMemberTypePayInfo(loginUser.getId(), memberTypeId);
         if (memberType == null) {
             return WebUtils.error("商品类型错误");
         }
         // 1.检查是否有权限
         Pair<Boolean, String> pass = signupService.risePurchaseCheck(loginUser.getId(), memberTypeId);
-        // 2.获取相关数据
-        List<RiseMember> riseMembers = allUserMembers.stream().filter(item -> !item.getExpired()).collect(Collectors.toList());
-        // 3.拼装dto
+        // 2.拼装dto
         RiseMemberDto dto = new RiseMemberDto();
         dto.setPrivilege(pass.getLeft());
         dto.setErrorMsg(pass.getRight());
